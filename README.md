@@ -50,12 +50,23 @@ the guide breaking this script, but in the meantime the script may stop working 
 guide updates. I will do my best to fix them in a timely manner. Reporting such issues would be
 appreciated and will help identify issues more quickly.
 
-### Limitations & Roadmap
+### Limitations
 
-This script is a work in progress. At the moment, it only supports the following features:
+This script is a work in progress. At the moment, it only supports the following features and/or has
+the following limitations:
 
 * Only Sonarr is supported (Radarr will come in the future)
 * Only the [Sonarr Anime Guide][1] is supported (more guides to come)
-* Better and more polished error handling (it's pretty minimal right now)
+* Multiple scores on the same line are not supported. Only the first is used.
 
 [1]: https://trash-guides.info/Sonarr/V3/Sonarr-Release-Profile-RegEx-Anime/
+
+### Roadmap
+
+In addition to the above limitations, the following items are planned for the future.
+
+* Better and more polished error handling (it's pretty minimal right now)
+* Add a way to convert preferred with negative scores to "Must not contain" terms.
+* Implement some sort of guide versioning (e.g. to avoid updating a release profile if the guide did
+  not change).
+* Unit Testing
