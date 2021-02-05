@@ -25,6 +25,7 @@ score_regex = re.compile(r'score.*?\[([-\d]+)\]', re.IGNORECASE)
 # included_preferred_regex = re.compile(r'include preferred', re.IGNORECASE)
 # not_regex = re.compile(r'not', re.IGNORECASE)
 filter_regexes = (
+    (Filter.Required, re.compile(r'must contain', re.IGNORECASE)),
     (Filter.Ignored, re.compile(r'must not contain', re.IGNORECASE)),
     (Filter.Preferred, re.compile(r'preferred', re.IGNORECASE)),
 )
