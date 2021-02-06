@@ -21,7 +21,7 @@ args = argparser.parse_args()
 Filter = Enum('FilterType', 'Preferred Required Ignored')
 
 header_regex = re.compile(r'^(#+)\s([\w\s\d]+)\s*$')
-score_regex = re.compile(r'score.*?\[([-\d]+)\]', re.IGNORECASE)
+score_regex = re.compile(r'score.*?\[(-?[\d]+)\]', re.IGNORECASE)
 # included_preferred_regex = re.compile(r'include preferred', re.IGNORECASE)
 # not_regex = re.compile(r'not', re.IGNORECASE)
 filter_regexes = (
