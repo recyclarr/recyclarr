@@ -14,6 +14,7 @@ Features list will continue to grow. See the limitations & roadmap section for m
   this in the guides.
 * Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
   name based on the guide and this name is used to find them in subsequent runs.
+* Tags can be added to any updated or created profiles.
 
 ## Requirements
 

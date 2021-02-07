@@ -14,6 +14,8 @@ argparser.add_argument('--preview', help='Only display the processed markdown re
     action='store_true')
 argparser.add_argument('--debug', help='Display additional logs useful for development/debug purposes',
     action='store_true')
+argparser.add_argument('--tags', help='Tags to assign to the profiles that are created or updated. These tags will replace any existing tags when updating profiles.',
+    nargs='+')
 argparser.add_argument('base_uri', help='The base URL for your Sonarr instance, for example `http://localhost:8989`.')
 argparser.add_argument('api_key', help='Your API key.')
 args = argparser.parse_args()
@@ -162,9 +164,12 @@ def success_status_code(response):
 
 # --------------------------------------------------------------------------------------------------
 def get_error_message(response: requests.Response):
-    response_body = json.dumps(response.content.decode('utf8'))
-    if type(response_body) is list and len(response_body) > 0:
-        return response[0]['errorMessage']
+    content = json.loads(response.content)
+    if len(content) > 0:
+        if type(content) is list:
+            return content[0]['errorMessage']
+        elif type(content) is dict and 'message' in content:
+            return content['message']
     return None
 
 # --------------------------------------------------------------------------------------------------
@@ -186,7 +191,7 @@ def sonarr_get_version():
     return version.parse(body['version'])
 
 # --------------------------------------------------------------------------------------------------
-def sonarr_create_release_profile(profile_name: str, profile: ProfileData):
+def sonarr_create_release_profile(profile_name: str, profile: ProfileData, tag_ids: list):
     json_preferred = []
     for score, terms in profile.preferred.items():
         for term in terms:
@@ -199,7 +204,7 @@ def sonarr_create_release_profile(profile_name: str, profile: ProfileData):
         'ignored': ','.join(profile.ignored),
         'preferred': json_preferred,
         'includePreferredWhenRenaming': profile.include_preferred_when_renaming,
-        'tags': [],
+        'tags': tag_ids,
         'indexerId': 0
     }
 
@@ -217,7 +222,7 @@ def find_existing_profile(profile_name, existing_profiles):
     return None
 
 # --------------------------------------------------------------------------------------------------
-def sonarr_update_existing_profile(existing_profile, profile):
+def sonarr_update_existing_profile(existing_profile, profile, tag_ids: list):
     profile_id = existing_profile['id']
     debug_print(f'update existing profile with id {profile_id}')
 
@@ -232,7 +237,31 @@ def sonarr_update_existing_profile(existing_profile, profile):
     existing_profile['preferred'] = json_preferred
     existing_profile['includePreferredWhenRenaming'] = profile.include_preferred_when_renaming
 
+    if len(tag_ids) > 0:
+        existing_profile['tags'] = tag_ids
+
     sonarr_request('put', f'/releaseprofile/{profile_id}', existing_profile)
+
+# --------------------------------------------------------------------------------------------------
+def sonarr_get_tags():
+    return sonarr_request('get', '/tag')
+
+# --------------------------------------------------------------------------------------------------
+def sonarr_create_missing_tags(current_tags_json, new_tags: list):
+    for t in current_tags_json:
+        try:
+            new_tags.remove(t['label'])
+        except ValueError:
+            # The tag is not in the list specified by the user; ignore and continue
+            pass
+
+    # Anything still left in `new_tags` represents tags we need to add in Sonarr
+    for t in new_tags:
+        debug_print(f'Creating tag: {t}')
+        r = sonarr_request('post', '/tag', {'label': t})
+        current_tags_json.append(r)
+
+    return current_tags_json
 
 ####################################################################################################
 
@@ -257,6 +286,19 @@ try:
         print(f'ERROR: Your Sonarr version ({version}) does not meet the minimum required version of {minimum_version} to use this script.')
         exit(1)
 
+    # If tags were provided, ensure they exist. Tags that do not exist are added first, so that we
+    # may specify them with the release profile request payload.
+    tag_ids = []
+    if args.tags:
+        tags = sonarr_get_tags()
+        tags = sonarr_create_missing_tags(tags, args.tags[:])
+        debug_print(f'Tags JSON: {tags}')
+
+        # Get a list of IDs that we can pass along with the request to update/create release
+        # profiles
+        tag_ids = [t['id'] for t in tags if t['label'] in args.tags]
+        debug_print(f'Tag IDs: {tag_ids}')
+
     # Obtain all of the existing release profiles first. If any were previously created by our script
     # here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
     # (but with some differences, since there have likely been updates since the last run).
@@ -268,10 +310,10 @@ try:
 
         if profile_to_update:
             print(f'Updating existing profile: {new_profile_name}')
-            sonarr_update_existing_profile(profile_to_update, profile)
+            sonarr_update_existing_profile(profile_to_update, profile, tag_ids)
         else:
             print(f'Creating new profile: {new_profile_name}')
-            sonarr_create_release_profile(new_profile_name, profile)
+            sonarr_create_release_profile(new_profile_name, profile, tag_ids)
 
 except requests.exceptions.HTTPError as e:
     print(e)
