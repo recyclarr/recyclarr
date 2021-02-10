@@ -71,3 +71,11 @@ In addition to the above limitations, the following items are planned for the fu
 * Implement some sort of guide versioning (e.g. to avoid updating a release profile if the guide did
   not change).
 * Unit Testing
+
+## Development / Contributing
+
+### Prerequisites
+
+Some additional packages are required to run the unit tests. All can be installed via `pip`:
+
+* `pytest`
