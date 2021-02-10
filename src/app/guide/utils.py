@@ -42,3 +42,12 @@ def find_existing_profile(profile_name, existing_profiles):
         if p.get('name') == profile_name:
             return p
     return None
+
+# --------------------------------------------------------------------------------------------------
+def quality_preview(name, definition):
+        print(name)
+        formats = '  {:<20} {:<10} {:<10}'
+        print(formats.format('Quality', 'Min', 'Max'))
+        for (quality, min, max) in definition:
+            print(formats.format(quality, min, max))
+        print('')

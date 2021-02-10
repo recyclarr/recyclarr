@@ -8,13 +8,16 @@ Automatically mirror TRaSH guides to your *darr instance.
 
 Features list will continue to grow. See the limitations & roadmap section for more details!
 
-* Preferred, Must Not Contain, and Must Contain lists from guides are reflected completely in
-  corresponding fields in release profiles in Sonarr.
-* "Include Preferred when Renaming" is properly checked/unchecked depending on explicit mention of
-  this in the guides.
-* Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
-  name based on the guide and this name is used to find them in subsequent runs.
-* Tags can be added to any updated or created profiles.
+* Sonarr Release Profiles
+  * Preferred, Must Not Contain, and Must Contain lists from guides are reflected completely in
+    corresponding fields in release profiles in Sonarr.
+  * "Include Preferred when Renaming" is properly checked/unchecked depending on explicit mention of
+    this in the guides.
+  * Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
+    name based on the guide and this name is used to find them in subsequent runs.
+  * Tags can be added to any updated or created profiles.
+* Sonarr Quality Definitions
+  * Anime and Non-Anime quality definitions are now synced to Sonarr
 
 ## Requirements
 
@@ -26,21 +29,61 @@ Features list will continue to grow. See the limitations & roadmap section for m
 
 ## Getting Started
 
-I plan to add more tutorials/details/instructions later, but for now just run `trash.py --help`:
+The only script you will need to be using is `src/trash.py`. If you've cloned my repository, simply
+`cd` to the `src` directory so you can run `trash.py` directly:
 
 ```txt
-usage: trash.py [-h] [--preview] [--debug] base_uri api_key
+PS E:\code\TrashUpdater\src> .\trash.py -h
+usage: trash.py [-h] {profile,quality} ...
 
-Automatically mirror TRaSH guides to your *darr instance.
-
-positional arguments:
-  base_uri    The base URL for your Sonarr instance, for example `http://localhost:8989`.
-  api_key     Your API key.
+Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --preview   Only display the processed markdown results and nothing else.
-  --debug     Display additional logs useful for development/debug purposes
+  -h, --help         show this help message and exit
+
+subcommands:
+  Operations specific to different parts of the TRaSH guides
+
+  {profile,quality}
+    profile          Pages of the guide that define profiles
+    quality          Pages in the guide that provide quality definitions
+```
+
+The command line is structured into a series of subcommands that each handle a different area of the
+guides. For example, you use a separate subcommand to sync quality definitions than you do release
+profiles. Simply run `trash.py [subcommand] -h` to get help for `[subcommand]`, which can be any
+supported subcommand listed in the top level help output.
+
+### Examples
+
+Some command line examples to show you how to use the script for various tasks. Note that most
+command line options were generated on a Windows environment, so you will see OS-specific syntax
+(e.g. backslashes). Obviously Python works on Linux systems too, so adjust the examples as needed
+for your platform.
+
+To preview what release profile information is parsed out of the Anime profile guide:
+
+```txt
+.\trash.py profile sonarr:anime --preview
+```
+
+To sync the anime release profiles to your Sonarr instance:
+
+```txt
+.\trash.py profile sonarr:anime --base-uri http://localhost:8989 --api-key a95cc792074644759fefe3ccab544f6e
+```
+
+To preview the Anime quality definition data parsed out of the Quality Definitions (file sizes) page
+of the TRaSH guides:
+
+```txt
+.\trash.py quality sonarr:anime --preview
+```
+
+Sync the non-anime quality definition to Sonarr:
+
+```txt
+.\trash.py quality sonarr:non-anime --base-uri http://localhost:8989 --api-key a95cc792074644759fefe3ccab544f6e
 ```
 
 ## Important Notices

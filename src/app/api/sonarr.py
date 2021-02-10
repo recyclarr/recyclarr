@@ -1,6 +1,7 @@
 import requests
 import json
 from packaging import version # pip install packaging
+from copy import deepcopy
 
 from .server import Server
 from ..profile_data import ProfileData
@@ -12,6 +13,11 @@ class Sonarr(Server):
         key = f'?apikey={args.api_key}'
         self.logger = logger
         super().__init__(base_uri, key)
+
+        if not args.base_uri or not args.api_key:
+            raise ValueError('--base-uri and --api-key are required arguments when not using --preview')
+
+        self.do_version_check()
 
     # --------------------------------------------------------------------------------------------------
     @staticmethod
@@ -94,3 +100,41 @@ class Sonarr(Server):
             current_tags_json.append(r)
 
         return current_tags_json
+
+    # --------------------------------------------------------------------------------------------------
+    def do_version_check(self):
+        # Since this script requires a specific version of v3 Sonarr that implements name support for
+        # release profiles, we perform that version check here and bail out if it does not meet a minimum
+        # required version.
+        minimum_version = version.parse('3.0.4.1098')
+        sonarr_version = self.get_version()
+        if sonarr_version < minimum_version:
+            raise RuntimeError(f'Your Sonarr version ({sonarr_version}) does not meet the minimum required version of {minimum_version} to use this script.')
+            exit(1)
+
+    # --------------------------------------------------------------------------------------------------
+    # GET /qualitydefinition
+    def get_quality_definition(self):
+        return self.request('get', '/qualitydefinition')
+
+    # --------------------------------------------------------------------------------------------------
+    # PUT /qualityDefinition/update
+    def update_quality_definition(self, sonarr_definition, guide_definition):
+        new_definition = deepcopy(sonarr_definition)
+        for quality, min, max in guide_definition:
+            entry = self.find_quality_definition_entry(new_definition, quality)
+            if not entry:
+                print(f'WARN: Quality definition lacks entry for {quality}; it will be skipped.')
+                continue
+            entry['minSize'] = min
+            entry['maxSize'] = max
+
+        self.request('put', '/qualityDefinition/update', new_definition)
+
+    # --------------------------------------------------------------------------------------------------
+    def find_quality_definition_entry(self, new_definition, quality):
+        for entry in new_definition:
+            if entry.get('quality').get('name') == quality:
+                return entry
+
+        return None

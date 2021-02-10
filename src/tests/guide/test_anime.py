@@ -1,19 +1,15 @@
-import trash.guide.anime as anime
+import app.guide.anime as anime
 from pathlib import Path
+from tests.mock_logger import MockLogger
 
 data_files = Path(__file__).parent / 'data'
-
-class TestLogger:
-    def info(self, msg): pass
-
-    def debug(self, msg): pass
 
 def test_parse_markdown_complete_doc():
     md_file = data_files / 'test_parse_markdown_complete_doc.md'
     with open(md_file) as file:
         test_markdown = file.read()
 
-    results = anime.parse_markdown(TestLogger(), test_markdown)
+    results = anime.parse_markdown(MockLogger(), test_markdown)
 
     assert len(results) == 1
     profile = next(iter(results.values()))
