@@ -6,11 +6,11 @@ import requests
 # from enum import Enum
 from packaging import version # pip install packaging
 
-from trash import guide
-from trash.api.sonarr import Sonarr
-from trash.guide import anime, utils
-from trash.cmd import setup_and_parse_args
-from trash.logger import Logger
+from app import guide
+from app.api.sonarr import Sonarr
+from app.guide import anime, utils
+from app.cmd import setup_and_parse_args
+from app.logger import Logger
 
 ####################################################################################################
 
