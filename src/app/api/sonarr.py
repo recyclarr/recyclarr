@@ -132,8 +132,8 @@ class Sonarr(Server):
         self.request('put', '/qualityDefinition/update', new_definition)
 
     # --------------------------------------------------------------------------------------------------
-    def find_quality_definition_entry(self, new_definition, quality):
-        for entry in new_definition:
+    def find_quality_definition_entry(self, definition, quality):
+        for entry in definition:
             if entry.get('quality').get('name') == quality:
                 return entry
 

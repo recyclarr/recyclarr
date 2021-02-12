@@ -1,4 +1,5 @@
 import requests
+import re
 
 from app import guide
 from app.api.sonarr import Sonarr
@@ -43,22 +44,47 @@ def process_sonarr_profile(args, logger):
         profile_to_update = guide.utils.find_existing_profile(new_profile_name, existing_profiles)
 
         if profile_to_update:
-            print(f'Updating existing profile: {new_profile_name}')
+            logger.info(f'Updating existing profile: {new_profile_name}')
             sonarr.update_existing_profile(profile_to_update, profile, tag_ids)
         else:
-            print(f'Creating new profile: {new_profile_name}')
+            logger.info(f'Creating new profile: {new_profile_name}')
             sonarr.create_release_profile(new_profile_name, profile, tag_ids)
 
 def process_sonarr_quality(args, logger):
     guide_definitions = quality.parse_markdown(logger, quality.get_markdown())
 
     if args.type == 'sonarr:hybrid':
-        raise ValueError('Hybrid profile not implemented yet')
+        hybrid_quality_regex = re.compile(r'720|1080')
+        anime = guide_definitions.get('sonarr:anime')
+        nonanime = guide_definitions.get('sonarr:non-anime')
+        if len(anime) != len(nonanime):
+            raise RuntimeError('For some reason the anime and non-anime quality definitions are not the same length')
+
+        logger.info('Notice: Hybrid only functions on 720/1080 qualities and uses non-anime values for the rest (e.g. 2160)')
+
+        hybrid = []
+        for i in range(len(nonanime)):
+            left = nonanime[i]
+            if not hybrid_quality_regex.search(left[0]):
+                logger.debug('Ignored Quality: ' + left[0])
+                hybrid.append(left)
+            else:
+                right = None
+                for r in anime:
+                    if r[0] == left[0]:
+                        right = r
+
+                if right is None:
+                    raise RuntimeError(f'Could not find matching anime quality for non-anime quality named: {left[0]}')
+
+                hybrid.append((left[0], min(left[1], right[1]), max(left[2], right[2])))
+
+        guide_definitions['sonarr:hybrid'] = hybrid
 
     selected_definition = guide_definitions.get(args.type)
 
     if args.preview:
-        utils.quality_preview(args.type, selected_definition)
+        utils.quality_preview(selected_definition)
         exit(0)
 
     print(f'Updating quality definition using {args.type}')

@@ -44,10 +44,11 @@ def find_existing_profile(profile_name, existing_profiles):
     return None
 
 # --------------------------------------------------------------------------------------------------
-def quality_preview(name, definition):
-        print(name)
-        formats = '  {:<20} {:<10} {:<10}'
+def quality_preview(definition):
+        print('')
+        formats = '{:<20} {:<10} {:<10}'
         print(formats.format('Quality', 'Min', 'Max'))
+        print(formats.format('-------', '---', '---'))
         for (quality, min, max) in definition:
             print(formats.format(quality, min, max))
         print('')
