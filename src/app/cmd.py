@@ -25,6 +25,7 @@ def setup_and_parse_args(args_override=None):
         action='store_true')
     parent_p.add_argument('--debug', help='Display additional logs useful for development/debug purposes',
         action='store_true')
+    parent_p.add_argument('--config-file', help='The configuration YAML file to use. If not specified, the script will look for `trash.yml` in the same directory as the `trash.py` script.')
 
     parser = argparse.ArgumentParser(description='Automatically mirror TRaSH guides to your Sonarr/Radarr instance.')
     subparsers = parser.add_subparsers(description='Operations specific to different parts of the TRaSH guides', dest='subcommand')

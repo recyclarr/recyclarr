@@ -25,7 +25,14 @@ Features list will continue to grow. See the limitations & roadmap section for m
 * The following packages installed with `pip`:
   * `requests`
   * `packaging`
+  * `pyyaml`
 * For Sonarr updates, you must be running version `3.0.4.1098` or greater.
+
+To install all of the above required packages, here's a convenient copy & paste one-liner:
+
+```txt
+pip install requests packaging pyyaml
+```
 
 ## Getting Started
 
@@ -85,6 +92,24 @@ Sync the non-anime quality definition to Sonarr:
 ```txt
 .\trash.py quality sonarr:non-anime --base-uri http://localhost:8989 --api-key a95cc792074644759fefe3ccab544f6e
 ```
+
+## Configuration File
+
+By default, `trash.py` will look for a configuration file named `trash.yml` in the same directory as
+the script itself. This configuration file may be used to store your Sonarr and Radarr Base URI and
+API Key, which should make using the command line interface a bit less clunky.
+
+```yml
+sonarr:
+  base_uri: http://localhost:8989
+  api_key: a95cc792074644759fefe3ccab544f6e
+```
+
+Note that this file is not required to be present. If it is not present, then you will be required
+to specify the `--base-uri` and `--api-key` on the command line if it is needed.
+
+Lastly, there's a `--config-file` argument you can use to point to your own YAML config file if you
+don't like the where the default one is located.
 
 ## Important Notices
 
