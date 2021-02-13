@@ -110,7 +110,6 @@ class Sonarr(Server):
         sonarr_version = self.get_version()
         if sonarr_version < minimum_version:
             raise RuntimeError(f'Your Sonarr version ({sonarr_version}) does not meet the minimum required version of {minimum_version} to use this script.')
-            exit(1)
 
     # --------------------------------------------------------------------------------------------------
     # GET /qualitydefinition
