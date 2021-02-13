@@ -9,7 +9,7 @@ TermCategory = Enum('TermCategory', 'Preferred Required Ignored')
 
 header_regex = re.compile(r'^(#+)\s([\w\s\d]+)\s*$')
 score_regex = re.compile(r'score.*?\[(-?[\d]+)\]', re.IGNORECASE)
-# included_preferred_regex = re.compile(r'include preferred', re.IGNORECASE)
+header_release_profile_regex = re.compile(r'release profile', re.IGNORECASE)
 # not_regex = re.compile(r'not', re.IGNORECASE)
 category_regex = (
     (TermCategory.Required, re.compile(r'must contain', re.IGNORECASE)),
@@ -42,20 +42,17 @@ def parse_markdown(logger, markdown_content):
     for line in markdown_content.splitlines():
         # Header processing
         if match := header_regex.search(line):
-            header_depth = len(match.group(1))
             header_text = match.group(2)
 
             # Profile name (always reset previous state here)
-            if header_depth == 3:
+            if header_release_profile_regex.search(header_text):
                 score = None
                 category = TermCategory.Preferred
                 profile_name = header_text
                 logger.debug(f'New Profile: {header_text}')
             # Filter type for provided regexes
-            elif header_depth == 4:
-                category = parse_category(header_text)
-                if category:
-                    logger.debug(f'  Category Set: {category}')
+            elif category := parse_category(header_text):
+                logger.debug(f'  Category Set: {category}')
 
         # Lines we always look for
         elif line.startswith('```'):

@@ -1,4 +1,4 @@
-### Profile 1
+### Release Profile 1
 
 The score is [100]
  
