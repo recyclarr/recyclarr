@@ -16,6 +16,7 @@ Features list will continue to grow. See the limitations & roadmap section for m
   * Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
     name based on the guide and this name is used to find them in subsequent runs.
   * Tags can be added to any updated or created profiles.
+  * Ability to convert preferred with negative scores to "Must not contain" terms.
 * Sonarr Quality Definitions
   * Anime and Non-Anime quality definitions are now synced to Sonarr
 
@@ -135,7 +136,6 @@ the following limitations:
 In addition to the above limitations, the following items are planned for the future.
 
 * Better and more polished error handling (it's pretty minimal right now)
-* Add a way to convert preferred with negative scores to "Must not contain" terms.
 * Implement some sort of guide versioning (e.g. to avoid updating a release profile if the guide did
   not change).
 * Unit Testing

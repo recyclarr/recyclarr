@@ -39,6 +39,8 @@ def setup_and_parse_args(args_override=None):
     })
     profile_p.add_argument('--tags', help='Tags to assign to the profiles that are created or updated. These tags will replace any existing tags when updating profiles.',
         nargs='+')
+    profile_p.add_argument('--strict-negative-scores', help='Any negative scores get added to the list of "Must Not Contain" items',
+        action='store_true')
 
     # Subcommands for 'quality'
     quality_p = subparsers.add_parser('quality', help='Pages in the guide that provide quality definitions',

@@ -32,7 +32,7 @@ def parse_category(line):
     return None
 
 # --------------------------------------------------------------------------------------------------
-def parse_markdown(logger, markdown_content):
+def parse_markdown(args, logger, markdown_content):
     results = defaultdict(ProfileData)
     profile_name = None
     score = None
@@ -72,7 +72,10 @@ def parse_markdown(logger, markdown_content):
                 elif bracket_depth:
                     if score is not None:
                         logger.debug(f'  [Preferred] Score: {score}, Term: {line}')
-                        profile.preferred[score].append(line)
+                        if args.strict_negative_scores and score < 0:
+                            profile.ignored.append(line)
+                        else:
+                            profile.preferred[score].append(line)
             elif category == TermCategory.Ignored and bracket_depth:
                 # Sometimes a comma is present at the end of these regexes, because when it's
                 # pasted into Sonarr it acts as a delimiter. However, when using them with the

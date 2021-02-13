@@ -10,7 +10,7 @@ from app.cmd import setup_and_parse_args
 from app.logger import Logger
 
 def process_sonarr_profile(args, logger):
-    profiles = anime.parse_markdown(logger, anime.get_trash_anime_markdown())
+    profiles = anime.parse_markdown(args, logger, anime.get_trash_anime_markdown())
 
     # A few false-positive profiles are added sometimes. We filter these out by checking if they
     # actually have meaningful data attached to them, such as preferred terms. If they are mostly empty,
