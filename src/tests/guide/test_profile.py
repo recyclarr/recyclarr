@@ -1,4 +1,4 @@
-import app.guide.anime as anime
+from app.guide import profile
 from pathlib import Path
 from tests.mock_logger import MockLogger
 
@@ -12,19 +12,19 @@ def test_parse_markdown_complete_doc():
     class args:
         strict_negative_scores = False
 
-    results = anime.parse_markdown(args, MockLogger(), test_markdown)
+    results = profile.parse_markdown(args, MockLogger(), test_markdown)
 
     assert len(results) == 1
-    profile = next(iter(results.values()))
+    test_profile = next(iter(results.values()))
 
-    assert len(profile.ignored) == 2
-    assert sorted(profile.ignored) == sorted(['term2', 'term3'])
+    assert len(test_profile.ignored) == 2
+    assert sorted(test_profile.ignored) == sorted(['term2', 'term3'])
 
-    assert len(profile.required) == 1
-    assert profile.required == ['term4']
+    assert len(test_profile.required) == 1
+    assert test_profile.required == ['term4']
 
-    assert len(profile.preferred) == 1
-    assert profile.preferred.get(100) == ['term1']
+    assert len(test_profile.preferred) == 1
+    assert test_profile.preferred.get(100) == ['term1']
 
 
 def test_parse_markdown_strict_negative_scores():
@@ -47,7 +47,7 @@ xyz
     class args:
         strict_negative_scores = True
 
-    results = anime.parse_markdown(args, MockLogger(), test_markdown)
+    results = profile.parse_markdown(args, MockLogger(), test_markdown)
     assert len(results['Test Release Profile'].required) == 0
     assert len(results['Test Release Profile'].ignored) == 1
     assert results['Test Release Profile'].ignored[0] == 'abc'

@@ -1,5 +1,8 @@
 import argparse
 
+from app.guide.profile import types as profile_types
+from app.guide.quality import types as quality_types
+
 # class args: pass
 class NoAction(argparse.Action):
     def __init__(self, **kwargs):
@@ -33,10 +36,9 @@ def setup_and_parse_args(args_override=None):
     # Subcommands for 'profile'
     profile_p = subparsers.add_parser('profile', help='Pages of the guide that define profiles',
         parents=[parent_p])
-    add_choices_argument(profile_p, 'type', 'The specific guide type/page to pull data from.', {
-        'sonarr:anime': 'The anime release profile for Sonarr v3',
-        'sonarr:web-dl': 'The WEB-DL release profile for Sonarr v3'
-    })
+    add_choices_argument(profile_p, 'type', 'The specific guide type/page to pull data from.',
+        {type: data.get('cmd_help') for type, data in profile_types.items()})
+    # })
     profile_p.add_argument('--tags', help='Tags to assign to the profiles that are created or updated. These tags will replace any existing tags when updating profiles.',
         nargs='+')
     profile_p.add_argument('--strict-negative-scores', help='Any negative scores get added to the list of "Must Not Contain" items',
@@ -45,10 +47,7 @@ def setup_and_parse_args(args_override=None):
     # Subcommands for 'quality'
     quality_p = subparsers.add_parser('quality', help='Pages in the guide that provide quality definitions',
         parents=[parent_p])
-    add_choices_argument(quality_p, 'type', 'The specific guide type/page to pull data from.', {
-        'sonarr:anime': 'Choose the Sonarr quality definition best fit for anime',
-        'sonarr:non-anime': 'Choose the Sonarr quality definition best fit for tv shows (non-anime)',
-        'sonarr:hybrid': 'The script will generate a Sonarr quality definition that works best for all show types'
-    })
+    add_choices_argument(quality_p, 'type', 'The specific guide type/page to pull data from.',
+        {type: data.get('cmd_help') for type, data in quality_types.items()})
 
     return parser.parse_args(args=args_override)

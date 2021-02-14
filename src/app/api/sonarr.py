@@ -3,23 +3,11 @@ import json
 from packaging import version # pip install packaging
 from copy import deepcopy
 
-from .server import Server
-from ..profile_data import ProfileData
+from app.api.server import Server, TrashHttpError
+from app.profile_data import ProfileData
+from app.trash_error import TrashError
 
-class Sonarr(Server):
-    # --------------------------------------------------------------------------------------------------
-    def __init__(self, args, logger):
-        base_uri = f'{args.base_uri}/api/v3'
-        key = f'?apikey={args.api_key}'
-        self.logger = logger
-        super().__init__(base_uri, key)
-
-        if not args.base_uri or not args.api_key:
-            raise ValueError('--base-uri and --api-key are required arguments when not using --preview')
-
-        self.do_version_check()
-
-    # --------------------------------------------------------------------------------------------------
+class SonarrHttpError(TrashHttpError):
     @staticmethod
     def get_error_message(response: requests.Response):
         content = json.loads(response.content)
@@ -29,6 +17,25 @@ class Sonarr(Server):
             elif type(content) is dict and 'message' in content:
                 return content['message']
         return None
+
+    def __str__(self):
+        msg = f'HTTP Response Error [Status Code {self.response.status_code}] [URI: {self.response.url}]'
+        if error_msg := SonarrHttpError.get_error_message(self.response):
+            msg += f'\n  Response Message: {error_msg}'
+        return msg
+
+class Sonarr(Server):
+    # --------------------------------------------------------------------------------------------------
+    def __init__(self, args, logger):
+        base_uri = f'{args.base_uri}/api/v3'
+        key = f'?apikey={args.api_key}'
+        self.logger = logger
+        super().__init__(base_uri, key, SonarrHttpError)
+
+        if not args.base_uri or not args.api_key:
+            raise TrashError('--base-uri and --api-key are required arguments when not using --preview')
+
+        self.do_version_check()
 
     # --------------------------------------------------------------------------------------------------
     def get_version(self):
@@ -109,7 +116,7 @@ class Sonarr(Server):
         minimum_version = version.parse('3.0.4.1098')
         sonarr_version = self.get_version()
         if sonarr_version < minimum_version:
-            raise RuntimeError(f'Your Sonarr version ({sonarr_version}) does not meet the minimum required version of {minimum_version} to use this script.')
+            raise TrashError(f'Your Sonarr version ({sonarr_version}) does not meet the minimum required version of {minimum_version} to use this script.')
 
     # --------------------------------------------------------------------------------------------------
     # GET /qualitydefinition
