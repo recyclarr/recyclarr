@@ -4,17 +4,17 @@ from app.guide.profile import types as profile_types
 from app.guide.quality import types as quality_types
 
 # class args: pass
-class NoAction(argparse.Action):
+class _NoAction(argparse.Action):
     def __init__(self, **kwargs):
         kwargs.setdefault('default', argparse.SUPPRESS)
         kwargs.setdefault('nargs', 0)
-        super(NoAction, self).__init__(**kwargs)
+        super(_NoAction, self).__init__(**kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         pass
 
-def add_choices_argument(parser, variable_name, help_text, choices: dict):
-    parser.register('action', 'none', NoAction)
+def _add_choices_argument(parser, variable_name, help_text, choices: dict):
+    parser.register('action', 'none', _NoAction)
     parser.add_argument(variable_name, help=help_text, metavar=variable_name.upper(), choices=choices.keys())
     group = parser.add_argument_group(title=f'Choices for {variable_name.upper()}')
     for choice,choice_help in choices.items():
@@ -36,7 +36,7 @@ def setup_and_parse_args(args_override=None):
     # Subcommands for 'profile'
     profile_p = subparsers.add_parser('profile', help='Pages of the guide that define profiles',
         parents=[parent_p])
-    add_choices_argument(profile_p, 'type', 'The specific guide type/page to pull data from.',
+    _add_choices_argument(profile_p, 'type', 'The specific guide type/page to pull data from.',
         {type: data.get('cmd_help') for type, data in profile_types.items()})
     # })
     profile_p.add_argument('--tags', help='Tags to assign to the profiles that are created or updated. These tags will replace any existing tags when updating profiles.',
@@ -47,7 +47,7 @@ def setup_and_parse_args(args_override=None):
     # Subcommands for 'quality'
     quality_p = subparsers.add_parser('quality', help='Pages in the guide that provide quality definitions',
         parents=[parent_p])
-    add_choices_argument(quality_p, 'type', 'The specific guide type/page to pull data from.',
+    _add_choices_argument(quality_p, 'type', 'The specific guide type/page to pull data from.',
         {type: data.get('cmd_help') for type, data in quality_types.items()})
 
     return parser.parse_args(args=args_override)

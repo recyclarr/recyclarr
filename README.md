@@ -104,13 +104,36 @@ API Key, which should make using the command line interface a bit less clunky.
 sonarr:
   base_uri: http://localhost:8989
   api_key: a95cc792074644759fefe3ccab544f6e
+  profile:
+    - type: anime
+      tags:
+        - anime
+    - type: web-dl
+      tags:
+        - tv
 ```
 
-Note that this file is not required to be present. If it is not present, then you will be required
-to specify the `--base-uri` and `--api-key` on the command line if it is needed.
+Note that this file is not required to be present. If it is not present, then you will need to set
+respective parameters using the equivalent command line arguments (e.g. `--base-uri` and
+`--api-key`), as needed.
 
 Lastly, there's a `--config-file` argument you can use to point to your own YAML config file if you
 don't like the where the default one is located.
+
+### Profile Settings
+
+* **`profile`**<br>
+  Provide a list of settings used per each type of release profile supported in the guide (e.g.
+  `web-dl`, `anime`).
+
+  * **`type`**<br>
+    Type profile type to apply the settings to, such as adding new tags. The list of supported
+    profile types can be found by doing `trash.py profile -h`. Each valid choice listed under the
+    `type` argument can be used, just strip the `sonarr:` prefix.
+
+  * **`tags`**<br>
+    A list of tags to apply to the profile. Functions exactly as it would if you used the `--tags`
+    option to provide this list on the command line.
 
 ## Important Notices
 
