@@ -17,6 +17,7 @@ def test_config_tags():
         - type: web-dl
           tags:
             - tv
+            - series
     ''')
 
     args = cmd.setup_and_parse_args(['profile', 'sonarr:anime'])
@@ -27,4 +28,4 @@ def test_config_tags():
 
     args = cmd.setup_and_parse_args(['profile', 'sonarr:web-dl'])
     config.load_config_string(args, MockLogger(), yaml)
-    assert args.tags == ['tv']
+    assert args.tags == ['tv', 'series']
