@@ -173,3 +173,10 @@ In addition to the above limitations, the following items are planned for the fu
 Some additional packages are required to run the unit tests. All can be installed via `pip`:
 
 * `pytest`
+* `pytest-mock`
+
+To install all of the above required packages, here's a convenient copy & paste one-liner:
+
+```txt
+pip install pytest pytest-mock
+```
