@@ -13,12 +13,15 @@ Features list will continue to grow. See the limitations & roadmap section for m
     corresponding fields in release profiles in Sonarr.
   * "Include Preferred when Renaming" is properly checked/unchecked depending on explicit mention of
     this in the guides.
-  * Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
-    name based on the guide and this name is used to find them in subsequent runs.
+  * Profiles get created if they do not exist, or updated if they already exist. Profiles get a
+    unique name based on the guide and this name is used to find them in subsequent runs.
   * Tags can be added to any updated or created profiles.
   * Ability to convert preferred with negative scores to "Must not contain" terms.
 * Sonarr Quality Definitions
   * Anime and Non-Anime quality definitions are now synced to Sonarr
+* Configuration support using YAML
+  * Many command line arguments can instead be provided in YAML configuration to reduce the
+    redundancy of using the CLI.
 
 ## Requirements
 
