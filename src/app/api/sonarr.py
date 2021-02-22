@@ -27,14 +27,14 @@ class SonarrHttpError(TrashHttpError):
 class Sonarr(Server):
     # --------------------------------------------------------------------------------------------------
     def __init__(self, args, logger):
-        base_uri = f'{args.base_uri}/api/v3'
-        key = f'?apikey={args.api_key}'
-        self.logger = logger
-        super().__init__(base_uri, key, SonarrHttpError)
-
         if not args.base_uri or not args.api_key:
             raise TrashError('--base-uri and --api-key are required arguments when not using --preview')
 
+        self.logger = logger
+
+        base_uri = f'{args.base_uri}/api/v3'
+        key = f'?apikey={args.api_key}'
+        super().__init__(base_uri, key, SonarrHttpError)
         self.do_version_check()
 
     # --------------------------------------------------------------------------------------------------

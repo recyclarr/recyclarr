@@ -1,7 +1,7 @@
 import argparse
 
-from app.guide.profile import types as profile_types
-from app.guide.quality import types as quality_types
+from app.guide.profile_types import types as profile_types
+from app.guide.quality_types import types as quality_types
 
 # class args: pass
 class _NoAction(argparse.Action):
@@ -38,7 +38,6 @@ def setup_and_parse_args(args_override=None):
         parents=[parent_p])
     _add_choices_argument(profile_p, 'type', 'The specific guide type/page to pull data from.',
         {type: data.get('cmd_help') for type, data in profile_types.items()})
-    # })
     profile_p.add_argument('--tags', help='Tags to assign to the profiles that are created or updated. These tags will replace any existing tags when updating profiles.',
         nargs='+')
     profile_p.add_argument('--strict-negative-scores', help='Any negative scores get added to the list of "Must Not Contain" items',
@@ -49,5 +48,7 @@ def setup_and_parse_args(args_override=None):
         parents=[parent_p])
     _add_choices_argument(quality_p, 'type', 'The specific guide type/page to pull data from.',
         {type: data.get('cmd_help') for type, data in quality_types.items()})
+    quality_p.add_argument('--preferred-percentage', help='A percentage value that determines the preferred quality, when needed. Default is 100. Value is interpolated between the min (0%%) and max (100%%) value for each table row.',
+        type=int, default=100, metavar='[0-100]')
 
     return parser.parse_args(args=args_override)

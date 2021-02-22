@@ -1,7 +1,8 @@
 import re
 
-from app import guide
-from app.guide.profile import types as profile_types
+import app.guide.sonarr as guide
+from app.guide.sonarr import utils
+from app.guide.profile_types import types as profile_types
 from app.api.sonarr import Sonarr
 from app.trash_error import TrashError
 
@@ -14,10 +15,10 @@ def process_profile(args, logger):
     # A few false-positive profiles are added sometimes. We filter these out by checking if they
     # actually have meaningful data attached to them, such as preferred terms. If they are mostly empty,
     # we remove them here.
-    guide.utils.filter_profiles(profiles)
+    utils.filter_profiles(profiles)
 
     if args.preview:
-        guide.utils.print_terms_and_scores(profiles)
+        utils.print_terms_and_scores(profiles)
         exit(0)
 
     sonarr = Sonarr(args, logger)
@@ -43,7 +44,7 @@ def process_profile(args, logger):
     for name, profile in profiles.items():
         type_for_name = profile_types.get(args.type).get('profile_typename')
         new_profile_name = f'[Trash] {type_for_name} - {name}'
-        profile_to_update = guide.utils.find_existing_profile(new_profile_name, existing_profiles)
+        profile_to_update = utils.find_existing_profile(new_profile_name, existing_profiles)
 
         if profile_to_update:
             logger.info(f'Updating existing profile: {new_profile_name}')
@@ -88,7 +89,7 @@ def process_quality(args, logger):
     selected_definition = guide_definitions.get(args.type)
 
     if args.preview:
-        guide.utils.quality_preview(selected_definition)
+        utils.quality_preview(selected_definition)
         exit(0)
 
     print(f'Updating quality definition using {args.type}')

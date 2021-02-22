@@ -1,6 +1,6 @@
 # TRaSH Guide Updater Script
 
-Automatically mirror TRaSH guides to your *darr instance.
+Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
 > **NOTICE**: This is a work-in-progress Python script
 
@@ -19,6 +19,7 @@ Features list will continue to grow. See the limitations & roadmap section for m
   * Ability to convert preferred with negative scores to "Must not contain" terms.
 * Sonarr Quality Definitions
   * Anime and Non-Anime quality definitions are now synced to Sonarr
+* Radarr Quality Definition can be synced (there's only one for now).
 * Configuration support using YAML
   * Many command line arguments can instead be provided in YAML configuration to reduce the
     redundancy of using the CLI.
@@ -151,11 +152,8 @@ appreciated and will help identify issues more quickly.
 This script is a work in progress. At the moment, it only supports the following features and/or has
 the following limitations:
 
-* Only Sonarr is supported (Radarr will come in the future)
-* Only the [Sonarr Anime Guide][1] is supported (more guides to come)
+* Radarr custom formats are not supported yet (coming soon).
 * Multiple scores on the same line are not supported. Only the first is used.
-
-[1]: https://trash-guides.info/Sonarr/V3/Sonarr-Release-Profile-RegEx-Anime/
 
 ### Roadmap
 
@@ -164,7 +162,6 @@ In addition to the above limitations, the following items are planned for the fu
 * Better and more polished error handling (it's pretty minimal right now)
 * Implement some sort of guide versioning (e.g. to avoid updating a release profile if the guide did
   not change).
-* Unit Testing
 
 ## Development / Contributing
 

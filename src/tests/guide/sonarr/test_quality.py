@@ -1,4 +1,4 @@
-import app.guide.quality as quality
+import app.guide.sonarr.quality as quality
 from pathlib import Path
 from tests.mock_logger import MockLogger
 

@@ -1,4 +1,6 @@
 import sys
+from pathlib import Path
+
 from app.logic import main
 
 def test_main_sonarr_profile(mocker):
@@ -6,7 +8,7 @@ def test_main_sonarr_profile(mocker):
     mock_processor = mocker.patch('app.logic.sonarr.process_profile')
     mocker.patch.object(sys, 'argv', test_args)
 
-    main.main()
+    main.main(Path())
 
     mock_processor.assert_called_once()
 
@@ -15,6 +17,6 @@ def test_main_sonarr_quality(mocker):
     mock_processor = mocker.patch('app.logic.sonarr.process_quality')
     mocker.patch.object(sys, 'argv', test_args)
 
-    main.main()
+    main.main(Path())
 
     mock_processor.assert_called_once()

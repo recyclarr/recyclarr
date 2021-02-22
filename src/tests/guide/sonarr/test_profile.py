@@ -1,4 +1,4 @@
-from app.guide import profile
+from app.guide.sonarr import profile
 from pathlib import Path
 from tests.mock_logger import MockLogger
 

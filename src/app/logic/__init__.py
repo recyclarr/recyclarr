@@ -1,1 +1,1 @@
-from . import config, main, sonarr
+from . import config, main, sonarr, radarr

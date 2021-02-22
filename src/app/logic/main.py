@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from app.logic import sonarr, config
+from app.logic import sonarr, config, radarr
 from app.cmd import setup_and_parse_args
 from app.logger import Logger
 from app.trash_error import TrashError
 
 # --------------------------------------------------------------------------------------------------
-def main(root_directory):
+def main(root_directory: Path):
     args = setup_and_parse_args()
     logger = Logger(args)
 
@@ -15,6 +15,7 @@ def main(root_directory):
     subcommand_handlers = {
         ('sonarr', 'profile'): sonarr.process_profile,
         ('sonarr', 'quality'): sonarr.process_quality,
+        ('radarr', 'quality'): radarr.process_quality,
     }
 
     server_name = args.type.split(':')[0]
