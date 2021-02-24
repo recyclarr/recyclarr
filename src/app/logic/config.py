@@ -10,8 +10,8 @@ def find_profile_by_name(config, profile_type):
 
 # --------------------------------------------------------------------------------------------------
 def load_config(args, logger, default_load_path: Path):
-    if args.config_file:
-        config_path = Path(args.config_file)
+    if args.config:
+        config_path = Path(args.config)
     else:
         # Look for `trash.yml` in the same directory as the main (entrypoint) python script.
         config_path = default_load_path / 'trash.yml'

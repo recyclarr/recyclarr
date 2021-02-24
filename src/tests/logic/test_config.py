@@ -20,7 +20,7 @@ def test_config_load_from_file_args(mocker):
     mocker.patch.object(Path, 'exists', return_value=True)
 
     expected_yml_path = Path(__file__).parent.parent / 'overridden_config.yml'
-    args = cmd.setup_and_parse_args(['profile', 'sonarr:anime', '--config-file', str(expected_yml_path)])
+    args = cmd.setup_and_parse_args(['profile', 'sonarr:anime', '--config', str(expected_yml_path)])
     config.load_config(args, MockLogger(), '.')
 
     mock_open.assert_called_once_with(expected_yml_path, 'r')
