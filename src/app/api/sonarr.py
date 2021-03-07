@@ -125,15 +125,23 @@ class Sonarr(Server):
 
     # --------------------------------------------------------------------------------------------------
     # PUT /qualityDefinition/update
-    def update_quality_definition(self, sonarr_definition, guide_definition):
-        new_definition = deepcopy(sonarr_definition)
-        for quality, min, max in guide_definition:
-            entry = self.find_quality_definition_entry(new_definition, quality)
+    def update_quality_definition(self, server_definition, guide_definition):
+        new_definition = []
+        for quality, min_value, max_value in guide_definition:
+            entry = self.find_quality_definition_entry(server_definition, quality)
             if not entry:
                 print(f'WARN: Quality definition lacks entry for {quality}; it will be skipped.')
                 continue
-            entry['minSize'] = min
-            entry['maxSize'] = max
+            entry = deepcopy(entry)
+            entry['minSize'] = min_value
+            entry['maxSize'] = max_value
+            new_definition.append(entry)
+
+            self.logger.debug('Setting Quality '
+                f'[Name: {entry["quality"]["name"]}] '
+                f'[Min: {entry["minSize"]}] '
+                f'[Max: {entry["maxSize"]}] '
+            )
 
         self.request('put', '/qualityDefinition/update', new_definition)
 
