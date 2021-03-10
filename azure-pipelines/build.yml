@@ -1,0 +1,54 @@
+pool:
+  vmImage: windows-latest
+
+variables:
+  configuration: Release
+
+strategy:
+  matrix:
+    windows:
+      runtime: win-x64
+    linux:
+      runtime: linux-x64
+    macos:
+      runtime: osx-x64
+
+steps:
+  -
+    checkout: self
+  -
+    task: UseDotNet@2
+    displayName: Setup .NET Core
+    inputs:
+      version: 5.0.x
+  -
+    pwsh: |
+      dotnet tool install --tool-path . nbgv
+      ./nbgv cloud -a
+    displayName: Set build number
+  -
+    task: DotNetCoreCLI@2
+    displayName:
+    inputs:
+      command: build
+      arguments: --configuration $(configuration)
+  -
+    task: DotNetCoreCLI@2
+    displayName:
+    inputs:
+      command: test
+      arguments: --configuration $(configuration)
+  -
+    task: DotNetCoreCLI@2
+    displayName:
+    inputs:
+      command: publish
+      projects: Trash
+      arguments: >
+        --runtime $(runtime)
+        --configuration $(configuration)
+        --self-contained true
+        -p:PublishSingleFile=true
+        -p:PublishTrimmed=true
+        -p:IncludeNativeLibrariesForSelfExtract=true
+  

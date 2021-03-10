@@ -1,0 +1,11 @@
+{
+  "default": true,
+  "line-length": {
+    "line_length": 100,
+    "tables": false,
+    "code_blocks": false
+  },
+  "no-inline-html": {
+    "allowed_elements": ["br"]
+  }
+}

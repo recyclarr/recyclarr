@@ -1,0 +1,31 @@
+<Project>
+  <ItemGroup>
+    <!-- Test Packages -->
+    <PackageReference Update="AutofacContrib.NSubstitute" Version="7.*" />
+    <PackageReference Update="FluentAssertions" Version="5.*" />
+    <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.*" />
+    <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
+    <PackageReference Update="NSubstitute" Version="4.*" />
+    <PackageReference Update="NUnit.Analyzers" Version="3.*" />
+    <PackageReference Update="NUnit" Version="3.*" />
+    <PackageReference Update="NUnit3TestAdapter" Version="3.*" />
+
+    <!-- Non-Test Packages -->
+    <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />
+    <PackageReference Update="Autofac" Version="6.*" />
+    <PackageReference Update="CliFx" Version="2.*" />
+    <PackageReference Update="Flurl.Http" Version="3.*" />
+    <PackageReference Update="Flurl" Version="3.*" />
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*">
+      <PrivateAssets>true</PrivateAssets>
+    </PackageReference>
+    <PackageReference Update="JetBrains.Annotations" Version="*">
+      <PrivateAssets>true</PrivateAssets>
+    </PackageReference>
+    <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
+    <PackageReference Update="Serilog" Version="2.*" />
+    <PackageReference Update="System.IO.Abstractions" Version="13.*" />
+    <PackageReference Update="YamlDotNet" Version="10.*" />
+  </ItemGroup>
+</Project>

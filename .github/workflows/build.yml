@@ -1,0 +1,127 @@
+name: Build & Test
+
+on:
+  push:
+    paths-ignore:
+      - 'wiki/**'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - 'wiki/**'
+      - '**.md'
+
+env:
+  dotnetVersion: 5.0.x
+
+defaults:
+  run:
+    working-directory: src
+
+jobs:
+  test:
+    name: Test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for NBGV
+
+      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Test
+        run: dotnet test --configuration Release --logger GitHubActions
+
+  build:
+    name: Build
+    needs: test
+    strategy:
+      fail-fast: true
+      matrix:
+        runtime: [win-x64, linux-x64, osx-x64]
+    # Must run on Windows so that version info gets properly set in host EXE. See:
+    # https://github.com/dotnet/runtime/issues/3828
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for NBGV
+
+      - uses: dotnet/nbgv@master
+        id: nbgv
+
+      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Publish
+        run: >
+          dotnet publish Trash
+          --configuration Release
+          --output publish
+          --runtime ${{ matrix.runtime }}
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:PublishTrimmed=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Zip Binary
+        shell: pwsh
+        run: Compress-Archive publish/trash* trash-${{ matrix.runtime }}.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: trash
+          path: src/trash-*.zip
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+      # github.event.create.ref_type == 'tag'
+      # startsWith(github.event.push.ref, 'refs/heads/release/')
+      # github.event.pull_request.merged == true &&
+      # startsWith(github.event.pull_request.head.ref, 'release/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for NBGV
+          # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
+
+      - name: Set up NBGV
+        uses: dotnet/nbgv@master
+        id: nbgv
+
+      - name: Verify tag matches version.json
+        if: endsWith(github.ref, steps.nbgv.outputs.SimpleVersion) != true
+        run: |
+          echo "The tag ${{ github.ref }} does not match version.json: ${{ steps.nbgv.outputs.SimpleVersion }}"
+          exit 1
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: trash
+
+      - name: Extract Changelog
+        id: changelog
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          files: trash-*.zip
+          body: ${{ steps.changelog.outputs.release_notes }}
+          tag_name: ${{ github.event.create.ref }}
+          draft: false
+          prerelease: ${{ steps.nbgv.outputs.PrereleaseVersion != '' }}

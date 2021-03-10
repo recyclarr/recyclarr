@@ -1,0 +1,25 @@
+name: Publish Wiki
+
+on:
+  push:
+    paths:
+      - 'wiki/**'
+    branches:
+      - master
+
+jobs:
+  wiki:
+    name: Publish Wiki
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+
+      - name: Upload Documentation to Wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v2
+        env:
+          WIKI_DIR: wiki/
+          GH_TOKEN: ${{ secrets.PAT }}
+          GH_MAIL: ${{ secrets.EMAIL }}
+          GH_NAME: ${{ github.repository_owner }}
+          EXCLUDED_FILES: "*.json"
