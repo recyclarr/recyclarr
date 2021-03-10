@@ -1,2 +1,0 @@
-class TrashError(Exception):
-    pass
