@@ -26,6 +26,14 @@ def load_config(args, logger, default_load_path: Path):
         logger.debug('Config file could not be loaded because it does not exist')
 
 # --------------------------------------------------------------------------------------------------
+def _config_has_tags(profile):
+    if profile is None or 'tags' not in profile:
+        return False;
+
+    tags = profile['tags']
+    return tags is not None and len(tags) > 0
+
+# --------------------------------------------------------------------------------------------------
 def load_config_string(args, logger, config_yaml):
     config = yaml.load(config_yaml, Loader=yaml.Loader)
     if not config:
@@ -42,7 +50,7 @@ def load_config_string(args, logger, config_yaml):
 
     if args.subcommand == 'profile':
         profile = find_profile_by_name(server_config, type_name)
-        if profile:
+        if _config_has_tags(profile):
             if args.tags is None:
                 args.tags = []
             args.tags.extend(t for t in profile['tags'] if t not in args.tags)
