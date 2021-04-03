@@ -25,9 +25,9 @@ def setup_and_parse_args(args_override=None):
     parent_p.add_argument('--base-uri', help='The base URL for your Sonarr/Radarr instance, for example `http://localhost:8989`. Required if not doing --preview.')
     parent_p.add_argument('--api-key', help='Your API key. Required if not doing --preview.')
     parent_p.add_argument('--preview', help='Only display the processed markdown results and nothing else.',
-        action='store_true')
+        action='store_true', default=False)
     parent_p.add_argument('--debug', help='Display additional logs useful for development/debug purposes',
-        action='store_true')
+        action='store_true', default=False)
     parent_p.add_argument('--config', help='The configuration YAML file to use. If not specified, the script will look for `trash.yml` in the same directory as the `trash.py` script.')
 
     parser = argparse.ArgumentParser(description='Automatically mirror TRaSH guides to your Sonarr/Radarr instance.')
@@ -51,4 +51,9 @@ def setup_and_parse_args(args_override=None):
     quality_p.add_argument('--preferred-percentage', help='A percentage value that determines the preferred quality, when needed. Default is 100. Value is interpolated between the min (0%%) and max (100%%) value for each table row.',
         type=int, default=100, metavar='[0-100]')
 
-    return parser.parse_args(args=args_override)
+    args = parser.parse_args(args=args_override)
+    if not args.subcommand:
+        parser.print_help()
+        exit(1)
+
+    return args
