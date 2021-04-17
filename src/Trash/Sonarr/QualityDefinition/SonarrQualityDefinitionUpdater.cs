@@ -25,8 +25,8 @@ namespace Trash.Sonarr.QualityDefinition
 
         private ILogger Log { get; }
 
-        private List<SonarrQualityData> BuildHybridQuality(List<SonarrQualityData> anime,
-            List<SonarrQualityData> series)
+        private List<SonarrQualityData> BuildHybridQuality(IReadOnlyCollection<SonarrQualityData> anime,
+            IEnumerable<SonarrQualityData> series)
         {
             // todo Verify anime & series are the same length? Probably not, because we might not care about some rows anyway.
             Log.Information(
