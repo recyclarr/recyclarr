@@ -8,6 +8,11 @@ The rewritten version isn't completely identical to the Python script, unfortuna
 this page is to document all of the differences so you can learn the new command line and migrate
 your configuration over.
 
+## Sonarr-specific Differences
+
+- Release profile names that previously used `WEB-DL` now use `Series`. This may require you to
+  manually remove release profiles that start with `[Trash] WEB-DL`.
+
 ## Command Line Differences
 
 The biggest differences are:
