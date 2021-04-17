@@ -11,7 +11,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5-803F-41B3-92D8-4AD2B2E3E130}"
 ProjectSection(SolutionItems) = preProject
 	Directory.Build.props = Directory.Build.props
-	version.json = version.json
 	Directory.Build.targets = Directory.Build.targets
 EndProjectSection
 EndProject
