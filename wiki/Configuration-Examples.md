@@ -80,3 +80,32 @@ you run the program:
 ```bash
 trash sonarr --config sonarr-release-profiles.yml sonarr-quality-definition.yml
 ```
+
+## Update multiple Sonarr instances in a single YAML config
+
+If you have two instances of Sonarr that you'd like to update from a single run of the updater using
+one YAML file, you can do that by simply specifying both in the list under the `sonarr` property:
+
+```yml
+sonarr:
+  - base_url: http://instance_one:8989
+    api_key: f7e74ba6c80046e39e076a27af5a8444
+    quality_definition: anime
+    release_profiles:
+      - type: anime
+  - base_url: http://instance_two:8989
+    api_key: bf99da49d0b0488ea34e4464aa63a0e5
+    quality_definition: series
+    release_profiles:
+      - type: series
+```
+
+In the example above, two separate instances, each with its own API key, will be updated. One
+instance is for Anime only. The other is for Series (TV) only. And since I'm using two instances, I
+don't bother with tags, so I am able to leave those elements out.
+
+When you run `trash sonarr` (specify `--config` if you aren't using the default `trash.yml`) it will
+update both instances.
+
+You can also split theses two instances across different YAML files if you do not want both to
+update at the same time. There's an example of how to do that in a different section of this page.
