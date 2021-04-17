@@ -1,6 +1,8 @@
 ﻿using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
+using Serilog;
+using Serilog.Core;
 using Trash.Command;
 using Trash.Config;
 using Trash.Radarr.Api;
@@ -50,6 +52,20 @@ namespace Trash
         //         .AsSelf();
         // }
 
+        private static void SetupLogging(ContainerBuilder builder)
+        {
+            builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
+            builder.Register(c =>
+                {
+                    const string template = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+                    return new LoggerConfiguration()
+                        .MinimumLevel.ControlledBy(c.Resolve<LoggingLevelSwitch>())
+                        .WriteTo.Console(outputTemplate: template)
+                        .CreateLogger();
+                })
+                .As<ILogger>();
+        }
+
         private static void SonarrRegistrations(ContainerBuilder builder)
         {
             builder.RegisterType<SonarrApi>().As<ISonarrApi>();
@@ -89,6 +105,7 @@ namespace Trash
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                 .Where(t => t.IsAssignableTo(typeof(IBaseCommand)));
 
+            SetupLogging(builder);
             SonarrRegistrations(builder);
             RadarrRegistrations(builder);
 

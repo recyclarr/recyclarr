@@ -15,11 +15,15 @@ namespace Trash.Sonarr.QualityDefinition
         private readonly ISonarrQualityDefinitionGuideParser _parser;
         private readonly Regex _regexHybrid = new(@"720|1080", RegexOptions.Compiled);
 
-        public SonarrQualityDefinitionUpdater(ISonarrQualityDefinitionGuideParser parser, ISonarrApi api)
+        public SonarrQualityDefinitionUpdater(ILogger logger, ISonarrQualityDefinitionGuideParser parser,
+            ISonarrApi api)
         {
+            Log = logger;
             _parser = parser;
             _api = api;
         }
+
+        private ILogger Log { get; }
 
         private List<SonarrQualityData> BuildHybridQuality(List<SonarrQualityData> anime,
             List<SonarrQualityData> series)

@@ -13,11 +13,15 @@ namespace Trash.Radarr.QualityDefinition
         private readonly IRadarrApi _api;
         private readonly IRadarrQualityDefinitionGuideParser _parser;
 
-        public RadarrQualityDefinitionUpdater(IRadarrQualityDefinitionGuideParser parser, IRadarrApi api)
+        public RadarrQualityDefinitionUpdater(ILogger logger, IRadarrQualityDefinitionGuideParser parser,
+            IRadarrApi api)
         {
+            Log = logger;
             _parser = parser;
             _api = api;
         }
+
+        private ILogger Log { get; }
 
         private static void PrintQualityPreview(IEnumerable<RadarrQualityData> quality)
         {

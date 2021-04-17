@@ -15,11 +15,14 @@ namespace Trash.Sonarr.ReleaseProfile
         private readonly ISonarrApi _api;
         private readonly IReleaseProfileGuideParser _parser;
 
-        public ReleaseProfileUpdater(IReleaseProfileGuideParser parser, ISonarrApi api)
+        public ReleaseProfileUpdater(ILogger logger, IReleaseProfileGuideParser parser, ISonarrApi api)
         {
+            Log = logger;
             _parser = parser;
             _api = api;
         }
+
+        private ILogger Log { get; }
 
         private async Task DoVersionEnforcement()
         {

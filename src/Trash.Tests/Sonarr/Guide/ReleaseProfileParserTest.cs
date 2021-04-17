@@ -3,6 +3,7 @@ using System.Linq;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
+using Serilog;
 using TestLibrary;
 using Trash.Sonarr;
 using Trash.Sonarr.ReleaseProfile;
@@ -17,7 +18,7 @@ namespace Trash.Tests.Sonarr.Guide
             public Context()
             {
                 Config = Substitute.For<SonarrConfiguration>();
-                GuideParser = new ReleaseProfileGuideParser();
+                GuideParser = new ReleaseProfileGuideParser(Substitute.For<ILogger>());
             }
 
             public SonarrConfiguration Config { get; }

@@ -1,5 +1,6 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
+using Serilog;
 using Trash.Sonarr;
 using Trash.Sonarr.Api;
 using Trash.Sonarr.ReleaseProfile;
@@ -9,35 +10,38 @@ namespace Trash.Tests.Sonarr
     [TestFixture]
     public class ReleaseProfileUpdaterTest
     {
+        private class Context
+        {
+            public ISonarrCommand Args { get; } = Substitute.For<ISonarrCommand>();
+            public IReleaseProfileGuideParser Parser { get; } = Substitute.For<IReleaseProfileGuideParser>();
+            public ISonarrApi Api { get; } = Substitute.For<ISonarrApi>();
+            public SonarrConfiguration Config { get; } = Substitute.For<SonarrConfiguration>();
+            public ILogger Logger { get; } = Substitute.For<ILogger>();
+        }
+
         [Test]
         public void ProcessReleaseProfile_InvalidReleaseProfiles_NoCrashNoCalls()
         {
-            var args = Substitute.For<ISonarrCommand>();
-            var parser = Substitute.For<IReleaseProfileGuideParser>();
-            var api = Substitute.For<ISonarrApi>();
-            var config = Substitute.For<SonarrConfiguration>();
+            var context = new Context();
 
-            var logic = new ReleaseProfileUpdater(parser, api);
-            logic.Process(args, config);
+            var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api);
+            logic.Process(context.Args, context.Config);
 
-            parser.DidNotReceive().GetMarkdownData(Arg.Any<ReleaseProfileType>());
+            context.Parser.DidNotReceive().GetMarkdownData(Arg.Any<ReleaseProfileType>());
         }
 
         [Test]
         public void ProcessReleaseProfile_SingleProfilePreview()
         {
-            var parser = Substitute.For<IReleaseProfileGuideParser>();
-            var api = Substitute.For<ISonarrApi>();
-            var config = Substitute.For<SonarrConfiguration>();
-            var args = Substitute.For<ISonarrCommand>();
+            var context = new Context();
 
-            parser.GetMarkdownData(ReleaseProfileType.Anime).Returns("theMarkdown");
-            config.ReleaseProfiles.Add(new ReleaseProfileConfig {Type = ReleaseProfileType.Anime});
+            context.Parser.GetMarkdownData(ReleaseProfileType.Anime).Returns("theMarkdown");
+            context.Config.ReleaseProfiles.Add(new ReleaseProfileConfig {Type = ReleaseProfileType.Anime});
 
-            var updater = new ReleaseProfileUpdater(parser, api);
-            updater.Process(args, config);
+            var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api);
+            logic.Process(context.Args, context.Config);
 
-            parser.Received().ParseMarkdown(config.ReleaseProfiles[0], "theMarkdown");
+            context.Parser.Received().ParseMarkdown(context.Config.ReleaseProfiles[0], "theMarkdown");
         }
     }
 }

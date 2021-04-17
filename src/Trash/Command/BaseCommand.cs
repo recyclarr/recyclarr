@@ -11,12 +11,24 @@ using Flurl.Http.Configuration;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using YamlDotNet.Core;
 
 namespace Trash.Command
 {
     public abstract class BaseCommand : ICommand, IBaseCommand
     {
+        private readonly LoggingLevelSwitch _loggingLevelSwitch;
+
+        protected BaseCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch)
+        {
+            _loggingLevelSwitch = loggingLevelSwitch;
+            Log = logger;
+        }
+
+        protected ILogger Log { get; }
+
         [CommandOption("preview", 'p', Description =
             "Only display the processed markdown results without making any API calls.")]
         public bool Preview { get; [UsedImplicitly] set; } = false;
@@ -59,6 +71,12 @@ namespace Trash.Command
             }
         }
 
+        private void SetupLogging()
+        {
+            _loggingLevelSwitch.MinimumLevel =
+                Debug ? LogEventLevel.Debug : LogEventLevel.Information;
+        }
+
         private static void SetupHttp()
         {
             FlurlHttp.Configure(settings =>
@@ -75,22 +93,6 @@ namespace Trash.Command
         }
 
         public abstract Task Process();
-
-        private void SetupLogging()
-        {
-            var logConfig = new LoggerConfiguration();
-            if (Debug)
-            {
-                logConfig.MinimumLevel.Debug();
-            }
-            else
-            {
-                logConfig.MinimumLevel.Information();
-            }
-
-            const string template = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
-            Log.Logger = logConfig.WriteTo.Console(outputTemplate: template).CreateLogger();
-        }
 
         protected static void ExitDueToFailure()
         {

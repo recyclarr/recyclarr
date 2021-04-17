@@ -4,6 +4,7 @@ using CliFx.Attributes;
 using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
+using Serilog.Core;
 using Trash.Command;
 using Trash.Config;
 using Trash.Radarr.QualityDefinition;
@@ -18,8 +19,11 @@ namespace Trash.Radarr
         private readonly Func<RadarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
         public RadarrCommand(
+            ILogger logger,
+            LoggingLevelSwitch loggingLevelSwitch,
             IConfigurationLoader<RadarrConfiguration> configLoader,
             Func<RadarrQualityDefinitionUpdater> qualityUpdaterFactory)
+            : base(logger, loggingLevelSwitch)
         {
             _configLoader = configLoader;
             _qualityUpdaterFactory = qualityUpdaterFactory;

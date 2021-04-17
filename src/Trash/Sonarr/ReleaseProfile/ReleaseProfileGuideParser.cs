@@ -29,6 +29,13 @@ namespace Trash.Sonarr.ReleaseProfile
         private readonly Regex _regexHeaderReleaseProfile = BuildRegex(@"release profile");
         private readonly Regex _regexScore = BuildRegex(@"score.*?\[(-?[\d]+)\]");
 
+        public ReleaseProfileGuideParser(ILogger logger)
+        {
+            Log = logger;
+        }
+
+        private ILogger Log { get; }
+
         public async Task<string> GetMarkdownData(ReleaseProfileType profileName)
         {
             return await BuildUrl(profileName).GetStringAsync();

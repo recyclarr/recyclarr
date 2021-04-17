@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CliFx.Attributes;
-using CliFx.Exceptions;
 using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
+using Serilog.Core;
 using Trash.Command;
 using Trash.Config;
 using Trash.Sonarr.QualityDefinition;
 using Trash.Sonarr.ReleaseProfile;
-using YamlDotNet.Core;
 
 namespace Trash.Sonarr
 {
@@ -22,9 +21,12 @@ namespace Trash.Sonarr
         private readonly Func<SonarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
         public SonarrCommand(
+            ILogger logger,
+            LoggingLevelSwitch loggingLevelSwitch,
             IConfigurationLoader<SonarrConfiguration> configLoader,
             Func<ReleaseProfileUpdater> profileUpdaterFactory,
             Func<SonarrQualityDefinitionUpdater> qualityUpdaterFactory)
+            : base(logger, loggingLevelSwitch)
         {
             _configLoader = configLoader;
             _profileUpdaterFactory = profileUpdaterFactory;
