@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Trash.Extensions;
 
@@ -51,7 +52,7 @@ namespace Trash.Sonarr.ReleaseProfile
             for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
             {
                 state.LineNumber++;
-                if (string.IsNullOrEmpty(line))
+                if (IsSkippableLine(line))
                 {
                     continue;
                 }
@@ -89,6 +90,31 @@ namespace Trash.Sonarr.ReleaseProfile
 
             Log.Debug("\n");
             return results;
+        }
+
+        private bool IsSkippableLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                return true;
+            }
+
+            // Skip lines with leading whitespace (i.e. indentation).
+            // These lines will almost always be `!!! attention` blocks of some kind and won't contain useful data.
+            if (char.IsWhiteSpace(line, 0))
+            {
+                Log.Debug("  - Skip Indented Line: {Line}", line);
+                return true;
+            }
+
+            // Lines that begin with `???` or `!!!` are admonition syntax (extended markdown supported by Python)
+            if (line.StartsWith("!!!") || line.StartsWith("???"))
+            {
+                Log.Debug("  - Skip Admonition: {Line}", line);
+                return true;
+            }
+
+            return false;
         }
 
         private static Regex BuildRegex(string regex)

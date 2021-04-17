@@ -4,21 +4,21 @@ on how the python script is implemented currently.
 
 # Definitions
 
-* **Term**<br>
+- **Term**<br>
   A phrase that is included in Sonarr release profiles under either the "Preferred", "Must Contain",
   or "Must Not Contain" sections. In the TRaSH guides these are regular expressions.
 
-* **Ignored**<br>
+- **Ignored**<br>
   The API term for "Must Not Contain"
 
-* **Required**<br>
+- **Required**<br>
   The API term for "Must Contain"
 
-* **Category**<br>
+- **Category**<br>
   Refers to any of the different "sections" in a release profile where terms may be stored. Includes
   "Must Not Contain" (ignored), "Must Contain" (required), and "Preferred".
 
-* **Mention**<br>
+- **Mention**<br>
   This generally refers to any human-readable way of stating something that the script relies on for
   parsing purposes.
 
@@ -32,6 +32,12 @@ goal.
 Note that all parsing happens directly on the markdown files themselves from the TRaSH github
 repository. Those files are processed one line at a time. Guidelines will apply on a per-line basis,
 unless otherwise stated.
+
+The following general rules apply to all lines in the markdown data:
+
+- Lines with leading whitespace (indentation) are skipped
+- Blank lines are skipped
+- Admonition lines (starting with `!!!` or `???`) are skipped.
 
 ## Sonarr Release Profiles
 
@@ -68,9 +74,9 @@ unless otherwise stated.
 
    A category must mentioned as one of the following phrases (case insensitive):
 
-   * `Preferred`
-   * `Must Not Contain`
-   * `Must Contain`
+   - `Preferred`
+   - `Must Not Contain`
+   - `Must Contain`
 
    These phrases may appear in nested headers, normal lines, and may even appear inside the same
    line that defines a score (e.g. `Insert these as "Preferred" with a score of [100]`).
@@ -94,7 +100,7 @@ The script procedurally generates a name for release profiles it creates. For th
 
 The name is generated as follows:
 
-* `Anime` comes from the guide type (could be `WEB-DL`)
-* `First Release Profile` is directly from one of the headers in the anime guide
-* `[Trash]` is used by the script to mean "This release profile is controlled by the script". This
+- `Anime` comes from the guide type (could be `WEB-DL`)
+- `First Release Profile` is directly from one of the headers in the anime guide
+- `[Trash]` is used by the script to mean "This release profile is controlled by the script". This
   is to separate it from any manual ones the user has defined, which the script will not touch.

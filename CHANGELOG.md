@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Changed
 
 - A warning is now logged when we find a number in brackets (such as `[100]`) without the word
   `score` before it. This represents a potential score and bug in the guide itself.
+- Release Profile Guide Parser:
+  - Skip lines with leading whitespace (i.e. indented lines).
+  - Skip admonition lines (lines starting with `!!!` or `???`).
 
 ## [1.0.0] - 2021-04-14
 

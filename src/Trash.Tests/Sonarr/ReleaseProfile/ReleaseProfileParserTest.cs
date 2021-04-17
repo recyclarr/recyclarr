@@ -94,6 +94,35 @@ abc
         }
 
         [Test]
+        public void Parse_SkippableLines_AreSkippedWithLog()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# First Release Profile
+
+!!! Admonition lines are skipped
+    Indented lines are skipped
+");
+            // List of substrings of logs that should appear in the resulting list of logs after parsing is done.
+            // We are only looking for logs relevant to the skipped lines we're testing for.
+            var expectedLogs = new List<string>
+            {
+                "Skip Admonition",
+                "Skip Indented Line"
+            };
+
+            var context = new Context();
+            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+
+            results.Should().BeEmpty();
+
+            var ctx = TestCorrelator.GetLogEventsFromCurrentContext().ToList();
+            foreach (var log in expectedLogs)
+            {
+                ctx.Should().Contain(evt => evt.MessageTemplate.Text.Contains(log));
+            }
+        }
+
+        [Test]
         public void Parse_StrictNegativeScores()
         {
             var context = new Context();
