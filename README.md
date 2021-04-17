@@ -76,8 +76,8 @@ what drives the behavior of the program.
 
 Main documentation is located in the wiki. Links provided below for some main topics.
 
-- [Command Line Reference](../wiki/Command-Line-Reference)
-- [Configuration Reference](../wiki/Configuration-Reference)
+- [Command Line Reference](../../wiki/Command-Line-Reference)
+- [Configuration Reference](../../wiki/Configuration-Reference)
 
 ## Important Notices
 
@@ -90,7 +90,7 @@ TRaSH Guide markdown files. I have [documented guidelines][dg] for the TRaSH Gui
 to reduce the risk of the guide breaking the program's parsing logic, however it requires that guide
 contributors follow them.
 
-[dg]: ../wiki/TRaSH-Guide-Structural-Guidelines
+[dg]: ../../wiki/TRaSH-Guide-Structural-Guidelines
 
 ### Limitations
 
