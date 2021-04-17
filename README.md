@@ -51,7 +51,8 @@ release notes and older releases.
 
 When you extract the ZIP archive on Linux, it will *not* have the executable permission set. Here is
 a quick one-liner you can use in a terminal to download the latest release, extract it, and set it
-as executable. Run this from the directory where you want `trash` to be installed.
+as executable. It will also replace any existing `trash` executable, so this is useful for upgrades,
+too. Run this from the directory where you want `trash` to be installed.
 
 ```bash
  wget -O trash.zip https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip \
