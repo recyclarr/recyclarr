@@ -1,5 +1,9 @@
 Various scenarios supported using the flexible configuration support.
 
+- [Update as much as possible in both Sonarr and Radarr with a single config](#update-as-much-as-possible-in-both-sonarr-and-radarr-with-a-single-config)
+- [Selectively update different parts of Sonarr](#selectively-update-different-parts-of-sonarr)
+- [Update multiple Sonarr instances in a single YAML config](#update-multiple-sonarr-instances-in-a-single-yaml-config)
+
 ## Update as much as possible in both Sonarr and Radarr with a single config
 
 Create a single configuration file (use the default `trash.yml` if you want to simplify your CLI
