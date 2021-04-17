@@ -10,7 +10,7 @@ namespace Trash.Sonarr
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class SonarrConfiguration : BaseConfiguration
     {
-        public List<ReleaseProfileConfig> ReleaseProfiles { get; init; } = new();
+        public List<ReleaseProfileConfig> ReleaseProfiles { get; set; } = new();
         public SonarrQualityDefinitionType? QualityDefinition { get; init; }
 
         public override string BuildUrl()

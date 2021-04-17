@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
     <PackageReference Include="GitHubActionsTestLogger" />
+    <PackageReference Include="Serilog.Sinks.TestCorrelator" />
   </ItemGroup>
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <EmbeddedResource Include="**\Data\*" />

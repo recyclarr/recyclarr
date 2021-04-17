@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A warning is now logged when we find a number in brackets (such as `[100]`) without the word
+  `score` before it. This represents a potential score and bug in the guide itself.
+
 ## [1.0.0] - 2021-04-14
 
 See the [Python Migration Guide][py-mig] for details on how to update your YAML configuration.

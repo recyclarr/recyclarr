@@ -17,16 +17,6 @@ namespace Trash.Sonarr.Api
             _config = config;
         }
 
-        private string BaseUrl()
-        {
-            if (_config.ActiveConfiguration == null)
-            {
-                throw new InvalidOperationException("No active configuration available for API method");
-            }
-
-            return _config.ActiveConfiguration.BuildUrl();
-        }
-
         public async Task<Version> GetVersion()
         {
             dynamic data = await BaseUrl()
@@ -86,6 +76,16 @@ namespace Trash.Sonarr.Api
                 .AppendPathSegment("qualityDefinition/update")
                 .PutJsonAsync(newQuality)
                 .ReceiveJson<List<SonarrQualityDefinitionItem>>();
+        }
+
+        private string BaseUrl()
+        {
+            if (_config.ActiveConfiguration == null)
+            {
+                throw new InvalidOperationException("No active configuration available for API method");
+            }
+
+            return _config.ActiveConfiguration.BuildUrl();
         }
     }
 }

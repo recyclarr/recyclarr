@@ -4,11 +4,12 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
+using Serilog.Sinks.TestCorrelator;
 using TestLibrary;
 using Trash.Sonarr;
 using Trash.Sonarr.ReleaseProfile;
 
-namespace Trash.Tests.Sonarr.Guide
+namespace Trash.Tests.Sonarr.ReleaseProfile
 {
     [TestFixture]
     public class ReleaseProfileParserTest
@@ -17,8 +18,15 @@ namespace Trash.Tests.Sonarr.Guide
         {
             public Context()
             {
+                var logger = new LoggerConfiguration()
+                    .WriteTo.TestCorrelator()
+                    .MinimumLevel.Debug()
+                    .CreateLogger();
+
                 Config = Substitute.For<SonarrConfiguration>();
-                GuideParser = new ReleaseProfileGuideParser(Substitute.For<ILogger>());
+                Config.ReleaseProfiles.Add(new ReleaseProfileConfig());
+
+                GuideParser = new ReleaseProfileGuideParser(logger);
             }
 
             public SonarrConfiguration Config { get; }
@@ -30,8 +38,6 @@ namespace Trash.Tests.Sonarr.Guide
         public void Parse_IgnoredRequiredPreferredScores()
         {
             var context = new Context();
-            context.Config.ReleaseProfiles.Add(new ReleaseProfileConfig());
-
             var markdown = context.TestData.GetResourceData("test_parse_markdown_complete_doc.md");
             var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
 
@@ -48,30 +54,53 @@ namespace Trash.Tests.Sonarr.Guide
         public void Parse_IncludePreferredWhenRenaming()
         {
             var context = new Context();
-            context.Config.ReleaseProfiles.Add(new ReleaseProfileConfig());
-
             var markdown = context.TestData.GetResourceData("include_preferred_when_renaming.md");
             var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
 
             results.Should()
                 .ContainKey("First Release Profile")
-                .WhichValue.IncludePreferredWhenRenaming.Should()
-                .Be(true);
+                .WhichValue.IncludePreferredWhenRenaming.Should().Be(true);
             results.Should()
                 .ContainKey("Second Release Profile")
-                .WhichValue.IncludePreferredWhenRenaming.Should()
-                .Be(false);
+                .WhichValue.IncludePreferredWhenRenaming.Should().Be(false);
+        }
+
+        [Test]
+        public void Parse_PotentialScore_WarningLogged()
+        {
+            string markdown = StringUtils.TrimmedString(@"
+# First Release Profile
+
+The below line should be a score but isn't because it's missing the word 'score'.
+
+Use this number [100]
+
+```
+abc
+```
+");
+            var context = new Context();
+            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+
+            results.Should().ContainKey("First Release Profile")
+                .WhichValue.Should().BeEquivalentTo(new ProfileData());
+
+            const string expectedLog =
+                "Found a potential score on line #5 that will be ignored because the " +
+                "word 'score' is missing (This is probably a bug in the guide itself): \"[100]\"";
+
+            TestCorrelator.GetLogEventsFromCurrentContext()
+                .Should().ContainSingle(evt => evt.RenderMessage(default) == expectedLog);
         }
 
         [Test]
         public void Parse_StrictNegativeScores()
         {
             var context = new Context();
-            context.Config.ReleaseProfiles.Add(new ReleaseProfileConfig
+            context.Config.ReleaseProfiles = new List<ReleaseProfileConfig>
             {
-                // Pretend the user specified this option for testing purposes
-                StrictNegativeScores = true
-            });
+                new() {StrictNegativeScores = true}
+            };
 
             var markdown = context.TestData.GetResourceData("strict_negative_scores.md");
             var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);

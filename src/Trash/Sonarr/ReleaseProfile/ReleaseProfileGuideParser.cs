@@ -27,6 +27,7 @@ namespace Trash.Sonarr.ReleaseProfile
 
         private readonly Regex _regexHeader = new(@"^(#+)\s([\w\s\d]+)\s*$", RegexOptions.Compiled);
         private readonly Regex _regexHeaderReleaseProfile = BuildRegex(@"release profile");
+        private readonly Regex _regexPotentialScore = BuildRegex(@"\[(-?[\d]+)\]");
         private readonly Regex _regexScore = BuildRegex(@"score.*?\[(-?[\d]+)\]");
 
         public ReleaseProfileGuideParser(ILogger logger)
@@ -49,6 +50,7 @@ namespace Trash.Sonarr.ReleaseProfile
             var reader = new StringReader(markdown);
             for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
             {
+                state.LineNumber++;
                 if (string.IsNullOrEmpty(line))
                 {
                     continue;
@@ -158,9 +160,11 @@ namespace Trash.Sonarr.ReleaseProfile
 
         private void ParseMarkdownOutsideFence(string line, ParserState state, IDictionary<string, ProfileData> results)
         {
+            // ReSharper disable once InlineOutVariableDeclaration
+            Match match;
+
             // Header Processing
-            var match = _regexHeader.Match(line);
-            if (match.Success)
+            if (_regexHeader.Match(line, out match))
             {
                 var headerDepth = match.Groups[1].Length;
                 var headerText = match.Groups[2].Value;
@@ -211,11 +215,16 @@ namespace Trash.Sonarr.ReleaseProfile
                 // return;
             }
 
-            match = _regexScore.Match(line);
-            if (match.Success)
+            if (_regexScore.Match(line, out match))
             {
                 state.Score = int.Parse(match.Groups[1].Value);
                 Log.Debug("  - Score [Value: {Score}]", state.Score);
+            }
+            else if (_regexPotentialScore.Match(line, out match))
+            {
+                Log.Warning("Found a potential score on line #{Line} that will be ignored because the " +
+                            "word 'score' is missing (This is probably a bug in the guide itself): {ScoreMatch}",
+                    state.LineNumber, match.Groups[0].Value);
             }
         }
 
@@ -223,8 +232,7 @@ namespace Trash.Sonarr.ReleaseProfile
         {
             foreach (var (category, regex) in _regexCategories)
             {
-                var match = regex.Match(line);
-                if (match.Success)
+                if (regex.Match(line).Success)
                 {
                     return category;
                 }
@@ -252,6 +260,7 @@ namespace Trash.Sonarr.ReleaseProfile
             public TermCategory CurrentCategory { get; set; }
             public int BracketDepth { get; set; }
             public int CurrentHeaderDepth { get; set; }
+            public int LineNumber { get; set; }
 
             public bool IsValid => ProfileName != null && (CurrentCategory != TermCategory.Preferred || Score != null);
 
