@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2021-04-18
+
 ### Added
 
 - Optional terms in the release profile guides are no longer synchronized to Sonarr.
@@ -15,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A warning is now logged when we find a number in brackets (such as `[100]`) without the word
   `score` before it. This represents a potential score and bug in the guide itself.
-- Release Profile Guide Parser:
+- Release profile guide parser now skips certain lines to avoid false positives:
   - Skip lines with leading whitespace (i.e. indented lines).
   - Skip admonition lines (lines starting with `!!!` or `???`).
 
@@ -41,6 +43,7 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 First (and final) release of the Python version of the application.
 
 <!-- Release Links -->
-[unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/rcdailey/trash-updater/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rcdailey/trash-updater/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/rcdailey/trash-updater/releases/tag/v0.1.0
