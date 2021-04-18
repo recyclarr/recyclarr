@@ -8,6 +8,7 @@ using Trash.Sonarr.ReleaseProfile;
 namespace Trash.Tests.Sonarr
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     public class ReleaseProfileUpdaterTest
     {
         private class Context

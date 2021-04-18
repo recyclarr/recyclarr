@@ -17,6 +17,7 @@ using YamlDotNet.Serialization.ObjectFactories;
 namespace Trash.Tests.Config
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     public class ConfigurationLoaderTest
     {
         private TextReader GetResourceData(string file)

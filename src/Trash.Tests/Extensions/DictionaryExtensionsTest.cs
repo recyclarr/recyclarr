@@ -6,6 +6,7 @@ using Trash.Extensions;
 namespace Trash.Tests.Extensions
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     public class DictionaryExtensionsTest
     {
         private class MySampleValue

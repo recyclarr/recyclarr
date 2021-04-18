@@ -25,6 +25,41 @@ namespace Trash.Sonarr.ReleaseProfile
 
         public static void PrintTermsAndScores(ProfileDataCollection profiles)
         {
+            static void PrintPreferredTerms(string title, IDictionary<int, List<string>> dict)
+            {
+                if (dict.Count <= 0)
+                {
+                    return;
+                }
+
+                Console.WriteLine($"  {title}:");
+                foreach (var (score, terms) in dict)
+                {
+                    foreach (var term in terms)
+                    {
+                        Console.WriteLine($"    {score,-10} {term}");
+                    }
+                }
+
+                Console.WriteLine("");
+            }
+
+            static void PrintTerms(string title, IReadOnlyCollection<string> terms)
+            {
+                if (terms.Count == 0)
+                {
+                    return;
+                }
+
+                Console.WriteLine($"  {title}:");
+                foreach (var term in terms)
+                {
+                    Console.WriteLine($"    {term}");
+                }
+
+                Console.WriteLine("");
+            }
+
             Console.WriteLine("");
 
             foreach (var (name, profile) in profiles)
@@ -39,36 +74,12 @@ namespace Trash.Sonarr.ReleaseProfile
                     Console.WriteLine("");
                 }
 
-                static void PrintTerms(string title, IReadOnlyCollection<string> terms)
-                {
-                    if (terms.Count == 0)
-                    {
-                        return;
-                    }
-
-                    Console.WriteLine($"  {title}:");
-                    foreach (var term in terms)
-                    {
-                        Console.WriteLine($"    {term}");
-                    }
-
-                    Console.WriteLine("");
-                }
-
                 PrintTerms("Must Contain", profile.Required);
+                PrintTerms("Must Contain (Optional)", profile.Optional.Required);
                 PrintTerms("Must Not Contain", profile.Ignored);
-
-                if (profile.Preferred.Count > 0)
-                {
-                    Console.WriteLine("  Preferred:");
-                    foreach (var (score, terms) in profile.Preferred)
-                    {
-                        foreach (var term in terms)
-                        {
-                            Console.WriteLine($"    {score,-10} {term}");
-                        }
-                    }
-                }
+                PrintTerms("Must Not Contain (Optional)", profile.Optional.Ignored);
+                PrintPreferredTerms("Preferred", profile.Preferred);
+                PrintPreferredTerms("Preferred (Optional)", profile.Optional.Preferred);
 
                 Console.WriteLine("");
             }

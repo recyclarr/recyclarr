@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Trash.Extensions;
 
@@ -26,7 +25,7 @@ namespace Trash.Sonarr.ReleaseProfile
             (TermCategory.Preferred, BuildRegex(@"preferred"))
         };
 
-        private readonly Regex _regexHeader = new(@"^(#+)\s([\w\s\d]+)\s*$", RegexOptions.Compiled);
+        private readonly Regex _regexHeader = new(@"^(#+)\s(.+?)\s*$", RegexOptions.Compiled);
         private readonly Regex _regexHeaderReleaseProfile = BuildRegex(@"release profile");
         private readonly Regex _regexPotentialScore = BuildRegex(@"\[(-?[\d]+)\]");
         private readonly Regex _regexScore = BuildRegex(@"score.*?\[(-?[\d]+)\]");
@@ -45,14 +44,13 @@ namespace Trash.Sonarr.ReleaseProfile
 
         public IDictionary<string, ProfileData> ParseMarkdown(ReleaseProfileConfig config, string markdown)
         {
-            var results = new Dictionary<string, ProfileData>();
-            var state = new ParserState();
+            var state = new ParserState(Log);
 
             var reader = new StringReader(markdown);
             for (var line = reader.ReadLine(); line != null; line = reader.ReadLine())
             {
                 state.LineNumber++;
-                if (IsSkippableLine(line))
+                if (string.IsNullOrEmpty(line))
                 {
                     continue;
                 }
@@ -61,17 +59,17 @@ namespace Trash.Sonarr.ReleaseProfile
                 // the logic we use.
                 if (line.StartsWith("```"))
                 {
-                    state.BracketDepth = 1 - state.BracketDepth;
+                    state.InsideCodeBlock = !state.InsideCodeBlock;
                     continue;
                 }
 
                 // Not inside brackets
-                if (state.BracketDepth == 0)
+                if (!state.InsideCodeBlock)
                 {
-                    ParseMarkdownOutsideFence(line, state, results);
+                    OutsideFence_ParseMarkdown(line, state);
                 }
                 // Inside brackets
-                else if (state.BracketDepth == 1)
+                else
                 {
                     if (!state.IsValid)
                     {
@@ -79,26 +77,21 @@ namespace Trash.Sonarr.ReleaseProfile
                                   "[Profile Name: {ProfileName}] " +
                                   "[Category: {Category}] " + "[Score: {Score}] " + "[Line: {Line}] ",
                             state.ProfileName,
-                            state.CurrentCategory, state.Score, line);
+                            state.CurrentCategory.Value, state.Score, line);
                     }
                     else
                     {
-                        ParseMarkdownInsideFence(config, line, state, results);
+                        InsideFence_ParseMarkdown(config, line, state);
                     }
                 }
             }
 
             Log.Debug("\n");
-            return results;
+            return state.Results;
         }
 
         private bool IsSkippableLine(string line)
         {
-            if (string.IsNullOrEmpty(line))
-            {
-                return true;
-            }
-
             // Skip lines with leading whitespace (i.e. indentation).
             // These lines will almost always be `!!! attention` blocks of some kind and won't contain useful data.
             if (char.IsWhiteSpace(line, 0))
@@ -128,35 +121,34 @@ namespace Trash.Sonarr.ReleaseProfile
                 $"{_markdownDocNames[profileName]}.md");
         }
 
-        private void ParseMarkdownInsideFence(ReleaseProfileConfig config, string line, ParserState state,
-            IDictionary<string, ProfileData> results)
+        private void InsideFence_ParseMarkdown(ReleaseProfileConfig config, string line, ParserState state)
         {
-            // ProfileName is verified for validity prior to this method being invoked.
-            // The actual check occurs in the call to ParserState.IsValid.
-            var profile = results.GetOrCreate(state.ProfileName!);
-
             // Sometimes a comma is present at the end of these lines, because when it's
             // pasted into Sonarr it acts as a delimiter. However, when using them with the
             // API we do not need them.
             line = line.TrimEnd(',');
 
-            switch (state.CurrentCategory)
+            var category = state.CurrentCategory.Value;
+            switch (category!.Value)
             {
                 case TermCategory.Preferred:
                 {
-                    Log.Debug("    + Capture Term " + "[Category: {CurrentCategory}] " + "[Score: {Score}] " +
-                              "[Strict: {StrictNegativeScores}] " + "[Term: {Line}]", state.CurrentCategory,
-                        state.Score,
-                        config.StrictNegativeScores, line);
+                    Log.Debug("    + Capture Term " +
+                              "[Category: {CurrentCategory}] " +
+                              "[Optional: {Optional}] " +
+                              "[Score: {Score}] " +
+                              "[Strict: {StrictNegativeScores}] " +
+                              "[Term: {Line}]",
+                        category.Value, state.TermsAreOptional.Value, state.Score, config.StrictNegativeScores, line);
 
                     if (config.StrictNegativeScores && state.Score < 0)
                     {
-                        profile.Ignored.Add(line);
+                        state.IgnoredTerms.Add(line);
                     }
                     else
                     {
                         // Score is already checked for null prior to the method being invoked.
-                        var prefList = profile.Preferred.GetOrCreate(state.Score!.Value);
+                        var prefList = state.PreferredTerms.GetOrCreate(state.Score!.Value);
                         prefList.Add(line);
                     }
 
@@ -165,53 +157,43 @@ namespace Trash.Sonarr.ReleaseProfile
 
                 case TermCategory.Ignored:
                 {
-                    profile.Ignored.Add(line);
-                    Log.Debug("    + Capture Term [Category: {Category}] [Term: {Line}]", state.CurrentCategory, line);
+                    state.IgnoredTerms.Add(line);
+                    Log.Debug("    + Capture Term " +
+                              "[Category: {Category}] " +
+                              "[Optional: {Optional}] " +
+                              "[Term: {Line}]",
+                        category.Value, state.TermsAreOptional.Value, line);
                     break;
                 }
 
                 case TermCategory.Required:
                 {
-                    profile.Required.Add(line);
-                    Log.Debug("    + Capture Term [Category: {Category}] [Term: {Line}]", state.CurrentCategory, line);
+                    state.RequiredTerms.Add(line);
+                    Log.Debug("    + Capture Term " +
+                              "[Category: {Category}] " +
+                              "[Optional: {Optional}] " +
+                              "[Term: {Line}]",
+                        category.Value, state.TermsAreOptional.Value, line);
                     break;
                 }
 
                 default:
                 {
-                    throw new ArgumentOutOfRangeException($"Unknown term category: {state.CurrentCategory}");
+                    throw new ArgumentOutOfRangeException($"Unknown term category: {category.Value}");
                 }
             }
         }
 
-        private void ParseMarkdownOutsideFence(string line, ParserState state, IDictionary<string, ProfileData> results)
+        private void OutsideFence_ParseMarkdown(string line, ParserState state)
         {
             // ReSharper disable once InlineOutVariableDeclaration
             Match match;
 
-            // Header Processing
+            // Header Processing. Never do any additional processing to headers, so return after processing it
             if (_regexHeader.Match(line, out match))
             {
-                var headerDepth = match.Groups[1].Length;
-                var headerText = match.Groups[2].Value;
-                Log.Debug("> Parsing Header [Text: {HeaderText}] [Depth: {HeaderDepth}]", headerText, headerDepth);
-
-                // Profile name (always reset previous state here)
-                if (_regexHeaderReleaseProfile.Match(headerText).Success)
-                {
-                    state.Reset();
-                    state.ProfileName = headerText;
-                    state.CurrentHeaderDepth = headerDepth;
-                    Log.Debug("  - New Profile [Text: {HeaderText}]", headerText);
-                    return;
-                }
-
-                if (headerDepth <= state.CurrentHeaderDepth)
-                {
-                    Log.Debug("  - !! Non-nested, non-profile header found; resetting all state");
-                    state.Reset();
-                    return;
-                }
+                OutsideFence_ParseHeader(state, match);
+                return;
             }
 
             // Until we find a header that defines a profile, we don't care about anything under it.
@@ -220,29 +202,77 @@ namespace Trash.Sonarr.ReleaseProfile
                 return;
             }
 
-            var profile = results.GetOrCreate(state.ProfileName);
+            // These are often found in admonition (indented) blocks, so we check for it before we
+            // run the IsSkippableLine() check.
             if (line.ContainsIgnoreCase("include preferred"))
             {
-                profile.IncludePreferredWhenRenaming = !line.ContainsIgnoreCase("not");
+                state.Profile.IncludePreferredWhenRenaming = !line.ContainsIgnoreCase("not");
                 Log.Debug("  - 'Include Preferred' found [Value: {IncludePreferredWhenRenaming}] [Line: {Line}]",
-                    profile.IncludePreferredWhenRenaming, line);
+                    state.Profile.IncludePreferredWhenRenaming, line);
                 return;
             }
 
-            // Either we have a nested header or normal line at this point.
-            // We need to check if we're defining a new category.
-            var category = ParseCategory(line);
-            if (category != null)
+            if (IsSkippableLine(line))
             {
-                state.CurrentCategory = category.Value;
-                Log.Debug("  - Category Set [Name: {Category}] [Line: {Line}]", category, line);
-                // DO NOT RETURN HERE!
-                // The category and score are sometimes in the same sentence (line); continue processing the line!
-                // return;
+                return;
             }
+
+            OutsideFence_ParseInformationOnSameLine(line, state);
+        }
+
+        private void OutsideFence_ParseHeader(ParserState state, Match match)
+        {
+            var headerDepth = match.Groups[1].Length;
+            var headerText = match.Groups[2].Value;
+            state.CurrentHeaderDepth = headerDepth;
+
+            // Always reset the scope-based state any time we see a header, regardless of depth or phrasing.
+            // Each header "resets" scope-based state, even if it's entering into a nested header, which usually will
+            // not reset as much state.
+            state.ResetScopeState(headerDepth);
+
+            Log.Debug("> Parsing Header [Nested: {Nested}] [Depth: {HeaderDepth}] [Text: {HeaderText}]",
+                headerDepth > state.ProfileHeaderDepth, headerDepth, headerText);
+
+            // Profile name (always reset previous state here)
+            if (_regexHeaderReleaseProfile.Match(headerText).Success)
+            {
+                state.ResetParserState();
+                state.ProfileName = headerText;
+                state.ProfileHeaderDepth = headerDepth;
+                Log.Debug("  - New Profile [Text: {HeaderText}]", headerText);
+            }
+            else if (headerDepth <= state.ProfileHeaderDepth)
+            {
+                Log.Debug("  - !! Non-nested, non-profile header found; resetting all state");
+                state.ResetParserState();
+            }
+
+            // If a single header can be parsed with multiple phrases, add more if conditions below this comment.
+            // In order to make sure all checks happen as needed, do not return from the condition (to allow conditions
+            // below it to be executed)
+
+            // Another note: Any "state" set by headers has longer lasting effects. That state will remain in effect
+            // until the next header. That means multiple fenced code blocks will be impacted.
+
+            ParseAndSetOptional(headerText, state);
+            ParseAndSetCategory(headerText, state);
+        }
+
+        private void OutsideFence_ParseInformationOnSameLine(string line, ParserState state)
+        {
+            // ReSharper disable once InlineOutVariableDeclaration
+            Match match;
+
+            ParseAndSetOptional(line, state);
+            ParseAndSetCategory(line, state);
 
             if (_regexScore.Match(line, out match))
             {
+                // As a convenience, if we find a score, we obviously should set the category to Preferred even if
+                // the guide didn't explicitly mention that.
+                state.CurrentCategory.PushValue(TermCategory.Preferred, state.CurrentHeaderDepth);
+
                 state.Score = int.Parse(match.Groups[1].Value);
                 Log.Debug("  - Score [Value: {Score}]", state.Score);
             }
@@ -251,6 +281,38 @@ namespace Trash.Sonarr.ReleaseProfile
                 Log.Warning("Found a potential score on line #{Line} that will be ignored because the " +
                             "word 'score' is missing (This is probably a bug in the guide itself): {ScoreMatch}",
                     state.LineNumber, match.Groups[0].Value);
+            }
+        }
+
+        private void ParseAndSetCategory(string line, ParserState state)
+        {
+            var category = ParseCategory(line);
+            if (category == null)
+            {
+                return;
+            }
+
+            state.CurrentCategory.PushValue(category.Value, state.CurrentHeaderDepth);
+
+            Log.Debug("  - Category Set " +
+                      "[Scope: {Scope}] " +
+                      "[Name: {Category}] " +
+                      "[Stack Size: {StackSize}] " +
+                      "[Line: {Line}]",
+                category.Value, state.CurrentHeaderDepth, state.CurrentCategory.StackSize, line);
+        }
+
+        private void ParseAndSetOptional(string line, ParserState state)
+        {
+            if (line.ContainsIgnoreCase("optional"))
+            {
+                state.TermsAreOptional.PushValue(true, state.CurrentHeaderDepth);
+
+                Log.Debug("  - Optional Set " +
+                          "[Scope: {Scope}] " +
+                          "[Stack Size: {StackSize}] " +
+                          "[Line: {Line}]",
+                    state.CurrentHeaderDepth, state.CurrentCategory.StackSize, line);
             }
         }
 
@@ -265,39 +327,6 @@ namespace Trash.Sonarr.ReleaseProfile
             }
 
             return null;
-        }
-
-        private enum TermCategory
-        {
-            Required,
-            Ignored,
-            Preferred
-        }
-
-        private class ParserState
-        {
-            public ParserState()
-            {
-                Reset();
-            }
-
-            public string? ProfileName { get; set; }
-            public int? Score { get; set; }
-            public TermCategory CurrentCategory { get; set; }
-            public int BracketDepth { get; set; }
-            public int CurrentHeaderDepth { get; set; }
-            public int LineNumber { get; set; }
-
-            public bool IsValid => ProfileName != null && (CurrentCategory != TermCategory.Preferred || Score != null);
-
-            public void Reset()
-            {
-                ProfileName = null;
-                Score = null;
-                CurrentCategory = TermCategory.Preferred;
-                BracketDepth = 0;
-                CurrentHeaderDepth = -1;
-            }
         }
     }
 }

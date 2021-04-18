@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional terms in the release profile guides are no longer synchronized to Sonarr.
+
 ### Changed
 
 - A warning is now logged when we find a number in brackets (such as `[100]`) without the word

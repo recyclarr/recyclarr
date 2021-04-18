@@ -12,8 +12,15 @@ using Trash.Sonarr.ReleaseProfile;
 namespace Trash.Tests.Sonarr.ReleaseProfile
 {
     [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     public class ReleaseProfileParserTest
     {
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            // Formatter.AddFormatter(new ProfileDataValueFormatter());
+        }
+
         private class Context
         {
             public Context()
@@ -32,6 +39,77 @@ namespace Trash.Tests.Sonarr.ReleaseProfile
             public SonarrConfiguration Config { get; }
             public ReleaseProfileGuideParser GuideParser { get; }
             public TestData<ReleaseProfileParserTest> TestData { get; } = new();
+
+            public IDictionary<string, ProfileData> ParseWithDefaults(string markdown)
+            {
+                return GuideParser.ParseMarkdown(Config.ReleaseProfiles.First(), markdown);
+            }
+        }
+
+        [Test]
+        public void Parse_CodeBlockScopedCategories_CategoriesSwitch()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Test Release Profile
+
+Add this to must not contain (ignored)
+
+```
+abc
+```
+
+Add this to must contain (required)
+
+```
+xyz
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            results.Should().ContainKey("Test Release Profile")
+                .WhichValue.Should().BeEquivalentTo(new
+                {
+                    Ignored = new List<string> {"abc"},
+                    Required = new List<string> {"xyz"}
+                });
+        }
+
+        [Test]
+        public void Parse_HeaderCategoryFollowedByCodeBlockCategories_CodeBlockChangesCurrentCategory()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Test Release Profile
+
+## Must Not Contain
+
+Add this one
+
+```
+abc
+```
+
+Add this to must contain (required)
+
+```
+xyz
+```
+
+One more
+
+```
+123
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            results.Should().ContainKey("Test Release Profile")
+                .WhichValue.Should().BeEquivalentTo(new
+                {
+                    Ignored = new List<string> {"abc"},
+                    Required = new List<string> {"xyz", "123"}
+                });
         }
 
         [Test]
@@ -55,7 +133,7 @@ namespace Trash.Tests.Sonarr.ReleaseProfile
         {
             var context = new Context();
             var markdown = context.TestData.GetResourceData("include_preferred_when_renaming.md");
-            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+            var results = context.ParseWithDefaults(markdown);
 
             results.Should()
                 .ContainKey("First Release Profile")
@@ -63,6 +141,124 @@ namespace Trash.Tests.Sonarr.ReleaseProfile
             results.Should()
                 .ContainKey("Second Release Profile")
                 .WhichValue.IncludePreferredWhenRenaming.Should().Be(false);
+        }
+
+        [Test]
+        public void Parse_IndentedIncludePreferred_ShouldBeParsed()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Release Profile 1
+
+!!! Warning
+    Do not check include preferred
+
+must contain
+
+```
+test1
+```
+
+# Release Profile 2
+
+!!! Warning
+    Check include preferred
+
+must contain
+
+```
+test2
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            var expectedResults = new Dictionary<string, ProfileData>
+            {
+                {
+                    "Release Profile 1", new ProfileData
+                    {
+                        IncludePreferredWhenRenaming = false,
+                        Required = new List<string> {"test1"}
+                    }
+                },
+                {
+                    "Release Profile 2", new ProfileData
+                    {
+                        IncludePreferredWhenRenaming = true,
+                        Required = new List<string> {"test2"}
+                    }
+                }
+            };
+
+            results.Should().BeEquivalentTo(expectedResults);
+        }
+
+        [Test]
+        public void Parse_OptionalTerms_AreCapturedProperly()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Optional Release Profile
+
+```
+skipped1
+```
+
+## Must Not Contain
+
+```
+optional1
+```
+
+## Preferred
+
+score [10]
+
+```
+optional2
+```
+
+One more must contain:
+
+```
+optional3
+```
+
+# Second Release Profile
+
+This must not contain:
+
+```
+not-optional1
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            var expectedResults = new Dictionary<string, ProfileData>
+            {
+                {
+                    "Optional Release Profile", new ProfileData
+                    {
+                        Optional = new ProfileDataOptional
+                        {
+                            Ignored = new List<string> {"optional1"},
+                            Required = new List<string> {"optional3"},
+                            Preferred = new Dictionary<int, List<string>>
+                            {
+                                {10, new List<string> {"optional2"}}
+                            }
+                        }
+                    }
+                },
+                {
+                    "Second Release Profile", new ProfileData
+                    {
+                        Ignored = new List<string> {"not-optional1"}
+                    }
+                }
+            };
+
+            results.Should().BeEquivalentTo(expectedResults);
         }
 
         [Test]
@@ -80,10 +276,9 @@ abc
 ```
 ");
             var context = new Context();
-            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+            var results = context.ParseWithDefaults(markdown);
 
-            results.Should().ContainKey("First Release Profile")
-                .WhichValue.Should().BeEquivalentTo(new ProfileData());
+            results.Should().BeEmpty();
 
             const string expectedLog =
                 "Found a potential score on line #5 that will be ignored because the " +
@@ -91,6 +286,30 @@ abc
 
             TestCorrelator.GetLogEventsFromCurrentContext()
                 .Should().ContainSingle(evt => evt.RenderMessage(default) == expectedLog);
+        }
+
+        [Test]
+        public void Parse_ScoreWithoutCategory_ImplicitlyPreferred()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Test Release Profile
+
+score is [100]
+
+```
+abc
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            results.Should()
+                .ContainKey("Test Release Profile")
+                .WhichValue.Preferred.Should()
+                .BeEquivalentTo(new Dictionary<int, List<string>>
+                {
+                    {100, new List<string> {"abc"}}
+                });
         }
 
         [Test]
@@ -111,7 +330,7 @@ abc
             };
 
             var context = new Context();
-            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+            var results = context.ParseWithDefaults(markdown);
 
             results.Should().BeEmpty();
 
@@ -132,7 +351,7 @@ abc
             };
 
             var markdown = context.TestData.GetResourceData("strict_negative_scores.md");
-            var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
+            var results = context.ParseWithDefaults(markdown);
 
             results.Should()
                 .ContainKey("Test Release Profile")
@@ -143,6 +362,62 @@ abc
                     Ignored = new List<string> {"abc"},
                     Preferred = new Dictionary<int, List<string>> {{0, new List<string> {"xyz"}}}
                 });
+        }
+
+        [Test]
+        public void Parse_TermsWithoutCategory_AreSkipped()
+        {
+            var markdown = StringUtils.TrimmedString(@"
+# Test Release Profile
+
+```
+skipped1
+```
+
+## Must Not Contain
+
+```
+added1
+```
+
+## Preferred
+
+score [10]
+
+```
+added2
+```
+
+One more
+
+```
+added3
+```
+
+# Second Release Profile
+
+```
+skipped2
+```
+");
+            var context = new Context();
+            var results = context.ParseWithDefaults(markdown);
+
+            var expectedResults = new Dictionary<string, ProfileData>
+            {
+                {
+                    "Test Release Profile", new ProfileData
+                    {
+                        Ignored = new List<string> {"added1"},
+                        Preferred = new Dictionary<int, List<string>>
+                        {
+                            {10, new List<string> {"added2", "added3"}}
+                        }
+                    }
+                }
+            };
+
+            results.Should().BeEquivalentTo(expectedResults);
         }
     }
 }
