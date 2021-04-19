@@ -27,6 +27,8 @@ namespace Trash.Command
             Log = logger;
         }
 
+        public static string DefaultConfigPath { get; } = Path.Join(AppContext.BaseDirectory, "trash.yml");
+
         protected ILogger Log { get; }
 
         [CommandOption("preview", 'p', Description =
@@ -40,8 +42,7 @@ namespace Trash.Command
         [CommandOption("config", 'c', Description =
             "One or more YAML config files to use. All configs will be used and settings are additive. " +
             "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
-        public List<string> Config { get; [UsedImplicitly] set; } =
-            new() {Path.Join(AppContext.BaseDirectory, "trash.yml")};
+        public List<string> Config { get; [UsedImplicitly] set; } = new() {DefaultConfigPath};
 
         public async ValueTask ExecuteAsync(IConsole console)
         {

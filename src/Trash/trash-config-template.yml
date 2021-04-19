@@ -1,0 +1,33 @@
+# A starter config to use with Trash Updater. Most values are set to "reasonable defaults".
+# Update the values below as needed for your instance. You will be required to update the
+# API Key and URL for each instance you want to use.
+#
+# Many optional settings have been omitted to keep this template simple.
+#
+# For more details on the configuration, see the Configuration Reference on the wiki here:
+# https://github.com/rcdailey/trash-updater/wiki/Configuration-Reference
+
+# Configuration specific to Sonarr
+sonarr:
+    # Set the URL/API Key to your actual instance
+  - base_url: http://localhost:8989
+    api_key: f7e74ba6c80046e39e076a27af5a8444
+
+    # Quality definitions from the guide to sync to Sonarr. Choice: anime, series, hybrid
+    quality_definition: hybrid
+
+    # Release profiles from the guide to sync to Sonarr. Types: anime, series
+    # You can optionally add tags and make negative scores strictly ignored
+    release_profiles:
+      - type: anime
+      - type: series
+
+# Configuration specific to Radarr.
+radarr:
+  # Set the URL/API Key to your actual instance
+  - base_url: http://localhost:7878
+    api_key: bf99da49d0b0488ea34e4464aa63a0e5
+
+    # Which quality definition in the guide to sync to Radarr. Only choice right now is 'movie'
+    quality_definition:
+      type: movie

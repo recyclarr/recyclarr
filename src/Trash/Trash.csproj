@@ -21,4 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="trash-config-template.yml" />
+  </ItemGroup>
 </Project>

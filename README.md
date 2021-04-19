@@ -61,21 +61,28 @@ too. Run this from the directory where you want `trash` to be installed.
 
 ## Getting Started
 
-> **TL;DR**: Run `trash [sonarr|radarr] --help` for help with available command line options. Visit
-> [the wiki](https://github.com/rcdailey/trash-updater/wiki) for in-depth documentation about the
-> command line, configuration, and other topics.
+Trash Updater requires a YML configuration file in order to work. Run the steps below if you want to
+get started with minimal configuration file template.
 
-The `trash` executable provides one subcommand per distinct service. This means, for example, you
-can run `trash sonarr` and `trash radarr`. When you run these subcommands, the relevant service
-configuration is read from the YAML files.
+- Run `trash create-config` to create a starter `trash.yml` file in the same directory as the
+  executable. You can also use `--config` to
+- Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
+  and `api_key` settings for each service that you want to use.
+- Run `trash sonarr` and/or `trash.radarr` as needed to update those instances.
 
-That's all you need to do on the command line to get the program to parse guides and push settings
-to the respective service. Most of the documentation will be for the YAML configuration, which is
-what drives the behavior of the program.
+The last step above will do a "basic" sync from the guides to Sonarr and/or Radarr. The starter YAML
+config is very minimal. See the next section for further reading and links to the wiki for
+additional topics and more advanced customization.
+
+Lastly, each subcommand supports printing help on the command line. Simply run `trash --help` for
+the main help output and a list of subcommands. You can then see the help for each subcommand by
+running `trash [subcommand] --help`, where `[subcommand]` is one of those subcommands (e.g.
+`sonarr`)
 
 ### Read the Documentation
 
-Main documentation is located in the wiki. Links provided below for some main topics.
+Main documentation is located in [the wiki](https://github.com/rcdailey/trash-updater/wiki). Links
+provided below for some main topics.
 
 - [Command Line Reference](../../wiki/Command-Line-Reference)
 - [Configuration Reference](../../wiki/Configuration-Reference)

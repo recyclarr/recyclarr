@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
+using CliFx;
 using Serilog;
 using Serilog.Core;
-using Trash.Command;
 using Trash.Config;
 using Trash.Radarr.Api;
 using Trash.Radarr.QualityDefinition;
@@ -16,42 +16,6 @@ namespace Trash
 {
     public static class CompositionRoot
     {
-        // private static void SetupMediator(ContainerBuilder builder)
-        // {
-        //     builder
-        //         .RegisterType<Mediator>()
-        //         .As<IMediator>()
-        //         .InstancePerLifetimeScope();
-        //
-        //     builder.Register<ServiceFactory>(context =>
-        //     {
-        //         var c = context.Resolve<IComponentContext>();
-        //         return t => c.Resolve(t);
-        //     });
-        //
-        //     builder.RegisterAssemblyTypes(typeof(CompositionRoot).GetTypeInfo().Assembly).AsImplementedInterfaces();
-        // }
-
-        // private static void RegisterConfiguration<T>(ContainerBuilder builder)
-        //     where T : BaseConfiguration
-        // {
-        //
-        //     builder.Register(ctx =>
-        //         {
-        //             var selector = ctx.Resolve<IConfigurationProvider<T>>();
-        //             if (selector.ActiveConfiguration == null)
-        //             {
-        //                 // If this exception is thrown, that means that a BaseCommand subclass has not implemented the
-        //                 // appropriate logic to set the active configuration via an IConfigurationSelector.
-        //                 throw new InvalidOperationException("No valid configuration has been selected");
-        //             }
-        //
-        //             return selector.ActiveConfiguration;
-        //         })
-        //         .As<BaseConfiguration>()
-        //         .AsSelf();
-        // }
-
         private static void SetupLogging(ContainerBuilder builder)
         {
             builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
@@ -101,9 +65,9 @@ namespace Trash
                 .As(typeof(IConfigurationProvider<>))
                 .SingleInstance();
 
-            // Register all types deriving from BaseCommand. These are all of our supported subcommands.
+            // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                .Where(t => t.IsAssignableTo(typeof(IBaseCommand)));
+                .Where(t => t.IsAssignableTo(typeof(ICommand)));
 
             SetupLogging(builder);
             SonarrRegistrations(builder);

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `create-config` subcommand to create a starter YAML config file
+
 ## [1.1.0] - 2021-04-18
 
 ### Added
