@@ -5,5 +5,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DefaultDataFile.txt" />
+    <EmbeddedResource Include="TestData\DataFile.txt" />
   </ItemGroup>
 </Project>

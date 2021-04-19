@@ -17,4 +17,8 @@
     <PackageReference Include="YamlDotNet" />
     <PackageReference Include="System.IO.Abstractions" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
 </Project>

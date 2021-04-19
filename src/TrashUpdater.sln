@@ -14,6 +14,10 @@ ProjectSection(SolutionItems) = preProject
 	Directory.Build.targets = Directory.Build.targets
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{0720939D-1CA6-43D7-BBED-F8F894C4F562}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +40,14 @@ Global
 		{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18CF1FCA-7983-4423-8B7E-4A830108C624}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18CF1FCA-7983-4423-8B7E-4A830108C624}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18CF1FCA-7983-4423-8B7E-4A830108C624}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18CF1FCA-7983-4423-8B7E-4A830108C624}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0720939D-1CA6-43D7-BBED-F8F894C4F562}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0720939D-1CA6-43D7-BBED-F8F894C4F562}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0720939D-1CA6-43D7-BBED-F8F894C4F562}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0720939D-1CA6-43D7-BBED-F8F894C4F562}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

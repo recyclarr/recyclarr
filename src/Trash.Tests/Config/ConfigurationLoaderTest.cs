@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
+using Common;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
@@ -22,13 +23,13 @@ namespace Trash.Tests.Config
     {
         private TextReader GetResourceData(string file)
         {
-            var testData = new TestData<ConfigurationLoaderTest>();
+            var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
             if (testData == null)
             {
                 throw new InvalidOperationException("TestData object has not been created yet");
             }
 
-            return new StringReader(testData.GetResourceData(file));
+            return new StringReader(testData.ReadData(file));
         }
 
         [Test]

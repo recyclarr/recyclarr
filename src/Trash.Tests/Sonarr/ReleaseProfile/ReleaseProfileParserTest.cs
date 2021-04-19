@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Common;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
@@ -38,7 +39,7 @@ namespace Trash.Tests.Sonarr.ReleaseProfile
 
             public SonarrConfiguration Config { get; }
             public ReleaseProfileGuideParser GuideParser { get; }
-            public TestData<ReleaseProfileParserTest> TestData { get; } = new();
+            public ResourceDataReader TestData { get; } = new(typeof(ReleaseProfileParserTest), "Data");
 
             public IDictionary<string, ProfileData> ParseWithDefaults(string markdown)
             {
@@ -116,7 +117,7 @@ One more
         public void Parse_IgnoredRequiredPreferredScores()
         {
             var context = new Context();
-            var markdown = context.TestData.GetResourceData("test_parse_markdown_complete_doc.md");
+            var markdown = context.TestData.ReadData("test_parse_markdown_complete_doc.md");
             var results = context.GuideParser.ParseMarkdown(context.Config.ReleaseProfiles.First(), markdown);
 
             results.Count.Should().Be(1);
@@ -132,7 +133,7 @@ One more
         public void Parse_IncludePreferredWhenRenaming()
         {
             var context = new Context();
-            var markdown = context.TestData.GetResourceData("include_preferred_when_renaming.md");
+            var markdown = context.TestData.ReadData("include_preferred_when_renaming.md");
             var results = context.ParseWithDefaults(markdown);
 
             results.Should()
@@ -350,7 +351,7 @@ abc
                 new() {StrictNegativeScores = true}
             };
 
-            var markdown = context.TestData.GetResourceData("strict_negative_scores.md");
+            var markdown = context.TestData.ReadData("strict_negative_scores.md");
             var results = context.ParseWithDefaults(markdown);
 
             results.Should()
