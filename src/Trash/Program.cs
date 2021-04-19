@@ -14,7 +14,7 @@ namespace Trash
             return await new CliApplicationBuilder()
                 .AddCommandsFromThisAssembly()
                 .SetExecutableName(ThisAssembly.AssemblyName)
-                .SetVersion(ThisAssembly.AssemblyInformationalVersion)
+                .SetVersion($"v{ThisAssembly.AssemblyInformationalVersion}")
                 .UseTypeActivator(type => _container.Resolve(type))
                 .Build()
                 .RunAsync();
