@@ -63,10 +63,10 @@ too. Run this from the directory where you want `trash` to be installed.
 ## Getting Started
 
 Trash Updater requires a YAML configuration file in order to work. Run the steps below if you want
-to get started with minimal configuration file template.
+to get started with a minimal configuration file.
 
 - Run `trash create-config` to create a starter `trash.yml` file in the same directory as the
-  executable. You can also use `--config` to customize the filename and location.
+  executable. You can also use `--path` to customize the filename and location.
 - Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
   and `api_key` settings for each service that you want to use.
 - Run `trash sonarr` and/or `trash.radarr` as needed to update those instances.
