@@ -5,15 +5,24 @@
     <WarningLevel>9999</WarningLevel>
     <!-- <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
     <DebugType>embedded</DebugType>
-    <!-- Rider does not support `AllEnabledByDefault` yet. See:
-    https://youtrack.jetbrains.com/issue/RIDER-55142
+    <!--
+      Rider does not support `AllEnabledByDefault` yet. See:
+      https://youtrack.jetbrains.com/issue/RIDER-55142
+      <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     -->
-<!--    <AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Condition=" '$(DisableNbgv)' != 'true' " />
   </ItemGroup>
+
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit.Analyzers" />
@@ -26,6 +35,7 @@
     <PackageReference Include="GitHubActionsTestLogger" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" />
   </ItemGroup>
+
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <EmbeddedResource Include="**\Data\*" />
   </ItemGroup>
