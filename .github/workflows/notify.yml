@@ -1,0 +1,21 @@
+name: Release Notification
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+    steps:
+      - run: wget https://raw.githubusercontent.com/rcdailey/trash-updater/master/ci/notify/discord_notify.py
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install discord-webhook
+      - run: |
+          python discord_notify.py \
+            "${{ github.event.release.tag_name }}" \
+            "${{ secrets.DISCORD_WEBHOOK }}" \
+            "${{ github.event.release.body }}"
