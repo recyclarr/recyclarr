@@ -20,7 +20,8 @@ Release Profiles
   name based on the guide and this name is used to find them in subsequent runs.
 - Tags can be added to any updated or created profiles.
 - Ability to convert preferred with negative scores to "Must not contain" terms.
-- Terms mentioned as "optional" in the guide are not synced to Sonarr release profiles.
+- Terms mentioned as "optional" in the guide are not synced to Sonarr release profiles by default
+  (can be enabled via config).
 
 Quality Definitions
 
