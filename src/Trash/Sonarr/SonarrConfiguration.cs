@@ -26,6 +26,14 @@ namespace Trash.Sonarr
     {
         public ReleaseProfileType Type { get; init; }
         public bool StrictNegativeScores { get; init; }
+        public SonarrProfileFilterConfig Filter { get; init; } = new();
         public List<string> Tags { get; init; } = new();
+    }
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    public class SonarrProfileFilterConfig
+    {
+        public bool IncludeOptional { get; set; }
+        // todo: Add Include & Exclude later (list of strings)
     }
 }

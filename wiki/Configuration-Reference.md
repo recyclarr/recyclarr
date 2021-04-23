@@ -37,6 +37,8 @@ sonarr:
           - anime
       - type: series
         strict_negative_scores: false
+        filter:
+          include_optional: true
         tags:
           - tv
 ```
@@ -80,6 +82,11 @@ sonarr:
     release profile. Tags are created in Sonarr if they do not exist. All tags on an existing
     release profile (if present) are removed and replaced with only the tags in this list. If no
     tags are specified, no tags will be set on the release profile.
+
+  - `filter` (Optional): Defines various ways that release profile terms from the guide are
+    synchronized with Sonarr. Any combination of the below properties may be specified here:
+    - `include_optional`: Set to `true` to include terms marked "Optional" in the guide. By default,
+      optional terms are *not* synchronized to Sonarr. The default is `false`.
 
 [sonarr_quality]: https://trash-guides.info/Sonarr/V3/Sonarr-Quality-Settings-File-Size/
 [sonarr_profile_anime]: https://trash-guides.info/Sonarr/V3/Sonarr-Release-Profile-RegEx-Anime/

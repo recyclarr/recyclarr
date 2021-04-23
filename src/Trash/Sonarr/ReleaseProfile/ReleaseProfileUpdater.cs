@@ -56,12 +56,13 @@ namespace Trash.Sonarr.ReleaseProfile
             return $"[Trash] {titleType} - {profileName}";
         }
 
-        private static SonarrReleaseProfile? GetProfileToUpdate(List<SonarrReleaseProfile> profiles, string profileName)
+        private static SonarrReleaseProfile? GetProfileToUpdate(IEnumerable<SonarrReleaseProfile> profiles,
+            string profileName)
         {
             return profiles.FirstOrDefault(p => p.Name == profileName);
         }
 
-        private static void SetupProfileRequestObject(SonarrReleaseProfile profileToUpdate, ProfileData profile,
+        private static void SetupProfileRequestObject(SonarrReleaseProfile profileToUpdate, FilteredProfileData profile,
             List<int> tagIds)
         {
             profileToUpdate.Preferred = profile.Preferred
@@ -80,7 +81,7 @@ namespace Trash.Sonarr.ReleaseProfile
             profileToUpdate.Tags = tagIds;
         }
 
-        private async Task UpdateExistingProfile(SonarrReleaseProfile profileToUpdate, ProfileData profile,
+        private async Task UpdateExistingProfile(SonarrReleaseProfile profileToUpdate, FilteredProfileData profile,
             List<int> tagIds)
         {
             Log.Debug("Update existing profile with id {ProfileId}", profileToUpdate.Id);
@@ -88,7 +89,7 @@ namespace Trash.Sonarr.ReleaseProfile
             await _api.UpdateReleaseProfile(profileToUpdate);
         }
 
-        private async Task CreateNewProfile(string title, ProfileData profile, List<int> tagIds)
+        private async Task CreateNewProfile(string title, FilteredProfileData profile, List<int> tagIds)
         {
             var newProfile = new SonarrReleaseProfile
             {
@@ -101,7 +102,7 @@ namespace Trash.Sonarr.ReleaseProfile
         }
 
         private async Task ProcessReleaseProfiles(IDictionary<string, ProfileData> profiles,
-            ReleaseProfileConfig profile)
+            ReleaseProfileConfig config)
         {
             await DoVersionEnforcement();
 
@@ -109,11 +110,11 @@ namespace Trash.Sonarr.ReleaseProfile
 
             // If tags were provided, ensure they exist. Tags that do not exist are added first, so that we
             // may specify them with the release profile request payload.
-            if (profile.Tags.Count > 0)
+            if (config.Tags.Count > 0)
             {
                 var sonarrTags = await _api.GetTags();
-                await CreateMissingTags(sonarrTags, profile.Tags);
-                tagIds = sonarrTags.Where(t => profile.Tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
+                await CreateMissingTags(sonarrTags, config.Tags);
+                tagIds = sonarrTags.Where(t => config.Tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
                     .Select(t => t.Id)
                     .ToList();
             }
@@ -125,17 +126,18 @@ namespace Trash.Sonarr.ReleaseProfile
 
             foreach (var (name, profileData) in profiles)
             {
-                var title = BuildProfileTitle(profile.Type, name);
+                var filteredProfileData = new FilteredProfileData(profileData, config);
+                var title = BuildProfileTitle(config.Type, name);
                 var profileToUpdate = GetProfileToUpdate(existingProfiles, title);
                 if (profileToUpdate != null)
                 {
                     Log.Information("Update existing profile: {ProfileName}", title);
-                    await UpdateExistingProfile(profileToUpdate, profileData, tagIds);
+                    await UpdateExistingProfile(profileToUpdate, filteredProfileData, tagIds);
                 }
                 else
                 {
                     Log.Information("Create new profile: {ProfileName}", title);
-                    await CreateNewProfile(title, profileData, tagIds);
+                    await CreateNewProfile(title, filteredProfileData, tagIds);
                 }
             }
         }
@@ -146,8 +148,12 @@ namespace Trash.Sonarr.ReleaseProfile
             {
                 Log.Information("Processing Release Profile: {ProfileName}", profile.Type);
                 var markdown = await _parser.GetMarkdownData(profile.Type);
-
                 var profiles = Utils.FilterProfiles(_parser.ParseMarkdown(profile, markdown));
+
+                if (profile.Filter.IncludeOptional)
+                {
+                    Log.Information("Configuration is set to allow optional terms to be synchronized");
+                }
 
                 if (args.Preview)
                 {
