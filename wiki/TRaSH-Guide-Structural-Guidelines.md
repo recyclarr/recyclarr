@@ -90,6 +90,19 @@ The following general rules apply to all lines in the markdown data:
 
    This is optional and the default is always "UNCHECKED".
 
+1. **Terms may be marked "optional".**
+
+   From a header or sentence within a header section, the appearance of the word "optional" will
+   indicate that certain terms will *not* be synchronized to Sonarr by default. The semantics for
+   this differ depending on where the word is mentioned:
+
+   - **Headers**: "Optional" mentioned in a header will apply to all code blocks in that whole
+     section. Furthermore, any nested headers will also be treated as if the word "Optional" appears
+     in its name, even if it isn't.
+   - **Sentence**: Once the term "Optional" is found in any sentence following a header, it applies
+     to all code blocks for the remainder of that section. Once a new header is found (nested or
+     not), terms are not considered optional anymore.
+
 ### Release Profile Naming
 
 The script procedurally generates a name for release profiles it creates. For the following example:
