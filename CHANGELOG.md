@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New filter configuration for Sonarr release profiles that (for now) allows you to include optional
-  terms. Look for `filter` in the [Configuration Reference] for more details.
+- New configuration for Sonarr release profiles that allows all optional terms to be synced. Look
+  for `filter` in the [Configuration Reference] for more details.
 
 [Configuration Reference]: https://github.com/rcdailey/trash-updater/wiki/Configuration-Reference
 
