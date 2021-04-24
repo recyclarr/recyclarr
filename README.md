@@ -1,5 +1,10 @@
 # TRaSH Guide Updater
 
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/rcdailey/trash-updater/blob/master/LICENSE)
+![build status](https://github.com/rcdailey/trash-updater/actions/workflows/build.yml/badge.svg?branch=master)
+[![GitHub release](https://img.shields.io/github/release/rcdailey/trash-updater.svg)](https://github.com/rcdailey/trash-updater/releases/)
+[![Support Server](https://img.shields.io/discord/492590071455940612.svg?color=7289da&label=TRaSH-Guides&logo=discord&style=flat-square)](https://discord.com/invite/Vau8dZ3)
+
 Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
 > **NOTICE**: This program is a work-in-progress!
