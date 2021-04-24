@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2021-04-23
+
 ### Added
 
 - New configuration for Sonarr release profiles that allows all optional terms to be synced. Look
@@ -52,7 +54,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/rcdailey/trash-updater/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/rcdailey/trash-updater/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/rcdailey/trash-updater/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rcdailey/trash-updater/compare/v0.1.0...v1.0.0
