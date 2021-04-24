@@ -7,8 +7,6 @@
 
 Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
-> **NOTICE**: This program is a work-in-progress!
-
 ## Features
 
 Features list will continue to grow. See the limitations & roadmap section for more details!
