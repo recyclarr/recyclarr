@@ -13,10 +13,6 @@ on:
 env:
   dotnetVersion: 5.0.x
 
-defaults:
-  run:
-    working-directory: src
-
 jobs:
   test:
     name: Test
@@ -33,7 +29,7 @@ jobs:
           dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Test
-        run: dotnet test --configuration Release --logger GitHubActions
+        run: dotnet test src --configuration Release --logger GitHubActions
 
   build:
     name: Build
@@ -41,10 +37,16 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        runtime: [win-x64, linux-x64, osx-x64]
+        include:
+          - runtime: win-x64
+            image: windows-latest
+          - runtime: linux-x64
+            image: ubuntu-latest
+          - runtime: osx-x64
+            image: macos-latest
     # Must run on Windows so that version info gets properly set in host EXE. See:
     # https://github.com/dotnet/runtime/issues/3828
-    runs-on: windows-latest
+    runs-on: ${{ matrix.image }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v2
@@ -59,26 +61,15 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Publish
-        run: >
-          dotnet publish Trash
-          --configuration Release
-          --output publish
-          --runtime ${{ matrix.runtime }}
-          --self-contained true
-          -p:PublishSingleFile=true
-          -p:PublishTrimmed=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Zip Binary
+      - name: Publish & Zip
         shell: pwsh
-        run: Compress-Archive publish/trash* trash-${{ matrix.runtime }}.zip
+        run: ci/PublishAndZip.ps1 ${{ matrix.runtime }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: trash
-          path: src/trash-*.zip
+          path: publish/zip/trash-*.zip
 
   release:
     name: Release
