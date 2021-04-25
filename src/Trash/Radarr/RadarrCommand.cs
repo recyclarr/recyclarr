@@ -13,7 +13,7 @@ namespace Trash.Radarr
 {
     [Command("radarr", Description = "Perform operations on a Radarr instance")]
     [UsedImplicitly]
-    public class RadarrCommand : BaseCommand, IRadarrCommand
+    public class RadarrCommand : ServiceCommand, IRadarrCommand
     {
         private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
         private readonly Func<RadarrQualityDefinitionUpdater> _qualityUpdaterFactory;

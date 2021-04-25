@@ -2,7 +2,7 @@
 
 namespace Trash.Radarr
 {
-    public interface IRadarrCommand : IBaseCommand
+    public interface IRadarrCommand : IServiceCommand
     {
     }
 }

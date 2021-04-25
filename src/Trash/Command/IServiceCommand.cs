@@ -2,7 +2,7 @@
 
 namespace Trash.Command
 {
-    public interface IBaseCommand
+    public interface IServiceCommand
     {
         bool Preview { get; }
         bool Debug { get; }

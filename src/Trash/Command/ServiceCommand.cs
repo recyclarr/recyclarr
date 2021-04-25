@@ -17,11 +17,11 @@ using YamlDotNet.Core;
 
 namespace Trash.Command
 {
-    public abstract class BaseCommand : ICommand, IBaseCommand
+    public abstract class ServiceCommand : ICommand, IServiceCommand
     {
         private readonly LoggingLevelSwitch _loggingLevelSwitch;
 
-        protected BaseCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch)
+        protected ServiceCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch)
         {
             _loggingLevelSwitch = loggingLevelSwitch;
             Log = logger;

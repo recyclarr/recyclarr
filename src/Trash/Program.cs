@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Autofac;
 using CliFx;
+using Trash.Command;
 
 namespace Trash
 {
@@ -15,7 +16,7 @@ namespace Trash
                 .AddCommandsFromThisAssembly()
                 .SetExecutableName(ThisAssembly.AssemblyName)
                 .SetVersion($"v{ThisAssembly.AssemblyInformationalVersion}")
-                .UseTypeActivator(type => _container.Resolve(type))
+                .UseTypeActivator(type => CliTypeActivator.ResolveType(_container, type))
                 .Build()
                 .RunAsync();
         }

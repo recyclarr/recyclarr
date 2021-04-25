@@ -14,7 +14,7 @@ namespace Trash.Sonarr
 {
     [Command("sonarr", Description = "Perform operations on a Sonarr instance")]
     [UsedImplicitly]
-    public class SonarrCommand : BaseCommand, ISonarrCommand
+    public class SonarrCommand : ServiceCommand, ISonarrCommand
     {
         private readonly IConfigurationLoader<SonarrConfiguration> _configLoader;
         private readonly Func<ReleaseProfileUpdater> _profileUpdaterFactory;

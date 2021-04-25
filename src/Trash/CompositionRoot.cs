@@ -4,6 +4,7 @@ using Autofac;
 using CliFx;
 using Serilog;
 using Serilog.Core;
+using Trash.Command;
 using Trash.Config;
 using Trash.Radarr.Api;
 using Trash.Radarr.QualityDefinition;
@@ -52,22 +53,42 @@ namespace Trash
             builder.RegisterType<RadarrQualityDefinitionGuideParser>().As<IRadarrQualityDefinitionGuideParser>();
         }
 
-        public static IContainer Setup()
+        private static void ConfigurationRegistrations(ContainerBuilder builder)
         {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterType<FileSystem>().As<IFileSystem>();
-
-            // Configuration
             builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
             builder.RegisterGeneric(typeof(ConfigurationLoader<>)).As(typeof(IConfigurationLoader<>));
             builder.RegisterGeneric(typeof(ConfigurationProvider<>))
                 .As(typeof(IConfigurationProvider<>))
                 .SingleInstance();
+        }
 
+        private static void CommandRegistrations(ContainerBuilder builder)
+        {
             // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                 .Where(t => t.IsAssignableTo(typeof(ICommand)));
+
+            // Used to access the chosen command class. This is assigned from CliTypeActivator
+            builder.RegisterType<ActiveServiceCommandProvider>()
+                .As<IActiveServiceCommandProvider>()
+                .SingleInstance();
+
+            builder.Register(c => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand)
+                .As<IServiceCommand>();
+        }
+
+        public static IContainer Setup()
+        {
+            return Setup(new ContainerBuilder());
+        }
+
+        public static IContainer Setup(ContainerBuilder builder)
+        {
+            builder.RegisterType<FileSystem>()
+                .As<IFileSystem>();
+
+            ConfigurationRegistrations(builder);
+            CommandRegistrations(builder);
 
             SetupLogging(builder);
             SonarrRegistrations(builder);

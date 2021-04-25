@@ -2,7 +2,7 @@
 
 namespace Trash.Sonarr
 {
-    public interface ISonarrCommand : IBaseCommand
+    public interface ISonarrCommand : IServiceCommand
     {
     }
 }
