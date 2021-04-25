@@ -31,19 +31,6 @@ namespace Trash.Command
 
         protected ILogger Log { get; }
 
-        [CommandOption("preview", 'p', Description =
-            "Only display the processed markdown results without making any API calls.")]
-        public bool Preview { get; [UsedImplicitly] set; } = false;
-
-        [CommandOption("debug", 'd', Description =
-            "Display additional logs useful for development/debug purposes.")]
-        public bool Debug { get; [UsedImplicitly] set; } = false;
-
-        [CommandOption("config", 'c', Description =
-            "One or more YAML config files to use. All configs will be used and settings are additive. " +
-            "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
-        public List<string> Config { get; [UsedImplicitly] set; } = new() {DefaultConfigPath};
-
         public async ValueTask ExecuteAsync(IConsole console)
         {
             SetupLogging();
@@ -71,6 +58,19 @@ namespace Trash.Command
                 ExitDueToFailure();
             }
         }
+
+        [CommandOption("preview", 'p', Description =
+            "Only display the processed markdown results without making any API calls.")]
+        public bool Preview { get; [UsedImplicitly] set; } = false;
+
+        [CommandOption("debug", 'd', Description =
+            "Display additional logs useful for development/debug purposes.")]
+        public bool Debug { get; [UsedImplicitly] set; } = false;
+
+        [CommandOption("config", 'c', Description =
+            "One or more YAML config files to use. All configs will be used and settings are additive. " +
+            "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
+        public List<string> Config { get; [UsedImplicitly] set; } = new() {DefaultConfigPath};
 
         private void SetupLogging()
         {

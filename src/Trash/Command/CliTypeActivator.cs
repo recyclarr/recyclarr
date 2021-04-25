@@ -11,7 +11,7 @@ namespace Trash.Command
             if (instance.GetType().IsAssignableTo<IServiceCommand>())
             {
                 var activeServiceProvider = container.Resolve<IActiveServiceCommandProvider>();
-                activeServiceProvider.ActiveCommand = (IServiceCommand)instance;
+                activeServiceProvider.ActiveCommand = (IServiceCommand) instance;
             }
 
             return instance;
