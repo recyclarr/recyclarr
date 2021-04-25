@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
-namespace Trash.Extensions
+namespace Trash.YamlDotNet
 {
     public static class YamlDotNetExtensions
     {
