@@ -17,9 +17,9 @@ namespace Trash.Tests.Command
 
         public class StubCommand : IServiceCommand
         {
-            public bool Preview { get; }
-            public bool Debug { get; }
-            public List<string>? Config { get; }
+            public bool Preview => false;
+            public bool Debug => false;
+            public List<string>? Config => null;
         }
 
         [Test]
