@@ -7,7 +7,6 @@ using CliFx.Infrastructure;
 using Common;
 using JetBrains.Annotations;
 using Serilog;
-using Trash.Command;
 
 namespace Trash.CreateConfig
 {
@@ -29,7 +28,7 @@ namespace Trash.CreateConfig
             "Path where the new YAML file should be created. Must include the filename (e.g. path/to/config.yml). " +
             "File must not already exist. If not specified, uses the default path of `trash.yml` right next to the " +
             "executable.")]
-        public string Path { get; [UsedImplicitly] set; } = ServiceCommand.DefaultConfigPath;
+        public string Path { get; [UsedImplicitly] set; } = AppPaths.DefaultConfigPath;
 
         public ValueTask ExecuteAsync(IConsole console)
         {

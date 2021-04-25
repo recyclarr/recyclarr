@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
@@ -70,7 +69,7 @@ namespace Trash.Command
         [CommandOption("config", 'c', Description =
             "One or more YAML config files to use. All configs will be used and settings are additive. " +
             "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
-        public List<string> Config { get; [UsedImplicitly] set; } = new() {DefaultConfigPath};
+        public List<string> Config { get; [UsedImplicitly] set; } = new() {AppPaths.DefaultConfigPath};
 
         private void SetupLogging()
         {
