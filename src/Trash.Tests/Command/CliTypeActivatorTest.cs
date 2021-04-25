@@ -20,6 +20,7 @@ namespace Trash.Tests.Command
             public bool Preview => false;
             public bool Debug => false;
             public List<string>? Config => null;
+            public string CacheStoragePath => "";
         }
 
         [Test]

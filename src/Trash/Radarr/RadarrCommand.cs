@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using CliFx.Attributes;
 using Flurl.Http;
@@ -29,7 +30,8 @@ namespace Trash.Radarr
             _qualityUpdaterFactory = qualityUpdaterFactory;
         }
 
-        // todo: Add options to exclude parts of YAML on the fly?
+        public override string CacheStoragePath { get; } =
+            Path.Join(AppPaths.AppDataPath, "cache/radarr");
 
         public override async Task Process()
         {

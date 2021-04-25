@@ -4,6 +4,7 @@ using Autofac;
 using CliFx;
 using Serilog;
 using Serilog.Core;
+using Trash.Cache;
 using Trash.Command;
 using Trash.Config;
 using Trash.Radarr.Api;
@@ -66,7 +67,9 @@ namespace Trash
         {
             // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                .Where(t => t.IsAssignableTo(typeof(ICommand)));
+                .Where(t => t.IsAssignableTo(typeof(ICommand)))
+                .As<IServiceCommand>()
+                .AsSelf();
 
             // Used to access the chosen command class. This is assigned from CliTypeActivator
             builder.RegisterType<ActiveServiceCommandProvider>()
@@ -86,6 +89,9 @@ namespace Trash
         {
             builder.RegisterType<FileSystem>()
                 .As<IFileSystem>();
+
+            builder.RegisterType<ServiceCache>().As<IServiceCache>();
+            builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
 
             ConfigurationRegistrations(builder);
             CommandRegistrations(builder);
