@@ -73,7 +73,7 @@ to get started with a minimal configuration file.
   executable. You can also use `--path` to customize the filename and location.
 - Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
   and `api_key` settings for each service that you want to use.
-- Run `trash sonarr` and/or `trash.radarr` as needed to update those instances.
+- Run `trash sonarr` and/or `trash radarr` as needed to update those instances.
 
 The last step above will do a "basic" sync from the guides to Sonarr and/or Radarr. The starter YAML
 config is very minimal. See the next section for further reading and links to the wiki for
@@ -104,20 +104,3 @@ to reduce the risk of the guide breaking the program's parsing logic, however it
 contributors follow them.
 
 [dg]: ../../wiki/TRaSH-Guide-Structural-Guidelines
-
-### Limitations
-
-This application is a work in progress. At the moment, it only supports the following features
-and/or has the following limitations:
-
-- Radarr custom formats are not supported yet (coming soon).
-- Multiple scores on the same line are not supported. Only the first is used.
-- There's no way to explicitly include optional terms to be synced to Sonarr.
-
-### Roadmap
-
-In addition to the above limitations, the following items are planned for the future.
-
-- Better and more polished error handling (it's pretty minimal right now)
-- Implement some sort of guide versioning (e.g. to avoid updating a release profile if the guide did
-  not change).
