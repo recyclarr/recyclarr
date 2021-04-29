@@ -1,0 +1,97 @@
+
+[*]
+charset = utf-8-bom
+end_of_line = crlf
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+# Microsoft .NET properties
+csharp_new_line_before_members_in_object_initializers = false
+csharp_preferred_modifier_order = public, private, protected, internal, new, abstract, virtual, sealed, override, static, readonly, extern, unsafe, volatile, async:suggestion
+csharp_space_after_cast = true
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_other_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+
+# ReSharper properties
+resharper_apply_auto_detected_rules = false
+resharper_autodetect_indent_settings = true
+resharper_blank_lines_after_block_statements = 1
+resharper_blank_lines_around_auto_property = 1
+resharper_blank_lines_around_field = 1
+resharper_blank_lines_before_case = 1
+resharper_braces_for_for = required
+resharper_braces_for_foreach = required
+resharper_braces_for_ifelse = required
+resharper_braces_for_while = required
+resharper_csharp_align_multiline_argument = false
+resharper_csharp_align_multiline_calls_chain = false
+resharper_csharp_align_multiline_expression = false
+resharper_csharp_align_multiline_parameter = false
+resharper_csharp_insert_final_newline = true
+resharper_csharp_max_line_length = 120
+resharper_csharp_stick_comment = false
+resharper_enforce_line_ending_style = true
+resharper_keep_blank_lines_in_declarations = 2
+resharper_keep_existing_invocation_parens_arrangement = true
+resharper_max_initializer_elements_on_line = 1
+resharper_place_accessorholder_attribute_on_same_line = false
+resharper_place_accessor_attribute_on_same_line = true
+resharper_place_expr_accessor_on_single_line = true
+resharper_place_expr_method_on_single_line = true
+resharper_place_expr_property_on_single_line = true
+resharper_place_simple_initializer_on_single_line = false
+resharper_show_autodetect_configure_formatting_tip = false
+resharper_use_indent_from_vs = false
+resharper_wrap_array_initializer_style = chop_always
+resharper_wrap_before_arrow_with_expressions = true
+resharper_wrap_object_and_collection_initializer_style = chop_always
+resharper_xmldoc_max_line_length = 100
+
+# ReSharper inspection severities
+resharper_arrange_redundant_parentheses_highlighting = hint
+resharper_arrange_this_qualifier_highlighting = hint
+resharper_arrange_type_member_modifiers_highlighting = hint
+resharper_arrange_type_modifiers_highlighting = hint
+resharper_built_in_type_reference_style_for_member_access_highlighting = hint
+resharper_built_in_type_reference_style_highlighting = hint
+resharper_redundant_base_qualifier_highlighting = warning
+resharper_suggest_var_or_type_built_in_types_highlighting = hint
+resharper_suggest_var_or_type_elsewhere_highlighting = hint
+resharper_suggest_var_or_type_simple_types_highlighting = hint
+resharper_web_config_module_not_resolved_highlighting = warning
+resharper_web_config_type_not_resolved_highlighting = warning
+resharper_web_config_wrong_module_highlighting = warning
+
+[{*.yaml,*.yml}]
+indent_style = space
+indent_size = 2
+
+[{*.overridetasks,*.targets,*.tasks}]
+indent_style = space
+indent_size = 2
+
+[*.props]
+indent_style = space
+indent_size = 2
+
+[{*.androidproj,*.ccproj,*.csproj}]
+indent_style = space
+indent_size = 2
+
+[*.{appxmanifest,asax,ascx,aspx,axaml,build,cg,cginc,compute,cs,cshtml,dtd,hlsl,hlsli,hlslinc,master,nuspec,paml,razor,resw,resx,skin,usf,ush,vb,xaml,xamlx,xoml,xsd}]
+indent_style = space
+indent_size = 4
+tab_width = 4
