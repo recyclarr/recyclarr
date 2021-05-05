@@ -68,13 +68,13 @@ namespace Trash.Sonarr.QualityDefinition
         private static void PrintQualityPreview(IEnumerable<SonarrQualityData> quality)
         {
             Console.WriteLine("");
-            const string format = "{0,-20} {1,-10} {2,-10}";
+            const string format = "{0,-20} {1,-10} {2,-15}";
             Console.WriteLine(format, "Quality", "Min", "Max");
             Console.WriteLine(format, "-------", "---", "---");
 
             foreach (var q in quality)
             {
-                Console.WriteLine(format, q.Name, q.Min, q.Max);
+                Console.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax);
             }
 
             Console.WriteLine("");
@@ -116,13 +116,10 @@ namespace Trash.Sonarr.QualityDefinition
         {
             static bool QualityIsDifferent(SonarrQualityDefinitionItem a, SonarrQualityData b)
             {
-                const decimal tolerance = 0.1m;
-                return
-                    Math.Abs(a.MaxSize - b.Max) > tolerance ||
-                    Math.Abs(a.MinSize - b.Min) > tolerance;
+                return b.MinOutsideTolerance(a.MinSize) ||
+                       b.MaxOutsideTolerance(a.MaxSize);
             }
 
-            // var newQuality = serverQuality.Where(q => guideQuality.Any(gq => gq.Name == q.Quality.Name));
             var newQuality = new List<SonarrQualityDefinitionItem>();
             foreach (var qualityData in guideQuality)
             {
@@ -139,12 +136,13 @@ namespace Trash.Sonarr.QualityDefinition
                 }
 
                 // Not using the original list again, so it's OK to modify the definition reftype objects in-place.
-                entry.MinSize = qualityData.Min;
-                entry.MaxSize = qualityData.Max;
+                entry.MinSize = qualityData.MinForApi;
+                entry.MaxSize = qualityData.MaxForApi;
                 newQuality.Add(entry);
 
-                Log.Debug("Setting Quality [Name: {Name}] [Min: {Min}] [Max: {Max}]",
-                    entry.Quality?.Name, entry.MinSize, entry.MaxSize);
+                Log.Debug("Setting Quality " +
+                          "[Name: {Name}] [Source: {Source}] [Min: {Min}] [Max: {Max}]",
+                    entry.Quality?.Name, entry.Quality?.Source, entry.MinSize, entry.MaxSize);
             }
 
             await _api.UpdateQualityDefinition(newQuality);

@@ -19,6 +19,6 @@ namespace Trash.Sonarr.Api.Objects
         public string Title { get; set; } = "";
         public int Weight { get; set; }
         public decimal MinSize { get; set; }
-        public decimal MaxSize { get; set; }
+        public decimal? MaxSize { get; set; }
     }
 }
