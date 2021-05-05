@@ -67,9 +67,7 @@ namespace Trash
         {
             // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                .Where(t => t.IsAssignableTo(typeof(ICommand)))
-                .As<IServiceCommand>()
-                .AsSelf();
+                .Where(t => t.IsAssignableTo(typeof(ICommand)));
 
             // Used to access the chosen command class. This is assigned from CliTypeActivator
             builder.RegisterType<ActiveServiceCommandProvider>()

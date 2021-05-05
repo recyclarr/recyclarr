@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix exception that occurred when running the create-config subcommand.
+
 ## [1.3.1] - 2021-05-05
 
 ### Changed
