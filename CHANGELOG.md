@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Executable is now compiled using [Ready to Run]. This substantially increases the size of the
   executable but makes the code much faster.
 
+### Fixed
+
+- Radarr Quality Definition Max and Preferred, when set to their maximum values, are now properly
+  set to "Unlimited". Without this, larger sized releases were unintentionally rejected.
+
 [Ready to Run]: https://docs.microsoft.com/en-us/dotnet/core/deploying/ready-to-run
 
 ## [1.3.0] - 2021-04-23
