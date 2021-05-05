@@ -24,7 +24,7 @@ namespace Trash.Tests
             public IEnumerator GetEnumerator()
             {
                 return _asm.DefinedTypes
-                    .Where(t => t.GetInterfaces().Contains(typeof(ICommand)) && !t.IsAbstract)
+                    .Where(t => t.GetInterfaces().Contains(typeof(T)) && !t.IsAbstract)
                     .GetEnumerator();
             }
         }
