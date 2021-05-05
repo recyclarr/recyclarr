@@ -26,13 +26,13 @@ namespace Trash.Radarr.QualityDefinition
         private static void PrintQualityPreview(IEnumerable<RadarrQualityData> quality)
         {
             Console.WriteLine("");
-            const string format = "{0,-20} {1,-10} {2,-10} {3,-10}";
+            const string format = "{0,-20} {1,-10} {2,-15} {3,-15}";
             Console.WriteLine(format, "Quality", "Min", "Max", "Preferred");
             Console.WriteLine(format, "-------", "---", "---", "---------");
 
             foreach (var q in quality)
             {
-                Console.WriteLine(format, q.Name, q.Min, q.Max, q.Preferred);
+                Console.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
             }
 
             Console.WriteLine("");
@@ -59,8 +59,7 @@ namespace Trash.Radarr.QualityDefinition
             // Apply a calculated preferred size
             foreach (var quality in selectedQuality)
             {
-                quality.Preferred =
-                    Math.Round(quality.Min + (quality.Max - quality.Min) * config.QualityDefinition.PreferredRatio, 1);
+                quality.Preferred = quality.InterpolatedPreferred(config.QualityDefinition.PreferredRatio);
             }
 
             if (args.Preview)
@@ -83,11 +82,9 @@ namespace Trash.Radarr.QualityDefinition
         {
             static bool QualityIsDifferent(RadarrQualityDefinitionItem a, RadarrQualityData b)
             {
-                const decimal tolerance = 0.1m;
-                return
-                    Math.Abs(a.MaxSize - b.Max) > tolerance ||
-                    Math.Abs(a.MinSize - b.Min) > tolerance ||
-                    Math.Abs(a.PreferredSize - b.Preferred) > tolerance;
+                return b.MinOutsideTolerance(a.MinSize) ||
+                       b.MaxOutsideTolerance(a.MaxSize) ||
+                       b.PreferredOutsideTolerance(a.PreferredSize);
             }
 
             var newQuality = new List<RadarrQualityDefinitionItem>();
@@ -106,9 +103,9 @@ namespace Trash.Radarr.QualityDefinition
                 }
 
                 // Not using the original list again, so it's OK to modify the definition reftype objects in-place.
-                entry.MinSize = qualityData.Min;
-                entry.MaxSize = qualityData.Max;
-                entry.PreferredSize = qualityData.Preferred;
+                entry.MinSize = qualityData.MinForApi;
+                entry.MaxSize = qualityData.MaxForApi;
+                entry.PreferredSize = qualityData.PreferredForApi;
                 newQuality.Add(entry);
 
                 Log.Debug("Setting Quality " +

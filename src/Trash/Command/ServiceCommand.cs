@@ -86,8 +86,13 @@ namespace Trash.Command
                     // This is important. If any DTOs are missing members, say, if Radarr or Sonarr adds one in a future
                     // version, this needs to fail to indicate that a software change is required. Otherwise, we lose
                     // state between when we request settings, and re-apply them again with a few properties modified.
-                    MissingMemberHandling = MissingMemberHandling.Error
+                    MissingMemberHandling = MissingMemberHandling.Error,
+
+                    // This makes sure that null properties, such as maxSize and preferredSize in Radarr
+                    // Quality Definitions, do not get written out to JSON request bodies.
+                    NullValueHandling = NullValueHandling.Ignore
                 };
+
                 settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
             });
         }
