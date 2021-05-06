@@ -8,32 +8,40 @@ namespace Trash.Tests.Sonarr.QualityDefinition
     [Parallelizable(ParallelScope.All)]
     public class SonarrQualityDataTest
     {
-        private static readonly object[] ToleranceTestValues =
+        private static readonly object[] MaxTestValues =
         {
-            new object[] {-SonarrQualityData.Tolerance - 0.01m, true},
-            new object[] {-SonarrQualityData.Tolerance, false},
-            new object[] {-SonarrQualityData.Tolerance / 2, false},
-            new object[] {SonarrQualityData.Tolerance / 2, false},
-            new object[] {SonarrQualityData.Tolerance, false},
-            new object[] {SonarrQualityData.Tolerance + 0.01m, true}
+            new object?[] {100m, 100m, false},
+            new object?[] {100m, 101m, true},
+            new object?[] {100m, 98m, true},
+            new object?[] {100m, null, true},
+            new object?[] {SonarrQualityData.MaxUnlimitedThreshold, null, false},
+            new object?[] {SonarrQualityData.MaxUnlimitedThreshold - 1, null, true},
+            new object?[] {SonarrQualityData.MaxUnlimitedThreshold, SonarrQualityData.MaxUnlimitedThreshold, true}
         };
 
-        [TestCaseSource(nameof(ToleranceTestValues))]
-        public void MaxOutsideTolerance_WithVariousTolerance_ReturnsExpectedResult(decimal offset, bool expectedResult)
+        private static readonly object[] MinTestValues =
         {
-            const decimal testVal = 100;
-            var data = new SonarrQualityData {Max = testVal};
-            data.MaxOutsideTolerance(testVal + offset)
-                .Should().Be(expectedResult);
+            new object?[] {0m, 0m, false},
+            new object?[] {0m, -1m, true},
+            new object?[] {0m, 1m, true}
+        };
+
+        [TestCaseSource(nameof(MaxTestValues))]
+        public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
+            bool isDifferent)
+        {
+            var data = new SonarrQualityData {Max = guideValue};
+            data.IsMaxDifferent(radarrValue)
+                .Should().Be(isDifferent);
         }
 
-        [TestCaseSource(nameof(ToleranceTestValues))]
-        public void MinOutsideTolerance_WithVariousTolerance_ReturnsExpectedResult(decimal offset, bool expectedResult)
+        [TestCaseSource(nameof(MinTestValues))]
+        public void MinDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal radarrValue,
+            bool isDifferent)
         {
-            const decimal testVal = 0;
-            var data = new SonarrQualityData {Min = testVal};
-            data.MinOutsideTolerance(testVal + offset)
-                .Should().Be(expectedResult);
+            var data = new SonarrQualityData {Min = guideValue};
+            data.IsMinDifferent(radarrValue)
+                .Should().Be(isDifferent);
         }
 
         [Test]

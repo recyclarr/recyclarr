@@ -17,7 +17,11 @@ namespace Trash.Radarr.QualityDefinition
             return Math.Round(Min + (cappedMax - Min) * ratio, 1);
         }
 
-        public bool PreferredOutsideTolerance(decimal? other) =>
-            Math.Abs((other ?? PreferredUnlimitedThreshold) - Preferred) > Tolerance;
+        public bool IsPreferredDifferent(decimal? serviceValue)
+        {
+            return serviceValue == null
+                ? PreferredUnlimitedThreshold != Preferred
+                : serviceValue != Preferred || PreferredUnlimitedThreshold == Preferred;
+        }
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace Trash.Sonarr.QualityDefinition
 {
     public class SonarrQualityData
     {
-        public const decimal Tolerance = 0.1m;
         public const decimal MaxUnlimitedThreshold = 400;
 
         public string Name { get; set; } = "";
@@ -30,10 +28,13 @@ namespace Trash.Sonarr.QualityDefinition
             return builder.ToString();
         }
 
-        public bool MinOutsideTolerance(decimal other) =>
-            Math.Abs(other - Min) > Tolerance;
+        public bool IsMinDifferent(decimal serviceValue) => serviceValue != Min;
 
-        public bool MaxOutsideTolerance(decimal? other) =>
-            Math.Abs((other ?? MaxUnlimitedThreshold) - Max) > Tolerance;
+        public bool IsMaxDifferent(decimal? serviceValue)
+        {
+            return serviceValue == null
+                ? MaxUnlimitedThreshold != Max
+                : serviceValue != Max || MaxUnlimitedThreshold == Max;
+        }
     }
 }

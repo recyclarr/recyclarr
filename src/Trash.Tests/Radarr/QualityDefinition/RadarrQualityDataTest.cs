@@ -1,7 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
 using Trash.Radarr.QualityDefinition;
-using Trash.Sonarr.QualityDefinition;
 
 namespace Trash.Tests.Radarr.QualityDefinition
 {
@@ -9,24 +8,25 @@ namespace Trash.Tests.Radarr.QualityDefinition
     [Parallelizable(ParallelScope.All)]
     public class RadarrQualityDataTest
     {
-        private static readonly object[] ToleranceTestValues =
+        private static readonly object[] PreferredTestValues =
         {
-            new object[] {-SonarrQualityData.Tolerance - 0.01m, true},
-            new object[] {-SonarrQualityData.Tolerance, false},
-            new object[] {-SonarrQualityData.Tolerance / 2, false},
-            new object[] {SonarrQualityData.Tolerance / 2, false},
-            new object[] {SonarrQualityData.Tolerance, false},
-            new object[] {SonarrQualityData.Tolerance + 0.01m, true}
+            new object?[] {100m, 100m, false},
+            new object?[] {100m, 101m, true},
+            new object?[] {100m, 98m, true},
+            new object?[] {100m, null, true},
+            new object?[] {RadarrQualityData.PreferredUnlimitedThreshold, null, false},
+            new object?[] {RadarrQualityData.PreferredUnlimitedThreshold - 1, null, true},
+            new object?[]
+                {RadarrQualityData.PreferredUnlimitedThreshold, RadarrQualityData.PreferredUnlimitedThreshold, true}
         };
 
-        [TestCaseSource(nameof(ToleranceTestValues))]
-        public void PreferredOutsideTolerance_WithVariousTolerance_ReturnsExpectedResult(decimal offset,
-            bool expectedResult)
+        [TestCaseSource(nameof(PreferredTestValues))]
+        public void PreferredDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
+            bool isDifferent)
         {
-            const decimal testVal = 100;
-            var data = new RadarrQualityData {Preferred = testVal};
-            data.PreferredOutsideTolerance(testVal + offset)
-                .Should().Be(expectedResult);
+            var data = new RadarrQualityData {Preferred = guideValue};
+            data.IsPreferredDifferent(radarrValue)
+                .Should().Be(isDifferent);
         }
 
         private static readonly object[] InterpolatedPreferredTestParams =

@@ -116,8 +116,8 @@ namespace Trash.Sonarr.QualityDefinition
         {
             static bool QualityIsDifferent(SonarrQualityDefinitionItem a, SonarrQualityData b)
             {
-                return b.MinOutsideTolerance(a.MinSize) ||
-                       b.MaxOutsideTolerance(a.MaxSize);
+                return b.IsMinDifferent(a.MinSize) ||
+                       b.IsMaxDifferent(a.MaxSize);
             }
 
             var newQuality = new List<SonarrQualityDefinitionItem>();

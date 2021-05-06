@@ -82,9 +82,9 @@ namespace Trash.Radarr.QualityDefinition
         {
             static bool QualityIsDifferent(RadarrQualityDefinitionItem a, RadarrQualityData b)
             {
-                return b.MinOutsideTolerance(a.MinSize) ||
-                       b.MaxOutsideTolerance(a.MaxSize) ||
-                       b.PreferredOutsideTolerance(a.PreferredSize);
+                return b.IsMinDifferent(a.MinSize) ||
+                       b.IsMaxDifferent(a.MaxSize) ||
+                       b.IsPreferredDifferent(a.PreferredSize);
             }
 
             var newQuality = new List<RadarrQualityDefinitionItem>();
