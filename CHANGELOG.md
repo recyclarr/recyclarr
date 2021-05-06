@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Sonarr Quality Definition Max, when set to its maximum value of 400, is now properly set to
+  "Unlimited". This is equivalent to the user maxing out the visual slider in the Sonarr UI. Without
+  this, some larger sized releases were unintentionally rejected.
+
 ## [1.3.2] - 2021-05-05
 
 ### Fixed
