@@ -2,7 +2,8 @@
 
 namespace Trash.Cache
 {
-    public class CacheObjectNameAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class CacheObjectNameAttribute : Attribute
     {
         public CacheObjectNameAttribute(string name)
         {

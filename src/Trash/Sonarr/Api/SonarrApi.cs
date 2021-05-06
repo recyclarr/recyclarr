@@ -25,7 +25,7 @@ namespace Trash.Sonarr.Api
             return new Version(data.version);
         }
 
-        public async Task<List<SonarrTag>> GetTags()
+        public async Task<IList<SonarrTag>> GetTags()
         {
             return await BaseUrl()
                 .AppendPathSegment("tag")
@@ -40,7 +40,7 @@ namespace Trash.Sonarr.Api
                 .ReceiveJson<SonarrTag>();
         }
 
-        public async Task<List<SonarrReleaseProfile>> GetReleaseProfiles()
+        public async Task<IList<SonarrReleaseProfile>> GetReleaseProfiles()
         {
             return await BaseUrl()
                 .AppendPathSegment("releaseprofile")
@@ -62,15 +62,15 @@ namespace Trash.Sonarr.Api
                 .ReceiveJson<SonarrReleaseProfile>();
         }
 
-        public async Task<List<SonarrQualityDefinitionItem>> GetQualityDefinition()
+        public async Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition()
         {
             return await BaseUrl()
                 .AppendPathSegment("qualitydefinition")
                 .GetJsonAsync<List<SonarrQualityDefinitionItem>>();
         }
 
-        public async Task<List<SonarrQualityDefinitionItem>> UpdateQualityDefinition(
-            List<SonarrQualityDefinitionItem> newQuality)
+        public async Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(
+            IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality)
         {
             return await BaseUrl()
                 .AppendPathSegment("qualityDefinition/update")

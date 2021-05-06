@@ -14,15 +14,15 @@ namespace Trash.Sonarr.ReleaseProfile
             _config = config;
         }
 
-        public List<string> Required => _config.Filter.IncludeOptional
+        public IEnumerable<string> Required => _config.Filter.IncludeOptional
             ? _profileData.Required.Concat(_profileData.Optional.Required).ToList()
             : _profileData.Required;
 
-        public List<string> Ignored => _config.Filter.IncludeOptional
+        public IEnumerable<string> Ignored => _config.Filter.IncludeOptional
             ? _profileData.Ignored.Concat(_profileData.Optional.Ignored).ToList()
             : _profileData.Ignored;
 
-        public Dictionary<int, List<string>> Preferred => _config.Filter.IncludeOptional
+        public IDictionary<int, List<string>> Preferred => _config.Filter.IncludeOptional
             ? _profileData.Preferred
                 .Union(_profileData.Optional.Preferred)
                 .GroupBy(kvp => kvp.Key)

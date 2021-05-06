@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Autofac;
 using CliFx;
 using Trash.Command;

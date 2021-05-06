@@ -15,11 +15,11 @@ namespace Trash.Tests.Command
         {
         }
 
-        public class StubCommand : IServiceCommand
+        private class StubCommand : IServiceCommand
         {
             public bool Preview => false;
             public bool Debug => false;
-            public List<string>? Config => null;
+            public ICollection<string>? Config => null;
             public string CacheStoragePath => "";
         }
 

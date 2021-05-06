@@ -44,7 +44,7 @@ namespace Trash.Sonarr.ReleaseProfile
                 Console.WriteLine("");
             }
 
-            static void PrintTerms(string title, IReadOnlyCollection<string> terms)
+            static void PrintTerms(string title, ICollection<string> terms)
             {
                 if (terms.Count == 0)
                 {

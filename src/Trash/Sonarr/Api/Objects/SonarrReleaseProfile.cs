@@ -28,9 +28,9 @@ namespace Trash.Sonarr.Api.Objects
         public string Name { get; set; } = "";
         public string Required { get; set; } = "";
         public string Ignored { get; set; } = "";
-        public List<SonarrPreferredTerm> Preferred { get; set; } = new();
+        public IReadOnlyCollection<SonarrPreferredTerm> Preferred { get; set; } = new List<SonarrPreferredTerm>();
         public bool IncludePreferredWhenRenaming { get; set; }
         public int IndexerId { get; set; }
-        public List<int> Tags { get; set; } = new();
+        public IReadOnlyCollection<int> Tags { get; set; } = new List<int>();
     }
 }

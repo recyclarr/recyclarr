@@ -10,7 +10,7 @@ namespace Trash.Sonarr
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class SonarrConfiguration : BaseConfiguration
     {
-        public List<ReleaseProfileConfig> ReleaseProfiles { get; set; } = new();
+        public IList<ReleaseProfileConfig> ReleaseProfiles { get; set; } = new List<ReleaseProfileConfig>();
         public SonarrQualityDefinitionType? QualityDefinition { get; init; }
 
         public override string BuildUrl()
@@ -27,7 +27,7 @@ namespace Trash.Sonarr
         public ReleaseProfileType Type { get; init; }
         public bool StrictNegativeScores { get; init; }
         public SonarrProfileFilterConfig Filter { get; init; } = new();
-        public List<string> Tags { get; init; } = new();
+        public ICollection<string> Tags { get; init; } = new List<string>();
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

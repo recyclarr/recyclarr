@@ -8,12 +8,12 @@ namespace Trash.Sonarr.Api
     public interface ISonarrApi
     {
         Task<Version> GetVersion();
-        Task<List<SonarrTag>> GetTags();
+        Task<IList<SonarrTag>> GetTags();
         Task<SonarrTag> CreateTag(string tag);
-        Task<List<SonarrReleaseProfile>> GetReleaseProfiles();
+        Task<IList<SonarrReleaseProfile>> GetReleaseProfiles();
         Task UpdateReleaseProfile(SonarrReleaseProfile profileToUpdate);
         Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile newProfile);
-        Task<List<SonarrQualityDefinitionItem>> GetQualityDefinition();
-        Task<List<SonarrQualityDefinitionItem>> UpdateQualityDefinition(List<SonarrQualityDefinitionItem> newQuality);
+        Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition();
+        Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality);
     }
 }

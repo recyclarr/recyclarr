@@ -206,9 +206,9 @@ namespace Trash.Sonarr.ReleaseProfile
             // run the IsSkippableLine() check.
             if (line.ContainsIgnoreCase("include preferred"))
             {
-                state.Profile.IncludePreferredWhenRenaming = !line.ContainsIgnoreCase("not");
+                state.GetProfile().IncludePreferredWhenRenaming = !line.ContainsIgnoreCase("not");
                 Log.Debug("  - 'Include Preferred' found [Value: {IncludePreferredWhenRenaming}] [Line: {Line}]",
-                    state.Profile.IncludePreferredWhenRenaming, line);
+                    state.GetProfile().IncludePreferredWhenRenaming, line);
                 return;
             }
 

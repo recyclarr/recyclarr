@@ -38,26 +38,23 @@ namespace Trash.Sonarr.ReleaseProfile
                                // If category is preferred, we also require a score
                                (CurrentCategory.Value != TermCategory.Preferred || Score != null);
 
-        public List<string> IgnoredTerms
-            => TermsAreOptional.Value ? Profile.Optional.Ignored : Profile.Ignored;
+        public ICollection<string> IgnoredTerms
+            => TermsAreOptional.Value ? GetProfile().Optional.Ignored : GetProfile().Ignored;
 
-        public List<string> RequiredTerms
-            => TermsAreOptional.Value ? Profile.Optional.Required : Profile.Required;
+        public ICollection<string> RequiredTerms
+            => TermsAreOptional.Value ? GetProfile().Optional.Required : GetProfile().Required;
 
-        public Dictionary<int, List<string>> PreferredTerms
-            => TermsAreOptional.Value ? Profile.Optional.Preferred : Profile.Preferred;
+        public IDictionary<int, List<string>> PreferredTerms
+            => TermsAreOptional.Value ? GetProfile().Optional.Preferred : GetProfile().Preferred;
 
-        public ProfileData Profile
+        public ProfileData GetProfile()
         {
-            get
+            if (ProfileName == null)
             {
-                if (ProfileName == null)
-                {
-                    throw new NullReferenceException();
-                }
-
-                return Results.GetOrCreate(ProfileName);
+                throw new NullReferenceException();
             }
+
+            return Results.GetOrCreate(ProfileName);
         }
 
         public void ResetParserState()

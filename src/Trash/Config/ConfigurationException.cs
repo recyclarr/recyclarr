@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 
 namespace Trash.Config
 {
     public class ConfigurationException : Exception
     {
-        public ConfigurationException(string propertyName, Type type)
+        public ConfigurationException(string propertyName, Type deserializableType)
         {
             PropertyName = propertyName;
-            Type = type;
+            DeserializableType = deserializableType;
         }
 
         public string PropertyName { get; }
-        public Type Type { get; }
+        public Type DeserializableType { get; }
     }
 }

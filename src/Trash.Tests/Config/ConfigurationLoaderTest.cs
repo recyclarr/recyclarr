@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -24,11 +23,6 @@ namespace Trash.Tests.Config
         private TextReader GetResourceData(string file)
         {
             var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
-            if (testData == null)
-            {
-                throw new InvalidOperationException("TestData object has not been created yet");
-            }
-
             return new StringReader(testData.ReadData(file));
         }
 

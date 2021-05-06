@@ -16,7 +16,6 @@ namespace Trash.Tests.Sonarr
             public ISonarrCommand Args { get; } = Substitute.For<ISonarrCommand>();
             public IReleaseProfileGuideParser Parser { get; } = Substitute.For<IReleaseProfileGuideParser>();
             public ISonarrApi Api { get; } = Substitute.For<ISonarrApi>();
-            public SonarrConfiguration Config { get; } = Substitute.For<SonarrConfiguration>();
             public ILogger Logger { get; } = Substitute.For<ILogger>();
         }
 
@@ -26,7 +25,7 @@ namespace Trash.Tests.Sonarr
             var context = new Context();
 
             var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api);
-            logic.Process(context.Args, context.Config);
+            logic.Process(context.Args, new SonarrConfiguration());
 
             context.Parser.DidNotReceive().GetMarkdownData(Arg.Any<ReleaseProfileType>());
         }
@@ -37,12 +36,15 @@ namespace Trash.Tests.Sonarr
             var context = new Context();
 
             context.Parser.GetMarkdownData(ReleaseProfileType.Anime).Returns("theMarkdown");
-            context.Config.ReleaseProfiles.Add(new ReleaseProfileConfig {Type = ReleaseProfileType.Anime});
+            var config = new SonarrConfiguration
+            {
+                ReleaseProfiles = new[] {new ReleaseProfileConfig {Type = ReleaseProfileType.Anime}}
+            };
 
             var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api);
-            logic.Process(context.Args, context.Config);
+            logic.Process(context.Args, config);
 
-            context.Parser.Received().ParseMarkdown(context.Config.ReleaseProfiles[0], "theMarkdown");
+            context.Parser.Received().ParseMarkdown(config.ReleaseProfiles[0], "theMarkdown");
         }
     }
 }

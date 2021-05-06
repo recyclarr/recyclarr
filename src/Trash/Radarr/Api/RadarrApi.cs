@@ -24,8 +24,8 @@ namespace Trash.Radarr.Api
                 .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
         }
 
-        public async Task<List<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
-            List<RadarrQualityDefinitionItem> newQuality)
+        public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
+            IList<RadarrQualityDefinitionItem> newQuality)
         {
             return await BaseUrl()
                 .AppendPathSegment("qualityDefinition/update")

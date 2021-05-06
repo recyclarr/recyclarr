@@ -7,6 +7,6 @@ namespace Trash.Radarr.Api
     public interface IRadarrApi
     {
         Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition();
-        Task<List<RadarrQualityDefinitionItem>> UpdateQualityDefinition(List<RadarrQualityDefinitionItem> newQuality);
+        Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(IList<RadarrQualityDefinitionItem> newQuality);
     }
 }

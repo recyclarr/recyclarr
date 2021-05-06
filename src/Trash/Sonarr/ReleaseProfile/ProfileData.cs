@@ -4,16 +4,16 @@ namespace Trash.Sonarr.ReleaseProfile
 {
     public class ProfileDataOptional
     {
-        public List<string> Required { get; init; } = new();
-        public List<string> Ignored { get; init; } = new();
-        public Dictionary<int, List<string>> Preferred { get; init; } = new();
+        public ICollection<string> Required { get; init; } = new List<string>();
+        public ICollection<string> Ignored { get; init; } = new List<string>();
+        public IDictionary<int, List<string>> Preferred { get; init; } = new Dictionary<int, List<string>>();
     }
 
     public class ProfileData
     {
-        public List<string> Required { get; init; } = new();
-        public List<string> Ignored { get; init; } = new();
-        public Dictionary<int, List<string>> Preferred { get; init; } = new();
+        public ICollection<string> Required { get; init; } = new List<string>();
+        public ICollection<string> Ignored { get; init; } = new List<string>();
+        public IDictionary<int, List<string>> Preferred { get; init; } = new Dictionary<int, List<string>>();
 
         // We use 'null' here to represent no explicit mention of the "include preferred" string
         // found in the markdown. We use this to control whether or not the corresponding profile

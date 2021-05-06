@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Common;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using Serilog.Sinks.TestCorrelator;
@@ -31,8 +30,10 @@ namespace Trash.Tests.Sonarr.ReleaseProfile
                     .MinimumLevel.Debug()
                     .CreateLogger();
 
-                Config = Substitute.For<SonarrConfiguration>();
-                Config.ReleaseProfiles.Add(new ReleaseProfileConfig());
+                Config = new SonarrConfiguration
+                {
+                    ReleaseProfiles = new[] {new ReleaseProfileConfig()}
+                };
 
                 GuideParser = new ReleaseProfileGuideParser(logger);
             }
