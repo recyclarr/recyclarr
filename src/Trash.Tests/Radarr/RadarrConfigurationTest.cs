@@ -16,7 +16,28 @@ namespace Trash.Tests.Radarr
     public class RadarrConfigurationTest
     {
         [Test]
-        public void Deserialize_QualityDefinitionTypeMissing_Throw()
+        public void Custom_format_names_list_is_required()
+        {
+            const string testYaml = @"
+radarr:
+  - api_key: abc
+    base_url: xyz
+    custom_formats:
+      - quality_profiles:
+          - name: MyProfile
+";
+
+            var configLoader = new ConfigurationLoader<RadarrConfiguration>(
+                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IFileSystem>(), new DefaultObjectFactory());
+
+            Action act = () => configLoader.LoadFromStream(new StringReader(testYaml), "radarr");
+
+            act.Should().Throw<YamlException>();
+        }
+
+        [Test]
+        public void Quality_definition_type_is_required()
         {
             const string yaml = @"
 radarr:
@@ -34,6 +55,28 @@ radarr:
 
             act.Should().Throw<YamlException>()
                 .WithMessage("*'type' is required for 'quality_definition'");
+        }
+
+        [Test]
+        public void Quality_profile_name_is_required()
+        {
+            const string testYaml = @"
+radarr:
+  - api_key: abc
+    base_url: xyz
+    custom_formats:
+      - names: [one, two]
+        quality_profiles:
+          - score: 100
+";
+
+            var configLoader = new ConfigurationLoader<RadarrConfiguration>(
+                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IFileSystem>(), new DefaultObjectFactory());
+
+            Action act = () => configLoader.LoadFromStream(new StringReader(testYaml), "radarr");
+
+            act.Should().Throw<YamlException>();
         }
     }
 }

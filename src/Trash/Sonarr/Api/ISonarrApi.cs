@@ -14,6 +14,8 @@ namespace Trash.Sonarr.Api
         Task UpdateReleaseProfile(SonarrReleaseProfile profileToUpdate);
         Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile newProfile);
         Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition();
-        Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality);
+
+        Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(
+            IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality);
     }
 }

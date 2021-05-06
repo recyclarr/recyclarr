@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
-using Trash.Radarr.Api;
-using Trash.Radarr.Api.Objects;
+using Trash.Radarr.QualityDefinition.Api;
+using Trash.Radarr.QualityDefinition.Api.Objects;
 
 namespace Trash.Radarr.QualityDefinition
 {
     public class RadarrQualityDefinitionUpdater
     {
-        private readonly IRadarrApi _api;
+        private readonly IQualityDefinitionService _api;
         private readonly IRadarrQualityDefinitionGuideParser _parser;
 
         public RadarrQualityDefinitionUpdater(ILogger logger, IRadarrQualityDefinitionGuideParser parser,
-            IRadarrApi api)
+            IQualityDefinitionService api)
         {
             Log = logger;
             _parser = parser;

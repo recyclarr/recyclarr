@@ -12,7 +12,6 @@ namespace Trash.Sonarr.ReleaseProfile
         Preferred
     }
 
-
     public class ParserState
     {
         public ParserState(ILogger logger)

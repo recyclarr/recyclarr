@@ -70,7 +70,7 @@ namespace Trash.Cache
                 throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
             }
 
-            return Path.Join(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
+            return Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
         }
     }
 }

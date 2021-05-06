@@ -73,7 +73,7 @@ namespace Trash.Tests.Cache
 
             obj.Should().NotBeNull();
             obj!.TestValue.Should().Be("Foo");
-            ctx.Filesystem.File.Received().ReadAllText(Path.Join("testpath", "c59d1c81", $"{ValidObjectName}.json"));
+            ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "c59d1c81", $"{ValidObjectName}.json"));
         }
 
         [Test]
@@ -109,11 +109,11 @@ namespace Trash.Tests.Cache
 
             ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-            var expectedParentDirectory = Path.Join("testpath", "c59d1c81");
+            var expectedParentDirectory = Path.Combine("testpath", "c59d1c81");
             ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
 
             dynamic expectedJson = new {TestValue = "Foo"};
-            var expectedPath = Path.Join(expectedParentDirectory, $"{ValidObjectName}.json");
+            var expectedPath = Path.Combine(expectedParentDirectory, $"{ValidObjectName}.json");
             ctx.Filesystem.File.Received()
                 .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, Formatting.Indented));
         }

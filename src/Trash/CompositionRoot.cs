@@ -1,14 +1,21 @@
 ﻿using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
+using Autofac.Extras.AggregateService;
 using CliFx;
 using Serilog;
 using Serilog.Core;
 using Trash.Cache;
 using Trash.Command;
 using Trash.Config;
-using Trash.Radarr.Api;
+using Trash.Radarr.CustomFormat;
+using Trash.Radarr.CustomFormat.Api;
+using Trash.Radarr.CustomFormat.Guide;
+using Trash.Radarr.CustomFormat.Processors;
+using Trash.Radarr.CustomFormat.Processors.GuideSteps;
+using Trash.Radarr.CustomFormat.Processors.PersistenceSteps;
 using Trash.Radarr.QualityDefinition;
+using Trash.Radarr.QualityDefinition.Api;
 using Trash.Sonarr.Api;
 using Trash.Sonarr.QualityDefinition;
 using Trash.Sonarr.ReleaseProfile;
@@ -47,11 +54,33 @@ namespace Trash
 
         private static void RadarrRegistrations(ContainerBuilder builder)
         {
-            builder.RegisterType<RadarrApi>().As<IRadarrApi>();
+            // Api Services
+            builder.RegisterType<QualityDefinitionService>().As<IQualityDefinitionService>();
+            builder.RegisterType<CustomFormatService>().As<ICustomFormatService>();
+            builder.RegisterType<QualityProfileService>().As<IQualityProfileService>();
 
             // Quality Definition Support
             builder.RegisterType<RadarrQualityDefinitionUpdater>();
             builder.RegisterType<RadarrQualityDefinitionGuideParser>().As<IRadarrQualityDefinitionGuideParser>();
+
+            // Custom Format Support
+            builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
+            builder.RegisterType<CustomFormatGuideParser>().As<ICustomFormatGuideParser>();
+            builder.RegisterType<CachePersister>().As<ICachePersister>();
+
+            // Guide Processor
+            builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
+            builder.RegisterAggregateService<IGuideProcessorSteps>();
+            builder.RegisterType<CustomFormatStep>().As<ICustomFormatStep>();
+            builder.RegisterType<ConfigStep>().As<IConfigStep>();
+            builder.RegisterType<QualityProfileStep>().As<IQualityProfileStep>();
+
+            // Persistence Processor
+            builder.RegisterType<PersistenceProcessor>().As<IPersistenceProcessor>();
+            builder.RegisterAggregateService<IPersistenceProcessorSteps>();
+            builder.RegisterType<JsonTransactionStep>().As<IJsonTransactionStep>();
+            builder.RegisterType<CustomFormatApiPersistenceStep>().As<ICustomFormatApiPersistenceStep>();
+            builder.RegisterType<QualityProfileApiPersistenceStep>().As<IQualityProfileApiPersistenceStep>();
         }
 
         private static void ConfigurationRegistrations(ContainerBuilder builder)

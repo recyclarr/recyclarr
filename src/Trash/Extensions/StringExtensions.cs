@@ -10,7 +10,7 @@ namespace Trash.Extensions
             return value.Contains(searchFor, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool EqualsIgnoreCase(this string value, string matchThis)
+        public static bool EqualsIgnoreCase(this string value, string? matchThis)
         {
             return value.Equals(matchThis, StringComparison.OrdinalIgnoreCase);
         }

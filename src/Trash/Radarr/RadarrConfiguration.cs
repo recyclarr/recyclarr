@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Flurl;
 using JetBrains.Annotations;
 using Trash.Config;
 using Trash.Radarr.QualityDefinition;
+using Trash.YamlDotNet;
 
 namespace Trash.Radarr
 {
@@ -10,6 +12,8 @@ namespace Trash.Radarr
     public class RadarrConfiguration : ServiceConfiguration
     {
         public QualityDefinitionConfig? QualityDefinition { get; init; }
+        public List<CustomFormatConfig> CustomFormats { get; set; } = new();
+        public bool DeleteOldCustomFormats { get; set; }
 
         public override string BuildUrl()
         {
@@ -17,6 +21,24 @@ namespace Trash.Radarr
                 .AppendPathSegment("api/v3")
                 .SetQueryParams(new {apikey = ApiKey});
         }
+    }
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    public class CustomFormatConfig
+    {
+        [CannotBeEmpty]
+        public List<string> Names { get; set; } = new();
+
+        public List<QualityProfileConfig> QualityProfiles { get; set; } = new();
+    }
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    public class QualityProfileConfig
+    {
+        [Required]
+        public string Name { get; set; } = "";
+
+        public int? Score { get; set; }
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

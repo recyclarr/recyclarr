@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json.Linq;
+using NSubstitute;
+using NUnit.Framework;
+using Trash.Radarr;
+using Trash.Radarr.CustomFormat.Api;
+using Trash.Radarr.CustomFormat.Models;
+using Trash.Radarr.CustomFormat.Models.Cache;
+using Trash.Radarr.CustomFormat.Processors;
+
+namespace Trash.Tests.Radarr.CustomFormat.Processors
+{
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    public class PersistenceProcessorTest
+    {
+        [Test]
+        public void Custom_formats_are_deleted_if_deletion_option_is_enabled_in_config()
+        {
+            var steps = Substitute.For<IPersistenceProcessorSteps>();
+            var cfApi = Substitute.For<ICustomFormatService>();
+            var qpApi = Substitute.For<IQualityProfileService>();
+            var config = new RadarrConfiguration {DeleteOldCustomFormats = true};
+
+            var guideCfs = Array.Empty<ProcessedCustomFormatData>();
+            var deletedCfsInCache = new Collection<TrashIdMapping>();
+            var profileScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>();
+
+            var processor = new PersistenceProcessor(cfApi, qpApi, config, () => steps);
+            processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
+
+            steps.JsonTransactionStep.Received().RecordDeletions(Arg.Is(deletedCfsInCache), Arg.Any<List<JObject>>());
+        }
+
+        [Test]
+        public void Custom_formats_are_not_deleted_if_deletion_option_is_disabled_in_config()
+        {
+            var steps = Substitute.For<IPersistenceProcessorSteps>();
+            var cfApi = Substitute.For<ICustomFormatService>();
+            var qpApi = Substitute.For<IQualityProfileService>();
+            var config = new RadarrConfiguration(); // DeleteOldCustomFormats should default to false
+
+            var guideCfs = Array.Empty<ProcessedCustomFormatData>();
+            var deletedCfsInCache = Array.Empty<TrashIdMapping>();
+            var profileScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>();
+
+            var processor = new PersistenceProcessor(cfApi, qpApi, config, () => steps);
+            processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
+
+            steps.JsonTransactionStep.DidNotReceive()
+                .RecordDeletions(Arg.Any<IEnumerable<TrashIdMapping>>(), Arg.Any<List<JObject>>());
+        }
+    }
+}

@@ -3,6 +3,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="FluentAssertions.Json" />
+    <PackageReference Include="NSubstitute" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />

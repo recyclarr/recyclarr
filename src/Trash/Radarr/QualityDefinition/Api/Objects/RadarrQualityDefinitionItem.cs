@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Trash.Radarr.Api.Objects
+namespace Trash.Radarr.QualityDefinition.Api.Objects
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class RadarrQualityItem

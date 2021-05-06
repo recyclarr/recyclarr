@@ -31,3 +31,26 @@ radarr:
     # Which quality definition in the guide to sync to Radarr. Only choice right now is 'movie'
     quality_definition:
       type: movie
+
+    # Set to 'true' to automatically remove custom formats from Radarr when they are removed from
+    # the guide or your configuration. This will NEVER delete custom formats you manually created!
+    delete_old_custom_formats: false
+
+    custom_formats:
+      # A list of custom formats to sync to Radarr. Must match the "name" in the importable JSON.
+      # Do NOT use the heading names here, those do not work! These are case-insensitive.
+      - names:
+          - BR-DISK
+          - EVO (no WEB-DL)
+          - LQ
+          - x265 (720/1080p)
+          - 3D
+
+        # Uncomment the below properties to specify one or more quality profiles that should be
+        # updated with scores from the guide for each custom format. Without this, custom formats
+        # are synced to Radarr but no scores are set in any quality profiles.
+
+#        quality_profiles:
+#          - name: Quality Profile 1
+#          - name: Quality Profile 2
+#            #score: -9999 # Optional score to assign to all CFs. Overrides scores in the guide.

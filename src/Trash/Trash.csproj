@@ -6,17 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Flurl" />
-    <PackageReference Include="Flurl.Http" />
-    <PackageReference Include="JetBrains.Annotations" />
-    <PackageReference Include="CliFx" />
-    <PackageReference Include="Serilog" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
-    <PackageReference Include="YamlDotNet" />
-    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="CliFx" />
+    <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="Flurl" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.HashFunction.FNV" />
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>
