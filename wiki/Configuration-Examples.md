@@ -1,8 +1,11 @@
-Various scenarios supported using the flexible configuration support.
+Various scenarios supported using flexible configuration structure:
 
 - [Update as much as possible in both Sonarr and Radarr with a single config](#update-as-much-as-possible-in-both-sonarr-and-radarr-with-a-single-config)
 - [Selectively update different parts of Sonarr](#selectively-update-different-parts-of-sonarr)
 - [Update multiple Sonarr instances in a single YAML config](#update-multiple-sonarr-instances-in-a-single-yaml-config)
+- [Synchronize a lot of custom formats for a single quality profile](#synchronize-a-lot-of-custom-formats-for-a-single-quality-profile)
+- [Manually assign different scores to multiple custom formats](#manually-assign-different-scores-to-multiple-custom-formats)
+- [Assign custom format scores the same way to multiple quality profiles](#assign-custom-format-scores-the-same-way-to-multiple-quality-profiles)
 
 ## Update as much as possible in both Sonarr and Radarr with a single config
 
@@ -113,3 +116,120 @@ update both instances.
 
 You can also split theses two instances across different YAML files if you do not want both to
 update at the same time. There's an example of how to do that in a different section of this page.
+
+## Synchronize a lot of custom formats for a single quality profile
+
+I want to be able to synchronize a list of custom formats to Radarr. In addition, I want the scores
+in the guide to be applied to a single quality profile.
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      # Advanced Audio from the guide
+      - names:
+          - TrueHD ATMOS
+          - DTS X
+          - ATMOS (undefined)
+          - DD+ ATMOS
+          - TrueHD
+          - DTS-HD MA
+          - FLAC
+          - PCM
+          - DTS-HD HRA
+          - DD+
+          - DTS-ES
+          - DTS
+          - AAC
+          - DD
+        quality_profiles:
+          - name: SD
+```
+
+## Manually assign different scores to multiple custom formats
+
+I want to synchronize custom formats to Radarr. I also do not want to use the scores in the guide.
+Instead, I want to assign my own distinct score to each custom format in a single quality profile.
+
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names: [TrueHD ATMOS]
+        quality_profiles:
+          - name: SD
+            score: 100
+      - names: [DTS X]
+        quality_profiles:
+          - name: SD
+            score: 200
+      - names: [ATMOS (undefined)]
+        quality_profiles:
+          - name: SD
+            score: 300
+      - names: [TrueHD]
+        quality_profiles:
+          - name: SD
+            score: 400
+      - names: [DTS-HD MA]
+        quality_profiles:
+          - name: SD
+            score: 500
+      - names: [FLAC]
+        quality_profiles:
+          - name: SD
+            score: 600
+```
+
+The configuration is structured around assigning multiple custom formats the same way to just a few
+quality profiles. It starts to look more redundant and ugly when you want fine-grained control over
+the scores, especially if its on a per-single-custom-format basis.
+
+## Assign custom format scores the same way to multiple quality profiles
+
+You can assign custom format scores (from the guide) to multiple profiles (all the same way):
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names:
+          - TrueHD ATMOS
+          - DTS X
+          - ATMOS (undefined)
+          - DD+ ATMOS
+          - TrueHD
+        quality_profiles:
+          - name: SD
+          - name: Ultra-HD
+```
+
+Quality profiles named `HD` and `Ultra-HD` will all receive the same scores for the same custom
+formats.
+
+You can also choose to override the score (for all custom formats!) in one profile:
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names:
+          - TrueHD ATMOS
+          - DTS X
+          - ATMOS (undefined)
+          - DD+ ATMOS
+          - TrueHD
+        quality_profiles:
+          - name: SD
+            score: 100 # This score is assigned to all 5 CFs in this profile
+          - name: Ultra-HD # Still uses scores from the guide
+```

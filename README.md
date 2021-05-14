@@ -7,13 +7,9 @@
 
 Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
-## Features
+## Sonarr Features
 
-Features list will continue to grow. See the limitations & roadmap section for more details!
-
-### Sonarr
-
-Release Profiles
+### Release Profiles
 
 - "Preferred", "Must Not Contain", and "Must Contain" terms from guides are reflected in
   corresponding release profile fields in Sonarr.
@@ -26,16 +22,24 @@ Release Profiles
 - Terms mentioned as "optional" in the guide are not synced to Sonarr release profiles by default
   (can be enabled via config).
 
-Quality Definitions
+### Quality Definitions
 
 - Anime and Series (Non-Anime) quality definitions from the guide.
 - "Hybrid" type supported that is a mixture of both.
 
-### Radarr
+## Radarr Features
 
-Quality Definitions
+### Quality Definitions
 
 - Movie quality definition from the guide
+
+### Custom Formats
+
+- A user-specified list of custom formats are synchronized to Radarr from the TRaSH guides.
+- Scores from the guides can be synchronized to quality profiles of your choosing.
+- User can specify their own scores for custom formats (instead of using the guide score).
+- Option to enable automatic deletion custom formats in Radarr when they are removed from config or
+  the guide.
 
 ## Installation
 
@@ -48,7 +52,17 @@ Simply download the latest release for your platform:
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
 
-> **Note**: For Sonarr updates to work, you must be running version `3.0.4.1098` or greater.
+---
+
+*Important Notices!*
+
+- > **Note**: For Sonarr updates to work, you must be running version `3.0.4.1098` or greater.
+
+- > **Note**: Do not run Notifiarr's Trash Guides Integration in conjunction with Trash Updater's
+  > Custom Format synchronization. In general, you should not have two different tools updating the
+  > same data in Radarr.
+
+---
 
 [rp]: https://github.com/rcdailey/trash-updater/releases
 
