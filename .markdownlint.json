@@ -7,5 +7,6 @@
   },
   "no-inline-html": {
     "allowed_elements": ["br"]
-  }
+  },
+  "no-duplicate-heading": false
 }
