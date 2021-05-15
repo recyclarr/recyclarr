@@ -100,7 +100,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
         }
 
         [Test]
-        public void Combination_of_create_update_and_no_change_and_verify_proper_json_merging()
+        public void Combination_of_create_update_and_unchanged_and_verify_proper_json_merging()
         {
             const string radarrCfData = @"[{
   'id': 1,
@@ -178,7 +178,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
                 new("created", "", guideCfData[0]),
                 new("updated_different_name", "", guideCfData[1])
                 {
-                    CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 2}
+                    CacheEntry = new TrashIdMapping("", "", 2)
                 },
                 new("no_change", "", guideCfData[2])
             };
@@ -361,6 +361,67 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var expectedTransactions = new CustomFormatTransactionData();
             expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", "testname", 2));
             processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
+        }
+
+        [Test]
+        public void Updated_and_unchanged_custom_formats_have_cache_entry_set_when_there_is_no_cache()
+        {
+            const string radarrCfData = @"[{
+  'id': 1,
+  'name': 'updated',
+  'specifications': [{
+    'name': 'spec2',
+    'fields': [{
+      'name': 'value',
+      'value': 'value1'
+    }]
+  }]
+}, {
+  'id': 2,
+  'name': 'no_change',
+  'specifications': [{
+    'name': 'spec4',
+    'negate': false,
+    'fields': [{
+      'name': 'value',
+      'value': 'value1'
+    }]
+  }]
+}]";
+            var guideCfData = JsonConvert.DeserializeObject<List<JObject>>(@"[{
+  'name': 'updated',
+  'specifications': [{
+    'name': 'spec2',
+    'fields': {
+      'value': 'value2'
+    }
+  }]
+}, {
+  'name': 'no_change',
+  'specifications': [{
+    'name': 'spec4',
+    'negate': false,
+    'fields': {
+      'value': 'value1'
+    }
+  }]
+}]");
+
+            var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
+            var guideCfs = new List<ProcessedCustomFormatData>
+            {
+                new("updated", "", guideCfData[0]),
+                new("no_change", "", guideCfData[1])
+            };
+
+            var processor = new JsonTransactionStep();
+            processor.Process(guideCfs, radarrCfs);
+
+            processor.Transactions.UpdatedCustomFormats.First().CacheEntry.Should()
+                .BeEquivalentTo(new TrashIdMapping("", "updated", 1));
+
+            processor.Transactions.UnchangedCustomFormats.First().CacheEntry.Should()
+                .BeEquivalentTo(new TrashIdMapping("", "no_change", 2));
         }
     }
 }

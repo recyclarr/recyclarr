@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Invalid cache data files no longer cause the program to exit. An error is printed and the
   application continues as if there was no cache at all.
+- Fix a bug that resulted in certain custom formats not having their scores set in quality
+  profiles.
 
 ### Changed
 

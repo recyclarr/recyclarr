@@ -36,13 +36,6 @@ namespace Trash.Radarr.CustomFormat.Api
 
         public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
         {
-            // Set the cache first, since it's needed to perform the update. This case will apply to CFs we update that
-            // exist in Radarr but not the cache (e.g. moving to a new machine, same-named CF was created manually)
-            if (cf.CacheEntry == null)
-            {
-                cf.SetCache((int) cf.Json["id"]);
-            }
-
             await BaseUrl()
                 .AppendPathSegment($"customformat/{cf.GetCustomFormatId()}")
                 .PutJsonAsync(cf.Json)

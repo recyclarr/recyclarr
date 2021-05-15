@@ -39,6 +39,14 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
                     guideCf.Json = (JObject) radarrCf.DeepClone();
                     UpdateRadarrCf(guideCf.Json, guideCfJson);
 
+                    // Set the cache for use later (like updating scores) if it hasn't been updated already.
+                    // This handles CFs that already exist in Radarr but aren't cached (they will be added to cache
+                    // later).
+                    if (guideCf.CacheEntry == null)
+                    {
+                        guideCf.SetCache((int) guideCf.Json["id"]);
+                    }
+
                     if (!JToken.DeepEquals(radarrCf, guideCf.Json))
                     {
                         Transactions.UpdatedCustomFormats.Add(guideCf);
