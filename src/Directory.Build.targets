@@ -22,15 +22,9 @@
     <PackageReference Update="CliFx" Version="2.*" />
     <PackageReference Update="Flurl.Http" Version="3.*" />
     <PackageReference Update="Flurl" Version="3.*" />
-    <PackageReference Update="JetBrains.Annotations" Version="*">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.*">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Update="JetBrains.Annotations" Version="*"/>
+    <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.*"/>
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*"/>
     <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
     <PackageReference Update="Serilog" Version="2.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
