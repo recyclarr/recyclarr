@@ -5,6 +5,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using NSubstitute;
 using NUnit.Framework;
+using Serilog;
 using Trash.Cache;
 using Trash.Config;
 
@@ -21,7 +22,7 @@ namespace Trash.Tests.Cache
                 Filesystem = fs ?? Substitute.For<IFileSystem>();
                 StoragePath = Substitute.For<ICacheStoragePath>();
                 ServiceConfig = Substitute.For<IServiceConfiguration>();
-                Cache = new ServiceCache(Filesystem, StoragePath, ServiceConfig);
+                Cache = new ServiceCache(Filesystem, StoragePath, ServiceConfig, Substitute.For<ILogger>());
             }
 
             public ServiceCache Cache { get; }
@@ -140,6 +141,19 @@ namespace Trash.Tests.Cache
             act.Should()
                 .Throw<ArgumentException>()
                 .WithMessage("CacheObjectNameAttribute is missing*");
+        }
+
+        [Test]
+        public void When_cache_file_is_empty_do_not_throw()
+        {
+            var ctx = new Context();
+            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
+            ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
+                .Returns(_ => "");
+
+            Action act = () => ctx.Cache.Load<ObjectWithAttribute>();
+
+            act.Should().NotThrow();
         }
     }
 }

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Invalid cache data files no longer cause the program to exit. An error is printed and the
+  application continues as if there was no cache at all.
+
 ### Changed
 
 - The log message listing custom formats without scores in the guide now prints information one per

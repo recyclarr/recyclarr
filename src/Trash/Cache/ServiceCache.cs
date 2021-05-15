@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using Trash.Config;
 
 namespace Trash.Cache
@@ -19,13 +20,17 @@ namespace Trash.Cache
         private readonly IFNV1a _hash;
         private readonly ICacheStoragePath _storagePath;
 
-        public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath, IServiceConfiguration config)
+        public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath, IServiceConfiguration config,
+            ILogger log)
         {
             _fileSystem = fileSystem;
             _storagePath = storagePath;
             _config = config;
+            Log = log;
             _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
         }
+
+        private ILogger Log { get; }
 
         public T? Load<T>() where T : class
         {
@@ -36,7 +41,17 @@ namespace Trash.Cache
             }
 
             var json = _fileSystem.File.ReadAllText(path);
-            return JObject.Parse(json).ToObject<T>();
+
+            try
+            {
+                return JObject.Parse(json).ToObject<T>();
+            }
+            catch (JsonException e)
+            {
+                Log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
+            }
+
+            return null;
         }
 
         public void Save<T>(T obj) where T : class
