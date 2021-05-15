@@ -19,6 +19,52 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
     public class QualityProfileApiPersistenceStepTest
     {
         [Test]
+        public void Do_not_invoke_api_if_no_scores_to_update()
+        {
+            const string radarrQualityProfileData = @"[{
+  'name': 'profile1',
+  'formatItems': [{
+      'format': 1,
+      'name': 'cf1',
+      'score': 1
+    },
+    {
+      'format': 2,
+      'name': 'cf2',
+      'score': 2
+    },
+    {
+      'format': 3,
+      'name': 'cf3',
+      'score': 3
+    }
+  ],
+  'id': 1
+}]";
+
+            var api = Substitute.For<IQualityProfileService>();
+            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+
+            var cfScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+            {
+                {
+                    "profile1", new List<QualityProfileCustomFormatScoreEntry>
+                    {
+                        new(new ProcessedCustomFormatData("", "", new JObject())
+                        {
+                            CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 4}
+                        }, 100)
+                    }
+                }
+            };
+
+            var processor = new QualityProfileApiPersistenceStep();
+            processor.Process(api, cfScores);
+
+            api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
+        }
+
+        [Test]
         public void Invalid_quality_profile_names_are_reported()
         {
             const string radarrQualityProfileData = @"[{'name': 'profile1'}]";

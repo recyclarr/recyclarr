@@ -54,6 +54,12 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
                     _updatedScores.GetOrCreate(profileName).Add(score);
                 }
 
+                if (!_updatedScores.TryGetValue(profileName, out var updatedScores) || updatedScores.Count == 0)
+                {
+                    // No scores to update, so don't bother with the API call
+                    continue;
+                }
+
                 var jsonRoot = (JObject) jsonList.First().Root;
                 await api.UpdateQualityProfile(jsonRoot, (int) jsonRoot["id"]);
             }
