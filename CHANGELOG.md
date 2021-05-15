@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The log message listing custom formats without scores in the guide now prints information one per
+  line (improved readability)
+
 ## [1.4.0] - 2021-05-14
 
 ### Added

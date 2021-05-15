@@ -170,7 +170,10 @@ namespace Trash.Radarr.CustomFormat
                 Log.Warning("The below custom formats have no score in the guide or YAML " +
                             "config and will be skipped (remove them from your config or specify a " +
                             "score to fix this warning)");
-                Log.Warning("{CfList}", _guideProcessor.CustomFormatsWithoutScore);
+                foreach (var tuple in _guideProcessor.CustomFormatsWithoutScore)
+                {
+                    Log.Warning("{CfList}", tuple);
+                }
             }
 
             if (_guideProcessor.CustomFormatsWithOutdatedNames.Count > 0)
