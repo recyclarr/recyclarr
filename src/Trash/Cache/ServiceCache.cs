@@ -15,17 +15,18 @@ namespace Trash.Cache
     public class ServiceCache : IServiceCache
     {
         private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
-        private readonly IServiceConfiguration _config;
+        private readonly IConfigurationProvider _configProvider;
         private readonly IFileSystem _fileSystem;
         private readonly IFNV1a _hash;
         private readonly ICacheStoragePath _storagePath;
 
-        public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath, IServiceConfiguration config,
+        public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath,
+            IConfigurationProvider configProvider,
             ILogger log)
         {
             _fileSystem = fileSystem;
             _storagePath = storagePath;
-            _config = config;
+            _configProvider = configProvider;
             Log = log;
             _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
         }
@@ -74,7 +75,8 @@ namespace Trash.Cache
 
         private string BuildServiceGuid()
         {
-            return _hash.ComputeHash(Encoding.ASCII.GetBytes(_config.BaseUrl)).AsHexString();
+            return _hash.ComputeHash(Encoding.ASCII.GetBytes(_configProvider.ActiveConfiguration.BaseUrl))
+                .AsHexString();
         }
 
         private string PathFromAttribute<T>()

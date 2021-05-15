@@ -10,11 +10,11 @@ namespace Trash.Radarr.CustomFormat.Api
 {
     internal class CustomFormatService : ICustomFormatService
     {
-        private readonly IServiceConfiguration _serviceConfig;
+        private readonly IConfigurationProvider _configProvider;
 
-        public CustomFormatService(IServiceConfiguration serviceConfig)
+        public CustomFormatService(IConfigurationProvider configProvider)
         {
-            _serviceConfig = serviceConfig;
+            _configProvider = configProvider;
         }
 
         public async Task<List<JObject>> GetCustomFormats()
@@ -51,7 +51,7 @@ namespace Trash.Radarr.CustomFormat.Api
 
         private string BaseUrl()
         {
-            return _serviceConfig.BuildUrl();
+            return _configProvider.ActiveConfiguration.BuildUrl();
         }
     }
 }

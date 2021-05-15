@@ -10,11 +10,11 @@ namespace Trash.Sonarr.Api
 {
     public class SonarrApi : ISonarrApi
     {
-        private readonly IServiceConfiguration _config;
+        private readonly IConfigurationProvider _configProvider;
 
-        public SonarrApi(IServiceConfiguration config)
+        public SonarrApi(IConfigurationProvider configProvider)
         {
-            _config = config;
+            _configProvider = configProvider;
         }
 
         public async Task<Version> GetVersion()
@@ -78,9 +78,6 @@ namespace Trash.Sonarr.Api
                 .ReceiveJson<List<SonarrQualityDefinitionItem>>();
         }
 
-        private string BaseUrl()
-        {
-            return _config.BuildUrl();
-        }
+        private string BaseUrl() => _configProvider.ActiveConfiguration.BaseUrl;
     }
 }

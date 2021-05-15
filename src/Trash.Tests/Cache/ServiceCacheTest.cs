@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using FluentAssertions;
@@ -21,12 +22,17 @@ namespace Trash.Tests.Cache
             {
                 Filesystem = fs ?? Substitute.For<IFileSystem>();
                 StoragePath = Substitute.For<ICacheStoragePath>();
-                ServiceConfig = Substitute.For<IServiceConfiguration>();
-                Cache = new ServiceCache(Filesystem, StoragePath, ServiceConfig, Substitute.For<ILogger>());
+                ConfigProvider = Substitute.For<IConfigurationProvider>();
+
+                // Set up a default for the active config's base URL. This is used to generate part of the path
+                ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
+                ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
+
+                Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
             }
 
             public ServiceCache Cache { get; }
-            public IServiceConfiguration ServiceConfig { get; }
+            public IConfigurationProvider ConfigProvider { get; }
             public ICacheStoragePath StoragePath { get; }
             public IFileSystem Filesystem { get; }
         }
@@ -74,7 +80,7 @@ namespace Trash.Tests.Cache
 
             obj.Should().NotBeNull();
             obj!.TestValue.Should().Be("Foo");
-            ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "c59d1c81", $"{ValidObjectName}.json"));
+            ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "be8fbc8f", $"{ValidObjectName}.json"));
         }
 
         [Test]
@@ -110,7 +116,7 @@ namespace Trash.Tests.Cache
 
             ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-            var expectedParentDirectory = Path.Combine("testpath", "c59d1c81");
+            var expectedParentDirectory = Path.Combine("testpath", "be8fbc8f");
             ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
 
             dynamic expectedJson = new {TestValue = "Foo"};
@@ -141,6 +147,31 @@ namespace Trash.Tests.Cache
             act.Should()
                 .Throw<ArgumentException>()
                 .WithMessage("CacheObjectNameAttribute is missing*");
+        }
+
+        [Test]
+        public void Switching_config_and_base_url_should_yield_different_cache_paths()
+        {
+            var ctx = new Context();
+            ctx.StoragePath.Path.Returns("testpath");
+
+            var actualPaths = new List<string>();
+
+            dynamic testJson = new {TestValue = "Foo"};
+            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
+            ctx.Filesystem.File.ReadAllText(Arg.Do<string>(s => actualPaths.Add(s)))
+                .Returns(_ => JsonConvert.SerializeObject(testJson));
+
+            ctx.Cache.Load<ObjectWithAttribute>();
+
+            // Change the active config & base URL so we get a different path
+            ctx.ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
+            ctx.ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
+
+            ctx.Cache.Load<ObjectWithAttribute>();
+
+            actualPaths.Count.Should().Be(2);
+            actualPaths.Should().OnlyHaveUniqueItems();
         }
 
         [Test]

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   application continues as if there was no cache at all.
 - Fix a bug that resulted in certain custom formats not having their scores set in quality
   profiles.
+- Fixed an issue where multiple instance configuration was not working.
 
 ### Changed
 

@@ -21,8 +21,7 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
             IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> cfScores)
         {
             var radarrProfiles = (await api.GetQualityProfiles())
-                .Select(p => (Name: p["name"].ToString(), Json: p))
-                .ToList();
+                .Select(p => (Name: p["name"].ToString(), Json: p));
 
             var profileScores = cfScores
                 .GroupJoin(radarrProfiles,
