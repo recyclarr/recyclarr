@@ -137,6 +137,28 @@ namespace Trash.Radarr.CustomFormat
 
         private bool ValidateGuideDataAndCheckShouldProceed(RadarrConfiguration config)
         {
+            Console.WriteLine("");
+
+            if (_guideProcessor.DuplicatedCustomFormats.Count > 0)
+            {
+                Log.Warning("One or more of the custom formats you want are duplicated in the guide. These custom " +
+                            "formats WILL BE SKIPPED. Radarr requires custom formats names to be unique. Trash Updater " +
+                            "is not able to choose which one you actually wanted. This is a bug in the guide and you " +
+                            "should request that it be fixed");
+
+                foreach (var (cfName, dupes) in _guideProcessor.DuplicatedCustomFormats)
+                {
+                    Log.Warning("{CfName} is duplicated {DupeTimes} with the following Trash IDs:", cfName,
+                        dupes.Count);
+                    foreach (var cf in dupes)
+                    {
+                        Log.Warning(" - {TrashId}", cf.TrashId);
+                    }
+                }
+
+                Console.WriteLine("");
+            }
+
             if (_guideProcessor.CustomFormatsNotInGuide.Count > 0)
             {
                 Log.Warning("The Custom Formats below do not exist in the guide and will " +
@@ -144,6 +166,8 @@ namespace Trash.Radarr.CustomFormat
                             "the guide! Either fix the names or remove them from your YAML config to resolve this " +
                             "warning");
                 Log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
+
+                Console.WriteLine("");
             }
 
             var cfsWithoutQualityProfiles = _guideProcessor.ConfigData
@@ -155,6 +179,8 @@ namespace Trash.Radarr.CustomFormat
             {
                 Log.Debug("These custom formats will be uploaded but are not associated to a quality profile in the " +
                           "config file: {UnassociatedCfs}", cfsWithoutQualityProfiles);
+
+                Console.WriteLine("");
             }
 
             // No CFs are defined in this item, or they are all invalid. Skip this whole instance.
@@ -174,6 +200,8 @@ namespace Trash.Radarr.CustomFormat
                 {
                     Log.Warning("{CfList}", tuple);
                 }
+
+                Console.WriteLine("");
             }
 
             if (_guideProcessor.CustomFormatsWithOutdatedNames.Count > 0)
@@ -186,6 +214,8 @@ namespace Trash.Radarr.CustomFormat
                 {
                     Log.Warning(" - '{OldName}' -> '{NewName}'", oldName, newName);
                 }
+
+                Console.WriteLine("");
             }
 
             return true;

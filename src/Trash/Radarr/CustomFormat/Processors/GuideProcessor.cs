@@ -55,6 +55,9 @@ namespace Trash.Radarr.CustomFormat.Processors
         public List<(string, string)> CustomFormatsWithOutdatedNames
             => _steps.CustomFormat.CustomFormatsWithOutdatedNames;
 
+        public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
+            => _steps.CustomFormat.DuplicatedCustomFormats;
+
         public async Task BuildGuideData(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache)
         {
             if (_guideData == null)

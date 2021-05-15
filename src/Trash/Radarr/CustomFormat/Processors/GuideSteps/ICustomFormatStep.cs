@@ -10,6 +10,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         List<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
         List<TrashIdMapping> DeletedCustomFormatsInCache { get; }
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }
+        Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
         void Process(IEnumerable<CustomFormatData> customFormatGuideData, IEnumerable<CustomFormatConfig> config,
             CustomFormatCache? cache);

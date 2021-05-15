@@ -49,7 +49,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Load_NoFileExists_ReturnsNull()
+        public void Load_returns_null_when_file_does_not_exist()
         {
             var ctx = new Context();
             ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(false);
@@ -59,7 +59,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Load_WithAttribute_ParsesCorrectly()
+        public void Loading_with_attribute_parses_correctly()
         {
             var ctx = new Context();
 
@@ -78,7 +78,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Load_WithAttributeInvalidName_ThrowsException()
+        public void Loading_with_invalid_object_name_throws()
         {
             var ctx = new Context();
 
@@ -90,7 +90,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Load_WithoutAttribute_Throws()
+        public void Loading_without_attribute_throws()
         {
             var ctx = new Context();
 
@@ -102,7 +102,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Save_WithAttribute_ParsesCorrectly()
+        public void Saving_with_attribute_parses_correctly()
         {
             var ctx = new Context();
 
@@ -120,7 +120,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Save_WithAttributeInvalidName_ThrowsException()
+        public void Saving_with_invalid_object_name_throws()
         {
             var ctx = new Context();
 
@@ -132,7 +132,7 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
-        public void Save_WithoutAttribute_Throws()
+        public void Saving_without_attribute_throws()
         {
             var ctx = new Context();
 

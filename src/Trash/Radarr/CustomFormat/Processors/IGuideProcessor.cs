@@ -14,6 +14,7 @@ namespace Trash.Radarr.CustomFormat.Processors
         IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; }
         IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }
+        Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
         Task BuildGuideData(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache);
         void Reset();

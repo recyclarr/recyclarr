@@ -85,6 +85,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(testGuideData, testConfig, testCache);
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().HaveCount(outdatedCount);
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
@@ -125,6 +126,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(guideData, testConfig, testCache);
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Count.Should().Be(1);
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
@@ -150,6 +152,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
@@ -179,6 +182,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
@@ -214,6 +218,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(guideData, testConfig, testCache);
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should()
                 .BeEquivalentTo(new TrashIdMapping("id1000", "name1"));
@@ -240,6 +245,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(guideCfs, Array.Empty<CustomFormatConfig>(), cache);
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEquivalentTo(cache.TrashIdMappings[0]);
             processor.ProcessedCustomFormats.Should().BeEmpty();
@@ -269,6 +275,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(guideData, testConfig, testCache);
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should()
@@ -288,6 +295,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
@@ -309,6 +317,36 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new CustomFormatStep();
             processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
+            processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
+            processor.DeletedCustomFormatsInCache.Should().BeEmpty();
+            processor.ProcessedCustomFormats.Should().BeEmpty();
+        }
+
+        [Test]
+        public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list()
+        {
+            var guideData = new List<CustomFormatData>
+            {
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id2'}"}
+            };
+
+            var testConfig = new List<CustomFormatConfig>
+            {
+                new() {Names = new List<string> {"name1"}}
+            };
+
+            var processor = new CustomFormatStep();
+            processor.Process(guideData, testConfig, null);
+
+            //Dictionary<string, List<ProcessedCustomFormatData>>
+            processor.DuplicatedCustomFormats.Should().ContainKey("name1")
+                .WhichValue.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
+                {
+                    new ("name1", "id1", JObject.Parse(@"{'name': 'name1'}")),
+                    new ("name1", "id2", JObject.Parse(@"{'name': 'name1'}"))
+                });
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEmpty();

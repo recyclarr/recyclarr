@@ -15,6 +15,9 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         public List<ProcessedCustomFormatData> ProcessedCustomFormats { get; } = new();
         public List<TrashIdMapping> DeletedCustomFormatsInCache { get; } = new();
 
+        public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; private set; } =
+            new();
+
         public void Process(IEnumerable<CustomFormatData> customFormatGuideData, IEnumerable<CustomFormatConfig> config,
             CustomFormatCache? cache)
         {
@@ -28,7 +31,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
                 .ToList();
 
             // Perform updates and deletions based on matches in the cache. Matches in the cache are by ID.
-            foreach (var cf in processedCfs) //.Where(cf => cf.CacheEntry != null))
+            foreach (var cf in processedCfs)
             {
                 // Does the name of the CF in the guide match a name in the config? If yes, we keep it.
                 var configName = allConfigCfNames.FirstOrDefault(n => n.EqualsIgnoreCase(cf.Name));
@@ -63,6 +66,19 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
 
             // Orphaned entries in cache represent custom formats we need to delete.
             ProcessDeletedCustomFormats(cache);
+
+            // Check for multiple custom formats with the same name in the guide data (e.g. "DoVi")
+            ProcessDuplicates();
+        }
+
+        private void ProcessDuplicates()
+        {
+            DuplicatedCustomFormats = ProcessedCustomFormats
+                .GroupBy(cf => cf.Name)
+                .Where(grp => grp.Count() > 1)
+                .ToDictionary(grp => grp.Key, grp => grp.ToList());
+
+            ProcessedCustomFormats.RemoveAll(cf => DuplicatedCustomFormats.ContainsKey(cf.Name));
         }
 
         private static ProcessedCustomFormatData ProcessCustomFormatData(CustomFormatData guideData,
