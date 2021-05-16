@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2021-05-15
+
 ### Fixed
 
 - Fixed using incorrect URL for Sonarr
@@ -109,7 +111,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.4.2...HEAD
+[1.4.2]: https://github.com/rcdailey/trash-updater/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/rcdailey/trash-updater/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/rcdailey/trash-updater/compare/v1.3.3...v1.4.0
 [1.3.3]: https://github.com/rcdailey/trash-updater/compare/v1.3.2...v1.3.3
