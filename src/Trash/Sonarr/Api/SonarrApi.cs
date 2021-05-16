@@ -78,6 +78,6 @@ namespace Trash.Sonarr.Api
                 .ReceiveJson<List<SonarrQualityDefinitionItem>>();
         }
 
-        private string BaseUrl() => _configProvider.ActiveConfiguration.BaseUrl;
+        private string BaseUrl() => _configProvider.ActiveConfiguration.BuildUrl();
     }
 }
