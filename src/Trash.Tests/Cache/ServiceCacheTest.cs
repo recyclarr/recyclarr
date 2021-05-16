@@ -4,9 +4,11 @@ using System.IO;
 using System.IO.Abstractions;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
+using TestLibrary.NSubstitute;
 using Trash.Cache;
 using Trash.Config;
 
@@ -23,6 +25,14 @@ namespace Trash.Tests.Cache
                 Filesystem = fs ?? Substitute.For<IFileSystem>();
                 StoragePath = Substitute.For<ICacheStoragePath>();
                 ConfigProvider = Substitute.For<IConfigurationProvider>();
+                JsonSettings = new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new SnakeCaseNamingStrategy()
+                    }
+                };
 
                 // Set up a default for the active config's base URL. This is used to generate part of the path
                 ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
@@ -31,6 +41,7 @@ namespace Trash.Tests.Cache
                 Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
             }
 
+            public JsonSerializerSettings JsonSettings { get; }
             public ServiceCache Cache { get; }
             public IConfigurationProvider ConfigProvider { get; }
             public ICacheStoragePath StoragePath { get; }
@@ -108,6 +119,17 @@ namespace Trash.Tests.Cache
         }
 
         [Test]
+        public void Properties_are_saved_using_snake_case()
+        {
+            var ctx = new Context();
+            ctx.StoragePath.Path.Returns("testpath");
+            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+
+            ctx.Filesystem.File.Received()
+                .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
+        }
+
+        [Test]
         public void Saving_with_attribute_parses_correctly()
         {
             var ctx = new Context();
@@ -122,7 +144,7 @@ namespace Trash.Tests.Cache
             dynamic expectedJson = new {TestValue = "Foo"};
             var expectedPath = Path.Combine(expectedParentDirectory, $"{ValidObjectName}.json");
             ctx.Filesystem.File.Received()
-                .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, Formatting.Indented));
+                .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, ctx.JsonSettings));
         }
 
         [Test]

@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using Trash.Config;
 
@@ -59,7 +60,14 @@ namespace Trash.Cache
         {
             var path = PathFromAttribute<T>();
             _fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(path));
-            _fileSystem.File.WriteAllText(path, JsonConvert.SerializeObject(obj, Formatting.Indented));
+            _fileSystem.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            }));
         }
 
         private static string GetCacheObjectNameAttribute<T>()
