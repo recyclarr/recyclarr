@@ -118,5 +118,36 @@ namespace Trash.Tests.Radarr.CustomFormat
             ctx.Persister.Update(new List<ProcessedCustomFormatData>());
             ctx.Persister.CfCache.Should().NotBeNull();
         }
+
+        [Test]
+        public void Accept_loaded_cache_when_versions_match()
+        {
+            var ctx = new Context();
+
+            var testCfObj = new CustomFormatCache
+            {
+                Version = CustomFormatCache.LatestVersion,
+                TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
+            };
+            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.Persister.Load();
+            ctx.Persister.CfCache.Should().NotBeNull();
+        }
+
+        [TestCase(CustomFormatCache.LatestVersion-1)]
+        [TestCase(CustomFormatCache.LatestVersion+1)]
+        public void Set_loaded_cache_to_null_if_versions_mismatch(int versionToTest)
+        {
+            var ctx = new Context();
+
+            var testCfObj = new CustomFormatCache
+            {
+                Version = versionToTest,
+                TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
+            };
+            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.Persister.Load();
+            ctx.Persister.CfCache.Should().BeNull();
+        }
     }
 }

@@ -27,6 +27,15 @@ namespace Trash.Radarr.CustomFormat
             if (CfCache != null)
             {
                 Log.Debug("Loaded Cache");
+
+                // If the version is higher OR lower, we invalidate the cache. It means there's an
+                // incompatibility that we do not support.
+                if (CfCache.Version != CustomFormatCache.LatestVersion)
+                {
+                    Log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
+                        CfCache.Version, CustomFormatCache.LatestVersion);
+                    CfCache = null;
+                }
             }
             else
             {

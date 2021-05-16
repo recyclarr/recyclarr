@@ -6,6 +6,9 @@ namespace Trash.Radarr.CustomFormat.Models.Cache
     [CacheObjectName("custom-format-cache")]
     public class CustomFormatCache
     {
+        public const int LatestVersion = 1;
+
+        public int Version { get; init; } = LatestVersion;
         public List<TrashIdMapping> TrashIdMappings { get; init; } = new();
     }
 
