@@ -11,7 +11,7 @@ using YamlDotNet.Serialization.NamingConventions;
 namespace Trash.Config
 {
     public class ConfigurationLoader<T> : IConfigurationLoader<T>
-        where T : ServiceConfiguration
+        where T : IServiceConfiguration
     {
         private readonly IConfigurationProvider _configProvider;
         private readonly IDeserializer _deserializer;
@@ -43,23 +43,35 @@ namespace Trash.Config
             parser.Consume<DocumentStart>();
             parser.Consume<MappingStart>();
 
-            var configs = new List<T>();
+            var validConfigs = new List<T>();
             while (parser.TryConsume<Scalar>(out var key))
             {
                 if (key.Value == configSection)
                 {
-                    configs = _deserializer.Deserialize<List<T>>(parser);
+                    var configs = (List<T>?) _deserializer.Deserialize<List<T>>(parser);
+                    if (configs != null)
+                    {
+                        foreach (var config in configs)
+                        {
+                            if (!config.IsValid(out var msg))
+                            {
+                                throw new ConfigurationException(configSection, typeof(T), msg);
+                            }
+
+                            validConfigs.Add(config);
+                        }
+                    }
                 }
 
                 parser.SkipThisAndNestedEvents();
             }
 
-            if (configs.Count == 0)
+            if (validConfigs.Count == 0)
             {
-                throw new ConfigurationException(configSection, typeof(T));
+                throw new ConfigurationException(configSection, typeof(T), "There are no configured instances defined");
             }
 
-            return configs;
+            return validConfigs;
         }
 
         public IEnumerable<T> LoadMany(IEnumerable<string> configFiles, string configSection)

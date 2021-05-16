@@ -25,6 +25,11 @@ namespace Trash.Tests.Config
             {
                 throw new NotImplementedException();
             }
+
+            public override bool IsValid(out string msg)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [Test]

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using Common;
 using FluentAssertions;
+using JetBrains.Annotations;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary;
@@ -20,54 +22,51 @@ namespace Trash.Tests.Config
     [Parallelizable(ParallelScope.All)]
     public class ConfigurationLoaderTest
     {
-        private TextReader GetResourceData(string file)
+        private static TextReader GetResourceData(string file)
         {
             var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
             return new StringReader(testData.ReadData(file));
         }
 
-        [Test]
-        public void Load_UsingStream_CorrectParsing()
+        [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+        public class TestConfigValidFalse : IServiceConfiguration
         {
-            var configLoader = new ConfigurationLoader<SonarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
-                Substitute.For<IFileSystem>(),
-                new DefaultObjectFactory());
+            public const string Msg = "validate_false";
+            public string BaseUrl { get; init; } = "";
+            public string ApiKey { get; init; } = "";
 
-            var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
+            public string BuildUrl()
+            {
+                throw new NotImplementedException();
+            }
 
-            configs.Should()
-                .BeEquivalentTo(new List<SonarrConfiguration>
-                {
-                    new()
-                    {
-                        ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                        BaseUrl = "http://localhost:8989",
-                        ReleaseProfiles = new List<ReleaseProfileConfig>
-                        {
-                            new()
-                            {
-                                Type = ReleaseProfileType.Anime,
-                                StrictNegativeScores = true,
-                                Tags = new List<string> {"anime"}
-                            },
-                            new()
-                            {
-                                Type = ReleaseProfileType.Series,
-                                StrictNegativeScores = false,
-                                Tags = new List<string>
-                                {
-                                    "tv",
-                                    "series"
-                                }
-                            }
-                        }
-                    }
-                });
+            public bool IsValid(out string msg)
+            {
+                msg = Msg;
+                return false;
+            }
+        }
+
+        [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+        public class TestConfigValidTrue : IServiceConfiguration
+        {
+            public string BaseUrl { get; init; } = "";
+            public string ApiKey { get; init; } = "";
+
+            public string BuildUrl()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool IsValid(out string msg)
+            {
+                msg = "";
+                return true;
+            }
         }
 
         [Test]
-        public void LoadMany_CorrectNumberOfIterations()
+        public void Load_many_iterations_of_config()
         {
             static StreamReader MockYaml(params object[] args)
             {
@@ -107,7 +106,81 @@ namespace Trash.Tests.Config
             var actual = loader.LoadMany(fakeFiles, "sonarr").ToList();
 
             actual.Should().BeEquivalentTo(expected);
-            actualActiveConfigs.Should().BeEquivalentTo(expected);
+            actualActiveConfigs.Should().BeEquivalentTo(expected, op => op.WithoutStrictOrdering());
+        }
+
+        [Test]
+        public void Parse_using_stream()
+        {
+            var configLoader = new ConfigurationLoader<SonarrConfiguration>(
+                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IFileSystem>(),
+                new DefaultObjectFactory());
+
+            var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
+
+            configs.Should()
+                .BeEquivalentTo(new List<SonarrConfiguration>
+                {
+                    new()
+                    {
+                        ApiKey = "95283e6b156c42f3af8a9b16173f876b",
+                        BaseUrl = "http://localhost:8989",
+                        ReleaseProfiles = new List<ReleaseProfileConfig>
+                        {
+                            new()
+                            {
+                                Type = ReleaseProfileType.Anime,
+                                StrictNegativeScores = true,
+                                Tags = new List<string> {"anime"}
+                            },
+                            new()
+                            {
+                                Type = ReleaseProfileType.Series,
+                                StrictNegativeScores = false,
+                                Tags = new List<string>
+                                {
+                                    "tv",
+                                    "series"
+                                }
+                            }
+                        }
+                    }
+                });
+        }
+
+        [Test]
+        public void Validation_failure_throws()
+        {
+            var configLoader = new ConfigurationLoader<TestConfigValidFalse>(
+                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IFileSystem>(),
+                new DefaultObjectFactory());
+
+            var testYml = @"
+fubar:
+- api_key: abc
+";
+            Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "fubar");
+
+            act.Should().Throw<ConfigurationException>()
+                .WithMessage($"*{TestConfigValidFalse.Msg}");
+        }
+
+        [Test]
+        public void Validation_success_does_not_throw()
+        {
+            var configLoader = new ConfigurationLoader<TestConfigValidTrue>(
+                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IFileSystem>(),
+                new DefaultObjectFactory());
+
+            var testYml = @"
+fubar:
+- api_key: abc
+";
+            Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "fubar");
+            act.Should().NotThrow();
         }
     }
 }

@@ -11,5 +11,6 @@ namespace Trash.Config
         public string ApiKey { get; init; } = "";
 
         public abstract string BuildUrl();
+        public abstract bool IsValid(out string msg);
     }
 }

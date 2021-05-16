@@ -4,7 +4,7 @@ using System.IO;
 namespace Trash.Config
 {
     public interface IConfigurationLoader<out T>
-        where T : ServiceConfiguration
+        where T : IServiceConfiguration
     {
         IEnumerable<T> Load(string propertyName, string configSection);
         IEnumerable<T> LoadFromStream(TextReader stream, string configSection);

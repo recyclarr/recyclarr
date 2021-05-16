@@ -21,6 +21,12 @@ namespace Trash.Radarr
                 .AppendPathSegment("api/v3")
                 .SetQueryParams(new {apikey = ApiKey});
         }
+
+        public override bool IsValid(out string msg)
+        {
+            msg = "";
+            return true;
+        }
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
