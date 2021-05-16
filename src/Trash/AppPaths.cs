@@ -9,5 +9,7 @@ namespace Trash
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "trash-updater");
 
         public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "trash.yml");
+
+        public static string LogDirectory { get; } = Path.Combine(AppDataPath, "logs");
     }
 }

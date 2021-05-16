@@ -1,4 +1,6 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO;
+using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.AggregateService;
@@ -27,16 +29,23 @@ namespace Trash
     {
         private static void SetupLogging(ContainerBuilder builder)
         {
+            builder.RegisterType<LogJanitor>().As<ILogJanitor>();
             builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
             builder.Register(c =>
                 {
-                    const string template = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+                    var logPath = Path.Combine(AppPaths.LogDirectory,
+                        $"trash_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
+
+                    const string consoleTemplate = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+
                     return new LoggerConfiguration()
-                        .MinimumLevel.ControlledBy(c.Resolve<LoggingLevelSwitch>())
-                        .WriteTo.Console(outputTemplate: template)
+                        .MinimumLevel.Debug()
+                        .WriteTo.Console(outputTemplate: consoleTemplate, levelSwitch: c.Resolve<LoggingLevelSwitch>())
+                        .WriteTo.File(logPath)
                         .CreateLogger();
                 })
-                .As<ILogger>();
+                .As<ILogger>()
+                .SingleInstance();
         }
 
         private static void SonarrRegistrations(ContainerBuilder builder)
@@ -123,9 +132,7 @@ namespace Trash
 
         public static IContainer Setup(ContainerBuilder builder)
         {
-            builder.RegisterType<FileSystem>()
-                .As<IFileSystem>();
-
+            builder.RegisterType<FileSystem>().As<IFileSystem>();
             builder.RegisterType<ServiceCache>().As<IServiceCache>();
             builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
 

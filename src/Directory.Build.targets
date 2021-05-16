@@ -6,6 +6,7 @@
     <PackageReference Update="FluentAssertions" Version="5.*" />
     <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.*" />
+    <PackageReference Update="morelinq" Version="3.*" />
     <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
     <PackageReference Update="NSubstitute" Version="4.*" />
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
@@ -13,7 +14,6 @@
     <PackageReference Update="NUnit3TestAdapter" Version="3.*" />
     <PackageReference Update="Serilog.Sinks.NUnit" Version="1.*" />
     <PackageReference Update="Serilog.Sinks.TestCorrelator" Version="3.*" />
-    <PackageReference Update="morelinq" Version="3.*" />
 
     <!-- Non-Test Packages -->
     <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />
@@ -26,6 +26,7 @@
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.*"/>
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.*"/>
     <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
+    <PackageReference Update="Serilog.Sinks.File" Version="4.*" />
     <PackageReference Update="Serilog" Version="2.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
     <PackageReference Update="System.IO.Abstractions" Version="13.*" />

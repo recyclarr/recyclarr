@@ -24,10 +24,11 @@ namespace Trash.Radarr
         public RadarrCommand(
             ILogger logger,
             LoggingLevelSwitch loggingLevelSwitch,
+            ILogJanitor logJanitor,
             IConfigurationLoader<RadarrConfiguration> configLoader,
             Func<RadarrQualityDefinitionUpdater> qualityUpdaterFactory,
             Lazy<ICustomFormatUpdater> customFormatUpdater)
-            : base(logger, loggingLevelSwitch)
+            : base(logger, loggingLevelSwitch, logJanitor)
         {
             _configLoader = configLoader;
             _qualityUpdaterFactory = qualityUpdaterFactory;

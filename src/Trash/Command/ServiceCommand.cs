@@ -19,10 +19,12 @@ namespace Trash.Command
     public abstract class ServiceCommand : ICommand, IServiceCommand
     {
         private readonly LoggingLevelSwitch _loggingLevelSwitch;
+        private readonly ILogJanitor _logJanitor;
 
-        protected ServiceCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch)
+        protected ServiceCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch, ILogJanitor logJanitor)
         {
             _loggingLevelSwitch = loggingLevelSwitch;
+            _logJanitor = logJanitor;
             Log = logger;
         }
 
@@ -54,6 +56,10 @@ namespace Trash.Command
                 Log.Error(e, "Unrecoverable Exception");
                 ExitDueToFailure();
             }
+            finally
+            {
+                CleanupOldLogFiles();
+            }
         }
 
         [CommandOption("preview", 'p', Description =
@@ -71,6 +77,11 @@ namespace Trash.Command
             new List<string> {AppPaths.DefaultConfigPath};
 
         public abstract string CacheStoragePath { get; }
+
+        private void CleanupOldLogFiles()
+        {
+            _logJanitor.DeleteOldestLogFiles(20);
+        }
 
         private void SetupLogging()
         {

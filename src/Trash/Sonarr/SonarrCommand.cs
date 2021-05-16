@@ -24,10 +24,11 @@ namespace Trash.Sonarr
         public SonarrCommand(
             ILogger logger,
             LoggingLevelSwitch loggingLevelSwitch,
+            ILogJanitor logJanitor,
             IConfigurationLoader<SonarrConfiguration> configLoader,
             Func<ReleaseProfileUpdater> profileUpdaterFactory,
             Func<SonarrQualityDefinitionUpdater> qualityUpdaterFactory)
-            : base(logger, loggingLevelSwitch)
+            : base(logger, loggingLevelSwitch, logJanitor)
         {
             _configLoader = configLoader;
             _profileUpdaterFactory = profileUpdaterFactory;

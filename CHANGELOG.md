@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Debug-level logs are now written to file in addition to the Info-level logs in console output.
+
 ## [1.4.2] - 2021-05-15
 
 ### Fixed

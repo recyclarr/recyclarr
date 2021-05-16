@@ -12,6 +12,7 @@
     <PackageReference Include="CliFx" />
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Flurl" />
+    <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.HashFunction.FNV" />
