@@ -8,7 +8,6 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
 {
     public class ConfigStep : IConfigStep
     {
-        public List<ProcessedCustomFormatData> RenamedCustomFormats { get; private set; } = new();
         public List<string> CustomFormatsNotInGuide { get; } = new();
         public List<ProcessedConfigData> ConfigData { get; } = new();
 
@@ -40,28 +39,6 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
                     QualityProfiles = configCf.QualityProfiles
                 });
             }
-
-            var allCfs = ConfigData
-                .SelectMany(cd => cd.CustomFormats.Select(cf => cf))
-                .Distinct()
-                .ToList();
-
-            // List of CFs in cache vs guide that have mismatched Trash ID. This means that a CF was renamed
-            // to the same name as a previous CF's name, and we should treat that one as missing.
-            // CustomFormatsSameNameDiffTrashId = allCfs
-            //     .Where(cf => cf.CacheEntry != null)
-            //     .GroupBy(cf => allCfs.FirstOrDefault(
-            //         cf2 => cf2.Name.EqualsIgnoreCase(cf.CacheEntry!.CustomFormatName) &&
-            //                !cf2.TrashId.EqualsIgnoreCase(cf.CacheEntry.TrashId)))
-            //     .Where(grp => grp.Key != null)
-            //     .Select(grp => grp.Append(grp.Key!).ToList())
-            //     .ToList();
-
-            // CFs in the guide that match the same TrashID in cache but have different names. Warn the user that it
-            // is renamed in the guide and they need to update their config.
-            RenamedCustomFormats = allCfs
-                .Where(cf => cf.CacheEntry != null && !cf.CacheEntry.CustomFormatName.EqualsIgnoreCase(cf.Name))
-                .ToList();
         }
     }
 }

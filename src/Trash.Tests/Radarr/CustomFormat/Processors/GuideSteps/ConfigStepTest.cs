@@ -40,7 +40,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new ConfigStep();
             processor.Process(testProcessedCfs, testConfig);
 
-            processor.RenamedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsNotInGuide.Should().BeEmpty();
             processor.ConfigData.Should().BeEquivalentTo(new List<ProcessedConfigData>
             {
@@ -113,7 +112,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new ConfigStep();
             processor.Process(testProcessedCfs, testConfig);
 
-            processor.RenamedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsNotInGuide.Should().BeEmpty();
             processor.ConfigData.Should().BeEquivalentTo(new List<ProcessedConfigData>
             {
@@ -149,7 +147,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new ConfigStep();
             processor.Process(testProcessedCfs, testConfig);
 
-            processor.RenamedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsNotInGuide.Should().BeEquivalentTo(new List<string> {"name3"}, op => op
                 .Using<JToken>(jctx => jctx.Subject.Should().BeEquivalentTo(jctx.Expectation))
                 .WhenTypeIs<JToken>());
@@ -161,47 +158,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
                     {
                         new("name1", "", new JObject())
                     }
-                }
-            }, op => op
-                .Using<JToken>(jctx => jctx.Subject.Should().BeEquivalentTo(jctx.Expectation))
-                .WhenTypeIs<JToken>());
-        }
-
-        [Test]
-        public void Custom_formats_with_same_trash_id_and_same_name_in_cache_are_in_renamed_list()
-        {
-            var testProcessedCfs = new List<ProcessedCustomFormatData>
-            {
-                new("name1", "id1", new JObject())
-                {
-                    CacheEntry = new TrashIdMapping("id1", "name2")
-                },
-                new("name2", "id2", new JObject())
-                {
-                    CacheEntry = new TrashIdMapping("id2", "name1")
-                }
-            };
-
-            var testConfig = new CustomFormatConfig[]
-            {
-                new()
-                {
-                    Names = new List<string> {"name1", "name2"}
-                }
-            };
-
-            var processor = new ConfigStep();
-            processor.Process(testProcessedCfs, testConfig);
-
-            processor.RenamedCustomFormats.Should().BeEquivalentTo(testProcessedCfs, op => op
-                .Using<JToken>(jctx => jctx.Subject.Should().BeEquivalentTo(jctx.Expectation))
-                .WhenTypeIs<JToken>());
-            processor.CustomFormatsNotInGuide.Should().BeEmpty();
-            processor.ConfigData.Should().BeEquivalentTo(new List<ProcessedConfigData>
-            {
-                new()
-                {
-                    CustomFormats = testProcessedCfs
                 }
             }, op => op
                 .Using<JToken>(jctx => jctx.Subject.Should().BeEquivalentTo(jctx.Expectation))

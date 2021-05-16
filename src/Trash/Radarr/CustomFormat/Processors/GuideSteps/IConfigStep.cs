@@ -5,7 +5,6 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
 {
     public interface IConfigStep
     {
-        List<ProcessedCustomFormatData> RenamedCustomFormats { get; }
         List<string> CustomFormatsNotInGuide { get; }
         List<ProcessedConfigData> ConfigData { get; }
 
