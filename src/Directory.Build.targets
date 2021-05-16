@@ -6,7 +6,6 @@
     <PackageReference Update="FluentAssertions" Version="5.*" />
     <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.*" />
-    <PackageReference Update="morelinq" Version="3.*" />
     <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
     <PackageReference Update="NSubstitute" Version="4.*" />
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
@@ -24,6 +23,7 @@
     <PackageReference Update="Flurl" Version="3.*" />
     <PackageReference Update="JetBrains.Annotations" Version="*"/>
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.*"/>
+    <PackageReference Update="morelinq" Version="3.*" />
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.*"/>
     <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
     <PackageReference Update="Serilog.Sinks.File" Version="4.*" />

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Flurl;
 using JetBrains.Annotations;
 using Trash.Config;
 using Trash.Radarr.QualityDefinition;
-using Trash.YamlDotNet;
 
 namespace Trash.Radarr
 {
@@ -12,8 +12,8 @@ namespace Trash.Radarr
     public class RadarrConfiguration : ServiceConfiguration
     {
         public QualityDefinitionConfig? QualityDefinition { get; init; }
-        public List<CustomFormatConfig> CustomFormats { get; set; } = new();
-        public bool DeleteOldCustomFormats { get; set; }
+        public List<CustomFormatConfig> CustomFormats { get; init; } = new();
+        public bool DeleteOldCustomFormats { get; init; }
 
         public override string BuildUrl()
         {
@@ -24,6 +24,12 @@ namespace Trash.Radarr
 
         public override bool IsValid(out string msg)
         {
+            if (CustomFormats.Any(cf => cf.TrashIds.Count + cf.Names.Count == 0))
+            {
+                msg = "'custom_formats' elements must contain at least one element in either 'names' or 'trash_ids'.";
+                return false;
+            }
+
             msg = "";
             return true;
         }
@@ -32,19 +38,18 @@ namespace Trash.Radarr
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class CustomFormatConfig
     {
-        [CannotBeEmpty]
-        public List<string> Names { get; set; } = new();
-
-        public List<QualityProfileConfig> QualityProfiles { get; set; } = new();
+        public List<string> Names { get; init; } = new();
+        public List<string> TrashIds { get; init; } = new();
+        public List<QualityProfileConfig> QualityProfiles { get; init; } = new();
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class QualityProfileConfig
     {
-        [Required]
-        public string Name { get; set; } = "";
+        [Required(ErrorMessage = "'name' is required for elements under 'quality_profiles'")]
+        public string Name { get; init; } = "";
 
-        public int? Score { get; set; }
+        public int? Score { get; init; }
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

@@ -198,11 +198,19 @@ Synchronization]] page.
   in Radarr **will not be deleted** if you enable this setting.
 
 - `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
-  A list of one or more sets of custom format names, each with an optional set of quality profiles
-  names that identify which quality profiles to assign the scores for those custom formats to. The
-  child properties documented below apply to each element of this list.
+  A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set
+  of quality profiles names that identify which quality profiles to assign the scores for those
+  custom formats to. The child properties documented below apply to each element of this list.
 
-  - `names` **(Required)**<br>
+  > **Note:** Even though `names` and `trash_ids` below are marked *optional*, at least one of them
+  > is required. For example, if `names` is empty you must use `trash_ids` and vice versa.
+  >
+  > When would you use `names` or `trash_ids`? Rule of thumb: Stick to `names`. It's more user
+  > friendly than IDs, because you can look at a name and know what custom format it is referring
+  > to. The IDs are there for certain corner cases (you can read more about those in the relevant
+  > bullet point below).
+
+  - `names` (Optional; *Default: `trash_ids` is required*)<br>
     A list of one or more custom format names to synchronize to Radarr. The names *must* be taken
     from the JSON itself in the guide, for example:
 
@@ -228,6 +236,41 @@ Synchronization]] page.
     > - It's OK for the same custom format to exist in multiple lists of `names`. Trash Updater will
     >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
     >   assign it to different profiles with different scores.
+
+  - `trash_ids` (Optional; *Default: `names` is required*)<br>
+    A list of one or more Trash IDs of custom formats to synchronize to Radarr. The IDs *must* be
+    taken from the value of the `"trash_id"` property in the JSON itself. It will look like the
+    following:
+
+    ```json
+    {
+      "trash_id": "496f355514737f7d83bf7aa4d24f8169",
+    }
+    ```
+
+    Normally you should be using `names` to specify which custom formats you want. There are a few
+    rare cases where you might prefer (or need) to use the ID instead:
+
+    - Sometimes there are custom formats in the guide with the same name, such as "DoVi". In this
+      case, Trash Updater will issue you a warning instructing you to use the Trash ID instead of
+      the name to resolve the ambiguity.
+    - Trash IDs never change. Custom format names can change. Trash Updater keeps an internal cache
+      of every custom format its seen to reduce the need for your config names to be updated. But
+      it's not 100% fool proof. Using the ID could mean less config maintenance for you in the long
+      run at the expense of readability.
+
+    Most of the rules and semantics are identical to the `names` property, which is documented
+    above. Just apply that logic to the ID instead of the name.
+
+    Lastly, as a tip, to ease the readability concerns of using IDs instead of names, leave a
+    comment beside the Trash ID in your configuration so it can be easily identified later. For
+    example:
+
+    ```yml
+    trash_ids:
+      - 5d96ce331b98e077abb8ceb60553aa16 # dovi
+      - a570d4a0e56a2874b64e5bfa55202a1b # flac
+    ```
 
   - `quality_profiles` (Optional; *Default: No quality profiles are changed*)<br>
     One or more quality profiles to update with the scores from the custom formats listed above.

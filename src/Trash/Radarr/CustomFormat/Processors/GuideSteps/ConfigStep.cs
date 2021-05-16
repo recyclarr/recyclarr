@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MoreLinq.Extensions;
 using Trash.Extensions;
 using Trash.Radarr.CustomFormat.Models;
 
@@ -14,31 +15,53 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         public void Process(IReadOnlyCollection<ProcessedCustomFormatData> processedCfs,
             IEnumerable<CustomFormatConfig> config)
         {
-            foreach (var configCf in config)
+            foreach (var singleConfig in config)
             {
-                // Also get the list of CFs that are in the guide
-                var cfsInGuide = configCf.Names
-                    .ToLookup(n =>
-                    {
-                        // Iterate up to two times:
-                        // 1. Find a match in the cache using name in config. If not found,
-                        // 2. Find a match in the guide using name in config.
-                        return processedCfs.FirstOrDefault(
-                                   cf => cf.CacheEntry?.CustomFormatName.EqualsIgnoreCase(n) ?? false) ??
-                               processedCfs.FirstOrDefault(
-                                   cf => cf.Name.EqualsIgnoreCase(n));
-                    });
+                var validCfs = new List<ProcessedCustomFormatData>();
 
-                // Names grouped under 'null' were not found in the guide OR the cache
-                CustomFormatsNotInGuide.AddRange(
-                    cfsInGuide[null].Distinct(StringComparer.CurrentCultureIgnoreCase));
+                foreach (var name in singleConfig.Names)
+                {
+                    var match = FindCustomFormatByName(processedCfs, name);
+                    if (match == null)
+                    {
+                        CustomFormatsNotInGuide.Add(name);
+                    }
+                    else
+                    {
+                        validCfs.Add(match);
+                    }
+                }
+
+                foreach (var trashId in singleConfig.TrashIds)
+                {
+                    var match = processedCfs.FirstOrDefault(cf => cf.TrashId.EqualsIgnoreCase(trashId));
+                    if (match == null)
+                    {
+                        CustomFormatsNotInGuide.Add(trashId);
+                    }
+                    else
+                    {
+                        validCfs.Add(match);
+                    }
+                }
 
                 ConfigData.Add(new ProcessedConfigData
                 {
-                    CustomFormats = cfsInGuide.Where(grp => grp.Key != null).Select(grp => grp.Key!).ToList(),
-                    QualityProfiles = configCf.QualityProfiles
+                    QualityProfiles = singleConfig.QualityProfiles,
+                    CustomFormats = validCfs
+                        .DistinctBy(cf => cf.TrashId, StringComparer.InvariantCultureIgnoreCase)
+                        .ToList()
                 });
             }
+        }
+
+        private static ProcessedCustomFormatData? FindCustomFormatByName(
+            IReadOnlyCollection<ProcessedCustomFormatData> processedCfs, string name)
+        {
+            return processedCfs.FirstOrDefault(
+                       cf => cf.CacheEntry?.CustomFormatName.EqualsIgnoreCase(name) ?? false) ??
+                   processedCfs.FirstOrDefault(
+                       cf => cf.Name.EqualsIgnoreCase(name));
         }
     }
 }

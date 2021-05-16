@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Custom formats can now be specified by Trash ID. This is useful for situations where two or more
+  custom formats in the guide have the same name (e.g. 'DoVi').
 - Debug-level logs are now written to file in addition to the Info-level logs in console output.
 
 ## [1.4.2] - 2021-05-15

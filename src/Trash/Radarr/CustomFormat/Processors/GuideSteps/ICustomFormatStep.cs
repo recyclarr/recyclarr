@@ -12,7 +12,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }
         Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-        void Process(IEnumerable<CustomFormatData> customFormatGuideData, IEnumerable<CustomFormatConfig> config,
-            CustomFormatCache? cache);
+        void Process(IEnumerable<CustomFormatData> customFormatGuideData,
+            IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache);
     }
 }

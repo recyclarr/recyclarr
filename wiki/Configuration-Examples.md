@@ -6,6 +6,7 @@ Various scenarios supported using flexible configuration structure:
 - [Synchronize a lot of custom formats for a single quality profile](#synchronize-a-lot-of-custom-formats-for-a-single-quality-profile)
 - [Manually assign different scores to multiple custom formats](#manually-assign-different-scores-to-multiple-custom-formats)
 - [Assign custom format scores the same way to multiple quality profiles](#assign-custom-format-scores-the-same-way-to-multiple-quality-profiles)
+- [Resolving ambiguity between custom formats with the same name](#resolving-ambiguity-between-custom-formats-with-the-same-name)
 
 ## Update as much as possible in both Sonarr and Radarr with a single config
 
@@ -119,8 +120,12 @@ update at the same time. There's an example of how to do that in a different sec
 
 ## Synchronize a lot of custom formats for a single quality profile
 
-I want to be able to synchronize a list of custom formats to Radarr. In addition, I want the scores
-in the guide to be applied to a single quality profile.
+Scenario:
+
+"I want to be able to synchronize a list of custom formats to Radarr. In addition, I want the scores
+in the guide to be applied to a single quality profile."
+
+Solution:
 
 ```yml
 radarr:
@@ -150,9 +155,13 @@ radarr:
 
 ## Manually assign different scores to multiple custom formats
 
-I want to synchronize custom formats to Radarr. I also do not want to use the scores in the guide.
-Instead, I want to assign my own distinct score to each custom format in a single quality profile.
+Scenario:
 
+"I want to synchronize custom formats to Radarr. I also do not want to use the scores in
+the guide. Instead, I want to assign my own distinct score to each custom format in a single quality
+profile."
+
+Solution:
 
 ```yml
 radarr:
@@ -233,3 +242,40 @@ radarr:
             score: 100 # This score is assigned to all 5 CFs in this profile
           - name: Ultra-HD # Still uses scores from the guide
 ```
+
+## Resolving ambiguity between custom formats with the same name
+
+Normally when you want a custom format, you list it by name under the `names` property, like so:
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names:
+          - FLAC
+          - DoVi
+```
+
+However, especially in the case of DoVi, there are actually two custom formats with this name in the
+guide. You'll get a warning from Trash Updater stating that it couldn't pick which one you wanted,
+so it was skipped. To fix this, simply use `trash_ids` and refer to it by an ID. IDs are never
+duplicated in the guide and also never change, so it's a robust and effective way to identify custom
+formats. The downside is that they are less readable than a name, but using comments can help with
+that. The example below demonstrates how to do this.
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names:
+          - FLAC
+      - trash_ids:
+          - 5d96ce331b98e077abb8ceb60553aa16 # DoVi
+```
+
+Where do you get the Trash ID? That's from the `"trash_id"` property of the actual JSON for the
+custom format in the guide.

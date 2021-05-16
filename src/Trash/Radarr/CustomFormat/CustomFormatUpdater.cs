@@ -142,9 +142,9 @@ namespace Trash.Radarr.CustomFormat
             if (_guideProcessor.DuplicatedCustomFormats.Count > 0)
             {
                 Log.Warning("One or more of the custom formats you want are duplicated in the guide. These custom " +
-                            "formats WILL BE SKIPPED. Radarr requires custom formats names to be unique. Trash Updater " +
-                            "is not able to choose which one you actually wanted. This is a bug in the guide and you " +
-                            "should request that it be fixed");
+                            "formats WILL BE SKIPPED. Trash Updater is not able to choose which one you actually " +
+                            "wanted. To resolve this ambiguity, use the `trash_ids` property in your YML " +
+                            "configuration to refer to the custom format using its Trash ID instead of its name");
 
                 foreach (var (cfName, dupes) in _guideProcessor.DuplicatedCustomFormats)
                 {

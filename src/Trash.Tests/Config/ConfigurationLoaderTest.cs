@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -28,6 +29,8 @@ namespace Trash.Tests.Config
             return new StringReader(testData.ReadData(file));
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1034",
+            Justification = "YamlDotNet requires this type to be public so it may access it")]
         [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
         public class TestConfigValidFalse : IServiceConfiguration
         {
@@ -47,6 +50,8 @@ namespace Trash.Tests.Config
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1034",
+            Justification = "YamlDotNet requires this type to be public so it may access it")]
         [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
         public class TestConfigValidTrue : IServiceConfiguration
         {

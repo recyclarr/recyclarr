@@ -284,6 +284,35 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         }
 
         [Test]
+        public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list()
+        {
+            var guideData = new List<CustomFormatData>
+            {
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id2'}"}
+            };
+
+            var testConfig = new List<CustomFormatConfig>
+            {
+                new() {Names = new List<string> {"name1"}}
+            };
+
+            var processor = new CustomFormatStep();
+            processor.Process(guideData, testConfig, null);
+
+            //Dictionary<string, List<ProcessedCustomFormatData>>
+            processor.DuplicatedCustomFormats.Should().ContainKey("name1")
+                .WhichValue.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
+                {
+                    new("name1", "id1", JObject.Parse(@"{'name': 'name1'}")),
+                    new("name1", "id2", JObject.Parse(@"{'name': 'name1'}"))
+                });
+            processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
+            processor.DeletedCustomFormatsInCache.Should().BeEmpty();
+            processor.ProcessedCustomFormats.Should().BeEmpty();
+        }
+
+        [Test]
         public void Match_cf_names_regardless_of_case_in_config()
         {
             var ctx = new Context();
@@ -306,6 +335,33 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         }
 
         [Test]
+        public void Match_custom_format_using_trash_id()
+        {
+            var guideData = new List<CustomFormatData>
+            {
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
+                new() {Json = @"{'name': 'name2', 'trash_id': 'id2'}"}
+            };
+
+            var testConfig = new List<CustomFormatConfig>
+            {
+                new() {TrashIds = new List<string> {"id2"}}
+            };
+
+            var processor = new CustomFormatStep();
+            processor.Process(guideData, testConfig, null);
+
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
+            processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
+            processor.DeletedCustomFormatsInCache.Should().BeEmpty();
+            processor.ProcessedCustomFormats.Should()
+                .BeEquivalentTo(new List<ProcessedCustomFormatData>
+                {
+                    new("name2", "id2", JObject.FromObject(new {name = "name2"}))
+                });
+        }
+
+        [Test]
         public void Non_existent_cfs_in_config_are_skipped()
         {
             var ctx = new Context();
@@ -318,35 +374,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
             processor.DuplicatedCustomFormats.Should().BeEmpty();
-            processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
-            processor.DeletedCustomFormatsInCache.Should().BeEmpty();
-            processor.ProcessedCustomFormats.Should().BeEmpty();
-        }
-
-        [Test]
-        public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list()
-        {
-            var guideData = new List<CustomFormatData>
-            {
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id2'}"}
-            };
-
-            var testConfig = new List<CustomFormatConfig>
-            {
-                new() {Names = new List<string> {"name1"}}
-            };
-
-            var processor = new CustomFormatStep();
-            processor.Process(guideData, testConfig, null);
-
-            //Dictionary<string, List<ProcessedCustomFormatData>>
-            processor.DuplicatedCustomFormats.Should().ContainKey("name1")
-                .WhichValue.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
-                {
-                    new ("name1", "id1", JObject.Parse(@"{'name': 'name1'}")),
-                    new ("name1", "id2", JObject.Parse(@"{'name': 'name1'}"))
-                });
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEmpty();

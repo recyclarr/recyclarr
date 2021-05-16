@@ -18,16 +18,29 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; private set; } =
             new();
 
-        public void Process(IEnumerable<CustomFormatData> customFormatGuideData, IEnumerable<CustomFormatConfig> config,
-            CustomFormatCache? cache)
+        public void Process(IEnumerable<CustomFormatData> customFormatGuideData,
+            IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
         {
+            var processedCfs = customFormatGuideData
+                .Select(cf => ProcessCustomFormatData(cf, cache))
+                .ToList();
+
+            // For each ID listed under the `trash_ids` YML property, match it to an existing CF
+            ProcessedCustomFormats.AddRange(config
+                .SelectMany(c => c.TrashIds)
+                .Distinct(StringComparer.CurrentCultureIgnoreCase)
+                .Join(processedCfs,
+                    id => id,
+                    cf => cf.TrashId,
+                    (_, cf) => cf,
+                    StringComparer.InvariantCultureIgnoreCase));
+
+            // Build a list of CF names under the `names` property in YAML. Exclude any names that
+            // are already provided by the `trash_ids` property.
             var allConfigCfNames = config
                 .SelectMany(c => c.Names)
                 .Distinct(StringComparer.CurrentCultureIgnoreCase)
-                .ToList();
-
-            var processedCfs = customFormatGuideData
-                .Select(cf => ProcessCustomFormatData(cf, cache))
+                .Where(n => !ProcessedCustomFormats.Any(cf => cf.CacheAwareName.EqualsIgnoreCase(n)))
                 .ToList();
 
             // Perform updates and deletions based on matches in the cache. Matches in the cache are by ID.
@@ -60,8 +73,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
                 }
 
                 // If we get here, we can't find a match in the config using cache or guide name, so the user must have
-                // removed it from their config. This will get marked for deletion when we process those later in
-                // ProcessDeletedCustomFormats().
+                // removed it from their config. This will get marked for deletion later.
             }
 
             // Orphaned entries in cache represent custom formats we need to delete.
