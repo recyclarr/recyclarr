@@ -43,18 +43,19 @@ namespace Trash.Radarr.CustomFormat
             if (args.Preview)
             {
                 PreviewCustomFormats();
-                return;
             }
+            else
+            {
+                await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
+                    _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
 
-            await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
-                _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
+                PrintApiStatistics(args, _persistenceProcessor.Transactions);
+                PrintQualityProfileUpdates();
 
-            PrintApiStatistics(args, _persistenceProcessor.Transactions);
-            PrintQualityProfileUpdates();
-
-            // Cache all the custom formats (using ID from API response).
-            _cache.Update(_guideProcessor.ProcessedCustomFormats);
-            _cache.Save();
+                // Cache all the custom formats (using ID from API response).
+                _cache.Update(_guideProcessor.ProcessedCustomFormats);
+                _cache.Save();
+            }
 
             _persistenceProcessor.Reset();
             _guideProcessor.Reset();

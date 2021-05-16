@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   custom formats in the guide have the same name (e.g. 'DoVi').
 - Debug-level logs are now written to file in addition to the Info-level logs in console output.
 
+### Fixed
+
+- An issue with radarr `--preview` that caused duplicate output when updating a second instance has
+  been fixed.
+
 ## [1.4.2] - 2021-05-15
 
 ### Fixed
