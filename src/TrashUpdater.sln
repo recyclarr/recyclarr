@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib", "TrashLib\TrashL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib.Tests", "TrashLib.Tests\TrashLib.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr", "Recyclarr\Recyclarr.csproj", "{18778760-C81D-4A97-9CD7-50F506E391C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18778760-C81D-4A97-9CD7-50F506E391C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18778760-C81D-4A97-9CD7-50F506E391C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18778760-C81D-4A97-9CD7-50F506E391C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18778760-C81D-4A97-9CD7-50F506E391C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

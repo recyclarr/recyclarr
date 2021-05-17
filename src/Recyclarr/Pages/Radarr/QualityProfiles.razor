@@ -1,0 +1,19 @@
+@page "/radarr/quality-profiles"
+@using TrashLib.Radarr.CustomFormat.Api
+
+<MudList>
+
+</MudList>
+
+@code {
+
+    [Inject]
+    public IQualityProfileService ProfileService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var profiles = await ProfileService.GetQualityProfiles();
+    }
+
+}

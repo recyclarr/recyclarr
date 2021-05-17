@@ -1,0 +1,72 @@
+@using Recyclarr.Pages.Main
+@* <Blazorise.ThemeProvider Theme="@Theme"> *@
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
+@* </Blazorise.ThemeProvider> *@
+
+@code
+{
+    /*
+    private Theme Theme { get; } = new()
+    {
+        BarOptions = new ThemeBarOptions
+        {
+            HorizontalHeight = "64px"
+        },
+        BreakpointOptions = new ThemeBreakpointOptions(),
+        ColorOptions = new ThemeColorOptions
+        {
+            Primary = "#0288D1"
+    // Secondary = "#A65529",
+    // Success = "#23C02E",
+    // Info = "#9BD8FE",
+    // Warning = "#F8B86C",
+    // Danger = "#F95741",
+    // Light = "#F0F0F0",
+    // Dark = "#535353",
+        },
+    // BackgroundOptions = new ThemeBackgroundOptions
+    // {
+    //     Primary = "#2b2b2b",
+    //     Secondary = "#454545",
+    //     Body = "#000000",
+    //     Danger = "",
+    //     Dark = "#2b2b2b",
+    //     Info = "",
+    //     Light = "",
+    //     Muted = "",
+    //     Success = "",
+    //     Warning = "",
+    // },
+        TextColorOptions = new ThemeTextColorOptions(),
+    // ButtonOptions = new ThemeButtonOptions { },
+    //DropdownOptions = new ThemeDropdownOptions { },
+        InputOptions = new ThemeInputOptions
+        {
+            CheckColor = "#0288D1"
+        }
+    //CardOptions = new ThemeCardOptions { },
+    //ModalOptions = new ThemeModalOptions { },
+    //TabsOptions = new ThemeTabsOptions { },
+    //ProgressOptions = new ThemeProgressOptions { },
+    //AlertOptions = new ThemeAlertOptions { },
+    //BreadcrumbOptions = new ThemeBreadcrumbOptions { },
+    //BadgeOptions = new ThemeBadgeOptions { },
+    //PaginationOptions = new ThemePaginationOptions { },
+    //TooltipOptions = new ThemeTooltipOptions
+    //{
+    //    BackgroundColor = "#22c8ce",
+    //    BackgroundOpacity = .7f,
+    //    Color = "#ff0000",
+    //},
+    };
+    */
+}

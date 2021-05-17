@@ -1,0 +1,27 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@DarkMode" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MediaQueryList>
+    <MudLayout>
+        <MudAppBar Elevation="1">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(_ => DrawerToggle())" />
+            <MudAppBarSpacer />
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/rcdailey/trash-updater" Target="_blank" />
+        </MudAppBar>
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Breakpoint="Breakpoint.Md">
+            <MudDrawerHeader>
+                <MudAvatar Image="favicon-32x32.png" Color="Color.Transparent" Size="Size.Medium" />
+                <MudText Typo="Typo.h5" Class="mt-1">Recyclarr</MudText>
+            </MudDrawerHeader>
+            <NavMenu />
+        </MudDrawer>
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.Medium" Class="ml-0 pt-4">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+</MediaQueryList>

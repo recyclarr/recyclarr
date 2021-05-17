@@ -1,0 +1,33 @@
+@using Recyclarr.Pages.Main
+@inherits LayoutComponentBase
+@layout MainLayout
+
+<div>
+    @if (_exceptionOccurred)
+    {
+        <MudContainer>
+            <MudText Class="my-2">
+                An exception occurred while attempting to obtain custom formats.
+            </MudText>
+
+            <MudText Color="Color.Error" Style="overflow: hidden">
+                @_exceptionMsg
+            </MudText>
+
+            <MudButton Class="mud-theme-primary my-2" OnClick="@ForceReload">Retry</MudButton>
+        </MudContainer>
+    }
+    else if (!CfRepository.IsLoaded)
+    {
+        <MudContainer Class="d-flex flex-column align-center">
+            <MudText Align="Align.Center" Class="my-2">Loading custom formats...</MudText>
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </MudContainer>
+    }
+    else
+    {
+        <CascadingValue Value="this" IsFixed="true">
+            @Body
+        </CascadingValue>
+    }
+</div>

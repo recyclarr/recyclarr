@@ -1,0 +1,116 @@
+@page "/radarr/custom-formats"
+@using MudBlazor
+@layout CustomFormatAccessLayout
+
+<div class="d-flex mb-4 flex-column flex-sm-row">
+    <div class="d-flex align-center">
+        <MudHidden Breakpoint="Breakpoint.SmAndUp">
+            <MudButton Class="mr-3 mud-theme-primary" OnClick="@ShowModal">
+                Add Custom Formats
+            </MudButton>
+        </MudHidden>
+        <MudButton Class="mr-3 mud-theme-primary" OnClick="@ForceReload">
+            Refresh
+        </MudButton>
+    </div>
+    <MudSelect @bind-Value="@SelectedConfig" Label="Select Radarr Server" Class="mt-3 mt-sm-0">
+        @foreach (var instance in _configs)
+        {
+            <MudSelectItem Value="@instance">@instance.BaseUrl</MudSelectItem>
+        }
+    </MudSelect>
+</div>
+
+@if (_selectedConfig == null)
+{
+    <MudContainer Class="d-flex flex-column align-center">
+        <MudText Align="Align.Center" Class="my-2 mud-error-text">
+            No servers have been set up yet
+        </MudText>
+        <MudLink Href="/radarr/servers" Underline="Underline.Always" Color="Color.Tertiary">
+            Go set one up
+        </MudLink>
+    </MudContainer>
+}
+else
+{
+    <MudGrid Spacing="1">
+        <MudItem xs="12" sm="6">
+            <MudPaper Class="d-flex flex-column" Outlined="true">
+                <MudToolBar>
+                    <MudCheckBox T="bool?"
+                                 Checked="@SelectAllCheckbox"
+                                 CheckedChanged="@OnSelectAllCheckboxChanged"
+                                 Disabled="@(_currentSelection.Count == 0)" />
+
+                    @if (GetSelected().Any())
+                    {
+                        <MudChip Class="mud-theme-dark">@GetSelected().Count() selected</MudChip>
+                    }
+                    <MudToolBarSpacer />
+                    <MudTooltip Text="Delete">
+                        <MudIconButton
+                            Icon="@Icons.Material.Outlined.Delete"
+                            Disabled="@(!GetSelected().Any())"
+                            OnClick="@OnDeleteSelected" />
+                    </MudTooltip>
+                </MudToolBar>
+
+                <MudDivider />
+
+                @if (_currentSelection.Count == 0)
+                {
+                    <MudText Align="Align.Center" Class="my-2">No custom formats selected</MudText>
+                }
+                else
+                {
+                    <MudList>
+                        @foreach (var item in _currentSelection)
+                        {
+                            <MudListItem @key=item Class="py-0" OnClick="@(() => ToggleSelected(item))">
+                                <MudCheckBox T="bool"
+                                             Checked="@item.Selected"
+                                             CheckedChanged="@(chk => SetSelected(item, chk))"
+                                             Color="Color.Primary"
+                                             Class="my-n2">
+                                    @if (item.ExistsInGuide)
+                                    {
+                                        @item.Item.Names.First()
+                                    }
+                                    else
+                                    {
+                                        <del class="grey-text">@item.Item.Names.First()</del>
+                                        <span class="mud-error-text">(Removed In Guide)</span>
+                                    }
+                                </MudCheckBox>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudHidden Breakpoint="Breakpoint.Xs">
+            <MudItem xs="12" sm="6">
+                <MudPaper Class="d-flex flex-column" Outlined="true">
+                    <MudToolBar Class="d-flex">
+                        <MudSpacer />
+                        <MudTooltip Text="Add Selected">
+                            <MudIconButton Icon="@Icons.Material.Outlined.Add"
+                                           Title="Add"
+                                           Disabled="@IsAddSelectedDisabled"
+                                           OnClick="@OnChooserAddSelected" />
+                        </MudTooltip>
+                    </MudToolBar>
+
+                    <MudDivider />
+
+                    <CustomFormatChooser @ref="_cfChooser"
+                                         ExcludedCustomFormatTrashIds="@ChosenCustomFormatIds"
+                                         CfIdentifiers="@CustomFormatIds"
+                                         OnListStateChanged="@StateHasChanged" />
+                </MudPaper>
+            </MudItem>
+        </MudHidden>
+    </MudGrid>
+}

@@ -1,0 +1,26 @@
+@page "/Settings"
+@{
+    #nullable disable
+}
+
+<MudPaper Outlined="true" Class="pa-4" MaxWidth="MaxWidth.Small">
+    <MudText Typo="Typo.h5" Class="mb-6 mud-secondary-text">General Settings</MudText>
+
+    <MudGrid>
+        <IndividualSetting
+            IsSame="@_repoPath.IsSame"
+            Title="Repository Path"
+            Description="The directory where the git repository is cloned into.">
+
+            <MudTextField @bind-Value="@_repoPath.Value" Class="slim-input" />
+        </IndividualSetting>
+    </MudGrid>
+</MudPaper>
+
+<MudDivider Class="my-5" />
+
+<div class="d-flex flex-column flex-sm-row align-items-stretch">
+    <MudButton OnClick="SaveChanges" Class="mud-theme-primary" Disabled="@(_changedValues.Count == 0)">Save Changes</MudButton>
+    <MudButton OnClick="DiscardChanges" Class="ml-sm-4" Disabled="@(_changedValues.Count == 0)">Discard</MudButton>
+    <MudButton OnClick="ResetDefaults" Class="ml-sm-auto">Reset to Defaults</MudButton>
+</div>

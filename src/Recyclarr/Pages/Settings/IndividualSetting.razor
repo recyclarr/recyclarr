@@ -1,0 +1,36 @@
+@{
+    #nullable disable
+}
+
+<MudItem sm="6" Class="d-flex flex-column mud-width-full">
+    <div class="d-flex align-center">
+        <MudText Typo="Typo.h6">
+            @Title
+        </MudText>
+        <div hidden="@IsSame">
+            <MudChip Class="ml-2" Color="Color.Primary" Size="Size.Small">Changed</MudChip>
+        </div>
+    </div>
+    <MudText Typo="Typo.body2">
+        @Description
+    </MudText>
+</MudItem>
+
+<MudItem sm="6" Class="mud-width-full">
+    @ChildContent
+</MudItem>
+
+@code
+{
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool? IsSame { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Description { get; set; } = "";
+}

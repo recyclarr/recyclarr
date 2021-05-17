@@ -23,13 +23,8 @@ namespace TrashLib.Radarr
             builder.RegisterType<QualityProfileService>().As<IQualityProfileService>();
 
             // Configuration
+            builder.RegisterModule<ConfigAutofacModule>();
             builder.RegisterType<RadarrValidationMessages>().As<IRadarrValidationMessages>();
-            builder.Register(c =>
-                {
-                    var config = c.Resolve<IConfigurationProvider>().ActiveConfiguration;
-                    return new ServerInfo(config.BaseUrl, config.ApiKey);
-                })
-                .As<IServerInfo>();
 
             // Quality Definition Support
             builder.RegisterType<RadarrQualityDefinitionUpdater>().As<IRadarrQualityDefinitionUpdater>();

@@ -1,0 +1,42 @@
+@page "/radarr/servers"
+
+<MudButton Class="mud-theme-primary mb-4" OnClick="@OnAddServer">Add Server</MudButton>
+
+<MudPaper Outlined="true" Class="d-flex justify-center pa-4">
+    @if (_instances.Count == 0)
+    {
+        <MudText Typo="Typo.h6">No Servers Configured</MudText>
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var instance in _instances)
+            {
+                <MudItem xs="12" sm="6">
+                    <MudCard Elevation="3" Style="background-color: #2f2e3a" Outlined="true">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h5">@instance.BaseUrl</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardActions Class="d-flex">
+                            <MudButton
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Outlined.Edit"
+                                OnClick="@(() => OnEdit(instance))">
+                                Edit
+                            </MudButton>
+                            <MudButton
+                                Class="ml-auto"
+                                Color="Color.Error"
+                                StartIcon="@Icons.Material.Outlined.Delete"
+                                OnClick="@(() => OnDelete(instance))">
+                                Delete
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudPaper>

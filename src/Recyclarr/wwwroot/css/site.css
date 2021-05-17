@@ -1,0 +1,9 @@
+.radarr-icon {
+    background: url(icons/radarr.png);
+    background-size: contain;
+}
+
+/* To make MudTextField vertically thinner */
+.slim-input, .slim-input .mud-input {
+    margin-top: 0 !important;
+}

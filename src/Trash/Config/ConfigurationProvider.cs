@@ -1,6 +1,7 @@
 ﻿using System;
+using TrashLib.Config;
 
-namespace TrashLib.Config
+namespace Trash.Config
 {
     internal class ConfigurationProvider : IConfigurationProvider
     {

@@ -9,7 +9,7 @@ namespace TrashLib.Radarr.Config
     public class RadarrConfiguration : ServiceConfiguration
     {
         public QualityDefinitionConfig? QualityDefinition { get; init; }
-        public List<CustomFormatConfig> CustomFormats { get; init; } = new();
+        public List<CustomFormatConfig> CustomFormats { get; set; } = new();
         public bool DeleteOldCustomFormats { get; init; }
     }
 

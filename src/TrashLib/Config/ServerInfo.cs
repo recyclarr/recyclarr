@@ -4,20 +4,20 @@ namespace TrashLib.Config
 {
     internal class ServerInfo : IServerInfo
     {
-        private readonly string _apiKey;
-        private readonly string _baseUrl;
+        private readonly IConfigurationProvider _configProvider;
+        public string ApiKey => _configProvider.ActiveConfiguration.ApiKey;
+        public string BaseUrl => _configProvider.ActiveConfiguration.BaseUrl;
 
-        public ServerInfo(string baseUrl, string apiKey)
+        public ServerInfo(IConfigurationProvider configProvider)
         {
-            _baseUrl = baseUrl;
-            _apiKey = apiKey;
+            _configProvider = configProvider;
         }
 
         public string BuildUrl()
         {
-            return _baseUrl
+            return BaseUrl
                 .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = _apiKey});
+                .SetQueryParams(new {apikey = ApiKey});
         }
     }
 }

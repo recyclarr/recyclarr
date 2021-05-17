@@ -1,0 +1,16 @@
+<div class="d-flex flex-column" style="@Style">
+    <MudList>
+        @foreach (var item in _selectableItems)
+        {
+            <MudListItem @key=item Class="py-0" OnClick="@(() => ItemToggled(item))">
+                <MudCheckBox T="bool"
+                             Checked="@item.Selected"
+                             CheckedChanged="@(isChecked => ItemSelected(item, isChecked))"
+                             Label="@item.Item.Name"
+                             Color="Color.Primary"
+                             Class="my-n2"
+                             Style="white-space: nowrap" />
+            </MudListItem>
+        }
+    </MudList>
+</div>

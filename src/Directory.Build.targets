@@ -23,6 +23,7 @@
     <PackageReference Update="Flurl" Version="3.*" />
     <PackageReference Update="Flurl.Http" Version="3.*" />
     <PackageReference Update="JetBrains.Annotations" Version="*"/>
+    <PackageReference Update="LibGit2Sharp" Version="0.*" />
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.*"/>
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.*"/>
     <PackageReference Update="Serilog" Version="2.*" />

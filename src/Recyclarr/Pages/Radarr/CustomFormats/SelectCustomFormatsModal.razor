@@ -1,0 +1,44 @@
+@using MudBlazor
+@{
+    #nullable disable
+}
+
+<MudDialog>
+    <DialogContent>
+        <MudPaper Style="overflow-y: auto" MaxHeight="60vh" Elevation="0">
+            <CustomFormatChooser @ref="_chooser"
+                                 Style="overflow-x: hidden"
+                                 ExcludedCustomFormatTrashIds="@ExcludedCustomFormatTrashIds"
+                                 OnListStateChanged="@StateHasChanged" />
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudChip Class="mr-auto mud-theme-dark">
+            Selected: @_chooser.SelectedCount
+        </MudChip>
+        <MudButton Class="mud-theme-secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Class="mud-theme-primary" OnClick="Accept">Accept</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; private set; }
+
+    [Parameter]
+    public List<string> ExcludedCustomFormatTrashIds { get; set; }
+
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+
+    private void Accept()
+    {
+        Dialog.Close(DialogResult.Ok(_chooser.Selected));
+    }
+
+    private CustomFormatChooser _chooser;
+}

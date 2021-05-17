@@ -1,0 +1,51 @@
+<MudDialog>
+    <DialogContent>
+        <MudPaper Style="width: 250px">
+            <MudForm>
+                <MudTextFieldString @bind-Value="@BaseUrl" Label="Base URL" OnKeyDown="OnKeyDown"/>
+                <MudTextFieldString @bind-Value="@ApiKey" Label="API Key" OnKeyDown="OnKeyDown" />
+            </MudForm>
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Class="mud-theme-secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Class="mud-theme-primary" OnClick="Accept">Accept</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter]
+    public MudDialogInstance Dialog { get; private set; } = default!;
+
+    [Parameter]
+    public string BaseUrl { get; set; } = "";
+
+    [Parameter]
+    public string ApiKey { get; set; } = "";
+
+    private void Cancel()
+    {
+        Dialog.Cancel();
+    }
+
+    private void Accept()
+    {
+        Dialog.Close(DialogResult.Ok((BaseUrl, ApiKey)));
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Code)
+        {
+            case "Enter" or "NumpadEnter":
+                Accept();
+                break;
+
+            case "Escape":
+                Cancel();
+                break;
+        }
+    }
+}

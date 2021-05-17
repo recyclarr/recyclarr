@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="BlazorPro.BlazorSize" Version="5.*" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.*" />
+    <PackageReference Include="MudBlazor" Version="5.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
+  </ItemGroup>
+</Project>
