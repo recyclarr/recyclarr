@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2021-05-26
+
 ### Changed
 
 - Support `trash_score` property in Custom Format JSON from the guide. This property is optional and
@@ -129,7 +131,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/rcdailey/trash-updater/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/rcdailey/trash-updater/compare/v1.4.2...v1.5.0
 [1.4.2]: https://github.com/rcdailey/trash-updater/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/rcdailey/trash-updater/compare/v1.4.0...v1.4.1
