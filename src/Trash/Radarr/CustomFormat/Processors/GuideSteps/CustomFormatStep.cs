@@ -97,8 +97,19 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
             CustomFormatCache? cache)
         {
             JObject obj = JObject.Parse(guideData.Json);
-            var name = obj["name"].Value<string>();
-            var trashId = obj["trash_id"].Value<string>();
+            var name = (string) obj["name"];
+            var trashId = (string) obj["trash_id"];
+            int? finalScore;
+
+            if (obj.TryGetValue("trash_score", out var score))
+            {
+                finalScore = (int) score;
+                obj.Property("trash_score").Remove();
+            }
+            else
+            {
+                finalScore = guideData.Score;
+            }
 
             // Remove trash_id, it's metadata that is not meant for Radarr itself
             // Radarr supposedly drops this anyway, but I prefer it to be removed by TrashUpdater
@@ -106,7 +117,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
 
             return new ProcessedCustomFormatData(name, trashId, obj)
             {
-                Score = guideData.Score,
+                Score = finalScore,
                 CacheEntry = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == trashId)
             };
         }

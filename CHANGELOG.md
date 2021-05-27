@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Support `trash_score` property in Custom Format JSON from the guide. This property is optional and
+  takes precedence over a score mentioned in the guide markdown.
+
 ## [1.5.0] - 2021-05-16
 
 ### Added

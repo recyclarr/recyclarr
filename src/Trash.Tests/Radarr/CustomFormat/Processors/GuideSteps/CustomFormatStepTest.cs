@@ -378,5 +378,42 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEmpty();
         }
+
+        [Test]
+        public void Score_from_json_takes_precedence_over_score_from_guide()
+        {
+            var guideData = new List<CustomFormatData>
+            {
+                new() {Json = @"{'name': 'name1', 'trash_id': 'id1', 'trash_score': 100}"}
+            };
+
+            var testConfig = new List<CustomFormatConfig>
+            {
+                new()
+                {
+                    Names = new List<string> {"name1"},
+                    QualityProfiles = new List<QualityProfileConfig>
+                    {
+                        new() {Name = "profile", Score = 200}
+                    }
+                }
+            };
+
+            var processor = new CustomFormatStep();
+            processor.Process(guideData, testConfig, null);
+
+            processor.DuplicatedCustomFormats.Should().BeEmpty();
+            processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
+            processor.DeletedCustomFormatsInCache.Should().BeEmpty();
+            processor.ProcessedCustomFormats.Should()
+                .BeEquivalentTo(new List<ProcessedCustomFormatData>
+                    {
+                        new("name1", "id1", JObject.FromObject(new {name = "name1"}))
+                        {
+                            Score = 100
+                        }
+                    },
+                    op => op.Using(new JsonEquivalencyStep()));
+        }
     }
 }
