@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 using Trash.Radarr.CustomFormat.Guide;
@@ -18,15 +19,14 @@ namespace Trash.Radarr.CustomFormat.Processors
 
     internal class GuideProcessor : IGuideProcessor
     {
-        private readonly ICustomFormatGuideParser _guideParser;
+        private readonly IRadarrGuideService _guideService;
         private readonly Func<IGuideProcessorSteps> _stepsFactory;
-        private IList<CustomFormatData>? _guideData;
+        private IList<string>? _guideCustomFormatJson;
         private IGuideProcessorSteps _steps;
 
-        public GuideProcessor(ILogger log, ICustomFormatGuideParser guideParser,
-            Func<IGuideProcessorSteps> stepsFactory)
+        public GuideProcessor(ILogger log, IRadarrGuideService guideService, Func<IGuideProcessorSteps> stepsFactory)
         {
-            _guideParser = guideParser;
+            _guideService = guideService;
             _stepsFactory = stepsFactory;
             Log = log;
             _steps = stepsFactory();
@@ -60,16 +60,15 @@ namespace Trash.Radarr.CustomFormat.Processors
 
         public async Task BuildGuideData(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache)
         {
-            if (_guideData == null)
+            if (_guideCustomFormatJson == null)
             {
                 Log.Debug("Requesting and parsing guide markdown");
-                var markdownData = await _guideParser.GetMarkdownData();
-                _guideData = _guideParser.ParseMarkdown(markdownData);
+                _guideCustomFormatJson = (await _guideService.GetCustomFormatJson()).ToList();
             }
 
             // Step 1: Process and filter the custom formats from the guide.
             // Custom formats in the guide not mentioned in the config are filtered out.
-            _steps.CustomFormat.Process(_guideData, config, cache);
+            _steps.CustomFormat.Process(_guideCustomFormatJson, config, cache);
 
             // todo: Process cache entries that do not exist in the guide. Those should be deleted
             // This might get taken care of when we rebuild the cache based on what is actually updated when

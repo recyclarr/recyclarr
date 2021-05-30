@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Support the new custom format structure in the guide: JSON files are parsed directly now. Trash
+  Updater no longer parses the markdown file.
+
 ## [1.5.1] - 2021-05-26
 
 ### Changed

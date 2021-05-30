@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using TestLibrary.FluentAssertions;
 using Trash.Radarr;
-using Trash.Radarr.CustomFormat.Guide;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Models.Cache;
 using Trash.Radarr.CustomFormat.Processors.GuideSteps;
@@ -19,34 +18,23 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
     {
         private class Context
         {
-            public List<CustomFormatData> TestGuideData { get; } = new()
+            public List<string> TestGuideData { get; } = new()
             {
-                new CustomFormatData
+                JsonConvert.SerializeObject(new
                 {
-                    Score = 100,
-                    Json = JsonConvert.SerializeObject(new
-                    {
-                        trash_id = "id1",
-                        name = "name1"
-                    }, Formatting.Indented)
-                },
-                new CustomFormatData
+                    trash_id = "id1",
+                    name = "name1"
+                }, Formatting.Indented),
+                JsonConvert.SerializeObject(new
                 {
-                    Score = 200,
-                    Json = JsonConvert.SerializeObject(new
-                    {
-                        trash_id = "id2",
-                        name = "name2"
-                    }, Formatting.Indented)
-                },
-                new CustomFormatData
+                    trash_id = "id2",
+                    name = "name2"
+                }, Formatting.Indented),
+                JsonConvert.SerializeObject(new
                 {
-                    Json = JsonConvert.SerializeObject(new
-                    {
-                        trash_id = "id3",
-                        name = "name3"
-                    }, Formatting.Indented)
-                }
+                    trash_id = "id3",
+                    name = "name3"
+                }, Formatting.Indented)
             };
         }
 
@@ -69,17 +57,13 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
                 }
             };
 
-            var testGuideData = new List<CustomFormatData>
+            var testGuideData = new List<string>
             {
-                new()
+                JsonConvert.SerializeObject(new
                 {
-                    Score = 100,
-                    Json = JsonConvert.SerializeObject(new
-                    {
-                        trash_id = "id1",
-                        name = variableCfName
-                    }, Formatting.Indented)
-                }
+                    trash_id = "id1",
+                    name = variableCfName
+                }, Formatting.Indented)
             };
 
             var processor = new CustomFormatStep();
@@ -92,7 +76,6 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
                 {
                     new(variableCfName, "id1", JObject.FromObject(new {name = variableCfName}))
                     {
-                        Score = 100,
                         CacheEntry = testCache.TrashIdMappings[0]
                     }
                 },
@@ -102,12 +85,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Cache_entry_is_not_set_when_id_is_different()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new()
-                {
-                    Json = @"{'name': 'name1', 'trash_id': 'id1'}"
-                }
+                @"{'name': 'name1', 'trash_id': 'id1'}"
             };
 
             var testConfig = new List<CustomFormatConfig>
@@ -157,14 +137,8 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "id1", JObject.FromObject(new {name = "name1"}))
-                    {
-                        Score = 100
-                    },
-                    new("name3", "id3", JObject.FromObject(new {name = "name3"}))
-                    {
-                        Score = null
-                    }
+                    new("name1", "id1", JObject.FromObject(new {name = "name1"})) {Score = null},
+                    new("name3", "id3", JObject.FromObject(new {name = "name3"})) {Score = null}
                 },
                 op => op.Using(new JsonEquivalencyStep()));
         }
@@ -187,8 +161,8 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "id1", JObject.FromObject(new {name = "name1"})) {Score = 100},
-                    new("name2", "id2", JObject.FromObject(new {name = "name2"})) {Score = 200},
+                    new("name1", "id1", JObject.FromObject(new {name = "name1"})) {Score = null},
+                    new("name2", "id2", JObject.FromObject(new {name = "name2"})) {Score = null},
                     new("name3", "id3", JObject.FromObject(new {name = "name3"})) {Score = null}
                 },
                 op => op.Using(new JsonEquivalencyStep()));
@@ -197,12 +171,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Custom_format_is_deleted_if_in_config_and_cache_but_not_in_guide()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new()
-                {
-                    Json = @"{'name': 'name1', 'trash_id': 'id1'}"
-                }
+                @"{'name': 'name1', 'trash_id': 'id1'}"
             };
 
             var testConfig = new List<CustomFormatConfig>
@@ -237,9 +208,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
                 TrashIdMappings = new List<TrashIdMapping> {new("id1", "3D", 9)}
             };
 
-            var guideCfs = new List<CustomFormatData>
+            var guideCfs = new List<string>
             {
-                new() {Json = "{'name': '3D', 'trash_id': 'id1'}"}
+                "{'name': '3D', 'trash_id': 'id1'}"
             };
 
             var processor = new CustomFormatStep();
@@ -254,12 +225,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Custom_format_name_in_cache_is_updated_if_renamed_in_guide_and_config()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new()
-                {
-                    Json = @"{'name': 'name2', 'trash_id': 'id1'}"
-                }
+                @"{'name': 'name2', 'trash_id': 'id1'}"
             };
 
             var testConfig = new List<CustomFormatConfig>
@@ -286,10 +254,10 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id2'}"}
+                @"{'name': 'name1', 'trash_id': 'id1'}",
+                @"{'name': 'name1', 'trash_id': 'id2'}"
             };
 
             var testConfig = new List<CustomFormatConfig>
@@ -329,7 +297,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.DeletedCustomFormatsInCache.Should().BeEmpty();
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "id1", JObject.FromObject(new {name = "name1"})) {Score = 100}
+                    new("name1", "id1", JObject.FromObject(new {name = "name1"}))
                 },
                 op => op.Using(new JsonEquivalencyStep()));
         }
@@ -337,10 +305,10 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Match_custom_format_using_trash_id()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id1'}"},
-                new() {Json = @"{'name': 'name2', 'trash_id': 'id2'}"}
+                @"{'name': 'name1', 'trash_id': 'id1'}",
+                @"{'name': 'name2', 'trash_id': 'id2'}"
             };
 
             var testConfig = new List<CustomFormatConfig>
@@ -382,9 +350,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
         [Test]
         public void Score_from_json_takes_precedence_over_score_from_guide()
         {
-            var guideData = new List<CustomFormatData>
+            var guideData = new List<string>
             {
-                new() {Json = @"{'name': 'name1', 'trash_id': 'id1', 'trash_score': 100}"}
+                @"{'name': 'name1', 'trash_id': 'id1', 'trash_score': 100}"
             };
 
             var testConfig = new List<CustomFormatConfig>

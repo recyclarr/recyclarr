@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Trash.Radarr.CustomFormat.Guide;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Models.Cache;
 
@@ -12,7 +11,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }
         Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-        void Process(IEnumerable<CustomFormatData> customFormatGuideData,
+        void Process(IEnumerable<string> customFormatGuideData,
             IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache);
     }
 }

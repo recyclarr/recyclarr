@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using Trash.Extensions;
-using Trash.Radarr.CustomFormat.Guide;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Models.Cache;
 
@@ -18,7 +17,7 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
         public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; private set; } =
             new();
 
-        public void Process(IEnumerable<CustomFormatData> customFormatGuideData,
+        public void Process(IEnumerable<string> customFormatGuideData,
             IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
         {
             var processedCfs = customFormatGuideData
@@ -93,22 +92,17 @@ namespace Trash.Radarr.CustomFormat.Processors.GuideSteps
             ProcessedCustomFormats.RemoveAll(cf => DuplicatedCustomFormats.ContainsKey(cf.Name));
         }
 
-        private static ProcessedCustomFormatData ProcessCustomFormatData(CustomFormatData guideData,
-            CustomFormatCache? cache)
+        private static ProcessedCustomFormatData ProcessCustomFormatData(string guideData, CustomFormatCache? cache)
         {
-            JObject obj = JObject.Parse(guideData.Json);
+            JObject obj = JObject.Parse(guideData);
             var name = (string) obj["name"];
             var trashId = (string) obj["trash_id"];
-            int? finalScore;
+            int? finalScore = null;
 
             if (obj.TryGetValue("trash_score", out var score))
             {
                 finalScore = (int) score;
                 obj.Property("trash_score").Remove();
-            }
-            else
-            {
-                finalScore = guideData.Score;
             }
 
             // Remove trash_id, it's metadata that is not meant for Radarr itself

@@ -51,16 +51,27 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
 
         [Test]
         [SuppressMessage("Maintainability", "CA1506", Justification = "Designed to be a high-level integration test")]
-        public void Guide_processor_behaves_as_expected_with_normal_markdown()
+        public void Guide_processor_behaves_as_expected_with_normal_guide_data()
         {
             var ctx = new Context();
             var guideProcessor =
-                new GuideProcessor(ctx.Logger, new CustomFormatGuideParser(ctx.Logger),
+                new GuideProcessor(ctx.Logger, new GithubCustomFormatJsonRequester(),
                     () => new TestGuideProcessorSteps());
 
             // simulate guide data
             using var testHttp = new HttpTest();
-            testHttp.RespondWith(ctx.Data.ReadData("CF_Markdown1.md"));
+            testHttp.RespondWithJson(new[]
+            {
+                new {name = "ImportableCustomFormat1.json", type = "file", download_url = "http://not_real/file.json"},
+                new {name = "ImportableCustomFormat2.json", type = "file", download_url = "http://not_real/file.json"},
+                new {name = "NoScore.json", type = "file", download_url = "http://not_real/file.json"},
+                new {name = "WontBeInConfig.json", type = "file", download_url = "http://not_real/file.json"}
+            });
+
+            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat1.json"));
+            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat2.json"));
+            testHttp.RespondWithJson(ctx.ReadJson("NoScore.json"));
+            testHttp.RespondWithJson(ctx.ReadJson("WontBeInConfig.json"));
 
             // Simulate user config in YAML
             var config = new List<CustomFormatConfig>
@@ -102,24 +113,23 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
                 new("No Score", "abc", JObject.FromObject(new {name = "No Score"}))
             };
 
-            guideProcessor.ProcessedCustomFormats.Should().BeEquivalentTo(expectedProcessedCustomFormatData,
-                op => op.Using(new JsonEquivalencyStep()));
+            guideProcessor.ProcessedCustomFormats.Should()
+                .BeEquivalentTo(expectedProcessedCustomFormatData, op => op.Using(new JsonEquivalencyStep()));
 
-            guideProcessor.ConfigData.Should().BeEquivalentTo(new List<ProcessedConfigData>
-            {
-                new()
+            guideProcessor.ConfigData.Should()
+                .BeEquivalentTo(new List<ProcessedConfigData>
                 {
-                    CustomFormats = expectedProcessedCustomFormatData,
-                    QualityProfiles = config[0].QualityProfiles
-                },
-                new()
-                {
-                    CustomFormats = expectedProcessedCustomFormatData.GetRange(2, 1),
-                    QualityProfiles = config[1].QualityProfiles
-                }
-            }, op => op
-                .Using<JToken>(jctx => jctx.Subject.Should().BeEquivalentTo(jctx.Expectation))
-                .WhenTypeIs<JToken>());
+                    new()
+                    {
+                        CustomFormats = expectedProcessedCustomFormatData,
+                        QualityProfiles = config[0].QualityProfiles
+                    },
+                    new()
+                    {
+                        CustomFormats = expectedProcessedCustomFormatData.GetRange(2, 1),
+                        QualityProfiles = config[1].QualityProfiles
+                    }
+                }, op => op.Using(new JsonEquivalencyStep()));
 
             guideProcessor.CustomFormatsWithoutScore.Should()
                 .Equal(new List<(string name, string trashId, string profileName)>

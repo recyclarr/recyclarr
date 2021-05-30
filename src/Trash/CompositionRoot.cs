@@ -74,7 +74,7 @@ namespace Trash
 
             // Custom Format Support
             builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
-            builder.RegisterType<CustomFormatGuideParser>().As<ICustomFormatGuideParser>();
+            builder.RegisterType<GithubCustomFormatJsonRequester>().As<IRadarrGuideService>();
             builder.RegisterType<CachePersister>().As<ICachePersister>();
 
             // Guide Processor

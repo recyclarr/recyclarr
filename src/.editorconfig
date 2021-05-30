@@ -3589,6 +3589,15 @@ resharper_xunit_xunit_test_with_console_output_highlighting = warning
 indent_style = space
 indent_size = 2
 
+[*.{xml,xsd}]
+indent_style = space
+indent_size = 2
+
+[*.json]
+indent_style = space
+indent_size = 2
+ij_javascript_array_initializer_right_brace_on_new_line = false
+
 [{*.overridetasks,*.targets,*.tasks}]
 indent_style = space
 indent_size = 2
@@ -3601,7 +3610,7 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
-[*.{appxmanifest,asax,ascx,aspx,axaml,build,cg,cginc,compute,cs,cshtml,dtd,hlsl,hlsli,hlslinc,master,nuspec,paml,razor,resw,resx,skin,usf,ush,vb,xaml,xamlx,xoml,xsd}]
+[*.{appxmanifest,asax,ascx,aspx,axaml,build,cg,cginc,compute,cs,cshtml,dtd,hlsl,hlsli,hlslinc,master,nuspec,paml,razor,resw,resx,skin,usf,ush,vb,xaml,xamlx,xoml}]
 indent_style = space
 indent_size = 4
 tab_width = 4
