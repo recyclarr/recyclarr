@@ -83,7 +83,7 @@ sonarr:
     good idea to use this one if you want more releases to be blocked by your release profiles
     instead of quality.
 
-[sonarr_quality]: https://trash-guides.info/Sonarr/V3/Sonarr-Quality-Settings-File-Size/
+[sonarr_quality]: https://trash-guides.info/Sonarr/Sonarr-Quality-Settings-File-Size/
 
 ### Release Profile Settings
 
@@ -116,8 +116,8 @@ sonarr:
       Set to `true` to include terms marked "Optional" in the guide. If set to `false`, optional
       terms are *not* synchronized to Sonarr.
 
-[sonarr_profile_anime]: https://trash-guides.info/Sonarr/V3/Sonarr-Release-Profile-RegEx-Anime/
-[sonarr_profile_series]: https://trash-guides.info/Sonarr/V3/Sonarr-Release-Profile-RegEx/
+[sonarr_profile_anime]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/
+[sonarr_profile_series]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
 
 ## Radarr
 
@@ -184,7 +184,7 @@ radarr:
     Any value less than `0` or greater than `1` will result in a warning log printed and the value
     will be clamped.
 
-[radarr_quality]: https://trash-guides.info/Radarr/V3/Radarr-Quality-Settings-File-Size/
+[radarr_quality]: https://trash-guides.info/Radarr/Radarr-Quality-Settings-File-Size/
 
 ### Custom Format Settings
 
