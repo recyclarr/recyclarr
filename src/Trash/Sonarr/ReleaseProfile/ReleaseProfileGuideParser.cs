@@ -117,7 +117,7 @@ namespace Trash.Sonarr.ReleaseProfile
 
         private Url BuildUrl(ReleaseProfileType profileName)
         {
-            return "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Sonarr/V3".AppendPathSegment(
+            return "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Sonarr".AppendPathSegment(
                 $"{_markdownDocNames[profileName]}.md");
         }
 

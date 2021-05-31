@@ -17,7 +17,7 @@ namespace Trash.Radarr.QualityDefinition
         public async Task<string> GetMarkdownData()
         {
             return await
-                "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Radarr/V3/Radarr-Quality-Settings-File-Size.md"
+                "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Radarr/Radarr-Quality-Settings-File-Size.md"
                     .GetStringAsync();
         }
 
