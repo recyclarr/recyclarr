@@ -54,3 +54,4 @@ radarr:
 #          - name: Quality Profile 1
 #          - name: Quality Profile 2
 #            #score: -9999 # Optional score to assign to all CFs. Overrides scores in the guide.
+#            #reset_unmatched_scores: true # Optionally set other scores to 0 if they are not listed in 'names' above.

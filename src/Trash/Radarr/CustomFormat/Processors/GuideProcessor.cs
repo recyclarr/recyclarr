@@ -43,7 +43,7 @@ namespace Trash.Radarr.CustomFormat.Processors
         public IReadOnlyCollection<ProcessedConfigData> ConfigData
             => _steps.Config.ConfigData;
 
-        public IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> ProfileScores
+        public IDictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores
             => _steps.QualityProfile.ProfileScores;
 
         public IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore

@@ -8,13 +8,13 @@ namespace Trash.Radarr.CustomFormat.Processors
 {
     public interface IPersistenceProcessor
     {
-        IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> UpdatedScores { get; }
+        IDictionary<string, List<UpdatedFormatScore>> UpdatedScores { get; }
         IReadOnlyCollection<string> InvalidProfileNames { get; }
         CustomFormatTransactionData Transactions { get; }
 
         Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
-            IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> profileScores);
+            IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores);
 
         void Reset();
     }

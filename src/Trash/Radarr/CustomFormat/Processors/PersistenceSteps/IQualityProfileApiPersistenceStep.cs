@@ -7,10 +7,10 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
 {
     public interface IQualityProfileApiPersistenceStep
     {
-        IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> UpdatedScores { get; }
+        IDictionary<string, List<UpdatedFormatScore>> UpdatedScores { get; }
         IReadOnlyCollection<string> InvalidProfileNames { get; }
 
         Task Process(IQualityProfileService api,
-            IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> cfScores);
+            IDictionary<string, QualityProfileCustomFormatScoreMapping> cfScores);
     }
 }

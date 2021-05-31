@@ -12,45 +12,60 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
     public class QualityProfileApiPersistenceStep : IQualityProfileApiPersistenceStep
     {
         private readonly List<string> _invalidProfileNames = new();
-        private readonly Dictionary<string, List<QualityProfileCustomFormatScoreEntry>> _updatedScores = new();
+        private readonly Dictionary<string, List<UpdatedFormatScore>> _updatedScores = new();
 
-        public IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> UpdatedScores => _updatedScores;
+        public IDictionary<string, List<UpdatedFormatScore>> UpdatedScores => _updatedScores;
         public IReadOnlyCollection<string> InvalidProfileNames => _invalidProfileNames;
 
         public async Task Process(IQualityProfileService api,
-            IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> cfScores)
+            IDictionary<string, QualityProfileCustomFormatScoreMapping> cfScores)
         {
-            var radarrProfiles = (await api.GetQualityProfiles())
-                .Select(p => (Name: p["name"].ToString(), Json: p));
+            var radarrProfiles = await api.GetQualityProfiles();
 
-            var profileScores = cfScores
-                .GroupJoin(radarrProfiles,
-                    s => s.Key,
-                    p => p.Name,
-                    (s, pList) => (s.Key, s.Value,
-                        pList.SelectMany(p => p.Json["formatItems"].Children<JObject>()).ToList()),
-                    StringComparer.InvariantCultureIgnoreCase);
+            // Match quality profiles in Radarr to ones the user put in their config.
+            // For each match, we return a tuple including the list of custom format scores ("formatItems").
+            // Using GroupJoin() because we want a LEFT OUTER JOIN so we can list which quality profiles in config
+            // do not match profiles in Radarr.
+            var profileScores = cfScores.GroupJoin(radarrProfiles,
+                s => s.Key,
+                p => (string) p["name"],
+                (s, p) => (s.Key, s.Value, p.SelectMany(pi => pi["formatItems"].Children<JObject>()).ToList()),
+                StringComparer.InvariantCultureIgnoreCase);
 
-            foreach (var (profileName, scoreList, jsonList) in profileScores)
+            foreach (var (profileName, scoreMap, formatItems) in profileScores)
             {
-                if (jsonList.Count == 0)
+                if (formatItems.Count == 0)
                 {
                     _invalidProfileNames.Add(profileName);
                     continue;
                 }
 
-                foreach (var (score, json) in scoreList
-                    .Select(s => (s, FindJsonScoreEntry(s, jsonList)))
-                    .Where(p => p.Item2 != null))
+                foreach (var json in formatItems)
                 {
-                    var currentScore = (int) json!["score"];
-                    if (currentScore == score.Score)
+                    var map = FindScoreEntry(json, scoreMap);
+
+                    int? scoreToUse = null;
+                    FormatScoreUpdateReason? reason = null;
+
+                    if (map != null)
+                    {
+                        scoreToUse = map.Score;
+                        reason = FormatScoreUpdateReason.Updated;
+                    }
+                    else if (scoreMap.ResetUnmatchedScores)
+                    {
+                        scoreToUse = 0;
+                        reason = FormatScoreUpdateReason.Reset;
+                    }
+
+                    if (scoreToUse == null || reason == null || (int) json["score"] == scoreToUse)
                     {
                         continue;
                     }
 
-                    json!["score"] = score.Score;
-                    _updatedScores.GetOrCreate(profileName).Add(score);
+                    json!["score"] = scoreToUse.Value;
+                    _updatedScores.GetOrCreate(profileName)
+                        .Add(new UpdatedFormatScore((string) json["name"], scoreToUse.Value, reason.Value));
                 }
 
                 if (!_updatedScores.TryGetValue(profileName, out var updatedScores) || updatedScores.Count == 0)
@@ -59,17 +74,17 @@ namespace Trash.Radarr.CustomFormat.Processors.PersistenceSteps
                     continue;
                 }
 
-                var jsonRoot = (JObject) jsonList.First().Root;
+                var jsonRoot = (JObject) formatItems.First().Root;
                 await api.UpdateQualityProfile(jsonRoot, (int) jsonRoot["id"]);
             }
         }
 
-        private static JObject? FindJsonScoreEntry(QualityProfileCustomFormatScoreEntry score,
-            IEnumerable<JObject> jsonList)
+        private static FormatMappingEntry? FindScoreEntry(JObject formatItem,
+            QualityProfileCustomFormatScoreMapping scoreMap)
         {
-            return jsonList.FirstOrDefault(j
-                => score.CustomFormat.CacheEntry != null &&
-                   (int) j["format"] == score.CustomFormat.CacheEntry.CustomFormatId);
+            return scoreMap.Mapping.FirstOrDefault(
+                m => m.CustomFormat.CacheEntry != null &&
+                     (int) formatItem["format"] == m.CustomFormat.CacheEntry.CustomFormatId);
         }
     }
 }

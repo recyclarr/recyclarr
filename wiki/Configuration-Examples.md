@@ -7,6 +7,7 @@ Various scenarios supported using flexible configuration structure:
 - [Manually assign different scores to multiple custom formats](#manually-assign-different-scores-to-multiple-custom-formats)
 - [Assign custom format scores the same way to multiple quality profiles](#assign-custom-format-scores-the-same-way-to-multiple-quality-profiles)
 - [Resolving ambiguity between custom formats with the same name](#resolving-ambiguity-between-custom-formats-with-the-same-name)
+- [Scores in a quality profile should be set to zero if it wasn't listed in config](#scores-in-a-quality-profile-should-be-set-to-zero-if-it-wasnt-listed-in-config)
 
 ## Update as much as possible in both Sonarr and Radarr with a single config
 
@@ -120,10 +121,8 @@ update at the same time. There's an example of how to do that in a different sec
 
 ## Synchronize a lot of custom formats for a single quality profile
 
-Scenario:
-
-"I want to be able to synchronize a list of custom formats to Radarr. In addition, I want the scores
-in the guide to be applied to a single quality profile."
+Scenario: *"I want to be able to synchronize a list of custom formats to Radarr. In addition, I want
+the scores in the guide to be applied to a single quality profile."*
 
 Solution:
 
@@ -155,11 +154,9 @@ radarr:
 
 ## Manually assign different scores to multiple custom formats
 
-Scenario:
-
-"I want to synchronize custom formats to Radarr. I also do not want to use the scores in
+Scenario: *"I want to synchronize custom formats to Radarr. I also do not want to use the scores in
 the guide. Instead, I want to assign my own distinct score to each custom format in a single quality
-profile."
+profile."*
 
 Solution:
 
@@ -279,3 +276,42 @@ radarr:
 
 Where do you get the Trash ID? That's from the `"trash_id"` property of the actual JSON for the
 custom format in the guide.
+
+## Scores in a quality profile should be set to zero if it wasn't listed in config
+
+Scenario: *"I completely rely on Trash Updater to set scores on my quality profiles. I never plan to
+manually set scores on those profiles. If I alter which custom format scores get assigned to a
+quality profile, the old scores should be set back to 0 automatically for me."*
+
+```yml
+radarr:
+  - base_url: http://localhost:7878
+    api_key: 87674e2c316645ed85696a91a3d41988
+
+    custom_formats:
+      - names:
+          - DTS X
+          - TrueHD
+        quality_profiles:
+          - name: SD
+            reset_unmatched_scores: true
+          - name: Ultra-HD
+```
+
+Let's say you have three custom formats added to Radarr: "DTS X", "TrueHD", and "DoVi". Since only
+the first two are listed in the `names` array, what happens to "DoVi"? Since two quality profiles
+are specified above, each with a different setting for `reset_unmatched_scores`, the behavior will
+be different:
+
+- The `SD` profile will always have the score for "DoVi" set to zero (`0`).
+- The `Ultra-HD` profile's score for "DoVi" will never be altered.
+
+The `reset_unmatched_scores` setting basically determines how scores are handled for custom formats
+that exist in Radarr but are not in the list of `names` in config. As shown in the example above,
+you set it to `true` which results in unmatched scores being set to `0`, or you can set it to
+`false` (or leave it omitted) in which case Trash Updater will not alter the value.
+
+Which one should you use? That depends on how much control you want Trash Updater to have. If you
+use Trash Updater to supplement manual changes to your profiles, you probably want it set to `false`
+so it doesn't clobber your manual edits. Otherwise, set it to `true` so that scores aren't left over
+when you add/remove custom formats from a profile.

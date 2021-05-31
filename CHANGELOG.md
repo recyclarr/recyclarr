@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New setting `reset_unmatched_scores` under `custom_formats.quality_profiles` in YAML config which
+  allows Trash Updater to set scores to 0 if they were not in the list of custom format names or
+  listed but had no score applied (e.g. no score in guide).
+
 ### Changed
 
 - Support the new custom format structure in the guide: JSON files are parsed directly now. Trash

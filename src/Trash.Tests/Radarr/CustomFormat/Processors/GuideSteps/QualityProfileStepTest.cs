@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Trash.Radarr;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Processors.GuideSteps;
+using Trash.TestLibrary;
 
 namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
 {
@@ -58,11 +59,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new QualityProfileStep();
             processor.Process(testConfigData);
 
-            processor.ProfileScores.Should().ContainKey("profile1")
-                .WhichValue.Should().BeEquivalentTo(new List<QualityProfileCustomFormatScoreEntry>
-                {
-                    new(testConfigData[0].CustomFormats[0], 50)
-                });
+            processor.ProfileScores.Should()
+                .ContainKey("profile1").WhichValue.Should()
+                .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 50)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();
         }
@@ -89,13 +88,11 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new QualityProfileStep();
             processor.Process(testConfigData);
 
-            var expectedScoreEntries = new List<QualityProfileCustomFormatScoreEntry>
-            {
-                new(testConfigData[0].CustomFormats[0], 100)
-            };
+            var expectedScoreEntries =
+                CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 100));
 
             processor.ProfileScores.Should().BeEquivalentTo(
-                new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+                new Dictionary<string, QualityProfileCustomFormatScoreMapping>
                 {
                     {"profile1", expectedScoreEntries},
                     {"profile2", expectedScoreEntries}
@@ -125,11 +122,9 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.GuideSteps
             var processor = new QualityProfileStep();
             processor.Process(testConfigData);
 
-            processor.ProfileScores.Should().ContainKey("profile1")
-                .WhichValue.Should().BeEquivalentTo(new List<QualityProfileCustomFormatScoreEntry>
-                {
-                    new(testConfigData[0].CustomFormats[0], 0)
-                });
+            processor.ProfileScores.Should()
+                .ContainKey("profile1").WhichValue.Should()
+                .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 0)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();
         }

@@ -29,7 +29,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = new Collection<TrashIdMapping>();
-            var profileScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>();
+            var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
             var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
@@ -49,7 +49,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
-            var profileScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>();
+            var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
             var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
@@ -68,7 +68,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
-            var profileScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>();
+            var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
             var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
 

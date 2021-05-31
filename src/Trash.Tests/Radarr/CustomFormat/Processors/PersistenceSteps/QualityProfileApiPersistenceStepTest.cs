@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
 using FluentAssertions.Json;
 using Newtonsoft.Json;
@@ -11,6 +10,7 @@ using Trash.Radarr.CustomFormat.Api;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Models.Cache;
 using Trash.Radarr.CustomFormat.Processors.PersistenceSteps;
+using Trash.TestLibrary;
 
 namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 {
@@ -31,7 +31,7 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
     {
       'format': 2,
       'name': 'cf2',
-      'score': 2
+      'score': 0
     },
     {
       'format': 3,
@@ -45,16 +45,14 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var api = Substitute.For<IQualityProfileService>();
             api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
-            var cfScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+            var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
                 {
-                    "profile1", new List<QualityProfileCustomFormatScoreEntry>
-                    {
-                        new(new ProcessedCustomFormatData("", "", new JObject())
+                    "profile1", CfTestUtils.NewMapping(
+                        new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
                         {
                             CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 4}
-                        }, 100)
-                    }
+                        }, 100))
                 }
             };
 
@@ -72,17 +70,72 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var api = Substitute.For<IQualityProfileService>();
             api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
-            var cfScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+            var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
-                {"wrong_profile_name", new List<QualityProfileCustomFormatScoreEntry>()}
+                {"wrong_profile_name", CfTestUtils.NewMapping()}
             };
 
             var processor = new QualityProfileApiPersistenceStep();
             processor.Process(api, cfScores);
 
-            api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
-            processor.InvalidProfileNames.Should().BeEquivalentTo("wrong_profile_name");
+            processor.InvalidProfileNames.Should().Equal("wrong_profile_name");
             processor.UpdatedScores.Should().BeEmpty();
+        }
+
+        [Test]
+        public void Reset_scores_for_unmatched_cfs_if_enabled()
+        {
+            const string radarrQualityProfileData = @"[{
+  'name': 'profile1',
+  'formatItems': [{
+      'format': 1,
+      'name': 'cf1',
+      'score': 1
+    },
+    {
+      'format': 2,
+      'name': 'cf2',
+      'score': 50
+    },
+    {
+      'format': 3,
+      'name': 'cf3',
+      'score': 3
+    }
+  ],
+  'id': 1
+}]";
+
+            var api = Substitute.For<IQualityProfileService>();
+            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+
+            var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
+            {
+                {
+                    "profile1", CfTestUtils.NewMappingWithReset(
+                        new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
+                        {
+                            CacheEntry = new TrashIdMapping("", "", 2)
+                        }, 100))
+                }
+            };
+
+            var processor = new QualityProfileApiPersistenceStep();
+            processor.Process(api, cfScores);
+
+            processor.InvalidProfileNames.Should().BeEmpty();
+            processor.UpdatedScores.Should()
+                .ContainKey("profile1").WhichValue.Should()
+                .BeEquivalentTo(new List<UpdatedFormatScore>
+                {
+                    new("cf1", 0, FormatScoreUpdateReason.Reset),
+                    new("cf2", 100, FormatScoreUpdateReason.Updated),
+                    new("cf3", 0, FormatScoreUpdateReason.Reset)
+                });
+
+            api.Received().UpdateQualityProfile(
+                Verify.That<JObject>(j => j["formatItems"].Children().Should().HaveCount(3)),
+                Arg.Any<int>());
         }
 
         [Test]
@@ -132,27 +185,25 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var api = Substitute.For<IQualityProfileService>();
             api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
-            var cfScores = new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+            var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
                 {
-                    "profile1", new List<QualityProfileCustomFormatScoreEntry>
-                    {
-                        new(new ProcessedCustomFormatData("", "", new JObject())
+                    "profile1", CfTestUtils.NewMapping(
+                        new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
                         {
                             // First match by ID
-                            CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 4}
+                            CacheEntry = new TrashIdMapping("", "", 4)
                         }, 100),
-                        new(new ProcessedCustomFormatData("", "", new JObject())
+                        new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
                         {
                             // Should NOT match because we do not use names to assign scores
                             CacheEntry = new TrashIdMapping("", "BR-DISK")
                         }, 101),
-                        new(new ProcessedCustomFormatData("", "", new JObject())
+                        new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
                         {
                             // Second match by ID
-                            CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 1}
-                        }, 102)
-                    }
+                            CacheEntry = new TrashIdMapping("", "", 1)
+                        }, 102))
                 }
             };
 
@@ -203,9 +254,13 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             api.Received()
                 .UpdateQualityProfile(Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
             processor.InvalidProfileNames.Should().BeEmpty();
-            processor.UpdatedScores.Should().ContainKey("profile1").WhichValue.Should().BeEquivalentTo(
-                cfScores.Values.First()[0],
-                cfScores.Values.First()[2]);
+            processor.UpdatedScores.Should()
+                .ContainKey("profile1").WhichValue.Should()
+                .BeEquivalentTo(new List<UpdatedFormatScore>
+                {
+                    new("3D", 100, FormatScoreUpdateReason.Updated),
+                    new("asdf2", 102, FormatScoreUpdateReason.Updated)
+                });
         }
     }
 }

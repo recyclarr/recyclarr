@@ -12,6 +12,7 @@ using Trash.Radarr.CustomFormat.Guide;
 using Trash.Radarr.CustomFormat.Models;
 using Trash.Radarr.CustomFormat.Processors;
 using Trash.Radarr.CustomFormat.Processors.GuideSteps;
+using Trash.TestLibrary;
 
 namespace Trash.Tests.Radarr.CustomFormat.Processors
 {
@@ -144,30 +145,26 @@ namespace Trash.Tests.Radarr.CustomFormat.Processors
             });
 
             guideProcessor.ProfileScores.Should()
-                .BeEquivalentTo(new Dictionary<string, List<QualityProfileCustomFormatScoreEntry>>
+                .BeEquivalentTo(new Dictionary<string, QualityProfileCustomFormatScoreMapping>
                 {
                     {
-                        "profile1", new List<QualityProfileCustomFormatScoreEntry>
-                        {
-                            new(expectedProcessedCustomFormatData[0], 500),
-                            new(expectedProcessedCustomFormatData[1], 480)
-                        }
+                        "profile1", CfTestUtils.NewMapping(
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[0], 500),
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[1], 480))
                     },
                     {
-                        "profile2", new List<QualityProfileCustomFormatScoreEntry>
-                        {
-                            new(expectedProcessedCustomFormatData[0], -1234),
-                            new(expectedProcessedCustomFormatData[1], -1234),
-                            new(expectedProcessedCustomFormatData[2], -1234)
-                        }
+                        "profile2", CfTestUtils.NewMapping(
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[0], -1234),
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[1], -1234),
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[2], -1234))
                     },
                     {
-                        "profile4", new List<QualityProfileCustomFormatScoreEntry>
-                        {
-                            new(expectedProcessedCustomFormatData[2], 5678)
-                        }
+                        "profile4", CfTestUtils.NewMapping(
+                            new FormatMappingEntry(expectedProcessedCustomFormatData[2], 5678))
                     }
-                }, op => op.Using(new JsonEquivalencyStep()));
+                }, op => op
+                    .Using(new JsonEquivalencyStep())
+                    .ComparingByMembers<FormatMappingEntry>());
         }
     }
 }

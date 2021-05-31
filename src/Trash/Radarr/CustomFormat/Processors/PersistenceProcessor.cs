@@ -40,7 +40,7 @@ namespace Trash.Radarr.CustomFormat.Processors
         public CustomFormatTransactionData Transactions
             => _steps.JsonTransactionStep.Transactions;
 
-        public IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> UpdatedScores
+        public IDictionary<string, List<UpdatedFormatScore>> UpdatedScores
             => _steps.ProfileQualityProfileApiPersister.UpdatedScores;
 
         public IReadOnlyCollection<string> InvalidProfileNames
@@ -53,7 +53,7 @@ namespace Trash.Radarr.CustomFormat.Processors
 
         public async Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
-            IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> profileScores)
+            IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
         {
             var radarrCfs = await _customFormatService.GetCustomFormats();
 

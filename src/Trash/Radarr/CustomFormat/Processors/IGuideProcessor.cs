@@ -10,7 +10,7 @@ namespace Trash.Radarr.CustomFormat.Processors
         IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
         IReadOnlyCollection<string> CustomFormatsNotInGuide { get; }
         IReadOnlyCollection<ProcessedConfigData> ConfigData { get; }
-        IDictionary<string, List<QualityProfileCustomFormatScoreEntry>> ProfileScores { get; }
+        IDictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores { get; }
         IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; }
         IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }

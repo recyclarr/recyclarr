@@ -284,3 +284,9 @@ Synchronization]] page.
       A positive or negative number representing the score to apply to *all* custom formats listed
       in the `names` list. A score of `0` is also acceptable, which effectively disables the custom
       formats without having to delete them.
+
+    - `reset_unmatched_scores` (Optional; *Default: `false`*)<br>
+      If set to `true`, enables setting scores to `0` in quality profiles where either a name was
+      not mentioned in the `names` array *or* it was in that list but did not get a score (e.g. no
+      score in guide). If `false`, scores are never altered unless it is listed in the `names` array
+      *and* has a valid score to assign.

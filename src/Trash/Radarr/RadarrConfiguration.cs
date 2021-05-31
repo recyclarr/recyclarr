@@ -50,6 +50,7 @@ namespace Trash.Radarr
         public string Name { get; init; } = "";
 
         public int? Score { get; init; }
+        public bool ResetUnmatchedScores { get; init; }
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

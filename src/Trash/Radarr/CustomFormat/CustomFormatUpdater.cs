@@ -69,9 +69,9 @@ namespace Trash.Radarr.CustomFormat
                 {
                     Log.Debug("> Scores updated for quality profile: {ProfileName}", profileName);
 
-                    foreach (var score in scores)
+                    foreach (var (customFormatName, score, reason) in scores)
                     {
-                        Log.Debug("  - {Format}: {Score}", score.CustomFormat.Name, score.Score);
+                        Log.Debug("  - {Format}: {Score} ({Reason})", customFormatName, score, reason);
                     }
                 }
 
@@ -249,23 +249,23 @@ namespace Trash.Radarr.CustomFormat
             Console.WriteLine(profileFormat, "Profile", "Custom Format", "Score");
             Console.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
 
-            foreach (var (profileName, scoreEntries) in _guideProcessor.ProfileScores)
+            foreach (var (profileName, scoreMap) in _guideProcessor.ProfileScores)
             {
                 Console.WriteLine(profileFormat, profileName, "", "");
 
-                foreach (var scoreEntry in scoreEntries)
+                foreach (var (customFormat, score) in scoreMap.Mapping)
                 {
                     var matchingCf = _guideProcessor.ProcessedCustomFormats
-                        .FirstOrDefault(cf => cf.TrashId.EqualsIgnoreCase(scoreEntry.CustomFormat.TrashId));
+                        .FirstOrDefault(cf => cf.TrashId.EqualsIgnoreCase(customFormat.TrashId));
 
                     if (matchingCf == null)
                     {
                         Log.Warning("Quality Profile refers to CF not found in guide: {TrashId}",
-                            scoreEntry.CustomFormat.TrashId);
+                            customFormat.TrashId);
                         continue;
                     }
 
-                    Console.WriteLine(profileFormat, "", matchingCf.Name, scoreEntry.Score);
+                    Console.WriteLine(profileFormat, "", matchingCf.Name, score);
                 }
             }
 

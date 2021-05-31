@@ -16,16 +16,9 @@ namespace Trash.Extensions
             return val;
         }
 
-        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
-            where TValue : struct
+        public static TValue? GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
         {
-            if (!dict.TryGetValue(key, out var val))
-            {
-                val = default;
-                dict.Add(key, val);
-            }
-
-            return val;
+            return dict.TryGetValue(key, out var val) ? val : default;
         }
     }
 }
