@@ -9,14 +9,14 @@ namespace Trash.Radarr.CustomFormat.Api
 {
     internal class QualityProfileService : IQualityProfileService
     {
-        private readonly IConfigurationProvider _configProvider;
+        private readonly IServerInfo _serverInfo;
 
-        public QualityProfileService(IConfigurationProvider configProvider)
+        public QualityProfileService(IServerInfo serverInfo)
         {
-            _configProvider = configProvider;
+            _serverInfo = serverInfo;
         }
 
-        private string BaseUrl => _configProvider.ActiveConfiguration.BuildUrl();
+        private string BaseUrl => _serverInfo.BuildUrl();
 
         public async Task<List<JObject>> GetQualityProfiles()
         {

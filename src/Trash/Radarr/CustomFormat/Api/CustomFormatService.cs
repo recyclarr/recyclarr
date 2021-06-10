@@ -10,23 +10,25 @@ namespace Trash.Radarr.CustomFormat.Api
 {
     internal class CustomFormatService : ICustomFormatService
     {
-        private readonly IConfigurationProvider _configProvider;
+        private readonly IServerInfo _serverInfo;
 
-        public CustomFormatService(IConfigurationProvider configProvider)
+        public CustomFormatService(IServerInfo serverInfo)
         {
-            _configProvider = configProvider;
+            _serverInfo = serverInfo;
         }
+
+        private string BaseUrl => _serverInfo.BuildUrl();
 
         public async Task<List<JObject>> GetCustomFormats()
         {
-            return await BaseUrl()
+            return await BaseUrl
                 .AppendPathSegment("customformat")
                 .GetJsonAsync<List<JObject>>();
         }
 
         public async Task CreateCustomFormat(ProcessedCustomFormatData cf)
         {
-            var response = await BaseUrl()
+            var response = await BaseUrl
                 .AppendPathSegment("customformat")
                 .PostJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
@@ -36,7 +38,7 @@ namespace Trash.Radarr.CustomFormat.Api
 
         public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
         {
-            await BaseUrl()
+            await BaseUrl
                 .AppendPathSegment($"customformat/{cf.GetCustomFormatId()}")
                 .PutJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
@@ -44,14 +46,9 @@ namespace Trash.Radarr.CustomFormat.Api
 
         public async Task DeleteCustomFormat(int customFormatId)
         {
-            await BaseUrl()
+            await BaseUrl
                 .AppendPathSegment($"customformat/{customFormatId}")
                 .DeleteAsync();
-        }
-
-        private string BaseUrl()
-        {
-            return _configProvider.ActiveConfiguration.BuildUrl();
         }
     }
 }

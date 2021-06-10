@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Flurl;
 using JetBrains.Annotations;
 using Trash.Config;
 using Trash.Sonarr.QualityDefinition;
@@ -13,13 +12,6 @@ namespace Trash.Sonarr
     {
         public IList<ReleaseProfileConfig> ReleaseProfiles { get; set; } = new List<ReleaseProfileConfig>();
         public SonarrQualityDefinitionType? QualityDefinition { get; init; }
-
-        public override string BuildUrl()
-        {
-            return BaseUrl
-                .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = ApiKey});
-        }
 
         public override bool IsValid(out string msg)
         {

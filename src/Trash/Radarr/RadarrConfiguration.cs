@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Flurl;
 using JetBrains.Annotations;
 using Trash.Config;
 using Trash.Radarr.QualityDefinition;
@@ -14,13 +13,6 @@ namespace Trash.Radarr
         public QualityDefinitionConfig? QualityDefinition { get; init; }
         public List<CustomFormatConfig> CustomFormats { get; init; } = new();
         public bool DeleteOldCustomFormats { get; init; }
-
-        public override string BuildUrl()
-        {
-            return BaseUrl
-                .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = ApiKey});
-        }
 
         public override bool IsValid(out string msg)
         {

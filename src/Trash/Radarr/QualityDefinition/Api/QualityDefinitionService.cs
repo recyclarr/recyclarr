@@ -9,14 +9,14 @@ namespace Trash.Radarr.QualityDefinition.Api
 {
     public class QualityDefinitionService : IQualityDefinitionService
     {
-        private readonly IConfigurationProvider _configProvider;
+        private readonly IServerInfo _serverInfo;
 
-        public QualityDefinitionService(IConfigurationProvider configProvider)
+        public QualityDefinitionService(IServerInfo serverInfo)
         {
-            _configProvider = configProvider;
+            _serverInfo = serverInfo;
         }
 
-        private string BaseUrl => _configProvider.ActiveConfiguration.BuildUrl();
+        private string BaseUrl => _serverInfo.BuildUrl();
 
         public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
         {

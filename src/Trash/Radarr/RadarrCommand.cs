@@ -18,7 +18,7 @@ namespace Trash.Radarr
     public class RadarrCommand : ServiceCommand, IRadarrCommand
     {
         private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
-        private readonly Lazy<ICustomFormatUpdater> _customFormatUpdater;
+        private readonly Func<ICustomFormatUpdater> _customFormatUpdaterFactory;
         private readonly Func<RadarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
         public RadarrCommand(
@@ -27,12 +27,12 @@ namespace Trash.Radarr
             ILogJanitor logJanitor,
             IConfigurationLoader<RadarrConfiguration> configLoader,
             Func<RadarrQualityDefinitionUpdater> qualityUpdaterFactory,
-            Lazy<ICustomFormatUpdater> customFormatUpdater)
+            Func<ICustomFormatUpdater> customFormatUpdaterFactory)
             : base(logger, loggingLevelSwitch, logJanitor)
         {
             _configLoader = configLoader;
             _qualityUpdaterFactory = qualityUpdaterFactory;
-            _customFormatUpdater = customFormatUpdater;
+            _customFormatUpdaterFactory = customFormatUpdaterFactory;
         }
 
         public override string CacheStoragePath { get; } =
@@ -51,7 +51,7 @@ namespace Trash.Radarr
 
                     if (config.CustomFormats.Count > 0)
                     {
-                        await _customFormatUpdater.Value.Process(this, config);
+                        await _customFormatUpdaterFactory().Process(this, config);
                     }
                 }
             }
