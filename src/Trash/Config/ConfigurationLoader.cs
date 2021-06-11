@@ -2,7 +2,8 @@
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using Trash.YamlDotNet;
+using Common.YamlDotNet;
+using TrashLib.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

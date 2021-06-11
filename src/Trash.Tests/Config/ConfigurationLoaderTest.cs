@@ -6,15 +6,16 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using Common;
+using Common.Extensions;
 using FluentAssertions;
 using JetBrains.Annotations;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary;
 using Trash.Config;
-using Trash.Extensions;
-using Trash.Sonarr;
-using Trash.Sonarr.ReleaseProfile;
+using TrashLib.Config;
+using TrashLib.Sonarr;
+using TrashLib.Sonarr.ReleaseProfile;
 using YamlDotNet.Serialization.ObjectFactories;
 
 namespace Trash.Tests.Config
@@ -38,15 +39,15 @@ namespace Trash.Tests.Config
             public string BaseUrl { get; init; } = "";
             public string ApiKey { get; init; } = "";
 
-            public string BuildUrl()
-            {
-                throw new NotImplementedException();
-            }
-
             public bool IsValid(out string msg)
             {
                 msg = Msg;
                 return false;
+            }
+
+            public string BuildUrl()
+            {
+                throw new NotImplementedException();
             }
         }
 
@@ -58,15 +59,15 @@ namespace Trash.Tests.Config
             public string BaseUrl { get; init; } = "";
             public string ApiKey { get; init; } = "";
 
-            public string BuildUrl()
-            {
-                throw new NotImplementedException();
-            }
-
             public bool IsValid(out string msg)
             {
                 msg = "";
                 return true;
+            }
+
+            public string BuildUrl()
+            {
+                throw new NotImplementedException();
             }
         }
 

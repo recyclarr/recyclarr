@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using NSubstitute;
 using NUnit.Framework;
 using Trash.Config;
+using TrashLib.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization.ObjectFactories;
 

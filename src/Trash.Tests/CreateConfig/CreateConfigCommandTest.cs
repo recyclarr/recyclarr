@@ -4,7 +4,7 @@ using CliFx.Infrastructure;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
-using Trash.CreateConfig;
+using Trash.Command;
 
 // ReSharper disable MethodHasAsyncOverload
 

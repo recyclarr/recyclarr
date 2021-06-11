@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Trash.Radarr.CustomFormat.Models;
+using TrashLib.Radarr.CustomFormat.Models;
 
 namespace Trash.TestLibrary
 {

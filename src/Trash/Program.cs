@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Autofac;
 using CliFx;
-using Trash.Command;
+using Trash.Command.Helpers;
 
 namespace Trash
 {

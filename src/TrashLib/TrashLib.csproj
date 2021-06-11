@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="Flurl" />
+    <PackageReference Include="morelinq" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Data.HashFunction.FNV" />
+    <PackageReference Include="System.IO.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+</Project>
