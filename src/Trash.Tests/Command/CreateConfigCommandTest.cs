@@ -8,7 +8,7 @@ using Trash.Command;
 
 // ReSharper disable MethodHasAsyncOverload
 
-namespace Trash.Tests.CreateConfig
+namespace Trash.Tests.Command
 {
     [TestFixture]
     [Parallelizable(ParallelScope.All)]

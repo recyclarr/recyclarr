@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
+using Autofac.Core.Activators.Reflection;
 using CliFx;
 using Serilog;
 using Serilog.Core;
@@ -47,6 +48,7 @@ namespace Trash
                 .As<IObjectFactory>();
 
             builder.RegisterGeneric(typeof(ConfigurationLoader<>))
+                .WithProperty(new AutowiringParameter())
                 .As(typeof(IConfigurationLoader<>));
 
             // note: Do not allow consumers to resolve IServiceConfiguration directly; if this gets cached

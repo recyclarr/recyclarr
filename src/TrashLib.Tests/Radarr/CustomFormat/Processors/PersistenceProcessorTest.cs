@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using TrashLib.Config;
-using TrashLib.Radarr;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;

@@ -8,7 +8,7 @@ using Serilog;
 using Serilog.Core;
 using Trash.Command.Helpers;
 using Trash.Config;
-using TrashLib.Sonarr;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
 

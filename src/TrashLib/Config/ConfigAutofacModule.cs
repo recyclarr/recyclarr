@@ -1,4 +1,7 @@
+using System.Reflection;
 using Autofac;
+using FluentValidation;
+using Module = Autofac.Module;
 
 namespace TrashLib.Config
 {
@@ -9,6 +12,10 @@ namespace TrashLib.Config
             builder.RegisterType<ConfigurationProvider>()
                 .As<IConfigurationProvider>()
                 .SingleInstance();
+
+            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+                .AsClosedTypesOf(typeof(IValidator<>))
+                .AsImplementedInterfaces();
         }
     }
 }

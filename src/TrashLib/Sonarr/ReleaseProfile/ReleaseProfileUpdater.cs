@@ -7,6 +7,7 @@ using Serilog;
 using TrashLib.ExceptionTypes;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile
 {

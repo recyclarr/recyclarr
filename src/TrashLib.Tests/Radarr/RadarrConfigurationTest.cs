@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Autofac;
 using FluentAssertions;
-using NSubstitute;
+using FluentValidation;
 using NUnit.Framework;
-using Trash.Config;
 using TrashLib.Config;
 using TrashLib.Radarr;
-using YamlDotNet.Core;
-using YamlDotNet.Serialization.ObjectFactories;
+using TrashLib.Radarr.Config;
+using TrashLib.Radarr.QualityDefinition;
 
 namespace TrashLib.Tests.Radarr
 {
@@ -17,105 +15,96 @@ namespace TrashLib.Tests.Radarr
     [Parallelizable(ParallelScope.All)]
     public class RadarrConfigurationTest
     {
-        public static IEnumerable GetTrashIdsOrNamesEmptyTestData()
-        {
-            yield return new TestCaseData(@"
-radarr:
-  - api_key: abc
-    base_url: xyz
-    custom_formats:
-      - names: [foo]
-        quality_profiles:
-          - name: MyProfile
-")
-                .SetName("{m} (without_trash_ids)");
+        private IContainer _container = default!;
 
-            yield return new TestCaseData(@"
-radarr:
-  - api_key: abc
-    base_url: xyz
-    custom_formats:
-      - trash_ids: [abc123]
-        quality_profiles:
-          - name: MyProfile
-")
-                .SetName("{m} (without_names)");
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterModule<ConfigAutofacModule>();
+            builder.RegisterModule<RadarrAutofacModule>();
+            _container = builder.Build();
         }
 
-        [TestCaseSource(nameof(GetTrashIdsOrNamesEmptyTestData))]
-        public void Custom_format_either_names_or_trash_id_not_empty_is_ok(string testYaml)
+        private static readonly TestCaseData[] NameOrIdsTestData =
         {
-            var configLoader = new ConfigurationLoader<RadarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
-                Substitute.For<IFileSystem>(), new DefaultObjectFactory());
+            new(new List<string> {"name"}, new List<string>()),
+            new(new List<string>(), new List<string> {"trash_id"})
+        };
 
-            Action act = () => configLoader.LoadFromStream(new StringReader(testYaml), "radarr");
-
-            act.Should().NotThrow();
-        }
-
-        [Test]
-        public void Custom_format_names_and_trash_ids_lists_must_not_both_be_empty()
+        [TestCaseSource(nameof(NameOrIdsTestData))]
+        public void Custom_format_is_valid_with_one_of_either_names_or_trash_id(List<string> namesList,
+            List<string> trashIdsList)
         {
-            var testYaml = @"
-radarr:
-  - api_key: abc
-    base_url: xyz
-    custom_formats:
-      - quality_profiles:
-          - name: MyProfile
-";
-            var configLoader = new ConfigurationLoader<RadarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
-                Substitute.For<IFileSystem>(), new DefaultObjectFactory());
+            var config = new RadarrConfiguration
+            {
+                ApiKey = "required value",
+                BaseUrl = "required value",
+                CustomFormats = new List<CustomFormatConfig>
+                {
+                    new() {Names = namesList, TrashIds = trashIdsList}
+                }
+            };
 
-            Action act = () => configLoader.LoadFromStream(new StringReader(testYaml), "radarr");
+            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+            var result = validator.Validate(config);
 
-            act.Should().Throw<ConfigurationException>()
-                .WithMessage("*must contain at least one element in either 'names' or 'trash_ids'.");
+            result.IsValid.Should().BeTrue();
+            result.Errors.Should().BeEmpty();
         }
 
         [Test]
-        public void Quality_definition_type_is_required()
+        public void Validation_fails_for_all_missing_required_properties()
         {
-            const string yaml = @"
-radarr:
-- base_url: a
-  api_key: b
-  quality_definition:
-    preferred_ratio: 0.5
-";
-            var loader = new ConfigurationLoader<RadarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
-                Substitute.For<IFileSystem>(),
-                new DefaultObjectFactory());
+            // default construct which should yield default values (invalid) for all required properties
+            var config = new RadarrConfiguration();
+            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
 
-            Action act = () => loader.LoadFromStream(new StringReader(yaml), "radarr");
+            var result = validator.Validate(config);
 
-            act.Should().Throw<YamlException>()
-                .WithMessage("*'type' is required for 'quality_definition'");
+            var expectedErrorMessageSubstrings = new[]
+            {
+                "Property 'base_url' is required",
+                "Property 'api_key' is required",
+                "'custom_formats' elements must contain at least one element in either 'names' or 'trash_ids'",
+                "'name' is required for elements under 'quality_profiles'",
+                "'type' is required for 'quality_definition'"
+            };
+
+            result.IsValid.Should().BeFalse();
+            result.Errors.Select(e => e.ErrorMessage).Should()
+                .OnlyContain(x => expectedErrorMessageSubstrings.Any(x.Contains));
         }
 
         [Test]
-        public void Quality_profile_name_is_required()
+        public void Validation_succeeds_when_no_missing_required_properties()
         {
-            const string testYaml = @"
-radarr:
-  - api_key: abc
-    base_url: xyz
-    custom_formats:
-      - names: [one, two]
-        quality_profiles:
-          - score: 100
-";
+            var config = new RadarrConfiguration
+            {
+                ApiKey = "required value",
+                BaseUrl = "required value",
+                CustomFormats = new List<CustomFormatConfig>
+                {
+                    new()
+                    {
+                        Names = new List<string>{"required value"},
+                        QualityProfiles = new List<QualityProfileConfig>
+                        {
+                            new() {Name = "required value"}
+                        }
+                    }
+                },
+                QualityDefinition = new QualityDefinitionConfig
+                {
+                    Type = RadarrQualityDefinitionType.Movie
+                }
+            };
 
-            var configLoader = new ConfigurationLoader<RadarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
-                Substitute.For<IFileSystem>(), new DefaultObjectFactory());
+            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+            var result = validator.Validate(config);
 
-            Action act = () => configLoader.LoadFromStream(new StringReader(testYaml), "radarr");
-
-            act.Should().Throw<YamlException>();
+            result.IsValid.Should().BeTrue();
+            result.Errors.Should().BeEmpty();
         }
     }
 }

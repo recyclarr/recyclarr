@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 

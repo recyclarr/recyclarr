@@ -1,6 +1,6 @@
 using Flurl;
 
-namespace TrashLib
+namespace TrashLib.Config
 {
     internal class ServerInfo : IServerInfo
     {

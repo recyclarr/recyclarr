@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using TrashLib.Config;
 using TrashLib.Sonarr.Api.Objects;
 
 namespace TrashLib.Sonarr.Api

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.QualityDefinition
 {

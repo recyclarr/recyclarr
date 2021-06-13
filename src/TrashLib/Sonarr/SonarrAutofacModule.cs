@@ -1,5 +1,6 @@
 using Autofac;
 using TrashLib.Sonarr.Api;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
 
@@ -10,6 +11,7 @@ namespace TrashLib.Sonarr
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<SonarrApi>().As<ISonarrApi>();
+            builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
 
             // Release Profile Support
             builder.RegisterType<ReleaseProfileUpdater>().As<IReleaseProfileUpdater>();

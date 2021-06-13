@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{0720939D-1CA6-43D7-BBED-F8F894C4F562}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Trash.TestLibrary", "Trash.TestLibrary\Trash.TestLibrary.csproj", "{33226068-65E3-4890-8671-59A56BA3F6F0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib.TestLibrary", "TrashLib.TestLibrary\TrashLib.TestLibrary.csproj", "{33226068-65E3-4890-8671-59A56BA3F6F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib", "TrashLib\TrashLib.csproj", "{4F6ACBA6-9A7D-487C-ACC1-787CCC90A381}"
 EndProject

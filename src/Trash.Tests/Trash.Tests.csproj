@@ -5,7 +5,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
-    <ProjectReference Include="..\Trash.TestLibrary\Trash.TestLibrary.csproj" />
     <ProjectReference Include="..\Trash\Trash.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CreateConfig" />
   </ItemGroup>
 </Project>

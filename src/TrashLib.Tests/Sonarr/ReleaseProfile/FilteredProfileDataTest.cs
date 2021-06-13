@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Sonarr;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile

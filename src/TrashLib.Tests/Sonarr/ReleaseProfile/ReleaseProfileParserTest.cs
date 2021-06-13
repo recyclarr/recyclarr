@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Serilog;
 using Serilog.Sinks.TestCorrelator;
 using TestLibrary;
-using TrashLib.Sonarr;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile

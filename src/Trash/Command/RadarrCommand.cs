@@ -8,7 +8,7 @@ using Serilog;
 using Serilog.Core;
 using Trash.Command.Helpers;
 using Trash.Config;
-using TrashLib.Radarr;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.QualityDefinition;
 

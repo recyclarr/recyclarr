@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using Common.YamlDotNet;
+using FluentValidation;
 using TrashLib.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -17,14 +18,19 @@ namespace Trash.Config
         private readonly IConfigurationProvider _configProvider;
         private readonly IDeserializer _deserializer;
         private readonly IFileSystem _fileSystem;
+        private readonly IValidator<T> _validator;
 
-        public ConfigurationLoader(IConfigurationProvider configProvider, IFileSystem fileSystem,
-            IObjectFactory objectFactory)
+        public ConfigurationLoader(
+            IConfigurationProvider configProvider,
+            IFileSystem fileSystem,
+            IObjectFactory objectFactory,
+            IValidator<T> validator)
         {
             _configProvider = configProvider;
             _fileSystem = fileSystem;
+            _validator = validator;
             _deserializer = new DeserializerBuilder()
-                .WithRequiredPropertyValidation()
+                .IgnoreUnmatchedProperties()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .WithTypeConverter(new YamlNullableEnumTypeConverter())
                 .WithObjectFactory(objectFactory)
@@ -54,9 +60,10 @@ namespace Trash.Config
                     {
                         foreach (var config in configs)
                         {
-                            if (!config.IsValid(out var msg))
+                            var result = _validator.Validate(config);
+                            if (result is {IsValid: false})
                             {
-                                throw new ConfigurationException(configSection, typeof(T), msg);
+                                throw new ConfigurationException(configSection, typeof(T), result.Errors);
                             }
 
                             validConfigs.Add(config);

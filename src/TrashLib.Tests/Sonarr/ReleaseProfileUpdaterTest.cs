@@ -1,8 +1,8 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
 using Serilog;
-using TrashLib.Sonarr;
 using TrashLib.Sonarr.Api;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr

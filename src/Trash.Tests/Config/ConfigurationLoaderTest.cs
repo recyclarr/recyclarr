@@ -8,13 +8,14 @@ using System.Text;
 using Common;
 using Common.Extensions;
 using FluentAssertions;
-using JetBrains.Annotations;
+using FluentValidation;
+using FluentValidation.Results;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary;
 using Trash.Config;
 using TrashLib.Config;
-using TrashLib.Sonarr;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 using YamlDotNet.Serialization.ObjectFactories;
 
@@ -32,43 +33,10 @@ namespace Trash.Tests.Config
 
         [SuppressMessage("Microsoft.Design", "CA1034",
             Justification = "YamlDotNet requires this type to be public so it may access it")]
-        [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-        public class TestConfigValidFalse : IServiceConfiguration
+        public class TestConfig : IServiceConfiguration
         {
-            public const string Msg = "validate_false";
-            public string BaseUrl { get; init; } = "";
-            public string ApiKey { get; init; } = "";
-
-            public bool IsValid(out string msg)
-            {
-                msg = Msg;
-                return false;
-            }
-
-            public string BuildUrl()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1034",
-            Justification = "YamlDotNet requires this type to be public so it may access it")]
-        [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-        public class TestConfigValidTrue : IServiceConfiguration
-        {
-            public string BaseUrl { get; init; } = "";
-            public string ApiKey { get; init; } = "";
-
-            public bool IsValid(out string msg)
-            {
-                msg = "";
-                return true;
-            }
-
-            public string BuildUrl()
-            {
-                throw new NotImplementedException();
-            }
+            public string BaseUrl => "";
+            public string ApiKey => "";
         }
 
         [Test]
@@ -94,7 +62,9 @@ namespace Trash.Tests.Config
             var actualActiveConfigs = new List<SonarrConfiguration>();
             provider.ActiveConfiguration = Arg.Do<SonarrConfiguration>(a => actualActiveConfigs.Add(a));
 
-            var loader = new ConfigurationLoader<SonarrConfiguration>(provider, fs, new DefaultObjectFactory());
+            var validator = Substitute.For<IValidator<SonarrConfiguration>>();
+            var loader =
+                new ConfigurationLoader<SonarrConfiguration>(provider, fs, new DefaultObjectFactory(), validator);
 
             var fakeFiles = new List<string>
             {
@@ -118,10 +88,12 @@ namespace Trash.Tests.Config
         [Test]
         public void Parse_using_stream()
         {
+            var validator = Substitute.For<IValidator<SonarrConfiguration>>();
             var configLoader = new ConfigurationLoader<SonarrConfiguration>(
                 Substitute.For<IConfigurationProvider>(),
                 Substitute.For<IFileSystem>(),
-                new DefaultObjectFactory());
+                new DefaultObjectFactory(),
+                validator);
 
             var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
@@ -156,12 +128,20 @@ namespace Trash.Tests.Config
         }
 
         [Test]
-        public void Validation_failure_throws()
+        public void Throw_when_validation_fails()
         {
-            var configLoader = new ConfigurationLoader<TestConfigValidFalse>(
+            var validator = Substitute.For<IValidator<TestConfig>>();
+            var configLoader = new ConfigurationLoader<TestConfig>(
                 Substitute.For<IConfigurationProvider>(),
                 Substitute.For<IFileSystem>(),
-                new DefaultObjectFactory());
+                new DefaultObjectFactory(),
+                validator);
+
+            // force the validator to return a validation error
+            validator.Validate(Arg.Any<TestConfig>()).Returns(new ValidationResult
+            {
+                Errors = {new ValidationFailure("PropertyName", "Test Validation Failure")}
+            });
 
             var testYml = @"
 fubar:
@@ -169,17 +149,18 @@ fubar:
 ";
             Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "fubar");
 
-            act.Should().Throw<ConfigurationException>()
-                .WithMessage($"*{TestConfigValidFalse.Msg}");
+            act.Should().Throw<ConfigurationException>();
         }
 
         [Test]
         public void Validation_success_does_not_throw()
         {
-            var configLoader = new ConfigurationLoader<TestConfigValidTrue>(
+            var validator = Substitute.For<IValidator<TestConfig>>();
+            var configLoader = new ConfigurationLoader<TestConfig>(
                 Substitute.For<IConfigurationProvider>(),
                 Substitute.For<IFileSystem>(),
-                new DefaultObjectFactory());
+                new DefaultObjectFactory(),
+                validator);
 
             var testYml = @"
 fubar:

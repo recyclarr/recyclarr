@@ -5,7 +5,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
-    <ProjectReference Include="..\Trash.TestLibrary\Trash.TestLibrary.csproj" />
-    <ProjectReference Include="..\Trash\Trash.csproj" />
+    <ProjectReference Include="..\TrashLib.TestLibrary\TrashLib.TestLibrary.csproj" />
+    <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
   </ItemGroup>
 </Project>

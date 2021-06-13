@@ -7,6 +7,7 @@ using Common.Extensions;
 using Flurl;
 using Flurl.Http;
 using Serilog;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile
 {

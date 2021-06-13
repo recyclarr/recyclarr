@@ -8,7 +8,7 @@ using NUnit.Framework;
 using Serilog;
 using TestLibrary.FluentAssertions;
 using Trash.TestLibrary;
-using TrashLib.Radarr;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Processors;

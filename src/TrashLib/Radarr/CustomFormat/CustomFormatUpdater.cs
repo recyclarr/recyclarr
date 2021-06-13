@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.Extensions;
 using Serilog;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Processors;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
 

@@ -1,4 +1,4 @@
-namespace TrashLib
+namespace TrashLib.Config
 {
     public interface IServerInfo
     {

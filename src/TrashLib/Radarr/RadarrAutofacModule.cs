@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
 using TrashLib.Config;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Guide;
@@ -21,6 +22,8 @@ namespace TrashLib.Radarr
             builder.RegisterType<CustomFormatService>().As<ICustomFormatService>();
             builder.RegisterType<QualityProfileService>().As<IQualityProfileService>();
 
+            // Configuration
+            builder.RegisterType<RadarrValidationMessages>().As<IRadarrValidationMessages>();
             builder.Register(c =>
                 {
                     var config = c.Resolve<IConfigurationProvider>().ActiveConfiguration;

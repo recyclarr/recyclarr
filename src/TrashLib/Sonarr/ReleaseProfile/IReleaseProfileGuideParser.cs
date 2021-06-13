@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile
 {

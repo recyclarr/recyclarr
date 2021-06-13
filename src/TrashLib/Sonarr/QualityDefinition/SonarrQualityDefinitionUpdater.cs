@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Serilog;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.QualityDefinition
 {

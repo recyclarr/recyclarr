@@ -5,7 +5,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using Trash.Command.Helpers;
 
-namespace Trash.Tests.Command
+namespace Trash.Tests.Command.Helpers
 {
     [TestFixture]
     [Parallelizable(ParallelScope.All)]

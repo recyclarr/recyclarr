@@ -3,7 +3,7 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Trash.TestLibrary;
-using TrashLib.Radarr;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
 
