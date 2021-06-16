@@ -2,7 +2,7 @@
 {
     public abstract class ServiceConfiguration : IServiceConfiguration
     {
-        public string BaseUrl { get; init; } = "";
-        public string ApiKey { get; init; } = "";
+        public string BaseUrl { get; set; } = "";
+        public string ApiKey { get; set; } = "";
     }
 }

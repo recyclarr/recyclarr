@@ -9,6 +9,7 @@
     <PackageReference Include="System.Data.HashFunction.FNV" />
     <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="morelinq" />
+    <PackageReference Include="LibGit2Sharp" />
   </ItemGroup>
 
   <ItemGroup>

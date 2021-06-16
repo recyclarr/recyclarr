@@ -2,8 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Common;
 using FluentAssertions;
-using Flurl.Http.Testing;
 using Newtonsoft.Json.Linq;
+using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using TestLibrary.FluentAssertions;
@@ -55,24 +55,17 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
         public void Guide_processor_behaves_as_expected_with_normal_guide_data()
         {
             var ctx = new Context();
-            var guideProcessor =
-                new GuideProcessor(ctx.Logger, new GithubCustomFormatJsonRequester(),
-                    () => new TestGuideProcessorSteps());
+            var guideService = Substitute.For<IRadarrGuideService>();
+            var guideProcessor = new GuideProcessor(ctx.Logger, guideService, () => new TestGuideProcessorSteps());
 
-            // simulate guide data
-            using var testHttp = new HttpTest();
-            testHttp.RespondWithJson(new[]
+            // Simulate custom format JSON data from local Git repository
+            guideService.GetCustomFormatJson().Returns(new[]
             {
-                new {name = "ImportableCustomFormat1.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "ImportableCustomFormat2.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "NoScore.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "WontBeInConfig.json", type = "file", download_url = "http://not_real/file.json"}
+                ctx.Data.ReadData("ImportableCustomFormat1.json"),
+                ctx.Data.ReadData("ImportableCustomFormat2.json"),
+                ctx.Data.ReadData("NoScore.json"),
+                ctx.Data.ReadData("WontBeInConfig.json")
             });
-
-            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat1.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat2.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("NoScore.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("WontBeInConfig.json"));
 
             // Simulate user config in YAML
             var config = new List<CustomFormatConfig>

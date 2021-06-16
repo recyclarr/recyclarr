@@ -37,13 +37,12 @@ namespace TrashLib.Radarr
 
             // Custom Format Support
             builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
-            builder.RegisterType<GithubCustomFormatJsonRequester>().As<IRadarrGuideService>();
+            builder.RegisterType<LocalRepoCustomFormatJsonParser>().As<IRadarrGuideService>();
             builder.RegisterType<CachePersister>().As<ICachePersister>();
 
             // Guide Processor
-            builder.RegisterType<GuideProcessor>()
-                .As<
-                    IGuideProcessor>(); // todo: register as singleton to avoid parsing guide multiple times when using 2 or more instances in config
+            // todo: register as singleton to avoid parsing guide multiple times when using 2 or more instances in config
+            builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
             builder.RegisterAggregateService<IGuideProcessorSteps>();
             builder.RegisterType<CustomFormatStep>().As<ICustomFormatStep>();
             builder.RegisterType<ConfigStep>().As<IConfigStep>();
