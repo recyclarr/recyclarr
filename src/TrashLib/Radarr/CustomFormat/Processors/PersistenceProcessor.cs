@@ -19,7 +19,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
 
     internal class PersistenceProcessor : IPersistenceProcessor
     {
-        private readonly IConfigurationProvider _configProvider;
+        private readonly IConfigurationProvider<RadarrConfiguration> _configProvider;
         private readonly ICustomFormatService _customFormatService;
         private readonly IQualityProfileService _qualityProfileService;
         private readonly Func<IPersistenceProcessorSteps> _stepsFactory;
@@ -28,7 +28,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         public PersistenceProcessor(
             ICustomFormatService customFormatService,
             IQualityProfileService qualityProfileService,
-            IConfigurationProvider configProvider,
+            IConfigurationProvider<RadarrConfiguration> configProvider,
             Func<IPersistenceProcessorSteps> stepsFactory)
         {
             _customFormatService = customFormatService;
@@ -52,7 +52,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors
             _steps = _stepsFactory();
         }
 
-        public async Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
+        public async Task PersistCustomFormats(
+            IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
         {
@@ -64,7 +65,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
             _steps.JsonTransactionStep.Process(guideCfs, radarrCfs);
 
             // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
-            var config = (RadarrConfiguration) _configProvider.ActiveConfiguration;
+            var config = _configProvider.ActiveConfiguration;
             if (config.DeleteOldCustomFormats)
             {
                 _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, radarrCfs);

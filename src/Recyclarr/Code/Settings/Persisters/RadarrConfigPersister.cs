@@ -14,7 +14,7 @@ namespace Recyclarr.Code.Settings.Persisters
 
         private const string Filename = "radarr.json";
 
-        public IList<RadarrConfiguration> Load()
+        public ICollection<RadarrConfiguration> Load()
         {
             return _persister.LoadSettings<List<RadarrConfiguration>>(Filename);
         }

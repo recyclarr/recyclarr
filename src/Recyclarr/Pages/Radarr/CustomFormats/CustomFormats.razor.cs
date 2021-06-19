@@ -15,35 +15,17 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
     [UsedImplicitly]
     public partial class CustomFormats : IDisposable
     {
-        private readonly Queue<Func<Task>> _afterRenderActions = new();
         private CustomFormatChooser? _cfChooser;
-        private IList<RadarrConfiguration> _configs = new List<RadarrConfiguration>();
         private HashSet<SelectableCustomFormat> _currentSelection = new();
-        private RadarrConfiguration? _selectedConfig;
-
-        private RadarrConfiguration? SelectedConfig
-        {
-            get => _selectedConfig;
-            set
-            {
-                _selectedConfig = value;
-                UpdateSelectedCustomFormats();
-                _afterRenderActions.Enqueue(async ()
-                    => await LocalStorage.SetItemAsync("selectedInstance", _selectedConfig?.BaseUrl));
-            }
-        }
 
         [CascadingParameter]
         public CustomFormatAccessLayout? CfAccessor { get; set; }
 
-        [Inject]
-        public IDialogService DialogService { get; set; } = default!;
+        // [Inject]
+        // public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
         public IRadarrConfigPersister SettingsPersister { get; set; } = default!;
-
-        [Inject]
-        public ILocalStorageService LocalStorage { get; set; } = default!;
 
         private bool? SelectAllCheckbox { get; set; } = false;
         private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashIds.First()).ToList();
@@ -67,29 +49,18 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
 
             _configs = SettingsPersister.Load();
 
-            _afterRenderActions.Enqueue(async () =>
-            {
-                var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-                var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-                _selectedConfig = instanceToSelect ?? _configs.FirstOrDefault();
-                UpdateSelectedCustomFormats();
-            });
+            // _afterRenderActions.Enqueue(async () =>
+            // {
+                // var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
+                // var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
+                // _selectedConfig = instanceToSelect ?? _configs.FirstOrDefault();
+                // UpdateSelectedCustomFormats();
+            // });
 
             if (CfAccessor != null)
             {
                 CfAccessor.OnReload += OnReloadCompleted;
             }
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            while (_afterRenderActions.TryDequeue(out var action))
-            {
-                await action.Invoke();
-                StateHasChanged();
-            }
-
-            await base.OnAfterRenderAsync(firstRender);
         }
 
         private void OnReloadCompleted()

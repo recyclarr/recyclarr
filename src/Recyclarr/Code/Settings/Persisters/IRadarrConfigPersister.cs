@@ -5,7 +5,7 @@ namespace Recyclarr.Code.Settings.Persisters
 {
     public interface IRadarrConfigPersister
     {
-        IList<RadarrConfiguration> Load();
+        ICollection<RadarrConfiguration> Load();
         void Save(IEnumerable<RadarrConfiguration> settings);
     }
 }

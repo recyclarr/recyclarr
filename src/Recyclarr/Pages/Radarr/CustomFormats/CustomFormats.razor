@@ -12,12 +12,7 @@
             Refresh
         </MudButton>
     </div>
-    <MudSelect @bind-Value="@SelectedConfig" Label="Select Radarr Server" Class="mt-3 mt-sm-0">
-        @foreach (var instance in _configs)
-        {
-            <MudSelectItem Value="@instance">@instance.BaseUrl</MudSelectItem>
-        }
-    </MudSelect>
+    <ServerSelector />
 </div>
 
 @if (_selectedConfig == null)
