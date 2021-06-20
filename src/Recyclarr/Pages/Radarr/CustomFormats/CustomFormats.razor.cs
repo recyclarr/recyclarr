@@ -190,7 +190,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
 
         private static CustomFormatConfig CreateCustomFormatConfig(CustomFormatIdentifier cf)
         {
-            return new()
+            return new CustomFormatConfig
             {
                 TrashIds = new List<string> {cf.TrashId},
                 Names = new List<string> {cf.Name}

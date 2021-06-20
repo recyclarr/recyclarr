@@ -32,7 +32,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
 
         private ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
         {
-            return new(cfName, trashId, new JObject())
+            return new ProcessedCustomFormatData(cfName, trashId, new JObject())
             {
                 CacheEntry = new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId}
             };

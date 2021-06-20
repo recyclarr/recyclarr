@@ -39,5 +39,3 @@ namespace Recyclarr.Pages.Main
         }
     }
 }
-
-

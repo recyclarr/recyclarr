@@ -113,7 +113,7 @@ namespace TrashLib.Sonarr.ReleaseProfile
 
         private static Regex BuildRegex(string regex)
         {
-            return new(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            return new Regex(regex, RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
 
         private Url BuildUrl(ReleaseProfileType profileName)
