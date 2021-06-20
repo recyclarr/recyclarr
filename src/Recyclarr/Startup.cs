@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Autofac;
 using Blazored.LocalStorage;
 using BlazorPro.BlazorSize;
@@ -8,12 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MudBlazor.Services;
-using Recyclarr.Code.Radarr;
-using Recyclarr.Code.Settings;
-using Recyclarr.Code.Settings.Persisters;
-using Serilog;
-using TrashLib.Config;
-using TrashLib.Radarr;
 
 namespace Recyclarr
 {
@@ -38,26 +31,7 @@ namespace Recyclarr
             services.AddBlazoredLocalStorage();
         }
 
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            builder.RegisterModule<RadarrAutofacModule>();
-
-            builder.Register(_ => new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .CreateLogger())
-                .As<ILogger>()
-                .SingleInstance();
-
-            builder.RegisterType<CustomFormatRepository>();
-            builder.RegisterType<ResizeListener>().As<IResizeListener>();
-            builder.RegisterType<FileSystem>().As<IFileSystem>();
-            builder.RegisterType<ResourcePaths>().As<IResourcePaths>();
-
-            // Persisters
-            builder.RegisterType<SettingsPersister>().As<ISettingsPersister>();
-            builder.RegisterType<AppSettingsPersister>().As<IAppSettingsPersister>();
-            builder.RegisterType<RadarrConfigPersister>().As<IRadarrConfigPersister>();
-        }
+        public void ConfigureContainer(ContainerBuilder builder) => CompositionRoot.Build(builder);
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

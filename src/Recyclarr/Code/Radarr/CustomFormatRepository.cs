@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,36 +22,38 @@ namespace Recyclarr.Code.Radarr
     public class CustomFormatRepository
     {
         private readonly IRadarrGuideService _guideService;
-        private readonly List<CustomFormatIdentifier> _customFormatIdentifiers = new();
+        private List<CustomFormatIdentifier>? _customFormatIdentifiers;
 
         public CustomFormatRepository(IRadarrGuideService guideService)
         {
             _guideService = guideService;
         }
 
-        public IList<CustomFormatIdentifier> Identifiers => _customFormatIdentifiers;
-        public bool IsLoaded { get; private set; }
+        public IList<CustomFormatIdentifier> Identifiers =>
+            _customFormatIdentifiers ?? throw new NullReferenceException(
+                "CustomFormatRepository.BuildRepository() must be called before requesting a list of CF identifiers");
+
+        public bool IsLoaded => _customFormatIdentifiers != null;
 
         public async Task ForceRebuildRepository()
         {
-            IsLoaded = false;
-            _customFormatIdentifiers.Clear();
+            _customFormatIdentifiers = null;
             await BuildRepository();
         }
 
         public async Task<bool> BuildRepository()
         {
-            if (!IsLoaded)
+            if (_customFormatIdentifiers != null)
             {
-                _customFormatIdentifiers.AddRange((await _guideService.GetCustomFormatJson())
-                    .Select(JObject.Parse)
-                    .Select(json => new CustomFormatIdentifier((string) json["name"], (string) json["trash_id"])));
-
-                IsLoaded = true;
-                return true;
+                return false;
             }
 
-            return false;
+            _customFormatIdentifiers = (await _guideService.GetCustomFormatJson())
+                .Select(JObject.Parse)
+                .Select(json => new CustomFormatIdentifier((string) json["name"], (string) json["trash_id"]))
+                .ToList();
+
+            return true;
         }
     }
 }

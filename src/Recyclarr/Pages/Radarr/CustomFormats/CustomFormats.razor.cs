@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Blazored.LocalStorage;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Recyclarr.Code.Radarr;
 using Recyclarr.Code.Settings.Persisters;
+using Recyclarr.Components;
+using TrashLib.Config;
 using TrashLib.Radarr.Config;
 
 namespace Recyclarr.Pages.Radarr.CustomFormats
@@ -17,15 +18,19 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
     {
         private CustomFormatChooser? _cfChooser;
         private HashSet<SelectableCustomFormat> _currentSelection = new();
+        private ServerSelector<RadarrConfiguration> _serverSelector = default!;
 
         [CascadingParameter]
         public CustomFormatAccessLayout? CfAccessor { get; set; }
 
-        // [Inject]
-        // public IDialogService DialogService { get; set; } = default!;
+        [Inject]
+        public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
-        public IRadarrConfigPersister SettingsPersister { get; set; } = default!;
+        public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
+
+        [Inject]
+        public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
 
         private bool? SelectAllCheckbox { get; set; } = false;
         private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashIds.First()).ToList();
@@ -47,14 +52,12 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         {
             await base.OnInitializedAsync();
 
-            _configs = SettingsPersister.Load();
-
             // _afterRenderActions.Enqueue(async () =>
             // {
-                // var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-                // var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-                // _selectedConfig = instanceToSelect ?? _configs.FirstOrDefault();
-                // UpdateSelectedCustomFormats();
+            // var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
+            // var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
+            // _serverSelector.Selection = instanceToSelect ?? _configs.FirstOrDefault();
+            // UpdateSelectedCustomFormats();
             // });
 
             if (CfAccessor != null)
@@ -69,14 +72,14 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
             StateHasChanged();
         }
 
-        private void UpdateSelectedCustomFormats()
+        private void UpdateSelectedCustomFormats(RadarrConfiguration? selection)
         {
-            if (_selectedConfig == null)
+            if (selection == null)
             {
                 return;
             }
 
-            _currentSelection = _selectedConfig.CustomFormats
+            _currentSelection = selection.CustomFormats
                 .Select(cf =>
                 {
                     var exists = CfAccessor?.CfRepository.Identifiers.Any(id2 => id2.TrashId == cf.TrashIds.First());
@@ -91,15 +94,15 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         {
             _cfChooser?.RequestRefreshList();
 
-            if (_selectedConfig != null)
+            if (_serverSelector.Selection != null)
             {
-                _selectedConfig.CustomFormats = _currentSelection
+                _serverSelector.Selection.CustomFormats = _currentSelection
                     .Where(s => s.ExistsInGuide)
                     .Select(s => s.Item)
                     .ToList();
             }
 
-            SettingsPersister.Save(_configs);
+            ConfigPersister.Save(ConfigProvider.Configs);
         }
 
         private IEnumerable<SelectableCustomFormat> GetSelected() => _currentSelection.Where(i => i.Selected);

@@ -1,5 +1,7 @@
 @page "/radarr/custom-formats"
 @layout CustomFormatAccessLayout
+@using Recyclarr.Components
+@using TrashLib.Radarr.Config
 
 <div class="d-flex mb-4 flex-column flex-sm-row">
     <div class="d-flex align-center">
@@ -12,10 +14,14 @@
             Refresh
         </MudButton>
     </div>
-    <ServerSelector />
+    <ServerSelector
+        @ref="@_serverSelector"
+        TConfig="RadarrConfiguration"
+        Label="Choose Radarr Server"
+        SelectionChanged="@UpdateSelectedCustomFormats" />
 </div>
 
-@if (_selectedConfig == null)
+@if (_serverSelector.Selection == null)
 {
     <MudContainer Class="d-flex flex-column align-center">
         <MudText Align="Align.Center" Class="my-2 mud-error-text">

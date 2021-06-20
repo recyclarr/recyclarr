@@ -24,8 +24,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var cfApi = Substitute.For<ICustomFormatService>();
             var qpApi = Substitute.For<IQualityProfileService>();
 
-            var configProvider = Substitute.For<IConfigurationProvider>();
-            configProvider.ActiveConfiguration = new RadarrConfiguration {DeleteOldCustomFormats = true};
+            var configProvider = Substitute.For<IConfigProvider<RadarrConfiguration>>();
+            configProvider.Active.Returns(new RadarrConfiguration {DeleteOldCustomFormats = true});
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = new Collection<TrashIdMapping>();
@@ -44,8 +44,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var cfApi = Substitute.For<ICustomFormatService>();
             var qpApi = Substitute.For<IQualityProfileService>();
 
-            var configProvider = Substitute.For<IConfigurationProvider>();
-            configProvider.ActiveConfiguration = new RadarrConfiguration {DeleteOldCustomFormats = false};
+            var configProvider = Substitute.For<IConfigProvider<RadarrConfiguration>>();
+            configProvider.Active.Returns(new RadarrConfiguration {DeleteOldCustomFormats = false});
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
@@ -64,7 +64,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var steps = Substitute.For<IPersistenceProcessorSteps>();
             var cfApi = Substitute.For<ICustomFormatService>();
             var qpApi = Substitute.For<IQualityProfileService>();
-            var configProvider = Substitute.For<IConfigurationProvider>();
+            var configProvider = Substitute.For<IConfigProvider<RadarrConfiguration>>();
 
             var guideCfs = Array.Empty<ProcessedCustomFormatData>();
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
@@ -72,10 +72,10 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
 
             var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
 
-            configProvider.ActiveConfiguration = new RadarrConfiguration {DeleteOldCustomFormats = false};
+            configProvider.Active = new RadarrConfiguration {DeleteOldCustomFormats = false};
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
-            configProvider.ActiveConfiguration = new RadarrConfiguration {DeleteOldCustomFormats = true};
+            configProvider.Active = new RadarrConfiguration {DeleteOldCustomFormats = true};
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
             steps.JsonTransactionStep.Received(1)

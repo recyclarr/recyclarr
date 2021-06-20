@@ -3,14 +3,14 @@
 <MudButton Class="mud-theme-primary mb-4" OnClick="@OnAddServer">Add Server</MudButton>
 
 <MudPaper Outlined="true" Class="d-flex justify-center pa-4">
-    @if (_instances.Count == 0)
+    @if (ConfigProvider.Configs.Count == 0)
     {
         <MudText Typo="Typo.h6">No Servers Configured</MudText>
     }
     else
     {
         <MudGrid>
-            @foreach (var instance in _instances)
+            @foreach (var instance in ConfigProvider.Configs)
             {
                 <MudItem xs="12" sm="6">
                     <MudCard Elevation="3" Style="background-color: #2f2e3a" Outlined="true">

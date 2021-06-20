@@ -15,13 +15,13 @@ namespace Trash.Config
     public class ConfigurationLoader<T> : IConfigurationLoader<T>
         where T : IServiceConfiguration
     {
-        private readonly IConfigurationProvider _configProvider;
+        private readonly IConfigProvider<T> _configProvider;
         private readonly IDeserializer _deserializer;
         private readonly IFileSystem _fileSystem;
         private readonly IValidator<T> _validator;
 
         public ConfigurationLoader(
-            IConfigurationProvider configProvider,
+            IConfigProvider<T> configProvider,
             IFileSystem fileSystem,
             IObjectFactory objectFactory,
             IValidator<T> validator)
@@ -86,7 +86,7 @@ namespace Trash.Config
         {
             foreach (var config in configFiles.SelectMany(file => Load(file, configSection)))
             {
-                _configProvider.ActiveConfiguration = config;
+                _configProvider.Active = config;
                 yield return config;
             }
         }

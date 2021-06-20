@@ -59,7 +59,7 @@ namespace TrashLib.Radarr.CustomFormat
         {
             Log.Debug("Updating cache");
             CfCache = new CustomFormatCache();
-            CfCache!.TrashIdMappings.AddRange(customFormats
+            CfCache.TrashIdMappings.AddRange(customFormats
                 .Where(cf => cf.CacheEntry != null)
                 .Select(cf => cf.CacheEntry!));
         }

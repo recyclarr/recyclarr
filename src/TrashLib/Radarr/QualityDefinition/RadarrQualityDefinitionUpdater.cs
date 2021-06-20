@@ -29,7 +29,7 @@ namespace TrashLib.Radarr.QualityDefinition
             Log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition!.Type);
             var qualityDefinitions = _parser.ParseMarkdown(await _parser.GetMarkdownData());
 
-            var selectedQuality = qualityDefinitions[config.QualityDefinition!.Type];
+            var selectedQuality = qualityDefinitions[config.QualityDefinition.Type];
 
             // Fix an out of range ratio and warn the user
             if (config.QualityDefinition.PreferredRatio is < 0 or > 1)

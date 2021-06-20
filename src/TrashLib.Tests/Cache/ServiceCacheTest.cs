@@ -24,7 +24,7 @@ namespace TrashLib.Tests.Cache
             {
                 Filesystem = fs ?? Substitute.For<IFileSystem>();
                 StoragePath = Substitute.For<ICacheStoragePath>();
-                ConfigProvider = Substitute.For<IConfigurationProvider>();
+                ServerInfo = Substitute.For<IServerInfo>();
                 JsonSettings = new JsonSerializerSettings
                 {
                     Formatting = Formatting.Indented,
@@ -35,15 +35,14 @@ namespace TrashLib.Tests.Cache
                 };
 
                 // Set up a default for the active config's base URL. This is used to generate part of the path
-                ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-                ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
+                ServerInfo.BaseUrl.Returns("http://localhost:1234");
 
-                Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
+                Cache = new ServiceCache(Filesystem, StoragePath, ServerInfo, Substitute.For<ILogger>());
             }
 
             public JsonSerializerSettings JsonSettings { get; }
             public ServiceCache Cache { get; }
-            public IConfigurationProvider ConfigProvider { get; }
+            public IServerInfo ServerInfo { get; }
             public ICacheStoragePath StoragePath { get; }
             public IFileSystem Filesystem { get; }
         }
@@ -187,8 +186,7 @@ namespace TrashLib.Tests.Cache
             ctx.Cache.Load<ObjectWithAttribute>();
 
             // Change the active config & base URL so we get a different path
-            ctx.ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-            ctx.ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
+            ctx.ServerInfo.BaseUrl.Returns("http://localhost:5678");
 
             ctx.Cache.Load<ObjectWithAttribute>();
 

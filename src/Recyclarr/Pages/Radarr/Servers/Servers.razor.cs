@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
@@ -12,18 +11,14 @@ namespace Recyclarr.Pages.Radarr.Servers
     [UsedImplicitly]
     public partial class Servers
     {
-        private IList<RadarrConfiguration> _instances = default!;
-
         [Inject]
         public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
-        public IRadarrConfigPersister SettingsPersister { get; set; } = default!;
+        public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
 
-        protected override void OnInitialized()
-        {
-            _instances = SettingsPersister.Load();
-        }
+        [Inject]
+        public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
 
         private async Task<bool> ShowEditServerModal(string title, ServiceConfiguration instance)
         {
@@ -55,7 +50,7 @@ namespace Recyclarr.Pages.Radarr.Servers
             var item = new RadarrConfiguration();
             if (await ShowEditServerModal("Add Server", item))
             {
-                _instances.Add(item);
+                ConfigProvider.Configs.Add(item);
                 SaveServers();
             }
         }
@@ -68,7 +63,7 @@ namespace Recyclarr.Pages.Radarr.Servers
 
         private void SaveServers()
         {
-            SettingsPersister.Save(_instances);
+            ConfigPersister.Save(ConfigProvider.Configs);
         }
 
         private async Task OnDelete(RadarrConfiguration item)
@@ -81,7 +76,7 @@ namespace Recyclarr.Pages.Radarr.Servers
 
             if (shouldDelete == true)
             {
-                _instances.Remove(item);
+                ConfigProvider.Configs.Remove(item);
                 SaveServers();
             }
         }

@@ -1,66 +1,13 @@
-﻿@using TrashLib.Radarr.Config
-@using Blazored.LocalStorage
-@using Recyclarr.Code.Settings.Persisters
-@using TrashLib.Config
+﻿@typeparam TConfig
 
-<MudSelect @bind-Value="@SelectedConfig" Label="@Label" Class="mt-3 mt-sm-0">
-    @foreach (var instance in _configs)
+<MudSelect
+    T="TConfig"
+    Value="@Selection"
+    ValueChanged="OnSelectionChanged"
+    Label="@Label"
+    Class="mt-3 mt-sm-0">
+    @foreach (var instance in ConfigProvider.Configs)
     {
         <MudSelectItem Value="@instance">@instance.BaseUrl</MudSelectItem>
     }
 </MudSelect>
-
-@code {
-
-
-    private IList<RadarrConfiguration> _configs = new List<RadarrConfiguration>();
-    private readonly Queue<Func<Task>> _afterRenderActions = new();
-    private RadarrConfiguration? _selectedConfig;
-
-    [Inject]
-    public ILocalStorageService LocalStorage { get; set; } = default!;
-
-    [Inject]
-    public IRadarrConfigPersister SettingsPersister { get; set; } = default!;
-
-    [Parameter]
-    public string Label { get; set; } = "Select Server";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        _configs = SettingsPersister.Load();
-
-        _afterRenderActions.Enqueue(async () =>
-        {
-            var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-            var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-            _selectedConfig = instanceToSelect ?? _configs.FirstOrDefault();
-            UpdateSelectedCustomFormats();
-        });
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        while (_afterRenderActions.TryDequeue(out var action))
-        {
-            await action.Invoke();
-            StateHasChanged();
-        }
-
-        await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private RadarrConfiguration? SelectedConfig
-    {
-        get => _selectedConfig;
-        set
-        {
-            _selectedConfig = value;
-            UpdateSelectedCustomFormats();
-            _afterRenderActions.Enqueue(async ()
-                => await LocalStorage.SetItemAsync("selectedInstance", _selectedConfig?.BaseUrl));
-        }
-    }
-}

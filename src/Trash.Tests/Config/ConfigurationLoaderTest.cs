@@ -54,13 +54,16 @@ namespace Trash.Tests.Config
             fs.File.OpenText(Arg.Any<string>())
                 .Returns(MockYaml(1, 2), MockYaml(3));
 
-            var provider = Substitute.For<IConfigurationProvider>();
+            var provider = Substitute.For<IConfigProvider<SonarrConfiguration>>();
             // var objectFactory = Substitute.For<IObjectFactory>();
             // objectFactory.Create(Arg.Any<Type>())
             // .Returns(t => Substitute.For(new[] {(Type)t[0]}, Array.Empty<object>()));
 
             var actualActiveConfigs = new List<SonarrConfiguration>();
-            provider.ActiveConfiguration = Arg.Do<SonarrConfiguration>(a => actualActiveConfigs.Add(a));
+            provider.Active.Returns(
+#pragma warning disable NS1004
+                Arg.Do<SonarrConfiguration>(a => actualActiveConfigs.Add(a)));
+#pragma warning restore NS1004
 
             var validator = Substitute.For<IValidator<SonarrConfiguration>>();
             var loader =
@@ -90,7 +93,7 @@ namespace Trash.Tests.Config
         {
             var validator = Substitute.For<IValidator<SonarrConfiguration>>();
             var configLoader = new ConfigurationLoader<SonarrConfiguration>(
-                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IConfigProvider<SonarrConfiguration>>(),
                 Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);
@@ -132,7 +135,7 @@ namespace Trash.Tests.Config
         {
             var validator = Substitute.For<IValidator<TestConfig>>();
             var configLoader = new ConfigurationLoader<TestConfig>(
-                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IConfigProvider<TestConfig>>(),
                 Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);
@@ -157,7 +160,7 @@ fubar:
         {
             var validator = Substitute.For<IValidator<TestConfig>>();
             var configLoader = new ConfigurationLoader<TestConfig>(
-                Substitute.For<IConfigurationProvider>(),
+                Substitute.For<IConfigProvider<TestConfig>>(),
                 Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);

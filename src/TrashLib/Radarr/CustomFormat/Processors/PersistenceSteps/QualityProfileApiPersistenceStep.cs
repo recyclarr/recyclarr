@@ -63,7 +63,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                         continue;
                     }
 
-                    json!["score"] = scoreToUse.Value;
+                    json["score"] = scoreToUse.Value;
                     _updatedScores.GetOrCreate(profileName)
                         .Add(new UpdatedFormatScore((string) json["name"], scoreToUse.Value, reason.Value));
                 }
