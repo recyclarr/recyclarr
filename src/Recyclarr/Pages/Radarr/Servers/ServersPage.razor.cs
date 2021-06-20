@@ -9,7 +9,7 @@ using TrashLib.Radarr.Config;
 namespace Recyclarr.Pages.Radarr.Servers
 {
     [UsedImplicitly]
-    public partial class Servers
+    public partial class ServersPage
     {
         [Inject]
         public IDialogService DialogService { get; set; } = default!;

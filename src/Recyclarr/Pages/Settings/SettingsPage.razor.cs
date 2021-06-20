@@ -9,7 +9,7 @@ using Recyclarr.Code.Settings.Persisters;
 namespace Recyclarr.Pages.Settings
 {
     [UsedImplicitly]
-    public partial class Settings
+    public partial class SettingsPage
     {
         private readonly HashSet<IValueWatcher> _changedValues = new();
         private ValueWatcher<string> _repoPath;

@@ -1,7 +1,3 @@
-@{
-    #nullable disable
-}
-
 <MudDialog>
     <DialogContent>
         <MudPaper Style="overflow-y: auto" MaxHeight="60vh" Elevation="0">
@@ -24,20 +20,20 @@
 @code
 {
     [CascadingParameter]
-    public MudDialogInstance Dialog { get; private set; }
+    public MudDialogInstance? Dialog { get; private set; }
 
     [Parameter]
-    public List<string> ExcludedCustomFormatTrashIds { get; set; }
+    public List<string>? ExcludedCustomFormatTrashIds { get; set; }
 
     private void Cancel()
     {
-        Dialog.Cancel();
+        Dialog?.Cancel();
     }
 
     private void Accept()
     {
-        Dialog.Close(DialogResult.Ok(_chooser.Selected));
+        Dialog?.Close(DialogResult.Ok(_chooser.Selected));
     }
 
-    private CustomFormatChooser _chooser;
+    private CustomFormatChooser _chooser = default!;
 }

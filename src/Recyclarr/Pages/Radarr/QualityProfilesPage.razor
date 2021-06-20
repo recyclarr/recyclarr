@@ -1,0 +1,76 @@
+@page "/radarr/quality-profiles"
+@using TrashLib.Radarr.CustomFormat.Api
+@using Recyclarr.Components
+@using TrashLib.Radarr.Config
+@using Newtonsoft.Json.Linq
+@using Recyclarr.Code.Settings.Persisters
+@using TrashLib.Config
+
+
+<div class="d-flex mb-4 flex-column flex-sm-row">
+    <ServerSelector TConfig="RadarrConfiguration"
+                    @ref="_serverSelector"
+                    Label="Choose Radarr Server"
+                    SelectionChanged="@OnSelectedInstanceChanged" />
+</div>
+
+<MudPaper Class="d-flex" Outlined="true">
+    @* <MudSelect @bind-Value="@_selectedProfile"> *@
+    @*     @foreach (var profile in _profiles) *@
+    @*     { *@
+    @*         <MudSelectItem></MudSelectItem> *@
+    @*     } *@
+    @* </MudSelect> *@
+    <MudList Clickable="true" @bind-SelectedItem="@_selectedProfile">
+        @foreach (var profile in _profiles)
+        {
+            <MudListItem>@((string)profile["name"])</MudListItem>
+        }
+    </MudList>
+
+    @if (_profiles != null)
+    {
+        <MudSimpleTable>
+            <thead>
+            <tr>
+                <th>Custom Format</th>
+                <th>New Score</th>
+                <th>Score in Radarr</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td></td>
+            </tr>
+
+            </tbody>
+
+        </MudSimpleTable>
+    }
+</MudPaper>
+
+@code {
+
+    [Inject]
+    public IQualityProfileService ProfileService { get; set; } = default!;
+
+    [Inject]
+    public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
+
+    [Inject]
+    public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _profiles = await ProfileService.GetQualityProfiles();
+    }
+
+    private void OnSelectedInstanceChanged(RadarrConfiguration? obj)
+    {
+    }
+
+    private ServerSelector<RadarrConfiguration>? _serverSelector;
+    private List<JObject>? _profiles;
+    private JObject? _selectedProfile;
+}

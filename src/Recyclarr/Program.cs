@@ -19,7 +19,7 @@ namespace Recyclarr
                 {
                     webBuilder
                         .UseStartup<Startup>()
-                        .UseUrls("http://*:7889"); // use injected ISettings interface here somehow
+                        .UseUrls("http://*:7889");
                 });
     }
 }

@@ -1,8 +1,4 @@
-@{
-    #nullable disable
-}
-
-<MudItem sm="6" Class="d-flex flex-column mud-width-full">
+<MudItem sm="5" Class="d-flex flex-column mud-width-full">
     <div class="d-flex align-center">
         <MudText Typo="Typo.h6">
             @Title
@@ -16,14 +12,14 @@
     </MudText>
 </MudItem>
 
-<MudItem sm="6" Class="mud-width-full">
+<MudItem sm="7" Class="mud-width-full">
     @ChildContent
 </MudItem>
 
 @code
 {
     [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    public RenderFragment? ChildContent { get; set; }
 
     [Parameter]
     public bool? IsSame { get; set; }

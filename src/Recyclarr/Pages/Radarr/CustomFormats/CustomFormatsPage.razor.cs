@@ -14,11 +14,11 @@ using TrashLib.Radarr.Config;
 namespace Recyclarr.Pages.Radarr.CustomFormats
 {
     [UsedImplicitly]
-    public partial class CustomFormats : IDisposable
+    public sealed partial class CustomFormatsPage : IDisposable
     {
         private CustomFormatChooser? _cfChooser;
         private HashSet<SelectableCustomFormat> _currentSelection = new();
-        private ServerSelector<RadarrConfiguration> _serverSelector = default!;
+        private ServerSelector<RadarrConfiguration>? _serverSelector;
 
         [CascadingParameter]
         public CustomFormatAccessLayout? CfAccessor { get; set; }
@@ -51,14 +51,6 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-
-            // _afterRenderActions.Enqueue(async () =>
-            // {
-            // var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-            // var instanceToSelect = _configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-            // _serverSelector.Selection = instanceToSelect ?? _configs.FirstOrDefault();
-            // UpdateSelectedCustomFormats();
-            // });
 
             if (CfAccessor != null)
             {
@@ -94,7 +86,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         {
             _cfChooser?.RequestRefreshList();
 
-            if (_serverSelector.Selection != null)
+            if (_serverSelector?.Selection != null)
             {
                 _serverSelector.Selection.CustomFormats = _currentSelection
                     .Where(s => s.ExistsInGuide)

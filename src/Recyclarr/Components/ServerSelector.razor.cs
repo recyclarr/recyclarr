@@ -38,7 +38,7 @@ namespace Recyclarr.Components
         {
             var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
             var instanceToSelect = ConfigProvider.Configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-            SetSelected(instanceToSelect ?? ConfigProvider.Configs.FirstOrDefault(), false);
+            await SetSelected(instanceToSelect ?? ConfigProvider.Configs.FirstOrDefault(), false);
         }
 
         private async Task SaveSelected()
@@ -59,17 +59,17 @@ namespace Recyclarr.Components
 
         private async Task OnSelectionChanged(TConfig selected)
         {
-            SetSelected(selected, true);
-            await SelectionChanged.InvokeAsync(Selection);
+            await SetSelected(selected, true);
         }
 
-        private void SetSelected(TConfig? value, bool shouldSave)
+        private async Task SetSelected(TConfig? value, bool shouldSave)
         {
             Selection = value;
             if (shouldSave)
             {
                 _afterRenderActions.Enqueue(SaveSelected);
             }
+            await SelectionChanged.InvokeAsync(Selection);
         }
     }
 }

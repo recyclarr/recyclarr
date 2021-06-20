@@ -14,14 +14,17 @@
             Refresh
         </MudButton>
     </div>
-    <ServerSelector
-        @ref="@_serverSelector"
-        TConfig="RadarrConfiguration"
+    <ServerSelector TConfig="RadarrConfiguration"
+        @ref="_serverSelector"
         Label="Choose Radarr Server"
         SelectionChanged="@UpdateSelectedCustomFormats" />
 </div>
 
-@if (_serverSelector.Selection == null)
+@if (_serverSelector == null)
+{
+    // Draw nothing until the selector has been initialized
+}
+else if (_serverSelector.Selection == null)
 {
     <MudContainer Class="d-flex flex-column align-center">
         <MudText Align="Align.Center" Class="my-2 mud-error-text">
