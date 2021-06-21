@@ -3,15 +3,16 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 using TrashLib.Config;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
 
 namespace TrashLib.Radarr.QualityDefinition.Api
 {
     internal class QualityDefinitionService : IQualityDefinitionService
     {
-        private readonly IServerInfo _serverInfo;
+        private readonly IServerInfo<RadarrConfiguration> _serverInfo;
 
-        public QualityDefinitionService(IServerInfo serverInfo)
+        public QualityDefinitionService(IServerInfo<RadarrConfiguration> serverInfo)
         {
             _serverInfo = serverInfo;
         }

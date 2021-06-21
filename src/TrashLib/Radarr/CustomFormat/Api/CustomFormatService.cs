@@ -4,15 +4,16 @@ using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
     internal class CustomFormatService : ICustomFormatService
     {
-        private readonly IServerInfo _serverInfo;
+        private readonly IServerInfo<RadarrConfiguration> _serverInfo;
 
-        public CustomFormatService(IServerInfo serverInfo)
+        public CustomFormatService(IServerInfo<RadarrConfiguration> serverInfo)
         {
             _serverInfo = serverInfo;
         }

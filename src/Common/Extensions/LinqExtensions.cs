@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Common.Extensions
 {
-    internal static class LinqExtensions
+    public static class LinqExtensions
     {
         internal static IEnumerable<TResult> FullOuterGroupJoin<TA, TB, TKey, TResult>(
             this IEnumerable<TA> a,
@@ -52,6 +52,18 @@ namespace Common.Extensions
                 select projection(xa, xb, key);
 
             return join;
+        }
+
+        // Taken from https://stackoverflow.com/a/9031044/157971
+        public static bool None<TSource>(this IEnumerable<TSource>? source)
+        {
+            return source == null || !source.Any();
+        }
+
+        // Taken from https://stackoverflow.com/a/9031044/157971
+        public static bool None<TSource>(this IEnumerable<TSource>? source, Func<TSource, bool> predicate)
+        {
+            return source == null || !source.Any(predicate);
         }
     }
 }

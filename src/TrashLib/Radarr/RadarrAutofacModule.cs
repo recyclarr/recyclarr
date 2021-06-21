@@ -1,3 +1,4 @@
+using System;
 using Autofac;
 using Autofac.Extras.AggregateService;
 using TrashLib.Config;
@@ -15,6 +16,20 @@ namespace TrashLib.Radarr
 {
     public class RadarrAutofacModule : Module
     {
+        class ServiceFactory<T>
+        {
+            private readonly Func<string, T> _factory;
+
+            public ServiceFactory(Func<string, T> factory)
+            {
+                _factory = factory;
+            }
+
+            public T Create(IServiceConfiguration config)
+            {
+                return _factory()
+            }
+        }
         protected override void Load(ContainerBuilder builder)
         {
             // Services

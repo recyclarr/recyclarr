@@ -35,6 +35,7 @@ namespace Trash.Tests.Config
             Justification = "YamlDotNet requires this type to be public so it may access it")]
         public class TestConfig : IServiceConfiguration
         {
+            public string ServiceId => "";
             public string BaseUrl => "";
             public string ApiKey => "";
         }

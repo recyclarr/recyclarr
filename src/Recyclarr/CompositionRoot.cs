@@ -28,15 +28,7 @@ namespace Recyclarr
             builder.RegisterType<SettingsPersister>().As<ISettingsPersister>();
             builder.RegisterType<AppSettingsPersister>().As<IAppSettingsPersister>();
 
-            builder.RegisterType<ConfigProvider>()
-                .As<IConfigProvider>()
-                .InstancePerLifetimeScope();
-
             SetupRadarrDependencies(builder);
-
-            builder.RegisterGeneric(typeof(GenericConfigProvider<>))
-                .As(typeof(IConfigProvider<>))
-                .InstancePerLifetimeScope();
         }
 
         private static void SetupRadarrDependencies(ContainerBuilder builder)

@@ -1,4 +1,5 @@
 using Autofac;
+using TrashLib.Config;
 
 namespace TrashLib.Cache
 {
@@ -6,6 +7,11 @@ namespace TrashLib.Cache
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterModule<ConfigAutofacModule>();
+
+            builder.RegisterGeneric(typeof(CacheGuidBuilder<>))
+                .As<ICacheGuidBuilder>();
+
             // Clients must register their own implementation of ICacheStoragePath
             builder.RegisterType<ServiceCache>().As<IServiceCache>();
         }

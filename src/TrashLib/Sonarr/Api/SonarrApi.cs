@@ -5,14 +5,15 @@ using Flurl;
 using Flurl.Http;
 using TrashLib.Config;
 using TrashLib.Sonarr.Api.Objects;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.Api
 {
     public class SonarrApi : ISonarrApi
     {
-        private readonly IServerInfo _serverInfo;
+        private readonly IServerInfo<SonarrConfiguration> _serverInfo;
 
-        public SonarrApi(IServerInfo serverInfo)
+        public SonarrApi(IServerInfo<SonarrConfiguration> serverInfo)
         {
             _serverInfo = serverInfo;
         }

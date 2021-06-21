@@ -11,6 +11,7 @@ namespace TrashLib.Radarr.Config
         public QualityDefinitionConfig? QualityDefinition { get; init; }
         public List<CustomFormatConfig> CustomFormats { get; set; } = new();
         public bool DeleteOldCustomFormats { get; init; }
+        public override string ServiceId => "radarr";
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

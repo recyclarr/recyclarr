@@ -4,14 +4,15 @@ using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
+using TrashLib.Radarr.Config;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
     internal class QualityProfileService : IQualityProfileService
     {
-        private readonly IServerInfo _serverInfo;
+        private readonly IServerInfo<RadarrConfiguration> _serverInfo;
 
-        public QualityProfileService(IServerInfo serverInfo)
+        public QualityProfileService(IServerInfo<RadarrConfiguration> serverInfo)
         {
             _serverInfo = serverInfo;
         }

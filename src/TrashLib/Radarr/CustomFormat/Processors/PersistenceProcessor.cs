@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TrashLib.Config;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Models;
@@ -19,7 +18,6 @@ namespace TrashLib.Radarr.CustomFormat.Processors
 
     internal class PersistenceProcessor : IPersistenceProcessor
     {
-        private readonly IConfigProvider<RadarrConfiguration> _configProvider;
         private readonly ICustomFormatService _customFormatService;
         private readonly IQualityProfileService _qualityProfileService;
         private readonly Func<IPersistenceProcessorSteps> _stepsFactory;
@@ -28,13 +26,11 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         public PersistenceProcessor(
             ICustomFormatService customFormatService,
             IQualityProfileService qualityProfileService,
-            IConfigProvider<RadarrConfiguration> configProvider,
             Func<IPersistenceProcessorSteps> stepsFactory)
         {
             _customFormatService = customFormatService;
             _qualityProfileService = qualityProfileService;
             _stepsFactory = stepsFactory;
-            _configProvider = configProvider;
             _steps = _stepsFactory();
         }
 
@@ -53,7 +49,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         }
 
         public async Task PersistCustomFormats(
-            IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
+            RadarrConfiguration config,
+            IEnumerable<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
         {
@@ -65,11 +62,12 @@ namespace TrashLib.Radarr.CustomFormat.Processors
             _steps.JsonTransactionStep.Process(guideCfs, radarrCfs);
 
             // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
-            var config = _configProvider.Active;
             if (config.DeleteOldCustomFormats)
             {
                 _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, radarrCfs);
             }
+
+            var customFormatService = _serviceFactory.CreateService<ICustomFormatService>(config);
 
             // Step 2: For each merged CF, persist it to Radarr via its API. This will involve a combination of updates
             // to existing CFs and creation of brand new ones, depending on what's already available in Radarr.

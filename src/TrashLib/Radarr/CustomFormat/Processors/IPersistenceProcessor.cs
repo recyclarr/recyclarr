@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
@@ -12,7 +13,9 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         IReadOnlyCollection<string> InvalidProfileNames { get; }
         CustomFormatTransactionData Transactions { get; }
 
-        Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
+        Task PersistCustomFormats(
+            RadarrConfiguration config,
+            IEnumerable<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores);
 

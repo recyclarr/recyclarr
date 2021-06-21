@@ -46,8 +46,10 @@ namespace TrashLib.Radarr.CustomFormat
             }
             else
             {
-                await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
-                    _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
+                await _persistenceProcessor.PersistCustomFormats(config,
+                    _guideProcessor.ProcessedCustomFormats,
+                    _guideProcessor.DeletedCustomFormatsInCache,
+                    _guideProcessor.ProfileScores);
 
                 PrintApiStatistics(_persistenceProcessor.Transactions);
                 PrintQualityProfileUpdates();

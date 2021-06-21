@@ -9,7 +9,11 @@ namespace TrashLib.Config
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ServerInfo>().As<IServerInfo>();
+            builder.RegisterGeneric(typeof(GenericConfigProvider<>))
+                .As(typeof(IConfigProvider<>))
+                .InstancePerLifetimeScope();
+
+            builder.RegisterGeneric(typeof(ServerInfo<>)).As(typeof(IServerInfo<>));
 
             builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
                 .AsClosedTypesOf(typeof(IValidator<>))

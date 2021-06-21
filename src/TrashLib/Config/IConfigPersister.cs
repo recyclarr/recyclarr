@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using TrashLib.Config;
 
-namespace Recyclarr.Code.Settings.Persisters
+namespace TrashLib.Config
 {
     public interface IConfigPersister<T>
         where T : IServiceConfiguration

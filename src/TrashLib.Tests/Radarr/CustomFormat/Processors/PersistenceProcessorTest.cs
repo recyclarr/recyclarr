@@ -31,7 +31,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var deletedCfsInCache = new Collection<TrashIdMapping>();
             var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-            var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
+            var processor = new PersistenceProcessor(cfApi, qpApi, () => steps);
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
             steps.JsonTransactionStep.Received().RecordDeletions(Arg.Is(deletedCfsInCache), Arg.Any<List<JObject>>());
@@ -51,7 +51,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
             var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-            var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
+            var processor = new PersistenceProcessor(cfApi, qpApi, () => steps);
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
             steps.JsonTransactionStep.DidNotReceive()
@@ -70,7 +70,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             var deletedCfsInCache = Array.Empty<TrashIdMapping>();
             var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-            var processor = new PersistenceProcessor(cfApi, qpApi, configProvider, () => steps);
+            var processor = new PersistenceProcessor(cfApi, qpApi, () => steps);
 
             configProvider.Active = new RadarrConfiguration {DeleteOldCustomFormats = false};
             processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);

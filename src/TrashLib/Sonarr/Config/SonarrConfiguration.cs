@@ -9,6 +9,7 @@ namespace TrashLib.Sonarr.Config
     {
         public IList<ReleaseProfileConfig> ReleaseProfiles { get; set; } = new List<ReleaseProfileConfig>();
         public SonarrQualityDefinitionType? QualityDefinition { get; init; }
+        public override string ServiceId => "sonarr";
     }
 
     public class ReleaseProfileConfig

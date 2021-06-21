@@ -13,25 +13,48 @@ using TrashLib.Config;
 
 namespace TrashLib.Cache
 {
+    public interface ICacheGuidBuilder
+    {
+        string MakeGuid();
+    }
+
+    internal class CacheGuidBuilder<TConfig> : ICacheGuidBuilder
+        where TConfig : IServiceConfiguration
+    {
+        private readonly IFNV1a _hash;
+        private readonly IConfigProvider<TConfig> _configProvider;
+
+        public CacheGuidBuilder(IConfigProvider<TConfig> configProvider)
+        {
+            _configProvider = configProvider;
+            _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
+        }
+
+        public string MakeGuid()
+        {
+            return _hash
+                .ComputeHash(Encoding.ASCII.GetBytes(_configProvider.Active.BaseUrl))
+                .AsHexString();
+        }
+    }
+
     internal class ServiceCache : IServiceCache
     {
         private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
         private readonly IFileSystem _fileSystem;
-        private readonly IFNV1a _hash;
-        private readonly IServerInfo _serverInfo;
+        private readonly ICacheGuidBuilder _guidBuilder;
         private readonly ICacheStoragePath _storagePath;
 
         public ServiceCache(
             IFileSystem fileSystem,
             ICacheStoragePath storagePath,
-            IServerInfo serverInfo,
+            ICacheGuidBuilder guidBuilder,
             ILogger log)
         {
             _fileSystem = fileSystem;
             _storagePath = storagePath;
-            _serverInfo = serverInfo;
+            _guidBuilder = guidBuilder;
             Log = log;
-            _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
         }
 
         private ILogger Log { get; }
@@ -83,13 +106,6 @@ namespace TrashLib.Cache
             return attribute.Name;
         }
 
-        private string BuildServiceGuid()
-        {
-            return _hash
-                .ComputeHash(Encoding.ASCII.GetBytes(_serverInfo.BaseUrl))
-                .AsHexString();
-        }
-
         private string PathFromAttribute<T>()
         {
             var objectName = GetCacheObjectNameAttribute<T>();
@@ -98,7 +114,7 @@ namespace TrashLib.Cache
                 throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
             }
 
-            return Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
+            return Path.Combine(_storagePath.Path, _guidBuilder.MakeGuid(), objectName + ".json");
         }
     }
 }

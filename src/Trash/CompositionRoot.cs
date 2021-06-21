@@ -44,10 +44,6 @@ namespace Trash
         {
             builder.RegisterModule<ConfigAutofacModule>();
 
-            builder.RegisterType<ConfigProvider>()
-                .As<IConfigProvider>()
-                .SingleInstance();
-
             builder.RegisterType<ObjectFactory>()
                 .As<IObjectFactory>();
 

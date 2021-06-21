@@ -31,7 +31,14 @@ namespace Recyclarr.Components
         {
             await base.OnInitializedAsync();
 
-            _afterRenderActions.Enqueue(LoadSelected);
+            if (!ConfigProvider.IsActiveValid())
+            {
+                _afterRenderActions.Enqueue(LoadSelected);
+            }
+            else
+            {
+                await SetSelected(ConfigProvider.Active, false);
+            }
         }
 
         private async Task LoadSelected()
