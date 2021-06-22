@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
-using Newtonsoft.Json.Linq;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
@@ -15,19 +15,19 @@ namespace TrashLib.Radarr.CustomFormat.Api
             _baseUrl = baseUrl;
         }
 
-        public async Task<List<JObject>> GetQualityProfiles()
+        public async Task<List<QualityProfileData>> GetQualityProfiles()
         {
             return await _baseUrl
                 .AppendPathSegment("qualityprofile")
-                .GetJsonAsync<List<JObject>>();
+                .GetJsonAsync<List<QualityProfileData>>();
         }
 
-        public async Task<JObject> UpdateQualityProfile(JObject profileJson, int id)
+        public async Task<QualityProfileData> UpdateQualityProfile(QualityProfileData profile, int profileId)
         {
             return await _baseUrl
-                .AppendPathSegment($"qualityprofile/{id}")
-                .PutJsonAsync(profileJson)
-                .ReceiveJson<JObject>();
+                .AppendPathSegment($"qualityprofile/{profileId}")
+                .PutJsonAsync(profile)
+                .ReceiveJson<QualityProfileData>();
         }
     }
 }

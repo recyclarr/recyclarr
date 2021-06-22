@@ -1,11 +1,12 @@
 @page "/radarr/quality-profiles"
 @using TrashLib.Radarr.CustomFormat.Api
+@using TrashLib.Radarr.CustomFormat.Api.Models
 @using TrashLib.Radarr.Config
 @using TrashLib.Config
 @using Recyclarr.Components
-@using Newtonsoft.Json.Linq
 @using Flurl.Http
-@using Newtonsoft.Json
+@using TrashLib.Cache
+@using TrashLib.Radarr.CustomFormat
 
 
 <div class="d-flex mb-4 flex-column flex-sm-row">
@@ -49,11 +50,11 @@
         return;
     }
 
-    <MudSelect @bind-Value="@_selectedProfileId" Class="mb-2" Style="width: auto">
+    <MudSelect @bind-Value="@SelectedProfile" Class="mb-2" Style="width: auto">
         @foreach (var profile in _profiles)
         {
-            <MudSelectItem @key="profile" Value="@((int) profile["id"])">
-                @((string) profile["name"])
+            <MudSelectItem @key="profile" Value="@profile">
+                @profile.Name
             </MudSelectItem>
         }
     </MudSelect>
@@ -76,13 +77,19 @@
         <tbody>
         @if (SelectedProfile != null)
         {
-            @foreach (var formatItem in SelectedProfile["formatItems"].Children<JObject>())
+            @foreach (var formatItem in SelectedProfile.FormatItems)
             {
                 <tr>
+                    <td>@formatItem.Name</td>
+                    <td>
+                        <MudTextField @bind-Value="@formatItem.Score"
+                                      FullWidth="false"
+                                      Margin="Margin.Dense"
+                                      Variant="Variant.Outlined"
+                                      Style="width: 100px" />
+                    </td>
                     <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>@((int)formatItem["score"])</td>
+                    <td>@formatItem.Score</td>
                 </tr>
             }
         }
@@ -108,6 +115,26 @@
         await base.OnInitializedAsync();
     }
 
+    class ProfileSelectionPageManager
+    {
+        private readonly Func<ICacheGuidBuilder, ICachePersister> _cachePersisterFactory;
+        private readonly Func<string, ICustomFormatService> _customFormatServiceFactory;
+
+        public ProfileSelectionPageManager(
+            Func<ICacheGuidBuilder, ICachePersister> cachePersisterFactory,
+            Func<string, ICustomFormatService> customFormatServiceFactory)
+        {
+            _cachePersisterFactory = cachePersisterFactory;
+            _customFormatServiceFactory = customFormatServiceFactory;
+        }
+
+        async Task RequestCustomFormatsAndUpdateCache(RadarrConfiguration config)
+        {
+            var cfService = _customFormatServiceFactory(config.BuildUrl());
+            var customFormats = await cfService.GetCustomFormats();
+        }
+    }
+
     private async Task OnSelectedInstanceChanged(RadarrConfiguration? activeConfig)
     {
         try
@@ -119,7 +146,14 @@
 
             if (activeConfig != null)
             {
-                _profiles.AddRange(await ProfileServiceFactory(activeConfig.BuildUrl()).GetQualityProfiles());
+                // todo:
+                // - Build the cache (for TrashID -> CfId mapping)
+                // - Need to pair guide score with current profile score
+                // - Exclude FormatItems that represent Custom Formats not selected by the user
+                //
+                var qualityProfiles = await ProfileServiceFactory(activeConfig.BuildUrl()).GetQualityProfiles();
+                qualityProfiles.Where(_activeConfig.CustomFormats)
+                _profiles.AddRange();
             }
 
             SelectedProfile = _profiles.FirstOrDefault();
@@ -134,7 +168,7 @@
 
     private RadarrConfiguration? _activeConfig;
     private ServerSelector<RadarrConfiguration>? _serverSelector;
-    private readonly List<JObject> _profiles = new();
+    private readonly List<QualityProfileData> _profiles = new();
     private Exception? _exception;
     private bool _loading;
 
@@ -143,11 +177,7 @@
         await OnSelectedInstanceChanged(_activeConfig);
     }
 
-    private JObject? SelectedProfile
-    {
-        get => _profiles.FirstOrDefault(p => (int) p["id"] == _selectedProfileId);
-        set => _selectedProfileId = (int?) value?["id"];
-    }
+    private QualityProfileData? SelectedProfile { get; set; }
 
-    private int? _selectedProfileId;
+    // private int? _selectedProfileId;
 }

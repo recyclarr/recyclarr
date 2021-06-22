@@ -17,24 +17,24 @@ namespace TrashLib.Radarr
 {
     public class RadarrAutofacModule : Module
     {
-        class CachePersisterFactory
-        {
-            private readonly Func<IServiceConfiguration, ICacheGuidBuilder> _guidBuilderFactory;
-            private readonly Func<ICacheGuidBuilder, ICachePersister> _persisterFactory;
-
-            public CachePersisterFactory(
-                Func<IServiceConfiguration, ICacheGuidBuilder> guidBuilderFactory,
-                Func<ICacheGuidBuilder, ICachePersister> persisterFactory)
-            {
-                _guidBuilderFactory = guidBuilderFactory;
-                _persisterFactory = persisterFactory;
-            }
-
-            public ICachePersister Create(IServiceConfiguration config)
-            {
-                return _persisterFactory(_guidBuilderFactory(config));
-            }
-        }
+        // class CachePersisterFactory
+        // {
+        //     private readonly Func<IServiceConfiguration, ICacheGuidBuilder> _guidBuilderFactory;
+        //     private readonly Func<ICacheGuidBuilder, ICachePersister> _persisterFactory;
+        //
+        //     public CachePersisterFactory(
+        //         Func<IServiceConfiguration, ICacheGuidBuilder> guidBuilderFactory,
+        //         Func<ICacheGuidBuilder, ICachePersister> persisterFactory)
+        //     {
+        //         _guidBuilderFactory = guidBuilderFactory;
+        //         _persisterFactory = persisterFactory;
+        //     }
+        //
+        //     public ICachePersister Create(IServiceConfiguration config)
+        //     {
+        //         return _persisterFactory(_guidBuilderFactory(config));
+        //     }
+        // }
 
         protected override void Load(ContainerBuilder builder)
         {

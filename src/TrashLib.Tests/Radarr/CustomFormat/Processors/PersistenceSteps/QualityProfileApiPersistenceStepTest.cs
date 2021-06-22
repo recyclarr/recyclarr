@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using FluentAssertions;
-using FluentAssertions.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -8,6 +7,7 @@ using NUnit.Framework;
 using TestLibrary.NSubstitute;
 using Trash.TestLibrary;
 using TrashLib.Radarr.CustomFormat.Api;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
@@ -43,7 +43,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()
+                .Returns(JsonConvert.DeserializeObject<List<QualityProfileData>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -59,7 +60,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var processor = new QualityProfileApiPersistenceStep();
             processor.Process(api, cfScores);
 
-            api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
+            api.DidNotReceive().UpdateQualityProfile(Arg.Any<QualityProfileData>(), Arg.Any<int>());
         }
 
         [Test]
@@ -68,7 +69,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             const string radarrQualityProfileData = @"[{'name': 'profile1'}]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()
+                .Returns(JsonConvert.DeserializeObject<List<QualityProfileData>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -107,7 +109,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()
+                .Returns(JsonConvert.DeserializeObject<List<QualityProfileData>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -134,7 +137,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
                 });
 
             api.Received().UpdateQualityProfile(
-                Verify.That<JObject>(j => j["formatItems"].Children().Should().HaveCount(3)),
+                Verify.That<QualityProfileData>(j => j.FormatItems.Should().HaveCount(3)),
                 Arg.Any<int>());
         }
 
@@ -183,7 +186,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()
+                .Returns(JsonConvert.DeserializeObject<List<QualityProfileData>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -251,8 +255,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
   'id': 1
 }");
 
-            api.Received()
-                .UpdateQualityProfile(Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
+            api.Received().UpdateQualityProfile(
+                Verify.That<QualityProfileData>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
             processor.InvalidProfileNames.Should().BeEmpty();
             processor.UpdatedScores.Should()
                 .ContainKey("profile1").WhichValue.Should()

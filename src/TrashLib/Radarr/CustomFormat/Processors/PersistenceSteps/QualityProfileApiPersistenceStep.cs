@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Extensions;
-using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.CustomFormat.Api;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
@@ -28,21 +28,23 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             // do not match profiles in Radarr.
             var profileScores = cfScores.GroupJoin(radarrProfiles,
                 s => s.Key,
-                p => (string) p["name"],
-                (s, p) => (s.Key, s.Value, p.SelectMany(pi => pi["formatItems"].Children<JObject>()).ToList()),
+                p => p.Name,
+                (s, p) => (s.Key, s.Value, p.First()),
                 StringComparer.InvariantCultureIgnoreCase);
 
-            foreach (var (profileName, scoreMap, formatItems) in profileScores)
+            foreach (var (profileName, scoreMap, profileData) in profileScores)
             {
+                // `SelectMany` is only needed here because we used GroupJoin() above the loop.
+                var formatItems = profileData.FormatItems;
                 if (formatItems.Count == 0)
                 {
                     _invalidProfileNames.Add(profileName);
                     continue;
                 }
 
-                foreach (var json in formatItems)
+                foreach (var formatItem in formatItems)
                 {
-                    var map = FindScoreEntry(json, scoreMap);
+                    var map = FindScoreEntry(formatItem, scoreMap);
 
                     int? scoreToUse = null;
                     FormatScoreUpdateReason? reason = null;
@@ -58,33 +60,31 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                         reason = FormatScoreUpdateReason.Reset;
                     }
 
-                    if (scoreToUse == null || reason == null || (int) json["score"] == scoreToUse)
+                    if (scoreToUse == null || reason == null || formatItem.Score == scoreToUse)
                     {
                         continue;
                     }
 
-                    json["score"] = scoreToUse.Value;
+                    formatItem.Score = scoreToUse.Value;
                     _updatedScores.GetOrCreate(profileName)
-                        .Add(new UpdatedFormatScore((string) json["name"], scoreToUse.Value, reason.Value));
+                        .Add(new UpdatedFormatScore(formatItem.Name, scoreToUse.Value, reason.Value));
                 }
 
                 if (!_updatedScores.TryGetValue(profileName, out var updatedScores) || updatedScores.Count == 0)
                 {
                     // No scores to update, so don't bother with the API call
-                    continue;
                 }
 
-                var jsonRoot = (JObject) formatItems.First().Root;
-                await api.UpdateQualityProfile(jsonRoot, (int) jsonRoot["id"]);
+                await api.UpdateQualityProfile(profileData, profileData.Id);
             }
         }
 
-        private static FormatMappingEntry? FindScoreEntry(JObject formatItem,
+        private static FormatMappingEntry? FindScoreEntry(QualityProfileData.FormatItemData formatItem,
             QualityProfileCustomFormatScoreMapping scoreMap)
         {
             return scoreMap.Mapping.FirstOrDefault(
                 m => m.CustomFormat.CacheEntry != null &&
-                     (int) formatItem["format"] == m.CustomFormat.CacheEntry.CustomFormatId);
+                     formatItem.Format == m.CustomFormat.CacheEntry.CustomFormatId);
         }
     }
 }

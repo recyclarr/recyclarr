@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
     public interface IQualityProfileService
     {
-        Task<List<JObject>> GetQualityProfiles();
-        Task<JObject> UpdateQualityProfile(JObject profileJson, int id);
+        Task<List<QualityProfileData>> GetQualityProfiles();
+        Task<QualityProfileData> UpdateQualityProfile(QualityProfileData profile, int profileId);
     }
 }
