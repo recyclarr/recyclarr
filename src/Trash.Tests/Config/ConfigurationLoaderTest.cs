@@ -35,9 +35,9 @@ namespace Trash.Tests.Config
             Justification = "YamlDotNet requires this type to be public so it may access it")]
         public class TestConfig : IServiceConfiguration
         {
-            public string ServiceId => "";
             public string BaseUrl => "";
             public string ApiKey => "";
+            public string BuildUrl() => throw new NotImplementedException();
         }
 
         [Test]
@@ -55,20 +55,8 @@ namespace Trash.Tests.Config
             fs.File.OpenText(Arg.Any<string>())
                 .Returns(MockYaml(1, 2), MockYaml(3));
 
-            var provider = Substitute.For<IConfigProvider<SonarrConfiguration>>();
-            // var objectFactory = Substitute.For<IObjectFactory>();
-            // objectFactory.Create(Arg.Any<Type>())
-            // .Returns(t => Substitute.For(new[] {(Type)t[0]}, Array.Empty<object>()));
-
-            var actualActiveConfigs = new List<SonarrConfiguration>();
-            provider.Active.Returns(
-#pragma warning disable NS1004
-                Arg.Do<SonarrConfiguration>(a => actualActiveConfigs.Add(a)));
-#pragma warning restore NS1004
-
             var validator = Substitute.For<IValidator<SonarrConfiguration>>();
-            var loader =
-                new ConfigurationLoader<SonarrConfiguration>(provider, fs, new DefaultObjectFactory(), validator);
+            var loader = new ConfigurationLoader<SonarrConfiguration>(fs, new DefaultObjectFactory(), validator);
 
             var fakeFiles = new List<string>
             {
@@ -86,16 +74,13 @@ namespace Trash.Tests.Config
             var actual = loader.LoadMany(fakeFiles, "sonarr").ToList();
 
             actual.Should().BeEquivalentTo(expected);
-            actualActiveConfigs.Should().BeEquivalentTo(expected, op => op.WithoutStrictOrdering());
         }
 
         [Test]
         public void Parse_using_stream()
         {
             var validator = Substitute.For<IValidator<SonarrConfiguration>>();
-            var configLoader = new ConfigurationLoader<SonarrConfiguration>(
-                Substitute.For<IConfigProvider<SonarrConfiguration>>(),
-                Substitute.For<IFileSystem>(),
+            var configLoader = new ConfigurationLoader<SonarrConfiguration>(Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);
 
@@ -135,9 +120,7 @@ namespace Trash.Tests.Config
         public void Throw_when_validation_fails()
         {
             var validator = Substitute.For<IValidator<TestConfig>>();
-            var configLoader = new ConfigurationLoader<TestConfig>(
-                Substitute.For<IConfigProvider<TestConfig>>(),
-                Substitute.For<IFileSystem>(),
+            var configLoader = new ConfigurationLoader<TestConfig>(Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);
 
@@ -160,9 +143,7 @@ fubar:
         public void Validation_success_does_not_throw()
         {
             var validator = Substitute.For<IValidator<TestConfig>>();
-            var configLoader = new ConfigurationLoader<TestConfig>(
-                Substitute.For<IConfigProvider<TestConfig>>(),
-                Substitute.For<IFileSystem>(),
+            var configLoader = new ConfigurationLoader<TestConfig>(Substitute.For<IFileSystem>(),
                 new DefaultObjectFactory(),
                 validator);
 

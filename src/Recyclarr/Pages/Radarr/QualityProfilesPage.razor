@@ -1,10 +1,11 @@
 @page "/radarr/quality-profiles"
 @using TrashLib.Radarr.CustomFormat.Api
-@using Recyclarr.Components
 @using TrashLib.Radarr.Config
-@using Newtonsoft.Json.Linq
-@using Recyclarr.Code.Settings.Persisters
 @using TrashLib.Config
+@using Recyclarr.Components
+@using Newtonsoft.Json.Linq
+@using Flurl.Http
+@using Newtonsoft.Json
 
 
 <div class="d-flex mb-4 flex-column flex-sm-row">
@@ -14,70 +15,139 @@
                     SelectionChanged="@OnSelectedInstanceChanged" />
 </div>
 
-<MudPaper Class="d-flex" Outlined="true">
-    @* <MudSelect @bind-Value="@_selectedProfile"> *@
-    @*     @foreach (var profile in _profiles) *@
-    @*     { *@
-    @*         <MudSelectItem></MudSelectItem> *@
-    @*     } *@
-    @* </MudSelect> *@
-    @if (_profiles == null || _profiles.Count == 0)
+<MudPaper Class="d-flex flex-column pa-4" Outlined="true">
+    @if (_exception != null)
     {
-        <p>This instance has no quality profiles</p>
-    }
-    else
-    {
-        <MudList T="JObject" Clickable="true" @bind-SelectedItem="@SelectedListItem">
-            @foreach (var profile in _profiles)
-            {
-                <MudListItem >@((string) profile["name"])</MudListItem>
-            }
-        </MudList>
+        <MudContainer>
+            <MudText Class="mb-2">
+                A failure occurred while trying to get quality profiles from Radarr:
+            </MudText>
 
-        @if (_profiles != null)
+            <MudText Class="mb-2" Color="Color.Error" Style="overflow: hidden">
+                @_exception.Message
+            </MudText>
+
+            <MudButton Class="mud-theme-primary my-2" OnClick="@ForceReload">Retry</MudButton>
+        </MudContainer>
+        return;
+    }
+
+    @if (_loading)
+    {
+        <MudContainer Class="d-flex flex-column align-center">
+            <MudText Align="Align.Center">Loading quality profiles...</MudText>
+            <MudProgressCircular Class="mt-2" Color="Color.Primary" Indeterminate="true" />
+        </MudContainer>
+        return;
+    }
+
+    @if (_profiles.Count == 0)
+    {
+        <MudText Typo="Typo.body1" Class="mx-auto">
+            This instance has no quality profiles
+        </MudText>
+        return;
+    }
+
+    <MudSelect @bind-Value="@_selectedProfileId" Class="mb-2" Style="width: auto">
+        @foreach (var profile in _profiles)
         {
-            <MudSimpleTable>
-                <thead>
-                <tr>
-                    <th>Custom Format</th>
-                    <th>New Score</th>
-                    <th>Score in Radarr</th>
-                </tr>
-                </thead>
-                <tbody>
+            <MudSelectItem @key="profile" Value="@((int) profile["id"])">
+                @((string) profile["name"])
+            </MudSelectItem>
+        }
+    </MudSelect>
+
+    @* <MudList @ref="@_profileSelectList" *@
+    @*          T="JObject" *@
+    @*          Clickable="true" *@
+    @*          @bind-SelectedItem="@SelectedListItem" *@
+    @*          Class="mr-2" /> *@
+
+    <MudSimpleTable Dense="true">
+        <thead>
+        <tr>
+            <th>Custom Format</th>
+            <th>Manual Score</th>
+            <th>Guide Score</th>
+            <th>Radarr Score</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (SelectedProfile != null)
+        {
+            @foreach (var formatItem in SelectedProfile["formatItems"].Children<JObject>())
+            {
                 <tr>
                     <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>@((int)formatItem["score"])</td>
                 </tr>
-
-                </tbody>
-
-            </MudSimpleTable>
+            }
         }
-    }
+
+        </tbody>
+
+    </MudSimpleTable>
 </MudPaper>
 
 @code {
 
     [Inject]
-    public IQualityProfileService ProfileService { get; set; } = default!;
+    public Func<string, IQualityProfileService> ProfileServiceFactory { get; set; } = default!;
 
     [Inject]
     public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
 
     [Inject]
-    public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
+    public ICollection<RadarrConfiguration> Configs { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
     }
 
-    private async Task OnSelectedInstanceChanged(RadarrConfiguration? obj)
+    private async Task OnSelectedInstanceChanged(RadarrConfiguration? activeConfig)
     {
-        _profiles = await ProfileService.GetQualityProfiles();
+        try
+        {
+            _activeConfig = activeConfig;
+            _exception = null;
+            _loading = true;
+            _profiles.Clear();
+
+            if (activeConfig != null)
+            {
+                _profiles.AddRange(await ProfileServiceFactory(activeConfig.BuildUrl()).GetQualityProfiles());
+            }
+
+            SelectedProfile = _profiles.FirstOrDefault();
+        }
+        catch (FlurlHttpException e)
+        {
+            _exception = e;
+        }
+
+        _loading = false;
     }
 
+    private RadarrConfiguration? _activeConfig;
     private ServerSelector<RadarrConfiguration>? _serverSelector;
-    private List<JObject>? _profiles;
-    public MudListItem? SelectedListItem { get; set; }
+    private readonly List<JObject> _profiles = new();
+    private Exception? _exception;
+    private bool _loading;
+
+    private async Task ForceReload()
+    {
+        await OnSelectedInstanceChanged(_activeConfig);
+    }
+
+    private JObject? SelectedProfile
+    {
+        get => _profiles.FirstOrDefault(p => (int) p["id"] == _selectedProfileId);
+        set => _selectedProfileId = (int?) value?["id"];
+    }
+
+    private int? _selectedProfileId;
 }

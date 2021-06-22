@@ -3,32 +3,28 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
-using TrashLib.Config;
-using TrashLib.Radarr.Config;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
     internal class QualityProfileService : IQualityProfileService
     {
-        private readonly IServerInfo<RadarrConfiguration> _serverInfo;
+        private readonly string _baseUrl;
 
-        public QualityProfileService(IServerInfo<RadarrConfiguration> serverInfo)
+        public QualityProfileService(string baseUrl)
         {
-            _serverInfo = serverInfo;
+            _baseUrl = baseUrl;
         }
-
-        private string BaseUrl => _serverInfo.BuildUrl();
 
         public async Task<List<JObject>> GetQualityProfiles()
         {
-            return await BaseUrl
+            return await _baseUrl
                 .AppendPathSegment("qualityprofile")
                 .GetJsonAsync<List<JObject>>();
         }
 
         public async Task<JObject> UpdateQualityProfile(JObject profileJson, int id)
         {
-            return await BaseUrl
+            return await _baseUrl
                 .AppendPathSegment($"qualityprofile/{id}")
                 .PutJsonAsync(profileJson)
                 .ReceiveJson<JObject>();

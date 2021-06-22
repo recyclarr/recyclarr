@@ -18,19 +18,19 @@ namespace TrashLib.Radarr.CustomFormat.Processors
 
     internal class PersistenceProcessor : IPersistenceProcessor
     {
-        private readonly ICustomFormatService _customFormatService;
-        private readonly IQualityProfileService _qualityProfileService;
+        private readonly Func<string, ICustomFormatService> _customFormatServiceFactory;
+        private readonly Func<string, IQualityProfileService> _qualityProfileServiceFactory;
         private readonly Func<IPersistenceProcessorSteps> _stepsFactory;
         private IPersistenceProcessorSteps _steps;
 
         public PersistenceProcessor(
-            ICustomFormatService customFormatService,
-            IQualityProfileService qualityProfileService,
+            Func<string, ICustomFormatService> customFormatServiceFactory,
+            Func<string, IQualityProfileService> qualityProfileServiceFactory,
             Func<IPersistenceProcessorSteps> stepsFactory)
         {
-            _customFormatService = customFormatService;
-            _qualityProfileService = qualityProfileService;
+            _qualityProfileServiceFactory = qualityProfileServiceFactory;
             _stepsFactory = stepsFactory;
+            _customFormatServiceFactory = customFormatServiceFactory;
             _steps = _stepsFactory();
         }
 
@@ -54,7 +54,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
         {
-            var radarrCfs = await _customFormatService.GetCustomFormats();
+            var customFormatService = _customFormatServiceFactory(config.BuildUrl());
+            var radarrCfs = await customFormatService.GetCustomFormats();
 
             // Step 1: Match CFs between the guide & Radarr and merge the data. The goal is to retain as much of the
             // original data from Radarr as possible. There are many properties in the response JSON that we don't
@@ -67,15 +68,14 @@ namespace TrashLib.Radarr.CustomFormat.Processors
                 _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, radarrCfs);
             }
 
-            var customFormatService = _serviceFactory.CreateService<ICustomFormatService>(config);
-
             // Step 2: For each merged CF, persist it to Radarr via its API. This will involve a combination of updates
             // to existing CFs and creation of brand new ones, depending on what's already available in Radarr.
-            await _steps.CustomFormatCustomFormatApiPersister.Process(_customFormatService,
-                _steps.JsonTransactionStep.Transactions);
+            await _steps.CustomFormatCustomFormatApiPersister.Process(
+                customFormatService, _steps.JsonTransactionStep.Transactions);
 
             // Step 3: Update all quality profiles with the scores from the guide for the uploaded custom formats
-            await _steps.ProfileQualityProfileApiPersister.Process(_qualityProfileService, profileScores);
+            await _steps.ProfileQualityProfileApiPersister.Process(
+                _qualityProfileServiceFactory(config.BuildUrl()), profileScores);
         }
     }
 }

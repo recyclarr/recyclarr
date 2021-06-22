@@ -15,18 +15,15 @@ namespace Trash.Config
     public class ConfigurationLoader<T> : IConfigurationLoader<T>
         where T : IServiceConfiguration
     {
-        private readonly IConfigProvider<T> _configProvider;
         private readonly IDeserializer _deserializer;
         private readonly IFileSystem _fileSystem;
         private readonly IValidator<T> _validator;
 
         public ConfigurationLoader(
-            IConfigProvider<T> configProvider,
             IFileSystem fileSystem,
             IObjectFactory objectFactory,
             IValidator<T> validator)
         {
-            _configProvider = configProvider;
             _fileSystem = fileSystem;
             _validator = validator;
             _deserializer = new DeserializerBuilder()
@@ -84,11 +81,7 @@ namespace Trash.Config
 
         public IEnumerable<T> LoadMany(IEnumerable<string> configFiles, string configSection)
         {
-            foreach (var config in configFiles.SelectMany(file => Load(file, configSection)))
-            {
-                _configProvider.Active = config;
-                yield return config;
-            }
+            return configFiles.SelectMany(file => Load(file, configSection));
         }
     }
 }

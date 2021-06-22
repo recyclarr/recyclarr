@@ -24,7 +24,6 @@ namespace TrashLib.Tests.Cache
             {
                 Filesystem = fs ?? Substitute.For<IFileSystem>();
                 StoragePath = Substitute.For<ICacheStoragePath>();
-                ServerInfo = Substitute.For<IServerInfo>();
                 JsonSettings = new JsonSerializerSettings
                 {
                     Formatting = Formatting.Indented,
@@ -34,17 +33,23 @@ namespace TrashLib.Tests.Cache
                     }
                 };
 
-                // Set up a default for the active config's base URL. This is used to generate part of the path
-                ServerInfo.BaseUrl.Returns("http://localhost:1234");
-
-                Cache = new ServiceCache(Filesystem, StoragePath, ServerInfo, Substitute.For<ILogger>());
+                Cache = new ServiceCache(Filesystem, StoragePath, Substitute.For<ILogger>());
             }
 
             public JsonSerializerSettings JsonSettings { get; }
             public ServiceCache Cache { get; }
-            public IServerInfo ServerInfo { get; }
             public ICacheStoragePath StoragePath { get; }
             public IFileSystem Filesystem { get; }
+
+            public ICacheGuidBuilder MakeGuidBuilder(string baseUrl = "http://localhost:1234")
+            {
+                return new CacheGuidBuilder(new TestServiceConfig
+                    {BaseUrl = baseUrl});
+            }
+
+            private class TestServiceConfig : ServiceConfiguration
+            {
+            }
         }
 
         private class ObjectWithoutAttribute
@@ -70,7 +75,7 @@ namespace TrashLib.Tests.Cache
             var ctx = new Context();
             ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(false);
 
-            var result = ctx.Cache.Load<ObjectWithAttribute>();
+            var result = ctx.Cache.Load<ObjectWithAttribute>(ctx.MakeGuidBuilder());
             result.Should().BeNull();
         }
 
@@ -86,7 +91,7 @@ namespace TrashLib.Tests.Cache
             ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
                 .Returns(_ => JsonConvert.SerializeObject(testJson));
 
-            var obj = ctx.Cache.Load<ObjectWithAttribute>();
+            var obj = ctx.Cache.Load<ObjectWithAttribute>(ctx.MakeGuidBuilder());
 
             obj.Should().NotBeNull();
             obj!.TestValue.Should().Be("Foo");
@@ -98,7 +103,7 @@ namespace TrashLib.Tests.Cache
         {
             var ctx = new Context();
 
-            Action act = () => ctx.Cache.Load<ObjectWithAttributeInvalidChars>();
+            Action act = () => ctx.Cache.Load<ObjectWithAttributeInvalidChars>(ctx.MakeGuidBuilder());
 
             act.Should()
                 .Throw<ArgumentException>()
@@ -110,7 +115,7 @@ namespace TrashLib.Tests.Cache
         {
             var ctx = new Context();
 
-            Action act = () => ctx.Cache.Load<ObjectWithoutAttribute>();
+            Action act = () => ctx.Cache.Load<ObjectWithoutAttribute>(ctx.MakeGuidBuilder());
 
             act.Should()
                 .Throw<ArgumentException>()
@@ -122,7 +127,7 @@ namespace TrashLib.Tests.Cache
         {
             var ctx = new Context();
             ctx.StoragePath.Path.Returns("testpath");
-            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"}, ctx.MakeGuidBuilder());
 
             ctx.Filesystem.File.Received()
                 .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
@@ -135,7 +140,7 @@ namespace TrashLib.Tests.Cache
 
             ctx.StoragePath.Path.Returns("testpath");
 
-            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"}, ctx.MakeGuidBuilder());
 
             var expectedParentDirectory = Path.Combine("testpath", "be8fbc8f");
             ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
@@ -151,7 +156,7 @@ namespace TrashLib.Tests.Cache
         {
             var ctx = new Context();
 
-            Action act = () => ctx.Cache.Save(new ObjectWithAttributeInvalidChars());
+            Action act = () => ctx.Cache.Save(new ObjectWithAttributeInvalidChars(), ctx.MakeGuidBuilder());
 
             act.Should()
                 .Throw<ArgumentException>()
@@ -163,7 +168,7 @@ namespace TrashLib.Tests.Cache
         {
             var ctx = new Context();
 
-            Action act = () => ctx.Cache.Save(new ObjectWithoutAttribute());
+            Action act = () => ctx.Cache.Save(new ObjectWithoutAttribute(), ctx.MakeGuidBuilder());
 
             act.Should()
                 .Throw<ArgumentException>()
@@ -183,12 +188,10 @@ namespace TrashLib.Tests.Cache
             ctx.Filesystem.File.ReadAllText(Arg.Do<string>(s => actualPaths.Add(s)))
                 .Returns(_ => JsonConvert.SerializeObject(testJson));
 
-            ctx.Cache.Load<ObjectWithAttribute>();
+            ctx.Cache.Load<ObjectWithAttribute>(ctx.MakeGuidBuilder());
 
             // Change the active config & base URL so we get a different path
-            ctx.ServerInfo.BaseUrl.Returns("http://localhost:5678");
-
-            ctx.Cache.Load<ObjectWithAttribute>();
+            ctx.Cache.Load<ObjectWithAttribute>(ctx.MakeGuidBuilder("http://localhost:5678"));
 
             actualPaths.Count.Should().Be(2);
             actualPaths.Should().OnlyHaveUniqueItems();
@@ -202,7 +205,7 @@ namespace TrashLib.Tests.Cache
             ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
                 .Returns(_ => "");
 
-            Action act = () => ctx.Cache.Load<ObjectWithAttribute>();
+            Action act = () => ctx.Cache.Load<ObjectWithAttribute>(ctx.MakeGuidBuilder());
 
             act.Should().NotThrow();
         }

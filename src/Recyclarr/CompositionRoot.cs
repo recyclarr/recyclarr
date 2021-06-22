@@ -1,7 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
 using BlazorPro.BlazorSize;
-using Recyclarr.Code;
 using Recyclarr.Code.Radarr;
 using Recyclarr.Code.Settings;
 using Recyclarr.Code.Settings.Persisters;
@@ -41,6 +40,9 @@ namespace Recyclarr
             builder.RegisterType<ConfigPersister<RadarrConfiguration>>()
                 .As<IConfigPersister<RadarrConfiguration>>()
                 .WithParameter(new NamedParameter("filename", "radarr.json"));
+
+            builder.Register(c => c.Resolve<IConfigPersister<RadarrConfiguration>>().Load())
+                .InstancePerLifetimeScope();
         }
     }
 }

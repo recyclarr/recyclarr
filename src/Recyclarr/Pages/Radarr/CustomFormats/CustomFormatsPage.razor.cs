@@ -6,7 +6,6 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Recyclarr.Code.Radarr;
-using Recyclarr.Code.Settings.Persisters;
 using Recyclarr.Components;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
@@ -30,7 +29,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
 
         [Inject]
-        public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
+        public ICollection<RadarrConfiguration> Configs { get; set; } = default!;
 
         private bool? SelectAllCheckbox { get; set; } = false;
         private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashIds.First()).ToList();
@@ -94,7 +93,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
                     .ToList();
             }
 
-            ConfigPersister.Save(ConfigProvider.Configs);
+            ConfigPersister.Save(Configs);
         }
 
         private IEnumerable<SelectableCustomFormat> GetSelected() => _currentSelection.Where(i => i.Selected);

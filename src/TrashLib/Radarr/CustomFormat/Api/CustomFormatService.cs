@@ -3,22 +3,18 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
-using TrashLib.Config;
-using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api
 {
     internal class CustomFormatService : ICustomFormatService
     {
-        private readonly IServerInfo<RadarrConfiguration> _serverInfo;
-
-        public CustomFormatService(IServerInfo<RadarrConfiguration> serverInfo)
+        public CustomFormatService(string baseUrl)
         {
-            _serverInfo = serverInfo;
+            BaseUrl = baseUrl;
         }
 
-        private string BaseUrl => _serverInfo.BuildUrl();
+        private string BaseUrl { get; }
 
         public async Task<List<JObject>> GetCustomFormats()
         {

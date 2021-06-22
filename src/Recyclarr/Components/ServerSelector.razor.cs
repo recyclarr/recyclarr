@@ -17,7 +17,7 @@ namespace Recyclarr.Components
         public ILocalStorageService LocalStorage { get; set; } = default!;
 
         [Inject]
-        public IConfigProvider<TConfig> ConfigProvider { get; set; } = default!;
+        public ICollection<TConfig> Configs { get; set; } = default!;
 
         [Parameter]
         public string Label { get; set; } = "Select Server";
@@ -30,22 +30,14 @@ namespace Recyclarr.Components
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-
-            if (!ConfigProvider.IsActiveValid())
-            {
-                _afterRenderActions.Enqueue(LoadSelected);
-            }
-            else
-            {
-                await SetSelected(ConfigProvider.Active, false);
-            }
+            _afterRenderActions.Enqueue(LoadSelected);
         }
 
         private async Task LoadSelected()
         {
             var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-            var instanceToSelect = ConfigProvider.Configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-            await SetSelected(instanceToSelect ?? ConfigProvider.Configs.FirstOrDefault(), false);
+            var instanceToSelect = Configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
+            await SetSelected(instanceToSelect ?? Configs.FirstOrDefault(), false);
         }
 
         private async Task SaveSelected()

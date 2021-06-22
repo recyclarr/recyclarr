@@ -3,24 +3,22 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
-using TrashLib.Config;
 using TrashLib.Sonarr.Api.Objects;
-using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.Api
 {
     public class SonarrApi : ISonarrApi
     {
-        private readonly IServerInfo<SonarrConfiguration> _serverInfo;
+        private readonly string _baseUrl;
 
-        public SonarrApi(IServerInfo<SonarrConfiguration> serverInfo)
+        public SonarrApi(string baseUrl)
         {
-            _serverInfo = serverInfo;
+            _baseUrl = baseUrl;
         }
 
         public async Task<Version> GetVersion()
         {
-            dynamic data = await BaseUrl()
+            dynamic data = await _baseUrl
                 .AppendPathSegment("system/status")
                 .GetJsonAsync();
             return new Version(data.version);
@@ -28,14 +26,14 @@ namespace TrashLib.Sonarr.Api
 
         public async Task<IList<SonarrTag>> GetTags()
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("tag")
                 .GetJsonAsync<List<SonarrTag>>();
         }
 
         public async Task<SonarrTag> CreateTag(string tag)
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("tag")
                 .PostJsonAsync(new {label = tag})
                 .ReceiveJson<SonarrTag>();
@@ -43,21 +41,21 @@ namespace TrashLib.Sonarr.Api
 
         public async Task<IList<SonarrReleaseProfile>> GetReleaseProfiles()
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("releaseprofile")
                 .GetJsonAsync<List<SonarrReleaseProfile>>();
         }
 
         public async Task UpdateReleaseProfile(SonarrReleaseProfile profileToUpdate)
         {
-            await BaseUrl()
+            await _baseUrl
                 .AppendPathSegment($"releaseprofile/{profileToUpdate.Id}")
                 .PutJsonAsync(profileToUpdate);
         }
 
         public async Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile newProfile)
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("releaseprofile")
                 .PostJsonAsync(newProfile)
                 .ReceiveJson<SonarrReleaseProfile>();
@@ -65,7 +63,7 @@ namespace TrashLib.Sonarr.Api
 
         public async Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition()
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("qualitydefinition")
                 .GetJsonAsync<List<SonarrQualityDefinitionItem>>();
         }
@@ -73,12 +71,10 @@ namespace TrashLib.Sonarr.Api
         public async Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(
             IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality)
         {
-            return await BaseUrl()
+            return await _baseUrl
                 .AppendPathSegment("qualityDefinition/update")
                 .PutJsonAsync(newQuality)
                 .ReceiveJson<List<SonarrQualityDefinitionItem>>();
         }
-
-        private string BaseUrl() => _serverInfo.BuildUrl();
     }
 }

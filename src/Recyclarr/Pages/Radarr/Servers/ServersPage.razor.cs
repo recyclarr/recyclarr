@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Recyclarr.Code.Settings.Persisters;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
 
@@ -18,7 +18,7 @@ namespace Recyclarr.Pages.Radarr.Servers
         public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
 
         [Inject]
-        public IConfigProvider<RadarrConfiguration> ConfigProvider { get; set; } = default!;
+        public ICollection<RadarrConfiguration> Configs { get; set; } = default!;
 
         private async Task<bool> ShowEditServerModal(string title, ServiceConfiguration instance)
         {
@@ -50,7 +50,7 @@ namespace Recyclarr.Pages.Radarr.Servers
             var item = new RadarrConfiguration();
             if (await ShowEditServerModal("Add Server", item))
             {
-                ConfigProvider.Configs.Add(item);
+                Configs.Add(item);
                 SaveServers();
             }
         }
@@ -63,7 +63,7 @@ namespace Recyclarr.Pages.Radarr.Servers
 
         private void SaveServers()
         {
-            ConfigPersister.Save(ConfigProvider.Configs);
+            ConfigPersister.Save(Configs);
         }
 
         private async Task OnDelete(RadarrConfiguration item)
@@ -76,7 +76,7 @@ namespace Recyclarr.Pages.Radarr.Servers
 
             if (shouldDelete == true)
             {
-                ConfigProvider.Configs.Remove(item);
+                Configs.Remove(item);
                 SaveServers();
             }
         }

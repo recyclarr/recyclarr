@@ -10,11 +10,13 @@ namespace TrashLib.Radarr.CustomFormat
     internal class CachePersister : ICachePersister
     {
         private readonly IServiceCache _cache;
+        private readonly ICacheGuidBuilder _guidBuilder;
 
-        public CachePersister(ILogger log, IServiceCache cache)
+        public CachePersister(ILogger log, IServiceCache cache, ICacheGuidBuilder guidBuilder)
         {
             Log = log;
             _cache = cache;
+            _guidBuilder = guidBuilder;
         }
 
         private ILogger Log { get; }
@@ -22,7 +24,7 @@ namespace TrashLib.Radarr.CustomFormat
 
         public void Load()
         {
-            CfCache = _cache.Load<CustomFormatCache>();
+            CfCache = _cache.Load<CustomFormatCache>(_guidBuilder);
             // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
             if (CfCache != null)
             {
@@ -52,7 +54,7 @@ namespace TrashLib.Radarr.CustomFormat
             }
 
             Log.Debug("Saving Cache");
-            _cache.Save(CfCache);
+            _cache.Save(CfCache, _guidBuilder);
         }
 
         public void Update(IEnumerable<ProcessedCustomFormatData> customFormats)

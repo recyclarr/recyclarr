@@ -22,9 +22,11 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             {
                 Log = Substitute.For<ILogger>();
                 ServiceCache = Substitute.For<IServiceCache>();
-                Persister = new CachePersister(Log, ServiceCache);
+                GuidBuilder = Substitute.For<ICacheGuidBuilder>();
+                Persister = new CachePersister(Log, ServiceCache, GuidBuilder);
             }
 
+            public ICacheGuidBuilder GuidBuilder { get; }
             public CachePersister Persister { get; }
             public ILogger Log { get; }
             public IServiceCache ServiceCache { get; }
@@ -49,7 +51,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
                 Version = versionToTest,
                 TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
             };
-            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.ServiceCache.Load<CustomFormatCache>(Arg.Any<ICacheGuidBuilder>()).Returns(testCfObj);
             ctx.Persister.Load();
             ctx.Persister.CfCache.Should().BeNull();
         }
@@ -64,7 +66,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
                 Version = CustomFormatCache.LatestVersion,
                 TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
             };
-            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.ServiceCache.Load<CustomFormatCache>(Arg.Any<ICacheGuidBuilder>()).Returns(testCfObj);
             ctx.Persister.Load();
             ctx.Persister.CfCache.Should().NotBeNull();
         }
@@ -74,7 +76,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
         {
             var ctx = new Context();
             var testCfObj = new CustomFormatCache();
-            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.ServiceCache.Load<CustomFormatCache>(Arg.Any<ICacheGuidBuilder>()).Returns(testCfObj);
 
             ctx.Persister.Load();
             ctx.Persister.CfCache.Should().BeSameAs(testCfObj);
@@ -93,12 +95,12 @@ namespace TrashLib.Tests.Radarr.CustomFormat
         {
             var ctx = new Context();
             var testCfObj = new CustomFormatCache();
-            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.ServiceCache.Load<CustomFormatCache>(Arg.Any<ICacheGuidBuilder>()).Returns(testCfObj);
 
             ctx.Persister.Load();
             ctx.Persister.Save();
 
-            ctx.ServiceCache.Received().Save(Arg.Is(testCfObj));
+            ctx.ServiceCache.Received().Save(Arg.Is(testCfObj), Arg.Any<ICacheGuidBuilder>());
         }
 
         [Test]
@@ -106,7 +108,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
         {
             var ctx = new Context();
             ctx.Persister.Save();
-            ctx.ServiceCache.DidNotReceive().Save(Arg.Any<object>());
+            ctx.ServiceCache.DidNotReceive().Save(Arg.Any<object>(), Arg.Any<ICacheGuidBuilder>());
         }
 
         [Test]
@@ -119,7 +121,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             {
                 TrashIdMappings = new List<TrashIdMapping> {new("", "") {CustomFormatId = 5}}
             };
-            ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            ctx.ServiceCache.Load<CustomFormatCache>(Arg.Any<ICacheGuidBuilder>()).Returns(testCfObj);
             ctx.Persister.Load();
 
             // Update with new cached items

@@ -1,6 +1,7 @@
 using System;
 using Autofac;
 using Autofac.Extras.AggregateService;
+using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
@@ -16,20 +17,25 @@ namespace TrashLib.Radarr
 {
     public class RadarrAutofacModule : Module
     {
-        class ServiceFactory<T>
+        class CachePersisterFactory
         {
-            private readonly Func<string, T> _factory;
+            private readonly Func<IServiceConfiguration, ICacheGuidBuilder> _guidBuilderFactory;
+            private readonly Func<ICacheGuidBuilder, ICachePersister> _persisterFactory;
 
-            public ServiceFactory(Func<string, T> factory)
+            public CachePersisterFactory(
+                Func<IServiceConfiguration, ICacheGuidBuilder> guidBuilderFactory,
+                Func<ICacheGuidBuilder, ICachePersister> persisterFactory)
             {
-                _factory = factory;
+                _guidBuilderFactory = guidBuilderFactory;
+                _persisterFactory = persisterFactory;
             }
 
-            public T Create(IServiceConfiguration config)
+            public ICachePersister Create(IServiceConfiguration config)
             {
-                return _factory()
+                return _persisterFactory(_guidBuilderFactory(config));
             }
         }
+
         protected override void Load(ContainerBuilder builder)
         {
             // Services
@@ -49,6 +55,12 @@ namespace TrashLib.Radarr
             builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
             builder.RegisterType<LocalRepoCustomFormatJsonParser>().As<IRadarrGuideService>();
             builder.RegisterType<CachePersister>().As<ICachePersister>();
+
+            builder.Register<Func<IServiceConfiguration, ICachePersister>>(c => config =>
+            {
+                var guidBuilderFactory = c.Resolve<Func<IServiceConfiguration, ICacheGuidBuilder>>();
+                return c.Resolve<CachePersister>(TypedParameter.From(guidBuilderFactory(config)));
+            });
 
             // Guide Processor
             // todo: register as singleton to avoid parsing guide multiple times when using 2 or more instances in config
