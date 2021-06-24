@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace TrashLib.Radarr.Config
 {
     [UsedImplicitly]
-    internal class RadarrConfigurationValidator : AbstractValidator<RadarrConfiguration>
+    internal class RadarrConfigurationValidator : AbstractValidator<RadarrConfig>
     {
         public RadarrConfigurationValidator(
             IRadarrValidationMessages messages,

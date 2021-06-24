@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Common.Extensions;
 using Serilog;
 using TrashLib.Radarr.Config;
+using TrashLib.Radarr.CustomFormat.Cache;
 using TrashLib.Radarr.CustomFormat.Processors;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
 
@@ -29,7 +30,7 @@ namespace TrashLib.Radarr.CustomFormat
 
         private ILogger Log { get; }
 
-        public async Task Process(bool isPreview, RadarrConfiguration config)
+        public async Task Process(bool isPreview, RadarrConfig config)
         {
             _cache.Load();
 
@@ -135,7 +136,7 @@ namespace TrashLib.Radarr.CustomFormat
             }
         }
 
-        private bool ValidateGuideDataAndCheckShouldProceed(RadarrConfiguration config)
+        private bool ValidateGuideDataAndCheckShouldProceed(RadarrConfig config)
         {
             Console.WriteLine("");
 

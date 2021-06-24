@@ -5,7 +5,7 @@ using TrashLib.Cache;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 
-namespace TrashLib.Radarr.CustomFormat
+namespace TrashLib.Radarr.CustomFormat.Cache
 {
     internal class CachePersister : ICachePersister
     {
@@ -20,28 +20,27 @@ namespace TrashLib.Radarr.CustomFormat
         }
 
         private ILogger Log { get; }
+
         public CustomFormatCache? CfCache { get; private set; }
 
         public void Load()
         {
             CfCache = _cache.Load<CustomFormatCache>(_guidBuilder);
-            // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-            if (CfCache != null)
-            {
-                Log.Debug("Loaded Cache");
-
-                // If the version is higher OR lower, we invalidate the cache. It means there's an
-                // incompatibility that we do not support.
-                if (CfCache.Version != CustomFormatCache.LatestVersion)
-                {
-                    Log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
-                        CfCache.Version, CustomFormatCache.LatestVersion);
-                    CfCache = null;
-                }
-            }
-            else
+            if (CfCache == null)
             {
                 Log.Debug("Custom format cache does not exist; proceeding without it");
+                return;
+            }
+
+            Log.Debug("Loaded Cache");
+
+            // If the version is higher OR lower, we invalidate the cache. It means there's an
+            // incompatibility that we do not support.
+            if (CfCache.Version != CustomFormatCache.LatestVersion)
+            {
+                Log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
+                    CfCache.Version, CustomFormatCache.LatestVersion);
+                CfCache = null;
             }
         }
 

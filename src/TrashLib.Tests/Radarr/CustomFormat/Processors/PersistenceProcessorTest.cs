@@ -41,7 +41,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
         [Test]
         public void Custom_formats_are_deleted_if_deletion_option_is_enabled_in_config()
         {
-            var config = new RadarrConfiguration {DeleteOldCustomFormats = true};
+            var config = new RadarrConfig {DeleteOldCustomFormats = true};
             var ctx = new Context();
 
             ctx.Processor.PersistCustomFormats(config, ctx.GuideCfs, ctx.DeletedCfsInCache, ctx.ProfileScores);
@@ -52,7 +52,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
         [Test]
         public void Custom_formats_are_not_deleted_if_deletion_option_is_disabled_in_config()
         {
-            var config = new RadarrConfiguration {DeleteOldCustomFormats = false};
+            var config = new RadarrConfig {DeleteOldCustomFormats = false};
             var ctx = new Context();
 
             ctx.Processor.PersistCustomFormats(config, ctx.GuideCfs, ctx.DeletedCfsInCache, ctx.ProfileScores);
@@ -65,10 +65,10 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
         {
             var ctx = new Context();
 
-            var config = new RadarrConfiguration {DeleteOldCustomFormats = false};
+            var config = new RadarrConfig {DeleteOldCustomFormats = false};
             ctx.Processor.PersistCustomFormats(config, ctx.GuideCfs, ctx.DeletedCfsInCache, ctx.ProfileScores);
 
-            config = new RadarrConfiguration {DeleteOldCustomFormats = true};
+            config = new RadarrConfig {DeleteOldCustomFormats = true};
             ctx.Processor.PersistCustomFormats(config, ctx.GuideCfs, ctx.DeletedCfsInCache, ctx.ProfileScores);
 
             ctx.Steps.JsonTransactionStep.Received(1)

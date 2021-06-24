@@ -18,7 +18,7 @@ namespace Trash.Command
     [UsedImplicitly]
     public class RadarrCommand : ServiceCommand
     {
-        private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
+        private readonly IConfigurationLoader<RadarrConfig> _configLoader;
         private readonly Func<ICustomFormatUpdater> _customFormatUpdaterFactory;
         private readonly Func<IRadarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
@@ -26,7 +26,7 @@ namespace Trash.Command
             ILogger logger,
             LoggingLevelSwitch loggingLevelSwitch,
             ILogJanitor logJanitor,
-            IConfigurationLoader<RadarrConfiguration> configLoader,
+            IConfigurationLoader<RadarrConfig> configLoader,
             Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
             Func<ICustomFormatUpdater> customFormatUpdaterFactory)
             : base(logger, loggingLevelSwitch, logJanitor)

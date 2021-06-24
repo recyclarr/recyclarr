@@ -49,7 +49,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         }
 
         public async Task PersistCustomFormats(
-            RadarrConfiguration config,
+            RadarrConfig config,
             IEnumerable<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)

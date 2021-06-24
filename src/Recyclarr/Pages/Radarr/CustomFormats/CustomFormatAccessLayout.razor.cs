@@ -12,9 +12,9 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         public Action? OnReload { get; set; }
 
         [Inject]
-        public CustomFormatRepository CfRepository { get; set; } = default!;
+        public IGuideProcessor GuideProcessor { get; set; } = default!;
 
-        public bool IsLoaded => CfRepository.IsLoaded;
+        public bool IsLoaded => GuideProcessor.IsLoaded;
 
         protected override async Task OnInitializedAsync()
         {
@@ -32,11 +32,11 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
 
                 if (force)
                 {
-                    await CfRepository.ForceRebuildRepository();
+                    await GuideProcessor.ForceBuildGuideData();
                 }
                 else
                 {
-                    wasLoaded = await CfRepository.BuildRepository();
+                    wasLoaded = await GuideProcessor.BuildRepository();
                 }
 
                 if (wasLoaded)

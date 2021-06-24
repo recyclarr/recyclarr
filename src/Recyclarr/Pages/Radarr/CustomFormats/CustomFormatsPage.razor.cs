@@ -17,7 +17,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
     {
         private CustomFormatChooser? _cfChooser;
         private HashSet<SelectableCustomFormat> _currentSelection = new();
-        private ServerSelector<RadarrConfiguration>? _serverSelector;
+        private ServerSelector<RadarrConfig>? _serverSelector;
 
         [CascadingParameter]
         public CustomFormatAccessLayout? CfAccessor { get; set; }
@@ -26,10 +26,10 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
-        public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
+        public IConfigPersister<RadarrConfig> ConfigPersister { get; set; } = default!;
 
         [Inject]
-        public ICollection<RadarrConfiguration> Configs { get; set; } = default!;
+        public ICollection<RadarrConfig> Configs { get; set; } = default!;
 
         private bool? SelectAllCheckbox { get; set; } = false;
         private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashIds.First()).ToList();
@@ -37,7 +37,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         private bool IsAddSelectedDisabled => IsRefreshDisabled || _cfChooser!.SelectedCount == 0;
 
         private IList<CustomFormatIdentifier> CustomFormatIds
-            => CfAccessor?.CfRepository.Identifiers ?? new List<CustomFormatIdentifier>();
+            => CfAccessor?.GuideProcessor.ProcessedCustomFormats ?? new List<CustomFormatIdentifier>();
 
         public void Dispose()
         {
@@ -63,7 +63,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
             StateHasChanged();
         }
 
-        private void UpdateSelectedCustomFormats(RadarrConfiguration? selection)
+        private void UpdateSelectedCustomFormats(RadarrConfig? selection)
         {
             if (selection == null)
             {
@@ -73,7 +73,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
             _currentSelection = selection.CustomFormats
                 .Select(cf =>
                 {
-                    var exists = CfAccessor?.CfRepository.Identifiers.Any(id2 => id2.TrashId == cf.TrashIds.First());
+                    var exists = CfAccessor?.GuideProcessor.Identifiers.Any(id2 => id2.TrashId == cf.TrashIds.First());
                     return new SelectableCustomFormat(cf, exists ?? false);
                 })
                 .ToHashSet();

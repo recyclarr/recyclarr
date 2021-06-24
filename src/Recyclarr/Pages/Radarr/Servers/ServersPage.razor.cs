@@ -15,10 +15,10 @@ namespace Recyclarr.Pages.Radarr.Servers
         public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
-        public IConfigPersister<RadarrConfiguration> ConfigPersister { get; set; } = default!;
+        public IConfigPersister<RadarrConfig> ConfigPersister { get; set; } = default!;
 
         [Inject]
-        public ICollection<RadarrConfiguration> Configs { get; set; } = default!;
+        public ICollection<RadarrConfig> Configs { get; set; } = default!;
 
         private async Task<bool> ShowEditServerModal(string title, ServiceConfiguration instance)
         {
@@ -47,7 +47,7 @@ namespace Recyclarr.Pages.Radarr.Servers
 
         private async Task OnAddServer()
         {
-            var item = new RadarrConfiguration();
+            var item = new RadarrConfig();
             if (await ShowEditServerModal("Add Server", item))
             {
                 Configs.Add(item);
@@ -55,7 +55,7 @@ namespace Recyclarr.Pages.Radarr.Servers
             }
         }
 
-        private async Task OnEdit(RadarrConfiguration item)
+        private async Task OnEdit(RadarrConfig item)
         {
             await ShowEditServerModal("Edit Server", item);
             SaveServers();
@@ -66,7 +66,7 @@ namespace Recyclarr.Pages.Radarr.Servers
             ConfigPersister.Save(Configs);
         }
 
-        private async Task OnDelete(RadarrConfiguration item)
+        private async Task OnDelete(RadarrConfig item)
         {
             var shouldDelete = await DialogService.ShowMessageBox(
                 "Warning",

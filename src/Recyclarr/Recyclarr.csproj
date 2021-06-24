@@ -6,6 +6,9 @@
     <PackageReference Include="BlazorPro.BlazorSize" Version="5.*" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.*" />
     <PackageReference Include="MudBlazor" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.*" />
   </ItemGroup>
 
   <ItemGroup>

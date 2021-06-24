@@ -14,7 +14,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         CustomFormatTransactionData Transactions { get; }
 
         Task PersistCustomFormats(
-            RadarrConfiguration config,
+            RadarrConfig config,
             IEnumerable<ProcessedCustomFormatData> guideCfs,
             IEnumerable<TrashIdMapping> deletedCfsInCache,
             IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores);

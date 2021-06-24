@@ -24,7 +24,7 @@ namespace TrashLib.Radarr.QualityDefinition
 
         private ILogger Log { get; }
 
-        public async Task Process(bool isPreview, RadarrConfiguration config)
+        public async Task Process(bool isPreview, RadarrConfig config)
         {
             Log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition!.Type);
             var qualityDefinitions = _parser.ParseMarkdown(await _parser.GetMarkdownData());

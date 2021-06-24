@@ -36,7 +36,7 @@ namespace TrashLib.Tests.Radarr
         public void Custom_format_is_valid_with_one_of_either_names_or_trash_id(List<string> namesList,
             List<string> trashIdsList)
         {
-            var config = new RadarrConfiguration
+            var config = new RadarrConfig
             {
                 ApiKey = "required value",
                 BaseUrl = "required value",
@@ -46,7 +46,7 @@ namespace TrashLib.Tests.Radarr
                 }
             };
 
-            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+            var validator = _container.Resolve<IValidator<RadarrConfig>>();
             var result = validator.Validate(config);
 
             result.IsValid.Should().BeTrue();
@@ -57,8 +57,8 @@ namespace TrashLib.Tests.Radarr
         public void Validation_fails_for_all_missing_required_properties()
         {
             // default construct which should yield default values (invalid) for all required properties
-            var config = new RadarrConfiguration();
-            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+            var config = new RadarrConfig();
+            var validator = _container.Resolve<IValidator<RadarrConfig>>();
 
             var result = validator.Validate(config);
 
@@ -79,7 +79,7 @@ namespace TrashLib.Tests.Radarr
         [Test]
         public void Validation_succeeds_when_no_missing_required_properties()
         {
-            var config = new RadarrConfiguration
+            var config = new RadarrConfig
             {
                 ApiKey = "required value",
                 BaseUrl = "required value",
@@ -100,7 +100,7 @@ namespace TrashLib.Tests.Radarr
                 }
             };
 
-            var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+            var validator = _container.Resolve<IValidator<RadarrConfig>>();
             var result = validator.Validate(config);
 
             result.IsValid.Should().BeTrue();

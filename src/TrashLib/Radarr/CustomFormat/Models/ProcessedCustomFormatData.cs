@@ -20,12 +20,9 @@ namespace TrashLib.Radarr.CustomFormat.Models
         public JObject Json { get; set; }
         public TrashIdMapping? CacheEntry { get; set; }
 
-        public string CacheAwareName => CacheEntry?.CustomFormatName ?? Name;
-
         public void SetCache(int customFormatId)
         {
-            CacheEntry ??= new TrashIdMapping(TrashId, Name);
-            CacheEntry.CustomFormatId = customFormatId;
+            CacheEntry = new TrashIdMapping(TrashId, customFormatId);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1024", Justification = "Method throws an exception")]

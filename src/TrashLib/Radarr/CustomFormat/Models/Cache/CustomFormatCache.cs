@@ -14,15 +14,13 @@ namespace TrashLib.Radarr.CustomFormat.Models.Cache
 
     public class TrashIdMapping
     {
-        public TrashIdMapping(string trashId, string customFormatName, int customFormatId = default)
+        public TrashIdMapping(string trashId, int customFormatId)
         {
-            CustomFormatName = customFormatName;
             TrashId = trashId;
             CustomFormatId = customFormatId;
         }
 
-        public string CustomFormatName { get; set; }
         public string TrashId { get; }
-        public int CustomFormatId { get; set; }
+        public int CustomFormatId { get; }
     }
 }

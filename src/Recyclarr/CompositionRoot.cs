@@ -34,14 +34,15 @@ namespace Recyclarr
         {
             builder.RegisterModule<RadarrAutofacModule>();
 
+            builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
             builder.RegisterType<CustomFormatRepository>()
                 .InstancePerLifetimeScope();
 
-            builder.RegisterType<ConfigPersister<RadarrConfiguration>>()
-                .As<IConfigPersister<RadarrConfiguration>>()
+            builder.RegisterType<ConfigPersister<RadarrConfig>>()
+                .As<IConfigPersister<RadarrConfig>>()
                 .WithParameter(new NamedParameter("filename", "radarr.json"));
 
-            builder.Register(c => c.Resolve<IConfigPersister<RadarrConfiguration>>().Load())
+            builder.Register(c => c.Resolve<IConfigPersister<RadarrConfig>>().Load())
                 .InstancePerLifetimeScope();
         }
     }

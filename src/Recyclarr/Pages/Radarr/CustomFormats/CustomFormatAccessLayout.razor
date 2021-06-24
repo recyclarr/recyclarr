@@ -17,7 +17,7 @@
             <MudButton Class="mud-theme-primary my-2" OnClick="@ForceReload">Retry</MudButton>
         </MudContainer>
     }
-    else if (!CfRepository.IsLoaded)
+    else if (!GuideProcessor.IsLoaded)
     {
         <MudContainer Class="d-flex flex-column align-center">
             <MudText Align="Align.Center" Class="my-2">Loading custom formats...</MudText>
