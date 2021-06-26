@@ -6,7 +6,7 @@ namespace TrashLib.Radarr.CustomFormat.Cache
 {
     public interface ICachePersister
     {
-        CustomFormatCache? CfCache { get; }
+        List<TrashIdMapping> CfCache { get; }
         void Load();
         void Save();
         void Update(IEnumerable<ProcessedCustomFormatData> customFormats);

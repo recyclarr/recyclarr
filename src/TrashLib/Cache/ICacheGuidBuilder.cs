@@ -1,7 +1,9 @@
-﻿namespace TrashLib.Cache
+﻿using TrashLib.Config;
+
+namespace TrashLib.Cache
 {
     public interface ICacheGuidBuilder
     {
-        string MakeGuid();
+        string MakeGuid(IServiceConfiguration config);
     }
 }

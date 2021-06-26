@@ -6,19 +6,17 @@ namespace TrashLib.Cache
 {
     internal class CacheGuidBuilder : ICacheGuidBuilder
     {
-        private readonly string _baseUrl;
         private readonly IFNV1a _hash;
 
-        public CacheGuidBuilder(IServiceConfiguration config)
+        public CacheGuidBuilder()
         {
-            _baseUrl = config.BaseUrl;
             _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
         }
 
-        public string MakeGuid()
+        public string MakeGuid(IServiceConfiguration config)
         {
             return _hash
-                .ComputeHash(Encoding.ASCII.GetBytes(_baseUrl))
+                .ComputeHash(Encoding.ASCII.GetBytes(config.BaseUrl))
                 .AsHexString();
         }
     }

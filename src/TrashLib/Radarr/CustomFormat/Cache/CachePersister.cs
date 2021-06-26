@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Serilog;
 using TrashLib.Cache;
+using TrashLib.Config;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 
@@ -12,25 +14,19 @@ namespace TrashLib.Radarr.CustomFormat.Cache
         private readonly IServiceCache _cache;
         private readonly ICacheGuidBuilder _guidBuilder;
 
-        public CachePersister(ILogger log, IServiceCache cache, ICacheGuidBuilder guidBuilder)
+        public CachePersister(ILogger log, IServiceCache cache)
         {
             Log = log;
             _cache = cache;
-            _guidBuilder = guidBuilder;
         }
 
         private ILogger Log { get; }
 
-        public CustomFormatCache? CfCache { get; private set; }
+        public List<TrashIdMapping> CfCache { get; private set; }
 
-        public void Load()
+        public void Load(IServiceConfiguration config)
         {
-            CfCache = _cache.Load<CustomFormatCache>(_guidBuilder);
-            if (CfCache == null)
-            {
-                Log.Debug("Custom format cache does not exist; proceeding without it");
-                return;
-            }
+            CfCache = _cache.Load<TrashIdMapping>(config).ToList();
 
             Log.Debug("Loaded Cache");
 

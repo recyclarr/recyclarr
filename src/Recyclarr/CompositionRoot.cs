@@ -1,6 +1,12 @@
 ﻿using System.IO.Abstractions;
 using Autofac;
+using Blazored.LocalStorage;
 using BlazorPro.BlazorSize;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MudBlazor.Services;
+using Recyclarr.Code.Database;
 using Recyclarr.Code.Radarr;
 using Recyclarr.Code.Settings;
 using Recyclarr.Code.Settings.Persisters;
@@ -13,8 +19,27 @@ namespace Recyclarr
 {
     internal static class CompositionRoot
     {
+        public static void Build(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddMediaQueryService();
+            services.AddMudServices();
+            services.AddBlazoredLocalStorage();
+            services.AddDatabaseDeveloperPageExceptionFilter();
+
+            // EFCore DB Context Factory Registrations
+            services.AddDbContextFactory<DatabaseContext>(options =>
+                options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+        }
+
         public static void Build(ContainerBuilder builder)
         {
+            // EF Core
+            // builder.RegisterGeneric(typeof(DbContextFactory<>))
+            //     .As(typeof(IDbContextFactory<>))
+            //     .SingleInstance();
+
             builder.Register(_ => new LoggerConfiguration().MinimumLevel.Debug().CreateLogger())
                 .As<ILogger>()
                 .SingleInstance();
@@ -35,7 +60,7 @@ namespace Recyclarr
             builder.RegisterModule<RadarrAutofacModule>();
 
             builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
-            builder.RegisterType<CustomFormatRepository>()
+            builder.RegisterType<DatabaseContext>()
                 .InstancePerLifetimeScope();
 
             builder.RegisterType<ConfigPersister<RadarrConfig>>()

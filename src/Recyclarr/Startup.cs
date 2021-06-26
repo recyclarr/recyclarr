@@ -1,12 +1,9 @@
 using Autofac;
-using Blazored.LocalStorage;
-using BlazorPro.BlazorSize;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MudBlazor.Services;
 
 namespace Recyclarr
 {
@@ -22,16 +19,11 @@ namespace Recyclarr
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddMediaQueryService();
-            services.AddMudServices();
-            services.AddBlazoredLocalStorage();
-        }
+        public void ConfigureServices(IServiceCollection services) =>
+            CompositionRoot.Build(services, Configuration);
 
-        public void ConfigureContainer(ContainerBuilder builder) => CompositionRoot.Build(builder);
+        public void ConfigureContainer(ContainerBuilder builder) =>
+            CompositionRoot.Build(builder);
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

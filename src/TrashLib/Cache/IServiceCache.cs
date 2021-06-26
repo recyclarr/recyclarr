@@ -1,8 +1,13 @@
-﻿namespace TrashLib.Cache
+﻿using System.Collections.Generic;
+using TrashLib.Config;
+using TrashLib.Radarr.CustomFormat.Cache;
+using TrashLib.Radarr.CustomFormat.Models.Cache;
+
+namespace TrashLib.Cache
 {
     public interface IServiceCache
     {
-        T? Load<T>(ICacheGuidBuilder guidBuilder) where T : class;
-        void Save<T>(T obj, ICacheGuidBuilder guidBuilder) where T : class;
+        IEnumerable<T> Load<T>(IServiceConfiguration config) where T : ServiceCacheObject;
+        void Save<T>(IEnumerable<T> objList, IServiceConfiguration config) where T : ServiceCacheObject;
     }
 }

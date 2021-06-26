@@ -11,7 +11,7 @@ namespace TrashLib.Cache
             builder.RegisterModule<ConfigAutofacModule>();
 
             builder.RegisterType<CacheGuidBuilder>().As<ICacheGuidBuilder>();
-            builder.RegisterType<ServiceCache>().As<IServiceCache>();
+            builder.RegisterType<FilesystemServiceCache>().As<IServiceCache>();
         }
     }
 }
