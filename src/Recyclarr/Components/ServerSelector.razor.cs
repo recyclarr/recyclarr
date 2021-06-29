@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Blazored.LocalStorage;
+using Fluxor;
 using Microsoft.AspNetCore.Components;
+using Recyclarr.Code;
+using Recyclarr.Code.Radarr;
+using Recyclarr.Code.Radarr.Fluxor;
 using TrashLib.Config;
 
 namespace Recyclarr.Components
@@ -11,13 +12,23 @@ namespace Recyclarr.Components
     public partial class ServerSelector<TConfig>
         where TConfig : IServiceConfiguration
     {
-        private readonly Queue<Func<Task>> _afterRenderActions = new();
+        [Inject]
+        public ILocalStorageActionQueue LocalStorage { get; set; } = default!;
 
         [Inject]
-        public ILocalStorageService LocalStorage { get; set; } = default!;
+        public IDispatcher Dispatcher { get; set; } = default!;
 
         [Inject]
-        public ICollection<TConfig> Configs { get; set; } = default!;
+        public IConfigRepository<TConfig> ConfigRepo { get; set; } = default!;
+
+        [Inject]
+        internal IState<ActiveConfig<TConfig>> ActiveConfig { get; set; } = default!;
+
+        public TConfig? Selection
+        {
+            get => ActiveConfig.Value.Config;
+            private set => Dispatcher.Dispatch(new ActiveConfig<TConfig>(value));
+        }
 
         [Parameter]
         public string Label { get; set; } = "Select Server";
@@ -25,34 +36,24 @@ namespace Recyclarr.Components
         [Parameter]
         public EventCallback<TConfig?> SelectionChanged { get; set; }
 
-        public TConfig? Selection { get; private set; }
-
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            _afterRenderActions.Enqueue(LoadSelected);
-        }
+            LocalStorage.Load<string>("selectedInstance", async savedSelection =>
+            {
+                var instanceToSelect = ConfigRepo.Configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
+                if (instanceToSelect == null)
+                {
+                    return;
+                }
 
-        private async Task LoadSelected()
-        {
-            var savedSelection = await LocalStorage.GetItemAsync<string>("selectedInstance");
-            var instanceToSelect = Configs.FirstOrDefault(c => c.BaseUrl == savedSelection);
-            await SetSelected(instanceToSelect ?? Configs.FirstOrDefault(), false);
-        }
-
-        private async Task SaveSelected()
-        {
-            await LocalStorage.SetItemAsync("selectedInstance", Selection?.BaseUrl);
+                await SetSelected(instanceToSelect, false);
+            });
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            while (_afterRenderActions.TryDequeue(out var action))
-            {
-                await action.Invoke();
-                StateHasChanged();
-            }
-
+            await LocalStorage.Process();
             await base.OnAfterRenderAsync(firstRender);
         }
 
@@ -61,13 +62,14 @@ namespace Recyclarr.Components
             await SetSelected(selected, true);
         }
 
-        private async Task SetSelected(TConfig? value, bool shouldSave)
+        private async Task SetSelected(TConfig value, bool shouldSave)
         {
-            Selection = value;
+            Dispatcher.Dispatch(new ActiveConfig<TConfig>(value));
             if (shouldSave)
             {
-                _afterRenderActions.Enqueue(SaveSelected);
+                LocalStorage.Save("selectedInstance", Selection?.BaseUrl);
             }
+
             await SelectionChanged.InvokeAsync(Selection);
         }
     }

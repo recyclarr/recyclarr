@@ -14,7 +14,7 @@
             Refresh
         </MudButton>
     </div>
-    <ServerSelector TConfig="RadarrConfiguration"
+    <ServerSelector TConfig="RadarrConfig"
         @ref="_serverSelector"
         Label="Choose Radarr Server"
         SelectionChanged="@UpdateSelectedCustomFormats" />
@@ -78,11 +78,11 @@ else
                                              Class="my-n2">
                                     @if (item.ExistsInGuide)
                                     {
-                                        @item.Item.Names.First()
+                                        @item.Item.Name
                                     }
                                     else
                                     {
-                                        <del class="grey-text">@item.Item.Names.First()</del>
+                                        <del class="grey-text">@item.Item.Name</del>
                                         <span class="mud-error-text">(Removed In Guide)</span>
                                     }
                                 </MudCheckBox>
@@ -110,7 +110,7 @@ else
 
                     <CustomFormatChooser @ref="_cfChooser"
                                          ExcludedCustomFormatTrashIds="@ChosenCustomFormatIds"
-                                         CfIdentifiers="@CustomFormatIds"
+                                         CfIdentifiers="@CustomFormats"
                                          OnListStateChanged="@StateHasChanged" />
                 </MudPaper>
             </MudItem>

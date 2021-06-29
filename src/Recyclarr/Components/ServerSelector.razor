@@ -6,8 +6,8 @@
     ValueChanged="OnSelectionChanged"
     Label="@Label"
     Class="mt-3 mt-sm-0">
-    @foreach (var instance in Configs)
+    @foreach (var instance in ConfigRepo.Configs)
     {
-        <MudSelectItem Value="@instance">@instance.BaseUrl</MudSelectItem>
+        <MudSelectItem @key="@instance.Id" Value="@instance">@instance.BaseUrl</MudSelectItem>
     }
 </MudSelect>

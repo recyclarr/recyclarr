@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using Fluxor;
 using Microsoft.AspNetCore.Components;
 using Recyclarr.Code.Radarr;
+using Recyclarr.Code.Radarr.Fluxor;
+using TrashLib.Radarr.Config;
 
 namespace Recyclarr.Pages.Radarr.CustomFormats
 {
@@ -14,29 +17,37 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         [Inject]
         public IGuideProcessor GuideProcessor { get; set; } = default!;
 
+        [Inject]
+        private IState<ActiveConfig<RadarrConfig>> ActiveConfig { get; set; } = default!;
+
         public bool IsLoaded => GuideProcessor.IsLoaded;
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await Reload();
         }
 
         private async Task RequestCustomFormats(bool force)
         {
             try
             {
+                var config = ActiveConfig.Value.Config;
+                if (config == null)
+                {
+                    return;
+                }
+
                 StateHasChanged();
                 _exceptionOccurred = false;
                 var wasLoaded = true;
 
                 if (force)
                 {
-                    await GuideProcessor.ForceBuildGuideData();
+                    await GuideProcessor.ForceBuildGuideData(config);
                 }
                 else
                 {
-                    wasLoaded = await GuideProcessor.BuildRepository();
+                    wasLoaded = await GuideProcessor.BuildGuideData(config);
                 }
 
                 if (wasLoaded)

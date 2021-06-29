@@ -5,13 +5,14 @@
 @using TrashLib.Config
 @using Recyclarr.Components
 @using Flurl.Http
+@using Recyclarr.Code.Radarr
 @using TrashLib.Cache
 @using TrashLib.Radarr.CustomFormat
 @using TrashLib.Radarr.CustomFormat.Cache
 
 
 <div class="d-flex mb-4 flex-column flex-sm-row">
-    <ServerSelector TConfig="RadarrConfiguration"
+    <ServerSelector TConfig="RadarrConfig"
                     @ref="_serverSelector"
                     Label="Choose Radarr Server"
                     SelectionChanged="@OnSelectedInstanceChanged" />
@@ -106,10 +107,7 @@
     public Func<string, IQualityProfileService> ProfileServiceFactory { get; set; } = default!;
 
     [Inject]
-    public IConfigPersister<RadarrConfig> ConfigPersister { get; set; } = default!;
-
-    [Inject]
-    public ICollection<RadarrConfig> Configs { get; set; } = default!;
+    public IConfigRepository<RadarrConfig> ConfigRepo { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,7 +116,7 @@
 
     class ProfileSelectionPageManager
     {
-        private readonly ICachePersisterFactory _cachePersisterFactory;
+        private readonly icachepersister _cachePersisterFactory;
         private readonly Func<string, ICustomFormatService> _customFormatServiceFactory;
 
         public ProfileSelectionPageManager(

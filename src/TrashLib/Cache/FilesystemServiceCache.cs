@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using Newtonsoft.Json;
@@ -6,14 +7,15 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using TrashLib.Config;
+using TrashLib.Radarr.CustomFormat.Cache;
 
 namespace TrashLib.Cache
 {
     internal class FilesystemServiceCache : IServiceCache
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ICacheStoragePath _storagePath;
         private readonly ICacheGuidBuilder _guidBuilder;
+        private readonly ICacheStoragePath _storagePath;
 
         public FilesystemServiceCache(
             IFileSystem fileSystem,
@@ -29,12 +31,13 @@ namespace TrashLib.Cache
 
         private ILogger Log { get; }
 
-        public IEnumerable<T>? Load<T>(IServiceConfiguration config) where T : class
+        public IEnumerable<T> Load<T>(IServiceConfiguration config)
+            where T : ServiceCacheObject
         {
             var path = PathFromAttribute<T>(config);
             if (!_fileSystem.File.Exists(path))
             {
-                return null;
+                return Array.Empty<T>();
             }
 
             var json = _fileSystem.File.ReadAllText(path);
@@ -48,10 +51,11 @@ namespace TrashLib.Cache
                 Log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
             }
 
-            return null;
+            return Array.Empty<T>();
         }
 
-        public void Save<T>(IEnumerable<T> objList, IServiceConfiguration config) where T : class
+        public void Save<T>(IEnumerable<T> objList, IServiceConfiguration config)
+            where T : ServiceCacheObject
         {
             var path = PathFromAttribute<T>(config);
             _fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(path));

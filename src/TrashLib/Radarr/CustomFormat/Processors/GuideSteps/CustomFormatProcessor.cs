@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using TrashLib.Config;
 using TrashLib.Radarr.Config;
+using TrashLib.Radarr.CustomFormat.Cache;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 
@@ -10,18 +12,24 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     internal class CustomFormatProcessor : ICustomFormatProcessor
     {
-        public List<(string, string)> CustomFormatsWithOutdatedNames { get; } = new();
-        public List<ProcessedCustomFormatData> ProcessedCustomFormats { get; } = new();
+        private readonly ICustomFormatCache _cache;
+
+        public CustomFormatProcessor(ICustomFormatCache cache)
+        {
+            _cache = cache;
+        }
+
+        public List<ProcessedCustomFormatData> CustomFormats { get; } = new();
         public List<TrashIdMapping> DeletedCustomFormatsInCache { get; } = new();
 
-        public void Process(IEnumerable<string> customFormatGuideData, RadarrConfig config, CustomFormatCache? cache)
+        public void Process(IEnumerable<string> customFormatGuideData, RadarrConfig config)
         {
             var processedCfs = customFormatGuideData
-                .Select(jsonData => ProcessCustomFormatData(jsonData, cache))
+                .Select(jsonData => ProcessCustomFormatData(jsonData, config))
                 .ToList();
 
             // For each ID listed under the `trash_ids` YML property, match it to an existing CF
-            ProcessedCustomFormats.AddRange(config.CustomFormats
+            CustomFormats.AddRange(config.CustomFormats
                 .Select(c => c.TrashId)
                 .Distinct()
                 .Join(processedCfs,
@@ -31,10 +39,12 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                     StringComparer.InvariantCultureIgnoreCase));
 
             // Orphaned entries in cache represent custom formats we need to delete.
-            ProcessDeletedCustomFormats(cache);
+            ProcessDeletedCustomFormats(config);
         }
 
-        private static ProcessedCustomFormatData ProcessCustomFormatData(string guideData, CustomFormatCache? cache)
+        private ProcessedCustomFormatData ProcessCustomFormatData(
+            string guideData,
+            IServiceConfiguration config)
         {
             JObject obj = JObject.Parse(guideData);
             var name = (string) obj["name"];
@@ -54,23 +64,18 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
             return new ProcessedCustomFormatData(name, trashId, obj)
             {
                 Score = finalScore,
-                CacheEntry = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == trashId)
+                CacheEntry = _cache.Load(config).FirstOrDefault(c => c.TrashId == trashId)
             };
         }
 
-        private void ProcessDeletedCustomFormats(CustomFormatCache? cache)
+        private void ProcessDeletedCustomFormats(RadarrConfig config)
         {
-            if (cache == null)
-            {
-                return;
-            }
-
             static bool MatchCfInCache(ProcessedCustomFormatData cf, TrashIdMapping c)
                 => cf.CacheEntry != null && cf.CacheEntry.TrashId == c.TrashId;
 
             // Delete if CF is in cache and not in the guide or config
-            DeletedCustomFormatsInCache.AddRange(cache.TrashIdMappings
-                .Where(c => !ProcessedCustomFormats.Any(cf => MatchCfInCache(cf, c))));
+            DeletedCustomFormatsInCache.AddRange(_cache.Load(config)
+                .Where(c => !CustomFormats.Any(cf => MatchCfInCache(cf, c))));
         }
     }
 }

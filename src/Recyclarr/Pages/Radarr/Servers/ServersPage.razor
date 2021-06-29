@@ -1,18 +1,19 @@
 @page "/radarr/servers"
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 
 <MudButton Class="mud-theme-primary mb-4" OnClick="@OnAddServer">Add Server</MudButton>
 
 <MudPaper Outlined="true" Class="d-flex justify-center pa-4">
-    @if (Configs.Count == 0)
+    @if (!ConfigRepo.Configs.Any())
     {
         <MudText Typo="Typo.h6">No Servers Configured</MudText>
     }
     else
     {
         <MudGrid>
-            @foreach (var instance in Configs)
+            @foreach (var instance in ConfigRepo.Configs)
             {
-                <MudItem xs="12" sm="6">
+                <MudItem @Key="@instance.Id" xs="12" sm="6">
                     <MudCard Elevation="3" Style="background-color: #2f2e3a" Outlined="true">
                         <MudCardHeader>
                             <CardHeaderContent>

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Serilog;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Api;
-using TrashLib.Radarr.CustomFormat.Cache;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
@@ -16,7 +15,6 @@ namespace Recyclarr.Code.Radarr
 {
     internal class GuideProcessor : IGuideProcessor
     {
-        private readonly ICachePersisterFactory _cachePersisterFactory;
         private readonly ICustomFormatApiPersistenceStep _customFormatCustomFormatApiPersister;
         private readonly ICustomFormatProcessor _customFormatProcessor;
         private readonly Func<string, ICustomFormatService> _customFormatServiceFactory;
@@ -28,7 +26,6 @@ namespace Recyclarr.Code.Radarr
             ILogger log,
             IRadarrGuideService guideService,
             ICustomFormatProcessor customFormatProcessor,
-            ICachePersisterFactory cachePersisterFactory,
             Func<string, ICustomFormatService> customFormatServiceFactory,
             IJsonTransactionStep jsonTransactionStep,
             ICustomFormatApiPersistenceStep customFormatCustomFormatApiPersister)
@@ -36,7 +33,6 @@ namespace Recyclarr.Code.Radarr
             Log = log;
             _guideService = guideService;
             _customFormatProcessor = customFormatProcessor;
-            _cachePersisterFactory = cachePersisterFactory;
             _customFormatServiceFactory = customFormatServiceFactory;
             _jsonTransactionStep = jsonTransactionStep;
             _customFormatCustomFormatApiPersister = customFormatCustomFormatApiPersister;
@@ -44,14 +40,11 @@ namespace Recyclarr.Code.Radarr
 
         private ILogger Log { get; }
 
-        public IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats
-            => _customFormatProcessor.ProcessedCustomFormats;
+        public IReadOnlyCollection<ProcessedCustomFormatData> CustomFormats
+            => _customFormatProcessor.CustomFormats;
 
         public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache
             => _customFormatProcessor.DeletedCustomFormatsInCache;
-
-        public List<(string, string)> CustomFormatsWithOutdatedNames
-            => _customFormatProcessor.CustomFormatsWithOutdatedNames;
 
         public bool IsLoaded => _guideCustomFormatJson is not null;
 
@@ -61,21 +54,21 @@ namespace Recyclarr.Code.Radarr
             await BuildGuideData(config);
         }
 
-        public async Task BuildGuideData(RadarrConfig config)
+        public async Task<bool> BuildGuideData(RadarrConfig config)
         {
-            var cache = _cachePersisterFactory.Create(config);
-            cache.Load();
+            var wasLoaded = true;
 
             if (_guideCustomFormatJson == null)
             {
                 Log.Debug("Requesting and parsing guide markdown");
                 _guideCustomFormatJson = (await _guideService.GetCustomFormatJson()).ToList();
+                wasLoaded = false;
             }
 
             // Process and filter the custom formats from the guide.
             // Custom formats in the guide not mentioned in the config are filtered out.
-            _customFormatProcessor.Process(_guideCustomFormatJson, config, cache.CfCache);
-            cache.Save();
+            _customFormatProcessor.Process(_guideCustomFormatJson, config);
+            return wasLoaded;
         }
 
         public async Task SaveToRadarr(RadarrConfig config)
@@ -86,7 +79,7 @@ namespace Recyclarr.Code.Radarr
             // Match CFs between the guide & Radarr and merge the data. The goal is to retain as much of the
             // original data from Radarr as possible. There are many properties in the response JSON that we don't
             // directly care about. We keep those and just update the ones we do care about.
-            _jsonTransactionStep.Process(ProcessedCustomFormats, radarrCfs);
+            _jsonTransactionStep.Process(CustomFormats, radarrCfs);
 
             // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
             if (config.DeleteOldCustomFormats)

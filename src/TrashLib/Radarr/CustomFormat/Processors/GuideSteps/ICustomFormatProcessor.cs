@@ -7,10 +7,9 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     public interface ICustomFormatProcessor
     {
-        List<(string, string)> CustomFormatsWithOutdatedNames { get; }
-        List<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
+        List<ProcessedCustomFormatData> CustomFormats { get; }
         List<TrashIdMapping> DeletedCustomFormatsInCache { get; }
 
-        void Process(IEnumerable<string> customFormatGuideData, RadarrConfig config, CustomFormatCache? cache);
+        void Process(IEnumerable<string> customFormatGuideData, RadarrConfig config);
     }
 }

@@ -8,12 +8,11 @@ namespace Recyclarr.Code.Radarr
 {
     public interface IGuideProcessor
     {
-        IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
+        IReadOnlyCollection<ProcessedCustomFormatData> CustomFormats { get; }
         IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
-        List<(string, string)> CustomFormatsWithOutdatedNames { get; }
         bool IsLoaded { get; }
-        Task BuildGuideData(RadarrConfig config);
-        Task SaveToRadarr(RadarrConfig config);
         Task ForceBuildGuideData(RadarrConfig config);
+        Task<bool> BuildGuideData(RadarrConfig config);
+        Task SaveToRadarr(RadarrConfig config);
     }
 }

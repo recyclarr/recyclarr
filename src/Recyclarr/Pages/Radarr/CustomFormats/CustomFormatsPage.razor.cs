@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Fluxor;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Recyclarr.Code.Radarr;
+using Recyclarr.Code.Radarr.Fluxor;
 using Recyclarr.Components;
-using TrashLib.Config;
 using TrashLib.Radarr.Config;
+using TrashLib.Radarr.CustomFormat.Models;
 
 namespace Recyclarr.Pages.Radarr.CustomFormats
 {
@@ -26,18 +28,18 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         public IDialogService DialogService { get; set; } = default!;
 
         [Inject]
-        public IConfigPersister<RadarrConfig> ConfigPersister { get; set; } = default!;
+        public IConfigRepository<RadarrConfig> ConfigRepo { get; set; } = default!;
 
         [Inject]
-        public ICollection<RadarrConfig> Configs { get; set; } = default!;
+        private IState<ActiveConfig<RadarrConfig>> ActiveConfig { get; set; } = default!;
 
         private bool? SelectAllCheckbox { get; set; } = false;
-        private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashIds.First()).ToList();
+        private List<string> ChosenCustomFormatIds => _currentSelection.Select(cf => cf.Item.TrashId).ToList();
         private bool IsRefreshDisabled => CfAccessor is not {IsLoaded: true};
         private bool IsAddSelectedDisabled => IsRefreshDisabled || _cfChooser!.SelectedCount == 0;
 
-        private IList<CustomFormatIdentifier> CustomFormatIds
-            => CfAccessor?.GuideProcessor.ProcessedCustomFormats ?? new List<CustomFormatIdentifier>();
+        private IReadOnlyCollection<ProcessedCustomFormatData> CustomFormats
+            => CfAccessor?.GuideProcessor.CustomFormats ?? new List<ProcessedCustomFormatData>();
 
         public void Dispose()
         {
@@ -73,7 +75,7 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
             _currentSelection = selection.CustomFormats
                 .Select(cf =>
                 {
-                    var exists = CfAccessor?.GuideProcessor.Identifiers.Any(id2 => id2.TrashId == cf.TrashIds.First());
+                    var exists = CfAccessor?.GuideProcessor.CustomFormats.Any(id2 => id2.TrashId == cf.TrashId);
                     return new SelectableCustomFormat(cf, exists ?? false);
                 })
                 .ToHashSet();
@@ -85,15 +87,15 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
         {
             _cfChooser?.RequestRefreshList();
 
-            if (_serverSelector?.Selection != null)
+            if (ActiveConfig.Value.Config != null)
             {
-                _serverSelector.Selection.CustomFormats = _currentSelection
+                ActiveConfig.Value.Config.CustomFormats = _currentSelection
                     .Where(s => s.ExistsInGuide)
                     .Select(s => s.Item)
                     .ToList();
             }
 
-            ConfigPersister.Save(Configs);
+            ConfigRepo.Save();
         }
 
         private IEnumerable<SelectableCustomFormat> GetSelected() => _currentSelection.Where(i => i.Selected);
@@ -165,27 +167,23 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
             var result = await dlg.Result;
             if (!result.Cancelled)
             {
-                var selections = (IEnumerable<CustomFormatIdentifier>) result.Data;
+                var selections = (IEnumerable<ProcessedCustomFormatData>) result.Data;
                 MergeChosenCustomFormats(selections);
             }
 
             StateHasChanged();
         }
 
-        private void MergeChosenCustomFormats(IEnumerable<CustomFormatIdentifier> selections)
+        private void MergeChosenCustomFormats(IEnumerable<ProcessedCustomFormatData> selections)
         {
             _currentSelection.UnionWith(selections
                 .Select(cf => new SelectableCustomFormat(CreateCustomFormatConfig(cf), true)));
             SelectedCustomFormatsChanged();
         }
 
-        private static CustomFormatConfig CreateCustomFormatConfig(CustomFormatIdentifier cf)
+        private static CustomFormatConfig CreateCustomFormatConfig(ProcessedCustomFormatData cf)
         {
-            return new CustomFormatConfig
-            {
-                TrashIds = new List<string> {cf.TrashId},
-                Names = new List<string> {cf.Name}
-            };
+            return new() {TrashId = cf.TrashId, Name = cf.Name};
         }
 
         private void OnChooserAddSelected()

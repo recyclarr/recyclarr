@@ -8,10 +8,9 @@ namespace TrashLib.Radarr.Config
 {
     public class RadarrConfig : ServiceConfiguration
     {
-        public int Id { get; set; }
         public QualityDefinitionConfig? QualityDefinition { get; init; }
-        public ICollection<CustomFormatConfig> CustomFormats { get; set; }// = new();
-        public ICollection<QualityProfileConfig> QualityProfiles { get; init; }// = new();
+        public ICollection<CustomFormatConfig> CustomFormats { get; set; } // = new();
+        public ICollection<QualityProfileConfig> QualityProfiles { get; init; } // = new();
         public bool DeleteOldCustomFormats { get; init; }
     }
 
@@ -23,7 +22,7 @@ namespace TrashLib.Radarr.Config
 
     public class QualityProfileConfig
     {
-        public ICollection<ScoreEntryConfig> Scores { get; init; }// = new();
+        public ICollection<ScoreEntryConfig> Scores { get; init; } // = new();
         public bool ResetUnmatchedScores { get; init; }
     }
 

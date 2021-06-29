@@ -11,6 +11,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.*" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.*" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.*" />
+    <PackageReference Include="Fluxor" Version="4.*" />
+    <PackageReference Include="Fluxor.Blazor.Web" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>

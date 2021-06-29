@@ -1,9 +1,13 @@
 ﻿using Flurl;
+using Newtonsoft.Json;
 
 namespace TrashLib.Config
 {
     public abstract class ServiceConfiguration : IServiceConfiguration
     {
+        [JsonIgnore]
+        public int Id { get; set; }
+
         public string BaseUrl { get; set; } = "";
         public string ApiKey { get; set; } = "";
 

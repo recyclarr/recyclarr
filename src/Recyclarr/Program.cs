@@ -1,8 +1,6 @@
-using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Recyclarr.Code.Database;
 
 namespace Recyclarr
 {
@@ -14,9 +12,9 @@ namespace Recyclarr
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .Build();
 
-            var container = host.Services.GetAutofacRoot();
-            var dbInitializer = container.Resolve<DatabaseInitializer>();
-            dbInitializer.Initialize();
+            // var container = host.Services.GetAutofacRoot();
+            // var dbInitializer = container.Resolve<DatabaseInitializer>();
+            // dbInitializer.Initialize();
 
             host.Run();
         }

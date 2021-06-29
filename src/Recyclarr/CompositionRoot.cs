@@ -2,11 +2,11 @@
 using Autofac;
 using Blazored.LocalStorage;
 using BlazorPro.BlazorSize;
+using Fluxor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
-using Recyclarr.Code.Database;
 using Recyclarr.Code.Radarr;
 using Recyclarr.Code.Settings;
 using Recyclarr.Code.Settings.Persisters;
@@ -27,9 +27,10 @@ namespace Recyclarr
             services.AddMudServices();
             services.AddBlazoredLocalStorage();
             services.AddDatabaseDeveloperPageExceptionFilter();
+            services.AddFluxor(options => options.ScanAssemblies(typeof(CompositionRoot).Assembly));
 
             // EFCore DB Context Factory Registrations
-            services.AddDbContextFactory<DatabaseContext>(options =>
+            services.AddDbContextFactory<RadarrDatabaseContext>(options =>
                 options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
         }
 
@@ -60,14 +61,11 @@ namespace Recyclarr
             builder.RegisterModule<RadarrAutofacModule>();
 
             builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
-            builder.RegisterType<DatabaseContext>()
+            builder.RegisterType<RadarrDatabaseContext>()
                 .InstancePerLifetimeScope();
 
-            builder.RegisterType<ConfigPersister<RadarrConfig>>()
-                .As<IConfigPersister<RadarrConfig>>()
-                .WithParameter(new NamedParameter("filename", "radarr.json"));
-
-            builder.Register(c => c.Resolve<IConfigPersister<RadarrConfig>>().Load())
+            builder.RegisterType<RadarrConfigRepository>()
+                .As<IConfigRepository<RadarrConfig>>()
                 .InstancePerLifetimeScope();
         }
     }
