@@ -116,14 +116,14 @@
 
     class ProfileSelectionPageManager
     {
-        private readonly icachepersister _cachePersisterFactory;
+        private readonly ICustomFormatCache _cfCache;
         private readonly Func<string, ICustomFormatService> _customFormatServiceFactory;
 
         public ProfileSelectionPageManager(
-            ICachePersisterFactory cachePersisterFactory,
+            ICustomFormatCache cfCache,
             Func<string, ICustomFormatService> customFormatServiceFactory)
         {
-            _cachePersisterFactory = cachePersisterFactory;
+            _cfCache = cfCache;
             _customFormatServiceFactory = customFormatServiceFactory;
         }
 

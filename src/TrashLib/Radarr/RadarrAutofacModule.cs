@@ -32,12 +32,12 @@ namespace TrashLib.Radarr
             builder.RegisterType<RadarrQualityDefinitionGuideParser>().As<IRadarrQualityDefinitionGuideParser>();
 
             // Custom Format Support
-            builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
+            // builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
             builder.RegisterType<LocalRepoCustomFormatJsonParser>().As<IRadarrGuideService>();
-            builder.RegisterType<CachePersisterFactory>().As<ICachePersisterFactory>();
-            builder.RegisterType<CachePersister>()
-                .As<ICachePersister>()
-                .InstancePerLifetimeScope();
+            // builder.RegisterType<CachePersisterFactory>().As<ICachePersisterFactory>();
+            // builder.RegisterType<CachePersister>()
+                // .As<ICachePersister>()
+                // .InstancePerLifetimeScope();
 
             // builder.Register<Func<IServiceConfiguration, ICachePersister>>(c => config =>
             // {

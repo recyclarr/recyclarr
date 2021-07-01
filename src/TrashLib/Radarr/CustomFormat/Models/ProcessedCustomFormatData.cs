@@ -18,16 +18,11 @@ namespace TrashLib.Radarr.CustomFormat.Models
         public string TrashId { get; }
         public int? Score { get; init; }
         public JObject Json { get; set; }
-        public TrashIdMapping? CacheEntry { get; set; }
+        // public TrashIdMapping? CacheEntry { get; set; }
 
-        public void SetCache(int customFormatId)
-        {
-            CacheEntry = new TrashIdMapping(TrashId, customFormatId);
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1024", Justification = "Method throws an exception")]
-        public int GetCustomFormatId()
-            => CacheEntry?.CustomFormatId ??
-               throw new InvalidOperationException("CacheEntry must exist to obtain custom format ID");
+        // [SuppressMessage("Microsoft.Design", "CA1024", Justification = "Method throws an exception")]
+        // public int GetCustomFormatId()
+        //     => CacheEntry?.CustomFormatId ??
+        //        throw new InvalidOperationException("CacheEntry must exist to obtain custom format ID");
     }
 }

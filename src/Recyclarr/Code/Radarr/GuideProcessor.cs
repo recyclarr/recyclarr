@@ -84,7 +84,7 @@ namespace Recyclarr.Code.Radarr
             // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
             if (config.DeleteOldCustomFormats)
             {
-                _jsonTransactionStep.RecordDeletions(DeletedCustomFormatsInCache, radarrCfs);
+                _jsonTransactionStep.RecordDeletions(CustomFormats, radarrCfs);
             }
 
             // Step 2: For each merged CF, persist it to Radarr via its API. This will involve a combination of updates

@@ -12,10 +12,10 @@ namespace TrashLib.Radarr.Config
             IValidator<QualityDefinitionConfig> qualityDefinitionConfigValidator,
             IValidator<CustomFormatConfig> customFormatConfigValidator)
         {
-            RuleFor(x => x.BaseUrl).NotEmpty().WithMessage(messages.BaseUrl);
-            RuleFor(x => x.ApiKey).NotEmpty().WithMessage(messages.ApiKey);
-            RuleFor(x => x.QualityDefinition).SetNonNullableValidator(qualityDefinitionConfigValidator);
-            RuleForEach(x => x.CustomFormats).SetValidator(customFormatConfigValidator);
+            // RuleFor(x => x.BaseUrl).NotEmpty().WithMessage(messages.BaseUrl);
+            // RuleFor(x => x.ApiKey).NotEmpty().WithMessage(messages.ApiKey);
+            // RuleFor(x => x.QualityDefinition).SetNonNullableValidator(qualityDefinitionConfigValidator);
+            // RuleForEach(x => x.CustomFormats).SetValidator(customFormatConfigValidator);
         }
     }
 
@@ -26,9 +26,9 @@ namespace TrashLib.Radarr.Config
             IRadarrValidationMessages messages,
             IValidator<QualityProfileConfig> qualityProfileConfigValidator)
         {
-            RuleFor(x => x.Names).NotEmpty().When(x => x.TrashIds.Count == 0)
-                .WithMessage(messages.CustomFormatNamesAndIds);
-            RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileConfigValidator);
+            // RuleFor(x => x.Names).NotEmpty().When(x => x.TrashIds.Count == 0)
+            //     .WithMessage(messages.CustomFormatNamesAndIds);
+            // RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileConfigValidator);
         }
     }
 
@@ -37,7 +37,7 @@ namespace TrashLib.Radarr.Config
     {
         public QualityProfileConfigValidator(IRadarrValidationMessages messages)
         {
-            RuleFor(x => x.Name).NotEmpty().WithMessage(messages.QualityProfileName);
+            // RuleFor(x => x.Name).NotEmpty().WithMessage(messages.QualityProfileName);
         }
     }
 
@@ -46,7 +46,7 @@ namespace TrashLib.Radarr.Config
     {
         public QualityDefinitionConfigValidator(IRadarrValidationMessages messages)
         {
-            RuleFor(x => x.Type).IsInEnum().WithMessage(messages.QualityDefinitionType);
+            // RuleFor(x => x.Type).IsInEnum().WithMessage(messages.QualityDefinitionType);
         }
     }
 }

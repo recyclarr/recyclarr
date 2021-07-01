@@ -14,6 +14,7 @@ using Serilog;
 using TrashLib.Config;
 using TrashLib.Radarr;
 using TrashLib.Radarr.Config;
+using TrashLib.Radarr.CustomFormat.Cache;
 
 namespace Recyclarr
 {
@@ -66,6 +67,10 @@ namespace Recyclarr
 
             builder.RegisterType<RadarrConfigRepository>()
                 .As<IConfigRepository<RadarrConfig>>()
+                .InstancePerLifetimeScope();
+
+            builder.RegisterType<CustomFormatCache>()
+                .As<ICustomFormatCache>()
                 .InstancePerLifetimeScope();
         }
     }

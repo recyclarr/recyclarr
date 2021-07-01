@@ -1,30 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
+using TrashLib.Config;
+using TrashLib.Radarr.Config;
+using TrashLib.Radarr.CustomFormat.Api;
+using TrashLib.Radarr.CustomFormat.Cache;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
 {
+    public record CachedCustomFormat(ProcessedCustomFormatData CustomFormat, int Id);
+
     public class CustomFormatTransactionData
     {
         public List<ProcessedCustomFormatData> NewCustomFormats { get; } = new();
-        public List<ProcessedCustomFormatData> UpdatedCustomFormats { get; } = new();
+        public List<CachedCustomFormat> UpdatedCustomFormats { get; } = new();
         public List<TrashIdMapping> DeletedCustomFormatIds { get; } = new();
         public List<ProcessedCustomFormatData> UnchangedCustomFormats { get; } = new();
     }
 
     internal class JsonTransactionStep : IJsonTransactionStep
     {
+        private readonly Func<IServiceConfiguration, ICustomFormatCache> _cacheFactory;
+
+        public JsonTransactionStep(Func<IServiceConfiguration, ICustomFormatCache> cacheFactory)
+        {
+            _cacheFactory = cacheFactory;
+        }
+
         public CustomFormatTransactionData Transactions { get; } = new();
 
-        public void Process(IEnumerable<ProcessedCustomFormatData> guideCfs,
-            IReadOnlyCollection<JObject> radarrCfs)
+        public void Process(
+            IEnumerable<ProcessedCustomFormatData> guideCfs,
+            IReadOnlyCollection<JObject> radarrCfs,
+            RadarrConfig config)
         {
-            foreach (var (guideCf, radarrCf) in guideCfs
-                .Select(gcf => (GuideCf: gcf, RadarrCf: FindRadarrCf(radarrCfs, gcf))))
+            var cache = _cacheFactory(config);
+
+            foreach (var guideCf in guideCfs)
             {
+                var mapping = cache.Mappings.FirstOrDefault(m => m.TrashId == guideCf.TrashId);
+                var radarrCf = FindRadarrCf(radarrCfs, mapping?.CustomFormatId, guideCf.Name);
                 var guideCfJson = BuildNewRadarrCf(guideCf.Json);
 
                 // no match; we add this CF as brand new
@@ -39,17 +58,10 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                     guideCf.Json = (JObject) radarrCf.DeepClone();
                     UpdateRadarrCf(guideCf.Json, guideCfJson);
 
-                    // Set the cache for use later (like updating scores) if it hasn't been updated already.
-                    // This handles CFs that already exist in Radarr but aren't cached (they will be added to cache
-                    // later).
-                    if (guideCf.CacheEntry == null)
-                    {
-                        guideCf.SetCache((int) guideCf.Json["id"]);
-                    }
-
                     if (!JToken.DeepEquals(radarrCf, guideCf.Json))
                     {
-                        Transactions.UpdatedCustomFormats.Add(guideCf);
+                        Transactions.UpdatedCustomFormats.Add(
+                            new CachedCustomFormat(guideCf, (int) guideCf.Json["id"]));
                     }
                     else
                     {
@@ -59,20 +71,21 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             }
         }
 
-        public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, List<JObject> radarrCfs)
+        public void RecordDeletions(IEnumerable<ProcessedCustomFormatData> guideCfs,
+            List<RadarrCustomFormatData> radarrCfs, RadarrConfig config)
         {
-            // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
-            // FindRadarrCf() specifies 'null' for name because we should never delete unless an ID is found
-            foreach (var del in deletedCfsInCache.Where(
-                del => FindRadarrCf(radarrCfs, del.CustomFormatId, null) != null))
-            {
-                Transactions.DeletedCustomFormatIds.Add(del);
-            }
-        }
+            var cache = _cacheFactory(config);
 
-        private static JObject? FindRadarrCf(IReadOnlyCollection<JObject> radarrCfs, ProcessedCustomFormatData guideCf)
-        {
-            return FindRadarrCf(radarrCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
+            foreach (var mapping in cache.Mappings
+                .Where(m => guideCfs.None(cf => cf.TrashId == m.TrashId)))
+            {
+                // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
+                var radarrCf = radarrCfs.FirstOrDefault(cf => cf.Id == mapping.CustomFormatId);
+                if (radarrCf != null)
+                {
+                    Transactions.DeletedCustomFormatIds.Add(mapping);
+                }
+            }
         }
 
         private static JObject? FindRadarrCf(IReadOnlyCollection<JObject> radarrCfs, int? cfId, string? cfName)

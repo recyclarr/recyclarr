@@ -23,28 +23,27 @@ namespace TrashLib.Radarr.CustomFormat.Api
                 .GetJsonAsync<List<JObject>>();
         }
 
-        public async Task CreateCustomFormat(ProcessedCustomFormatData cf)
+        public async Task<int> CreateCustomFormat(ProcessedCustomFormatData cf)
         {
             var response = await BaseUrl
                 .AppendPathSegment("customformat")
                 .PostJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
 
-            cf.SetCache((int) response["id"]);
+            return (int) response["id"];
         }
 
-        public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
+        public async Task UpdateCustomFormat(int formatId, ProcessedCustomFormatData cf)
         {
             await BaseUrl
-                .AppendPathSegment($"customformat/{cf.GetCustomFormatId()}")
-                .PutJsonAsync(cf.Json)
-                .ReceiveJson<JObject>();
+                .AppendPathSegment($"customformat/{formatId}")
+                .PutJsonAsync(cf.Json);
         }
 
-        public async Task DeleteCustomFormat(int customFormatId)
+        public async Task DeleteCustomFormat(int formatId)
         {
             await BaseUrl
-                .AppendPathSegment($"customformat/{customFormatId}")
+                .AppendPathSegment($"customformat/{formatId}")
                 .DeleteAsync();
         }
     }

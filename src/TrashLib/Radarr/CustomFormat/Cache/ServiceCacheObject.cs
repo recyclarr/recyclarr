@@ -2,7 +2,7 @@
 {
     public abstract class ServiceCacheObject
     {
-        public int Id { get; set; }
-        public string ServiceBaseUrl { get; set; } = default!;
+        public int Id { get; init; }
+        public string ServiceBaseUrl { get; init; } = default!;
     }
 }
