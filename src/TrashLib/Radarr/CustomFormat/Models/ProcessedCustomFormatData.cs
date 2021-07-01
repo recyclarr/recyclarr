@@ -1,28 +1,39 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json.Linq;
-using TrashLib.Radarr.CustomFormat.Models.Cache;
+﻿using Newtonsoft.Json;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Models
 {
     public class ProcessedCustomFormatData
     {
-        public ProcessedCustomFormatData(string name, string trashId, JObject json)
+        public ProcessedCustomFormatData(string trashId, CustomFormatData data)
         {
-            Name = name;
             TrashId = trashId;
-            Json = json;
+            Data = data;
         }
 
-        public string Name { get; }
+        public string Name => Data.Name;
         public string TrashId { get; }
         public int? Score { get; init; }
-        public JObject Json { get; set; }
-        // public TrashIdMapping? CacheEntry { get; set; }
 
-        // [SuppressMessage("Microsoft.Design", "CA1024", Justification = "Method throws an exception")]
-        // public int GetCustomFormatId()
-        //     => CacheEntry?.CustomFormatId ??
-        //        throw new InvalidOperationException("CacheEntry must exist to obtain custom format ID");
+        public CustomFormatData Data { get; }
+
+        public static ProcessedCustomFormatData CreateFromJson(string guideData)
+        {
+            var cfData = JsonConvert.DeserializeObject<CustomFormatData>(guideData);
+            var trashId = (string) cfData.ExtraJson["trash_id"];
+            int? finalScore = null;
+
+            if (cfData.ExtraJson.TryGetValue("trash_score", out var score))
+            {
+                finalScore = (int) score;
+                cfData.ExtraJson.Property("trash_score").Remove();
+            }
+
+            // Remove trash_id, it's metadata that is not meant for Radarr itself
+            // Radarr supposedly drops this anyway, but I prefer it to be removed by TrashUpdater
+            cfData.ExtraJson.Property("trash_id").Remove();
+
+            return new ProcessedCustomFormatData(trashId, cfData) {Score = finalScore};
+        }
     }
 }

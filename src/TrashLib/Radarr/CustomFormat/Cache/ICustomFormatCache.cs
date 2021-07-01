@@ -9,5 +9,6 @@ namespace TrashLib.Radarr.CustomFormat.Cache
         IEnumerable<TrashIdMapping> Mappings { get; }
         void Add(int formatId, ProcessedCustomFormatData format);
         void Remove(TrashIdMapping cfId);
+        void Save();
     }
 }

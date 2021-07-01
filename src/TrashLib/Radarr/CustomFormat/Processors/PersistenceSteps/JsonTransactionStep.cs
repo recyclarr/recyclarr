@@ -5,7 +5,7 @@ using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
-using TrashLib.Radarr.CustomFormat.Api;
+using TrashLib.Radarr.CustomFormat.Api.Models;
 using TrashLib.Radarr.CustomFormat.Cache;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
@@ -35,7 +35,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
 
         public void Process(
             IEnumerable<ProcessedCustomFormatData> guideCfs,
-            IReadOnlyCollection<JObject> radarrCfs,
+            IReadOnlyCollection<CustomFormatData> radarrCfs,
             RadarrConfig config)
         {
             var cache = _cacheFactory(config);
@@ -44,24 +44,22 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             {
                 var mapping = cache.Mappings.FirstOrDefault(m => m.TrashId == guideCf.TrashId);
                 var radarrCf = FindRadarrCf(radarrCfs, mapping?.CustomFormatId, guideCf.Name);
-                var guideCfJson = BuildNewRadarrCf(guideCf.Json);
+                FixupRadarrCf(guideCf.Data);
 
                 // no match; we add this CF as brand new
                 if (radarrCf == null)
                 {
-                    guideCf.Json = guideCfJson;
                     Transactions.NewCustomFormats.Add(guideCf);
                 }
                 // found match in radarr CFs; update the existing CF
                 else
                 {
-                    guideCf.Json = (JObject) radarrCf.DeepClone();
-                    UpdateRadarrCf(guideCf.Json, guideCfJson);
+                    var originalRadarrJson = JObject.FromObject(radarrCf);
+                    UpdateRadarrCf(radarrCf, guideCf.Data);
 
-                    if (!JToken.DeepEquals(radarrCf, guideCf.Json))
+                    if (!JToken.DeepEquals(JObject.FromObject(radarrCf), originalRadarrJson))
                     {
-                        Transactions.UpdatedCustomFormats.Add(
-                            new CachedCustomFormat(guideCf, (int) guideCf.Json["id"]));
+                        Transactions.UpdatedCustomFormats.Add(new CachedCustomFormat(guideCf, guideCf.Data.Id));
                     }
                     else
                     {
@@ -72,7 +70,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         }
 
         public void RecordDeletions(IEnumerable<ProcessedCustomFormatData> guideCfs,
-            List<RadarrCustomFormatData> radarrCfs, RadarrConfig config)
+            List<CustomFormatData> radarrCfs, RadarrConfig config)
         {
             var cache = _cacheFactory(config);
 
@@ -88,60 +86,64 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             }
         }
 
-        private static JObject? FindRadarrCf(IReadOnlyCollection<JObject> radarrCfs, int? cfId, string? cfName)
+        private static CustomFormatData? FindRadarrCf(IReadOnlyCollection<CustomFormatData> radarrCfs,
+            int? cfId, string? cfName)
         {
-            JObject? match = null;
+            CustomFormatData? match = null;
 
             // Try to find match in cache first
             if (cfId != null)
             {
-                match = radarrCfs.FirstOrDefault(rcf => cfId == rcf["id"].Value<int>());
+                match = radarrCfs.FirstOrDefault(rcf => cfId == rcf.Id);
             }
 
             // If we don't find by ID, search by name (if a name was given)
             if (match == null && cfName != null)
             {
-                match = radarrCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf["name"].Value<string>()));
+                match = radarrCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Name));
             }
 
             return match;
         }
 
-        private static void UpdateRadarrCf(JObject cfToModify, JObject cfToMergeFrom)
+        private static void UpdateRadarrCf(CustomFormatData cfToModify, CustomFormatData cfToMergeFrom)
         {
-            MergeProperties(cfToModify, cfToMergeFrom, JTokenType.Array);
+            MergeProperties(cfToModify.ExtraJson, cfToMergeFrom.ExtraJson);
 
-            var radarrSpecs = cfToModify["specifications"].Children<JObject>();
-            var guideSpecs = cfToMergeFrom["specifications"].Children<JObject>();
+            var radarrSpecs = cfToModify.Specifications;
+            var guideSpecs = cfToMergeFrom.Specifications;
 
             var matchedGuideSpecs = guideSpecs
-                .GroupBy(gs => radarrSpecs.FirstOrDefault(gss => KeyMatch(gss, gs, "name")))
+                .GroupBy(gs => radarrSpecs.FirstOrDefault(gss => gss.Name == gs.Name))
                 .SelectMany(kvp => kvp.Select(gs => new {GuideSpec = gs, RadarrSpec = kvp.Key}));
 
-            var newRadarrSpecs = new JArray();
+            cfToModify.Specifications.Clear();
 
             foreach (var match in matchedGuideSpecs)
             {
                 if (match.RadarrSpec != null)
                 {
-                    MergeProperties(match.RadarrSpec, match.GuideSpec);
-                    newRadarrSpecs.Add(match.RadarrSpec);
+                    MergeProperties(match.RadarrSpec.ExtraJson, match.GuideSpec.ExtraJson);
+                    cfToModify.Specifications.Add(match.RadarrSpec);
                 }
                 else
                 {
-                    newRadarrSpecs.Add(match.GuideSpec);
+                    cfToModify.Specifications.Add(match.GuideSpec);
                 }
             }
-
-            cfToModify["specifications"] = newRadarrSpecs;
         }
 
-        private static bool KeyMatch(JObject left, JObject right, string keyName)
-            => left[keyName].Value<string>() == right[keyName].Value<string>();
+        // private static bool KeyMatch(CustomFormatData left, CustomFormatData right, string keyName)
+        // => left[keyName].Value<string>() == right[keyName].Value<string>();
 
-        private static void MergeProperties(JObject radarrCf, JObject guideCfJson,
+        private static void MergeProperties(JObject? radarrCf, JObject? guideCfJson,
             JTokenType exceptType = JTokenType.None)
         {
+            if (radarrCf == null || guideCfJson == null)
+            {
+                return;
+            }
+
             foreach (var guideProp in guideCfJson.Properties().Where(p => p.Value.Type != exceptType))
             {
                 if (guideProp.Value.Type == JTokenType.Array &&
@@ -159,7 +161,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             }
         }
 
-        private static JObject BuildNewRadarrCf(JObject jsonPayload)
+        private static void FixupRadarrCf(CustomFormatData cfData)
         {
             // Information on required fields from nitsua
             /*
@@ -169,17 +171,20 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                 everything else radarr can handle with backend logic
              */
 
-            foreach (var child in jsonPayload["specifications"])
+            foreach (var spec in cfData.Specifications)
             {
+                if (spec.ExtraJson is null)
+                {
+                    continue;
+                }
+
                 // convert from `"fields": {}` to `"fields": [{}]` (object to array of object)
                 // Weirdly the exported version of a custom format is not in array form, but the API requires the array
                 // even if there's only one element.
-                var field = child["fields"];
+                var field = spec.ExtraJson["fields"];
                 field["name"] = "value";
-                child["fields"] = new JArray {field};
+                spec.ExtraJson["fields"] = new JArray {field};
             }
-
-            return jsonPayload;
         }
     }
 }

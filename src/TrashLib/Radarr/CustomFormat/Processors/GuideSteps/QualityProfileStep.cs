@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
@@ -8,22 +10,22 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
         public Dictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores { get; } = new();
         public List<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; } = new();
 
-        public void Process(IEnumerable<ProcessedConfigData> configData)
+        public void Process(RadarrConfig config, IReadOnlyCollection<ProcessedCustomFormatData> customFormats)
         {
-            foreach (var config in configData)
+            // foreach (var config in configData)
             foreach (var profile in config.QualityProfiles)
-            foreach (var cf in config.CustomFormats)
+            foreach (var cfScore in profile.Scores)
             {
                 // Check if there is a score we can use. Priority is:
                 //      1. Score from the YAML config is used. If user did not provide,
                 //      2. Score from the guide is used. If the guide did not have one,
                 //      3. Warn the user and
-                var scoreToUse = profile.Score;
+                var scoreToUse = profile.Scores.FirstOrDefault(s => s.TrashId == cf.TrashId);
                 if (scoreToUse == null)
                 {
                     if (cf.Score == null)
                     {
-                        CustomFormatsWithoutScore.Add((cf.Name, cf.TrashId, profile.Name));
+                        CustomFormatsWithoutScore.Add((cf.Name, cf.TrashId, profile.));
                     }
                     else
                     {

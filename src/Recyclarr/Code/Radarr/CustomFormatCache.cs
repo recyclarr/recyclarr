@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -33,9 +32,7 @@ namespace Recyclarr.Code.Radarr
             });
         }
 
-        public void Remove(TrashIdMapping cfId)
-        {
-            _context.CustomFormatCache.Remove(cfId);
-        }
+        public void Remove(TrashIdMapping cfId) => _context.CustomFormatCache.Remove(cfId);
+        public void Save() => _context.SaveChanges();
     }
 }

@@ -1,4 +1,4 @@
-
+# noinspection EditorConfigKeyCorrectness
 [*]
 charset = utf-8
 end_of_line = crlf
@@ -919,7 +919,7 @@ resharper_event_handler_pattern_short = On$event$
 resharper_expression_braces = inside
 resharper_expression_pars = inside
 resharper_extra_spaces = remove_all
-resharper_force_attribute_style = separate
+resharper_force_attribute_style = join
 resharper_force_chop_compound_do_expression = false
 resharper_force_chop_compound_if_expression = false
 resharper_force_chop_compound_while_expression = false

@@ -1,5 +1,6 @@
-using System.Linq;
+using System;
 using System.Threading.Tasks;
+using TrashLib.Config;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Cache;
@@ -8,31 +9,36 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
 {
     internal class CustomFormatApiPersistenceStep : ICustomFormatApiPersistenceStep
     {
-        private readonly ICustomFormatCache _cache;
+        private readonly Func<IServiceConfiguration, ICustomFormatCache> _cacheFactory;
 
-        public CustomFormatApiPersistenceStep(ICustomFormatCache cache)
+        public CustomFormatApiPersistenceStep(Func<IServiceConfiguration, ICustomFormatCache> cacheFactory)
         {
-            _cache = cache;
+            _cacheFactory = cacheFactory;
         }
 
-        public async Task Process(RadarrConfig config, ICustomFormatService api, CustomFormatTransactionData transactions)
+        public async Task Process(RadarrConfig config, ICustomFormatService api,
+            CustomFormatTransactionData transactions)
         {
+            var cache = _cacheFactory(config);
+
             foreach (var cf in transactions.NewCustomFormats)
             {
                 var id = await api.CreateCustomFormat(cf);
-                _cache.Add(id, cf);
+                cache.Add(id, cf);
             }
 
-            foreach (var cf in transactions.UpdatedCustomFormats)
+            foreach (var (customFormat, id) in transactions.UpdatedCustomFormats)
             {
-                await api.UpdateCustomFormat(cf.Id, cf.CustomFormat);
+                await api.UpdateCustomFormat(id, customFormat);
             }
 
             foreach (var cfId in transactions.DeletedCustomFormatIds)
             {
                 await api.DeleteCustomFormat(cfId.CustomFormatId);
-                _cache.Remove(cfId);
+                cache.Remove(cfId);
             }
+
+            cache.Save();
         }
     }
 }
