@@ -89,10 +89,11 @@ namespace Recyclarr.Pages.Radarr.CustomFormats
 
             if (ActiveConfig.Value.Config != null)
             {
-                ActiveConfig.Value.Config.CustomFormats = _currentSelection
+                var container = ActiveConfig.Value.Config.CustomFormats;
+                container.Clear();
+                container.AddRange(_currentSelection
                     .Where(s => s.ExistsInGuide)
-                    .Select(s => s.Item)
-                    .ToList();
+                    .Select(s => s.Item));
             }
 
             ConfigRepo.Save();

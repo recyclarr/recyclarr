@@ -7,7 +7,6 @@ using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
-using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
 
@@ -42,9 +41,6 @@ namespace Recyclarr.Code.Radarr
 
         public IReadOnlyCollection<ProcessedCustomFormatData> CustomFormats
             => _customFormatProcessor.CustomFormats;
-
-        public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache
-            => _customFormatProcessor.DeletedCustomFormatsInCache;
 
         public bool IsLoaded => _guideCustomFormatJson is not null;
 
@@ -84,13 +80,13 @@ namespace Recyclarr.Code.Radarr
             // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
             if (config.DeleteOldCustomFormats)
             {
-                _jsonTransactionStep.RecordDeletions(CustomFormats, radarrCfs);
+                _jsonTransactionStep.RecordDeletions(CustomFormats, radarrCfs, config);
             }
 
             // Step 2: For each merged CF, persist it to Radarr via its API. This will involve a combination of updates
             // to existing CFs and creation of brand new ones, depending on what's already available in Radarr.
-            await _customFormatCustomFormatApiPersister.Process(
-                customFormatService, _jsonTransactionStep.Transactions);
+            await _customFormatCustomFormatApiPersister.Process(config, customFormatService,
+                _jsonTransactionStep.Transactions);
         }
     }
 }
