@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Extensions;
@@ -82,9 +83,10 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         private static FormatMappingEntry? FindScoreEntry(QualityProfileData.FormatItemData formatItem,
             QualityProfileCustomFormatScoreMapping scoreMap)
         {
-            return scoreMap.Mapping.FirstOrDefault(
-                m => m.CustomFormat.CacheEntry != null &&
-                     formatItem.Format == m.CustomFormat.CacheEntry.CustomFormatId);
+            // return scoreMap.Mapping.FirstOrDefault(
+            //     m => m.CustomFormat.CacheEntry != null &&
+            //          formatItem.Format == m.CustomFormat.CacheEntry.CustomFormatId);
+            throw new NotImplementedException();
         }
     }
 }
