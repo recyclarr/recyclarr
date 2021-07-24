@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2021-07-23
+
 ### Fixed
 
 - Directly use the Trash Guides git repository to avoid getting HTTP 403 - rate limit reached error
@@ -157,7 +159,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/rcdailey/trash-updater/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/rcdailey/trash-updater/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/rcdailey/trash-updater/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/rcdailey/trash-updater/compare/v1.5.0...v1.5.1
