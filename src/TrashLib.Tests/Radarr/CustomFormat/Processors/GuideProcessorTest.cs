@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Common;
 using FluentAssertions;
-using Flurl.Http.Testing;
 using Newtonsoft.Json.Linq;
+using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using TestLibrary.FluentAssertions;
@@ -43,36 +44,26 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
             public ILogger Logger { get; }
             public ResourceDataReader Data { get; }
 
-            public JObject ReadJson(string jsonFile)
-            {
-                var jsonData = Data.ReadData(jsonFile);
-                return JObject.Parse(jsonData);
-            }
+            public string ReadText(string textFile) => Data.ReadData(textFile);
+            public JObject ReadJson(string jsonFile) => JObject.Parse(ReadText(jsonFile));
         }
 
         [Test]
         [SuppressMessage("Maintainability", "CA1506", Justification = "Designed to be a high-level integration test")]
-        public void Guide_processor_behaves_as_expected_with_normal_guide_data()
+        public async Task Guide_processor_behaves_as_expected_with_normal_guide_data()
         {
             var ctx = new Context();
-            var guideProcessor =
-                new GuideProcessor(ctx.Logger, new GithubCustomFormatJsonRequester(),
-                    () => new TestGuideProcessorSteps());
+            var guideService = Substitute.For<IRadarrGuideService>();
+            var guideProcessor = new GuideProcessor(ctx.Logger, guideService, () => new TestGuideProcessorSteps());
 
             // simulate guide data
-            using var testHttp = new HttpTest();
-            testHttp.RespondWithJson(new[]
+            guideService.GetCustomFormatJsonAsync().Returns(new[]
             {
-                new {name = "ImportableCustomFormat1.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "ImportableCustomFormat2.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "NoScore.json", type = "file", download_url = "http://not_real/file.json"},
-                new {name = "WontBeInConfig.json", type = "file", download_url = "http://not_real/file.json"}
+                ctx.ReadText("ImportableCustomFormat1.json"),
+                ctx.ReadText("ImportableCustomFormat2.json"),
+                ctx.ReadText("NoScore.json"),
+                ctx.ReadText("WontBeInConfig.json")
             });
-
-            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat1.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("ImportableCustomFormat2.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("NoScore.json"));
-            testHttp.RespondWithJson(ctx.ReadJson("WontBeInConfig.json"));
 
             // Simulate user config in YAML
             var config = new List<CustomFormatConfig>
@@ -97,7 +88,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors
                 }
             };
 
-            guideProcessor.BuildGuideData(config, null);
+            await guideProcessor.BuildGuideDataAsync(config, null);
 
             var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
             {

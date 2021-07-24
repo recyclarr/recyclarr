@@ -37,7 +37,7 @@ namespace TrashLib.Radarr
 
             // Custom Format Support
             builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
-            builder.RegisterType<GithubCustomFormatJsonRequester>().As<IRadarrGuideService>();
+            builder.RegisterType<LocalRepoCustomFormatJsonParser>().As<IRadarrGuideService>();
             builder.RegisterType<CachePersister>().As<ICachePersister>();
 
             // Guide Processor

@@ -5,6 +5,6 @@ namespace TrashLib.Radarr.CustomFormat.Guide
 {
     public interface IRadarrGuideService
     {
-        Task<IEnumerable<string>> GetCustomFormatJson();
+        Task<IEnumerable<string>> GetCustomFormatJsonAsync();
     }
 }

@@ -5,6 +5,7 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.HashFunction.FNV" />
     <PackageReference Include="System.IO.Abstractions" />

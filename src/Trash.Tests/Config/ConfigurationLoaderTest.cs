@@ -60,7 +60,9 @@ namespace Trash.Tests.Config
             // .Returns(t => Substitute.For(new[] {(Type)t[0]}, Array.Empty<object>()));
 
             var actualActiveConfigs = new List<SonarrConfiguration>();
+#pragma warning disable NS1004
             provider.ActiveConfiguration = Arg.Do<SonarrConfiguration>(a => actualActiveConfigs.Add(a));
+#pragma warning restore NS1004
 
             var validator = Substitute.For<IValidator<SonarrConfiguration>>();
             var loader =

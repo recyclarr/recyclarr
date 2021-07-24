@@ -12,6 +12,7 @@ using Trash.Config;
 using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Radarr;
+using TrashLib.Radarr.Config;
 using TrashLib.Sonarr;
 using YamlDotNet.Serialization;
 
@@ -44,8 +45,8 @@ namespace Trash
         {
             builder.RegisterModule<ConfigAutofacModule>();
 
-            builder.RegisterType<ObjectFactory>()
-                .As<IObjectFactory>();
+            builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
+            builder.RegisterType<ResourcePaths>().As<IResourcePaths>();
 
             builder.RegisterGeneric(typeof(ConfigurationLoader<>))
                 .WithProperty(new AutowiringParameter())

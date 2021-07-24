@@ -17,7 +17,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         List<(string, string)> CustomFormatsWithOutdatedNames { get; }
         Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-        Task BuildGuideData(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache);
+        Task BuildGuideDataAsync(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache);
         void Reset();
     }
 }

@@ -59,12 +59,12 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
             => _steps.CustomFormat.DuplicatedCustomFormats;
 
-        public async Task BuildGuideData(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache)
+        public async Task BuildGuideDataAsync(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache)
         {
             if (_guideCustomFormatJson == null)
             {
-                Log.Debug("Requesting and parsing guide markdown");
-                _guideCustomFormatJson = (await _guideService.GetCustomFormatJson()).ToList();
+                Log.Information("Requesting and parsing guide markdown");
+                _guideCustomFormatJson = (await _guideService.GetCustomFormatJsonAsync()).ToList();
             }
 
             // Step 1: Process and filter the custom formats from the guide.

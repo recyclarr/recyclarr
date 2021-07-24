@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Directly use the Trash Guides git repository to avoid getting HTTP 403 - rate limit reached error
+  in github.
+
 ## [1.6.1] - 2021-05-31
 
 ### Changed

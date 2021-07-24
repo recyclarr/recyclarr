@@ -33,7 +33,7 @@ namespace TrashLib.Radarr.CustomFormat
         {
             _cache.Load();
 
-            await _guideProcessor.BuildGuideData(config.CustomFormats, _cache.CfCache);
+            await _guideProcessor.BuildGuideDataAsync(config.CustomFormats, _cache.CfCache);
 
             if (!ValidateGuideDataAndCheckShouldProceed(config))
             {
