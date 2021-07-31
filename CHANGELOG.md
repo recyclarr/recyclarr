@@ -10,7 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### FIXED
 
-- Fix "assembly not found" error on startup related to LibGit2Sharp.
+- Fix "assembly not found" error on startup related to LibGit2Sharp (Windows only). Note that this
+  introduces an additional file in the released ZIP files named `git2-6777db8.pdb`. This file must
+  be next to `trash.exe`. In the future, I plan to have this extra file removed so it's just a
+  single executable again, but it will take some time.
 
 ## [1.6.2] - 2021-07-23
 
