@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### FIXED
+
+- Fix "assembly not found" error on startup related to LibGit2Sharp.
+
 ## [1.6.2] - 2021-07-23
 
 ### Fixed
