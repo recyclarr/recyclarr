@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] - 2021-07-31
+
 ### FIXED
 
 - Fix "assembly not found" error on startup related to LibGit2Sharp (Windows only). Note that this
@@ -166,7 +168,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.3...HEAD
+[1.6.3]: https://github.com/rcdailey/trash-updater/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/rcdailey/trash-updater/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/rcdailey/trash-updater/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/rcdailey/trash-updater/compare/v1.5.1...v1.6.0
