@@ -35,7 +35,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(testConfigData);
 
             processor.ProfileScores.Should().BeEmpty();
-            processor.CustomFormatsWithoutScore.Should().Equal(new List<object> {("name1", "id1", "profile1")});
+            processor.CustomFormatsWithoutScore.Should().Equal(("name1", "id1", "profile1"));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(testConfigData);
 
             processor.ProfileScores.Should()
-                .ContainKey("profile1").WhichValue.Should()
+                .ContainKey("profile1").WhoseValue.Should()
                 .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 50)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();
@@ -123,7 +123,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(testConfigData);
 
             processor.ProfileScores.Should()
-                .ContainKey("profile1").WhichValue.Should()
+                .ContainKey("profile1").WhoseValue.Should()
                 .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 0)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();

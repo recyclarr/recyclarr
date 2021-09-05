@@ -70,7 +70,7 @@ xyz
             var results = context.ParseWithDefaults(markdown);
 
             results.Should().ContainKey("Test Release Profile")
-                .WhichValue.Should().BeEquivalentTo(new
+                .WhoseValue.Should().BeEquivalentTo(new
                 {
                     Ignored = new List<string> {"abc"},
                     Required = new List<string> {"xyz"}
@@ -107,7 +107,7 @@ One more
             var results = context.ParseWithDefaults(markdown);
 
             results.Should().ContainKey("Test Release Profile")
-                .WhichValue.Should().BeEquivalentTo(new
+                .WhoseValue.Should().BeEquivalentTo(new
                 {
                     Ignored = new List<string> {"abc"},
                     Required = new List<string> {"xyz", "123"}
@@ -127,7 +127,7 @@ One more
 
             profile.Ignored.Should().BeEquivalentTo("term2", "term3");
             profile.Required.Should().BeEquivalentTo("term4");
-            profile.Preferred.Should().ContainKey(100).WhichValue.Should().BeEquivalentTo(new List<string> {"term1"});
+            profile.Preferred.Should().ContainKey(100).WhoseValue.Should().BeEquivalentTo(new List<string> {"term1"});
         }
 
         [Test]
@@ -139,10 +139,10 @@ One more
 
             results.Should()
                 .ContainKey("First Release Profile")
-                .WhichValue.IncludePreferredWhenRenaming.Should().Be(true);
+                .WhoseValue.IncludePreferredWhenRenaming.Should().Be(true);
             results.Should()
                 .ContainKey("Second Release Profile")
-                .WhichValue.IncludePreferredWhenRenaming.Should().Be(false);
+                .WhoseValue.IncludePreferredWhenRenaming.Should().Be(false);
         }
 
         [Test]
@@ -307,7 +307,7 @@ abc
 
             results.Should()
                 .ContainKey("Test Release Profile")
-                .WhichValue.Preferred.Should()
+                .WhoseValue.Preferred.Should()
                 .BeEquivalentTo(new Dictionary<int, List<string>>
                 {
                     {100, new List<string> {"abc"}}
@@ -356,8 +356,7 @@ abc
             var results = context.ParseWithDefaults(markdown);
 
             results.Should()
-                .ContainKey("Test Release Profile")
-                .WhichValue.Should()
+                .ContainKey("Test Release Profile").WhoseValue.Should()
                 .BeEquivalentTo(new
                 {
                     Required = new { },

@@ -192,7 +192,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
             processor.DeletedCustomFormatsInCache.Should()
-                .BeEquivalentTo(new TrashIdMapping("id1000", "name1"));
+                .BeEquivalentTo(new[] {new TrashIdMapping("id1000", "name1")});
             processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
                     new("name1", "id1", JObject.Parse(@"{'name': 'name1'}"))
@@ -218,7 +218,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             processor.DuplicatedCustomFormats.Should().BeEmpty();
             processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
-            processor.DeletedCustomFormatsInCache.Should().BeEquivalentTo(cache.TrashIdMappings[0]);
+            processor.DeletedCustomFormatsInCache.Should().BeEquivalentTo(new[] {cache.TrashIdMappings[0]});
             processor.ProcessedCustomFormats.Should().BeEmpty();
         }
 
@@ -269,8 +269,9 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(guideData, testConfig, null);
 
             //Dictionary<string, List<ProcessedCustomFormatData>>
-            processor.DuplicatedCustomFormats.Should().ContainKey("name1")
-                .WhichValue.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
+            processor.DuplicatedCustomFormats.Should()
+                .ContainKey("name1").WhoseValue.Should()
+                .BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
                     new("name1", "id1", JObject.Parse(@"{'name': 'name1'}")),
                     new("name1", "id2", JObject.Parse(@"{'name': 'name1'}"))

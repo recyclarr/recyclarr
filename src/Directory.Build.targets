@@ -5,8 +5,8 @@
     <PackageReference Update="Autofac.Extras.AggregateService" Version="6.*" />
     <PackageReference Update="AutofacContrib.NSubstitute" Version="7.*" />
     <PackageReference Update="CliFx" Version="2.*" />
-    <PackageReference Update="FluentAssertions" Version="5.*" />
-    <PackageReference Update="FluentAssertions.Json" Version="5.*" />
+    <PackageReference Update="FluentAssertions" Version="6.*" />
+    <PackageReference Update="FluentAssertions.Json" Version="6.*" />
     <PackageReference Update="FluentValidation" Version="10.*" />
     <PackageReference Update="Flurl" Version="3.*" />
     <PackageReference Update="Flurl.Http" Version="3.*" />

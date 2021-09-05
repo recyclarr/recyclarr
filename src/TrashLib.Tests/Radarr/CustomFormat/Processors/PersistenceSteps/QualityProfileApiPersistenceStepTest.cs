@@ -125,7 +125,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 
             processor.InvalidProfileNames.Should().BeEmpty();
             processor.UpdatedScores.Should()
-                .ContainKey("profile1").WhichValue.Should()
+                .ContainKey("profile1").WhoseValue.Should()
                 .BeEquivalentTo(new List<UpdatedFormatScore>
                 {
                     new("cf1", 0, FormatScoreUpdateReason.Reset),
@@ -255,7 +255,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
                 .UpdateQualityProfile(Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
             processor.InvalidProfileNames.Should().BeEmpty();
             processor.UpdatedScores.Should()
-                .ContainKey("profile1").WhichValue.Should()
+                .ContainKey("profile1").WhoseValue.Should()
                 .BeEquivalentTo(new List<UpdatedFormatScore>
                 {
                     new("3D", 100, FormatScoreUpdateReason.Updated),

@@ -6,17 +6,19 @@ namespace TestLibrary.FluentAssertions
 {
     public class JsonEquivalencyStep : IEquivalencyStep
     {
-        public bool CanHandle(IEquivalencyValidationContext context, IEquivalencyAssertionOptions config)
+        public EquivalencyResult Handle(Comparands comparands, IEquivalencyValidationContext context,
+            IEquivalencyValidator nestedValidator)
         {
-            return context.Subject?.GetType().IsAssignableTo(typeof(JToken)) ?? false;
-        }
+            var canHandle = comparands.Subject?.GetType().IsAssignableTo(typeof(JToken)) ?? false;
+            if (!canHandle)
+            {
+                return EquivalencyResult.ContinueWithNext;
+            }
 
-        public bool Handle(IEquivalencyValidationContext context, IEquivalencyValidator parent,
-            IEquivalencyAssertionOptions config)
-        {
-            ((JToken) context.Subject).Should()
-                .BeEquivalentTo((JToken) context.Expectation, context.Because, context.BecauseArgs);
-            return true;
+            ((JToken) comparands.Subject!).Should().BeEquivalentTo(
+                (JToken) comparands.Expectation, context.Reason.FormattedMessage, context.Reason.Arguments);
+
+            return EquivalencyResult.AssertionCompleted;
         }
     }
 }
