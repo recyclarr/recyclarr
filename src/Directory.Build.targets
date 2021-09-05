@@ -21,8 +21,8 @@
     <PackageReference Update="NUnit3TestAdapter" Version="4.*" />
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.*" />
     <PackageReference Update="Serilog" Version="2.*" />
-    <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
-    <PackageReference Update="Serilog.Sinks.File" Version="4.*" />
+    <PackageReference Update="Serilog.Sinks.Console" Version="4.*" />
+    <PackageReference Update="Serilog.Sinks.File" Version="5.*" />
     <PackageReference Update="Serilog.Sinks.NUnit" Version="1.*" />
     <PackageReference Update="Serilog.Sinks.TestCorrelator" Version="3.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
