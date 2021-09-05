@@ -27,7 +27,7 @@
     <PackageReference Update="Serilog.Sinks.TestCorrelator" Version="3.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
     <PackageReference Update="System.IO.Abstractions" Version="13.*" />
-    <PackageReference Update="YamlDotNet" Version="10.*" />
+    <PackageReference Update="YamlDotNet" Version="11.*" />
     <PackageReference Update="morelinq" Version="3.*" />
   </ItemGroup>
 </Project>
