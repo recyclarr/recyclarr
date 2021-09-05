@@ -18,8 +18,8 @@
     <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
     <PackageReference Update="NUnit" Version="3.*" />
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
-    <PackageReference Update="NUnit3TestAdapter" Version="3.*" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*"/>
+    <PackageReference Update="NUnit3TestAdapter" Version="4.*" />
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*" />
     <PackageReference Update="Serilog" Version="2.*" />
     <PackageReference Update="Serilog.Sinks.Console" Version="3.*" />
     <PackageReference Update="Serilog.Sinks.File" Version="4.*" />
