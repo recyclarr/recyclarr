@@ -1,0 +1,37 @@
+version: '3'
+
+volumes:
+  radarr1:
+  radarr2:
+  sonarr1:
+
+services:
+  radarr1:
+    image: ghcr.io/hotio/radarr:nightly
+    network_mode: bridge
+    ports:
+      - 7878:7878
+    volumes:
+      - radarr1:/config
+    environment:
+      - TZ=America/Chicago
+
+  radarr2:
+    image: ghcr.io/hotio/radarr:nightly
+    network_mode: bridge
+    ports:
+      - 6767:7878
+    volumes:
+      - radarr2:/config
+    environment:
+      - TZ=America/Chicago
+
+  sonarr1:
+    image: ghcr.io/hotio/sonarr:nightly
+    network_mode: bridge
+    ports:
+      - 8989:8989
+    volumes:
+      - sonarr1:/config
+    environment:
+      - TZ=America/Chicago
