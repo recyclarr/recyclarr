@@ -17,7 +17,7 @@ dotnet publish src\Trash `
     -p:PublishReadyToRun=true `
     -p:PublishReadyToRunShowWarnings=true
 
-if (Get-Command chmod) {
+if (Get-Command chmod -errorAction SilentlyContinue) {
     "The chmod command was found. Setting read + execute permission."
     & chmod +rx ./publish/$runtime/trash
 }
