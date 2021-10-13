@@ -44,7 +44,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                     // later).
                     if (guideCf.CacheEntry == null)
                     {
-                        guideCf.SetCache((int) guideCf.Json["id"]);
+                        guideCf.SetCache(guideCf.Json.Value<int>("id"));
                     }
 
                     if (!JToken.DeepEquals(radarrCf, guideCf.Json))
@@ -82,13 +82,13 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             // Try to find match in cache first
             if (cfId != null)
             {
-                match = radarrCfs.FirstOrDefault(rcf => cfId == rcf["id"].Value<int>());
+                match = radarrCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
             }
 
             // If we don't find by ID, search by name (if a name was given)
             if (match == null && cfName != null)
             {
-                match = radarrCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf["name"].Value<string>()));
+                match = radarrCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Value<string>("name")));
             }
 
             return match;
@@ -98,8 +98,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         {
             MergeProperties(cfToModify, cfToMergeFrom, JTokenType.Array);
 
-            var radarrSpecs = cfToModify["specifications"].Children<JObject>();
-            var guideSpecs = cfToMergeFrom["specifications"].Children<JObject>();
+            var radarrSpecs = cfToModify["specifications"]?.Children<JObject>() ?? new JEnumerable<JObject>();
+            var guideSpecs = cfToMergeFrom["specifications"]?.Children<JObject>() ?? new JEnumerable<JObject>();
 
             var matchedGuideSpecs = guideSpecs
                 .GroupBy(gs => radarrSpecs.FirstOrDefault(gss => KeyMatch(gss, gs, "name")))
@@ -124,7 +124,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         }
 
         private static bool KeyMatch(JObject left, JObject right, string keyName)
-            => left[keyName].Value<string>() == right[keyName].Value<string>();
+            => left.Value<string>(keyName) == right.Value<string>(keyName);
 
         private static void MergeProperties(JObject radarrCf, JObject guideCfJson,
             JTokenType exceptType = JTokenType.None)
@@ -156,14 +156,23 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                 everything else radarr can handle with backend logic
              */
 
-            foreach (var child in jsonPayload["specifications"])
+            var specs = jsonPayload["specifications"];
+            if (specs is not null)
             {
-                // convert from `"fields": {}` to `"fields": [{}]` (object to array of object)
-                // Weirdly the exported version of a custom format is not in array form, but the API requires the array
-                // even if there's only one element.
-                var field = child["fields"];
-                field["name"] = "value";
-                child["fields"] = new JArray {field};
+                foreach (var child in specs)
+                {
+                    // convert from `"fields": {}` to `"fields": [{}]` (object to array of object)
+                    // Weirdly the exported version of a custom format is not in array form, but the API requires the array
+                    // even if there's only one element.
+                    var field = child["fields"];
+                    if (field is null)
+                    {
+                        continue;
+                    }
+
+                    field["name"] = "value";
+                    child["fields"] = new JArray {field};
+                }
             }
 
             return jsonPayload;

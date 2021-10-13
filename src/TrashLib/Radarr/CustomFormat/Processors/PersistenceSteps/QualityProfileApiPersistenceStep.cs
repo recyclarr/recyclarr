@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.CustomFormat.Api;
@@ -28,8 +29,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             // do not match profiles in Radarr.
             var profileScores = cfScores.GroupJoin(radarrProfiles,
                 s => s.Key,
-                p => (string) p["name"],
-                (s, p) => (s.Key, s.Value, p.SelectMany(pi => pi["formatItems"].Children<JObject>()).ToList()),
+                p => p.Value<string>("name"),
+                (s, p) => (s.Key, s.Value, p.SelectMany(pi => pi.Children<JObject>("formatItems")).ToList()),
                 StringComparer.InvariantCultureIgnoreCase);
 
             foreach (var (profileName, scoreMap, formatItems) in profileScores)
@@ -58,14 +59,14 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                         reason = FormatScoreUpdateReason.Reset;
                     }
 
-                    if (scoreToUse == null || reason == null || (int) json["score"] == scoreToUse)
+                    if (scoreToUse == null || reason == null || json.Value<int>("score") == scoreToUse)
                     {
                         continue;
                     }
 
                     json["score"] = scoreToUse.Value;
                     _updatedScores.GetOrCreate(profileName)
-                        .Add(new UpdatedFormatScore((string) json["name"], scoreToUse.Value, reason.Value));
+                        .Add(new UpdatedFormatScore(json.ValueOrThrow<string>("name"), scoreToUse.Value, reason.Value));
                 }
 
                 if (!_updatedScores.TryGetValue(profileName, out var updatedScores) || updatedScores.Count == 0)
@@ -75,7 +76,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
                 }
 
                 var jsonRoot = (JObject) formatItems.First().Root;
-                await api.UpdateQualityProfile(jsonRoot, (int) jsonRoot["id"]);
+                await api.UpdateQualityProfile(jsonRoot, jsonRoot.Value<int>("id"));
             }
         }
 
@@ -84,7 +85,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         {
             return scoreMap.Mapping.FirstOrDefault(
                 m => m.CustomFormat.CacheEntry != null &&
-                     (int) formatItem["format"] == m.CustomFormat.CacheEntry.CustomFormatId);
+                     formatItem.Value<int>("format") == m.CustomFormat.CacheEntry.CustomFormatId);
         }
     }
 }

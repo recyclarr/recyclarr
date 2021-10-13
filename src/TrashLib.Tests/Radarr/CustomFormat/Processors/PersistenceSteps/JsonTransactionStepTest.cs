@@ -175,7 +175,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
             var guideCfs = new List<ProcessedCustomFormatData>
             {
-                new("created", "", guideCfData[0]),
+                new("created", "", guideCfData![0]),
                 new("updated_different_name", "", guideCfData[1])
                 {
                     CacheEntry = new TrashIdMapping("", "", 2)
@@ -184,7 +184,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             };
 
             var processor = new JsonTransactionStep();
-            processor.Process(guideCfs, radarrCfs);
+            processor.Process(guideCfs, radarrCfs!);
 
             var expectedJson = new[]
             {
@@ -297,8 +297,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
 
             var processor = new JsonTransactionStep();
-            processor.Process(guideCfs, radarrCfs);
-            processor.RecordDeletions(deletedCfsInCache, radarrCfs);
+            processor.Process(guideCfs, radarrCfs!);
+            processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
             var expectedJson = @"{
   'id': 1,
@@ -356,7 +356,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
 
             var processor = new JsonTransactionStep();
-            processor.RecordDeletions(deletedCfsInCache, radarrCfs);
+            processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
             var expectedTransactions = new CustomFormatTransactionData();
             expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", "testname", 2));
@@ -410,12 +410,12 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
             var guideCfs = new List<ProcessedCustomFormatData>
             {
-                new("updated", "", guideCfData[0]),
+                new("updated", "", guideCfData![0]),
                 new("no_change", "", guideCfData[1])
             };
 
             var processor = new JsonTransactionStep();
-            processor.Process(guideCfs, radarrCfs);
+            processor.Process(guideCfs, radarrCfs!);
 
             processor.Transactions.UpdatedCustomFormats.First().CacheEntry.Should()
                 .BeEquivalentTo(new TrashIdMapping("", "updated", 1));

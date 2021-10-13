@@ -18,6 +18,7 @@ namespace Trash.Command.Helpers
 {
     public abstract class ServiceCommand : ICommand, IServiceCommand
     {
+        private readonly AutofacContractResolver _contractResolver;
         private readonly LoggingLevelSwitch _loggingLevelSwitch;
         private readonly ILogJanitor _logJanitor;
 

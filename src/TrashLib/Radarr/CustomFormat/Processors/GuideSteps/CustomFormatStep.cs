@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Common;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.Config;
@@ -96,19 +97,19 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
         private static ProcessedCustomFormatData ProcessCustomFormatData(string guideData, CustomFormatCache? cache)
         {
             JObject obj = JObject.Parse(guideData);
-            var name = (string) obj["name"];
-            var trashId = (string) obj["trash_id"];
+            var name = obj.ValueOrThrow<string>("name");
+            var trashId = obj.ValueOrThrow<string>("trash_id");
             int? finalScore = null;
 
             if (obj.TryGetValue("trash_score", out var score))
             {
                 finalScore = (int) score;
-                obj.Property("trash_score").Remove();
+                obj.Property("trash_score")?.Remove();
             }
 
             // Remove trash_id, it's metadata that is not meant for Radarr itself
             // Radarr supposedly drops this anyway, but I prefer it to be removed by TrashUpdater
-            obj.Property("trash_id").Remove();
+            obj.Property("trash_id")?.Remove();
 
             return new ProcessedCustomFormatData(name, trashId, obj)
             {

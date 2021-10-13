@@ -33,7 +33,10 @@ namespace TrashLib.Radarr.CustomFormat.Api
                 .PostJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
 
-            cf.SetCache((int) response["id"]);
+            if (response != null)
+            {
+                cf.SetCache(response.Value<int>("id"));
+            }
         }
 
         public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)

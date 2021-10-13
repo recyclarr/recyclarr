@@ -43,7 +43,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -68,7 +68,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
             const string radarrQualityProfileData = @"[{'name': 'profile1'}]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -107,7 +107,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
@@ -134,7 +134,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
                 });
 
             api.Received().UpdateQualityProfile(
-                Verify.That<JObject>(j => j["formatItems"].Children().Should().HaveCount(3)),
+                Verify.That<JObject>(j => j["formatItems"]!.Children().Should().HaveCount(3)),
                 Arg.Any<int>());
         }
 
@@ -183,7 +183,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
 }]";
 
             var api = Substitute.For<IQualityProfileService>();
-            api.GetQualityProfiles().Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+            api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
             var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
             {
