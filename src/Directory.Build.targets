@@ -1,5 +1,6 @@
 <Project>
   <ItemGroup>
+    <PackageReference Update="AutoMapper" Version="10.*" />
     <PackageReference Update="Autofac" Version="6.*" />
     <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />
     <PackageReference Update="Autofac.Extras.AggregateService" Version="6.*" />
@@ -21,6 +22,8 @@
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
     <PackageReference Update="NUnit3TestAdapter" Version="4.*" />
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.*" />
+    <PackageReference Update="Newtonsoft.Json" Version="13.*" />
+    <PackageReference Update="Newtonsoft.Json.Schema" Version="3.*" />
     <PackageReference Update="Serilog" Version="2.*" />
     <PackageReference Update="Serilog.Sinks.Console" Version="4.*" />
     <PackageReference Update="Serilog.Sinks.File" Version="5.*" />
@@ -28,6 +31,7 @@
     <PackageReference Update="Serilog.Sinks.TestCorrelator" Version="3.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
     <PackageReference Update="System.IO.Abstractions" Version="13.*" />
+    <PackageReference Update="System.Reactive" Version="4.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
     <PackageReference Update="morelinq" Version="3.*" />
   </ItemGroup>

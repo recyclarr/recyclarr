@@ -18,11 +18,13 @@ namespace Trash.Command.Helpers
 {
     public abstract class ServiceCommand : ICommand, IServiceCommand
     {
-        private readonly AutofacContractResolver _contractResolver;
         private readonly LoggingLevelSwitch _loggingLevelSwitch;
         private readonly ILogJanitor _logJanitor;
 
-        protected ServiceCommand(ILogger logger, LoggingLevelSwitch loggingLevelSwitch, ILogJanitor logJanitor)
+        protected ServiceCommand(
+            ILogger logger,
+            LoggingLevelSwitch loggingLevelSwitch,
+            ILogJanitor logJanitor)
         {
             _loggingLevelSwitch = loggingLevelSwitch;
             _logJanitor = logJanitor;
@@ -90,7 +92,7 @@ namespace Trash.Command.Helpers
                 Debug ? LogEventLevel.Debug : LogEventLevel.Information;
         }
 
-        private static void SetupHttp()
+        private void SetupHttp()
         {
             FlurlHttp.Configure(settings =>
             {

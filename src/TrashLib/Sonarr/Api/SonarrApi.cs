@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using Newtonsoft.Json.Linq;
 using TrashLib.Config;
 using TrashLib.Sonarr.Api.Objects;
 
@@ -10,19 +11,13 @@ namespace TrashLib.Sonarr.Api
 {
     public class SonarrApi : ISonarrApi
     {
+        private readonly ISonarrReleaseProfileCompatibilityHandler _profileHandler;
         private readonly IServerInfo _serverInfo;
 
-        public SonarrApi(IServerInfo serverInfo)
+        public SonarrApi(IServerInfo serverInfo, ISonarrReleaseProfileCompatibilityHandler profileHandler)
         {
             _serverInfo = serverInfo;
-        }
-
-        public async Task<Version> GetVersion()
-        {
-            dynamic data = await BaseUrl()
-                .AppendPathSegment("system/status")
-                .GetJsonAsync();
-            return new Version(data.version);
+            _profileHandler = profileHandler;
         }
 
         public async Task<IList<SonarrTag>> GetTags()
@@ -42,24 +37,30 @@ namespace TrashLib.Sonarr.Api
 
         public async Task<IList<SonarrReleaseProfile>> GetReleaseProfiles()
         {
-            return await BaseUrl()
+            var response = await BaseUrl()
                 .AppendPathSegment("releaseprofile")
-                .GetJsonAsync<List<SonarrReleaseProfile>>();
+                .GetJsonAsync<List<JObject>>();
+
+            return response
+                .Select(_profileHandler.CompatibleReleaseProfileForReceiving)
+                .ToList();
         }
 
         public async Task UpdateReleaseProfile(SonarrReleaseProfile profileToUpdate)
         {
             await BaseUrl()
                 .AppendPathSegment($"releaseprofile/{profileToUpdate.Id}")
-                .PutJsonAsync(profileToUpdate);
+                .PutJsonAsync(_profileHandler.CompatibleReleaseProfileForSending(profileToUpdate));
         }
 
         public async Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile newProfile)
         {
-            return await BaseUrl()
+            var response = await BaseUrl()
                 .AppendPathSegment("releaseprofile")
-                .PostJsonAsync(newProfile)
-                .ReceiveJson<SonarrReleaseProfile>();
+                .PostJsonAsync(_profileHandler.CompatibleReleaseProfileForSending(newProfile))
+                .ReceiveJson<JObject>();
+
+            return _profileHandler.CompatibleReleaseProfileForReceiving(response);
         }
 
         public async Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition()

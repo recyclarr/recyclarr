@@ -13,9 +13,15 @@ namespace TrashLib.Sonarr
             builder.RegisterType<SonarrApi>().As<ISonarrApi>();
             builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
 
+            builder.RegisterType<SonarrCompatibility>()
+                .As<ISonarrCompatibility>()
+                .SingleInstance();
+
             // Release Profile Support
             builder.RegisterType<ReleaseProfileUpdater>().As<IReleaseProfileUpdater>();
             builder.RegisterType<ReleaseProfileGuideParser>().As<IReleaseProfileGuideParser>();
+            builder.RegisterType<SonarrReleaseProfileCompatibilityHandler>()
+                .As<ISonarrReleaseProfileCompatibilityHandler>();
 
             // Quality Definition Support
             builder.RegisterType<SonarrQualityDefinitionUpdater>().As<ISonarrQualityDefinitionUpdater>();

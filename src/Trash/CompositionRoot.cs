@@ -14,6 +14,7 @@ using TrashLib.Config;
 using TrashLib.Radarr;
 using TrashLib.Radarr.Config;
 using TrashLib.Sonarr;
+using TrashLib.Startup;
 using YamlDotNet.Serialization;
 
 namespace Trash
@@ -92,6 +93,8 @@ namespace Trash
 
             builder.RegisterModule<SonarrAutofacModule>();
             builder.RegisterModule<RadarrAutofacModule>();
+
+            builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
 
             // builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
             return builder.Build();

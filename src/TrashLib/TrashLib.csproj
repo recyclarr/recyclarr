@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="AutoMapper" />
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extras.AggregateService" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="LibGit2Sharp" />
+    <PackageReference Include="Newtonsoft.Json.Schema" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.HashFunction.FNV" />
     <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="System.Reactive" />
     <PackageReference Include="morelinq" />
   </ItemGroup>
 

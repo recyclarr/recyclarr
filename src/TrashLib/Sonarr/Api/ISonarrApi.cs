@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TrashLib.Sonarr.Api.Objects;
 
@@ -7,7 +6,6 @@ namespace TrashLib.Sonarr.Api
 {
     public interface ISonarrApi
     {
-        Task<Version> GetVersion();
         Task<IList<SonarrTag>> GetTags();
         Task<SonarrTag> CreateTag(string tag);
         Task<IList<SonarrReleaseProfile>> GetReleaseProfiles();

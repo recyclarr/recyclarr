@@ -13,13 +13,19 @@ namespace TrashLib.Sonarr.ReleaseProfile
     internal class ReleaseProfileUpdater : IReleaseProfileUpdater
     {
         private readonly ISonarrApi _api;
+        private readonly ISonarrCompatibility _compatibility;
         private readonly IReleaseProfileGuideParser _parser;
 
-        public ReleaseProfileUpdater(ILogger logger, IReleaseProfileGuideParser parser, ISonarrApi api)
+        public ReleaseProfileUpdater(
+            ILogger logger,
+            IReleaseProfileGuideParser parser,
+            ISonarrApi api,
+            ISonarrCompatibility compatibility)
         {
             Log = logger;
             _parser = parser;
             _api = api;
+            _compatibility = compatibility;
         }
 
         private ILogger Log { get; }
@@ -47,18 +53,13 @@ namespace TrashLib.Sonarr.ReleaseProfile
             }
         }
 
-        private async Task DoVersionEnforcement()
+        private void DoVersionEnforcement()
         {
-            // Since this script requires a specific version of v3 Sonarr that implements name support for
-            // release profiles, we perform that version check here and bail out if it does not meet a minimum
-            // required version.
-            var minimumVersion = new Version("3.0.4.1098");
-            var version = await _api.GetVersion();
-            if (version < minimumVersion)
+            if (!_compatibility.SupportsNamedReleaseProfiles)
             {
                 throw new VersionException(
-                    $"Your Sonarr version {version} does not meet the minimum " +
-                    $"required version of {minimumVersion} to use this program");
+                    $"Your Sonarr version {_compatibility.InformationalVersion} does not meet the minimum " +
+                    $"required version of {_compatibility.MinimumVersion} to use this program");
             }
         }
 
@@ -92,8 +93,8 @@ namespace TrashLib.Sonarr.ReleaseProfile
                 .SelectMany(kvp => kvp.Value.Select(term => new SonarrPreferredTerm(kvp.Key, term)))
                 .ToList();
 
-            profileToUpdate.Ignored = string.Join(',', profile.Ignored);
-            profileToUpdate.Required = string.Join(',', profile.Required);
+            profileToUpdate.Ignored = profile.Ignored.ToList(); //string.Join(',', profile.Ignored);
+            profileToUpdate.Required = profile.Required.ToList(); //string.Join(',', profile.Required);
 
             // Null means the guide didn't specify a value for this, so we leave the existing setting intact.
             if (profile.IncludePreferredWhenRenaming != null)
@@ -127,7 +128,7 @@ namespace TrashLib.Sonarr.ReleaseProfile
         private async Task ProcessReleaseProfiles(IDictionary<string, ProfileData> profiles,
             ReleaseProfileConfig config)
         {
-            await DoVersionEnforcement();
+            DoVersionEnforcement();
 
             List<int> tagIds = new();
 

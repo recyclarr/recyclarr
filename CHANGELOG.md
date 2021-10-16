@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### FIXED
 
 - libgit2sharp PDB is no longer required with trash.exe on Windows ([#15])
+- Unexpected character error due to breaking change in Sonarr API ([#16])
 
 [#15]: https://github.com/rcdailey/trash-updater/issues/15
+[#16]: https://github.com/rcdailey/trash-updater/issues/16
 
 ## [1.6.3] - 2021-07-31
-
-### FIXED
 
 - Fix "assembly not found" error on startup related to LibGit2Sharp (Windows only). Note that this
   introduces an additional file in the released ZIP files named `git2-6777db8.pdb`. This file must
