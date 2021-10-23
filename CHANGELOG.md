@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### FIXED
 
-- libgit2sharp PDB is no longer required with trash.exe on Windows.
+- libgit2sharp PDB is no longer required with trash.exe on Windows ([#15])
+
+[#15]: https://github.com/rcdailey/trash-updater/issues/15
 
 ## [1.6.3] - 2021-07-31
 
