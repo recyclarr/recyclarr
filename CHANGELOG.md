@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix "free-quota limit" exception that occurred in new JSON schema generation logic that was added
+  for API backward compatibility with Sonarr.
+
 ## [1.6.4] - 2021-10-23
 
 ### FIXED

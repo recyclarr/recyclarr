@@ -1,20 +1,17 @@
 using System.Collections.Generic;
 using System.IO;
 using AutoMapper;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Schema.Generation;
-using Newtonsoft.Json.Serialization;
 using Serilog;
 using TrashLib.Sonarr.Api.Objects;
+using TrashLib.Sonarr.Api.Schemas;
 
 namespace TrashLib.Sonarr.Api
 {
     public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCompatibilityHandler
     {
         private readonly ISonarrCompatibility _compatibility;
-        private readonly JSchemaGenerator _generator;
         private readonly IMapper _mapper;
 
         public SonarrReleaseProfileCompatibilityHandler(
@@ -23,11 +20,6 @@ namespace TrashLib.Sonarr.Api
         {
             _compatibility = compatibility;
             _mapper = mapper;
-            _generator = new JSchemaGenerator
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                DefaultRequired = Required.Default
-            };
         }
 
         public object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile)
@@ -42,7 +34,7 @@ namespace TrashLib.Sonarr.Api
             JSchema? schema;
             IList<string>? errorMessages;
 
-            schema = _generator.Generate(typeof(SonarrReleaseProfile));
+            schema = JSchema.Parse(SonarrReleaseProfileSchema.V2);
             if (profile.IsValid(schema, out errorMessages))
             {
                 return profile.ToObject<SonarrReleaseProfile>()
@@ -51,7 +43,7 @@ namespace TrashLib.Sonarr.Api
 
             Log.Debug("SonarrReleaseProfile is not a match for V2, proceeding to V1: {Reasons}", errorMessages);
 
-            schema = _generator.Generate(typeof(SonarrReleaseProfileV1));
+            schema = JSchema.Parse(SonarrReleaseProfileSchema.V1);
             if (profile.IsValid(schema, out errorMessages))
             {
                 // This will throw if there's an issue during mapping.
