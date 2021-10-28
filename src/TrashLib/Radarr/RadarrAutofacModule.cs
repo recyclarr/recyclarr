@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
+using Serilog;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
@@ -27,7 +28,8 @@ namespace TrashLib.Radarr
             builder.Register(c =>
                 {
                     var config = c.Resolve<IConfigurationProvider>().ActiveConfiguration;
-                    return new ServerInfo(config.BaseUrl, config.ApiKey);
+                    var log = c.Resolve<ILogger>();
+                    return new ServerInfo(config.BaseUrl, config.ApiKey, log);
                 })
                 .As<IServerInfo>();
 

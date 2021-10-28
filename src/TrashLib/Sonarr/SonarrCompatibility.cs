@@ -1,7 +1,6 @@
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using TrashLib.Config;
 
@@ -13,7 +12,7 @@ namespace TrashLib.Sonarr
 
         public SonarrCompatibility(IServerInfo serverInfo)
         {
-            var task = serverInfo.BuildUrl()
+            var task = serverInfo.BuildRequest()
                 .AppendPathSegment("system/status")
                 .GetJsonAsync();
 

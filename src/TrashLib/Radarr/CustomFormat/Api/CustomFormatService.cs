@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
@@ -17,18 +16,16 @@ namespace TrashLib.Radarr.CustomFormat.Api
             _serverInfo = serverInfo;
         }
 
-        private string BaseUrl => _serverInfo.BuildUrl();
-
         public async Task<List<JObject>> GetCustomFormats()
         {
-            return await BaseUrl
+            return await BuildRequest()
                 .AppendPathSegment("customformat")
                 .GetJsonAsync<List<JObject>>();
         }
 
         public async Task CreateCustomFormat(ProcessedCustomFormatData cf)
         {
-            var response = await BaseUrl
+            var response = await BuildRequest()
                 .AppendPathSegment("customformat")
                 .PostJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
@@ -41,7 +38,7 @@ namespace TrashLib.Radarr.CustomFormat.Api
 
         public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
         {
-            await BaseUrl
+            await BuildRequest()
                 .AppendPathSegment($"customformat/{cf.GetCustomFormatId()}")
                 .PutJsonAsync(cf.Json)
                 .ReceiveJson<JObject>();
@@ -49,9 +46,11 @@ namespace TrashLib.Radarr.CustomFormat.Api
 
         public async Task DeleteCustomFormat(int customFormatId)
         {
-            await BaseUrl
+            await BuildRequest()
                 .AppendPathSegment($"customformat/{customFormatId}")
                 .DeleteAsync();
         }
+
+        private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
     }
 }

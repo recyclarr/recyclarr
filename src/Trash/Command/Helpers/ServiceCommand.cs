@@ -12,26 +12,26 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using TrashLib.Extensions;
 using YamlDotNet.Core;
 
 namespace Trash.Command.Helpers
 {
     public abstract class ServiceCommand : ICommand, IServiceCommand
     {
+        private readonly ILogger _log;
         private readonly LoggingLevelSwitch _loggingLevelSwitch;
         private readonly ILogJanitor _logJanitor;
 
         protected ServiceCommand(
-            ILogger logger,
+            ILogger log,
             LoggingLevelSwitch loggingLevelSwitch,
             ILogJanitor logJanitor)
         {
             _loggingLevelSwitch = loggingLevelSwitch;
             _logJanitor = logJanitor;
-            Log = logger;
+            _log = log;
         }
-
-        protected ILogger Log { get; }
 
         public async ValueTask ExecuteAsync(IConsole console)
         {
@@ -50,13 +50,13 @@ namespace Trash.Command.Helpers
                     throw;
                 }
 
-                Log.Error("Found Unrecognized YAML Property: {ErrorMsg}", inner.Message);
-                Log.Error("Please remove the property quoted in the above message from your YAML file");
+                _log.Error("Found Unrecognized YAML Property: {ErrorMsg}", inner.Message);
+                _log.Error("Please remove the property quoted in the above message from your YAML file");
                 throw new CommandException("Exiting due to invalid configuration");
             }
             catch (Exception e) when (e is not CommandException)
             {
-                Log.Error(e, "Unrecoverable Exception");
+                _log.Error(e, "Unrecoverable Exception");
                 ExitDueToFailure();
             }
             finally
@@ -109,6 +109,7 @@ namespace Trash.Command.Helpers
                 };
 
                 settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
+                FlurlLogging.SetupLogging(settings, _log);
             });
         }
 

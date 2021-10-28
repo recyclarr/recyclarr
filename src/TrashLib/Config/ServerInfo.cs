@@ -1,4 +1,7 @@
 using Flurl;
+using Flurl.Http;
+using Serilog;
+using TrashLib.Extensions;
 
 namespace TrashLib.Config
 {
@@ -6,18 +9,21 @@ namespace TrashLib.Config
     {
         private readonly string _apiKey;
         private readonly string _baseUrl;
+        private readonly ILogger _log;
 
-        public ServerInfo(string baseUrl, string apiKey)
+        public ServerInfo(string baseUrl, string apiKey, ILogger log)
         {
             _baseUrl = baseUrl;
             _apiKey = apiKey;
+            _log = log;
         }
 
-        public string BuildUrl()
+        public IFlurlRequest BuildRequest()
         {
             return _baseUrl
                 .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = _apiKey});
+                .SetQueryParams(new {apikey = _apiKey})
+                .SanitizedLogging(_log);
         }
     }
 }

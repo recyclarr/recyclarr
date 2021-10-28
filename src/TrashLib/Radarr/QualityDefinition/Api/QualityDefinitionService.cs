@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using TrashLib.Config;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
@@ -16,11 +15,9 @@ namespace TrashLib.Radarr.QualityDefinition.Api
             _serverInfo = serverInfo;
         }
 
-        private string BaseUrl => _serverInfo.BuildUrl();
-
         public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
         {
-            return await BaseUrl
+            return await BuildRequest()
                 .AppendPathSegment("qualitydefinition")
                 .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
         }
@@ -28,10 +25,12 @@ namespace TrashLib.Radarr.QualityDefinition.Api
         public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
             IList<RadarrQualityDefinitionItem> newQuality)
         {
-            return await BaseUrl
+            return await BuildRequest()
                 .AppendPathSegment("qualityDefinition/update")
                 .PutJsonAsync(newQuality)
                 .ReceiveJson<List<RadarrQualityDefinitionItem>>();
         }
+
+        private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
@@ -16,21 +15,21 @@ namespace TrashLib.Radarr.CustomFormat.Api
             _serverInfo = serverInfo;
         }
 
-        private string BaseUrl => _serverInfo.BuildUrl();
-
         public async Task<List<JObject>> GetQualityProfiles()
         {
-            return await BaseUrl
+            return await BuildRequest()
                 .AppendPathSegment("qualityprofile")
                 .GetJsonAsync<List<JObject>>();
         }
 
         public async Task<JObject> UpdateQualityProfile(JObject profileJson, int id)
         {
-            return await BaseUrl
+            return await BuildRequest()
                 .AppendPathSegment($"qualityprofile/{id}")
                 .PutJsonAsync(profileJson)
                 .ReceiveJson<JObject>();
         }
+
+        private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
     }
 }

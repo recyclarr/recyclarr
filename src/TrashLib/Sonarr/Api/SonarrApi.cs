@@ -1,23 +1,29 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using TrashLib.Config;
+using TrashLib.Extensions;
 using TrashLib.Sonarr.Api.Objects;
 
 namespace TrashLib.Sonarr.Api
 {
     public class SonarrApi : ISonarrApi
     {
+        private readonly ILogger _log;
         private readonly ISonarrReleaseProfileCompatibilityHandler _profileHandler;
         private readonly IServerInfo _serverInfo;
 
-        public SonarrApi(IServerInfo serverInfo, ISonarrReleaseProfileCompatibilityHandler profileHandler)
+        public SonarrApi(
+            IServerInfo serverInfo,
+            ISonarrReleaseProfileCompatibilityHandler profileHandler,
+            ILogger log)
         {
             _serverInfo = serverInfo;
             _profileHandler = profileHandler;
+            _log = log;
         }
 
         public async Task<IList<SonarrTag>> GetTags()
@@ -79,6 +85,6 @@ namespace TrashLib.Sonarr.Api
                 .ReceiveJson<List<SonarrQualityDefinitionItem>>();
         }
 
-        private string BaseUrl() => _serverInfo.BuildUrl();
+        private IFlurlRequest BaseUrl() => _serverInfo.BuildRequest().SanitizedLogging(_log);
     }
 }
