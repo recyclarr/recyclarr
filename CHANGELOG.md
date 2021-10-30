@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.6] - 2021-10-30
+
 ### Fixed
 
 - Sonarr version check failed when instances were slow to respond or there was high latency.
@@ -187,7 +189,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.5...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.6.6...HEAD
+[1.6.6]: https://github.com/rcdailey/trash-updater/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/rcdailey/trash-updater/compare/v1.6.4...v1.6.5
 [1.6.4]: https://github.com/rcdailey/trash-updater/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/rcdailey/trash-updater/compare/v1.6.2...v1.6.3
