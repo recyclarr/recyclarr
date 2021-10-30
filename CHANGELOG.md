@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Sonarr version check failed when instances were slow to respond or there was high latency.
+
 ## [1.6.5] - 2021-10-24
 
 ### Fixed
