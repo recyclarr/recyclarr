@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Newtonsoft.Json;
@@ -55,7 +57,6 @@ namespace TrashLib.Tests.Sonarr.Api
 
             var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV1)));
 
-            _ = compat.DidNotReceive().ArraysNeededForReleaseProfileRequiredAndIgnored;
             result.Should().BeEquivalentTo(new SonarrReleaseProfile
             {
                 Ignored = new List<string> {"one", "two", "three"}
@@ -73,38 +74,43 @@ namespace TrashLib.Tests.Sonarr.Api
 
             var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV2)));
 
-            _ = compat.DidNotReceive().ArraysNeededForReleaseProfileRequiredAndIgnored;
             result.Should().BeEquivalentTo(dataV2);
         }
 
         [Test]
-        public void Send_v2_to_v1()
+        public async Task Send_v2_to_v1()
         {
             using var ctx = new TestContext();
 
             var compat = Substitute.For<ISonarrCompatibility>();
-            compat.ArraysNeededForReleaseProfileRequiredAndIgnored.Returns(false);
+            compat.Capabilities.Returns(new[]
+            {
+                new SonarrCapabilities {ArraysNeededForReleaseProfileRequiredAndIgnored = false}
+            }.ToObservable());
 
             var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
             var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
 
-            var result = sut.CompatibleReleaseProfileForSending(data);
+            var result = await sut.CompatibleReleaseProfileForSendingAsync(data);
 
             result.Should().BeEquivalentTo(new SonarrReleaseProfileV1 {Ignored = "one,two,three"});
         }
 
         [Test]
-        public void Send_v2_to_v2()
+        public async Task Send_v2_to_v2()
         {
             using var ctx = new TestContext();
 
             var compat = Substitute.For<ISonarrCompatibility>();
-            compat.ArraysNeededForReleaseProfileRequiredAndIgnored.Returns(true);
+            compat.Capabilities.Returns(new[]
+            {
+                new SonarrCapabilities {ArraysNeededForReleaseProfileRequiredAndIgnored = true}
+            }.ToObservable());
 
             var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
             var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
 
-            var result = sut.CompatibleReleaseProfileForSending(data);
+            var result = await sut.CompatibleReleaseProfileForSendingAsync(data);
 
             result.Should().BeEquivalentTo(data);
         }

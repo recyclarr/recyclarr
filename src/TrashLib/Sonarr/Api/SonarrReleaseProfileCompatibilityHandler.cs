@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -22,9 +24,10 @@ namespace TrashLib.Sonarr.Api
             _mapper = mapper;
         }
 
-        public object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile)
+        public async Task<object> CompatibleReleaseProfileForSendingAsync(SonarrReleaseProfile profile)
         {
-            return _compatibility.ArraysNeededForReleaseProfileRequiredAndIgnored
+            var capabilities = await _compatibility.Capabilities.LastAsync();
+            return capabilities.ArraysNeededForReleaseProfileRequiredAndIgnored
                 ? profile
                 : _mapper.Map<SonarrReleaseProfileV1>(profile);
         }

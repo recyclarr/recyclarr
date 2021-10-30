@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Common.Extensions;
 using Serilog;
@@ -53,12 +54,19 @@ namespace TrashLib.Sonarr.ReleaseProfile
             }
         }
 
-        private void DoVersionEnforcement()
+        private async Task DoVersionEnforcement()
         {
-            if (!_compatibility.SupportsNamedReleaseProfiles)
+            // _compatibility.Capabilities
+            //     .Where(x => !x.SupportsNamedReleaseProfiles)
+            //     .Subscribe(x => throw new VersionException(
+            //         $"Your Sonarr version {x.Version} does not meet the minimum " +
+            //         $"required version of {_compatibility.MinimumVersion} to use this program"));
+
+            var capabilities = await _compatibility.Capabilities.LastAsync();
+            if (!capabilities.SupportsNamedReleaseProfiles)
             {
                 throw new VersionException(
-                    $"Your Sonarr version {_compatibility.InformationalVersion} does not meet the minimum " +
+                    $"Your Sonarr version {capabilities.Version} does not meet the minimum " +
                     $"required version of {_compatibility.MinimumVersion} to use this program");
             }
         }
@@ -128,7 +136,7 @@ namespace TrashLib.Sonarr.ReleaseProfile
         private async Task ProcessReleaseProfiles(IDictionary<string, ProfileData> profiles,
             ReleaseProfileConfig config)
         {
-            DoVersionEnforcement();
+            await DoVersionEnforcement();
 
             List<int> tagIds = new();
 

@@ -19,18 +19,20 @@ namespace Trash.Command
     public class SonarrCommand : ServiceCommand
     {
         private readonly IConfigurationLoader<SonarrConfiguration> _configLoader;
+        private readonly ILogger _log;
         private readonly Func<IReleaseProfileUpdater> _profileUpdaterFactory;
         private readonly Func<ISonarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
         public SonarrCommand(
-            ILogger logger,
+            ILogger log,
             LoggingLevelSwitch loggingLevelSwitch,
             ILogJanitor logJanitor,
             IConfigurationLoader<SonarrConfiguration> configLoader,
             Func<IReleaseProfileUpdater> profileUpdaterFactory,
             Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory)
-            : base(logger, loggingLevelSwitch, logJanitor)
+            : base(log, loggingLevelSwitch, logJanitor)
         {
+            _log = log;
             _configLoader = configLoader;
             _profileUpdaterFactory = profileUpdaterFactory;
             _qualityUpdaterFactory = qualityUpdaterFactory;
@@ -60,7 +62,7 @@ namespace Trash.Command
             }
             catch (FlurlHttpException e)
             {
-                Log.Error(e, "HTTP error while communicating with Sonarr");
+                _log.Error(e, "HTTP error while communicating with Sonarr");
                 ExitDueToFailure();
             }
         }

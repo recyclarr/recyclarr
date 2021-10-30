@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="FluentValidation" />
-    <PackageReference Include="YamlDotNet" />
     <PackageReference Include="Autofac" />
+    <PackageReference Include="FluentValidation" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 </Project>

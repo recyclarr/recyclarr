@@ -54,16 +54,18 @@ namespace TrashLib.Sonarr.Api
 
         public async Task UpdateReleaseProfile(SonarrReleaseProfile profileToUpdate)
         {
+            var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(profileToUpdate);
             await BaseUrl()
                 .AppendPathSegment($"releaseprofile/{profileToUpdate.Id}")
-                .PutJsonAsync(_profileHandler.CompatibleReleaseProfileForSending(profileToUpdate));
+                .PutJsonAsync(profileToSend);
         }
 
         public async Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile newProfile)
         {
+            var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(newProfile);
             var response = await BaseUrl()
                 .AppendPathSegment("releaseprofile")
-                .PostJsonAsync(_profileHandler.CompatibleReleaseProfileForSending(newProfile))
+                .PostJsonAsync(profileToSend)
                 .ReceiveJson<JObject>();
 
             return _profileHandler.CompatibleReleaseProfileForReceiving(response);

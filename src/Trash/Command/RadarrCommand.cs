@@ -20,17 +20,19 @@ namespace Trash.Command
     {
         private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
         private readonly Func<ICustomFormatUpdater> _customFormatUpdaterFactory;
+        private readonly ILogger _log;
         private readonly Func<IRadarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
         public RadarrCommand(
-            ILogger logger,
+            ILogger log,
             LoggingLevelSwitch loggingLevelSwitch,
             ILogJanitor logJanitor,
             IConfigurationLoader<RadarrConfiguration> configLoader,
             Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
             Func<ICustomFormatUpdater> customFormatUpdaterFactory)
-            : base(logger, loggingLevelSwitch, logJanitor)
+            : base(log, loggingLevelSwitch, logJanitor)
         {
+            _log = log;
             _configLoader = configLoader;
             _qualityUpdaterFactory = qualityUpdaterFactory;
             _customFormatUpdaterFactory = customFormatUpdaterFactory;
@@ -58,7 +60,7 @@ namespace Trash.Command
             }
             catch (FlurlHttpException e)
             {
-                Log.Error(e, "HTTP error while communicating with Radarr");
+                _log.Error(e, "HTTP error while communicating with Radarr");
                 ExitDueToFailure();
             }
         }
