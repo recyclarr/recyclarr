@@ -87,7 +87,7 @@ namespace TrashLib.Tests.Radarr
                 {
                     new()
                     {
-                        Names = new List<string>{"required value"},
+                        Names = new List<string> {"required value"},
                         QualityProfiles = new List<QualityProfileConfig>
                         {
                             new() {Name = "required value"}
