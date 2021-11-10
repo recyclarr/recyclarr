@@ -14,6 +14,15 @@
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
   </PropertyGroup>
 
+  <!--
+    To prevent System.Reactive.xml (and other XML docs) from being in the publish dir.
+    See: https://github.com/dotnet/reactive/issues/1066#issuecomment-548941146
+  -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <AllowedReferenceRelatedFileExtensions>
+    </AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
@@ -21,9 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="All"/>
-    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" Condition=" '$(DisableNbgv)' != 'true' "/>
+    <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="All" />
+    <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" Condition=" '$(DisableNbgv)' != 'true' " />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
