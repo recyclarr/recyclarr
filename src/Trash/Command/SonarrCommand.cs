@@ -38,8 +38,6 @@ namespace Trash.Command
             _qualityUpdaterFactory = qualityUpdaterFactory;
         }
 
-        // todo: Add options to exclude parts of YAML on the fly?
-
         public override string CacheStoragePath { get; } =
             Path.Combine(AppPaths.AppDataPath, "cache", "sonarr");
 

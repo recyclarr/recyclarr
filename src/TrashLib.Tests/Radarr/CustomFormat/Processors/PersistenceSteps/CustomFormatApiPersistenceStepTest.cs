@@ -14,7 +14,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps
     [Parallelizable(ParallelScope.All)]
     public class CustomFormatApiPersistenceStepTest
     {
-        private ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
+        private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
         {
             return new ProcessedCustomFormatData(cfName, trashId, new JObject())
             {

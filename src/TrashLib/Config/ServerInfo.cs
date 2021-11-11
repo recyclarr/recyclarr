@@ -7,22 +7,23 @@ namespace TrashLib.Config
 {
     internal class ServerInfo : IServerInfo
     {
-        private readonly string _apiKey;
-        private readonly string _baseUrl;
+        private readonly IConfigurationProvider _config;
         private readonly ILogger _log;
 
-        public ServerInfo(string baseUrl, string apiKey, ILogger log)
+        public ServerInfo(IConfigurationProvider config, ILogger log)
         {
-            _baseUrl = baseUrl;
-            _apiKey = apiKey;
+            _config = config;
             _log = log;
         }
 
         public IFlurlRequest BuildRequest()
         {
-            return _baseUrl
+            var apiKey = _config.ActiveConfiguration.ApiKey;
+            var baseUrl = _config.ActiveConfiguration.BaseUrl;
+
+            return baseUrl
                 .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = _apiKey})
+                .SetQueryParams(new {apikey = apiKey})
                 .SanitizedLogging(_log);
         }
     }

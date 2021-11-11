@@ -1,7 +1,6 @@
 using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
 using Serilog;
 
 namespace Common.Extensions
@@ -13,31 +12,31 @@ namespace Common.Extensions
             opName ??= "IObservable";
             log.Debug("{OpName}: Observable obtained on Thread: {ThreadId}",
                 opName,
-                Thread.CurrentThread.ManagedThreadId);
+                Environment.CurrentManagedThreadId);
 
             return Observable.Create<T>(obs =>
             {
                 log.Debug("{OpName}: Subscribed to on Thread: {ThreadId}",
                     opName,
-                    Thread.CurrentThread.ManagedThreadId);
+                    Environment.CurrentManagedThreadId);
 
                 try
                 {
                     var subscription = source
                         .Do(
                             x => log.Debug("{OpName}: OnNext({Result}) on Thread: {ThreadId}", opName, x,
-                                Thread.CurrentThread.ManagedThreadId),
+                                Environment.CurrentManagedThreadId),
                             ex => log.Debug("{OpName}: OnError({Result}) on Thread: {ThreadId}", opName, ex.Message,
-                                Thread.CurrentThread.ManagedThreadId),
+                                Environment.CurrentManagedThreadId),
                             () => log.Debug("{OpName}: OnCompleted() on Thread: {ThreadId}", opName,
-                                Thread.CurrentThread.ManagedThreadId))
+                                Environment.CurrentManagedThreadId))
                         .Subscribe(obs);
                     return new CompositeDisposable(
                         subscription,
                         Disposable.Create(() => log.Debug(
                             "{OpName}: Cleaned up on Thread: {ThreadId}",
                             opName,
-                            Thread.CurrentThread.ManagedThreadId)));
+                            Environment.CurrentManagedThreadId)));
                 }
                 finally
                 {

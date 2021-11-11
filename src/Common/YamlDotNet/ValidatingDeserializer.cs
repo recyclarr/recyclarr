@@ -14,10 +14,10 @@ namespace Common.YamlDotNet
             _nodeDeserializer = nodeDeserializer;
         }
 
-        public bool Deserialize(IParser parser, Type expectedType,
+        public bool Deserialize(IParser reader, Type expectedType,
             Func<IParser, Type, object?> nestedObjectDeserializer, out object? value)
         {
-            if (!_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value) ||
+            if (!_nodeDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value) ||
                 value == null)
             {
                 return false;
@@ -31,12 +31,12 @@ namespace Common.YamlDotNet
             }
             catch (ValidationException e)
             {
-                if (parser.Current == null)
+                if (reader.Current == null)
                 {
                     throw;
                 }
 
-                throw new YamlException(parser.Current.Start, parser.Current.End, e.Message);
+                throw new YamlException(reader.Current.Start, reader.Current.End, e.Message);
             }
 
             return true;

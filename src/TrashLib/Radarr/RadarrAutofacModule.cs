@@ -1,6 +1,5 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
-using Serilog;
 using TrashLib.Config;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
@@ -25,13 +24,7 @@ namespace TrashLib.Radarr
 
             // Configuration
             builder.RegisterType<RadarrValidationMessages>().As<IRadarrValidationMessages>();
-            builder.Register(c =>
-                {
-                    var config = c.Resolve<IConfigurationProvider>().ActiveConfiguration;
-                    var log = c.Resolve<ILogger>();
-                    return new ServerInfo(config.BaseUrl, config.ApiKey, log);
-                })
-                .As<IServerInfo>();
+            builder.RegisterType<ServerInfo>().As<IServerInfo>();
 
             // Quality Definition Support
             builder.RegisterType<RadarrQualityDefinitionUpdater>().As<IRadarrQualityDefinitionUpdater>();
@@ -43,9 +36,9 @@ namespace TrashLib.Radarr
             builder.RegisterType<CachePersister>().As<ICachePersister>();
 
             // Guide Processor
-            builder.RegisterType<GuideProcessor>()
-                .As<
-                    IGuideProcessor>(); // todo: register as singleton to avoid parsing guide multiple times when using 2 or more instances in config
+
+            // todo: register as singleton to avoid parsing guide multiple times when using 2 or more instances in config
+            builder.RegisterType<GuideProcessor>().As<IGuideProcessor>();
             builder.RegisterAggregateService<IGuideProcessorSteps>();
             builder.RegisterType<CustomFormatStep>().As<ICustomFormatStep>();
             builder.RegisterType<ConfigStep>().As<IConfigStep>();

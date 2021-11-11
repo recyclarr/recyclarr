@@ -20,7 +20,7 @@ namespace Common.Extensions
             return ruleBuilder.SetAsyncValidator(adapter);
         }
 
-        private class NullableChildValidatorAdaptor<T, TProperty> : ChildValidatorAdaptor<T, TProperty>,
+        private sealed class NullableChildValidatorAdaptor<T, TProperty> : ChildValidatorAdaptor<T, TProperty>,
             IPropertyValidator<T, TProperty?>, IAsyncPropertyValidator<T, TProperty?>
         {
             public NullableChildValidatorAdaptor(IValidator<TProperty> validator, Type validatorType)

@@ -1,13 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using FluentValidation.Results;
 
 namespace Trash.Config
 {
+    [Serializable]
     public class ConfigurationException : Exception
     {
+        protected ConfigurationException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
         private ConfigurationException(string propertyName, Type deserializableType, IEnumerable<string> messages)
         {
             PropertyName = propertyName;
@@ -26,9 +33,9 @@ namespace Trash.Config
         {
         }
 
-        public IReadOnlyCollection<string> ErrorMessages { get; }
-        public string PropertyName { get; }
-        public Type DeserializableType { get; }
+        public IReadOnlyCollection<string> ErrorMessages { get; } = new List<string>();
+        public string PropertyName { get; } = "";
+        public Type DeserializableType { get; } = default!;
 
         public override string Message => BuildMessage();
 

@@ -21,7 +21,7 @@ namespace Common.YamlDotNet
         }
 
         [UsedImplicitly(ImplicitUseTargetFlags.Members)]
-        private class RootExtractor<T>
+        private sealed class RootExtractor<T>
             where T : class
         {
             public T? RootObject { get; }

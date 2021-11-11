@@ -1,9 +1,8 @@
-using System;
 using System.Collections;
 using System.Linq;
-using System.Reflection;
 using Autofac;
-using CliFx;
+using Autofac.Core;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace Trash.Tests
@@ -12,29 +11,31 @@ namespace Trash.Tests
     [Parallelizable(ParallelScope.All)]
     public class CompositionRootTest
     {
-        private class ConcreteTypeEnumerator<T> : IEnumerable
+        private sealed class ConcreteTypeEnumerator : IEnumerable
         {
-            private readonly Assembly _asm;
+            private readonly IContainer _container;
 
             public ConcreteTypeEnumerator()
             {
-                _asm = Assembly.GetAssembly(typeof(CompositionRoot)) ?? throw new NullReferenceException();
+                _container = CompositionRoot.Setup();
             }
 
             public IEnumerator GetEnumerator()
             {
-                return _asm.DefinedTypes
-                    .Where(t => t.GetInterfaces().Contains(typeof(T)) && !t.IsAbstract)
+                return _container.ComponentRegistry.Registrations
+                    .SelectMany(x => x.Services)
+                    .OfType<TypedService>()
                     .GetEnumerator();
             }
         }
 
-        [TestCaseSource(typeof(ConcreteTypeEnumerator<ICommand>))]
-        public void Resolve_ICommandConcreteClasses(Type concreteCmd)
+        [TestCaseSource(typeof(ConcreteTypeEnumerator))]
+        public void Resolve_ICommandConcreteClasses(Service service)
         {
-            var builder = new ContainerBuilder();
-            var container = CompositionRoot.Setup(builder);
-            container.Resolve(concreteCmd);
+            using var container = CompositionRoot.Setup();
+            container.Invoking(c => c.ResolveService(service))
+                .Should().NotThrow()
+                .And.NotBeNull();
         }
     }
 }

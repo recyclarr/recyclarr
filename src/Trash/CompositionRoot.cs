@@ -70,8 +70,8 @@ namespace Trash
                 .As<IActiveServiceCommandProvider>()
                 .SingleInstance();
 
-            builder.Register(c => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand)
-                .As<IServiceCommand>();
+            builder.Register(c => new Lazy<IServiceCommand>(
+                () => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand));
         }
 
         public static IContainer Setup()
@@ -96,7 +96,6 @@ namespace Trash
 
             builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
 
-            // builder.RegisterSource(new AnyConcreteTypeNotAlreadyRegisteredSource());
             return builder.Build();
         }
     }

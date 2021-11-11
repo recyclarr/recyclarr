@@ -37,9 +37,9 @@ namespace Trash.Config
                 .Build();
         }
 
-        public IEnumerable<T> Load(string configPath, string configSection)
+        public IEnumerable<T> Load(string propertyName, string configSection)
         {
-            using var stream = _fileSystem.File.OpenText(configPath);
+            using var stream = _fileSystem.File.OpenText(propertyName);
             return LoadFromStream(stream, configSection);
         }
 
@@ -53,24 +53,20 @@ namespace Trash.Config
             var validConfigs = new List<T>();
             while (parser.TryConsume<Scalar>(out var key))
             {
-                if (key.Value == configSection)
+                if (key.Value != configSection)
                 {
-                    var configs = (List<T>?) _deserializer.Deserialize<List<T>>(parser);
-                    if (configs != null)
-                    {
-                        foreach (var config in configs)
-                        {
-                            var result = _validator.Validate(config);
-                            if (result is {IsValid: false})
-                            {
-                                throw new ConfigurationException(configSection, typeof(T), result.Errors);
-                            }
-
-                            validConfigs.Add(config);
-                        }
-                    }
+                    parser.SkipThisAndNestedEvents();
+                    continue;
                 }
 
+                var configs = _deserializer.Deserialize<List<T>?>(parser);
+                if (configs == null)
+                {
+                    parser.SkipThisAndNestedEvents();
+                    continue;
+                }
+
+                ValidateConfigs(configSection, configs, validConfigs);
                 parser.SkipThisAndNestedEvents();
             }
 
@@ -80,6 +76,20 @@ namespace Trash.Config
             }
 
             return validConfigs;
+        }
+
+        private void ValidateConfigs(string configSection, IEnumerable<T> configs, ICollection<T> validConfigs)
+        {
+            foreach (var config in configs)
+            {
+                var result = _validator.Validate(config);
+                if (result is {IsValid: false})
+                {
+                    throw new ConfigurationException(configSection, typeof(T), result.Errors);
+                }
+
+                validConfigs.Add(config);
+            }
         }
 
         public IEnumerable<T> LoadMany(IEnumerable<string> configFiles, string configSection)

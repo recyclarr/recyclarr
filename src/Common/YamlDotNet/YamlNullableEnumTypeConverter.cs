@@ -19,13 +19,10 @@ namespace Common.YamlDotNet
             type = Nullable.GetUnderlyingType(type) ??
                    throw new ArgumentException("Expected nullable enum type for ReadYaml");
 
-            if (parser.Accept<NodeEvent>(out var @event))
+            if (parser.Accept<NodeEvent>(out var @event) && NodeIsNull(@event))
             {
-                if (NodeIsNull(@event))
-                {
-                    parser.SkipThisAndNestedEvents();
-                    return null;
-                }
+                parser.SkipThisAndNestedEvents();
+                return null;
             }
 
             var scalar = parser.Consume<Scalar>();
@@ -35,7 +32,7 @@ namespace Common.YamlDotNet
             }
             catch (Exception ex)
             {
-                throw new Exception($"Invalid value: \"{scalar.Value}\" for {type.Name}", ex);
+                throw new YamlException($"Invalid value: \"{scalar.Value}\" for {type.Name}", ex);
             }
         }
 
@@ -44,12 +41,14 @@ namespace Common.YamlDotNet
             type = Nullable.GetUnderlyingType(type) ??
                    throw new ArgumentException("Expected nullable enum type for WriteYaml");
 
-            if (value != null)
+            if (value == null)
             {
-                var toWrite = Enum.GetName(type, value) ??
-                              throw new InvalidOperationException($"Invalid value {value} for enum: {type}");
-                emitter.Emit(new Scalar(null!, null!, toWrite, ScalarStyle.Any, true, false));
+                return;
             }
+
+            var toWrite = Enum.GetName(type, value) ??
+                          throw new InvalidOperationException($"Invalid value {value} for enum: {type}");
+            emitter.Emit(new Scalar(null!, null!, toWrite, ScalarStyle.Any, true, false));
         }
 
         private static bool NodeIsNull(NodeEvent nodeEvent)
@@ -61,13 +60,13 @@ namespace Common.YamlDotNet
                 return true;
             }
 
-            if (nodeEvent is Scalar scalar && scalar.Style == ScalarStyle.Plain)
+            if (nodeEvent is not Scalar {Style: ScalarStyle.Plain} scalar)
             {
-                var value = scalar.Value;
-                return value is "" or "~" or "null" or "Null" or "NULL";
+                return false;
             }
 
-            return false;
+            var value = scalar.Value;
+            return value is "" or "~" or "null" or "Null" or "NULL";
         }
     }
 }

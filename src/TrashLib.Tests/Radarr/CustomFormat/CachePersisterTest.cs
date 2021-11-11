@@ -20,17 +20,16 @@ namespace TrashLib.Tests.Radarr.CustomFormat
         {
             public Context()
             {
-                Log = Substitute.For<ILogger>();
+                var log = Substitute.For<ILogger>();
                 ServiceCache = Substitute.For<IServiceCache>();
-                Persister = new CachePersister(Log, ServiceCache);
+                Persister = new CachePersister(log, ServiceCache);
             }
 
             public CachePersister Persister { get; }
-            public ILogger Log { get; }
             public IServiceCache ServiceCache { get; }
         }
 
-        private ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
+        private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
         {
             return new ProcessedCustomFormatData(cfName, trashId, new JObject())
             {
