@@ -1,17 +1,18 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Build & Test
 
 on:
   push:
     paths-ignore:
-      - 'wiki/**'
-      - '**.md'
+      - "wiki/**"
+      - "**.md"
   pull_request:
     paths-ignore:
-      - 'wiki/**'
-      - '**.md'
+      - "wiki/**"
+      - "**.md"
 
 env:
-  dotnetVersion: 6.0.x
+  dotnetVersion: "6.0.x"
 
 jobs:
   build:
@@ -56,15 +57,56 @@ jobs:
           name: trash
           path: publish/zip/trash-*.zip
 
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_ROLL_FORWARD: LatestMajor
+      GITHUB_TOKEN: ${{ secrets.PAT }}
+    steps:
+      - name: Get Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup NBGV
+        uses: dotnet/nbgv@master
+        id: nbgv
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Install Sonar Scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Begin Sonar Scanner
+        run: >
+          dotnet sonarscanner begin
+          -o:"rcdailey"
+          -k:"rcdailey_trash-updater"
+          -n:"Trash Updater"
+          -v:"${{ steps.nbgv.outputs.SimpleVersion }}"
+          -d:"sonar.login=${{ secrets.SONAR_TOKEN }}"
+          -d:"sonar.host.url=https://sonarcloud.io"
+
+      - name: Build
+        run: dotnet build src
+
+      - name: Test
+        run: dotnet test src
+
+      - name: End Sonar Scanner
+        run: >
+          dotnet sonarscanner end
+          -d:"sonar.login=${{ secrets.SONAR_TOKEN }}"
+
   release:
     name: Release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-      # github.event.create.ref_type == 'tag'
-      # startsWith(github.event.push.ref, 'refs/heads/release/')
-      # github.event.pull_request.merged == true &&
-      # startsWith(github.event.pull_request.head.ref, 'release/')
     steps:
       - name: Checkout
         uses: actions/checkout@v2
