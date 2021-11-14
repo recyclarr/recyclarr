@@ -14,10 +14,10 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         IDictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores { get; }
         IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; }
         IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
-        List<(string, string)> CustomFormatsWithOutdatedNames { get; }
-        Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
+        IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
+        IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-        Task BuildGuideDataAsync(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache);
+        Task BuildGuideDataAsync(IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache);
         void Reset();
     }
 }

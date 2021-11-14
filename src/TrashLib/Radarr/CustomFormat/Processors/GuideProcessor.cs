@@ -53,13 +53,13 @@ namespace TrashLib.Radarr.CustomFormat.Processors
         public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache
             => _steps.CustomFormat.DeletedCustomFormatsInCache;
 
-        public List<(string, string)> CustomFormatsWithOutdatedNames
+        public IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames
             => _steps.CustomFormat.CustomFormatsWithOutdatedNames;
 
-        public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
+        public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
             => _steps.CustomFormat.DuplicatedCustomFormats;
 
-        public async Task BuildGuideDataAsync(IReadOnlyList<CustomFormatConfig> config, CustomFormatCache? cache)
+        public async Task BuildGuideDataAsync(IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
         {
             if (_guideCustomFormatJson == null)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Autofac;
 using FluentAssertions;
@@ -28,13 +29,13 @@ namespace TrashLib.Tests.Radarr
 
         private static readonly TestCaseData[] NameOrIdsTestData =
         {
-            new(new List<string> {"name"}, new List<string>()),
-            new(new List<string>(), new List<string> {"trash_id"})
+            new(new Collection<string> {"name"}, new Collection<string>()),
+            new(new Collection<string>(), new Collection<string> {"trash_id"})
         };
 
         [TestCaseSource(nameof(NameOrIdsTestData))]
-        public void Custom_format_is_valid_with_one_of_either_names_or_trash_id(List<string> namesList,
-            List<string> trashIdsList)
+        public void Custom_format_is_valid_with_one_of_either_names_or_trash_id(Collection<string> namesList,
+            Collection<string> trashIdsList)
         {
             var config = new RadarrConfiguration
             {

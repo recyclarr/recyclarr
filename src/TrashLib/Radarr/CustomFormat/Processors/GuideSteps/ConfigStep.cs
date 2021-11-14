@@ -9,8 +9,11 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     internal class ConfigStep : IConfigStep
     {
-        public List<string> CustomFormatsNotInGuide { get; } = new();
-        public List<ProcessedConfigData> ConfigData { get; } = new();
+        private readonly List<ProcessedConfigData> _configData = new();
+        private readonly List<string> _customFormatsNotInGuide = new();
+
+        public IReadOnlyCollection<string> CustomFormatsNotInGuide => _customFormatsNotInGuide;
+        public IReadOnlyCollection<ProcessedConfigData> ConfigData => _configData;
 
         public void Process(IReadOnlyCollection<ProcessedCustomFormatData> processedCfs,
             IEnumerable<CustomFormatConfig> config)
@@ -24,7 +27,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                     var match = FindCustomFormatByName(processedCfs, name);
                     if (match == null)
                     {
-                        CustomFormatsNotInGuide.Add(name);
+                        _customFormatsNotInGuide.Add(name);
                     }
                     else
                     {
@@ -37,7 +40,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                     var match = processedCfs.FirstOrDefault(cf => cf.TrashId.EqualsIgnoreCase(trashId));
                     if (match == null)
                     {
-                        CustomFormatsNotInGuide.Add(trashId);
+                        _customFormatsNotInGuide.Add(trashId);
                     }
                     else
                     {
@@ -45,7 +48,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                     }
                 }
 
-                ConfigData.Add(new ProcessedConfigData
+                _configData.Add(new ProcessedConfigData
                 {
                     QualityProfiles = singleConfig.QualityProfiles,
                     CustomFormats = validCfs
@@ -58,10 +61,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
         private static ProcessedCustomFormatData? FindCustomFormatByName(
             IReadOnlyCollection<ProcessedCustomFormatData> processedCfs, string name)
         {
-            return processedCfs.FirstOrDefault(
-                       cf => cf.CacheEntry?.CustomFormatName.EqualsIgnoreCase(name) ?? false) ??
-                   processedCfs.FirstOrDefault(
-                       cf => cf.Name.EqualsIgnoreCase(name));
+            return processedCfs.FirstOrDefault(cf => cf.CacheEntry?.CustomFormatName.EqualsIgnoreCase(name) ?? false)
+                   ?? processedCfs.FirstOrDefault(cf => cf.Name.EqualsIgnoreCase(name));
         }
     }
 }

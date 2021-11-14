@@ -12,6 +12,6 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
         void Process(IEnumerable<ProcessedCustomFormatData> guideCfs,
             IReadOnlyCollection<JObject> radarrCfs);
 
-        void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, List<JObject> radarrCfs);
+        void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> radarrCfs);
     }
 }

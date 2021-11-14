@@ -5,8 +5,11 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     internal class QualityProfileStep : IQualityProfileStep
     {
-        public Dictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores { get; } = new();
-        public List<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; } = new();
+        private readonly Dictionary<string, QualityProfileCustomFormatScoreMapping> _profileScores = new();
+        private readonly List<(string name, string trashId, string profileName)> _customFormatsWithoutScore = new();
+
+        public IDictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores => _profileScores;
+        public IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore => _customFormatsWithoutScore;
 
         public void Process(IEnumerable<ProcessedConfigData> configData)
         {
@@ -23,7 +26,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                 {
                     if (cf.Score == null)
                     {
-                        CustomFormatsWithoutScore.Add((cf.Name, cf.TrashId, profile.Name));
+                        _customFormatsWithoutScore.Add((cf.Name, cf.TrashId, profile.Name));
                     }
                     else
                     {

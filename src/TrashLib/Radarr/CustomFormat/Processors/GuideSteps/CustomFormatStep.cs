@@ -12,12 +12,15 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     internal class CustomFormatStep : ICustomFormatStep
     {
-        public List<(string, string)> CustomFormatsWithOutdatedNames { get; } = new();
-        public List<ProcessedCustomFormatData> ProcessedCustomFormats { get; } = new();
-        public List<TrashIdMapping> DeletedCustomFormatsInCache { get; } = new();
+        private readonly List<(string, string)> _customFormatsWithOutdatedNames = new();
+        private readonly List<ProcessedCustomFormatData> _processedCustomFormats = new();
+        private readonly List<TrashIdMapping> _deletedCustomFormatsInCache = new();
+        private readonly Dictionary<string, List<ProcessedCustomFormatData>> _duplicatedCustomFormats = new();
 
-        public Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; private set; } =
-            new();
+        public IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames => _customFormatsWithOutdatedNames;
+        public IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats => _processedCustomFormats;
+        public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache => _deletedCustomFormatsInCache;
+        public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats => _duplicatedCustomFormats;
 
         public void Process(IEnumerable<string> customFormatGuideData,
             IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
@@ -27,7 +30,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                 .ToList();
 
             // For each ID listed under the `trash_ids` YML property, match it to an existing CF
-            ProcessedCustomFormats.AddRange(config
+            _processedCustomFormats.AddRange(config
                 .SelectMany(c => c.TrashIds)
                 .Distinct(StringComparer.CurrentCultureIgnoreCase)
                 .Join(processedCfs,
@@ -60,7 +63,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                         cf.CacheEntry.CustomFormatName = cf.Name;
                     }
 
-                    ProcessedCustomFormats.Add(cf);
+                    _processedCustomFormats.Add(cf);
                     continue;
                 }
 
@@ -69,8 +72,8 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                 if (configName != null)
                 {
                     // Config name is out of sync with the guide and should be updated
-                    CustomFormatsWithOutdatedNames.Add((configName, cf.Name));
-                    ProcessedCustomFormats.Add(cf);
+                    _customFormatsWithOutdatedNames.Add((configName, cf.Name));
+                    _processedCustomFormats.Add(cf);
                 }
 
                 // If we get here, we can't find a match in the config using cache or guide name, so the user must have
@@ -86,12 +89,13 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 
         private void ProcessDuplicates()
         {
-            DuplicatedCustomFormats = ProcessedCustomFormats
+            _duplicatedCustomFormats.Clear();
+            _duplicatedCustomFormats.AddRange(ProcessedCustomFormats
                 .GroupBy(cf => cf.Name)
                 .Where(grp => grp.Count() > 1)
-                .ToDictionary(grp => grp.Key, grp => grp.ToList());
+                .ToDictionary(grp => grp.Key, grp => grp.ToList()));
 
-            ProcessedCustomFormats.RemoveAll(cf => DuplicatedCustomFormats.ContainsKey(cf.Name));
+            _processedCustomFormats.RemoveAll(cf => DuplicatedCustomFormats.ContainsKey(cf.Name));
         }
 
         private static ProcessedCustomFormatData ProcessCustomFormatData(string guideData, CustomFormatCache? cache)
@@ -129,7 +133,7 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
                 => cf.CacheEntry != null && cf.CacheEntry.TrashId == c.TrashId;
 
             // Delete if CF is in cache and not in the guide or config
-            DeletedCustomFormatsInCache.AddRange(cache.TrashIdMappings
+            _deletedCustomFormatsInCache.AddRange(cache.TrashIdMappings
                 .Where(c => !ProcessedCustomFormats.Any(cf => MatchCfInCache(cf, c))));
         }
     }

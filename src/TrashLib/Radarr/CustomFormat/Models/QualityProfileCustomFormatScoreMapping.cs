@@ -12,6 +12,6 @@ namespace TrashLib.Radarr.CustomFormat.Models
         }
 
         public bool ResetUnmatchedScores { get; }
-        public List<FormatMappingEntry> Mapping { get; init; } = new();
+        public ICollection<FormatMappingEntry> Mapping { get; init; } = new List<FormatMappingEntry>();
     }
 }

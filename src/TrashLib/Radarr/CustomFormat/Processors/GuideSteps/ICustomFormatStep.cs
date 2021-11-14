@@ -7,10 +7,10 @@ namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps
 {
     public interface ICustomFormatStep
     {
-        List<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
-        List<TrashIdMapping> DeletedCustomFormatsInCache { get; }
-        List<(string, string)> CustomFormatsWithOutdatedNames { get; }
-        Dictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
+        IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats { get; }
+        IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
+        IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
+        IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
         void Process(IEnumerable<string> customFormatGuideData,
             IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache);

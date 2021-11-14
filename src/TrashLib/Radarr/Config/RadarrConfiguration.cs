@@ -9,16 +9,16 @@ namespace TrashLib.Radarr.Config
     public class RadarrConfiguration : ServiceConfiguration
     {
         public QualityDefinitionConfig? QualityDefinition { get; init; }
-        public List<CustomFormatConfig> CustomFormats { get; init; } = new();
+        public ICollection<CustomFormatConfig> CustomFormats { get; init; } = new List<CustomFormatConfig>();
         public bool DeleteOldCustomFormats { get; init; }
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class CustomFormatConfig
     {
-        public List<string> Names { get; init; } = new();
-        public List<string> TrashIds { get; init; } = new();
-        public List<QualityProfileConfig> QualityProfiles { get; init; } = new();
+        public ICollection<string> Names { get; init; } = new List<string>();
+        public ICollection<string> TrashIds { get; init; } = new List<string>();
+        public ICollection<QualityProfileConfig> QualityProfiles { get; init; } = new List<QualityProfileConfig>();
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
@@ -9,10 +10,10 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
 {
     public class CustomFormatTransactionData
     {
-        public List<ProcessedCustomFormatData> NewCustomFormats { get; } = new();
-        public List<ProcessedCustomFormatData> UpdatedCustomFormats { get; } = new();
-        public List<TrashIdMapping> DeletedCustomFormatIds { get; } = new();
-        public List<ProcessedCustomFormatData> UnchangedCustomFormats { get; } = new();
+        public Collection<ProcessedCustomFormatData> NewCustomFormats { get; } = new();
+        public Collection<ProcessedCustomFormatData> UpdatedCustomFormats { get; } = new();
+        public Collection<TrashIdMapping> DeletedCustomFormatIds { get; } = new();
+        public Collection<ProcessedCustomFormatData> UnchangedCustomFormats { get; } = new();
     }
 
     internal class JsonTransactionStep : IJsonTransactionStep
@@ -59,12 +60,14 @@ namespace TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps
             }
         }
 
-        public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, List<JObject> radarrCfs)
+        public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> radarrCfs)
         {
+            var cfs = radarrCfs.ToList();
+
             // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
             // FindRadarrCf() specifies 'null' for name because we should never delete unless an ID is found
             foreach (var del in deletedCfsInCache.Where(
-                del => FindRadarrCf(radarrCfs, del.CustomFormatId, null) != null))
+                del => FindRadarrCf(cfs, del.CustomFormatId, null) != null))
             {
                 Transactions.DeletedCustomFormatIds.Add(del);
             }

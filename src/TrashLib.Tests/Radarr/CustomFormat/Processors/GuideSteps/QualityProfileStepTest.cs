@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -61,7 +62,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             processor.ProfileScores.Should()
                 .ContainKey("profile1").WhoseValue.Should()
-                .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 50)));
+                .BeEquivalentTo(
+                    CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats.First(), 50)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();
         }
@@ -89,7 +91,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
             processor.Process(testConfigData);
 
             var expectedScoreEntries =
-                CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 100));
+                CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats.First(), 100));
 
             processor.ProfileScores.Should().BeEquivalentTo(
                 new Dictionary<string, QualityProfileCustomFormatScoreMapping>
@@ -124,7 +126,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             processor.ProfileScores.Should()
                 .ContainKey("profile1").WhoseValue.Should()
-                .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats[0], 0)));
+                .BeEquivalentTo(CfTestUtils.NewMapping(new FormatMappingEntry(testConfigData[0].CustomFormats.First(), 0)));
 
             processor.CustomFormatsWithoutScore.Should().BeEmpty();
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using TrashLib.Cache;
 
 namespace TrashLib.Radarr.CustomFormat.Models.Cache
@@ -9,7 +9,7 @@ namespace TrashLib.Radarr.CustomFormat.Models.Cache
         public const int LatestVersion = 1;
 
         public int Version { get; init; } = LatestVersion;
-        public List<TrashIdMapping> TrashIdMappings { get; init; } = new();
+        public Collection<TrashIdMapping> TrashIdMappings { get; init; } = new();
     }
 
     public class TrashIdMapping

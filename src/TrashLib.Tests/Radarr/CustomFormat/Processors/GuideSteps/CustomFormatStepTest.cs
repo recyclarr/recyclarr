@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -51,7 +52,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             var testCache = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping>
+                TrashIdMappings = new Collection<TrashIdMapping>
                 {
                     new("id1", "name1")
                 }
@@ -97,7 +98,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             var testCache = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping>
+                TrashIdMappings = new Collection<TrashIdMapping>
                 {
                     new("id1000", "name1")
                 }
@@ -183,7 +184,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             var testCache = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping> {new("id1000", "name1")}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("id1000", "name1")}
             };
 
             var processor = new CustomFormatStep();
@@ -205,7 +206,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
         {
             var cache = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping> {new("id1", "3D", 9)}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("id1", "3D", 9)}
             };
 
             var guideCfs = new List<string>
@@ -237,7 +238,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps
 
             var testCache = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping> {new("id1", "name1")}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("id1", "name1")}
             };
 
             var processor = new CustomFormatStep();

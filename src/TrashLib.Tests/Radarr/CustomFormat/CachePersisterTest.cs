@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
@@ -46,7 +47,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             var testCfObj = new CustomFormatCache
             {
                 Version = versionToTest,
-                TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
             };
             ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
             ctx.Persister.Load();
@@ -61,7 +62,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             var testCfObj = new CustomFormatCache
             {
                 Version = CustomFormatCache.LatestVersion,
-                TrashIdMappings = new List<TrashIdMapping> {new("", "", 5)}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
             };
             ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
             ctx.Persister.Load();
@@ -116,7 +117,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             // Load initial CfCache just to test that it gets replaced
             var testCfObj = new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping> {new("", "") {CustomFormatId = 5}}
+                TrashIdMappings = new Collection<TrashIdMapping> {new("", "") {CustomFormatId = 5}}
             };
             ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
             ctx.Persister.Load();
@@ -133,7 +134,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat
             ctx.Persister.Update(customFormatData);
             ctx.Persister.CfCache.Should().BeEquivalentTo(new CustomFormatCache
             {
-                TrashIdMappings = new List<TrashIdMapping> {customFormatData[0].CacheEntry!}
+                TrashIdMappings = new Collection<TrashIdMapping> {customFormatData[0].CacheEntry!}
             });
 
             customFormatData.Should().ContainSingle()
