@@ -30,7 +30,7 @@
     <PackageReference Update="Serilog.Sinks.NUnit" Version="1.*" />
     <PackageReference Update="Serilog.Sinks.TestCorrelator" Version="3.*" />
     <PackageReference Update="System.Data.HashFunction.FNV" Version="2.*" />
-    <PackageReference Update="System.IO.Abstractions" Version="13.*" />
+    <PackageReference Update="System.IO.Abstractions" Version="14.*" />
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
     <PackageReference Update="morelinq" Version="3.*" />
