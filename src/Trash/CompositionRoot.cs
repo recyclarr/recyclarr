@@ -70,8 +70,8 @@ namespace Trash
                 .As<IActiveServiceCommandProvider>()
                 .SingleInstance();
 
-            builder.Register(c => new Lazy<IServiceCommand>(
-                () => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand));
+            builder.Register(c => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand)
+                .As<IServiceCommand>();
         }
 
         public static IContainer Setup()
