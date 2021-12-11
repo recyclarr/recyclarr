@@ -10,7 +10,6 @@
       https://youtrack.jetbrains.com/issue/RIDER-55142
       <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     -->
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
   </PropertyGroup>
 
@@ -31,7 +30,6 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="All" />
     <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" Condition=" '$(DisableNbgv)' != 'true' " />
   </ItemGroup>
 
