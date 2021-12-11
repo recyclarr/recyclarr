@@ -5,11 +5,7 @@
     <WarningLevel>9999</WarningLevel>
     <!-- <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
     <DebugType>embedded</DebugType>
-    <!--
-      Rider does not support `AllEnabledByDefault` yet. See:
-      https://youtrack.jetbrains.com/issue/RIDER-55142
-      <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-    -->
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
   </PropertyGroup>
 
