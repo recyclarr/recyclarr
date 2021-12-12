@@ -69,9 +69,6 @@ namespace Trash
             builder.RegisterType<ActiveServiceCommandProvider>()
                 .As<IActiveServiceCommandProvider>()
                 .SingleInstance();
-
-            builder.Register(c => c.Resolve<IActiveServiceCommandProvider>().ActiveCommand)
-                .As<IServiceCommand>();
         }
 
         public static IContainer Setup()

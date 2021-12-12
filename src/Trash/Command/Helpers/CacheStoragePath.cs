@@ -1,17 +1,16 @@
-﻿using System;
-using TrashLib.Cache;
+﻿using TrashLib.Cache;
 
 namespace Trash.Command.Helpers
 {
     public class CacheStoragePath : ICacheStoragePath
     {
-        private readonly Lazy<IServiceCommand> _cmd;
+        private readonly IActiveServiceCommandProvider _serviceCommandProvider;
 
-        public CacheStoragePath(Lazy<IServiceCommand> cmd)
+        public CacheStoragePath(IActiveServiceCommandProvider serviceCommandProvider)
         {
-            _cmd = cmd;
+            _serviceCommandProvider = serviceCommandProvider;
         }
 
-        public string Path => _cmd.Value.CacheStoragePath;
+        public string Path => _serviceCommandProvider.ActiveCommand.CacheStoragePath;
     }
 }
