@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Remove `System.Reactive.xml` from the published ZIP files.
+- Fix exception that may occur at startup.
 
 ## [1.6.6] - 2021-10-30
 
