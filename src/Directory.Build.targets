@@ -13,7 +13,7 @@
     <PackageReference Update="Flurl.Http" Version="3.*" />
     <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
     <PackageReference Update="JetBrains.Annotations" Version="*" />
-    <PackageReference Update="LibGit2Sharp" Version="0.*-*" />
+    <PackageReference Update="LibGit2Sharp" Version="0.27.*-*" />
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.*" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Update="NSubstitute" Version="4.*" />
