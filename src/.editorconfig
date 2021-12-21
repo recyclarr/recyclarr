@@ -774,7 +774,6 @@ dotnet_style_qualification_for_field = false:suggestion
 dotnet_style_qualification_for_method = false:suggestion
 dotnet_style_qualification_for_property = false:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
-file_header_template =
 
 # ReSharper properties
 resharper_accessor_owner_body = expression_body
@@ -898,7 +897,7 @@ resharper_csharp_naming_rule.private_constants = AaBb
 resharper_csharp_naming_rule.private_static_fields = _ + aaBb
 resharper_csharp_naming_rule.private_static_readonly = AaBb
 resharper_csharp_naming_rule.static_readonly = AaBb
-resharper_csharp_new_line_before_while = false
+resharper_csharp_new_line_before_while = true
 resharper_csharp_prefer_qualified_reference = false
 resharper_csharp_space_after_unary_operator = false
 resharper_csharp_stick_comment = false
@@ -1020,6 +1019,7 @@ resharper_nested_ternary_style = autodetect
 resharper_new_line_before_catch = true
 resharper_new_line_before_else = true
 resharper_new_line_before_enumerators = true
+resharper_new_line_before_while = true
 resharper_normalize_tag_names = false
 resharper_no_indent_inside_elements = html, body, thead, tbody, tfoot
 resharper_no_indent_inside_if_element_longer_than = 200
