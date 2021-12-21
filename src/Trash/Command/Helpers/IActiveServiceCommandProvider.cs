@@ -1,7 +1,6 @@
-﻿namespace Trash.Command.Helpers
+﻿namespace Trash.Command.Helpers;
+
+public interface IActiveServiceCommandProvider
 {
-    public interface IActiveServiceCommandProvider
-    {
-        IServiceCommand ActiveCommand { get; set; }
-    }
+    IServiceCommand ActiveCommand { get; set; }
 }

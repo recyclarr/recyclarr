@@ -3,19 +3,18 @@ using Autofac;
 using FluentValidation;
 using Module = Autofac.Module;
 
-namespace TrashLib.Config
-{
-    public class ConfigAutofacModule : Module
-    {
-        protected override void Load(ContainerBuilder builder)
-        {
-            builder.RegisterType<ConfigurationProvider>()
-                .As<IConfigurationProvider>()
-                .SingleInstance();
+namespace TrashLib.Config;
 
-            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                .AsClosedTypesOf(typeof(IValidator<>))
-                .AsImplementedInterfaces();
-        }
+public class ConfigAutofacModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<ConfigurationProvider>()
+            .As<IConfigurationProvider>()
+            .SingleInstance();
+
+        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+            .AsClosedTypesOf(typeof(IValidator<>))
+            .AsImplementedInterfaces();
     }
 }

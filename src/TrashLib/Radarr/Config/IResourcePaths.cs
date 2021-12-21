@@ -1,7 +1,6 @@
-namespace TrashLib.Radarr.Config
+namespace TrashLib.Radarr.Config;
+
+public interface IResourcePaths
 {
-    public interface IResourcePaths
-    {
-        string RepoPath { get; }
-    }
+    string RepoPath { get; }
 }

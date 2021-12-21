@@ -1,7 +1,6 @@
-namespace Trash
+namespace Trash;
+
+public interface ILogJanitor
 {
-    public interface ILogJanitor
-    {
-        void DeleteOldestLogFiles(int numberOfNewestToKeep);
-    }
+    void DeleteOldestLogFiles(int numberOfNewestToKeep);
 }

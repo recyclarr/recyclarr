@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace TrashLib.Radarr.CustomFormat.Models
+namespace TrashLib.Radarr.CustomFormat.Models;
+
+public record FormatMappingEntry(ProcessedCustomFormatData CustomFormat, int Score);
+
+public class QualityProfileCustomFormatScoreMapping
 {
-    public record FormatMappingEntry(ProcessedCustomFormatData CustomFormat, int Score);
-
-    public class QualityProfileCustomFormatScoreMapping
+    public QualityProfileCustomFormatScoreMapping(bool resetUnmatchedScores)
     {
-        public QualityProfileCustomFormatScoreMapping(bool resetUnmatchedScores)
-        {
-            ResetUnmatchedScores = resetUnmatchedScores;
-        }
-
-        public bool ResetUnmatchedScores { get; }
-        public ICollection<FormatMappingEntry> Mapping { get; init; } = new List<FormatMappingEntry>();
+        ResetUnmatchedScores = resetUnmatchedScores;
     }
+
+    public bool ResetUnmatchedScores { get; }
+    public ICollection<FormatMappingEntry> Mapping { get; init; } = new List<FormatMappingEntry>();
 }

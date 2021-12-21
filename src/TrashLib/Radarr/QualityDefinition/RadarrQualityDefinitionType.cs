@@ -1,7 +1,6 @@
-﻿namespace TrashLib.Radarr.QualityDefinition
+﻿namespace TrashLib.Radarr.QualityDefinition;
+
+public enum RadarrQualityDefinitionType
 {
-    public enum RadarrQualityDefinitionType
-    {
-        Movie
-    }
+    Movie
 }

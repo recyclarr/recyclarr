@@ -3,28 +3,27 @@ using Flurl.Http;
 using Serilog;
 using TrashLib.Extensions;
 
-namespace TrashLib.Config
+namespace TrashLib.Config;
+
+internal class ServerInfo : IServerInfo
 {
-    internal class ServerInfo : IServerInfo
+    private readonly IConfigurationProvider _config;
+    private readonly ILogger _log;
+
+    public ServerInfo(IConfigurationProvider config, ILogger log)
     {
-        private readonly IConfigurationProvider _config;
-        private readonly ILogger _log;
+        _config = config;
+        _log = log;
+    }
 
-        public ServerInfo(IConfigurationProvider config, ILogger log)
-        {
-            _config = config;
-            _log = log;
-        }
+    public IFlurlRequest BuildRequest()
+    {
+        var apiKey = _config.ActiveConfiguration.ApiKey;
+        var baseUrl = _config.ActiveConfiguration.BaseUrl;
 
-        public IFlurlRequest BuildRequest()
-        {
-            var apiKey = _config.ActiveConfiguration.ApiKey;
-            var baseUrl = _config.ActiveConfiguration.BaseUrl;
-
-            return baseUrl
-                .AppendPathSegment("api/v3")
-                .SetQueryParams(new {apikey = apiKey})
-                .SanitizedLogging(_log);
-        }
+        return baseUrl
+            .AppendPathSegment("api/v3")
+            .SetQueryParams(new {apikey = apiKey})
+            .SanitizedLogging(_log);
     }
 }

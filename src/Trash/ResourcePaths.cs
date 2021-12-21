@@ -1,9 +1,8 @@
 using TrashLib.Radarr.Config;
 
-namespace Trash
+namespace Trash;
+
+public class ResourcePaths : IResourcePaths
 {
-    public class ResourcePaths : IResourcePaths
-    {
-        public string RepoPath => AppPaths.RepoDirectory;
-    }
+    public string RepoPath => AppPaths.RepoDirectory;
 }

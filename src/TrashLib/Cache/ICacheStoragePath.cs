@@ -1,7 +1,6 @@
-﻿namespace TrashLib.Cache
+﻿namespace TrashLib.Cache;
+
+public interface ICacheStoragePath
 {
-    public interface ICacheStoragePath
-    {
-        string Path { get; }
-    }
+    string Path { get; }
 }

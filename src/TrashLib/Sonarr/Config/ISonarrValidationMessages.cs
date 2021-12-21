@@ -1,9 +1,8 @@
-namespace TrashLib.Sonarr.Config
+namespace TrashLib.Sonarr.Config;
+
+public interface ISonarrValidationMessages
 {
-    public interface ISonarrValidationMessages
-    {
-        string BaseUrl { get; }
-        string ApiKey { get; }
-        string ReleaseProfileType { get; }
-    }
+    string BaseUrl { get; }
+    string ApiKey { get; }
+    string ReleaseProfileType { get; }
 }

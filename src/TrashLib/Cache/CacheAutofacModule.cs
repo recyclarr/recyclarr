@@ -1,13 +1,12 @@
 using Autofac;
 
-namespace TrashLib.Cache
+namespace TrashLib.Cache;
+
+public class CacheAutofacModule : Module
 {
-    public class CacheAutofacModule : Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-            // Clients must register their own implementation of ICacheStoragePath
-            builder.RegisterType<ServiceCache>().As<IServiceCache>();
-        }
+        // Clients must register their own implementation of ICacheStoragePath
+        builder.RegisterType<ServiceCache>().As<IServiceCache>();
     }
 }

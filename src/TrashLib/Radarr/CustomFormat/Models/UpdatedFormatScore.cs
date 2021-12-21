@@ -1,13 +1,12 @@
-namespace TrashLib.Radarr.CustomFormat.Models
-{
-    public enum FormatScoreUpdateReason
-    {
-        Updated,
-        Reset
-    }
+namespace TrashLib.Radarr.CustomFormat.Models;
 
-    public record UpdatedFormatScore(
-        string CustomFormatName,
-        int Score,
-        FormatScoreUpdateReason Reason);
+public enum FormatScoreUpdateReason
+{
+    Updated,
+    Reset
 }
+
+public record UpdatedFormatScore(
+    string CustomFormatName,
+    int Score,
+    FormatScoreUpdateReason Reason);

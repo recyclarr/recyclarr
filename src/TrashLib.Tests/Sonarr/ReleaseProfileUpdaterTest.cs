@@ -6,46 +6,45 @@ using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 
-namespace TrashLib.Tests.Sonarr
+namespace TrashLib.Tests.Sonarr;
+
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+public class ReleaseProfileUpdaterTest
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    public class ReleaseProfileUpdaterTest
+    private class Context
     {
-        private class Context
+        public IReleaseProfileGuideParser Parser { get; } = Substitute.For<IReleaseProfileGuideParser>();
+        public ISonarrApi Api { get; } = Substitute.For<ISonarrApi>();
+        public ILogger Logger { get; } = Substitute.For<ILogger>();
+        public ISonarrCompatibility Compatibility { get; } = Substitute.For<ISonarrCompatibility>();
+    }
+
+    [Test]
+    public void ProcessReleaseProfile_InvalidReleaseProfiles_NoCrashNoCalls()
+    {
+        var context = new Context();
+
+        var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api, context.Compatibility);
+        logic.Process(false, new SonarrConfiguration());
+
+        context.Parser.DidNotReceive().GetMarkdownData(Arg.Any<ReleaseProfileType>());
+    }
+
+    [Test]
+    public void ProcessReleaseProfile_SingleProfilePreview()
+    {
+        var context = new Context();
+
+        context.Parser.GetMarkdownData(ReleaseProfileType.Anime).Returns("theMarkdown");
+        var config = new SonarrConfiguration
         {
-            public IReleaseProfileGuideParser Parser { get; } = Substitute.For<IReleaseProfileGuideParser>();
-            public ISonarrApi Api { get; } = Substitute.For<ISonarrApi>();
-            public ILogger Logger { get; } = Substitute.For<ILogger>();
-            public ISonarrCompatibility Compatibility { get; } = Substitute.For<ISonarrCompatibility>();
-        }
+            ReleaseProfiles = new[] {new ReleaseProfileConfig {Type = ReleaseProfileType.Anime}}
+        };
 
-        [Test]
-        public void ProcessReleaseProfile_InvalidReleaseProfiles_NoCrashNoCalls()
-        {
-            var context = new Context();
+        var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api, context.Compatibility);
+        logic.Process(false, config);
 
-            var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api, context.Compatibility);
-            logic.Process(false, new SonarrConfiguration());
-
-            context.Parser.DidNotReceive().GetMarkdownData(Arg.Any<ReleaseProfileType>());
-        }
-
-        [Test]
-        public void ProcessReleaseProfile_SingleProfilePreview()
-        {
-            var context = new Context();
-
-            context.Parser.GetMarkdownData(ReleaseProfileType.Anime).Returns("theMarkdown");
-            var config = new SonarrConfiguration
-            {
-                ReleaseProfiles = new[] {new ReleaseProfileConfig {Type = ReleaseProfileType.Anime}}
-            };
-
-            var logic = new ReleaseProfileUpdater(context.Logger, context.Parser, context.Api, context.Compatibility);
-            logic.Process(false, config);
-
-            context.Parser.Received().ParseMarkdown(config.ReleaseProfiles[0], "theMarkdown");
-        }
+        context.Parser.Received().ParseMarkdown(config.ReleaseProfiles[0], "theMarkdown");
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace TrashLib.Sonarr.Api.Objects
+﻿namespace TrashLib.Sonarr.Api.Objects;
+
+public class SonarrTag
 {
-    public class SonarrTag
-    {
-        public string Label { get; set; } = "";
-        public int Id { get; set; }
-    }
+    public string Label { get; set; } = "";
+    public int Id { get; set; }
 }

@@ -1,8 +1,8 @@
-﻿namespace TrashLib.Sonarr.Api.Schemas
+﻿namespace TrashLib.Sonarr.Api.Schemas;
+
+public static class SonarrReleaseProfileSchema
 {
-    public static class SonarrReleaseProfileSchema
-    {
-        public static string V1 => @"{
+    public static string V1 => @"{
   'definitions': {
     'SonarrPreferredTerm': {
       'type': [
@@ -75,7 +75,7 @@
   }
 }";
 
-        public static string V2 => @"{
+    public static string V2 => @"{
   'definitions': {
     'SonarrPreferredTerm': {
       'type': [
@@ -160,5 +160,4 @@
   }
 }
 ";
-    }
 }

@@ -1,10 +1,9 @@
-namespace TrashLib.Radarr.CustomFormat
+namespace TrashLib.Radarr.CustomFormat;
+
+public enum ApiOperationType
 {
-    public enum ApiOperationType
-    {
-        Create,
-        Update,
-        NoChange,
-        Delete
-    }
+    Create,
+    Update,
+    NoChange,
+    Delete
 }

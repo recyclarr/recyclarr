@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TrashLib.Radarr.QualityDefinition
+namespace TrashLib.Radarr.QualityDefinition;
+
+public interface IRadarrQualityDefinitionGuideParser
 {
-    public interface IRadarrQualityDefinitionGuideParser
-    {
-        Task<string> GetMarkdownData();
-        IDictionary<RadarrQualityDefinitionType, List<RadarrQualityData>> ParseMarkdown(string markdown);
-    }
+    Task<string> GetMarkdownData();
+    IDictionary<RadarrQualityDefinitionType, List<RadarrQualityData>> ParseMarkdown(string markdown);
 }

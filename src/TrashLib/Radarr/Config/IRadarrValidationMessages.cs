@@ -1,11 +1,10 @@
-namespace TrashLib.Radarr.Config
+namespace TrashLib.Radarr.Config;
+
+public interface IRadarrValidationMessages
 {
-    public interface IRadarrValidationMessages
-    {
-        string BaseUrl { get; }
-        string ApiKey { get; }
-        string CustomFormatNamesAndIds { get; }
-        string QualityProfileName { get; }
-        string QualityDefinitionType { get; }
-    }
+    string BaseUrl { get; }
+    string ApiKey { get; }
+    string CustomFormatNamesAndIds { get; }
+    string QualityProfileName { get; }
+    string QualityDefinitionType { get; }
 }

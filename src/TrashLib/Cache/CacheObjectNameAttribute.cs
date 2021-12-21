@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace TrashLib.Cache
-{
-    [AttributeUsage(AttributeTargets.Class)]
-    internal sealed class CacheObjectNameAttribute : Attribute
-    {
-        public CacheObjectNameAttribute(string name)
-        {
-            Name = name;
-        }
+namespace TrashLib.Cache;
 
-        public string Name { get; }
+[AttributeUsage(AttributeTargets.Class)]
+internal sealed class CacheObjectNameAttribute : Attribute
+{
+    public CacheObjectNameAttribute(string name)
+    {
+        Name = name;
     }
+
+    public string Name { get; }
 }

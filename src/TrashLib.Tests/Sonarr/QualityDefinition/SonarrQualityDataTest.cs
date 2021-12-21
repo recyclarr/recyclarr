@@ -2,101 +2,100 @@ using FluentAssertions;
 using NUnit.Framework;
 using TrashLib.Sonarr.QualityDefinition;
 
-namespace TrashLib.Tests.Sonarr.QualityDefinition
+namespace TrashLib.Tests.Sonarr.QualityDefinition;
+
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+public class SonarrQualityDataTest
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    public class SonarrQualityDataTest
+    private static readonly object[] MaxTestValues =
     {
-        private static readonly object[] MaxTestValues =
-        {
-            new object?[] {100m, 100m, false},
-            new object?[] {100m, 101m, true},
-            new object?[] {100m, 98m, true},
-            new object?[] {100m, null, true},
-            new object?[] {SonarrQualityData.MaxUnlimitedThreshold, null, false},
-            new object?[] {SonarrQualityData.MaxUnlimitedThreshold - 1, null, true},
-            new object?[] {SonarrQualityData.MaxUnlimitedThreshold, SonarrQualityData.MaxUnlimitedThreshold, true}
-        };
+        new object?[] {100m, 100m, false},
+        new object?[] {100m, 101m, true},
+        new object?[] {100m, 98m, true},
+        new object?[] {100m, null, true},
+        new object?[] {SonarrQualityData.MaxUnlimitedThreshold, null, false},
+        new object?[] {SonarrQualityData.MaxUnlimitedThreshold - 1, null, true},
+        new object?[] {SonarrQualityData.MaxUnlimitedThreshold, SonarrQualityData.MaxUnlimitedThreshold, true}
+    };
 
-        private static readonly object[] MinTestValues =
-        {
-            new object?[] {0m, 0m, false},
-            new object?[] {0m, -1m, true},
-            new object?[] {0m, 1m, true}
-        };
+    private static readonly object[] MinTestValues =
+    {
+        new object?[] {0m, 0m, false},
+        new object?[] {0m, -1m, true},
+        new object?[] {0m, 1m, true}
+    };
 
-        [TestCaseSource(nameof(MaxTestValues))]
-        public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
-            bool isDifferent)
-        {
-            var data = new SonarrQualityData {Max = guideValue};
-            data.IsMaxDifferent(radarrValue)
-                .Should().Be(isDifferent);
-        }
+    [TestCaseSource(nameof(MaxTestValues))]
+    public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
+        bool isDifferent)
+    {
+        var data = new SonarrQualityData {Max = guideValue};
+        data.IsMaxDifferent(radarrValue)
+            .Should().Be(isDifferent);
+    }
 
-        [TestCaseSource(nameof(MinTestValues))]
-        public void MinDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal radarrValue,
-            bool isDifferent)
-        {
-            var data = new SonarrQualityData {Min = guideValue};
-            data.IsMinDifferent(radarrValue)
-                .Should().Be(isDifferent);
-        }
+    [TestCaseSource(nameof(MinTestValues))]
+    public void MinDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal radarrValue,
+        bool isDifferent)
+    {
+        var data = new SonarrQualityData {Min = guideValue};
+        data.IsMinDifferent(radarrValue)
+            .Should().Be(isDifferent);
+    }
 
-        [Test]
-        public void AnnotatedMax_OutsideThreshold_EqualsSameValueWithUnlimited()
-        {
-            const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold;
-            var data = new SonarrQualityData {Max = testVal};
-            data.AnnotatedMax.Should().Be($"{testVal} (Unlimited)");
-        }
+    [Test]
+    public void AnnotatedMax_OutsideThreshold_EqualsSameValueWithUnlimited()
+    {
+        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold;
+        var data = new SonarrQualityData {Max = testVal};
+        data.AnnotatedMax.Should().Be($"{testVal} (Unlimited)");
+    }
 
-        [Test]
-        public void AnnotatedMax_WithinThreshold_EqualsSameStringValue()
-        {
-            const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 1;
-            var data = new SonarrQualityData {Max = testVal};
-            data.AnnotatedMax.Should().Be($"{testVal}");
-        }
+    [Test]
+    public void AnnotatedMax_WithinThreshold_EqualsSameStringValue()
+    {
+        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 1;
+        var data = new SonarrQualityData {Max = testVal};
+        data.AnnotatedMax.Should().Be($"{testVal}");
+    }
 
-        [Test]
-        public void AnnotatedMin_NoThreshold_EqualsSameValue()
-        {
-            const decimal testVal = 10m;
-            var data = new SonarrQualityData {Max = testVal};
-            data.AnnotatedMax.Should().Be($"{testVal}");
-        }
+    [Test]
+    public void AnnotatedMin_NoThreshold_EqualsSameValue()
+    {
+        const decimal testVal = 10m;
+        var data = new SonarrQualityData {Max = testVal};
+        data.AnnotatedMax.Should().Be($"{testVal}");
+    }
 
-        [Test]
-        public void Max_AboveThreshold_EqualsSameValue()
-        {
-            const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
-            var data = new SonarrQualityData {Max = testVal};
-            data.Max.Should().Be(testVal);
-        }
+    [Test]
+    public void Max_AboveThreshold_EqualsSameValue()
+    {
+        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
+        var data = new SonarrQualityData {Max = testVal};
+        data.Max.Should().Be(testVal);
+    }
 
-        [Test]
-        public void MaxForApi_AboveThreshold_EqualsNull()
-        {
-            const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
-            var data = new SonarrQualityData {Max = testVal};
-            data.MaxForApi.Should().Be(null);
-        }
+    [Test]
+    public void MaxForApi_AboveThreshold_EqualsNull()
+    {
+        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
+        var data = new SonarrQualityData {Max = testVal};
+        data.MaxForApi.Should().Be(null);
+    }
 
-        [Test]
-        public void MaxForApi_HighestWithinThreshold_EqualsSameValue()
-        {
-            const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 0.1m;
-            var data = new SonarrQualityData {Max = testVal};
-            data.MaxForApi.Should().Be(testVal).And.Be(data.Max);
-        }
+    [Test]
+    public void MaxForApi_HighestWithinThreshold_EqualsSameValue()
+    {
+        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 0.1m;
+        var data = new SonarrQualityData {Max = testVal};
+        data.MaxForApi.Should().Be(testVal).And.Be(data.Max);
+    }
 
-        [Test]
-        public void MaxForApi_LowestWithinThreshold_EqualsSameValue()
-        {
-            var data = new SonarrQualityData {Max = 0};
-            data.MaxForApi.Should().Be(0);
-        }
+    [Test]
+    public void MaxForApi_LowestWithinThreshold_EqualsSameValue()
+    {
+        var data = new SonarrQualityData {Max = 0};
+        data.MaxForApi.Should().Be(0);
     }
 }

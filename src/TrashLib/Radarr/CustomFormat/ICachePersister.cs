@@ -2,13 +2,12 @@ using System.Collections.Generic;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 
-namespace TrashLib.Radarr.CustomFormat
+namespace TrashLib.Radarr.CustomFormat;
+
+public interface ICachePersister
 {
-    public interface ICachePersister
-    {
-        CustomFormatCache? CfCache { get; }
-        void Load();
-        void Save();
-        void Update(IEnumerable<ProcessedCustomFormatData> customFormats);
-    }
+    CustomFormatCache? CfCache { get; }
+    void Load();
+    void Save();
+    void Update(IEnumerable<ProcessedCustomFormatData> customFormats);
 }

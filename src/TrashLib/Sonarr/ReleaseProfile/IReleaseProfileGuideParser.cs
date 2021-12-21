@@ -2,11 +2,10 @@
 using System.Threading.Tasks;
 using TrashLib.Sonarr.Config;
 
-namespace TrashLib.Sonarr.ReleaseProfile
+namespace TrashLib.Sonarr.ReleaseProfile;
+
+public interface IReleaseProfileGuideParser
 {
-    public interface IReleaseProfileGuideParser
-    {
-        Task<string> GetMarkdownData(ReleaseProfileType profileName);
-        IDictionary<string, ProfileData> ParseMarkdown(ReleaseProfileConfig config, string markdown);
-    }
+    Task<string> GetMarkdownData(ReleaseProfileType profileName);
+    IDictionary<string, ProfileData> ParseMarkdown(ReleaseProfileConfig config, string markdown);
 }

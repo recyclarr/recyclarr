@@ -1,8 +1,7 @@
-﻿namespace Trash.Command.Helpers
+﻿namespace Trash.Command.Helpers;
+
+public enum ExitCode
 {
-    public enum ExitCode
-    {
-        Success = 0,
-        Failure = 1
-    }
+    Success = 0,
+    Failure = 1
 }

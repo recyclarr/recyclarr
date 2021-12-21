@@ -1,8 +1,7 @@
-namespace TrashLib.Config
+namespace TrashLib.Config;
+
+public interface IServiceConfiguration
 {
-    public interface IServiceConfiguration
-    {
-        string BaseUrl { get; }
-        string ApiKey { get; }
-    }
+    string BaseUrl { get; }
+    string ApiKey { get; }
 }

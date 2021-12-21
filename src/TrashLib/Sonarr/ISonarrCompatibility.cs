@@ -1,10 +1,9 @@
 using System;
 
-namespace TrashLib.Sonarr
+namespace TrashLib.Sonarr;
+
+public interface ISonarrCompatibility
 {
-    public interface ISonarrCompatibility
-    {
-        IObservable<SonarrCapabilities> Capabilities { get; }
-        Version MinimumVersion { get; }
-    }
+    IObservable<SonarrCapabilities> Capabilities { get; }
+    Version MinimumVersion { get; }
 }

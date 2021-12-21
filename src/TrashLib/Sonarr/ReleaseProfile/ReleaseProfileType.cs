@@ -1,8 +1,7 @@
-﻿namespace TrashLib.Sonarr.ReleaseProfile
+﻿namespace TrashLib.Sonarr.ReleaseProfile;
+
+public enum ReleaseProfileType
 {
-    public enum ReleaseProfileType
-    {
-        Anime,
-        Series
-    }
+    Anime,
+    Series
 }

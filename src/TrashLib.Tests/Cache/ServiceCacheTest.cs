@@ -12,201 +12,200 @@ using TestLibrary.NSubstitute;
 using TrashLib.Cache;
 using TrashLib.Config;
 
-namespace TrashLib.Tests.Cache
+namespace TrashLib.Tests.Cache;
+
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+public class ServiceCacheTest
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    public class ServiceCacheTest
+    private class Context
     {
-        private class Context
+        public Context(IFileSystem? fs = null)
         {
-            public Context(IFileSystem? fs = null)
+            Filesystem = fs ?? Substitute.For<IFileSystem>();
+            StoragePath = Substitute.For<ICacheStoragePath>();
+            ConfigProvider = Substitute.For<IConfigurationProvider>();
+            JsonSettings = new JsonSerializerSettings
             {
-                Filesystem = fs ?? Substitute.For<IFileSystem>();
-                StoragePath = Substitute.For<ICacheStoragePath>();
-                ConfigProvider = Substitute.For<IConfigurationProvider>();
-                JsonSettings = new JsonSerializerSettings
+                Formatting = Formatting.Indented,
+                ContractResolver = new DefaultContractResolver
                 {
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new SnakeCaseNamingStrategy()
-                    }
-                };
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            };
 
-                // Set up a default for the active config's base URL. This is used to generate part of the path
-                ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-                ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
+            // Set up a default for the active config's base URL. This is used to generate part of the path
+            ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
+            ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
 
-                Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
-            }
-
-            public JsonSerializerSettings JsonSettings { get; }
-            public ServiceCache Cache { get; }
-            public IConfigurationProvider ConfigProvider { get; }
-            public ICacheStoragePath StoragePath { get; }
-            public IFileSystem Filesystem { get; }
+            Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
         }
 
-        private class ObjectWithoutAttribute
-        {
-        }
+        public JsonSerializerSettings JsonSettings { get; }
+        public ServiceCache Cache { get; }
+        public IConfigurationProvider ConfigProvider { get; }
+        public ICacheStoragePath StoragePath { get; }
+        public IFileSystem Filesystem { get; }
+    }
 
-        private const string ValidObjectName = "azAZ_09";
+    private class ObjectWithoutAttribute
+    {
+    }
 
-        [CacheObjectName(ValidObjectName)]
-        private class ObjectWithAttribute
-        {
-            public string TestValue { get; init; } = "";
-        }
+    private const string ValidObjectName = "azAZ_09";
 
-        [CacheObjectName("invalid+name")]
-        private class ObjectWithAttributeInvalidChars
-        {
-        }
+    [CacheObjectName(ValidObjectName)]
+    private class ObjectWithAttribute
+    {
+        public string TestValue { get; init; } = "";
+    }
 
-        [Test]
-        public void Load_returns_null_when_file_does_not_exist()
-        {
-            var ctx = new Context();
-            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(false);
+    [CacheObjectName("invalid+name")]
+    private class ObjectWithAttributeInvalidChars
+    {
+    }
 
-            var result = ctx.Cache.Load<ObjectWithAttribute>();
-            result.Should().BeNull();
-        }
+    [Test]
+    public void Load_returns_null_when_file_does_not_exist()
+    {
+        var ctx = new Context();
+        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(false);
 
-        [Test]
-        public void Loading_with_attribute_parses_correctly()
-        {
-            var ctx = new Context();
+        var result = ctx.Cache.Load<ObjectWithAttribute>();
+        result.Should().BeNull();
+    }
 
-            ctx.StoragePath.Path.Returns("testpath");
+    [Test]
+    public void Loading_with_attribute_parses_correctly()
+    {
+        var ctx = new Context();
 
-            dynamic testJson = new {TestValue = "Foo"};
-            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-            ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
-                .Returns(_ => JsonConvert.SerializeObject(testJson));
+        ctx.StoragePath.Path.Returns("testpath");
 
-            var obj = ctx.Cache.Load<ObjectWithAttribute>();
+        dynamic testJson = new {TestValue = "Foo"};
+        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
+        ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
+            .Returns(_ => JsonConvert.SerializeObject(testJson));
 
-            obj.Should().NotBeNull();
-            obj!.TestValue.Should().Be("Foo");
-            ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "be8fbc8f", $"{ValidObjectName}.json"));
-        }
+        var obj = ctx.Cache.Load<ObjectWithAttribute>();
 
-        [Test]
-        public void Loading_with_invalid_object_name_throws()
-        {
-            var ctx = new Context();
+        obj.Should().NotBeNull();
+        obj!.TestValue.Should().Be("Foo");
+        ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "be8fbc8f", $"{ValidObjectName}.json"));
+    }
 
-            Action act = () => ctx.Cache.Load<ObjectWithAttributeInvalidChars>();
+    [Test]
+    public void Loading_with_invalid_object_name_throws()
+    {
+        var ctx = new Context();
 
-            act.Should()
-                .Throw<ArgumentException>()
-                .WithMessage("*'invalid+name' has unacceptable characters*");
-        }
+        Action act = () => ctx.Cache.Load<ObjectWithAttributeInvalidChars>();
 
-        [Test]
-        public void Loading_without_attribute_throws()
-        {
-            var ctx = new Context();
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("*'invalid+name' has unacceptable characters*");
+    }
 
-            Action act = () => ctx.Cache.Load<ObjectWithoutAttribute>();
+    [Test]
+    public void Loading_without_attribute_throws()
+    {
+        var ctx = new Context();
 
-            act.Should()
-                .Throw<ArgumentException>()
-                .WithMessage("CacheObjectNameAttribute is missing*");
-        }
+        Action act = () => ctx.Cache.Load<ObjectWithoutAttribute>();
 
-        [Test]
-        public void Properties_are_saved_using_snake_case()
-        {
-            var ctx = new Context();
-            ctx.StoragePath.Path.Returns("testpath");
-            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("CacheObjectNameAttribute is missing*");
+    }
 
-            ctx.Filesystem.File.Received()
-                .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
-        }
+    [Test]
+    public void Properties_are_saved_using_snake_case()
+    {
+        var ctx = new Context();
+        ctx.StoragePath.Path.Returns("testpath");
+        ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-        [Test]
-        public void Saving_with_attribute_parses_correctly()
-        {
-            var ctx = new Context();
+        ctx.Filesystem.File.Received()
+            .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
+    }
 
-            ctx.StoragePath.Path.Returns("testpath");
+    [Test]
+    public void Saving_with_attribute_parses_correctly()
+    {
+        var ctx = new Context();
 
-            ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        ctx.StoragePath.Path.Returns("testpath");
 
-            var expectedParentDirectory = Path.Combine("testpath", "be8fbc8f");
-            ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
+        ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-            dynamic expectedJson = new {TestValue = "Foo"};
-            var expectedPath = Path.Combine(expectedParentDirectory, $"{ValidObjectName}.json");
-            ctx.Filesystem.File.Received()
-                .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, ctx.JsonSettings));
-        }
+        var expectedParentDirectory = Path.Combine("testpath", "be8fbc8f");
+        ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
 
-        [Test]
-        public void Saving_with_invalid_object_name_throws()
-        {
-            var ctx = new Context();
+        dynamic expectedJson = new {TestValue = "Foo"};
+        var expectedPath = Path.Combine(expectedParentDirectory, $"{ValidObjectName}.json");
+        ctx.Filesystem.File.Received()
+            .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, ctx.JsonSettings));
+    }
 
-            Action act = () => ctx.Cache.Save(new ObjectWithAttributeInvalidChars());
+    [Test]
+    public void Saving_with_invalid_object_name_throws()
+    {
+        var ctx = new Context();
 
-            act.Should()
-                .Throw<ArgumentException>()
-                .WithMessage("*'invalid+name' has unacceptable characters*");
-        }
+        var act = () => ctx.Cache.Save(new ObjectWithAttributeInvalidChars());
 
-        [Test]
-        public void Saving_without_attribute_throws()
-        {
-            var ctx = new Context();
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("*'invalid+name' has unacceptable characters*");
+    }
 
-            Action act = () => ctx.Cache.Save(new ObjectWithoutAttribute());
+    [Test]
+    public void Saving_without_attribute_throws()
+    {
+        var ctx = new Context();
 
-            act.Should()
-                .Throw<ArgumentException>()
-                .WithMessage("CacheObjectNameAttribute is missing*");
-        }
+        var act = () => ctx.Cache.Save(new ObjectWithoutAttribute());
 
-        [Test]
-        public void Switching_config_and_base_url_should_yield_different_cache_paths()
-        {
-            var ctx = new Context();
-            ctx.StoragePath.Path.Returns("testpath");
+        act.Should()
+            .Throw<ArgumentException>()
+            .WithMessage("CacheObjectNameAttribute is missing*");
+    }
 
-            var actualPaths = new List<string>();
+    [Test]
+    public void Switching_config_and_base_url_should_yield_different_cache_paths()
+    {
+        var ctx = new Context();
+        ctx.StoragePath.Path.Returns("testpath");
 
-            dynamic testJson = new {TestValue = "Foo"};
-            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-            ctx.Filesystem.File.ReadAllText(Arg.Do<string>(s => actualPaths.Add(s)))
-                .Returns(_ => JsonConvert.SerializeObject(testJson));
+        var actualPaths = new List<string>();
 
-            ctx.Cache.Load<ObjectWithAttribute>();
+        dynamic testJson = new {TestValue = "Foo"};
+        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
+        ctx.Filesystem.File.ReadAllText(Arg.Do<string>(s => actualPaths.Add(s)))
+            .Returns(_ => JsonConvert.SerializeObject(testJson));
 
-            // Change the active config & base URL so we get a different path
-            ctx.ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-            ctx.ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
+        ctx.Cache.Load<ObjectWithAttribute>();
 
-            ctx.Cache.Load<ObjectWithAttribute>();
+        // Change the active config & base URL so we get a different path
+        ctx.ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
+        ctx.ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
 
-            actualPaths.Count.Should().Be(2);
-            actualPaths.Should().OnlyHaveUniqueItems();
-        }
+        ctx.Cache.Load<ObjectWithAttribute>();
 
-        [Test]
-        public void When_cache_file_is_empty_do_not_throw()
-        {
-            var ctx = new Context();
-            ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-            ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
-                .Returns(_ => "");
+        actualPaths.Count.Should().Be(2);
+        actualPaths.Should().OnlyHaveUniqueItems();
+    }
 
-            Action act = () => ctx.Cache.Load<ObjectWithAttribute>();
+    [Test]
+    public void When_cache_file_is_empty_do_not_throw()
+    {
+        var ctx = new Context();
+        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
+        ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
+            .Returns(_ => "");
 
-            act.Should().NotThrow();
-        }
+        Action act = () => ctx.Cache.Load<ObjectWithAttribute>();
+
+        act.Should().NotThrow();
     }
 }

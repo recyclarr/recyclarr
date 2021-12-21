@@ -4,33 +4,32 @@ using Flurl.Http;
 using TrashLib.Config;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
 
-namespace TrashLib.Radarr.QualityDefinition.Api
+namespace TrashLib.Radarr.QualityDefinition.Api;
+
+internal class QualityDefinitionService : IQualityDefinitionService
 {
-    internal class QualityDefinitionService : IQualityDefinitionService
+    private readonly IServerInfo _serverInfo;
+
+    public QualityDefinitionService(IServerInfo serverInfo)
     {
-        private readonly IServerInfo _serverInfo;
-
-        public QualityDefinitionService(IServerInfo serverInfo)
-        {
-            _serverInfo = serverInfo;
-        }
-
-        public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
-        {
-            return await BuildRequest()
-                .AppendPathSegment("qualitydefinition")
-                .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
-        }
-
-        public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
-            IList<RadarrQualityDefinitionItem> newQuality)
-        {
-            return await BuildRequest()
-                .AppendPathSegment("qualityDefinition/update")
-                .PutJsonAsync(newQuality)
-                .ReceiveJson<List<RadarrQualityDefinitionItem>>();
-        }
-
-        private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
+        _serverInfo = serverInfo;
     }
+
+    public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
+    {
+        return await BuildRequest()
+            .AppendPathSegment("qualitydefinition")
+            .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
+    }
+
+    public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
+        IList<RadarrQualityDefinitionItem> newQuality)
+    {
+        return await BuildRequest()
+            .AppendPathSegment("qualityDefinition/update")
+            .PutJsonAsync(newQuality)
+            .ReceiveJson<List<RadarrQualityDefinitionItem>>();
+    }
+
+    private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
 }

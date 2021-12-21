@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Trash.Command.Helpers
+namespace Trash.Command.Helpers;
+
+public interface IServiceCommand
 {
-    public interface IServiceCommand
-    {
-        bool Preview { get; }
-        bool Debug { get; }
-        ICollection<string>? Config { get; }
-        string CacheStoragePath { get; }
-    }
+    bool Preview { get; }
+    bool Debug { get; }
+    ICollection<string>? Config { get; }
+    string CacheStoragePath { get; }
 }

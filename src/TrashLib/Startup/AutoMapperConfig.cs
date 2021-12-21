@@ -1,22 +1,21 @@
 using AutoMapper;
 
-namespace TrashLib.Startup
+namespace TrashLib.Startup;
+
+public static class AutoMapperConfig
 {
-    public static class AutoMapperConfig
+    public static IMapper Setup()
     {
-        public static IMapper Setup()
+        // todo: consider using AutoMapper.Contrib.Autofac.DependencyInjection
+        var mapperConfig = new MapperConfiguration(cfg =>
         {
-            // todo: consider using AutoMapper.Contrib.Autofac.DependencyInjection
-            var mapperConfig = new MapperConfiguration(cfg =>
-            {
-                cfg.AddMaps(typeof(AutoMapperConfig));
-            });
+            cfg.AddMaps(typeof(AutoMapperConfig));
+        });
 
 #if DEBUG
-            mapperConfig.AssertConfigurationIsValid();
+        mapperConfig.AssertConfigurationIsValid();
 #endif
 
-            return mapperConfig.CreateMapper();
-        }
+        return mapperConfig.CreateMapper();
     }
 }

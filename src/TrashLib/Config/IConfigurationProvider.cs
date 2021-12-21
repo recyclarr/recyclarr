@@ -1,7 +1,6 @@
-﻿namespace TrashLib.Config
+﻿namespace TrashLib.Config;
+
+public interface IConfigurationProvider
 {
-    public interface IConfigurationProvider
-    {
-        IServiceConfiguration ActiveConfiguration { get; set; }
-    }
+    IServiceConfiguration ActiveConfiguration { get; set; }
 }

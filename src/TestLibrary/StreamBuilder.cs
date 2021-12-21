@@ -1,14 +1,13 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace TestLibrary
+namespace TestLibrary;
+
+public static class StreamBuilder
 {
-    public static class StreamBuilder
+    public static StreamReader FromString(string data)
     {
-        public static StreamReader FromString(string data)
-        {
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(data));
-            return new StreamReader(stream);
-        }
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(data));
+        return new StreamReader(stream);
     }
 }

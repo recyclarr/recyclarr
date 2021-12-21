@@ -1,16 +1,15 @@
 ﻿using TrashLib.Cache;
 
-namespace Trash.Command.Helpers
+namespace Trash.Command.Helpers;
+
+public class CacheStoragePath : ICacheStoragePath
 {
-    public class CacheStoragePath : ICacheStoragePath
+    private readonly IActiveServiceCommandProvider _serviceCommandProvider;
+
+    public CacheStoragePath(IActiveServiceCommandProvider serviceCommandProvider)
     {
-        private readonly IActiveServiceCommandProvider _serviceCommandProvider;
-
-        public CacheStoragePath(IActiveServiceCommandProvider serviceCommandProvider)
-        {
-            _serviceCommandProvider = serviceCommandProvider;
-        }
-
-        public string Path => _serviceCommandProvider.ActiveCommand.CacheStoragePath;
+        _serviceCommandProvider = serviceCommandProvider;
     }
+
+    public string Path => _serviceCommandProvider.ActiveCommand.CacheStoragePath;
 }

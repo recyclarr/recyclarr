@@ -11,91 +11,90 @@ using Newtonsoft.Json.Serialization;
 using Serilog;
 using TrashLib.Config;
 
-namespace TrashLib.Cache
+namespace TrashLib.Cache;
+
+internal class ServiceCache : IServiceCache
 {
-    internal class ServiceCache : IServiceCache
+    private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
+    private readonly IConfigurationProvider _configProvider;
+    private readonly IFileSystem _fileSystem;
+    private readonly IFNV1a _hash;
+    private readonly ICacheStoragePath _storagePath;
+
+    public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath,
+        IConfigurationProvider configProvider,
+        ILogger log)
     {
-        private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
-        private readonly IConfigurationProvider _configProvider;
-        private readonly IFileSystem _fileSystem;
-        private readonly IFNV1a _hash;
-        private readonly ICacheStoragePath _storagePath;
+        _fileSystem = fileSystem;
+        _storagePath = storagePath;
+        _configProvider = configProvider;
+        Log = log;
+        _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
+    }
 
-        public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath,
-            IConfigurationProvider configProvider,
-            ILogger log)
+    private ILogger Log { get; }
+
+    public T? Load<T>() where T : class
+    {
+        var path = PathFromAttribute<T>();
+        if (!_fileSystem.File.Exists(path))
         {
-            _fileSystem = fileSystem;
-            _storagePath = storagePath;
-            _configProvider = configProvider;
-            Log = log;
-            _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
-        }
-
-        private ILogger Log { get; }
-
-        public T? Load<T>() where T : class
-        {
-            var path = PathFromAttribute<T>();
-            if (!_fileSystem.File.Exists(path))
-            {
-                return null;
-            }
-
-            var json = _fileSystem.File.ReadAllText(path);
-
-            try
-            {
-                return JObject.Parse(json).ToObject<T>();
-            }
-            catch (JsonException e)
-            {
-                Log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
-            }
-
             return null;
         }
 
-        public void Save<T>(T obj) where T : class
+        var json = _fileSystem.File.ReadAllText(path);
+
+        try
         {
-            var path = PathFromAttribute<T>();
-            _fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(path));
-            _fileSystem.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            }));
+            return JObject.Parse(json).ToObject<T>();
+        }
+        catch (JsonException e)
+        {
+            Log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
         }
 
-        private static string GetCacheObjectNameAttribute<T>()
+        return null;
+    }
+
+    public void Save<T>(T obj) where T : class
+    {
+        var path = PathFromAttribute<T>();
+        _fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(path));
+        _fileSystem.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings
         {
-            var attribute = typeof(T).GetCustomAttribute<CacheObjectNameAttribute>();
-            if (attribute == null)
+            Formatting = Formatting.Indented,
+            ContractResolver = new DefaultContractResolver
             {
-                throw new ArgumentException($"{nameof(CacheObjectNameAttribute)} is missing on type {nameof(T)}");
+                NamingStrategy = new SnakeCaseNamingStrategy()
             }
+        }));
+    }
 
-            return attribute.Name;
-        }
-
-        private string BuildServiceGuid()
+    private static string GetCacheObjectNameAttribute<T>()
+    {
+        var attribute = typeof(T).GetCustomAttribute<CacheObjectNameAttribute>();
+        if (attribute == null)
         {
-            return _hash.ComputeHash(Encoding.ASCII.GetBytes(_configProvider.ActiveConfiguration.BaseUrl))
-                .AsHexString();
+            throw new ArgumentException($"{nameof(CacheObjectNameAttribute)} is missing on type {nameof(T)}");
         }
 
-        private string PathFromAttribute<T>()
+        return attribute.Name;
+    }
+
+    private string BuildServiceGuid()
+    {
+        return _hash.ComputeHash(Encoding.ASCII.GetBytes(_configProvider.ActiveConfiguration.BaseUrl))
+            .AsHexString();
+    }
+
+    private string PathFromAttribute<T>()
+    {
+        var objectName = GetCacheObjectNameAttribute<T>();
+        if (!AllowedObjectNameCharacters.IsMatch(objectName))
         {
-            var objectName = GetCacheObjectNameAttribute<T>();
-            if (!AllowedObjectNameCharacters.IsMatch(objectName))
-            {
-                throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
-            }
-
-            return Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
+            throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
+
+        return Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
     }
 }
