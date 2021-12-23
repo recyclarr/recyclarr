@@ -36,14 +36,14 @@
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <PackageReference Include="AutofacContrib.NSubstitute" />
-    <PackageReference Include="FluentAssertions.Json" />
     <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="FluentAssertions.Json" />
     <PackageReference Include="GitHubActionsTestLogger" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="NSubstitute.Analyzers.CSharp" />
     <PackageReference Include="NSubstitute" />
-    <PackageReference Include="NUnit.Analyzers" />
+    <PackageReference Include="NSubstitute.Analyzers.CSharp" />
     <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers" />
     <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Serilog.Sinks.NUnit" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" />
