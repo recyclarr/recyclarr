@@ -16,6 +16,7 @@ using TrashLib.Radarr;
 using TrashLib.Radarr.Config;
 using TrashLib.Sonarr;
 using TrashLib.Startup;
+using VersionControl;
 using YamlDotNet.Serialization;
 
 namespace Trash;
@@ -92,6 +93,7 @@ public static class CompositionRoot
 
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
+        builder.RegisterModule<VersionControlAutofacModule>();
 
         builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
 

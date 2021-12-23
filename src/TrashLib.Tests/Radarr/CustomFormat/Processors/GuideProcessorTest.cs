@@ -6,7 +6,6 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
-using Serilog;
 using TestLibrary.FluentAssertions;
 using Trash.TestLibrary;
 using TrashLib.Radarr.Config;
@@ -32,16 +31,9 @@ public class GuideProcessorTest
     {
         public Context()
         {
-            Logger = new LoggerConfiguration()
-                .WriteTo.TestCorrelator()
-                .WriteTo.NUnitOutput()
-                .MinimumLevel.Debug()
-                .CreateLogger();
-
             Data = new ResourceDataReader(typeof(GuideProcessorTest), "Data");
         }
 
-        public ILogger Logger { get; }
         public ResourceDataReader Data { get; }
 
         public string ReadText(string textFile) => Data.ReadData(textFile);
@@ -54,10 +46,10 @@ public class GuideProcessorTest
     {
         var ctx = new Context();
         var guideService = Substitute.For<IRadarrGuideService>();
-        var guideProcessor = new GuideProcessor(ctx.Logger, guideService, () => new TestGuideProcessorSteps());
+        var guideProcessor = new GuideProcessor(guideService, () => new TestGuideProcessorSteps());
 
         // simulate guide data
-        guideService.GetCustomFormatJsonAsync().Returns(new[]
+        guideService.GetCustomFormatJson().Returns(new[]
         {
             ctx.ReadText("ImportableCustomFormat1.json"),
             ctx.ReadText("ImportableCustomFormat2.json"),

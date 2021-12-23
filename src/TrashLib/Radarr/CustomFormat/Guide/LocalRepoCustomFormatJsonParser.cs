@@ -1,82 +1,86 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using LibGit2Sharp;
 using Serilog;
 using TrashLib.Config.Settings;
 using TrashLib.Radarr.Config;
+using VersionControl;
 
-namespace TrashLib.Radarr.CustomFormat.Guide
+namespace TrashLib.Radarr.CustomFormat.Guide;
+
+internal class LocalRepoCustomFormatJsonParser : IRadarrGuideService
 {
-    internal class LocalRepoCustomFormatJsonParser : IRadarrGuideService
+    private readonly ILogger _log;
+    private readonly IFileSystem _fileSystem;
+    private readonly IGitRepositoryFactory _repositoryFactory;
+    private readonly IFileUtilities _fileUtils;
+    private readonly ISettingsProvider _settingsProvider;
+    private readonly string _repoPath;
+
+    public LocalRepoCustomFormatJsonParser(
+        ILogger log,
+        IFileSystem fileSystem,
+        IResourcePaths paths,
+        IGitRepositoryFactory repositoryFactory,
+        IFileUtilities fileUtils,
+        ISettingsProvider settingsProvider)
     {
-        private readonly IFileSystem _fileSystem;
-        private readonly ISettingsProvider _settings;
-        private readonly ILogger _log;
-        private readonly string _repoPath;
+        _log = log;
+        _fileSystem = fileSystem;
+        _repositoryFactory = repositoryFactory;
+        _fileUtils = fileUtils;
+        _settingsProvider = settingsProvider;
+        _repoPath = paths.RepoPath;
+    }
 
-        public LocalRepoCustomFormatJsonParser(
-            IFileSystem fileSystem,
-            IResourcePaths paths,
-            ISettingsProvider settings,
-            ILogger log)
+    public IEnumerable<string> GetCustomFormatJson()
+    {
+        // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
+        // fresh.
+        var exception = CheckoutAndUpdateRepo();
+        if (exception is not null)
         {
-            _fileSystem = fileSystem;
-            _settings = settings;
-            _log = log;
-            _repoPath = paths.RepoPath;
-        }
+            _log.Information("Deleting local git repo and retrying git operation...");
+            _fileUtils.DeleteReadOnlyDirectory(_repoPath);
 
-        public async Task<IEnumerable<string>> GetCustomFormatJsonAsync()
-        {
-            CloneOrUpdateGitRepo();
-
-            var jsonDir = Path.Combine(_repoPath, "docs/json/radarr");
-            var tasks = _fileSystem.Directory.GetFiles(jsonDir, "*.json")
-                .Select(async f => await _fileSystem.File.ReadAllTextAsync(f));
-
-            return await Task.WhenAll(tasks);
-        }
-
-        private void CloneOrUpdateGitRepo()
-        {
-            var cloneUrl = _settings.Settings.Repository.CloneUrl;
-
-            if (!Repository.IsValid(_repoPath))
+            exception = CheckoutAndUpdateRepo();
+            if (exception is not null)
             {
-                if (_fileSystem.Directory.Exists(_repoPath))
-                {
-                    _fileSystem.Directory.Delete(_repoPath, true);
-                }
-
-                Repository.Clone(cloneUrl, _repoPath, new CloneOptions
-                {
-                    RecurseSubmodules = false
-                });
+                throw exception;
             }
-
-            using var repo = new Repository(_repoPath);
-            Commands.Checkout(repo, "master", new CheckoutOptions
-            {
-                CheckoutModifiers = CheckoutModifiers.Force
-            });
-
-            var origin = repo.Network.Remotes["origin"];
-            if (origin.Url != cloneUrl)
-            {
-                _log.Debug(
-                    "Origin's URL ({OriginUrl}) does not match the clone URL from settings ({CloneUrl}) and will be updated",
-                    origin.Url, cloneUrl);
-
-                repo.Network.Remotes.Update("origin", updater => updater.Url = cloneUrl);
-                origin = repo.Network.Remotes["origin"];
-            }
-
-            Commands.Fetch(repo, origin.Name, origin.FetchRefSpecs.Select(s => s.Specification), null, "");
-
-            repo.Reset(ResetMode.Hard, repo.Branches["origin/master"].Tip);
         }
+
+        var jsonDir = Path.Combine(_repoPath, "docs/json/radarr");
+        var tasks = _fileSystem.Directory.GetFiles(jsonDir, "*.json")
+            .Select(async f => await _fileSystem.File.ReadAllTextAsync(f));
+
+        return Task.WhenAll(tasks).Result;
+    }
+
+    private Exception? CheckoutAndUpdateRepo()
+    {
+        var repoSettings = _settingsProvider.Settings.Repository;
+        var cloneUrl = repoSettings.CloneUrl;
+        const string branch = "master";
+
+        try
+        {
+            using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, _repoPath, branch);
+            repo.ForceCheckout(branch);
+            repo.Fetch();
+            repo.ResetHard($"origin/{branch}");
+        }
+        catch (LibGit2SharpException e)
+        {
+            _log.Error(e, "An exception occurred during git operations on path: {RepoPath}", _repoPath);
+            return e;
+        }
+
+        return null;
     }
 }

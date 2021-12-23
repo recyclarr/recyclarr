@@ -16,14 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Schema added for `settings.yml`.
 - Add setting to bypass HTTPS certificate validation (useful for self-signed certificates used with
   Sonarr and Radarr instances) ([#20]).
-
-[setref]: https://github.com/rcdailey/trash-updater/wiki/Settings-Reference
-[#20]: https://github.com/rcdailey/trash-updater/issues/20
+- A progress bar that is visible when pulling down Custom Formats (Radarr Only).
 
 ### Fixed
 
 - Remove `System.Reactive.xml` from the published ZIP files.
 - Fix exception that may occur at startup.
+- Sometimes the "Requesting and parsing guide markdown" step would appear stuck and fail after
+  several minutes. Many changes have been made to try to alleviate this.
+
+[setref]: https://github.com/rcdailey/trash-updater/wiki/Settings-Reference
+[#20]: https://github.com/rcdailey/trash-updater/issues/20
 
 ## [1.6.6] - 2021-10-30
 

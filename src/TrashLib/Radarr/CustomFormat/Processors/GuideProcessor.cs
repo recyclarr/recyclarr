@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Serilog;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
@@ -25,15 +24,12 @@ internal class GuideProcessor : IGuideProcessor
     private IList<string>? _guideCustomFormatJson;
     private IGuideProcessorSteps _steps;
 
-    public GuideProcessor(ILogger log, IRadarrGuideService guideService, Func<IGuideProcessorSteps> stepsFactory)
+    public GuideProcessor(IRadarrGuideService guideService, Func<IGuideProcessorSteps> stepsFactory)
     {
         _guideService = guideService;
         _stepsFactory = stepsFactory;
-        Log = log;
         _steps = stepsFactory();
     }
-
-    private ILogger Log { get; }
 
     public IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats
         => _steps.CustomFormat.ProcessedCustomFormats;
@@ -59,12 +55,11 @@ internal class GuideProcessor : IGuideProcessor
     public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
         => _steps.CustomFormat.DuplicatedCustomFormats;
 
-    public async Task BuildGuideDataAsync(IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
+    public Task BuildGuideDataAsync(IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
     {
         if (_guideCustomFormatJson == null)
         {
-            Log.Information("Requesting and parsing guide markdown");
-            _guideCustomFormatJson = (await _guideService.GetCustomFormatJsonAsync()).ToList();
+            _guideCustomFormatJson = _guideService.GetCustomFormatJson().ToList();
         }
 
         // Step 1: Process and filter the custom formats from the guide.
@@ -84,6 +79,8 @@ internal class GuideProcessor : IGuideProcessor
         // Score precedence logic is utilized here to decide the CF score per profile (same CF can actually have
         // different scores depending on which profile it goes into).
         _steps.QualityProfile.Process(_steps.Config.ConfigData);
+
+        return Task.CompletedTask;
     }
 
     public void Reset()
