@@ -2,10 +2,13 @@
   <PropertyGroup>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" />
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.AutoNSubstitute" />
+    <PackageReference Include="AutoFixture.NUnit3" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="FluentAssertions.Json" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="NUnit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />

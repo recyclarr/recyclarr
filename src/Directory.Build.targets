@@ -1,5 +1,8 @@
 <Project>
   <ItemGroup>
+    <PackageReference Update="AutoFixture" Version="4.*" />
+    <PackageReference Update="AutoFixture.AutoNSubstitute" Version="4.*" />
+    <PackageReference Update="AutoFixture.NUnit3" Version="4.*" />
     <PackageReference Update="AutoMapper" Version="10.*" />
     <PackageReference Update="Autofac" Version="6.*" />
     <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />

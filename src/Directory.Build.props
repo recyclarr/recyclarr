@@ -35,6 +35,9 @@
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.AutoNSubstitute" />
+    <PackageReference Include="AutoFixture.NUnit3" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="FluentAssertions.Json" />
