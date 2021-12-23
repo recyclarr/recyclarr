@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api;

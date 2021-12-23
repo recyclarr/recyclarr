@@ -1,4 +1,4 @@
-namespace TrashLib.Config;
+namespace TrashLib.Config.Services;
 
 public interface IServiceConfiguration
 {

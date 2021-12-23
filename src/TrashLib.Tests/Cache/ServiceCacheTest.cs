@@ -11,6 +11,7 @@ using Serilog;
 using TestLibrary.NSubstitute;
 using TrashLib.Cache;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 
 namespace TrashLib.Tests.Cache;
 

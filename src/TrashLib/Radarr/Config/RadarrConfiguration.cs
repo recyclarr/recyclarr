@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition;
 
 namespace TrashLib.Radarr.Config;

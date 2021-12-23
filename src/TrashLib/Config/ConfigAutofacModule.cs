@@ -1,6 +1,7 @@
 using System.Reflection;
 using Autofac;
 using FluentValidation;
+using TrashLib.Config.Services;
 using Module = Autofac.Module;
 
 namespace TrashLib.Config;

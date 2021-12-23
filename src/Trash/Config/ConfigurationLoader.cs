@@ -5,6 +5,7 @@ using System.Linq;
 using Common.YamlDotNet;
 using FluentValidation;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Flurl.Http;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
 
 namespace TrashLib.Radarr.QualityDefinition.Api;

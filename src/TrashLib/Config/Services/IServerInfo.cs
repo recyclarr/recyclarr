@@ -1,6 +1,6 @@
 using Flurl.Http;
 
-namespace TrashLib.Config;
+namespace TrashLib.Config.Services;
 
 public interface IServerInfo
 {

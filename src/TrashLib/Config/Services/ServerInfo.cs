@@ -3,7 +3,7 @@ using Flurl.Http;
 using Serilog;
 using TrashLib.Extensions;
 
-namespace TrashLib.Config;
+namespace TrashLib.Config.Services;
 
 internal class ServerInfo : IServerInfo
 {

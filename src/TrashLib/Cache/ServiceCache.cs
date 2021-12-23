@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 
 namespace TrashLib.Cache;
 

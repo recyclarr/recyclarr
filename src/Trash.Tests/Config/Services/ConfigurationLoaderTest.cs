@@ -15,6 +15,7 @@ using NUnit.Framework;
 using TestLibrary;
 using Trash.Config;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 using YamlDotNet.Serialization.ObjectFactories;
