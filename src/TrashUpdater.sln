@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib", "TrashLib\TrashL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib.Tests", "TrashLib.Tests\TrashLib.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl", "VersionControl\VersionControl.csproj", "{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl.Tests", "VersionControl.Tests\VersionControl.Tests.csproj", "{F81C7EA3-4ACA-4171-8A60-531F129A33C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +71,14 @@ Global
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

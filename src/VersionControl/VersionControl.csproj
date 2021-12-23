@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+</Project>
