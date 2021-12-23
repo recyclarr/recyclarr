@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New settings file to control non-service specific behavior of Trash Updater. See [the
+  documentation](setref) for more information.
+- Trash git repository URL can be overridden in settings.
+
+[setref]: https://github.com/rcdailey/trash-updater/wiki/Settings-Reference
+
 ### Fixed
 
 - Remove `System.Reactive.xml` from the published ZIP files.

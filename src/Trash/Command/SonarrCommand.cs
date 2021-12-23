@@ -6,8 +6,8 @@ using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
 using Serilog.Core;
-using Trash.Command.Helpers;
 using Trash.Config;
+using TrashLib.Config.Settings;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
@@ -27,10 +27,11 @@ public class SonarrCommand : ServiceCommand
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
+        ISettingsPersister settingsPersister,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
         Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister)
     {
         _log = log;
         _configLoader = configLoader;

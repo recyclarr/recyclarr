@@ -42,7 +42,7 @@ public class ConfigurationLoaderTest
     {
         var builder = new ContainerBuilder();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
-        builder.RegisterType<YamlDeserializerFactory>().As<IYamlDeserializerFactory>();
+        builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         return builder.Build();
     }
 

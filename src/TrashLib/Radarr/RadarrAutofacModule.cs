@@ -1,6 +1,5 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
-using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;

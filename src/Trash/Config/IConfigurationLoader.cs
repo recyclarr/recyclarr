@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using TrashLib.Config;
 using TrashLib.Config.Services;
 
 namespace Trash.Config;

@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using Autofac;
 using AutoFixture.Kernel;

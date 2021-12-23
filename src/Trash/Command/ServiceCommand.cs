@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using YamlDotNet.Core;
 
@@ -22,20 +23,24 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
     private readonly ILogger _log;
     private readonly LoggingLevelSwitch _loggingLevelSwitch;
     private readonly ILogJanitor _logJanitor;
+    private readonly ISettingsPersister _settingsPersister;
 
     protected ServiceCommand(
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
-        ILogJanitor logJanitor)
+        ILogJanitor logJanitor,
+        ISettingsPersister settingsPersister)
     {
         _loggingLevelSwitch = loggingLevelSwitch;
         _logJanitor = logJanitor;
+        _settingsPersister = settingsPersister;
         _log = log;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
         SetupLogging();
+        LoadSettings();
         SetupHttp();
 
         try
@@ -63,6 +68,11 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         {
             CleanupOldLogFiles();
         }
+    }
+
+    private void LoadSettings()
+    {
+        _settingsPersister.Load();
     }
 
     [CommandOption("preview", 'p', Description =

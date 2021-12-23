@@ -10,6 +10,8 @@ internal static class AppPaths
 
     public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "trash.yml");
 
+    public static string DefaultSettingsPath { get; } = Path.Combine(AppDataPath, "settings.yml");
+
     public static string LogDirectory { get; } = Path.Combine(AppDataPath, "logs");
 
     public static string RepoDirectory { get; } = Path.Combine(AppDataPath, "repo");

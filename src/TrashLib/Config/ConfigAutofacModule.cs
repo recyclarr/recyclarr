@@ -2,6 +2,7 @@ using System.Reflection;
 using Autofac;
 using FluentValidation;
 using TrashLib.Config.Services;
+using TrashLib.Config.Settings;
 using Module = Autofac.Module;
 
 namespace TrashLib.Config;
@@ -10,14 +11,13 @@ public class ConfigAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<ConfigurationProvider>()
-            .As<IConfigurationProvider>()
-            .SingleInstance();
-
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AsClosedTypesOf(typeof(IValidator<>))
             .AsImplementedInterfaces();
 
-        builder.RegisterType<YamlDeserializerFactory>().As<IYamlDeserializerFactory>();
+        builder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().SingleInstance();
+        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
+        builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
+        builder.RegisterType<SettingsPersister>().As<ISettingsPersister>();
     }
 }

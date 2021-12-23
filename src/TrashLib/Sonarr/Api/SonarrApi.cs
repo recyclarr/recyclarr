@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using Serilog;
-using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Extensions;
 using TrashLib.Sonarr.Api.Objects;

@@ -6,8 +6,8 @@ using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
 using Serilog.Core;
-using Trash.Command.Helpers;
 using Trash.Config;
+using TrashLib.Config.Settings;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.QualityDefinition;
@@ -27,10 +27,11 @@ public class RadarrCommand : ServiceCommand
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
+        ISettingsPersister settingsPersister,
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
         Func<ICustomFormatUpdater> customFormatUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister)
     {
         _log = log;
         _configLoader = configLoader;

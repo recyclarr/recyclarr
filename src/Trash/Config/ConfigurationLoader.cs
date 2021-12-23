@@ -22,13 +22,13 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
     public ConfigurationLoader(
         IConfigurationProvider configProvider,
         IFileSystem fileSystem,
-        IYamlDeserializerFactory yamlFactory,
+        IYamlSerializerFactory yamlFactory,
         IValidator<T> validator)
     {
         _configProvider = configProvider;
         _fileSystem = fileSystem;
         _validator = validator;
-        _deserializer = yamlFactory.Create();
+        _deserializer = yamlFactory.CreateDeserializer();
     }
 
     public IEnumerable<T> Load(string propertyName, string configSection)

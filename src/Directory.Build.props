@@ -38,10 +38,11 @@
   </PropertyGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+    <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
     <PackageReference Include="AutoFixture" PrivateAssets="All" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="All" />
     <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="All" />
-    <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
+    <PackageReference Include="coverlet.collector" PrivateAssets="All" />
     <PackageReference Include="FluentAssertions" PrivateAssets="All" />
     <PackageReference Include="FluentAssertions.Json" PrivateAssets="All" />
     <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
@@ -53,7 +54,7 @@
     <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
-    <PackageReference Include="coverlet.collector" PrivateAssets="All" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
