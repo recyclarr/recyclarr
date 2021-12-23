@@ -2,14 +2,12 @@
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
-using Common.YamlDotNet;
 using FluentValidation;
 using TrashLib.Config;
 using TrashLib.Config.Services;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Trash.Config;
 
@@ -24,18 +22,13 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
     public ConfigurationLoader(
         IConfigurationProvider configProvider,
         IFileSystem fileSystem,
-        IObjectFactory objectFactory,
+        IYamlDeserializerFactory yamlFactory,
         IValidator<T> validator)
     {
         _configProvider = configProvider;
         _fileSystem = fileSystem;
         _validator = validator;
-        _deserializer = new DeserializerBuilder()
-            .IgnoreUnmatchedProperties()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .WithTypeConverter(new YamlNullableEnumTypeConverter())
-            .WithObjectFactory(objectFactory)
-            .Build();
+        _deserializer = yamlFactory.Create();
     }
 
     public IEnumerable<T> Load(string propertyName, string configSection)

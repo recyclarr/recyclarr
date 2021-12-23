@@ -17,5 +17,7 @@ public class ConfigAutofacModule : Module
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AsClosedTypesOf(typeof(IValidator<>))
             .AsImplementedInterfaces();
+
+        builder.RegisterType<YamlDeserializerFactory>().As<IYamlDeserializerFactory>();
     }
 }
