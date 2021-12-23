@@ -5,6 +5,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Core.Activators.Reflection;
 using CliFx;
+using Common;
 using Serilog;
 using Serilog.Core;
 using Trash.Command.Helpers;
@@ -79,6 +80,7 @@ public static class CompositionRoot
     public static IContainer Setup(ContainerBuilder builder)
     {
         builder.RegisterType<FileSystem>().As<IFileSystem>();
+        builder.RegisterType<FileUtilities>().As<IFileUtilities>();
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
