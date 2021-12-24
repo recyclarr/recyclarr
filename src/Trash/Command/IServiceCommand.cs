@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Trash.Command.Helpers;
+namespace Trash.Command;
 
 public interface IServiceCommand
 {

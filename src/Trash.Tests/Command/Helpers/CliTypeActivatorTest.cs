@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autofac;
 using FluentAssertions;
 using NUnit.Framework;
+using Trash.Command;
 using Trash.Command.Helpers;
 
 namespace Trash.Tests.Command.Helpers;

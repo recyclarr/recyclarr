@@ -15,7 +15,7 @@ using Serilog.Events;
 using TrashLib.Extensions;
 using YamlDotNet.Core;
 
-namespace Trash.Command.Helpers;
+namespace Trash.Command;
 
 public abstract class ServiceCommand : ICommand, IServiceCommand
 {
