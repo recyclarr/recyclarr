@@ -5,6 +5,7 @@ using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
+using Common.Networking;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using JetBrains.Annotations;
@@ -120,6 +121,8 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
 
             settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
             FlurlLogging.SetupLogging(settings, _log);
+
+            settings.HttpClientFactory = new UntrustedCertClientFactory();
         });
     }
 

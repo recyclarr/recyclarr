@@ -14,8 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   documentation][setref] for more information.
 - Trash git repository URL can be overridden in settings.
 - Schema added for `settings.yml`.
+- Add setting to bypass HTTPS certificate validation (useful for self-signed certificates used with
+  Sonarr and Radarr instances) ([#20]).
 
 [setref]: https://github.com/rcdailey/trash-updater/wiki/Settings-Reference
+[#20]: https://github.com/rcdailey/trash-updater/issues/20
 
 ### Fixed
 

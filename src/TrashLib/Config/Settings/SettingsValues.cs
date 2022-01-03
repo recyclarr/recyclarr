@@ -8,4 +8,5 @@ public record TrashRepository
 public record SettingsValues
 {
     public TrashRepository Repository { get; init; } = new();
+    public bool EnableSslCertificateValidation { get; init; } = true;
 }

@@ -2,6 +2,7 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Reactive" />

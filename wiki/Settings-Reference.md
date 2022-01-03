@@ -38,6 +38,18 @@ Table of Contents
 
 - [Repository Settings](#repository-settings)
 
+## Global Settings
+
+```yml
+enable_ssl_certificate_validation: true
+```
+
+- `enable_ssl_certificate_validation`<br>
+  If set to `false`, SSL certificates are not validated. This is useful if you are connecting to a
+  Sonarr or Radarr instance using `https` and it is set up with self-signed certificates. Note that
+  disabling this setting is a **security risk** and should be avoided unless you are absolutely sure
+  what you are doing.
+
 ## Repository Settings
 
 ```yml
