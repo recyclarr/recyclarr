@@ -29,4 +29,9 @@ public static class StringExtensions
     {
         return string.Format(value, args);
     }
+
+    public static string TrimNewlines(this string value)
+    {
+        return value.Trim('\r', '\n');
+    }
 }
