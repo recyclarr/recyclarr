@@ -34,22 +34,25 @@
     <PackageReference Include="Nerdbank.GitVersioning" PrivateAssets="All" Condition=" '$(DisableNbgv)' != 'true' " />
   </ItemGroup>
 
+  <PropertyGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+  </PropertyGroup>
+
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
-    <PackageReference Include="AutoFixture" />
-    <PackageReference Include="AutoFixture.AutoNSubstitute" />
-    <PackageReference Include="AutoFixture.NUnit3" />
-    <PackageReference Include="AutofacContrib.NSubstitute" />
-    <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="FluentAssertions.Json" />
-    <PackageReference Include="GitHubActionsTestLogger" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="NSubstitute.Analyzers.CSharp" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.Analyzers" />
-    <PackageReference Include="NUnit3TestAdapter" />
-    <PackageReference Include="Serilog.Sinks.NUnit" />
-    <PackageReference Include="Serilog.Sinks.TestCorrelator" />
+    <PackageReference Include="AutoFixture" PrivateAssets="All" />
+    <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="All" />
+    <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="All" />
+    <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
+    <PackageReference Include="FluentAssertions" PrivateAssets="All" />
+    <PackageReference Include="FluentAssertions.Json" PrivateAssets="All" />
+    <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" PrivateAssets="All" />
+    <PackageReference Include="NSubstitute" PrivateAssets="All" />
+    <PackageReference Include="NSubstitute.Analyzers.CSharp" PrivateAssets="All" />
+    <PackageReference Include="NUnit" PrivateAssets="All" />
+    <PackageReference Include="NUnit.Analyzers" PrivateAssets="All" />
+    <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
+    <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
+    <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
