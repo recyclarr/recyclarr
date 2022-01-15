@@ -88,16 +88,17 @@ jobs:
           -k:"rcdailey_trash-updater"
           -n:"Trash Updater"
           -v:"${{ steps.nbgv.outputs.SimpleVersion }}"
-          -d:"sonar.login=${{ secrets.SONAR_TOKEN }}"
-          -d:"sonar.host.url=https://sonarcloud.io"
+          -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          -d:sonar.host.url="https://sonarcloud.io"
+          -d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
 
       - name: Test
-        run: dotnet test src --collect:"XPLat Code Coverage"
+        run: dotnet test src --collect:"XPLat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: End Sonar Scanner
         run: >
           dotnet sonarscanner end
-          -d:"sonar.login=${{ secrets.SONAR_TOKEN }}"
+          -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   release:
     name: Release
