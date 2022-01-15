@@ -1,14 +1,15 @@
 <Project>
   <ItemGroup>
-    <PackageReference Update="AutoFixture" Version="4.*" />
-    <PackageReference Update="AutoFixture.AutoNSubstitute" Version="4.*" />
-    <PackageReference Update="AutoFixture.NUnit3" Version="4.*" />
-    <PackageReference Update="AutoMapper" Version="11.*" />
     <PackageReference Update="Autofac" Version="6.*" />
     <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />
     <PackageReference Update="Autofac.Extras.AggregateService" Version="6.*" />
     <PackageReference Update="AutofacContrib.NSubstitute" Version="7.*" />
+    <PackageReference Update="AutoFixture" Version="4.*" />
+    <PackageReference Update="AutoFixture.AutoNSubstitute" Version="4.*" />
+    <PackageReference Update="AutoFixture.NUnit3" Version="4.*" />
+    <PackageReference Update="AutoMapper" Version="11.*" />
     <PackageReference Update="CliFx" Version="2.*" />
+    <PackageReference Update="coverlet.collector" Version="3.*" />
     <PackageReference Update="FluentAssertions" Version="6.*" />
     <PackageReference Update="FluentAssertions.Json" Version="6.*" />
     <PackageReference Update="FluentValidation" Version="10.*" />
@@ -19,14 +20,15 @@
     <PackageReference Update="LibGit2Sharp" Version="0.27.*-*" />
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.*" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Update="morelinq" Version="3.*" />
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*" />
+    <PackageReference Update="Newtonsoft.Json" Version="13.*" />
+    <PackageReference Update="Newtonsoft.Json.Schema" Version="3.*" />
     <PackageReference Update="NSubstitute" Version="4.*" />
     <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
     <PackageReference Update="NUnit" Version="3.*" />
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
     <PackageReference Update="NUnit3TestAdapter" Version="4.*" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.*" />
-    <PackageReference Update="Newtonsoft.Json" Version="13.*" />
-    <PackageReference Update="Newtonsoft.Json.Schema" Version="3.*" />
     <PackageReference Update="Serilog" Version="2.*" />
     <PackageReference Update="Serilog.Sinks.Console" Version="4.*" />
     <PackageReference Update="Serilog.Sinks.File" Version="5.*" />
@@ -36,7 +38,5 @@
     <PackageReference Update="System.IO.Abstractions" Version="16.*" />
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
-    <PackageReference Update="coverlet.collector" Version="3.*" />
-    <PackageReference Update="morelinq" Version="3.*" />
   </ItemGroup>
 </Project>
