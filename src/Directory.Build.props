@@ -53,6 +53,7 @@
     <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
+    <PackageReference Include="coverlet.collector" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">

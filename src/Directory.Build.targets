@@ -36,6 +36,7 @@
     <PackageReference Update="System.IO.Abstractions" Version="16.*" />
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
+    <PackageReference Update="coverlet.collector" Version="3.*" />
     <PackageReference Update="morelinq" Version="3.*" />
   </ItemGroup>
 </Project>
