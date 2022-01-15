@@ -91,11 +91,8 @@ jobs:
           -d:"sonar.login=${{ secrets.SONAR_TOKEN }}"
           -d:"sonar.host.url=https://sonarcloud.io"
 
-      - name: Build
-        run: dotnet build src
-
       - name: Test
-        run: dotnet test src
+        run: dotnet test src --collect:"XPLat Code Coverage"
 
       - name: End Sonar Scanner
         run: >
