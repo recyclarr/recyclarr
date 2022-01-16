@@ -1,5 +1,7 @@
-This page contains the YAML reference for `settings.yml`. This file is located in the following
-locations depending on your platform:
+This page contains the YAML reference for Trash Updater settings. Settings support was introduced in
+version `1.7.0`.
+
+The `settings.yml` file is located in the following locations depending on your platform:
 
 | Platform | Location                                                   |
 | -------- | ---------------------------------------------------------- |
