@@ -53,17 +53,12 @@ Simply download the latest release for your platform:
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
 
----
+### Important Notices
 
-*Important Notices!*
-
-- > **Note**: For Sonarr updates to work, you must be running version `3.0.4.1098` or greater.
-
-- > **Note**: Do not run Notifiarr's Trash Guides Integration in conjunction with Trash Updater's
-  > Custom Format synchronization. In general, you should not have two different tools updating the
-  > same data in Radarr.
-
----
+- For Sonarr support to work, you must be running version `3.0.4.1098` or greater.
+- Do not run Notifiarr's Trash Guides Integration in conjunction with Trash Updater's Custom Format
+  synchronization. In general, you should not have two different tools updating the same data in
+  Radarr.
 
 [rp]: https://github.com/rcdailey/trash-updater/releases
 
