@@ -17,6 +17,21 @@ empty and default behavior will be used. There is absolutely no need to touch th
 have a specific reason to. It is recommended that you only add the specific properties for the
 customizations you need and leave the rest alone.
 
+# Schema Validation
+
+A schema file is provided for `settings.yml` to help assist in editing the file. To use it, simply
+add the below snippet to the first line in your `settings.yml` file:
+
+```yml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/rcdailey/trash-updater/master/schemas/settings-schema.json
+```
+
+If you use VS Code to edit your settings file and install the [YAML extension][yaml], it will
+suggest properties you can use and show you documentation for each without having to reference this
+page.
+
+[yaml]: https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml
+
 # YAML Reference
 
 Table of Contents

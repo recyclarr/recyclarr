@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New settings file to control non-service specific behavior of Trash Updater. See [the
-  documentation](setref) for more information.
+  documentation][setref] for more information.
 - Trash git repository URL can be overridden in settings.
+- Schema added for `settings.yml`.
 
 [setref]: https://github.com/rcdailey/trash-updater/wiki/Settings-Reference
 

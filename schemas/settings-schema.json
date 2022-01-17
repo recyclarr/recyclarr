@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Settings",
+  "definitions": {
+    "Settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "title": "Trash Updater Settings",
+      "description": "Optional settings to control the behavior of Trash Updater",
+      "properties": {
+        "repository": {
+          "$ref": "#/definitions/Repository"
+        },
+        "enable_ssl_certificate_validation": {
+          "type": "boolean",
+          "title": "Allow SSL certificate validation for Sonarr & Radarr",
+          "description": "If set to `false`, SSL certificates are not validated. This is useful if you are connecting to a Sonarr or Radarr instance using `https` and it is set up with self-signed certificates. Note that disabling this setting is a **security risk** and should be avoided unless you are absolutely sure what you are doing."
+        }
+      }
+    },
+    "Repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "title": "Settings for the git repo",
+      "description": "",
+      "properties": {
+        "clone_url": {
+          "type": "string",
+          "title": "Clone URL to the trash guides git repository",
+          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Trash Updater pull data from a fork instead of the official repository.",
+          "format": "uri",
+          "qt-uri-protocols": [
+            "http",
+            "https",
+            "ssh",
+            "git"
+          ],
+          "qt-uri-extensions": [
+            ".git"
+          ]
+        }
+      }
+    }
+  }
+}
