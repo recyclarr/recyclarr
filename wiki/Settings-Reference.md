@@ -32,7 +32,7 @@ repository:
 
 - `clone_url`<br>
   A URL compatible with `git clone` that is used to clone the [Trash Guides
-  repository](official_repo). This setting exists for enthusiasts that may want to instead have
+  repository][official_repo]. This setting exists for enthusiasts that may want to instead have
   Trash Updater pull data from a fork instead of the official repository.
 
 [official_repo]: https://github.com/TRaSH-/Guides
