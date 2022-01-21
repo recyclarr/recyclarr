@@ -101,6 +101,7 @@ provided below for some main topics.
 
 - [Command Line Reference](../../wiki/Command-Line-Reference)
 - [Configuration Reference](../../wiki/Configuration-Reference)
+- [Settings Reference](../../wiki/Settings-Reference)
 - [Troubleshooting](../../wiki/Troubleshooting)
 
 ## Important Notices
