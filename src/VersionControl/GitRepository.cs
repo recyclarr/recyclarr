@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using LibGit2Sharp;
 
@@ -5,21 +6,26 @@ namespace VersionControl;
 
 public sealed class GitRepository : IGitRepository
 {
-    private readonly Repository _repo;
+    private readonly Lazy<Repository> _repo;
 
     public GitRepository(string repoPath)
     {
-        _repo = new Repository(repoPath);
+        // Lazily construct the Repository object because it does too much work in its constructor
+        // We want to keep our own constructor here as thin as possible for DI and testability.
+        _repo = new Lazy<Repository>(() => new Repository(repoPath));
     }
 
     public void Dispose()
     {
-        _repo.Dispose();
+        if (_repo.IsValueCreated)
+        {
+            _repo.Value.Dispose();
+        }
     }
 
     public void ForceCheckout(string branch)
     {
-        Commands.Checkout(_repo, branch, new CheckoutOptions
+        Commands.Checkout(_repo.Value, branch, new CheckoutOptions
         {
             CheckoutModifiers = CheckoutModifiers.Force
         });
@@ -27,13 +33,13 @@ public sealed class GitRepository : IGitRepository
 
     public void Fetch(string remote = "origin")
     {
-        var origin = _repo.Network.Remotes[remote];
-        Commands.Fetch(_repo, origin.Name, origin.FetchRefSpecs.Select(s => s.Specification), null, "");
+        var origin = _repo.Value.Network.Remotes[remote];
+        Commands.Fetch(_repo.Value, origin.Name, origin.FetchRefSpecs.Select(s => s.Specification), null, "");
     }
 
     public void ResetHard(string toBranch)
     {
-        var commit = _repo.Branches[toBranch].Tip;
-        _repo.Reset(ResetMode.Hard, commit);
+        var commit = _repo.Value.Branches[toBranch].Tip;
+        _repo.Value.Reset(ResetMode.Hard, commit);
     }
 }
