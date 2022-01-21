@@ -35,17 +35,18 @@ public class GitRepositoryFactory : IGitRepositoryFactory
     {
         _fileUtils.DeleteReadOnlyDirectory(repoPath);
 
-        Console.Write("Requesting and parsing guide markdown ");
+        var progress = new ProgressBar
+        {
+            Description = "Requesting and parsing guide markdown"
+        };
 
-        using var progress = new ProgressBar();
         _staticWrapper.Clone(repoUrl, repoPath, new CloneOptions
         {
             RecurseSubmodules = false,
             BranchName = branch,
             OnTransferProgress = gitProgress =>
             {
-                // ReSharper disable once AccessToDisposedClosure
-                progress.Report((float) gitProgress.ReceivedObjects / gitProgress.TotalObjects);
+                progress.ReportProgress.OnNext((float) gitProgress.ReceivedObjects / gitProgress.TotalObjects);
                 return true;
             }
         });
