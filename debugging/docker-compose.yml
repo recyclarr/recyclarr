@@ -11,8 +11,10 @@ services:
     network_mode: bridge
     ports:
       - 7878:7878
+      - 9898:9898
     volumes:
       - radarr1:/config
+      - ./certs:/certs:ro
     environment:
       - TZ=America/Chicago
 
