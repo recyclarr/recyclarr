@@ -28,10 +28,11 @@ public class RadarrCommand : ServiceCommand
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
         ISettingsPersister settingsPersister,
+        ISettingsProvider settingsProvider,
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
         Func<ICustomFormatUpdater> customFormatUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor, settingsPersister)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider)
     {
         _log = log;
         _configLoader = configLoader;

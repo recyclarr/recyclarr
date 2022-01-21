@@ -28,10 +28,11 @@ public class SonarrCommand : ServiceCommand
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
         ISettingsPersister settingsPersister,
+        ISettingsProvider settingsProvider,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
         Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor, settingsPersister)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider)
     {
         _log = log;
         _configLoader = configLoader;

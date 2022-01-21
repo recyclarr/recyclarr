@@ -25,23 +25,30 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
     private readonly LoggingLevelSwitch _loggingLevelSwitch;
     private readonly ILogJanitor _logJanitor;
     private readonly ISettingsPersister _settingsPersister;
+    private readonly ISettingsProvider _settingsProvider;
 
     protected ServiceCommand(
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
-        ISettingsPersister settingsPersister)
+        ISettingsPersister settingsPersister,
+        ISettingsProvider settingsProvider)
     {
         _loggingLevelSwitch = loggingLevelSwitch;
         _logJanitor = logJanitor;
         _settingsPersister = settingsPersister;
+        _settingsProvider = settingsProvider;
         _log = log;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
+        // Must happen first because everything can use the logger.
         SetupLogging();
+
+        // Has to happen right after logging because stuff below may use settings.
         LoadSettings();
+
         SetupHttp();
 
         try
@@ -122,7 +129,12 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
             settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
             FlurlLogging.SetupLogging(settings, _log);
 
-            settings.HttpClientFactory = new UntrustedCertClientFactory();
+            if (!_settingsProvider.Settings.EnableSslCertificateValidation)
+            {
+                _log.Warning(
+                    "Security Risk: Certificate validation is being DISABLED because setting `enable_ssl_certificate_validation` is set to `false`");
+                settings.HttpClientFactory = new UntrustedCertClientFactory();
+            }
         });
     }
 
