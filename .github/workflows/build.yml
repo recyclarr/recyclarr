@@ -34,10 +34,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # avoid shallow clone for NBGV
-
-      - uses: dotnet/nbgv@master
-        id: nbgv
+          fetch-depth: 0 # avoid shallow clone for GitVersion
 
       - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
         uses: actions/setup-dotnet@v1
@@ -67,16 +64,21 @@ jobs:
       - name: Get Source Code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-
-      - name: Setup NBGV
-        uses: dotnet/nbgv@master
-        id: nbgv
+          fetch-depth: 0 # avoid shallow clone for GitVersion
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: 5.x
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        id: gitversion
 
       - name: Install Sonar Scanner
         run: dotnet tool install --global dotnet-sonarscanner
@@ -87,7 +89,7 @@ jobs:
           -o:"rcdailey"
           -k:"rcdailey_trash-updater"
           -n:"Trash Updater"
-          -v:"${{ steps.nbgv.outputs.SimpleVersion }}"
+          -v:"${{ steps.gitversion.outputs.fullSemVer }}"
           -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
           -d:sonar.host.url="https://sonarcloud.io"
           -d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
@@ -97,7 +99,11 @@ jobs:
         run: dotnet build src
 
       - name: Test
-        run: dotnet test src --collect:"XPLat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+        run: >
+          dotnet test src
+          --no-build
+          --collect:"XPLat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: End Sonar Scanner
         run: >
@@ -113,18 +119,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # avoid shallow clone for NBGV
+          fetch-depth: 0 # avoid shallow clone for GitVersion
           # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
 
-      - name: Set up NBGV
-        uses: dotnet/nbgv@master
-        id: nbgv
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: 5.x
 
-      - name: Verify tag matches version.json
-        if: endsWith(github.ref, steps.nbgv.outputs.SimpleVersion) != true
-        run: |
-          echo "The tag ${{ github.ref }} does not match version.json: ${{ steps.nbgv.outputs.SimpleVersion }}"
-          exit 1
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        id: gitversion
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
@@ -144,4 +149,4 @@ jobs:
           body: ${{ steps.changelog.outputs.release_notes }}
           tag_name: ${{ github.event.create.ref }}
           draft: false
-          prerelease: ${{ steps.nbgv.outputs.PrereleaseVersion != '' }}
+          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
