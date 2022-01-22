@@ -92,6 +92,10 @@ jobs:
           -d:sonar.host.url="https://sonarcloud.io"
           -d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
 
+      # Run a full build command because if we just do the tests, it will not build everything.
+      - name: Build
+        run: dotnet build src
+
       - name: Test
         run: dotnet test src --collect:"XPLat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
