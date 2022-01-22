@@ -1,11 +1,10 @@
 [CmdletBinding()]
-param (
-    [Parameter(Mandatory=$true)]
-    [string]
-    $version
-)
+param ()
 
 $ErrorActionPreference = "Stop"
+
+# Requires: dotnet tool install --global GitVersion.Tool
+$version = dotnet-gitversion /showvariable SemVer
 
 # Requires: Install-Module -Name ChangelogManagement
 Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
@@ -19,8 +18,5 @@ Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
 $content = Get-Content -Path .\CHANGELOG.md
 Set-Content -Path .\CHANGELOG.md -Value $content
 
-# Requires: dotnet tool install -g nbgv
-nbgv set-version $version
-
-git commit -m "release: v$version" -- CHANGELOG.md version.json
+git commit -m "release: v$version" -- CHANGELOG.md
 git tag -m "release v$version" "v$version"
