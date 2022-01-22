@@ -6,16 +6,7 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-dotnet publish src\Trash `
-    --output publish\$runtime `
-    --configuration Release `
-    --runtime $runtime `
-    --self-contained true `
-    -p:PublishSingleFile=true `
-    -p:PublishTrimmed=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:PublishReadyToRun=true `
-    -p:PublishReadyToRunShowWarnings=true
+& "$PSScriptRoot\Publish.ps1" $runtime
 
 if (Get-Command chmod -errorAction SilentlyContinue) {
     "The chmod command was found. Setting read + execute permission."

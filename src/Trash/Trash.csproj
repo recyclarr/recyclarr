@@ -3,6 +3,14 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Trash</RootNamespace>
     <AssemblyName>trash</AssemblyName>
+
+    <!-- Publish Settings -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
