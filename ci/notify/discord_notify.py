@@ -34,14 +34,14 @@ embed.set_author(
     url='https://github.com/rcdailey/trash-updater',
     icon_url='https://github.com/rcdailey/trash-updater/blob/master/ci/notify/trash-icon.png?raw=true')
 
-embed.add_embed_field(name='Linux (x64)',
-    value=f'[Download](https://github.com/rcdailey/trash-updater/releases/download/{version}/trash-linux-x64.zip)')
+def add_links(os_name, archs, os):
+    url_base = f'https://github.com/rcdailey/trash-updater/releases/download/{version}'
+    download_links = ', '.join(f'[{arch}]({url_base}/trash-{os}-{arch}.zip)' for arch in archs)
+    embed.add_embed_field(name=os_name, value=f'[{download_links}]')
 
-embed.add_embed_field(name='Windows (x64)',
-    value=f'[Download](https://github.com/rcdailey/trash-updater/releases/download/{version}/trash-win-x64.zip)')
-
-embed.add_embed_field(name='MacOS (x64)',
-    value=f'[Download](https://github.com/rcdailey/trash-updater/releases/download/{version}/trash-osx-x64.zip)')
+add_links('Linux', ('x64', 'arm', 'arm64'), 'linux')
+add_links('Windows', ('x64', 'arm64'), 'win')
+add_links('MacOS', ('x64', 'arm64'), 'osx')
 
 webhook = DiscordWebhook(webhook_url)
 webhook.add_embed(embed)
