@@ -42,20 +42,42 @@ jobs:
         shell: pwsh
         run: ci/Publish.ps1 ${{ matrix.runtime }}
 
-      - name: Smoke Test
-        shell: pwsh
-        run: ci/SmokeTest.ps1 ${{ matrix.runtime }}
-        if: ${{ endsWith(matrix.runtime, 'linux-x64') }}
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: trash-${{ matrix.runtime }}
           path: publish/${{ matrix.runtime }}/*
 
+  smoke:
+    name: Smoke Test
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: windows-latest
+            runtime: win-x64
+          - image: ubuntu-latest
+            runtime: linux-x64
+          - image: macos-latest
+            runtime: osx-x64
+    runs-on: ${{ matrix.image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: trash-${{ matrix.runtime }}
+
+      - name: Run Smoke Test
+        shell: pwsh
+        run: ci/SmokeTest.ps1 ./trash
+
   release:
     name: Release
-    needs: build
+    needs: smoke
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
