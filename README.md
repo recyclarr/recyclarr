@@ -44,11 +44,23 @@ Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
 ## Installation
 
-Simply download the latest release for your platform:
+Simply download the latest release for your platform using the table below. The download itself is
+just a ZIP file with a single executable in it. You can put this executable anywhere you want and
+run it.
 
-- [Windows (64-bit)](https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-x64.zip)
-- [Linux (64-bit)](https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip)
-- [macOS (64-bit)](https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-x64.zip)
+| Platform | 32-bit           | 64-bit                                 |
+| -------- | ---------------- | -------------------------------------- |
+| Windows  | ---              | [x64][win-x64], [arm64][win-arm64]     |
+| Linux    | [arm][linux-arm] | [x64][linux-x64], [arm64][linux-arm64] |
+| Mac OS   | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
+
+[win-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-x64.zip
+[win-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-arm64.zip
+[linux-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip
+[linux-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm64.zip
+[linux-arm]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm.zip
+[osx-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-x64.zip
+[osx-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-arm64.zip
 
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
@@ -64,15 +76,17 @@ release notes and older releases.
 
 ### Special Note about Linux
 
-When you extract the ZIP archive on Linux, it will *not* have the executable permission set. Here is
-a quick one-liner you can use in a terminal to download the latest release, extract it, and set it
-as executable. It will also replace any existing `trash` executable, so this is useful for upgrades,
-too. Run this from the directory where you want `trash` to be installed.
+When you extract the ZIP archive on Linux, it will *not* have the executable permission set. After
+you've downloaded and extracted the executable, you can use the command below to make it executable.
 
 ```bash
- wget -O trash.zip https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip \
-    && unzip -o trash.zip && rm trash.zip && chmod u+rx trash
+chmod u+rx trash
 ```
+
+*Note: There used to be a convenient one-liner available here, but that was removed with the
+introduction of multiple architecture support. That one liner was no longer sufficient and a more
+complex solution was needed to determine which architecture to download for. But if you're using
+linux, I think you can handle what needs to be done :-)*
 
 ## Getting Started
 

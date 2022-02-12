@@ -20,16 +20,10 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        include:
-          - runtime: win-x64
-            image: windows-latest
-          - runtime: linux-x64
-            image: ubuntu-latest
-          - runtime: osx-x64
-            image: macos-latest
+        runtime: [win-x64, win-arm64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
     # Must run on Windows so that version info gets properly set in host EXE. See:
     # https://github.com/dotnet/runtime/issues/3828
-    runs-on: ${{ matrix.image }}
+    runs-on: windows-latest
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v2
@@ -44,15 +38,65 @@ jobs:
       - name: Test
         run: dotnet test src --configuration Release --logger GitHubActions
 
-      - name: Publish & Zip
+      - name: Publish
         shell: pwsh
-        run: ci/PublishAndZip.ps1 ${{ matrix.runtime }}
+        run: ci/Publish.ps1 ${{ matrix.runtime }}
+
+      - name: Smoke Test
+        shell: pwsh
+        run: ci/SmokeTest.ps1 ${{ matrix.runtime }}
+        if: ${{ endsWith(matrix.runtime, 'linux-x64') }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: trash
-          path: publish/zip/trash-*.zip
+          name: trash-${{ matrix.runtime }}
+          path: publish/${{ matrix.runtime }}/*
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+          # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.7
+        with:
+          versionSpec: 5.x
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.7
+        id: gitversion
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: publish
+
+      - name: Create Zip Files
+        shell: pwsh
+        run: ci/CreateZip.ps1 publish
+
+      - name: Extract Changelog
+        id: changelog
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          files: publish-zip/trash-*.zip
+          body: ${{ steps.changelog.outputs.release_notes }}
+          tag_name: ${{ github.event.create.ref }}
+          draft: false
+          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 
   sonarcloud:
     name: SonarCloud
@@ -109,44 +153,3 @@ jobs:
         run: >
           dotnet sonarscanner end
           -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
-  release:
-    name: Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
-          # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
-
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0.9.7
-        with:
-          versionSpec: 5.x
-
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0.9.7
-        id: gitversion
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: trash
-
-      - name: Extract Changelog
-        id: changelog
-        uses: ffurrer2/extract-release-notes@v1
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          files: trash-*.zip
-          body: ${{ steps.changelog.outputs.release_notes }}
-          tag_name: ${{ github.event.create.ref }}
-          draft: false
-          prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
