@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - 64-bit ARM builds for Windows, Linux, and Mac OS.
+- 32-bit ARM build for Linux.
 
 ## [1.7.0] - 2022-02-06
 
