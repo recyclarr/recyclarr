@@ -16,7 +16,6 @@ public class YamlSerializerFactory : IYamlSerializerFactory
     public IDeserializer CreateDeserializer()
     {
         return new DeserializerBuilder()
-            .IgnoreUnmatchedProperties()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeConverter(new YamlNullableEnumTypeConverter())
             .WithObjectFactory(_objectFactory)
