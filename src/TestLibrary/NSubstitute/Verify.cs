@@ -6,6 +6,10 @@ using NSubstitute.Core.Arguments;
 
 namespace TestLibrary.NSubstitute;
 
+// Interface changes in IArgumentMatcher make nullability difficult
+// to deal with. So we just ignore that here for now.
+#nullable disable
+
 public static class Verify
 {
     public static T That<T>(Action<T> action)
