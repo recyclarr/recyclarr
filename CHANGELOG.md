@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Unrecognized or unwanted YAML properties in configuration YAML (`trash.yml`) now result in an
+  error. This is to help users more easily identify mistakes.
+
 ## [1.8.0] - 2022-02-13
 
 ### Added
