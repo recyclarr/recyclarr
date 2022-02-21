@@ -56,12 +56,6 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
 
     private async Task DoVersionEnforcement()
     {
-        // _compatibility.Capabilities
-        //     .Where(x => !x.SupportsNamedReleaseProfiles)
-        //     .Subscribe(x => throw new VersionException(
-        //         $"Your Sonarr version {x.Version} does not meet the minimum " +
-        //         $"required version of {_compatibility.MinimumVersion} to use this program"));
-
         var capabilities = await _compatibility.Capabilities.LastAsync();
         if (!capabilities.SupportsNamedReleaseProfiles)
         {
