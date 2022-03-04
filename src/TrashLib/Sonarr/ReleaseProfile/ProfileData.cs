@@ -1,13 +1,13 @@
 ﻿namespace TrashLib.Sonarr.ReleaseProfile;
 
-public class ProfileDataOptional
+public record ProfileDataOptional
 {
     public ICollection<string> Required { get; init; } = new List<string>();
     public ICollection<string> Ignored { get; init; } = new List<string>();
     public IDictionary<int, List<string>> Preferred { get; init; } = new Dictionary<int, List<string>>();
 }
 
-public class ProfileData
+public record ProfileData
 {
     public ICollection<string> Required { get; init; } = new List<string>();
     public ICollection<string> Ignored { get; init; } = new List<string>();

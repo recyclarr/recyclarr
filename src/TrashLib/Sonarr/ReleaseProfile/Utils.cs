@@ -8,7 +8,18 @@ public static class Utils
     {
         static bool IsEmpty(ProfileData data)
         {
-            return data.Required.Count == 0 && data.Ignored.Count == 0 && data.Preferred.Count == 0;
+            return data is
+            {
+                // Non-optional
+                Required.Count: 0,
+                Ignored.Count: 0,
+                Preferred.Count: 0,
+
+                // Optional
+                Optional.Required.Count: 0,
+                Optional.Ignored.Count: 0,
+                Optional.Preferred.Count: 0
+            };
         }
 
         // A few false-positive profiles are added sometimes. We filter these out by checking if they
