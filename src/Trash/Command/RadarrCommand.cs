@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using CliFx.Attributes;
+﻿using CliFx.Attributes;
 using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;

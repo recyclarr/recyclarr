@@ -1,4 +1,3 @@
-using System;
 using Common;
 using LibGit2Sharp;
 using VersionControl.Wrappers;

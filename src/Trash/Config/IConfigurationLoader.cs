@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using TrashLib.Config.Services;
+﻿using TrashLib.Config.Services;
 
 namespace Trash.Config;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace TrashLib.Sonarr.ReleaseProfile;
+﻿namespace TrashLib.Sonarr.ReleaseProfile;
 
 public class ScopedState<T>
 {

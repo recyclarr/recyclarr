@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 using Autofac;
 using CliFx;
 using Trash.Command.Helpers;

@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Linq;
 
 namespace Trash;
 

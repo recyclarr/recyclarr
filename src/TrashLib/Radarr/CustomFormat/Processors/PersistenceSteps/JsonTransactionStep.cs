@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.CustomFormat.Models;

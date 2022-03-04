@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace TrashLib.Sonarr.QualityDefinition;
+﻿namespace TrashLib.Sonarr.QualityDefinition;
 
 public interface ISonarrQualityDefinitionGuideParser
 {

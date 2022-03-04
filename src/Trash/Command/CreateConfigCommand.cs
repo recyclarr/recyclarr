@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;

@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Threading.Tasks;
 using CliFx.Infrastructure;
 using NSubstitute;
 using NUnit.Framework;

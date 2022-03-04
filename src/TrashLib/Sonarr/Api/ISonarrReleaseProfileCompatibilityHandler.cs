@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using TrashLib.Sonarr.Api.Objects;
 

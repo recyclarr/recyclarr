@@ -7,7 +7,7 @@ public static class NSubstituteFixture
 {
     public static Fixture Create()
     {
-        var fixture = new Fixture()
+        var fixture = new Fixture
         {
             OmitAutoProperties = true
         };

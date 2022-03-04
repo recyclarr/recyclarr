@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.IO;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;

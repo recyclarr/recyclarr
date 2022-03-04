@@ -1,5 +1,3 @@
-using System;
-
 namespace VersionControl;
 
 public interface IGitRepository : IDisposable

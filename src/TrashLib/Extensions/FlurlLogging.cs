@@ -1,4 +1,3 @@
-using System;
 using Flurl;
 using Flurl.Http.Configuration;
 using Serilog;

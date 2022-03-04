@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using TrashLib.Sonarr.Config;
+﻿using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile;
 

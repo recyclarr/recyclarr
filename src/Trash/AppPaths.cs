@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace Trash;
+﻿namespace Trash;
 
 internal static class AppPaths
 {

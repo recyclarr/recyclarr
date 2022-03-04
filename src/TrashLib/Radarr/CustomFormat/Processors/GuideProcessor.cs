@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TrashLib.Radarr.Config;
+﻿using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;

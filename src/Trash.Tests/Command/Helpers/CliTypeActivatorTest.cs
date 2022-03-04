@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Autofac;
+﻿using Autofac;
 using FluentAssertions;
 using NUnit.Framework;
 using Trash.Command;

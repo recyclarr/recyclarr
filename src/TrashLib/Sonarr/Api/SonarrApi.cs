@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Flurl.Http;
+﻿using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using TrashLib.Config.Services;

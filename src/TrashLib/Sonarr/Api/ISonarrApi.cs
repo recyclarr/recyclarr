@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using TrashLib.Sonarr.Api.Objects;
+﻿using TrashLib.Sonarr.Api.Objects;
 
 namespace TrashLib.Sonarr.Api;
 

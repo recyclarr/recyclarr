@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace TrashLib.Sonarr.ReleaseProfile;
+﻿namespace TrashLib.Sonarr.ReleaseProfile;
 
 using ProfileDataCollection = IDictionary<string, ProfileData>;
 

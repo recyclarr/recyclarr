@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps;

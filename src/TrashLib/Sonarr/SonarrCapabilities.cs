@@ -1,5 +1,3 @@
-using System;
-
 namespace TrashLib.Sonarr;
 
 public record SonarrCapabilities

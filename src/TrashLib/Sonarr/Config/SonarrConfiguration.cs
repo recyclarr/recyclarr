@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using TrashLib.Config.Services;
+﻿using TrashLib.Config.Services;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
 

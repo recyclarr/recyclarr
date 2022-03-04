@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config.Services;

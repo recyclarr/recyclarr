@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
+﻿using System.Reactive.Linq;
 using Common.Extensions;
 using Serilog;
 using TrashLib.ExceptionTypes;

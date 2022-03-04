@@ -4,7 +4,7 @@
     <LangVersion>latestmajor</LangVersion>
     <Nullable>enable</Nullable>
     <WarningLevel>9999</WarningLevel>
-    <!-- <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
+    <ImplicitUsings>enable</ImplicitUsings>
     <DebugType>embedded</DebugType>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>

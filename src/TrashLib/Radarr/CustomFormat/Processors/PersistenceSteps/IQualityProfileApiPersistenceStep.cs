@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Models;
 

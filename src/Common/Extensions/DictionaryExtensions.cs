@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Common.Extensions;
+﻿namespace Common.Extensions;
 
 public static class DictionaryExtensions
 {

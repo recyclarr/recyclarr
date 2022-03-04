@@ -1,4 +1,3 @@
-using System.Net.Http;
 using Flurl.Http.Configuration;
 
 namespace Common.Networking;

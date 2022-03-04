@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using LibGit2Sharp;
 
 namespace VersionControl;

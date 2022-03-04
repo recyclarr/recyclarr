@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Trash.Command.Helpers;
+﻿namespace Trash.Command.Helpers;
 
 public class ActiveServiceCommandProvider : IActiveServiceCommandProvider
 {

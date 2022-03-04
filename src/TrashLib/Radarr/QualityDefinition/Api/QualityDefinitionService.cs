@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Flurl.Http;
+﻿using Flurl.Http;
 using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
 
