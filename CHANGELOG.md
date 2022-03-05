@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2022-03-05
+
 ### Changed
 
 - Unrecognized or unwanted YAML properties in configuration YAML (`trash.yml`) now result in an
@@ -227,7 +229,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/rcdailey/trash-updater/compare/v1.8.1...HEAD
+[1.8.1]: https://github.com/rcdailey/trash-updater/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/rcdailey/trash-updater/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/rcdailey/trash-updater/compare/v1.6.6...v1.7.0
 [1.6.6]: https://github.com/rcdailey/trash-updater/compare/v1.6.5...v1.6.6
