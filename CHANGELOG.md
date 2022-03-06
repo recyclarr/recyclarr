@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Sonarr: Error when syncing optionals release profile with the `IncludeOptionals` filter setting
+  set to `false`.
+
 ## [1.8.1] - 2022-03-05
 
 ### Changed

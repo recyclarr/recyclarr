@@ -34,7 +34,8 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
         {
             Log.Information("Processing Release Profile: {ProfileName}", profile.Type);
             var markdown = await _parser.GetMarkdownData(profile.Type);
-            var profiles = Utils.FilterProfiles(_parser.ParseMarkdown(profile, markdown));
+            var profileData = _parser.ParseMarkdown(profile, markdown);
+            var profiles = Utils.FilterProfiles(profileData, profile.Filter);
 
             if (profile.Filter.IncludeOptional)
             {

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
+using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile;
@@ -8,13 +9,16 @@ namespace TrashLib.Tests.Sonarr.ReleaseProfile;
 [Parallelizable(ParallelScope.All)]
 public class UtilsTest
 {
+    private static readonly SonarrProfileFilterConfig _filterIncludeOptional = new() {IncludeOptional = true};
+    private static readonly SonarrProfileFilterConfig _filterExcludeOptional = new() {IncludeOptional = false};
+
     [Test]
     public void Profile_with_only_ignored_should_not_be_filtered_out()
     {
         var profileData = new ProfileData {Ignored = new List<string> {"term"}};
         var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -25,7 +29,7 @@ public class UtilsTest
         var profileData = new ProfileData {Required = new List<string> {"term"}};
         var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -43,7 +47,7 @@ public class UtilsTest
 
         var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -61,7 +65,7 @@ public class UtilsTest
 
         var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -82,7 +86,7 @@ public class UtilsTest
             {"actualData", profileData}
         };
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -103,7 +107,7 @@ public class UtilsTest
 
         var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().BeEquivalentTo(data);
     }
@@ -116,8 +120,29 @@ public class UtilsTest
             {"emptyData", new ProfileData()}
         };
 
-        var filteredData = Utils.FilterProfiles(data);
+        var filteredData = Utils.FilterProfiles(data, _filterIncludeOptional);
 
         filteredData.Should().NotContainKey("emptyData");
+    }
+
+    [Test]
+    public void Profile_with_only_optionals_should_be_filtered_out_when_config_excludes_optionals()
+    {
+        var profileData = new ProfileData
+        {
+            Optional = new ProfileDataOptional
+            {
+                Preferred = new Dictionary<int, List<string>>
+                {
+                    {100, new List<string> {"term"}}
+                }
+            }
+        };
+
+        var data = new Dictionary<string, ProfileData> {{"actualData", profileData}};
+
+        var filteredData = Utils.FilterProfiles(data, _filterExcludeOptional);
+
+        filteredData.Should().BeEmpty();
     }
 }

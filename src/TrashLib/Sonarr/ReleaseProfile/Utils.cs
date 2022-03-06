@@ -1,25 +1,35 @@
-﻿namespace TrashLib.Sonarr.ReleaseProfile;
+﻿using TrashLib.Sonarr.Config;
+
+namespace TrashLib.Sonarr.ReleaseProfile;
 
 using ProfileDataCollection = IDictionary<string, ProfileData>;
 
 public static class Utils
 {
-    public static ProfileDataCollection FilterProfiles(ProfileDataCollection profiles)
+    public static ProfileDataCollection FilterProfiles(ProfileDataCollection profiles, SonarrProfileFilterConfig filter)
     {
-        static bool IsEmpty(ProfileData data)
+        bool IsEmpty(ProfileData data)
         {
-            return data is
+            var isEmpty = data is
             {
                 // Non-optional
                 Required.Count: 0,
                 Ignored.Count: 0,
-                Preferred.Count: 0,
-
-                // Optional
-                Optional.Required.Count: 0,
-                Optional.Ignored.Count: 0,
-                Optional.Preferred.Count: 0
+                Preferred.Count: 0
             };
+
+            if (isEmpty && filter.IncludeOptional)
+            {
+                isEmpty = data is
+                {
+                    // Optional
+                    Optional.Required.Count: 0,
+                    Optional.Ignored.Count: 0,
+                    Optional.Preferred.Count: 0
+                };
+            }
+
+            return isEmpty;
         }
 
         // A few false-positive profiles are added sometimes. We filter these out by checking if they
