@@ -7,11 +7,10 @@ volumes:
 
 services:
   radarr1:
-    image: ghcr.io/hotio/radarr:nightly
+    image: ghcr.io/hotio/radarr
     network_mode: bridge
     ports:
       - 7878:7878
-      - 9898:9898
     volumes:
       - radarr1:/config
       - ./certs:/certs:ro

@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Core;
 using Trash.Config;
 using TrashLib.Config.Settings;
+using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.QualityDefinition;
@@ -59,7 +60,7 @@ public class RadarrCommand : ServiceCommand
         }
         catch (FlurlHttpException e)
         {
-            _log.Error(e, "HTTP error while communicating with Radarr");
+            _log.Error("HTTP error while communicating with Radarr: {Msg}", e.SanitizedExceptionMessage());
             ExitDueToFailure();
         }
     }

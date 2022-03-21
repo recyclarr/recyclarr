@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
   using the wrong URL.
+- Radarr: Sanitize URLs in HTTP exception messages ([#17]).
+
+[#17]: https://github.com/rcdailey/trash-updater/issues/17
 
 ## [1.8.2] - 2022-03-06
 
