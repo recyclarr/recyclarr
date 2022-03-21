@@ -11,4 +11,4 @@
 
   This cryptic message is actually a permissions error, likely because your executable does not have
   read permissions set. Simply run `chmod u+rx trash` to add read + execute permissions on the
-  `trash` executable. This is also done in the linux one-liner outlined in the main `README.md`.
+  `trash` executable.
