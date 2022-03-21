@@ -22,5 +22,13 @@ public static class FlurlLogging
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Response {Status} from {Url}", statusCode, url);
         };
+
+        settings.OnRedirect = call =>
+        {
+            log.Warning("HTTP Redirect received; this indicates a problem with your URL and/or reverse proxy: {Url}",
+                call.Redirect.Url);
+
+            call.Redirect.Follow = false;
+        };
     }
 }

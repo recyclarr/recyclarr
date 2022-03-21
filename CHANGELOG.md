@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
+  using the wrong URL.
+
 ## [1.8.2] - 2022-03-06
 
 ### Fixed
