@@ -46,6 +46,8 @@ public class SonarrCommand : ServiceCommand
         {
             foreach (var config in _configLoader.LoadMany(Config, "sonarr"))
             {
+                _log.Information("Processing server {Url}", config.BaseUrl);
+
                 if (config.ReleaseProfiles.Count > 0)
                 {
                     await _profileUpdaterFactory().Process(Preview, config);

@@ -47,6 +47,8 @@ public class RadarrCommand : ServiceCommand
         {
             foreach (var config in _configLoader.LoadMany(Config, "radarr"))
             {
+                _log.Information("Processing server {Url}", config.BaseUrl);
+
                 if (config.QualityDefinition != null)
                 {
                     await _qualityUpdaterFactory().Process(Preview, config);
