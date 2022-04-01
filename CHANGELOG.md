@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Linux MUSL builds for arm, arm64, and x64. Main target for this was supporting Alpine Linux in
+  Docker.
+
 ### Changed
 
 - Do not follow HTTP redirects and instead issue a warning to the user that they are potentially

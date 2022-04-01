@@ -48,17 +48,21 @@ Simply download the latest release for your platform using the table below. The 
 just a ZIP file with a single executable in it. You can put this executable anywhere you want and
 run it.
 
-| Platform | 32-bit           | 64-bit                                 |
-| -------- | ---------------- | -------------------------------------- |
-| Windows  | ---              | [x64][win-x64], [arm64][win-arm64]     |
-| Linux    | [arm][linux-arm] | [x64][linux-x64], [arm64][linux-arm64] |
-| Mac OS   | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
+| Platform   | 32-bit           | 64-bit                                 |
+| ---------- | ---------------- | -------------------------------------- |
+| Windows    | ---              | [x64][win-x64], [arm64][win-arm64]     |
+| Linux      | [arm][linux-arm] | [x64][linux-x64], [arm64][linux-arm64] |
+| Linux MUSL | [arm][musl-arm]  | [x64][musl-x64], [arm64][musl-arm64]   |
+| Mac OS     | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
 
 [win-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-x64.zip
 [win-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-arm64.zip
 [linux-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip
 [linux-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm64.zip
 [linux-arm]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm.zip
+[musl-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-x64.zip
+[musl-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-arm64.zip
+[musl-arm]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-arm.zip
 [osx-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-x64.zip
 [osx-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-arm64.zip
 

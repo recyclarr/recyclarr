@@ -20,7 +20,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        runtime: [win-x64, win-arm64, linux-x64, linux-arm, linux-arm64, osx-x64, osx-arm64]
+        runtime:
+          - win-x64
+          - win-arm64
+          - linux-x64
+          - linux-arm
+          - linux-arm64
+          - osx-x64
+          - osx-arm64
+          - linux-musl-x64
+          - linux-musl-arm
+          - linux-musl-arm64
     # Must run on Windows so that version info gets properly set in host EXE. See:
     # https://github.com/dotnet/runtime/issues/3828
     runs-on: windows-latest
