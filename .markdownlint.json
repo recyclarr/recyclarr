@@ -8,5 +8,8 @@
   "no-inline-html": {
     "allowed_elements": ["br"]
   },
-  "no-duplicate-heading": false
+  "no-duplicate-heading": false,
+  "no-trailing-spaces": {
+    "br_spaces": 0
+  }
 }
