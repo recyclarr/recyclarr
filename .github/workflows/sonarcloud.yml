@@ -6,10 +6,6 @@ on:
     paths-ignore:
       - "wiki/**"
       - "**.md"
-  pull_request:
-    paths-ignore:
-      - "wiki/**"
-      - "**.md"
 
 env:
   dotnetVersion: "6.0.x"
