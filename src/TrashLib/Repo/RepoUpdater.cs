@@ -1,0 +1,72 @@
+using Common;
+using LibGit2Sharp;
+using Serilog;
+using TrashLib.Config.Settings;
+using TrashLib.Radarr.Config;
+using VersionControl;
+
+namespace TrashLib.Repo;
+
+public class RepoUpdater : IRepoUpdater
+{
+    private readonly ILogger _log;
+    private readonly IGitRepositoryFactory _repositoryFactory;
+    private readonly IFileUtilities _fileUtils;
+    private readonly ISettingsProvider _settingsProvider;
+
+    public RepoUpdater(
+        ILogger log,
+        IResourcePaths paths,
+        IGitRepositoryFactory repositoryFactory,
+        IFileUtilities fileUtils,
+        ISettingsProvider settingsProvider)
+    {
+        _log = log;
+        _repositoryFactory = repositoryFactory;
+        _fileUtils = fileUtils;
+        _settingsProvider = settingsProvider;
+        RepoPath = paths.RepoPath;
+    }
+
+    public string RepoPath { get; }
+
+    public void UpdateRepo()
+    {
+        // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
+        // fresh.
+        var exception = CheckoutAndUpdateRepo();
+        if (exception is not null)
+        {
+            _log.Information("Deleting local git repo and retrying git operation...");
+            _fileUtils.DeleteReadOnlyDirectory(RepoPath);
+
+            exception = CheckoutAndUpdateRepo();
+            if (exception is not null)
+            {
+                throw exception;
+            }
+        }
+    }
+
+    private Exception? CheckoutAndUpdateRepo()
+    {
+        var repoSettings = _settingsProvider.Settings.Repository;
+        var cloneUrl = repoSettings.CloneUrl;
+        const string branch = "master";
+
+        try
+        {
+            using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath, branch);
+            repo.ForceCheckout(branch);
+            repo.Fetch();
+            repo.ResetHard($"origin/{branch}");
+        }
+        catch (LibGit2SharpException e)
+        {
+            _log.Error(e, "An exception occurred during git operations on path: {RepoPath}", RepoPath);
+            return e;
+        }
+
+        return null;
+    }
+}

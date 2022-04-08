@@ -12,6 +12,7 @@ using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Radarr;
 using TrashLib.Radarr.Config;
+using TrashLib.Repo;
 using TrashLib.Sonarr;
 using TrashLib.Startup;
 using VersionControl;
@@ -83,6 +84,7 @@ public static class CompositionRoot
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
+        builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
 
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
