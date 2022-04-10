@@ -1,4 +1,4 @@
-using Common.Extensions;
+using Common.FluentValidation;
 using FluentValidation;
 using JetBrains.Annotations;
 

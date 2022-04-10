@@ -21,6 +21,6 @@ internal class ReleaseProfileConfigValidator : AbstractValidator<ReleaseProfileC
 {
     public ReleaseProfileConfigValidator(ISonarrValidationMessages messages)
     {
-        RuleFor(x => x.Type).IsInEnum().WithMessage(messages.ReleaseProfileType);
+        RuleFor(x => x.TrashIds).NotEmpty().WithMessage(messages.ReleaseProfileTrashIds);
     }
 }

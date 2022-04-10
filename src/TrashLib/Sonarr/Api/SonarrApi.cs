@@ -68,6 +68,13 @@ public class SonarrApi : ISonarrApi
         return _profileHandler.CompatibleReleaseProfileForReceiving(response);
     }
 
+    public async Task DeleteReleaseProfile(int releaseProfileId)
+    {
+        await BaseUrl()
+            .AppendPathSegment($"releaseprofile/{releaseProfileId}")
+            .DeleteAsync();
+    }
+
     public async Task<IReadOnlyCollection<SonarrQualityDefinitionItem>> GetQualityDefinition()
     {
         return await BaseUrl()

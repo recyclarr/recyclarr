@@ -11,6 +11,6 @@ internal class SonarrValidationMessages : ISonarrValidationMessages
     public string ApiKey =>
         "Property 'api_key' is required";
 
-    public string ReleaseProfileType =>
-        "'type' is required for 'release_profiles' elements";
+    public string ReleaseProfileTrashIds =>
+        "'trash_ids' is required for 'release_profiles' elements";
 }

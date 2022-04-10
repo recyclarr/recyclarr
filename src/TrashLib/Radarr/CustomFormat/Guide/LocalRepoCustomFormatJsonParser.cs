@@ -1,26 +1,24 @@
 using System.IO.Abstractions;
-using TrashLib.Repo;
+using TrashLib.Radarr.Config;
 
 namespace TrashLib.Radarr.CustomFormat.Guide;
 
-internal class LocalRepoCustomFormatJsonParser : IRadarrGuideService
+public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
 {
     private readonly IFileSystem _fileSystem;
-    private readonly IRepoUpdater _repoUpdater;
+    private readonly IResourcePaths _paths;
 
-    public LocalRepoCustomFormatJsonParser(IFileSystem fileSystem, IRepoUpdater repoUpdater)
+    public LocalRepoCustomFormatJsonParser(IFileSystem fileSystem, IResourcePaths paths)
     {
         _fileSystem = fileSystem;
-        _repoUpdater = repoUpdater;
+        _paths = paths;
     }
 
     public IEnumerable<string> GetCustomFormatJson()
     {
-        _repoUpdater.UpdateRepo();
-
-        var jsonDir = Path.Combine(_repoUpdater.RepoPath, "docs/json/radarr");
+        var jsonDir = Path.Combine(_paths.RepoPath, "docs/json/radarr");
         var tasks = _fileSystem.Directory.GetFiles(jsonDir, "*.json")
-            .Select(async f => await _fileSystem.File.ReadAllTextAsync(f));
+            .Select(f => _fileSystem.File.ReadAllTextAsync(f));
 
         return Task.WhenAll(tasks).Result;
     }

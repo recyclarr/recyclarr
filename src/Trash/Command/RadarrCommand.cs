@@ -9,6 +9,7 @@ using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Repo;
 
 namespace Trash.Command;
 
@@ -27,10 +28,11 @@ public class RadarrCommand : ServiceCommand
         ILogJanitor logJanitor,
         ISettingsPersister settingsPersister,
         ISettingsProvider settingsProvider,
+        IRepoUpdater repoUpdater,
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
         Func<ICustomFormatUpdater> customFormatUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider, repoUpdater)
     {
         _log = log;
         _configLoader = configLoader;
@@ -41,7 +43,7 @@ public class RadarrCommand : ServiceCommand
     public override string CacheStoragePath { get; } =
         Path.Combine(AppPaths.AppDataPath, "cache", "radarr");
 
-    public override async Task Process()
+    protected override async Task Process()
     {
         try
         {

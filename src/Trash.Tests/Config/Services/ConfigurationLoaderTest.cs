@@ -18,7 +18,6 @@ using Trash.Config;
 using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Sonarr.Config;
-using TrashLib.Sonarr.ReleaseProfile;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 
@@ -105,13 +104,13 @@ public class ConfigurationLoaderTest
                     {
                         new()
                         {
-                            Type = ReleaseProfileType.Anime,
+                            TrashIds = new[] {"123"},
                             StrictNegativeScores = true,
                             Tags = new List<string> {"anime"}
                         },
                         new()
                         {
-                            Type = ReleaseProfileType.Series,
+                            TrashIds = new[] {"456"},
                             StrictNegativeScores = false,
                             Tags = new List<string>
                             {

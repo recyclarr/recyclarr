@@ -4,14 +4,24 @@ namespace Common.Extensions;
 
 public static class StringExtensions
 {
-    public static bool ContainsIgnoreCase(this string value, string searchFor)
+    public static bool ContainsIgnoreCase(this string? value, string searchFor)
     {
-        return value.Contains(searchFor, StringComparison.OrdinalIgnoreCase);
+        return value?.Contains(searchFor, StringComparison.OrdinalIgnoreCase) ?? false;
     }
 
-    public static bool EqualsIgnoreCase(this string value, string? matchThis)
+    public static bool EqualsIgnoreCase(this string? value, string? matchThis)
     {
-        return value.Equals(matchThis, StringComparison.OrdinalIgnoreCase);
+        return value?.Equals(matchThis, StringComparison.OrdinalIgnoreCase) ?? false;
+    }
+
+    public static bool EndsWithIgnoreCase(this string? value, string matchThis)
+    {
+        return value?.EndsWith(matchThis, StringComparison.OrdinalIgnoreCase) ?? false;
+    }
+
+    public static bool StartsWithIgnoreCase(this string? value, string matchThis)
+    {
+        return value?.StartsWith(matchThis, StringComparison.OrdinalIgnoreCase) ?? false;
     }
 
     public static float ToFloat(this string value)

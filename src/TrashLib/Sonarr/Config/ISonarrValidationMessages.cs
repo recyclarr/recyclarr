@@ -4,5 +4,5 @@ public interface ISonarrValidationMessages
 {
     string BaseUrl { get; }
     string ApiKey { get; }
-    string ReleaseProfileType { get; }
+    string ReleaseProfileTrashIds { get; }
 }
