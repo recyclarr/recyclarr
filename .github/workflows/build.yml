@@ -126,26 +126,17 @@ jobs:
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 
-  release-docker:
-    name: Release Docker Image
-    needs: release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      #- name: Login to DockerHub
+      #  uses: docker/login-action@v1
+      #  with:
+      #    username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #    password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
@@ -158,17 +149,16 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ github.repository }},ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }} #${{ github.repository }},ghcr.io/${{ github.repository }}
           tags: type=ref,event=tag
 
       - name: Build & Push Image
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: ./docker
-          build-args: |
-            DOTNET_VERSION=${{ env.dotnetVersion }}
-            VERSION=${{ github.event.create.ref }}
-          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
+          context: .
+          file: ./docker/Dockerfile
+          build-args: DOTNET_VERSION=${{ env.dotnetVersion }}
+          platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
