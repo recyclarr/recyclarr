@@ -21,7 +21,7 @@ RUN set -ex; \
     esac; \
     \
     # Download and extract the binary from the release
-    wget --quiet -O /tmp/trash.zip "https://github.com/rcdailey/trash-updater/releases/$download_path/trash-$runtime.zip"; \
+    wget --quiet -O /tmp/trash.zip "https://github.com/skayo/trash-updater/releases/$download_path/trash-$runtime.zip"; \
     apk add --no-cache unzip; \
     unzip -j /tmp/trash.zip -d /usr/local/bin trash; \
     chmod +x /usr/local/bin/trash; \
