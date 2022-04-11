@@ -1,5 +1,5 @@
 # Globally scoped arguments (for FROM instructions)
-#ARG BUILDPLATFORM=linux/amd64 <-- uncomment when building without Docker Buildx
+#ARG BUILDPLATFORM <-- uncomment when building without Docker Buildx
 ARG DOTNET_VERSION=6.0
 
 # This build step just copies all binaries into the container and filters out the correct one
@@ -8,10 +8,10 @@ FROM --platform=$BUILDPLATFORM alpine:3.15 as get-trash-binary
 # Copy all binaries into container
 COPY ./publish /publish
 
-ARG TARGETPLATFORM=linux/amd64
+ARG TARGETPLATFORM
 RUN set -ex; \
     \
-    # Pick the correct trash binary according to target platform provided by Docker Buildx
+    # Pick the correct trash binary according to the target platform provided by Docker Buildx
     case "$TARGETPLATFORM" in \
 		"linux/arm/v7") \
     		trash_binary="/publish/trash-linux-musl-arm/trash"  \
