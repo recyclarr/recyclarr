@@ -138,11 +138,6 @@ jobs:
         with:
           path: publish
 
-      - run: |
-          ls -liash
-          ls -liash publish
-          ls -liash publish/trash-linux-arm
-
       - name: Extract Changelog
         id: changelog
         uses: ffurrer2/extract-release-notes@v1
@@ -154,7 +149,7 @@ jobs:
         with:
           files: publish/**/trash-*.zip
           body: ${{ steps.changelog.outputs.release_notes }}
-          tag_name: ${{ github.event.create.ref }}
+          tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 
@@ -188,9 +183,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: .
-          file: ./docker/Dockerfile
-          build-args: DOTNET_VERSION=${{ env.DOTNET_VERSION }}
+          context: ./docker
+          build-args: |
+            DOTNET_VERSION=${{ env.DOTNET_VERSION }}
+            REPOSITORY=${{ github.repository }}
+            VERSION=${{ github.ref_name }}
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
