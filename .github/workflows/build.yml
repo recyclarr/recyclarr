@@ -157,7 +157,7 @@ jobs:
           images: ${{ github.repository }},ghcr.io/${{ github.repository }}
           tags: type=ref,event=tag
 
-      - name: Build & Push Image
+      - name: Build & Push Docker Image
         uses: docker/build-push-action@v2
         with:
           push: true
