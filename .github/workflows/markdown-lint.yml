@@ -6,6 +6,10 @@ on:
     paths:
       - "**.md"
       - "!src/**"
+  pull_request:
+    paths:
+      - "**.md"
+      - "!src/**"
 
 env:
   dotnetVersion: "6.0.x"
