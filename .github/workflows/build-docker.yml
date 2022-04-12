@@ -42,8 +42,9 @@ jobs:
         with:
           images: ${{ github.repository }},ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern=v{{version}},value=${{ github.event.release.tag_name }}
-            type=semver,pattern={{version}},value=${{ github.event.release.tag_name }}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}},value=${{ github.event.release.tag_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ github.event.release.tag_name }}
+            type=semver,pattern={{minor}},value=${{ github.event.release.tag_name }}
 
       - name: Build & Push Image
         uses: docker/build-push-action@v2
