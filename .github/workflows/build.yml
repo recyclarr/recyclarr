@@ -11,29 +11,8 @@ env:
   DOTNET_VERSION: "6.0"
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
-
-      - name: Setup .NET Core SDK ${{ env.DOTNET_VERSION }}
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Test
-        run: dotnet test src --configuration Release --logger GitHubActions
-
   build:
     name: Build
-    needs: test
-    runs-on: windows-latest # Must run on Windows so that version info gets properly set in host EXE. See: https://github.com/dotnet/runtime/issues/3828
-
     strategy:
       fail-fast: true
       matrix:
@@ -48,10 +27,12 @@ jobs:
           - linux-musl-x64
           - linux-musl-arm
           - linux-musl-arm64
-
+    # Must run on Windows so that version info gets properly set in host EXE. See:
+    # https://github.com/dotnet/runtime/issues/3828
+    runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
@@ -60,25 +41,22 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Test
+        run: dotnet test src --configuration Release --logger GitHubActions
+
       - name: Publish
         shell: pwsh
         run: ci/Publish.ps1 ${{ matrix.runtime }}
-
-      - name: Create Zip File
-        shell: pwsh
-        run: Compress-Archive publish/${{ matrix.runtime }}/* publish/trash-${{ matrix.runtime }}.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: trash-${{ matrix.runtime }}
-          path: publish/trash-${{ matrix.runtime }}.zip
+          path: publish/${{ matrix.runtime }}/*
 
   smoke:
     name: Smoke Test
     needs: build
-    runs-on: ${{ matrix.image }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -89,19 +67,15 @@ jobs:
             runtime: linux-x64
           - image: macos-latest
             runtime: osx-x64
-
+    runs-on: ${{ matrix.image }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
           name: trash-${{ matrix.runtime }}
-
-      - name: Extract Zip File
-        shell: pwsh
-        run: Expand-Archive trash-${{ matrix.runtime }}.zip ./
 
       - name: Run Smoke Test
         shell: pwsh
@@ -110,8 +84,8 @@ jobs:
   release:
     name: Release
     needs: smoke
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
 
     permissions:
       contents: write
@@ -119,7 +93,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
           # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
@@ -138,15 +112,23 @@ jobs:
         with:
           path: publish
 
+      - name: Create Zip Files
+        shell: pwsh
+        run: ci/CreateZip.ps1 publish
+
       - name: Extract Changelog
         id: changelog
         uses: ffurrer2/extract-release-notes@v1
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          files: publish/**/trash-*.zip
+          files: publish-zip/trash-*.zip
           body: ${{ steps.changelog.outputs.release_notes }}
+          tag_name: ${{ github.event.create.ref }}
+          draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 
       - name: Set up QEMU
