@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Build & Push Docker Image
+name: Build Docker Image
 
 on:
   release:
@@ -9,7 +9,7 @@ env:
   dotnetVersion: "6.0"
 
 jobs:
-  build:
+  build-docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
