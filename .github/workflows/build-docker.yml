@@ -41,7 +41,9 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ github.repository }},ghcr.io/${{ github.repository }}
-          tags: type=ref,event=tag
+          tags: |
+            type=semver,pattern=v{{version}},value=${{ github.event.release.tag_name }}
+            type=semver,pattern={{version}},value=${{ github.event.release.tag_name }}
 
       - name: Build & Push Image
         uses: docker/build-push-action@v2
