@@ -33,7 +33,7 @@ RUN set -ex; \
     chmod 755 /usr/local/bin/trash; \
     chmod 755 /entrypoint.sh; \
     \
-    # Cleanup system
+    # Remove build dependencies, temporary files and the existing crontab file (as it will be overwritten anyways)
     apk del unzip; \
     rm -rf /tmp/trash.zip; \
     rm -rf /var/spool/cron/crontabs/root; \
