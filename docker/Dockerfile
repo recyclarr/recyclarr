@@ -1,7 +1,7 @@
 ARG DOTNET_VERSION=6.0
 FROM mcr.microsoft.com/dotnet/runtime-deps:${DOTNET_VERSION}-alpine
 
-# Copy entrypoint script into container
+# Copy the entrypoint script into the container
 COPY ./entrypoint.sh /entrypoint.sh
 
 ARG VERSION=latest
@@ -24,12 +24,12 @@ RUN set -ex; \
         *) echo >&2 "ERROR: Unsupported target platform: $TARGETPLATFORM"; exit 1 ;; \
     esac; \
     \
-    # Download and extract the binary from the release
+    # Download and extract the trash binary from the release
     wget --quiet -O /tmp/trash.zip "https://github.com/$REPOSITORY/releases/$download_path/trash-$runtime.zip"; \
     apk add --no-cache unzip; \
     unzip -j /tmp/trash.zip -d /usr/local/bin trash; \
     \
-    # Set permissions
+    # Set executable permissions
     chmod 755 /usr/local/bin/trash; \
     chmod 755 /entrypoint.sh; \
     \
