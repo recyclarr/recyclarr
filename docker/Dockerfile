@@ -4,16 +4,16 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:${DOTNET_VERSION}-alpine
 # Copy the entrypoint script into the container
 COPY ./entrypoint.sh /entrypoint.sh
 
-ARG VERSION=latest
+ARG RELEASE_TAG=latest
 ARG TARGETPLATFORM
 ARG REPOSITORY=rcdailey/trash-updater
 RUN set -ex; \
     \
-    # The download path is a bit different when using the latest release instead of a tagged release
-    if [ "$VERSION" = "latest" ]; then \
+    # The download path is a bit different when using the latest release instead of a specific release
+    if [ "$RELEASE_TAG" = "latest" ]; then \
         download_path="latest/download"; \
     else \
-        download_path="download/$VERSION"; \
+        download_path="download/$RELEASE_TAG"; \
     fi; \
     \
     # Determine the runtime from the target platform provided by Docker Buildx
