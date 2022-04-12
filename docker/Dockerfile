@@ -39,10 +39,5 @@ RUN set -ex; \
     rm -rf /var/spool/cron/crontabs/root; \
     rm -rf /etc/periodic
 
-# Runtime configuration options (not sure if these actually affect anything but they wont't hurt)
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-ENV DOTNET_RUNNING_IN_CONTAINER=true
-
-# Define entrypoint and reset command
+# Define the entrypoint script as the entrypoint for the container
 ENTRYPOINT ["/entrypoint.sh"]
-CMD []
