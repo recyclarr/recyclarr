@@ -8,7 +8,7 @@ on:
       - "**.md"
 
 env:
-  DOTNET_VERSION: "6.0"
+  dotnetVersion: "6.0.x"
 
 jobs:
   build:
@@ -36,10 +36,10 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
-      - name: Setup .NET Core SDK ${{ env.DOTNET_VERSION }}
+      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Test
         run: dotnet test src --configuration Release --logger GitHubActions
@@ -86,11 +86,6 @@ jobs:
     needs: smoke
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-
-    permissions:
-      contents: write
-      packages: write
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -130,42 +125,3 @@ jobs:
           tag_name: ${{ github.event.create.ref }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ github.token }}
-
-      - name: Extract Metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ github.repository }},ghcr.io/${{ github.repository }}
-          tags: type=ref,event=tag
-
-      - name: Build & Push Docker Image
-        uses: docker/build-push-action@v2
-        with:
-          push: true
-          context: ./docker
-          build-args: |
-            DOTNET_VERSION=${{ env.DOTNET_VERSION }}
-            REPOSITORY=${{ github.repository }}
-            VERSION=${{ github.ref_name }}
-          platforms: linux/arm/v7,linux/arm64,linux/amd64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
