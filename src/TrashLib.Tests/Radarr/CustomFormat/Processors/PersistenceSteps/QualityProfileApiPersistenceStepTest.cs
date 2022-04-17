@@ -18,7 +18,7 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps;
 public class QualityProfileApiPersistenceStepTest
 {
     [Test]
-    public void Do_not_invoke_api_if_no_scores_to_update()
+    public async Task Do_not_invoke_api_if_no_scores_to_update()
     {
         const string radarrQualityProfileData = @"[{
   'name': 'profile1',
@@ -56,13 +56,13 @@ public class QualityProfileApiPersistenceStepTest
         };
 
         var processor = new QualityProfileApiPersistenceStep();
-        processor.Process(api, cfScores);
+        await processor.Process(api, cfScores);
 
-        api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
+        await api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
     }
 
     [Test]
-    public void Invalid_quality_profile_names_are_reported()
+    public async Task Invalid_quality_profile_names_are_reported()
     {
         const string radarrQualityProfileData = @"[{'name': 'profile1'}]";
 
@@ -75,14 +75,14 @@ public class QualityProfileApiPersistenceStepTest
         };
 
         var processor = new QualityProfileApiPersistenceStep();
-        processor.Process(api, cfScores);
+        await processor.Process(api, cfScores);
 
         processor.InvalidProfileNames.Should().Equal("wrong_profile_name");
         processor.UpdatedScores.Should().BeEmpty();
     }
 
     [Test]
-    public void Reset_scores_for_unmatched_cfs_if_enabled()
+    public async Task Reset_scores_for_unmatched_cfs_if_enabled()
     {
         const string radarrQualityProfileData = @"[{
   'name': 'profile1',
@@ -120,7 +120,7 @@ public class QualityProfileApiPersistenceStepTest
         };
 
         var processor = new QualityProfileApiPersistenceStep();
-        processor.Process(api, cfScores);
+        await processor.Process(api, cfScores);
 
         processor.InvalidProfileNames.Should().BeEmpty();
         processor.UpdatedScores.Should()
@@ -132,13 +132,13 @@ public class QualityProfileApiPersistenceStepTest
                 new("cf3", 0, FormatScoreUpdateReason.Reset)
             });
 
-        api.Received().UpdateQualityProfile(
+        await api.Received().UpdateQualityProfile(
             Verify.That<JObject>(j => j["formatItems"]!.Children().Should().HaveCount(3)),
             Arg.Any<int>());
     }
 
     [Test]
-    public void Scores_are_set_in_quality_profile()
+    public async Task Scores_are_set_in_quality_profile()
     {
         const string radarrQualityProfileData = @"[{
   'name': 'profile1',
@@ -207,7 +207,7 @@ public class QualityProfileApiPersistenceStepTest
         };
 
         var processor = new QualityProfileApiPersistenceStep();
-        processor.Process(api, cfScores);
+        await processor.Process(api, cfScores);
 
         var expectedProfileJson = JObject.Parse(@"{
   'name': 'profile1',
@@ -250,7 +250,7 @@ public class QualityProfileApiPersistenceStepTest
   'id': 1
 }");
 
-        api.Received()
+        await api.Received()
             .UpdateQualityProfile(Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
         processor.InvalidProfileNames.Should().BeEmpty();
         processor.UpdatedScores.Should()
