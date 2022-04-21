@@ -2,7 +2,7 @@
 set -e
 
 # If the script has any arguments, invoke the CLI instead.
-# This allows for "docker run rcdailey/trash-updater create-config", "docker run rcdailey/trash-updater --help", etc.
+# This allows the image to be used as a CLI with something like "docker run --rm -it -v ./trash.yml:/config/trash.yml rcdailey/trash-updater sonarr".
 if [ "$#" -gt 0 ]; then
 	/usr/local/bin/trash "$@"
 else

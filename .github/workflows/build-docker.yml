@@ -64,7 +64,7 @@ jobs:
           build-args: |
             DOTNET_VERSION=${{ env.dotnetVersion }}
             REPOSITORY=${{ github.repository }}
-            RELEASE_TAG=${{ github.event.release.tag_name }}
+            ${{ github.event.release.tag_name && format('RELEASE_TAG={0}', github.event.release.tag_name) }}
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
