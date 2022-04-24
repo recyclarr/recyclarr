@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.Diagnostics.CodeAnalysis;
+using Autofac;
 using FluentAssertions;
 using NUnit.Framework;
 using Trash.Command;
@@ -10,10 +11,14 @@ namespace Trash.Tests.Command.Helpers;
 [Parallelizable(ParallelScope.All)]
 public class CliTypeActivatorTest
 {
+    // Warning CA1812 : an internal class that is apparently never instantiated.
+    [SuppressMessage("Performance", "CA1812", Justification = "Registered to and created by Autofac")]
     private class NonServiceCommandType
     {
     }
 
+    // Warning CA1812 : an internal class that is apparently never instantiated.
+    [SuppressMessage("Performance", "CA1812", Justification = "Registered to and created by Autofac")]
     private class StubCommand : IServiceCommand
     {
         public bool Preview => false;
