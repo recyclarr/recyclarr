@@ -95,7 +95,7 @@ linux, I think you can handle what needs to be done :-)*
 
 ### Special Note regarding Ubuntu 22.04
 
-Ubuntu moved from libssl 1.1 to libssl 3.0 in 22.04. This currently breaks the updater. See https://github.com/rcdailey/trash-updater/issues/54
+Ubuntu moved from libssl 1.1 to libssl 3.0 in 22.04. This currently breaks the updater.
 
 ## Getting Started
 
