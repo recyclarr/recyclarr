@@ -3,7 +3,7 @@ Pages of Interest:
 - [[Command Line Reference]]
 - [[Configuration Reference]]
 - [[Settings Reference]]
-- [[TRaSH Guide Structural Guidelines]]
+- [[Behavior]]
 
 See the "Pages" list on the right side of this page for the complete list of wiki pages.
 
