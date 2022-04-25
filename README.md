@@ -93,10 +93,6 @@ introduction of multiple architecture support. That one liner was no longer suff
 complex solution was needed to determine which architecture to download for. But if you're using
 linux, I think you can handle what needs to be done :-)*
 
-### Special Note regarding Ubuntu 22.04
-
-Ubuntu moved from libssl 1.1 to libssl 3.0 in 22.04. This currently breaks the updater.
-
 ## Getting Started
 
 Trash Updater requires a YAML configuration file in order to work. Run the steps below if you want
