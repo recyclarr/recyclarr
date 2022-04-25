@@ -1,4 +1,5 @@
 {
   "extends": "../.markdownlint.json",
-  "first-line-heading": false
+  "first-line-heading": false,
+  "single-h1": false
 }
