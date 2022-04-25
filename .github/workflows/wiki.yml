@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'wiki/**'
+      - .github/workflows/wiki.yml
     branches:
       - master
 
@@ -16,7 +17,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Upload Documentation to Wiki
-        uses: Andrew-Chen-Wang/github-wiki-action@v2
+        # uses: Andrew-Chen-Wang/github-wiki-action@v2
+        uses: rcdailey/github-wiki-action@master # Temp until PR is merged: https://github.com/Andrew-Chen-Wang/github-wiki-action/pull/10
         env:
           WIKI_DIR: wiki/
           GH_TOKEN: ${{ secrets.PAT }}
