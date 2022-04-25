@@ -101,7 +101,8 @@ to get started with a minimal configuration file.
 - Run `trash create-config` to create a starter `trash.yml` file in the same directory as the
   executable. You can also use `--path` to customize the filename and location.
 - Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
-  and `api_key` settings for each service that you want to use.
+  and `api_key` settings for each service that you want to use. Change/delete other parts of the
+  file as you see fit.
 - Run `trash sonarr` and/or `trash radarr` as needed to update those instances.
 
 The last step above will do a "basic" sync from the guides to Sonarr and/or Radarr. The starter YAML
