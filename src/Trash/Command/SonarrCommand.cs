@@ -6,6 +6,7 @@ using Serilog.Core;
 using Trash.Config;
 using TrashLib.Config.Settings;
 using TrashLib.Repo;
+using TrashLib.Sonarr;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
@@ -20,6 +21,11 @@ public class SonarrCommand : ServiceCommand
     private readonly ILogger _log;
     private readonly Func<IReleaseProfileUpdater> _profileUpdaterFactory;
     private readonly Func<ISonarrQualityDefinitionUpdater> _qualityUpdaterFactory;
+    private readonly IReleaseProfileLister _lister;
+
+    [CommandOption("list-release-profiles", Description =
+        "List available release profiles from the guide in YAML format.")]
+    public bool ListReleaseProfiles { get; [UsedImplicitly] set; } = false;
 
     public SonarrCommand(
         ILogger log,
@@ -30,13 +36,15 @@ public class SonarrCommand : ServiceCommand
         IRepoUpdater repoUpdater,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
-        Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory)
+        Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory,
+        IReleaseProfileLister lister)
         : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider, repoUpdater)
     {
         _log = log;
         _configLoader = configLoader;
         _profileUpdaterFactory = profileUpdaterFactory;
         _qualityUpdaterFactory = qualityUpdaterFactory;
+        _lister = lister;
     }
 
     public override string CacheStoragePath { get; } =
@@ -46,6 +54,12 @@ public class SonarrCommand : ServiceCommand
     {
         try
         {
+            if (ListReleaseProfiles)
+            {
+                _lister.ListReleaseProfiles();
+                return;
+            }
+
             foreach (var config in _configLoader.LoadMany(Config, "sonarr"))
             {
                 _log.Information("Processing server {Url}", config.BaseUrl);

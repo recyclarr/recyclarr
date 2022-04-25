@@ -3,6 +3,7 @@
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="CliFx" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />

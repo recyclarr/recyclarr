@@ -26,6 +26,9 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
   Docker.
 - Sonarr: Ability to include or exclude specific optional Required, Ignored, or Preferred terms in
   release profiles.
+- Sonarr: New `--list-release-profiles` command line option which can be used to quickly and
+  conveniently get a list of release profiles (and their Trash IDs) so you know what to add in your
+  YAML config under `release_profiles`.
 
 [#17]: https://github.com/rcdailey/trash-updater/issues/17
 [Upgrade Guide]: https://github.com/rcdailey/trash-updater/wiki/Upgrade-Guide

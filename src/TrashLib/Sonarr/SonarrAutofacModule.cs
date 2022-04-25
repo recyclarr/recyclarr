@@ -13,10 +13,8 @@ public class SonarrAutofacModule : Module
     {
         builder.RegisterType<SonarrApi>().As<ISonarrApi>();
         builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
-
-        builder.RegisterType<SonarrCompatibility>()
-            .As<ISonarrCompatibility>()
-            .SingleInstance();
+        builder.RegisterType<SonarrCompatibility>().As<ISonarrCompatibility>().SingleInstance();
+        builder.RegisterType<ReleaseProfileLister>().As<IReleaseProfileLister>();
 
         // Release Profile Support
         builder.RegisterType<ReleaseProfileUpdater>().As<IReleaseProfileUpdater>();

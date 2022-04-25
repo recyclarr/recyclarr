@@ -23,6 +23,8 @@ Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 - Ability to convert preferred with negative scores to "Must not contain" terms.
 - Terms mentioned as "optional" in the guide can be selectively included or excluded; based entirely
   on user preference.
+- Convenient command line options to get information from the guide to more easily add it to your
+  YAML configuration.
 
 ### Quality Definitions
 
