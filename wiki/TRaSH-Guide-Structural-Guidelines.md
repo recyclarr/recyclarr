@@ -102,18 +102,3 @@ The following general rules apply to all lines in the markdown data:
    - **Sentence**: Once the term "Optional" is found in any sentence following a header, it applies
      to all code blocks for the remainder of that section. Once a new header is found (nested or
      not), terms are not considered optional anymore.
-
-### Release Profile Naming
-
-The script procedurally generates a name for release profiles it creates. For the following example:
-
-```txt
-[Trash] Anime - First Release Profile
-```
-
-The name is generated as follows:
-
-- `Anime` comes from the guide type (could be `WEB-DL`)
-- `First Release Profile` is directly from one of the headers in the anime guide
-- `[Trash]` is used by the script to mean "This release profile is controlled by the script". This
-  is to separate it from any manual ones the user has defined, which the script will not touch.
