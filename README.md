@@ -43,6 +43,14 @@ Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 - Option to enable automatic deletion custom formats in Radarr when they are removed from config or
   the guide.
 
+## Requirements
+
+Before installing & running Trash Updater, please review the requirements below.
+
+- Minimum Supported Sonarr Version: `3.0.4.1098`
+- Minimum Supported Radarr Version: `3.*`
+- OpenSSL 1.x required on Linux
+
 ## Installation
 
 Simply download the latest release for your platform using the table below. The download itself is
