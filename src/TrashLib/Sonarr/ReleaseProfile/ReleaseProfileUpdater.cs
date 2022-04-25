@@ -5,6 +5,7 @@ using TrashLib.ExceptionTypes;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;
 using TrashLib.Sonarr.Config;
+using TrashLib.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Sonarr.ReleaseProfile;
 
@@ -12,44 +13,132 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
 {
     private readonly ISonarrApi _api;
     private readonly ISonarrCompatibility _compatibility;
-    private readonly IReleaseProfileGuideParser _parser;
+    private readonly ISonarrGuideService _guide;
+    private readonly ILogger _log;
 
     public ReleaseProfileUpdater(
         ILogger logger,
-        IReleaseProfileGuideParser parser,
+        ISonarrGuideService guide,
         ISonarrApi api,
         ISonarrCompatibility compatibility)
     {
-        Log = logger;
-        _parser = parser;
+        _log = logger;
+        _guide = guide;
         _api = api;
         _compatibility = compatibility;
     }
 
-    private ILogger Log { get; }
-
     public async Task Process(bool isPreview, SonarrConfiguration config)
     {
-        foreach (var profile in config.ReleaseProfiles)
-        {
-            Log.Information("Processing Release Profile: {ProfileName}", profile.Type);
-            var markdown = await _parser.GetMarkdownData(profile.Type);
-            var profileData = _parser.ParseMarkdown(profile, markdown);
-            var profiles = Utils.FilterProfiles(profileData, profile.Filter);
+        var profilesFromGuide = _guide.GetReleaseProfileData();
 
-            if (profile.Filter.IncludeOptional)
+        var filteredProfiles = new List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)>();
+        var filterer = new ReleaseProfileDataFilterer(_log);
+
+        var configProfiles = config.ReleaseProfiles.SelectMany(x => x.TrashIds.Select(y => (TrashId: y, Config: x)));
+        foreach (var (trashId, configProfile) in configProfiles)
+        {
+            // For each release profile specified in our YAML config, find the matching profile in the guide.
+            var selectedProfile = profilesFromGuide.FirstOrDefault(x => x.TrashId.EqualsIgnoreCase(trashId));
+            if (selectedProfile is null)
             {
-                Log.Information("Configuration is set to allow optional terms to be synchronized");
+                _log.Warning("A release profile with Trash ID {TrashId} does not exist", trashId);
+                continue;
+            }
+
+            _log.Debug("Found Release Profile: {ProfileName} ({TrashId})", selectedProfile.Name,
+                selectedProfile.TrashId);
+
+            if (configProfile.Filter != null)
+            {
+                _log.Debug("This profile will be filtered");
+                var newProfile = filterer.FilterProfile(selectedProfile, configProfile.Filter);
+                if (newProfile is not null)
+                {
+                    selectedProfile = newProfile;
+                }
             }
 
             if (isPreview)
             {
-                Utils.PrintTermsAndScores(profiles);
+                Utils.PrintTermsAndScores(selectedProfile);
                 continue;
             }
 
-            await ProcessReleaseProfiles(profiles, profile);
+            filteredProfiles.Add((selectedProfile, configProfile.Tags));
         }
+
+        await ProcessReleaseProfiles(filteredProfiles);
+    }
+
+    private async Task ProcessReleaseProfiles(
+        List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)> profilesAndTags)
+    {
+        await DoVersionEnforcement();
+
+        // Obtain all of the existing release profiles first. If any were previously created by our program
+        // here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
+        // (but with some differences, since there have likely been updates since the last run).
+        var existingProfiles = await _api.GetReleaseProfiles();
+
+        foreach (var (profile, tags) in profilesAndTags)
+        {
+            // If tags were provided, ensure they exist. Tags that do not exist are added first, so that we
+            // may specify them with the release profile request payload.
+            var tagIds = await CreateTagsInSonarr(tags);
+
+            var title = BuildProfileTitle(profile.Name);
+            var profileToUpdate = GetProfileToUpdate(existingProfiles, title);
+            if (profileToUpdate != null)
+            {
+                _log.Information("Update existing profile: {ProfileName}", title);
+                await UpdateExistingProfile(profileToUpdate, profile, tagIds);
+            }
+            else
+            {
+                _log.Information("Create new profile: {ProfileName}", title);
+                await CreateNewProfile(title, profile, tagIds);
+            }
+        }
+
+        // Any profiles with `[Trash]` in front of their name are managed exclusively by Trash Updater. As such, if
+        // there are any still in Sonarr that we didn't update, those are most certainly old and shouldn't be kept
+        // around anymore.
+        await DeleteOldManagedProfiles(profilesAndTags, existingProfiles);
+    }
+
+    private async Task DeleteOldManagedProfiles(
+        IEnumerable<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)> profilesAndTags,
+        IEnumerable<SonarrReleaseProfile> sonarrProfiles)
+    {
+        var profiles = profilesAndTags.Select(x => x.Profile).ToList();
+        var sonarrProfilesToDelete = sonarrProfiles
+            .Where(sonarrProfile =>
+            {
+                return sonarrProfile.Name.StartsWithIgnoreCase("[Trash]") &&
+                       !profiles.Any(profile => sonarrProfile.Name.EndsWithIgnoreCase(profile.Name));
+            });
+
+        foreach (var profile in sonarrProfilesToDelete)
+        {
+            _log.Information("Deleting old Trash release profile: {ProfileName}", profile.Name);
+            await _api.DeleteReleaseProfile(profile.Id);
+        }
+    }
+
+    private async Task<IReadOnlyCollection<int>> CreateTagsInSonarr(IReadOnlyCollection<string> tags)
+    {
+        if (!tags.Any())
+        {
+            return Array.Empty<int>();
+        }
+
+        var sonarrTags = await _api.GetTags();
+        await CreateMissingTags(sonarrTags, tags);
+        return sonarrTags
+            .Where(t => tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
+            .Select(t => t.Id)
+            .ToList();
     }
 
     private async Task DoVersionEnforcement()
@@ -68,16 +157,17 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
         var missingTags = configTags.Where(t => !sonarrTags.Any(t2 => t2.Label.EqualsIgnoreCase(t)));
         foreach (var tag in missingTags)
         {
-            Log.Debug("Creating Tag: {Tag}", tag);
+            _log.Debug("Creating Tag: {Tag}", tag);
             var newTag = await _api.CreateTag(tag);
             sonarrTags.Add(newTag);
         }
     }
 
-    private string BuildProfileTitle(ReleaseProfileType profileType, string profileName)
+    private const string ProfileNamePrefix = "[Trash]";
+
+    private static string BuildProfileTitle(string profileName)
     {
-        var titleType = profileType.ToString();
-        return $"[Trash] {titleType} - {profileName}";
+        return $"{ProfileNamePrefix} {profileName}";
     }
 
     private static SonarrReleaseProfile? GetProfileToUpdate(IEnumerable<SonarrReleaseProfile> profiles,
@@ -86,83 +176,31 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
         return profiles.FirstOrDefault(p => p.Name == profileName);
     }
 
-    private static void SetupProfileRequestObject(SonarrReleaseProfile profileToUpdate, FilteredProfileData profile,
-        List<int> tagIds)
+    private static void SetupProfileRequestObject(SonarrReleaseProfile profileToUpdate, ReleaseProfileData profile,
+        IReadOnlyCollection<int> tagIds)
     {
         profileToUpdate.Preferred = profile.Preferred
-            .SelectMany(kvp => kvp.Value.Select(term => new SonarrPreferredTerm(kvp.Key, term)))
+            .SelectMany(x => x.Terms.Select(termData => new SonarrPreferredTerm(x.Score, termData.Term)))
             .ToList();
 
-        profileToUpdate.Ignored = profile.Ignored.ToList(); //string.Join(',', profile.Ignored);
-        profileToUpdate.Required = profile.Required.ToList(); //string.Join(',', profile.Required);
-
-        // Null means the guide didn't specify a value for this, so we leave the existing setting intact.
-        if (profile.IncludePreferredWhenRenaming != null)
-        {
-            profileToUpdate.IncludePreferredWhenRenaming = profile.IncludePreferredWhenRenaming.Value;
-        }
-
+        profileToUpdate.Ignored = profile.Ignored.Select(x => x.Term).ToList();
+        profileToUpdate.Required = profile.Required.Select(x => x.Term).ToList();
+        profileToUpdate.IncludePreferredWhenRenaming = profile.IncludePreferredWhenRenaming;
         profileToUpdate.Tags = tagIds;
     }
 
-    private async Task UpdateExistingProfile(SonarrReleaseProfile profileToUpdate, FilteredProfileData profile,
-        List<int> tagIds)
+    private async Task UpdateExistingProfile(SonarrReleaseProfile profileToUpdate, ReleaseProfileData profile,
+        IReadOnlyCollection<int> tagIds)
     {
-        Log.Debug("Update existing profile with id {ProfileId}", profileToUpdate.Id);
+        _log.Debug("Update existing profile with id {ProfileId}", profileToUpdate.Id);
         SetupProfileRequestObject(profileToUpdate, profile, tagIds);
         await _api.UpdateReleaseProfile(profileToUpdate);
     }
 
-    private async Task CreateNewProfile(string title, FilteredProfileData profile, List<int> tagIds)
+    private async Task CreateNewProfile(string title, ReleaseProfileData profile, IReadOnlyCollection<int> tagIds)
     {
-        var newProfile = new SonarrReleaseProfile
-        {
-            Name = title,
-            Enabled = true
-        };
-
+        var newProfile = new SonarrReleaseProfile {Name = title, Enabled = true};
         SetupProfileRequestObject(newProfile, profile, tagIds);
         await _api.CreateReleaseProfile(newProfile);
-    }
-
-    private async Task ProcessReleaseProfiles(IDictionary<string, ProfileData> profiles,
-        ReleaseProfileConfig config)
-    {
-        await DoVersionEnforcement();
-
-        List<int> tagIds = new();
-
-        // If tags were provided, ensure they exist. Tags that do not exist are added first, so that we
-        // may specify them with the release profile request payload.
-        if (config.Tags.Count > 0)
-        {
-            var sonarrTags = await _api.GetTags();
-            await CreateMissingTags(sonarrTags, config.Tags);
-            tagIds = sonarrTags.Where(t => config.Tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
-                .Select(t => t.Id)
-                .ToList();
-        }
-
-        // Obtain all of the existing release profiles first. If any were previously created by our program
-        // here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
-        // (but with some differences, since there have likely been updates since the last run).
-        var existingProfiles = await _api.GetReleaseProfiles();
-
-        foreach (var (name, profileData) in profiles)
-        {
-            var filteredProfileData = new FilteredProfileData(profileData, config);
-            var title = BuildProfileTitle(config.Type, name);
-            var profileToUpdate = GetProfileToUpdate(existingProfiles, title);
-            if (profileToUpdate != null)
-            {
-                Log.Information("Update existing profile: {ProfileName}", title);
-                await UpdateExistingProfile(profileToUpdate, filteredProfileData, tagIds);
-            }
-            else
-            {
-                Log.Information("Create new profile: {ProfileName}", title);
-                await CreateNewProfile(title, filteredProfileData, tagIds);
-            }
-        }
     }
 }

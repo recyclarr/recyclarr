@@ -18,6 +18,7 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         return new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeConverter(new YamlNullableEnumTypeConverter())
+            .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithObjectFactory(_objectFactory)
             .Build();
     }

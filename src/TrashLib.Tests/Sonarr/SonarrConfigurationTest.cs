@@ -5,7 +5,6 @@ using NUnit.Framework;
 using TrashLib.Config;
 using TrashLib.Sonarr;
 using TrashLib.Sonarr.Config;
-using TrashLib.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr;
 
@@ -28,21 +27,27 @@ public class SonarrConfigurationTest
     public void Validation_fails_for_all_missing_required_properties()
     {
         // default construct which should yield default values (invalid) for all required properties
-        var config = new SonarrConfiguration();
+        var config = new SonarrConfiguration
+        {
+            // validation is only applied to actual release profile elements. Not if it's empty.
+            ReleaseProfiles = new[] {new ReleaseProfileConfig()}
+        };
+
         var validator = _container.Resolve<IValidator<SonarrConfiguration>>();
 
         var result = validator.Validate(config);
 
+        var messages = new SonarrValidationMessages();
         var expectedErrorMessageSubstrings = new[]
         {
-            "Property 'base_url' is required",
-            "Property 'api_key' is required",
-            "'type' is required for 'release_profiles' elements"
+            messages.ApiKey,
+            messages.BaseUrl,
+            messages.ReleaseProfileTrashIds
         };
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Select(e => e.ErrorMessage).Should()
-            .OnlyContain(x => expectedErrorMessageSubstrings.Any(x.Contains));
+        result.Errors.Select(e => e.ErrorMessage)
+            .Should().BeEquivalentTo(expectedErrorMessageSubstrings);
     }
 
     [Test]
@@ -54,7 +59,7 @@ public class SonarrConfigurationTest
             BaseUrl = "required value",
             ReleaseProfiles = new List<ReleaseProfileConfig>
             {
-                new() {Type = ReleaseProfileType.Anime}
+                new() {TrashIds = new[] {"123"}}
             }
         };
 

@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Core;
 using Trash.Config;
 using TrashLib.Config.Settings;
+using TrashLib.Repo;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
@@ -26,10 +27,11 @@ public class SonarrCommand : ServiceCommand
         ILogJanitor logJanitor,
         ISettingsPersister settingsPersister,
         ISettingsProvider settingsProvider,
+        IRepoUpdater repoUpdater,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
         Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory)
-        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider)
+        : base(log, loggingLevelSwitch, logJanitor, settingsPersister, settingsProvider, repoUpdater)
     {
         _log = log;
         _configLoader = configLoader;
@@ -40,7 +42,7 @@ public class SonarrCommand : ServiceCommand
     public override string CacheStoragePath { get; } =
         Path.Combine(AppPaths.AppDataPath, "cache", "sonarr");
 
-    public override async Task Process()
+    protected override async Task Process()
     {
         try
         {

@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 
-namespace Common;
+namespace Common.Extensions;
 
 public static class JsonNetExtensions
 {

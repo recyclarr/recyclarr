@@ -2,11 +2,11 @@
   - base_url: http://localhost:8989
     api_key: 95283e6b156c42f3af8a9b16173f876b
     release_profiles:
-      - type: anime
+      - trash_ids: [123]
         strict_negative_scores: true
         tags:
           - anime
-      - type: series
+      - trash_ids: [456]
         tags:
           - tv
           - series

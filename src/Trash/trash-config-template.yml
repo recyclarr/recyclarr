@@ -16,11 +16,18 @@ sonarr:
     # Quality definitions from the guide to sync to Sonarr. Choice: anime, series, hybrid
     quality_definition: hybrid
 
-    # Release profiles from the guide to sync to Sonarr. Types: anime, series
+    # Release profiles from the guide to sync to Sonarr.
     # You can optionally add tags and make negative scores strictly ignored
     release_profiles:
-      - type: anime
-      - type: series
+      # Series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
+      # Anime (Uncomment below if you want it)
+#      - trash_ids:
+#          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+#          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
 
 # Configuration specific to Radarr.
 radarr:

@@ -12,6 +12,7 @@ using Serilog.Core;
 using Serilog.Events;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
+using TrashLib.Repo;
 using YamlDotNet.Core;
 
 namespace Trash.Command;
@@ -23,30 +24,50 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
     private readonly ILogJanitor _logJanitor;
     private readonly ISettingsPersister _settingsPersister;
     private readonly ISettingsProvider _settingsProvider;
+    private readonly IRepoUpdater _repoUpdater;
+
+    [CommandOption("preview", 'p', Description =
+        "Only display the processed markdown results without making any API calls.")]
+    public bool Preview { get; [UsedImplicitly] set; } = false;
+
+    [CommandOption("debug", 'd', Description =
+        "Display additional logs useful for development/debug purposes.")]
+    public bool Debug { get; [UsedImplicitly] set; } = false;
+
+    [CommandOption("config", 'c', Description =
+        "One or more YAML config files to use. All configs will be used and settings are additive. " +
+        "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
+    public ICollection<string> Config { get; [UsedImplicitly] set; } =
+        new List<string> {AppPaths.DefaultConfigPath};
+
+    public abstract string CacheStoragePath { get; }
 
     protected ServiceCommand(
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ILogJanitor logJanitor,
         ISettingsPersister settingsPersister,
-        ISettingsProvider settingsProvider)
+        ISettingsProvider settingsProvider,
+        IRepoUpdater repoUpdater)
     {
         _loggingLevelSwitch = loggingLevelSwitch;
         _logJanitor = logJanitor;
         _settingsPersister = settingsPersister;
         _settingsProvider = settingsProvider;
+        _repoUpdater = repoUpdater;
         _log = log;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
         // Must happen first because everything can use the logger.
-        SetupLogging();
+        _loggingLevelSwitch.MinimumLevel = Debug ? LogEventLevel.Debug : LogEventLevel.Information;
 
         // Has to happen right after logging because stuff below may use settings.
-        LoadSettings();
+        _settingsPersister.Load();
 
         SetupHttp();
+        _repoUpdater.UpdateRepo();
 
         try
         {
@@ -71,40 +92,8 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         }
         finally
         {
-            CleanupOldLogFiles();
+            _logJanitor.DeleteOldestLogFiles(20);
         }
-    }
-
-    private void LoadSettings()
-    {
-        _settingsPersister.Load();
-    }
-
-    [CommandOption("preview", 'p', Description =
-        "Only display the processed markdown results without making any API calls.")]
-    public bool Preview { get; [UsedImplicitly] set; } = false;
-
-    [CommandOption("debug", 'd', Description =
-        "Display additional logs useful for development/debug purposes.")]
-    public bool Debug { get; [UsedImplicitly] set; } = false;
-
-    [CommandOption("config", 'c', Description =
-        "One or more YAML config files to use. All configs will be used and settings are additive. " +
-        "If not specified, the script will look for `trash.yml` in the same directory as the executable.")]
-    public ICollection<string> Config { get; [UsedImplicitly] set; } =
-        new List<string> {AppPaths.DefaultConfigPath};
-
-    public abstract string CacheStoragePath { get; }
-
-    private void CleanupOldLogFiles()
-    {
-        _logJanitor.DeleteOldestLogFiles(20);
-    }
-
-    private void SetupLogging()
-    {
-        _loggingLevelSwitch.MinimumLevel =
-            Debug ? LogEventLevel.Debug : LogEventLevel.Information;
     }
 
     private void SetupHttp()
@@ -135,7 +124,7 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         });
     }
 
-    public abstract Task Process();
+    protected abstract Task Process();
 
     protected static void ExitDueToFailure()
     {

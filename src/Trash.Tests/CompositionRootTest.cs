@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Core;
 using FluentAssertions;
@@ -39,6 +40,11 @@ public class CompositionRootTest
         act.Should().NotThrow();
     }
 
+    // Warning CA1812 : CompositionRootTest.ConcreteTypeEnumerator is an internal class that is apparently never
+    // instantiated.
+    [SuppressMessage("Performance", "CA1812",
+        Justification = "Created via reflection by TestCaseSource attribute"
+    )]
     private sealed class ConcreteTypeEnumerator : IEnumerable
     {
         private readonly IContainer _container;

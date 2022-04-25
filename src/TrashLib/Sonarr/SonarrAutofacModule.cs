@@ -3,6 +3,7 @@ using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Sonarr;
 
@@ -19,7 +20,7 @@ public class SonarrAutofacModule : Module
 
         // Release Profile Support
         builder.RegisterType<ReleaseProfileUpdater>().As<IReleaseProfileUpdater>();
-        builder.RegisterType<ReleaseProfileGuideParser>().As<IReleaseProfileGuideParser>();
+        builder.RegisterType<LocalRepoReleaseProfileJsonParser>().As<ISonarrGuideService>();
         builder.RegisterType<SonarrReleaseProfileCompatibilityHandler>()
             .As<ISonarrReleaseProfileCompatibilityHandler>();
 

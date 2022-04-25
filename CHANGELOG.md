@@ -8,18 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [Upgrade Guide] for required changes you need to
+make.
+
+### Changed
+
+- **BREAKING**: Sonarr Release profiles are now synced based on a "Trash ID" taken from [the sonarr
+JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *are required*.
+- Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
+  using the wrong URL.
+- Radarr: Sanitize URLs in HTTP exception messages ([#17]).
+- Sonarr: Release profiles starting with `[Trash]` but are not specified in the config are deleted.
+
 ### Added
 
 - Linux MUSL builds for arm, arm64, and x64. Main target for this was supporting Alpine Linux in
   Docker.
-
-### Changed
-
-- Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
-  using the wrong URL.
-- Radarr: Sanitize URLs in HTTP exception messages ([#17]).
+- Sonarr: Ability to include or exclude specific optional Required, Ignored, or Preferred terms in
+  release profiles.
 
 [#17]: https://github.com/rcdailey/trash-updater/issues/17
+[Upgrade Guide]: https://github.com/rcdailey/trash-updater/wiki/Upgrade-Guide
+[sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
 
 ## [1.8.2] - 2022-03-06
 
