@@ -1,4 +1,5 @@
 ﻿using CliFx.Attributes;
+using CliFx.Exceptions;
 using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
@@ -26,6 +27,13 @@ public class SonarrCommand : ServiceCommand
     [CommandOption("list-release-profiles", Description =
         "List available release profiles from the guide in YAML format.")]
     public bool ListReleaseProfiles { get; [UsedImplicitly] set; } = false;
+
+    // The default value is "empty" because I need to know when the user specifies the option but no value with it.
+    // Discussed here: https://github.com/Tyrrrz/CliFx/discussions/128#discussioncomment-2647015
+    [CommandOption("list-terms", Description =
+        "For the given Release Profile Trash ID, list terms in it that can be filtered in YAML format. " +
+        "Note that not every release profile has terms that may be filtered.")]
+    public string? ListTerms { get; [UsedImplicitly] set; } = "empty";
 
     public SonarrCommand(
         ILogger log,
@@ -57,6 +65,21 @@ public class SonarrCommand : ServiceCommand
             if (ListReleaseProfiles)
             {
                 _lister.ListReleaseProfiles();
+                return;
+            }
+
+            if (ListTerms != "empty")
+            {
+                if (!string.IsNullOrEmpty(ListTerms))
+                {
+                    _lister.ListTerms(ListTerms);
+                }
+                else
+                {
+                    throw new CommandException(
+                        "The --list-terms option was specified without a Release Profile Trash ID specified");
+                }
+
                 return;
             }
 

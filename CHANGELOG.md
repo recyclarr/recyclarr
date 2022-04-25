@@ -29,6 +29,8 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - Sonarr: New `--list-release-profiles` command line option which can be used to quickly and
   conveniently get a list of release profiles (and their Trash IDs) so you know what to add in your
   YAML config under `release_profiles`.
+- Sonarr: New `--list-terms` command line option which can be used get a list of terms for a release
+  profile. These lists of terms can be used to include or exclude specific optionals, for example.
 
 [#17]: https://github.com/rcdailey/trash-updater/issues/17
 [Upgrade Guide]: https://github.com/rcdailey/trash-updater/wiki/Upgrade-Guide
