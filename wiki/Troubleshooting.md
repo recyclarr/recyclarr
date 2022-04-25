@@ -1,3 +1,18 @@
+# Obtaining Debug Logs
+
+Trash Updater always outputs logs as files in a directory on your filesystem. Each execution of
+Trash Updater yields a new file and those files always contain verbose (debug) logs. When reporting
+issues, I ask that you always include logs from the file rather than the command line output since
+Trash Updater will not include debug logs by default in the console output.
+
+Below is a list of locations where you can find the log directory depending on platform.
+
+| Platform | Location                                           |
+| -------- | -------------------------------------------------- |
+| Windows  | `%APPDATA%\trash-updater\logs`                     |
+| Linux    | `~/.config/trash-updater/logs`                     |
+| MacOS    | `~/Library/Application Support/trash-updater/logs` |
+
 # Errors & Solutions
 
 * On Mac or Linux OS, you may see the following error when you run `trash`:
