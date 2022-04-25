@@ -3,6 +3,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Core.Activators.Reflection;
 using CliFx;
+using CliFx.Infrastructure;
 using Common;
 using Serilog;
 using Serilog.Core;
@@ -81,6 +82,7 @@ public static class CompositionRoot
     {
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.RegisterType<FileUtilities>().As<IFileUtilities>();
+        builder.RegisterType<SystemConsole>().As<IConsole>().SingleInstance();
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();

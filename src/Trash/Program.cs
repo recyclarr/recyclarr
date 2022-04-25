@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using Autofac;
 using CliFx;
+using CliFx.Infrastructure;
 using Trash.Command.Helpers;
 
 namespace Trash;
@@ -20,6 +21,7 @@ internal static class Program
             .SetExecutableName(ExecutableName)
             .SetVersion(BuildVersion())
             .UseTypeActivator(type => CliTypeActivator.ResolveType(_container, type))
+            .UseConsole(_container.Resolve<IConsole>())
             .Build()
             .RunAsync();
     }
