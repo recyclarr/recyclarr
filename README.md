@@ -18,10 +18,11 @@ Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
   this in the guides.
 - Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
   name based on the guide and this name is used to find them in subsequent runs.
-- Tags can be added to any updated or created profiles.
+- Tags can be added to any updated or created profiles. Tags are created for you if they do not
+  exist.
 - Ability to convert preferred with negative scores to "Must not contain" terms.
-- Terms mentioned as "optional" in the guide are not synced to Sonarr release profiles by default
-  (can be enabled via config).
+- Terms mentioned as "optional" in the guide can be selectively included or excluded; based entirely
+  on user preference.
 
 ### Quality Definitions
 
