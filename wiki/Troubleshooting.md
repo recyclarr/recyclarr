@@ -39,7 +39,7 @@ Below is a list of locations where you can find the log directory depending on p
   This means your Base URL is missing from the URL you specified in the YAML. See issue [#42] for
   more details.
 
-* On Ubuntu 22.04 or deriviates when you run 'trash radarr' you will get the following error: 
+* On Ubuntu 22.04 or deriviates when you run 'trash radarr' you will get the following error:
 
   ```txt
   [ERR] An exception occurred during git operations on path: /home/REDACTED/.config/trash-updater/repo
@@ -48,18 +48,21 @@ Below is a list of locations where you can find the log directory depending on p
   [INF] Deleting local git repo and retrying git operation...
   [1] 257872 segmentation fault (core dumped) ./trash radarr
   ```
-  
-  Ubuntu moved from libssl 1.1 to libssl 3.0 in 22.04. This currently breaks the updater. See issue [#54] for more details.
 
-  As a workaround you can install libssl-1.1 from an earlier version, however, this might impact other applications.
+  Ubuntu moved from libssl 1.1 to libssl 3.0 in 22.04. This currently breaks the updater.
+  See issue [#54] for more details.
+  As a workaround you can install libssl-1.1 from an earlier version, however, this might
+  impact other applications.
 
-  On Ubuntu 22.04 x64 (64-bit) run the following commands in the shell  
-    `wget http://mirrors.kernel.org/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1l-1ubuntu1.2_amd64.deb`  
-    `dpkg -i libssl1.1_1.1.1l-1ubuntu1.2_amd64.deb`  
+  On Ubuntu 22.04 x64 (64-bit) run the following commands in the shell
+
+  > `wget http://mirrors.kernel.org/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1l-1ubuntu1.2_amd64.deb`<br/>
+  > `sudo dpkg -i libssl1.1_1.1.1l-1ubuntu1.2_amd64.deb`
 
   On Ubuntu 22.04 x86 (32-bit) run the following commands in the shell
-    `wget http://mirrors.kernel.org/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1l-1ubuntu1.2_i386.deb`  
-    `dpkg -i libssl1.1_1.1.1l-1ubuntu1.2_i386.deb`  
+
+  > `wget http://mirrors.kernel.org/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1l-1ubuntu1.2_i386.deb`<br/>
+  > `sudo dpkg -i libssl1.1_1.1.1l-1ubuntu1.2_i386.deb`
 
 [#42]: https://github.com/rcdailey/trash-updater/issues/42
 [#54]: https://github.com/rcdailey/trash-updater/issues/54
