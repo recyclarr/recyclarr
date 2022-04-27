@@ -21,14 +21,12 @@ sonarr:
     api_key: f7e74ba6c80046e39e076a27af5a8444
     quality_definition: hybrid
     release_profiles:
-      - type: anime
-        strict_negative_scores: true
-        tags:
-          - anime
-      - type: series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
         strict_negative_scores: false
-        tags:
-          - tv
+        tags: [tv]
 
 radarr:
   - base_url: http://localhost:7878
@@ -62,9 +60,10 @@ sonarr:
   - base_url: http://localhost:8989
     api_key: f7e74ba6c80046e39e076a27af5a8444
     release_profiles:
-      - type: anime
-        tags:
-          - anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
+        tags: [anime]
 ```
 
 `sonarr-quality-definition.yml`:
@@ -101,12 +100,17 @@ sonarr:
     api_key: f7e74ba6c80046e39e076a27af5a8444
     quality_definition: anime
     release_profiles:
-      - type: anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
   - base_url: http://instance_two:8989
     api_key: bf99da49d0b0488ea34e4464aa63a0e5
     quality_definition: series
     release_profiles:
-      - type: series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
 ```
 
 In the example above, two separate instances, each with its own API key, will be updated. One

@@ -43,16 +43,23 @@ sonarr:
 
     # Release Profile Settings
     release_profiles:
-      - type: anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
         strict_negative_scores: true
-        tags:
-          - anime
-      - type: series
+        tags: [anime]
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
         strict_negative_scores: false
+        tags: [tv]
+      - trash_ids: [76e060895c5b8a765c310933da0a5357] # Optionals
         filter:
-          include_optional: true
-        tags:
-          - tv
+          include:
+            - 436f5a7d08fbf02ba25cb5e5dfe98e55 # Ignore Dolby Vision without HDR10 fallback
+            - f3f0f3691c6a1988d4a02963e69d11f2 # Ignore The Group -SCENE
+        tags: [tv]
 ```
 
 ### Basic Settings
@@ -91,11 +98,8 @@ sonarr:
   A list of release profiles to parse from the guide. Each object in this list supports the below
   properties.
 
-  - `type` **(Required)**<br>
-    Must be one of the following values:
-
-    - `anime`: Parse the [Anime Release Profile][sonarr_profile_anime] page from the TRaSH Guide.
-    - `series`: Parse the [WEB-DL Release Profile][sonarr_profile_series] page from the TRaSH Guide.
+  - `trash_ids` **(Required)**<br>
+    A list of one or more Trash IDs taken from [the Trash Guide Sonarr JSON files][sonarrjson].
 
   - `strict_negative_scores` (Optional; *Default: `false`*)<br>
     Enables preferred term scores less than 0 to be instead treated as "Must Not Contain" (ignored)
@@ -108,16 +112,23 @@ sonarr:
     present) are removed and replaced with only the tags in this list. If no tags are specified, no
     tags will be set on the release profile.
 
-  - `filter` (Optional; *Default: Determined by child properties*)<br>
+  - `filter` (Optional)<br>
     Defines various ways that release profile terms from the guide are synchronized with Sonarr. Any
-    combination of the below properties may be specified here:
+    filters below that takes a list of `trash_id` values, those values come, again, from the [Sonarr
+    JSON Files][sonarrjson]. There is a `trash_id` field next to each `term` field; that is what you
+    use.
 
-    - `include_optional` (Optional; *Default: `false`*)<br>
-      Set to `true` to include terms marked "Optional" in the guide. If set to `false`, optional
-      terms are *not* synchronized to Sonarr.
+    - `include`<br>
+      A list of `trash_id` values representing terms (Required, Ignored, or Preferred) that should
+      be included in the created Release Profile in Sonarr. Terms that are NOT specified here are
+      excluded automatically. Not compatible with `exclude` and will take precedence over it.
 
-[sonarr_profile_anime]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/
-[sonarr_profile_series]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
+    - `exclude`<br>
+      A list of `trash_id` values representing terms (Required, Ignored, or Preferred) that should
+      be excluded from the created Release Profile in Sonarr. Terms that are NOT specified here are
+      included automatically. Not compatible with `include`; this list is not used if it is present.
+
+[sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
 
 ## Radarr
 
