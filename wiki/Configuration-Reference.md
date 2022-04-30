@@ -3,7 +3,7 @@ Examples]] page.
 
 # Summary
 
-The Trash Updater program utilizes YAML for its configuration files. The configuration can be set up
+The Recyclarr program utilizes YAML for its configuration files. The configuration can be set up
 multiple ways, offering a lot of flexibility:
 
 - You may use one or more YAML files simultaneously, allowing you to divide your configuration
@@ -13,10 +13,11 @@ multiple ways, offering a lot of flexibility:
 - Each YAML file may have one or more service configurations. This means you can have one file
   define settings for just Sonarr, Radarr, or both services. The program will only read the
   configuration from the file relevant for the specific service subcommand you specified (e.g.
-  `trash sonarr` will only read the Sonarr config in the file, even if Radarr config is present)
+  `recyclarr sonarr` will only read the Sonarr config in the file, even if Radarr config is
+  present).
 
-> **Remember**: If you do not specify the `--config` argument, the program will look for `trash.yml`
-> in the same directory where the executable lives.
+> **Remember**: If you do not specify the `--config` argument, the program will look for
+> `recyclarr.yml` in the same directory where the executable lives.
 
 # YAML Reference
 
@@ -69,7 +70,7 @@ sonarr:
   page.
 
 - `api_key` **(Required)**<br>
-  The API key that Trash Updater should use to synchronize settings to your instance. You can obtain
+  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
   your API key by going to `Sonarr > Settings > General` and copy & paste the "API Key" under the
   "Security" group/header.
 
@@ -169,7 +170,7 @@ radarr:
   page.
 
 - `api_key` **(Required)**<br>
-  The API key that Trash Updater should use to synchronize settings to your instance. You can obtain
+  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
   your API key by going to `Radarr > Settings > General` and copy & paste the "API Key" under the
   "Security" group/header.
 
@@ -205,8 +206,8 @@ Synchronization]] page.
 - `delete_old_custom_formats` (Optional; *Default: `false`*)<br>
   If enabled, custom formats that you remove from your YAML configuration OR that are removed from
   the guide will be deleted from your Radarr instance. Note that this *only* applies to custom
-  formats that Trash Updater has synchronized to Radarr. Custom formats that you have added manually
-  in Radarr **will not be deleted** if you enable this setting.
+  formats that Recyclarr has synchronized to Radarr. Custom formats that you have added manually in
+  Radarr **will not be deleted** if you enable this setting.
 
 - `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
   A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set
@@ -244,7 +245,7 @@ Synchronization]] page.
     >
     > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
     >   you remove them from this list.
-    > - It's OK for the same custom format to exist in multiple lists of `names`. Trash Updater will
+    > - It's OK for the same custom format to exist in multiple lists of `names`. Recyclarr will
     >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
     >   assign it to different profiles with different scores.
 
@@ -263,12 +264,12 @@ Synchronization]] page.
     rare cases where you might prefer (or need) to use the ID instead:
 
     - Sometimes there are custom formats in the guide with the same name, such as "DoVi". In this
-      case, Trash Updater will issue you a warning instructing you to use the Trash ID instead of
-      the name to resolve the ambiguity.
-    - Trash IDs never change. Custom format names can change. Trash Updater keeps an internal cache
-      of every custom format its seen to reduce the need for your config names to be updated. But
-      it's not 100% fool proof. Using the ID could mean less config maintenance for you in the long
-      run at the expense of readability.
+      case, Recyclarr will issue you a warning instructing you to use the Trash ID instead of the
+      name to resolve the ambiguity.
+    - Trash IDs never change. Custom format names can change. Recyclarr keeps an internal cache of
+      every custom format its seen to reduce the need for your config names to be updated. But it's
+      not 100% fool proof. Using the ID could mean less config maintenance for you in the long run
+      at the expense of readability.
 
     Most of the rules and semantics are identical to the `names` property, which is documented
     above. Just apply that logic to the ID instead of the name.

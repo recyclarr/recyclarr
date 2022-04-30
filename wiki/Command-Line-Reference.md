@@ -1,4 +1,4 @@
-Command line interface documentation for the `Trash` executable.
+Command line interface documentation for the `recyclarr` executable.
 
 ## Subcommands
 
@@ -18,20 +18,20 @@ These are optional arguments shared by *all* subcommands.
 
 One or more paths to YAML configuration files. Only the relevant configuration section for the
 specified subcommand will be read from each file. If this argument is not specified, a single
-default configuration file named `trash.yml` will be used. It must be in the same directory as the
-`trash` executable.
+default configuration file named `recyclarr.yml` will be used. It must be in the same directory as the
+`recyclarr` executable.
 
 **Command Line Examples**:
 
 ```bash
-# Default Config (trash.yml)
-trash sonarr
+# Default Config (recyclarr.yml)
+recyclarr sonarr
 
 # Single Config
-trash sonarr --config ../myconfig.yml
+recyclarr sonarr --config ../myconfig.yml
 
 # Multiple Config
-trash sonarr --config ../myconfig1.yml "files/my config 2.yml"
+recyclarr sonarr --config ../myconfig1.yml "files/my config 2.yml"
 ```
 
 ### `--preview`

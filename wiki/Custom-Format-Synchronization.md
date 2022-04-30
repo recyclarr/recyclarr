@@ -8,26 +8,26 @@ Custom format synchronization is broken up into three categories:
 
 > **Important**
 >
-> Trash Updater will *never* touch custom formats that you create by hand, unless they share a name
-> with a custom format in the guide. In general, Trash Updater must have been the one to create a
-> custom format in order to do anything to it (update or delete).
+> Recyclarr will *never* touch custom formats that you create by hand, unless they share a name with
+> a custom format in the guide. In general, Recyclarr must have been the one to create a custom
+> format in order to do anything to it (update or delete).
 
 ## Cache
 
 ### Summary
 
-The synchronization cache in Trash Updater allows it to more accurately detect changes to custom
-formats in the TRaSH guides. This mainly helps cover changes like renames.
+The synchronization cache in Recyclarr allows it to more accurately detect changes to custom formats
+in the TRaSH guides. This mainly helps cover changes like renames.
 
-Once Trash Updater creates or updates a custom format in Radarr, it records information about it in
-a cache file located on disk. The location varies depending on platform:
+Once Recyclarr creates or updates a custom format in Radarr, it records information about it in a
+cache file located on disk. The location varies depending on platform:
 
-- Windows: `%APPDATA%/trash-updater/cache`
-- Linux: `~/.config/trash-updater/cache`
-- MacOS: `~/Library/Application Support/trash-updater/cache`
+- Windows: `%APPDATA%/recyclarr/cache`
+- Linux: `~/.config/recyclarr/cache`
+- MacOS: `~/Library/Application Support/recyclarr/cache`
 
 The cache files are not meant to be edited by users. In general I recommend leaving them alone.
-Trash Updater will manage it for you. However, sometimes a bug may cause an issue where deleting the
+Recyclarr will manage it for you. However, sometimes a bug may cause an issue where deleting the
 cache directory will be a good way to recover.
 
 ### Custom Format Identification Behavior
