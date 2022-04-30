@@ -42,11 +42,11 @@ public class SettingsPersister : ISettingsPersister
     private void CreateDefaultSettingsFile()
     {
         const string fileData =
-            "# yaml-language-server: $schema=https://raw.githubusercontent.com/rcdailey/trash-updater/master/schemas/settings-schema.json\n" +
+            "# yaml-language-server: $schema=https://raw.githubusercontent.com/rcdailey/recyclarr/master/schemas/settings-schema.json\n" +
             "\n" +
-            "# Edit this file to customize the behavior of Trash Updater beyond its defaults\n" +
+            "# Edit this file to customize the behavior of Recyclarr beyond its defaults\n" +
             "# For the settings file reference guide, visit the link to the wiki below:\n" +
-            "# https://github.com/rcdailey/trash-updater/wiki/Settings-Reference\n";
+            "# https://github.com/rcdailey/recyclarr/wiki/Settings-Reference\n";
 
         _fileSystem.File.WriteAllText(_paths.SettingsPath, fileData);
     }
