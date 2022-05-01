@@ -1,6 +1,6 @@
 ﻿using TrashLib.Radarr.CustomFormat.Models;
 
-namespace Trash.TestLibrary;
+namespace TrashLib.TestLibrary;
 
 public static class CfTestUtils
 {
