@@ -25,14 +25,14 @@ public class CreateConfigCommand : ICommand
 
     [CommandOption("path", 'p', Description =
         "Path where the new YAML file should be created. Must include the filename (e.g. path/to/config.yml). " +
-        "File must not already exist. If not specified, uses the default path of `trash.yml` right next to the " +
+        "File must not already exist. If not specified, uses the default path of `recyclarr.yml` right next to the " +
         "executable.")]
     public string Path { get; [UsedImplicitly] set; } = AppPaths.DefaultConfigPath;
 
     public ValueTask ExecuteAsync(IConsole console)
     {
         var reader = new ResourceDataReader(typeof(Program));
-        var ymlData = reader.ReadData("trash-config-template.yml");
+        var ymlData = reader.ReadData("config-template.yml");
 
         if (_fileSystem.File.Exists(Path))
         {

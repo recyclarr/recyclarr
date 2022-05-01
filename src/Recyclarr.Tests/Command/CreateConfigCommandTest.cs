@@ -2,8 +2,8 @@
 using CliFx.Infrastructure;
 using NSubstitute;
 using NUnit.Framework;
-using Serilog;
 using Recyclarr.Command;
+using Serilog;
 
 // ReSharper disable MethodHasAsyncOverload
 
@@ -22,8 +22,8 @@ public class CreateConfigCommandTest
 
         await cmd.ExecuteAsync(Substitute.For<IConsole>()).ConfigureAwait(false);
 
-        filesystem.File.Received().Exists(Arg.Is<string>(s => s.EndsWith("trash.yml")));
-        filesystem.File.Received().WriteAllText(Arg.Is<string>(s => s.EndsWith("trash.yml")), Arg.Any<string>());
+        filesystem.File.Received().Exists(Arg.Is<string>(s => s.EndsWith("recyclarr.yml")));
+        filesystem.File.Received().WriteAllText(Arg.Is<string>(s => s.EndsWith("recyclarr.yml")), Arg.Any<string>());
     }
 
     [Test]

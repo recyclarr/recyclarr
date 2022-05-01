@@ -28,6 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="trash-config-template.yml" />
+    <EmbeddedResource Include="config-template.yml" />
   </ItemGroup>
 </Project>

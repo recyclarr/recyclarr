@@ -5,7 +5,7 @@ internal static class AppPaths
     public static string AppDataPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "trash-updater");
 
-    public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "trash.yml");
+    public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
 
     public static string DefaultSettingsPath { get; } = Path.Combine(AppDataPath, "settings.yml");
 

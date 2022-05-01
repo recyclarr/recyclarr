@@ -7,6 +7,7 @@ using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
 using Recyclarr.Config;
+using Recyclarr.Migration;
 using Serilog;
 using Serilog.Core;
 using TrashLib.Cache;
@@ -87,6 +88,10 @@ public static class CompositionRoot
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
+
+        // Automatically register all migration steps
+        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).AssignableTo<IMigrationStep>();
+        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
 
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);

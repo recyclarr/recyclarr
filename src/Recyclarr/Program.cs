@@ -4,6 +4,7 @@ using Autofac;
 using CliFx;
 using CliFx.Infrastructure;
 using Recyclarr.Command.Helpers;
+using Recyclarr.Migration;
 
 namespace Recyclarr;
 
@@ -16,6 +17,10 @@ internal static class Program
     public static async Task<int> Main()
     {
         _container = CompositionRoot.Setup();
+
+        var migration = _container.Resolve<IMigrationExecutor>();
+        migration.PerformAllMigrationSteps();
+
         return await new CliApplicationBuilder()
             .AddCommandsFromThisAssembly()
             .SetExecutableName(ExecutableName)
