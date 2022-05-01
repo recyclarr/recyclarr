@@ -89,10 +89,6 @@ public static class CompositionRoot
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
 
-        // Automatically register all migration steps
-        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly()).AssignableTo<IMigrationStep>();
-        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
-
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
 
@@ -101,6 +97,7 @@ public static class CompositionRoot
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
+        builder.RegisterModule<MigrationAutofacModule>();
 
         builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
 
