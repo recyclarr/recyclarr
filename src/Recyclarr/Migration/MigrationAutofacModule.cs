@@ -13,8 +13,5 @@ public class MigrationAutofacModule : Module
         // Migration Steps
         builder.RegisterType<MigrateTrashYml>().As<IMigrationStep>();
         builder.RegisterType<MigrateTrashUpdaterAppDataDir>().As<IMigrationStep>();
-
-        // Automatically register all migration steps
-        // builder.RegisterAssemblyTypes(typeof(MigrationAutofacModule).Assembly).AssignableTo<IMigrationStep>();
     }
 }

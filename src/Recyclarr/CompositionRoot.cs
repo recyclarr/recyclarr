@@ -55,11 +55,6 @@ public static class CompositionRoot
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())
             .As(typeof(IConfigurationLoader<>));
-
-        // note: Do not allow consumers to resolve IServiceConfiguration directly; if this gets cached
-        // they end up using the wrong configuration when multiple instances are used.
-        // builder.Register(c => c.Resolve<IConfigurationProvider>().ActiveConfiguration)
-        // .As<IServiceConfiguration>();
     }
 
     private static void CommandRegistrations(ContainerBuilder builder)
@@ -69,6 +64,9 @@ public static class CompositionRoot
             .Where(t => t.IsAssignableTo(typeof(ICommand)));
 
         // Used to access the chosen command class. This is assigned from CliTypeActivator
+        //
+        // note: Do not allow consumers to resolve IServiceConfiguration directly; if this gets cached they end up using
+        // the wrong configuration when multiple instances are used.
         builder.RegisterType<ActiveServiceCommandProvider>()
             .As<IActiveServiceCommandProvider>()
             .SingleInstance();
