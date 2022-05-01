@@ -24,7 +24,7 @@ public class MigrateTrashYml : IMigrationStep
         _fileSystem = fileSystem;
     }
 
-    public int Order => 1;
+    public int Order => 10;
 
     public string Description => "Migration from 'trash.yml' to 'recyclarr.yml'";
 

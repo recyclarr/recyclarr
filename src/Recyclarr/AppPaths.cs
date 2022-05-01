@@ -3,7 +3,7 @@
 internal static class AppPaths
 {
     public static string AppDataPath { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "trash-updater");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "recyclarr");
 
     public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
 
