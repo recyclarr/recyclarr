@@ -40,4 +40,8 @@
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
   </ItemGroup>
+
+  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+    <None Remove="TestResults/**/*" />
+  </ItemGroup>
 </Project>
