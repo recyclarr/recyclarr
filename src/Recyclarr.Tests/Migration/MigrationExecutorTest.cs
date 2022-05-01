@@ -1,7 +1,9 @@
+using Autofac;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Migration;
+using Recyclarr.Migration.Steps;
 using Serilog;
 
 namespace Recyclarr.Tests.Migration;
@@ -10,6 +12,21 @@ namespace Recyclarr.Tests.Migration;
 [Parallelizable(ParallelScope.All)]
 public class MigrationExecutorTest
 {
+    [Test]
+    public void Migration_steps_are_in_expected_order()
+    {
+        var container = CompositionRoot.Setup();
+        var steps = container.Resolve<IEnumerable<IMigrationStep>>();
+        var orderedSteps = steps.OrderBy(x => x.Order).Select(x => x.GetType()).ToList();
+        orderedSteps.Should().BeEquivalentTo(
+            new[]
+            {
+                typeof(MigrateTrashYml),
+                typeof(MigrateTrashUpdaterAppDataDir)
+            },
+            config => config.WithStrictOrdering());
+    }
+
     [Test]
     public void Step_not_executed_if_check_returns_false()
     {
