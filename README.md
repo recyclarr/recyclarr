@@ -142,10 +142,3 @@ provided below for some main topics.
 The script may stop working at any time due to guide updates. I will do my best to fix them in a
 timely manner. Reporting such issues ASAP would be appreciated and will help identify issues more
 quickly.
-
-Please be aware that this application relies on a deterministic and consistent structure of the
-TRaSH Guide markdown files. I have [documented guidelines][dg] for the TRaSH Guides that should help
-to reduce the risk of the guide breaking the program's parsing logic, however it requires that guide
-contributors follow them.
-
-[dg]: ../../wiki/TRaSH-Guide-Structural-Guidelines
