@@ -1,12 +1,15 @@
-# TRaSH Guide Updater
+# Recyclarr
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/rcdailey/trash-updater/blob/master/LICENSE)
-![build status](https://github.com/rcdailey/trash-updater/actions/workflows/build.yml/badge.svg?branch=master)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rcdailey_trash-updater&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rcdailey_trash-updater)
-[![GitHub release](https://img.shields.io/github/release/rcdailey/trash-updater.svg)](https://github.com/rcdailey/trash-updater/releases/)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/rcdailey/recyclarr/blob/master/LICENSE)
+![build status](https://github.com/rcdailey/recyclarr/actions/workflows/build.yml/badge.svg?branch=master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rcdailey_recyclarr&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rcdailey_recyclarr)
+[![GitHub release](https://img.shields.io/github/release/rcdailey/recyclarr.svg)](https://github.com/rcdailey/recyclarr/releases/)
 [![Support Server](https://img.shields.io/discord/492590071455940612.svg?color=7289da&label=TRaSH-Guides&logo=discord&style=flat-square)](https://discord.com/invite/Vau8dZ3)
 
-Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
+A command-line application that will automatically synchronize recommended settings from TRaSH
+guides to your Sonarr/Radarr instances.
+
+Formerly named "Trash Updater".
 
 ## Sonarr Features
 
@@ -47,7 +50,7 @@ Automatically mirror TRaSH guides to your Sonarr/Radarr instance.
 
 ## Requirements
 
-Before installing & running Trash Updater, please review the requirements below.
+Before installing & running Recyclarr, please review the requirements below.
 
 - Minimum Supported Sonarr Version: `3.0.4.1098`
 - Minimum Supported Radarr Version: `3.*`
@@ -66,16 +69,16 @@ run it.
 | Linux MUSL | [arm][musl-arm]  | [x64][musl-x64], [arm64][musl-arm64]   |
 | Mac OS     | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
 
-[win-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-x64.zip
-[win-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-win-arm64.zip
-[linux-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-x64.zip
-[linux-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm64.zip
-[linux-arm]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-arm.zip
-[musl-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-x64.zip
-[musl-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-arm64.zip
-[musl-arm]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-linux-musl-arm.zip
-[osx-x64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-x64.zip
-[osx-arm64]: https://github.com/rcdailey/trash-updater/releases/latest/download/trash-osx-arm64.zip
+[win-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-win-x64.zip
+[win-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-win-arm64.zip
+[linux-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-x64.zip
+[linux-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-arm64.zip
+[linux-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-arm.zip
+[musl-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-x64.zip
+[musl-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-arm64.zip
+[musl-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-arm.zip
+[osx-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-osx-x64.zip
+[osx-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-osx-arm64.zip
 
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
@@ -83,11 +86,11 @@ release notes and older releases.
 ### Important Notices
 
 - For Sonarr support to work, you must be running version `3.0.4.1098` or greater.
-- Do not run Notifiarr's Trash Guides Integration in conjunction with Trash Updater's Custom Format
+- Do not run Notifiarr's Trash Guides Integration in conjunction with Recyclarr's Custom Format
   synchronization. In general, you should not have two different tools updating the same data in
   Radarr.
 
-[rp]: https://github.com/rcdailey/trash-updater/releases
+[rp]: https://github.com/rcdailey/recyclarr/releases
 
 ### Special Note about Linux
 
@@ -105,8 +108,8 @@ linux, I think you can handle what needs to be done :-)*
 
 ## Getting Started
 
-Trash Updater requires a YAML configuration file in order to work. Run the steps below if you want
-to get started with a minimal configuration file.
+Recyclarr requires a YAML configuration file in order to work. Run the steps below if you want to
+get started with a minimal configuration file.
 
 - Run `trash create-config` to create a starter `trash.yml` file in the same directory as the
   executable. You can also use `--path` to customize the filename and location.
@@ -126,7 +129,7 @@ running `trash [subcommand] --help`, where `[subcommand]` is one of those subcom
 
 ### Read the Documentation
 
-Main documentation is located in [the wiki](https://github.com/rcdailey/trash-updater/wiki). Links
+Main documentation is located in [the wiki](https://github.com/rcdailey/recyclarr/wiki). Links
 provided below for some main topics.
 
 - [Command Line Reference](../../wiki/Command-Line-Reference)
