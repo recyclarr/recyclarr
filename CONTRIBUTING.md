@@ -15,6 +15,6 @@ that everyone should follow.
    be enough. If you're using Visual Studio or some other editor, you are on your own. Formatting
    rules are stored in `src/.editorconfig` and `src/TrashUpdater.sln.DotSettings`.
 
-[ideas]: https://github.com/rcdailey/trash-updater/discussions/categories/ideas
+[ideas]: https://github.com/rcdailey/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
 [Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
