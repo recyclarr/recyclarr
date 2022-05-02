@@ -30,11 +30,11 @@ public class MigrationExecutor : IMigrationExecutor
 
             try
             {
-                step.Execute(_log);
+                step.Execute();
             }
             catch (Exception e) when (e is not MigrationException)
             {
-                throw new MigrationException(step.Description, e.Message);
+                throw new MigrationException(e, step.Description, step.Remediation);
             }
         }
     }

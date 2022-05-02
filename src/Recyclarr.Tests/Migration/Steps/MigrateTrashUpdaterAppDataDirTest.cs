@@ -2,11 +2,8 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Text.RegularExpressions;
 using AutoFixture.NUnit3;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
-using Serilog;
 using TestLibrary.AutoFixture;
 
 namespace Recyclarr.Tests.Migration.Steps;
@@ -39,11 +36,12 @@ public class MigrateTrashUpdaterAppDataDirTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         MigrateTrashUpdaterAppDataDir sut)
     {
+        fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
         fs.AddDirectory(Path.Combine(BasePath, "recyclarr"));
 
-        var act = () => sut.Execute(Substitute.For<ILogger>());
+        var act = () => sut.Execute();
 
-        act.Should().Throw<MigrationException>().WithMessage("*already exist*");
+        act.Should().Throw<IOException>();
     }
 
     [Test, AutoMockData]
@@ -53,7 +51,7 @@ public class MigrateTrashUpdaterAppDataDirTest
     {
         fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
 
-        sut.Execute(Substitute.For<ILogger>());
+        sut.Execute();
 
         fs.AllDirectories.Should().ContainSingle(x => Regex.IsMatch(x, @"[/\\]recyclarr$"));
     }

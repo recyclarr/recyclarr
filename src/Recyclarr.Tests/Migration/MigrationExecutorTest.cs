@@ -38,7 +38,7 @@ public class MigrationExecutorTest
         executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.DidNotReceive().Execute(Arg.Any<ILogger>());
+        step.DidNotReceive().Execute();
     }
 
     [Test]
@@ -52,7 +52,7 @@ public class MigrationExecutorTest
         executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.Received().Execute(Arg.Any<ILogger>());
+        step.Received().Execute();
     }
 
     [Test]
@@ -88,11 +88,11 @@ public class MigrationExecutorTest
         var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(new ArgumentException("test message"));
+        step.When(x => x.Execute()).Throw(new ArgumentException("test message"));
 
         var act = () => executor.PerformAllMigrationSteps();
 
-        act.Should().Throw<MigrationException>().Which.FailureReason.Should().Be("test message");
+        act.Should().Throw<MigrationException>().Which.OriginalException.Message.Should().Be("test message");
     }
 
     [Test]
@@ -100,10 +100,10 @@ public class MigrationExecutorTest
     {
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
-        var exception = new MigrationException("a", "b");
+        var exception = new MigrationException(new Exception(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(exception);
+        step.When(x => x.Execute()).Throw(exception);
 
         var act = () => executor.PerformAllMigrationSteps();
 

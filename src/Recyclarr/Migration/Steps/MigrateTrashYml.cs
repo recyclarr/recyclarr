@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
-using Serilog;
 
 namespace Recyclarr.Migration.Steps;
 
@@ -19,29 +18,27 @@ public class MigrateTrashYml : IMigrationStep
     // Do not use AppPaths class here since that may change yet again in the future and break this migration step.
     private readonly string _newConfigPath = Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
 
+    public int Order => 10;
+    public string Description { get; }
+    public IReadOnlyCollection<string> Remediation { get; }
+
     public MigrateTrashYml(IFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
+        Remediation = new[]
+        {
+            $"Check if `{_newConfigPath}` already exists. If so, manually copy the data you want and then delete `{_oldConfigPath}` to fix the error.",
+            $"Ensure Recyclarr has permission to delete {_oldConfigPath}",
+            $"Ensure Recyclarr has permission to create {_newConfigPath}"
+        };
+
+        Description = $"Migration from `{_oldConfigPath}` to `{_newConfigPath}`";
     }
-
-    public int Order => 10;
-
-    public string Description => "Migration from 'trash.yml' to 'recyclarr.yml'";
 
     public bool CheckIfNeeded() => _fileSystem.File.Exists(_oldConfigPath);
 
-    public void Execute(ILogger log)
+    public void Execute()
     {
-        try
-        {
-            _fileSystem.File.Move(_oldConfigPath, _newConfigPath);
-            log.Information("Migration: Default configuration renamed from {Old} to {New}", _oldConfigPath,
-                _newConfigPath);
-        }
-        catch (IOException)
-        {
-            throw new MigrationException(Description,
-                "Unable to move due to IO Exception (does 'recyclarr.yml' already exist next to the executable?)");
-        }
+        _fileSystem.File.Move(_oldConfigPath, _newConfigPath);
     }
 }

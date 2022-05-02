@@ -18,15 +18,39 @@ internal static class Program
     {
         _container = CompositionRoot.Setup();
 
-        var migration = _container.Resolve<IMigrationExecutor>();
-        migration.PerformAllMigrationSteps();
+        var console = _container.Resolve<IConsole>();
+
+        try
+        {
+            var migration = _container.Resolve<IMigrationExecutor>();
+            migration.PerformAllMigrationSteps();
+        }
+        catch (MigrationException e)
+        {
+            var msg = new StringBuilder();
+            msg.AppendLine("Fatal exception during migration step. Details are below.\n");
+            msg.AppendLine($"Step That Failed:  {e.OperationDescription}");
+            msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
+
+            if (e.Remediation.Any())
+            {
+                msg.AppendLine("\nPossible remediation steps:");
+                foreach (var remedy in e.Remediation)
+                {
+                    msg.AppendLine($" - {remedy}");
+                }
+            }
+
+            await console.Error.WriteAsync(msg);
+            return 1;
+        }
 
         return await new CliApplicationBuilder()
             .AddCommandsFromThisAssembly()
             .SetExecutableName(ExecutableName)
             .SetVersion(BuildVersion())
             .UseTypeActivator(type => CliTypeActivator.ResolveType(_container, type))
-            .UseConsole(_container.Resolve<IConsole>())
+            .UseConsole(console)
             .Build()
             .RunAsync();
     }

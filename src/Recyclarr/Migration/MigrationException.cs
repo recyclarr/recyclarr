@@ -2,15 +2,17 @@ namespace Recyclarr.Migration;
 
 public class MigrationException : Exception
 {
-    public MigrationException(string operationDescription, string failureReason)
+    public MigrationException(
+        Exception originalException,
+        string operationDescription,
+        IReadOnlyCollection<string> remediation)
     {
         OperationDescription = operationDescription;
-        FailureReason = failureReason;
+        OriginalException = originalException;
+        Remediation = remediation;
     }
 
+    public Exception OriginalException { get; }
     public string OperationDescription { get; }
-    public string FailureReason { get; }
-
-    public override string Message =>
-        $"Fatal exception during migration step [Desc: {OperationDescription}] [Reason: {FailureReason}]";
+    public IReadOnlyCollection<string> Remediation { get; }
 }

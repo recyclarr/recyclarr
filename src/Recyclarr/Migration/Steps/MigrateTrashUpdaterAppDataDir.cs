@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
-using Serilog;
 
 namespace Recyclarr.Migration.Steps;
 
@@ -22,28 +21,27 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
     private readonly string _newPath =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "recyclarr");
 
+    public int Order => 20;
+    public string Description { get; }
+    public IReadOnlyCollection<string> Remediation { get; }
+
     public MigrateTrashUpdaterAppDataDir(IFileSystem fileSystem)
     {
         _fileSystem = fileSystem;
+        Remediation = new[]
+        {
+            $"Check if `{_newPath}` already exists. If so, manually copy settings you want and then delete `{_oldPath}` to fix the error.",
+            $"Ensure Recyclarr has permission to recursively delete {_oldPath}",
+            $"Ensure Recyclarr has permission to create {_newPath}"
+        };
+
+        Description = $"Rename app data directory from `{_oldPath}` to `{_newPath}`";
     }
-
-    public int Order => 20;
-
-    public string Description => "Rename app data directory from 'trash-updater' to 'recyclarr'";
 
     public bool CheckIfNeeded() => _fileSystem.Directory.Exists(_oldPath);
 
-    public void Execute(ILogger log)
+    public void Execute()
     {
-        try
-        {
-            _fileSystem.Directory.Move(_oldPath, _newPath);
-            log.Information("Migration: App data directory renamed from {Old} to {New}", _oldPath, _newPath);
-        }
-        catch (IOException)
-        {
-            throw new MigrationException(Description,
-                $"Unable to move due to IO Exception (does the '${_newPath}' directory already exist?)");
-        }
+        _fileSystem.Directory.Move(_oldPath, _newPath);
     }
 }
