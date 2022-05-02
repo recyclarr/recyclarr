@@ -30,8 +30,9 @@ public class MigrationExecutorTest
     [Test]
     public void Step_not_executed_if_check_returns_false()
     {
+        using var console = new FakeInMemoryConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
+        var executor = new MigrationExecutor(new[] {step}, console);
 
         step.CheckIfNeeded().Returns(false);
 
@@ -44,8 +45,9 @@ public class MigrationExecutorTest
     [Test]
     public void Step_executed_if_check_returns_true()
     {
+        using var console = new FakeInMemoryConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
+        var executor = new MigrationExecutor(new[] {step}, console);
 
         step.CheckIfNeeded().Returns(true);
 
@@ -58,6 +60,8 @@ public class MigrationExecutorTest
     [Test]
     public void Steps_executed_in_ascending_order()
     {
+        using var console = new FakeInMemoryConsole();
+
         var steps = new[]
         {
             Substitute.For<IMigrationStep>(),
@@ -69,7 +73,7 @@ public class MigrationExecutorTest
         steps[1].Order.Returns(10);
         steps[2].Order.Returns(30);
 
-        var executor = new MigrationExecutor(steps, Substitute.For<IConsole>());
+        var executor = new MigrationExecutor(steps, console);
 
         executor.PerformAllMigrationSteps();
 
@@ -84,8 +88,9 @@ public class MigrationExecutorTest
     [Test]
     public void Exception_converted_to_migration_exception()
     {
+        using var console = new FakeInMemoryConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
+        var executor = new MigrationExecutor(new[] {step}, console);
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute()).Throw(new ArgumentException("test message"));
@@ -98,8 +103,9 @@ public class MigrationExecutorTest
     [Test]
     public void Migration_exceptions_are_not_converted()
     {
+        using var console = new FakeInMemoryConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
+        var executor = new MigrationExecutor(new[] {step}, console);
         var exception = new MigrationException(new Exception(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);
