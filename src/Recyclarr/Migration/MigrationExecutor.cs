@@ -1,21 +1,21 @@
-using Serilog;
+using CliFx.Infrastructure;
 
 namespace Recyclarr.Migration;
 
 public class MigrationExecutor : IMigrationExecutor
 {
-    private readonly ILogger _log;
+    private readonly IConsole _console;
     private readonly List<IMigrationStep> _migrationSteps;
 
-    public MigrationExecutor(IEnumerable<IMigrationStep> migrationSteps, ILogger log)
+    public MigrationExecutor(IEnumerable<IMigrationStep> migrationSteps, IConsole console)
     {
-        _log = log;
+        _console = console;
         _migrationSteps = migrationSteps.OrderBy(x => x.Order).ToList();
     }
 
     public void PerformAllMigrationSteps()
     {
-        _log.Debug("Performing migration steps...");
+        _console.Output.WriteLine("Performing migration steps...");
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach (var step in _migrationSteps)
@@ -36,6 +36,8 @@ public class MigrationExecutor : IMigrationExecutor
             {
                 throw new MigrationException(e, step.Description, step.Remediation);
             }
+
+            _console.Output.WriteLine($"Migrate: {step.Description}");
         }
     }
 }

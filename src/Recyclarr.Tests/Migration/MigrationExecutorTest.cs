@@ -1,10 +1,10 @@
 using Autofac;
+using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
-using Serilog;
 
 namespace Recyclarr.Tests.Migration;
 
@@ -31,7 +31,7 @@ public class MigrationExecutorTest
     public void Step_not_executed_if_check_returns_false()
     {
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
+        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
 
         step.CheckIfNeeded().Returns(false);
 
@@ -45,7 +45,7 @@ public class MigrationExecutorTest
     public void Step_executed_if_check_returns_true()
     {
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
+        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
 
         step.CheckIfNeeded().Returns(true);
 
@@ -69,7 +69,7 @@ public class MigrationExecutorTest
         steps[1].Order.Returns(10);
         steps[2].Order.Returns(30);
 
-        var executor = new MigrationExecutor(steps, Substitute.For<ILogger>());
+        var executor = new MigrationExecutor(steps, Substitute.For<IConsole>());
 
         executor.PerformAllMigrationSteps();
 
@@ -85,7 +85,7 @@ public class MigrationExecutorTest
     public void Exception_converted_to_migration_exception()
     {
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
+        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute()).Throw(new ArgumentException("test message"));
@@ -99,7 +99,7 @@ public class MigrationExecutorTest
     public void Migration_exceptions_are_not_converted()
     {
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, Substitute.For<ILogger>());
+        var executor = new MigrationExecutor(new[] {step}, Substitute.For<IConsole>());
         var exception = new MigrationException(new Exception(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);
