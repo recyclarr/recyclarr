@@ -137,7 +137,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_guideProcessor.DuplicatedCustomFormats.Count > 0)
         {
             Log.Warning("One or more of the custom formats you want are duplicated in the guide. These custom " +
-                        "formats WILL BE SKIPPED. Trash Updater is not able to choose which one you actually " +
+                        "formats WILL BE SKIPPED. Recyclarr is not able to choose which one you actually " +
                         "wanted. To resolve this ambiguity, use the `trash_ids` property in your YML " +
                         "configuration to refer to the custom format using its Trash ID instead of its name");
 

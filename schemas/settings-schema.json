@@ -5,8 +5,8 @@
     "Settings": {
       "type": "object",
       "additionalProperties": false,
-      "title": "Trash Updater Settings",
-      "description": "Optional settings to control the behavior of Trash Updater",
+      "title": "Recyclarr Settings",
+      "description": "Optional settings to control the behavior of Recyclarr",
       "properties": {
         "repository": {
           "$ref": "#/definitions/Repository"
@@ -27,7 +27,7 @@
         "clone_url": {
           "type": "string",
           "title": "Clone URL to the trash guides git repository",
-          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Trash Updater pull data from a fork instead of the official repository.",
+          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Recyclarr pull data from a fork instead of the official repository.",
           "format": "uri",
           "qt-uri-protocols": [
             "http",

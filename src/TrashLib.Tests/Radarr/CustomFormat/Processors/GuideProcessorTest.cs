@@ -5,12 +5,12 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.FluentAssertions;
-using Trash.TestLibrary;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Processors;
 using TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Processors;
 

@@ -55,7 +55,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: trash-${{ matrix.runtime }}
+          name: recyclarr-${{ matrix.runtime }}
           path: publish/${{ matrix.runtime }}/*
 
   smoke:
@@ -79,11 +79,11 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: trash-${{ matrix.runtime }}
+          name: recyclarr-${{ matrix.runtime }}
 
       - name: Run Smoke Test
         shell: pwsh
-        run: ci/SmokeTest.ps1 ./trash
+        run: ci/SmokeTest.ps1 ./recyclarr
 
   release:
     name: Release
@@ -124,7 +124,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          files: publish-zip/trash-*.zip
+          files: publish-zip/recyclarr-*.zip
           body: ${{ steps.changelog.outputs.release_notes }}
           tag_name: ${{ github.event.create.ref }}
           draft: false

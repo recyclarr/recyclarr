@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>recyclarr</AssemblyName>
+
+    <!-- Publish Settings -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
+    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="CliFx" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="config-template.yml" />
+  </ItemGroup>
+</Project>

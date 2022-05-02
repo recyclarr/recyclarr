@@ -48,8 +48,8 @@ jobs:
         run: >
           dotnet sonarscanner begin
           -o:"rcdailey"
-          -k:"rcdailey_trash-updater"
-          -n:"Trash Updater"
+          -k:"rcdailey_recyclarr"
+          -n:"Recyclarr"
           -v:"${{ steps.gitversion.outputs.fullSemVer }}"
           -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
           -d:sonar.host.url="https://sonarcloud.io"

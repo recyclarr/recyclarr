@@ -6,7 +6,7 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-dotnet publish src\Trash `
+dotnet publish src\Recyclarr `
     --output publish\$runtime `
     --configuration Release `
     --runtime $runtime `

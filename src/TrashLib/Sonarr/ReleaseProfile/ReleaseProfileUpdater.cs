@@ -101,7 +101,7 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
             }
         }
 
-        // Any profiles with `[Trash]` in front of their name are managed exclusively by Trash Updater. As such, if
+        // Any profiles with `[Trash]` in front of their name are managed exclusively by Recyclarr. As such, if
         // there are any still in Sonarr that we didn't update, those are most certainly old and shouldn't be kept
         // around anymore.
         await DeleteOldManagedProfiles(profilesAndTags, existingProfiles);

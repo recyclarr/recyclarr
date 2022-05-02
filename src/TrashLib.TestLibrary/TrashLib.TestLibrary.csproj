@@ -1,7 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>Trash.TestLibrary</RootNamespace>
-  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
   </ItemGroup>
