@@ -2,10 +2,12 @@ using JetBrains.Annotations;
 
 namespace TrashLib.Config.Services;
 
-public class ServiceConfiguration : IServiceConfiguration
+public abstract class ServiceConfiguration : IServiceConfiguration
 {
-    public string BaseUrl { get; init; } = "";
-    public string ApiKey { get; init; } = "";
+    // Name is set dynamically by
+    public string Name { get; set; } = "";
+    public string BaseUrl { get; set; } = "";
+    public string ApiKey { get; set; } = "";
 
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } =
         new List<CustomFormatConfig>();

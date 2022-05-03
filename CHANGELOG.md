@@ -19,6 +19,12 @@ changes you need to make.
 - Secrets support. You can now store sensitive information from your configuration YAML such as
   `api_key` and `base_url` in a `secrets.yml` file. See [the secrets docs][secrets] for more info.
   Huge thanks to @voltron4lyfe for this one. (#105, #139)
+- Named instances are now supported in configuration YAML.
+
+### Changed
+
+- Deprecated array-style instances in configuration YAML. Read more about this in the v3.0 Upgrade
+  Guide.
 
 ### Removed
 

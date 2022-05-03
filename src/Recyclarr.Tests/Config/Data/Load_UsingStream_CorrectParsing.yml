@@ -1,5 +1,6 @@
 ﻿sonarr:
-  - base_url: http://localhost:8989
+  name:
+    base_url: http://localhost:8989
     api_key: 95283e6b156c42f3af8a9b16173f876b
     release_profiles:
       - trash_ids: [123]

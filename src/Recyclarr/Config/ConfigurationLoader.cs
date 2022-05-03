@@ -1,5 +1,6 @@
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using FluentValidation;
+using Serilog;
 using TrashLib.Config;
 using TrashLib.Config.Services;
 using YamlDotNet.Core;
@@ -9,17 +10,20 @@ using YamlDotNet.Serialization;
 namespace Recyclarr.Config;
 
 public class ConfigurationLoader<T> : IConfigurationLoader<T>
-    where T : IServiceConfiguration
+    where T : ServiceConfiguration
 {
+    private readonly ILogger _log;
     private readonly IDeserializer _deserializer;
     private readonly IFileSystem _fileSystem;
     private readonly IValidator<T> _validator;
 
     public ConfigurationLoader(
+        ILogger log,
         IFileSystem fileSystem,
         IYamlSerializerFactory yamlFactory,
         IValidator<T> validator)
     {
+        _log = log;
         _fileSystem = fileSystem;
         _validator = validator;
         _deserializer = yamlFactory.CreateDeserializer();
@@ -47,14 +51,36 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
                 continue;
             }
 
-            var configs = _deserializer.Deserialize<List<T>?>(parser);
-            if (configs == null)
+            List<T>? configs;
+            switch (parser.Current)
             {
-                parser.SkipThisAndNestedEvents();
-                continue;
+                case MappingStart:
+                    configs = _deserializer.Deserialize<Dictionary<string, T>>(parser)
+                        .Select(kvp =>
+                        {
+                            kvp.Value.Name = kvp.Key;
+                            return kvp.Value;
+                        })
+                        .ToList();
+                    break;
+
+                case SequenceStart:
+                    _log.Warning(
+                        "Found array-style list of instances instead of named-style. Array-style lists of Sonarr/Radarr " +
+                        "instances are deprecated");
+                    configs = _deserializer.Deserialize<List<T>>(parser);
+                    break;
+
+                default:
+                    configs = null;
+                    break;
             }
 
-            ValidateConfigs(configSection, configs, validConfigs);
+            if (configs is not null)
+            {
+                ValidateConfigs(configSection, configs, validConfigs);
+            }
+
             parser.SkipThisAndNestedEvents();
         }
 

@@ -5,131 +5,42 @@
   "additionalProperties": false,
   "properties": {
     "sonarr": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["base_url", "api_key"],
-        "properties": {
-          "base_url": {
-            "$ref": "#/$defs/base_url",
-            "examples": [
-              "http://localhost:8989",
-              "https://sonarr.mydomain.com",
-              "https://mydomain.com/sonarr"
-            ]
-          },
-          "api_key": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The API key from Sonarr."
-          },
-          "quality_definition": {
-            "type": "string"
-          },
-          "delete_old_custom_formats": {
-            "$ref": "#/$defs/delete_old_custom_formats"
-          },
-          "custom_formats": {
-            "$ref": "#/$defs/custom_formats"
-          },
-          "release_profiles": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "additionalProperties": false,
-              "required": ["trash_ids"],
-              "properties": {
-                "trash_ids": {
-                  "$ref": "#/$defs/trash_ids_list"
-                },
-                "strict_negative_scores": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "Enables preferred term scores less than 0 to be instead treated as \"Must Not Contain\" (ignored) terms."
-                },
-                "tags": {
-                  "type": "array",
-                  "description": "A list of one or more strings representing tags that will be applied to this release profile.",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "filter": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "description": "Defines various ways that release profile terms from the guide are synchronized with Sonarr.",
-                  "oneOf": [
-                    {
-                      "required": ["include"]
-                    },
-                    {
-                      "required": ["exclude"]
-                    }
-                  ],
-                  "properties": {
-                    "include": {
-                      "$ref": "#/$defs/trash_ids_list",
-                      "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be included in the created Release Profile in Sonarr."
-                    },
-                    "exclude": {
-                      "$ref": "#/$defs/trash_ids_list",
-                      "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be excluded from the created Release Profile in Sonarr."
-                    }
-                  }
-                }
-              }
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sonarr_instance"
+          }
+        },
+        {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "#/$defs/sonarr_instance"
             }
           }
         }
-      }
+      ]
     },
     "radarr": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["base_url", "api_key"],
-        "properties": {
-          "base_url": {
-            "$ref": "#/$defs/base_url",
-            "examples": [
-              "http://localhost:7878",
-              "https://radarr.mydomain.com",
-              "https://mydomain.com/radarr"
-            ]
-          },
-          "api_key": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The API key from Radarr."
-          },
-          "quality_definition": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["type"],
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "preferred_ratio": {
-                "type": "number",
-                "default": 1.0,
-                "minimum": 0.0,
-                "maximum": 1.0
-              }
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/radarr_instance"
+          }
+        },
+        {
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "$ref": "#/$defs/radarr_instance"
             }
-          },
-          "delete_old_custom_formats": {
-            "$ref": "#/$defs/delete_old_custom_formats"
-          },
-          "custom_formats": {
-            "$ref": "#/$defs/custom_formats"
           }
         }
-      }
+      ]
     }
   },
   "$defs": {
@@ -187,6 +98,125 @@
                   "type": "boolean",
                   "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
                   "default": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "radarr_instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "api_key"],
+      "properties": {
+        "base_url": {
+          "$ref": "#/$defs/base_url",
+          "examples": [
+            "http://localhost:7878",
+            "https://radarr.mydomain.com",
+            "https://mydomain.com/radarr"
+          ]
+        },
+        "api_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The API key from Radarr."
+        },
+        "quality_definition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "preferred_ratio": {
+              "type": "number",
+              "default": 1.0,
+              "minimum": 0.0,
+              "maximum": 1.0
+            }
+          }
+        },
+        "delete_old_custom_formats": {
+          "$ref": "#/$defs/delete_old_custom_formats"
+        },
+        "custom_formats": {
+          "$ref": "#/$defs/custom_formats"
+        }
+      }
+    },
+    "sonarr_instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "api_key"],
+      "properties": {
+        "base_url": {
+          "$ref": "#/$defs/base_url",
+          "examples": [
+            "http://localhost:8989",
+            "https://sonarr.mydomain.com",
+            "https://mydomain.com/sonarr"
+          ]
+        },
+        "api_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The API key from Sonarr."
+        },
+        "quality_definition": {
+          "type": "string"
+        },
+        "delete_old_custom_formats": {
+          "$ref": "#/$defs/delete_old_custom_formats"
+        },
+        "custom_formats": {
+          "$ref": "#/$defs/custom_formats"
+        },
+        "release_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "additionalProperties": false,
+            "required": ["trash_ids"],
+            "properties": {
+              "trash_ids": {
+                "$ref": "#/$defs/trash_ids_list"
+              },
+              "strict_negative_scores": {
+                "type": "boolean",
+                "default": false,
+                "description": "Enables preferred term scores less than 0 to be instead treated as \"Must Not Contain\" (ignored) terms."
+              },
+              "tags": {
+                "type": "array",
+                "description": "A list of one or more strings representing tags that will be applied to this release profile.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "filter": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Defines various ways that release profile terms from the guide are synchronized with Sonarr.",
+                "oneOf": [
+                  {
+                    "required": ["include"]
+                  },
+                  {
+                    "required": ["exclude"]
+                  }
+                ],
+                "properties": {
+                  "include": {
+                    "$ref": "#/$defs/trash_ids_list",
+                    "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be included in the created Release Profile in Sonarr."
+                  },
+                  "exclude": {
+                    "$ref": "#/$defs/trash_ids_list",
+                    "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be excluded from the created Release Profile in Sonarr."
+                  }
                 }
               }
             }

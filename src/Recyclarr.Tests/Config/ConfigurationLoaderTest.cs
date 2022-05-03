@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
@@ -9,14 +8,13 @@ using Common.Extensions;
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
-using JetBrains.Annotations;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Config;
 using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
-using TrashLib.Config.Services;
 using TrashLib.Services.Sonarr.Config;
+using TrashLib.TestLibrary;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Tests.Config;
@@ -29,19 +27,6 @@ public class ConfigurationLoaderTest : IntegrationFixture
     {
         var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
         return new StringReader(testData.ReadData(file));
-    }
-
-    [UsedImplicitly]
-    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-    [SuppressMessage("Microsoft.Design", "CA1034",
-        Justification = "YamlDotNet requires this type to be public so it may access it")]
-    [SuppressMessage("Performance", "CA1822", MessageId = "Mark members as static")]
-    public class TestConfig : IServiceConfiguration
-    {
-        public string BaseUrl => "";
-        public string ApiKey => "";
-        public ICollection<CustomFormatConfig> CustomFormats => new List<CustomFormatConfig>();
-        public bool DeleteOldCustomFormats => false;
     }
 
     [Test]
@@ -92,6 +77,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
             {
                 ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                 BaseUrl = "http://localhost:8989",
+                Name = "name",
                 ReleaseProfiles = new List<ReleaseProfileConfig>
                 {
                     new()

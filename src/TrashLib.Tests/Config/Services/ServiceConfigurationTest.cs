@@ -4,6 +4,7 @@ using FluentValidation;
 using NUnit.Framework;
 using Recyclarr.TestLibrary;
 using TrashLib.Config.Services;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Config.Services;
 
@@ -15,7 +16,7 @@ public class ServiceConfigurationTest : IntegrationFixture
     public void Validation_fails_for_all_missing_required_properties()
     {
         // default construct which should yield default values (invalid) for all required properties
-        var config = new ServiceConfiguration();
+        var config = new TestConfig();
 
         var validator = Container.Resolve<IValidator<ServiceConfiguration>>();
 
@@ -36,7 +37,7 @@ public class ServiceConfigurationTest : IntegrationFixture
     [Test]
     public void Fail_when_trash_ids_missing()
     {
-        var config = new ServiceConfiguration
+        var config = new TestConfig
         {
             BaseUrl = "valid",
             ApiKey = "valid",

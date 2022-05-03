@@ -34,7 +34,7 @@ public class CacheStoragePath : ICacheStoragePath
     {
         return _paths.CacheDirectory
             .SubDirectory(_serviceCommand.Name.ToLower())
-            .SubDirectory(BuildServiceGuid())
+            .SubDirectory(_config.Name.Any() ? _config.Name : BuildServiceGuid())
             .File(cacheObjectName + ".json");
     }
 }
