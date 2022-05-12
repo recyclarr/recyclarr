@@ -49,7 +49,8 @@ Below is a list of locations where you can find the log directory depending on p
   [1] 257872 segmentation fault (core dumped) ./trash radarr
   ```
 
-  Ubuntu and Fedora moved from libssl 1.1 to libssl 3.0 in version 22.04 and 36 respectively. This currently breaks the updater.
+  Ubuntu and Fedora moved from libssl 1.1 to libssl 3.0 in version 22.04 and 36 respectively. This
+  currently breaks the updater.
   See issue [#54] for more details.
   As a workaround, you can install libssl-1.1 from an earlier version, however, this might
   impact other applications.
@@ -65,7 +66,7 @@ Below is a list of locations where you can find the log directory depending on p
   > `sudo dpkg -i libssl1.1_1.1.1l-1ubuntu1.2_i386.deb`
 
   On Fedora 36 you can simply install the compatibility package included in the default repo
-  
+
   > `sudo dnf install openssl1.1`
 
 [#42]: https://github.com/rcdailey/trash-updater/issues/42
