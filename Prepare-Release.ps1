@@ -3,10 +3,10 @@ param ()
 
 $ErrorActionPreference = "Stop"
 
-# Requires: dotnet tool install --global GitVersion.Tool
+dotnet tool update --global GitVersion.Tool
 $version = dotnet-gitversion /showvariable SemVer
 
-# Requires: Install-Module -Name ChangelogManagement
+Install-Module -Name ChangelogManagement
 Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
     FirstRelease = "https://github.com/rcdailey/recyclarr/releases/tag/v{CUR}"
     NormalRelease = "https://github.com/rcdailey/recyclarr/compare/v{PREV}...v{CUR}"
