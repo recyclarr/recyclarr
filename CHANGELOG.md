@@ -31,10 +31,12 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
   YAML config under `release_profiles`.
 - Sonarr: New `--list-terms` command line option which can be used get a list of terms for a release
   profile. These lists of terms can be used to include or exclude specific optionals, for example.
+- [Migration System] that is responsible for performing one-time upgrade tasks as needed.
 
 [#17]: https://github.com/rcdailey/recyclarr/issues/17
 [Upgrade Guide]: https://github.com/rcdailey/recyclarr/wiki/Upgrade-Guide
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
+[Migration System]: https://github.com/rcdailey/recyclarr/wiki/Migration-System
 
 ## [1.8.2] - 2022-03-06
 
