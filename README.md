@@ -69,16 +69,16 @@ run it.
 | Linux MUSL | [arm][musl-arm]  | [x64][musl-x64], [arm64][musl-arm64]   |
 | Mac OS     | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
 
-[win-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-win-x64.zip
-[win-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-win-arm64.zip
-[linux-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-x64.zip
-[linux-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-arm64.zip
-[linux-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-arm.zip
-[musl-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-x64.zip
-[musl-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-arm64.zip
-[musl-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-linux-musl-arm.zip
-[osx-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-osx-x64.zip
-[osx-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/trash-osx-arm64.zip
+[win-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-win-x64.zip
+[win-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-win-arm64.zip
+[linux-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-x64.zip
+[linux-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-arm64.zip
+[linux-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-arm.zip
+[musl-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-musl-x64.zip
+[musl-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-musl-arm64.zip
+[musl-arm]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-linux-musl-arm.zip
+[osx-x64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-osx-x64.zip
+[osx-arm64]: https://github.com/rcdailey/recyclarr/releases/latest/download/recyclarr-osx-arm64.zip
 
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
@@ -98,7 +98,7 @@ When you extract the ZIP archive on Linux, it will *not* have the executable per
 you've downloaded and extracted the executable, you can use the command below to make it executable.
 
 ```bash
-chmod u+rx trash
+chmod u+rx recyclarr
 ```
 
 *Note: There used to be a convenient one-liner available here, but that was removed with the
@@ -111,20 +111,20 @@ linux, I think you can handle what needs to be done :-)*
 Recyclarr requires a YAML configuration file in order to work. Run the steps below if you want to
 get started with a minimal configuration file.
 
-- Run `trash create-config` to create a starter `trash.yml` file in the same directory as the
+- Run `recyclarr create-config` to create a starter `recyclarr.yml` file in the same directory as the
   executable. You can also use `--path` to customize the filename and location.
 - Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
   and `api_key` settings for each service that you want to use. Change/delete other parts of the
   file as you see fit.
-- Run `trash sonarr` and/or `trash radarr` as needed to update those instances.
+- Run `recyclarr sonarr` and/or `recyclarr radarr` as needed to update those instances.
 
 The last step above will do a "basic" sync from the guides to Sonarr and/or Radarr. The starter YAML
 config is very minimal. See the next section for further reading and links to the wiki for
 additional topics and more advanced customization.
 
-Lastly, each subcommand supports printing help on the command line. Simply run `trash --help` for
+Lastly, each subcommand supports printing help on the command line. Simply run `recyclarr --help` for
 the main help output and a list of subcommands. You can then see the help for each subcommand by
-running `trash [subcommand] --help`, where `[subcommand]` is one of those subcommands (e.g.
+running `recyclarr [subcommand] --help`, where `[subcommand]` is one of those subcommands (e.g.
 `sonarr`)
 
 ### Read the Documentation
