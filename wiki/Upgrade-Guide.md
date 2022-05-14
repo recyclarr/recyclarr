@@ -79,8 +79,13 @@ release_profiles:
       - tv
 ```
 
-In this release, since you now have the ability to specifically include optionals that you want, I
-recommend visiting the [Configuration Reference] and learning more about the `include` and `exclude`
-filter lists.
+## Other Notes
+
+- In this release, since you now have the ability to specifically include optionals that you want, I
+  recommend visiting the [Configuration Reference] and learning more about the `include` and
+  `exclude` filter lists.
+- Migration steps have been added. See the `v2.0` migration steps documented on the [Migration
+  System] page.
 
 [Configuration Reference]: https://github.com/rcdailey/recyclarr/wiki/Configuration-Reference
+[Migration System]: https://github.com/rcdailey/recyclarr/wiki/Migration-System
