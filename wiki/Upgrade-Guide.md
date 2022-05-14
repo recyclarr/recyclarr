@@ -79,6 +79,16 @@ release_profiles:
       - tv
 ```
 
+## Files & Directories Renamed
+
+Since "Trash Updater" is now known as "Recyclarr", the v2.0 release will attempt to perform the
+following each time you run it:
+
+- Rename the default `trash.yml` to `recyclarr.yml` (ignore this if you don't use it)
+- Rename the app data directory from `trash-updater` to `recyclarr`
+
+These are explained in more detail on the [Migration System] page.
+
 ## Other Notes
 
 - In this release, since you now have the ability to specifically include optionals that you want, I
