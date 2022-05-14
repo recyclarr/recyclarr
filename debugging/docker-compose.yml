@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+  recyclarr:
+    name: recyclarr
+
 volumes:
   radarr1:
   radarr2:
@@ -8,7 +12,10 @@ volumes:
 services:
   radarr1:
     image: ghcr.io/hotio/radarr
-    network_mode: bridge
+    networks:
+      recyclarr:
+        aliases:
+          - radarr1
     ports:
       - 7878:7878
     volumes:
@@ -19,7 +26,10 @@ services:
 
   radarr2:
     image: ghcr.io/hotio/radarr:nightly
-    network_mode: bridge
+    networks:
+      recyclarr:
+        aliases:
+          - radarr2
     ports:
       - 6767:7878
     volumes:
@@ -29,7 +39,10 @@ services:
 
   sonarr1:
     image: ghcr.io/hotio/sonarr:nightly
-    network_mode: bridge
+    networks:
+      recyclarr:
+        aliases:
+          - sonarr1
     ports:
       - 8989:8989
     volumes:

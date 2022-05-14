@@ -1,0 +1,21 @@
+version: '3'
+
+networks:
+  recyclarr:
+    name: recyclarr
+    external: true
+
+services:
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr
+    container_name: recyclarr
+    build:
+      context: .
+      args:
+        - TARGETPLATFORM=linux/amd64
+    init: true
+    networks: [recyclarr]
+    volumes:
+      - ./config:/config
+    environment:
+      CRON_SCHEDULE: "* * * * *"

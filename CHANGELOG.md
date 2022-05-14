@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Docker support! Image name is `ghcr.io/recyclarr/recyclarr`. See the [Docker] wiki page for more
+  information.
+
+[Docker]: https://github.com/recyclarr/recyclarr/wiki/Docker
+
 ## [2.1.2] - 2022-05-29
 
 ### Fixed
