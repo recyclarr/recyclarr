@@ -11,7 +11,7 @@ Various scenarios supported using flexible configuration structure:
 
 ## Update as much as possible in both Sonarr and Radarr with a single config
 
-Create a single configuration file (use the default `trash.yml` if you want to simplify your CLI
+Create a single configuration file (use the default `recyclarr.yml` if you want to simplify your CLI
 usage by not being required to specify `--config`) and put all of the configuration in there, like
 this:
 
@@ -21,14 +21,12 @@ sonarr:
     api_key: f7e74ba6c80046e39e076a27af5a8444
     quality_definition: hybrid
     release_profiles:
-      - type: anime
-        strict_negative_scores: true
-        tags:
-          - anime
-      - type: series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
         strict_negative_scores: false
-        tags:
-          - tv
+        tags: [tv]
 
 radarr:
   - base_url: http://localhost:7878
@@ -38,11 +36,11 @@ radarr:
       preferred_ratio: 0.5
 ```
 
-Even though it's all in one file, Radarr settings are ignored when you run `trash sonarr` and vice
-versa. To update both, just chain them together in your terminal, like so:
+Even though it's all in one file, Radarr settings are ignored when you run `recyclarr sonarr` and
+vice versa. To update both, just chain them together in your terminal, like so:
 
 ```bash
-trash sonarr && trash radarr
+recyclarr sonarr && recyclarr radarr
 ```
 
 This scenario is pretty ideal for a cron job you have running regularly and you want it to update
@@ -62,9 +60,10 @@ sonarr:
   - base_url: http://localhost:8989
     api_key: f7e74ba6c80046e39e076a27af5a8444
     release_profiles:
-      - type: anime
-        tags:
-          - anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
+        tags: [anime]
 ```
 
 `sonarr-quality-definition.yml`:
@@ -79,7 +78,7 @@ sonarr:
 Then run the following command:
 
 ```bash
-trash sonarr --config sonarr-release-profiles.yml
+recyclarr sonarr --config sonarr-release-profiles.yml
 ```
 
 This will only update release profiles since you have essentially moved the `quality_definition`
@@ -87,7 +86,7 @@ property to its own file. When you want to update both, you just specify both fi
 you run the program:
 
 ```bash
-trash sonarr --config sonarr-release-profiles.yml sonarr-quality-definition.yml
+recyclarr sonarr --config sonarr-release-profiles.yml sonarr-quality-definition.yml
 ```
 
 ## Update multiple Sonarr instances in a single YAML config
@@ -101,20 +100,25 @@ sonarr:
     api_key: f7e74ba6c80046e39e076a27af5a8444
     quality_definition: anime
     release_profiles:
-      - type: anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
   - base_url: http://instance_two:8989
     api_key: bf99da49d0b0488ea34e4464aa63a0e5
     quality_definition: series
     release_profiles:
-      - type: series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
 ```
 
 In the example above, two separate instances, each with its own API key, will be updated. One
 instance is for Anime only. The other is for Series (TV) only. And since I'm using two instances, I
 don't bother with tags, so I am able to leave those elements out.
 
-When you run `trash sonarr` (specify `--config` if you aren't using the default `trash.yml`) it will
-update both instances.
+When you run `recyclarr sonarr` (specify `--config` if you aren't using the default `recyclarr.yml`)
+it will update both instances.
 
 You can also split theses two instances across different YAML files if you do not want both to
 update at the same time. There's an example of how to do that in a different section of this page.
@@ -256,11 +260,11 @@ radarr:
 ```
 
 However, especially in the case of DoVi, there are actually two custom formats with this name in the
-guide. You'll get a warning from Trash Updater stating that it couldn't pick which one you wanted,
-so it was skipped. To fix this, simply use `trash_ids` and refer to it by an ID. IDs are never
-duplicated in the guide and also never change, so it's a robust and effective way to identify custom
-formats. The downside is that they are less readable than a name, but using comments can help with
-that. The example below demonstrates how to do this.
+guide. You'll get a warning from Recyclarr stating that it couldn't pick which one you wanted, so it
+was skipped. To fix this, simply use `trash_ids` and refer to it by an ID. IDs are never duplicated
+in the guide and also never change, so it's a robust and effective way to identify custom formats.
+The downside is that they are less readable than a name, but using comments can help with that. The
+example below demonstrates how to do this.
 
 ```yml
 radarr:
@@ -279,7 +283,7 @@ custom format in the guide.
 
 ## Scores in a quality profile should be set to zero if it wasn't listed in config
 
-Scenario: *"I completely rely on Trash Updater to set scores on my quality profiles. I never plan to
+Scenario: *"I completely rely on Recyclarr to set scores on my quality profiles. I never plan to
 manually set scores on those profiles. If I alter which custom format scores get assigned to a
 quality profile, the old scores should be set back to 0 automatically for me."*
 
@@ -309,9 +313,9 @@ be different:
 The `reset_unmatched_scores` setting basically determines how scores are handled for custom formats
 that exist in Radarr but are not in the list of `names` in config. As shown in the example above,
 you set it to `true` which results in unmatched scores being set to `0`, or you can set it to
-`false` (or leave it omitted) in which case Trash Updater will not alter the value.
+`false` (or leave it omitted) in which case Recyclarr will not alter the value.
 
-Which one should you use? That depends on how much control you want Trash Updater to have. If you
-use Trash Updater to supplement manual changes to your profiles, you probably want it set to `false`
-so it doesn't clobber your manual edits. Otherwise, set it to `true` so that scores aren't left over
-when you add/remove custom formats from a profile.
+Which one should you use? That depends on how much control you want Recyclarr to have. If you use
+Recyclarr to supplement manual changes to your profiles, you probably want it set to `false` so it
+doesn't clobber your manual edits. Otherwise, set it to `true` so that scores aren't left over when
+you add/remove custom formats from a profile.

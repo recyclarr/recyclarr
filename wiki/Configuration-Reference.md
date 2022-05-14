@@ -3,7 +3,7 @@ Examples]] page.
 
 # Summary
 
-The Trash Updater program utilizes YAML for its configuration files. The configuration can be set up
+The Recyclarr program utilizes YAML for its configuration files. The configuration can be set up
 multiple ways, offering a lot of flexibility:
 
 - You may use one or more YAML files simultaneously, allowing you to divide your configuration
@@ -13,10 +13,11 @@ multiple ways, offering a lot of flexibility:
 - Each YAML file may have one or more service configurations. This means you can have one file
   define settings for just Sonarr, Radarr, or both services. The program will only read the
   configuration from the file relevant for the specific service subcommand you specified (e.g.
-  `trash sonarr` will only read the Sonarr config in the file, even if Radarr config is present)
+  `recyclarr sonarr` will only read the Sonarr config in the file, even if Radarr config is
+  present).
 
-> **Remember**: If you do not specify the `--config` argument, the program will look for `trash.yml`
-> in the same directory where the executable lives.
+> **Remember**: If you do not specify the `--config` argument, the program will look for
+> `recyclarr.yml` in the same directory where the executable lives.
 
 # YAML Reference
 
@@ -43,16 +44,23 @@ sonarr:
 
     # Release Profile Settings
     release_profiles:
-      - type: anime
+      - trash_ids:
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
         strict_negative_scores: true
-        tags:
-          - anime
-      - type: series
+        tags: [anime]
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
         strict_negative_scores: false
+        tags: [tv]
+      - trash_ids: [76e060895c5b8a765c310933da0a5357] # Optionals
         filter:
-          include_optional: true
-        tags:
-          - tv
+          include:
+            - 436f5a7d08fbf02ba25cb5e5dfe98e55 # Ignore Dolby Vision without HDR10 fallback
+            - f3f0f3691c6a1988d4a02963e69d11f2 # Ignore The Group -SCENE
+        tags: [tv]
 ```
 
 ### Basic Settings
@@ -62,7 +70,7 @@ sonarr:
   page.
 
 - `api_key` **(Required)**<br>
-  The API key that Trash Updater should use to synchronize settings to your instance. You can obtain
+  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
   your API key by going to `Sonarr > Settings > General` and copy & paste the "API Key" under the
   "Security" group/header.
 
@@ -91,11 +99,8 @@ sonarr:
   A list of release profiles to parse from the guide. Each object in this list supports the below
   properties.
 
-  - `type` **(Required)**<br>
-    Must be one of the following values:
-
-    - `anime`: Parse the [Anime Release Profile][sonarr_profile_anime] page from the TRaSH Guide.
-    - `series`: Parse the [WEB-DL Release Profile][sonarr_profile_series] page from the TRaSH Guide.
+  - `trash_ids` **(Required)**<br>
+    A list of one or more Trash IDs taken from [the Trash Guide Sonarr JSON files][sonarrjson].
 
   - `strict_negative_scores` (Optional; *Default: `false`*)<br>
     Enables preferred term scores less than 0 to be instead treated as "Must Not Contain" (ignored)
@@ -108,16 +113,23 @@ sonarr:
     present) are removed and replaced with only the tags in this list. If no tags are specified, no
     tags will be set on the release profile.
 
-  - `filter` (Optional; *Default: Determined by child properties*)<br>
+  - `filter` (Optional)<br>
     Defines various ways that release profile terms from the guide are synchronized with Sonarr. Any
-    combination of the below properties may be specified here:
+    filters below that takes a list of `trash_id` values, those values come, again, from the [Sonarr
+    JSON Files][sonarrjson]. There is a `trash_id` field next to each `term` field; that is what you
+    use.
 
-    - `include_optional` (Optional; *Default: `false`*)<br>
-      Set to `true` to include terms marked "Optional" in the guide. If set to `false`, optional
-      terms are *not* synchronized to Sonarr.
+    - `include`<br>
+      A list of `trash_id` values representing terms (Required, Ignored, or Preferred) that should
+      be included in the created Release Profile in Sonarr. Terms that are NOT specified here are
+      excluded automatically. Not compatible with `exclude` and will take precedence over it.
 
-[sonarr_profile_anime]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/
-[sonarr_profile_series]: https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
+    - `exclude`<br>
+      A list of `trash_id` values representing terms (Required, Ignored, or Preferred) that should
+      be excluded from the created Release Profile in Sonarr. Terms that are NOT specified here are
+      included automatically. Not compatible with `include`; this list is not used if it is present.
+
+[sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
 
 ## Radarr
 
@@ -158,7 +170,7 @@ radarr:
   page.
 
 - `api_key` **(Required)**<br>
-  The API key that Trash Updater should use to synchronize settings to your instance. You can obtain
+  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
   your API key by going to `Radarr > Settings > General` and copy & paste the "API Key" under the
   "Security" group/header.
 
@@ -194,8 +206,8 @@ Synchronization]] page.
 - `delete_old_custom_formats` (Optional; *Default: `false`*)<br>
   If enabled, custom formats that you remove from your YAML configuration OR that are removed from
   the guide will be deleted from your Radarr instance. Note that this *only* applies to custom
-  formats that Trash Updater has synchronized to Radarr. Custom formats that you have added manually
-  in Radarr **will not be deleted** if you enable this setting.
+  formats that Recyclarr has synchronized to Radarr. Custom formats that you have added manually in
+  Radarr **will not be deleted** if you enable this setting.
 
 - `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
   A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set
@@ -233,7 +245,7 @@ Synchronization]] page.
     >
     > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
     >   you remove them from this list.
-    > - It's OK for the same custom format to exist in multiple lists of `names`. Trash Updater will
+    > - It's OK for the same custom format to exist in multiple lists of `names`. Recyclarr will
     >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
     >   assign it to different profiles with different scores.
 
@@ -252,12 +264,12 @@ Synchronization]] page.
     rare cases where you might prefer (or need) to use the ID instead:
 
     - Sometimes there are custom formats in the guide with the same name, such as "DoVi". In this
-      case, Trash Updater will issue you a warning instructing you to use the Trash ID instead of
-      the name to resolve the ambiguity.
-    - Trash IDs never change. Custom format names can change. Trash Updater keeps an internal cache
-      of every custom format its seen to reduce the need for your config names to be updated. But
-      it's not 100% fool proof. Using the ID could mean less config maintenance for you in the long
-      run at the expense of readability.
+      case, Recyclarr will issue you a warning instructing you to use the Trash ID instead of the
+      name to resolve the ambiguity.
+    - Trash IDs never change. Custom format names can change. Recyclarr keeps an internal cache of
+      every custom format its seen to reduce the need for your config names to be updated. But it's
+      not 100% fool proof. Using the ID could mean less config maintenance for you in the long run
+      at the expense of readability.
 
     Most of the rules and semantics are identical to the `names` property, which is documented
     above. Just apply that logic to the ID instead of the name.
