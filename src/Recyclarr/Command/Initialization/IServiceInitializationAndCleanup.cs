@@ -2,5 +2,5 @@
 
 public interface IServiceInitializationAndCleanup
 {
-    Task Execute(IServiceCommand cmd, Func<Task> logic);
+    Task Execute(ServiceCommand cmd, Func<Task> logic);
 }

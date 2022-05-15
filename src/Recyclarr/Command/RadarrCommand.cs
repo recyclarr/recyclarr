@@ -10,13 +10,19 @@ namespace Recyclarr.Command;
 internal class RadarrCommand : ServiceCommand, IRadarrCommand
 {
     private readonly Lazy<RadarrService> _service;
-
-    public override string CacheStoragePath { get; } =
-        Path.Combine(AppPaths.AppDataPath, "cache", "radarr");
+    private readonly string? _cacheStoragePath;
 
     public override string Name => "Radarr";
 
-    public RadarrCommand(IServiceInitializationAndCleanup init, Lazy<RadarrService> service)
+    public sealed override string CacheStoragePath
+    {
+        get => _cacheStoragePath ?? _service.Value.DefaultCacheStoragePath;
+        protected init => _cacheStoragePath = value;
+    }
+
+    public RadarrCommand(
+        IServiceInitializationAndCleanup init,
+        Lazy<RadarrService> service)
         : base(init)
     {
         _service = service;

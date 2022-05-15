@@ -1,15 +1,18 @@
-﻿using CliFx.Attributes;
+﻿using System.IO.Abstractions;
+using CliFx.Attributes;
 using JetBrains.Annotations;
 using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;
+using TrashLib;
 
 namespace Recyclarr.Command;
 
 [Command("sonarr", Description = "Perform operations on a Sonarr instance")]
 [UsedImplicitly]
-internal class SonarrCommand : ServiceCommand, ISonarrCommand
+public class SonarrCommand : ServiceCommand, ISonarrCommand
 {
     private readonly Lazy<SonarrService> _service;
+    private readonly string? _cacheStoragePath;
 
     [CommandOption("list-release-profiles", Description =
         "List available release profiles from the guide in YAML format.")]
@@ -22,12 +25,19 @@ internal class SonarrCommand : ServiceCommand, ISonarrCommand
         "Note that not every release profile has terms that may be filtered.")]
     public string? ListTerms { get; [UsedImplicitly] set; } = "empty";
 
-    public override string CacheStoragePath { get; } =
-        Path.Combine(AppPaths.AppDataPath, "cache", "sonarr");
+    public sealed override string CacheStoragePath
+    {
+        get => _cacheStoragePath ?? _service.Value.DefaultCacheStoragePath;
+        protected init => _cacheStoragePath = value;
+    }
 
     public override string Name => "Sonarr";
 
-    public SonarrCommand(IServiceInitializationAndCleanup init, Lazy<SonarrService> service)
+    public SonarrCommand(
+        IServiceInitializationAndCleanup init,
+        Lazy<SonarrService> service,
+        IFileSystem fs,
+        IAppPaths paths)
         : base(init)
     {
         _service = service;

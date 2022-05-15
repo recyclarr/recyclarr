@@ -1,6 +1,8 @@
-﻿using CliFx.Exceptions;
+﻿using System.IO.Abstractions;
+using CliFx.Exceptions;
 using Recyclarr.Config;
 using Serilog;
+using TrashLib;
 using TrashLib.Extensions;
 using TrashLib.Sonarr;
 using TrashLib.Sonarr.Config;
@@ -16,20 +18,28 @@ public class SonarrService : ServiceBase<ISonarrCommand>
     private readonly Func<IReleaseProfileUpdater> _profileUpdaterFactory;
     private readonly Func<ISonarrQualityDefinitionUpdater> _qualityUpdaterFactory;
     private readonly IReleaseProfileLister _lister;
+    private readonly IFileSystem _fs;
+    private readonly IAppPaths _paths;
 
     public SonarrService(
         ILogger log,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
         Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory,
-        IReleaseProfileLister lister)
+        IReleaseProfileLister lister,
+        IFileSystem fs,
+        IAppPaths paths)
     {
         _log = log;
         _configLoader = configLoader;
         _profileUpdaterFactory = profileUpdaterFactory;
         _qualityUpdaterFactory = qualityUpdaterFactory;
         _lister = lister;
+        _fs = fs;
+        _paths = paths;
     }
+
+    public string DefaultCacheStoragePath => _fs.Path.Combine(_paths.CacheDirectory, "sonarr");
 
     protected override async Task Process(ISonarrCommand cmd)
     {

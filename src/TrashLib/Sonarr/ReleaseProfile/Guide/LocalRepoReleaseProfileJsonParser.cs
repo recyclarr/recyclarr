@@ -3,17 +3,16 @@ using Common.Extensions;
 using Common.FluentValidation;
 using MoreLinq;
 using Newtonsoft.Json;
-using TrashLib.Radarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Guide;
 
 public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
 {
     private readonly IFileSystem _fileSystem;
-    private readonly IResourcePaths _paths;
+    private readonly IAppPaths _paths;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
 
-    public LocalRepoReleaseProfileJsonParser(IFileSystem fileSystem, IResourcePaths paths)
+    public LocalRepoReleaseProfileJsonParser(IFileSystem fileSystem, IAppPaths paths)
     {
         _fileSystem = fileSystem;
         _paths = paths;
@@ -23,7 +22,7 @@ public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
     private IEnumerable<ReleaseProfileData> GetReleaseProfileDataImpl()
     {
         var converter = new TermDataConverter();
-        var jsonDir = Path.Combine(_paths.RepoPath, "docs/json/sonarr");
+        var jsonDir = _fileSystem.Path.Combine(_paths.RepoDirectory, "docs/json/sonarr");
         var tasks = _fileSystem.Directory.GetFiles(jsonDir, "*.json")
             .Select(async f =>
             {

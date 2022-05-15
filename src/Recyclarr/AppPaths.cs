@@ -1,15 +1,23 @@
-﻿namespace Recyclarr;
+﻿using System.IO.Abstractions;
+using TrashLib;
 
-internal static class AppPaths
+namespace Recyclarr;
+
+internal class AppPaths : IAppPaths
 {
-    public static string AppDataPath { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "recyclarr");
+    private readonly IFileSystem _fs;
 
-    public static string DefaultConfigPath { get; } = Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
+    public AppPaths(IFileSystem fs)
+    {
+        _fs = fs;
+    }
 
-    public static string DefaultSettingsPath { get; } = Path.Combine(AppDataPath, "settings.yml");
+    public void SetAppDataPath(string path) => AppDataPath = path;
 
-    public static string LogDirectory { get; } = Path.Combine(AppDataPath, "logs");
-
-    public static string RepoDirectory { get; } = Path.Combine(AppDataPath, "repo");
+    public string AppDataPath { get; private set; } = "";
+    public string ConfigPath => _fs.Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
+    public string SettingsPath => _fs.Path.Combine(AppDataPath, "settings.yml");
+    public string LogDirectory => _fs.Path.Combine(AppDataPath, "logs");
+    public string RepoDirectory => _fs.Path.Combine(AppDataPath, "repo");
+    public string CacheDirectory => _fs.Path.Combine(AppDataPath, "cache");
 }

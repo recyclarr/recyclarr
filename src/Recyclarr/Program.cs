@@ -18,14 +18,12 @@ internal static class Program
     {
         _container = CompositionRoot.Setup();
 
-        var console = _container.Resolve<IConsole>();
-
         var status = await new CliApplicationBuilder()
             .AddCommands(GetRegisteredCommandTypes())
             .SetExecutableName(ExecutableName)
             .SetVersion(BuildVersion())
             .UseTypeActivator(type => CliTypeActivator.ResolveType(_container, type))
-            .UseConsole(console)
+            .UseConsole(_container.Resolve<IConsole>())
             .Build()
             .RunAsync();
 

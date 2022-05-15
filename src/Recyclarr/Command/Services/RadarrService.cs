@@ -1,5 +1,7 @@
-﻿using Recyclarr.Config;
+﻿using System.IO.Abstractions;
+using Recyclarr.Config;
 using Serilog;
+using TrashLib;
 using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
@@ -11,6 +13,8 @@ public class RadarrService : ServiceBase<IRadarrCommand>
 {
     private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
     private readonly Func<ICustomFormatUpdater> _customFormatUpdaterFactory;
+    private readonly IFileSystem _fs;
+    private readonly IAppPaths _paths;
     private readonly ILogger _log;
     private readonly Func<IRadarrQualityDefinitionUpdater> _qualityUpdaterFactory;
 
@@ -18,13 +22,19 @@ public class RadarrService : ServiceBase<IRadarrCommand>
         ILogger log,
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
-        Func<ICustomFormatUpdater> customFormatUpdaterFactory)
+        Func<ICustomFormatUpdater> customFormatUpdaterFactory,
+        IFileSystem fs,
+        IAppPaths paths)
     {
         _log = log;
         _configLoader = configLoader;
         _qualityUpdaterFactory = qualityUpdaterFactory;
         _customFormatUpdaterFactory = customFormatUpdaterFactory;
+        _fs = fs;
+        _paths = paths;
     }
+
+    public string DefaultCacheStoragePath => _fs.Path.Combine(_paths.CacheDirectory, "radarr");
 
     protected override async Task Process(IRadarrCommand cmd)
     {

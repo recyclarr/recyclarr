@@ -14,10 +14,10 @@ using Recyclarr.Logging;
 using Recyclarr.Migration;
 using Serilog;
 using Serilog.Core;
+using TrashLib;
 using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Radarr;
-using TrashLib.Radarr.Config;
 using TrashLib.Repo;
 using TrashLib.Sonarr;
 using TrashLib.Startup;
@@ -43,7 +43,7 @@ public static class CompositionRoot
         builder.RegisterModule<ConfigAutofacModule>();
 
         builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
-        builder.RegisterType<ResourcePaths>().As<IResourcePaths>();
+        builder.RegisterType<AppPaths>().As<IAppPaths>().SingleInstance();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())
@@ -80,7 +80,6 @@ public static class CompositionRoot
         builder.RegisterSource<OrderedRegistrationSource>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.RegisterType<FileUtilities>().As<IFileUtilities>();
         builder.RegisterType<SystemConsole>().As<IConsole>().SingleInstance();
 
         builder.RegisterModule<CacheAutofacModule>();
@@ -91,6 +90,7 @@ public static class CompositionRoot
         CommandRegistrations(builder);
         SetupLogging(builder);
 
+        builder.RegisterModule<CommonAutofacModule>();
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();

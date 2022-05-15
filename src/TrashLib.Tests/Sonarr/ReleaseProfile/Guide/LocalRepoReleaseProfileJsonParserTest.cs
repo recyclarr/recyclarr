@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Radarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 using TrashLib.Sonarr.ReleaseProfile.Guide;
 
@@ -17,7 +16,7 @@ public class LocalRepoReleaseProfileJsonParserTest
 {
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
-        [Frozen] IResourcePaths paths,
+        [Frozen] IAppPaths paths,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fileSystem,
         LocalRepoReleaseProfileJsonParser sut)
     {
@@ -37,7 +36,7 @@ public class LocalRepoReleaseProfileJsonParserTest
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");
 
-        paths.RepoPath.Returns("");
+        paths.RepoDirectory.Returns("");
         fileSystem.AddFile("docs/json/sonarr/first.json", MockFileData(mockData1));
         fileSystem.AddFile("docs/json/sonarr/second.json", MockFileData(mockData2));
 

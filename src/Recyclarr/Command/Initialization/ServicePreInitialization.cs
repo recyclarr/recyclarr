@@ -13,7 +13,7 @@ internal class ServicePreInitializer : IServiceInitializer
         _migration = migration;
     }
 
-    public void Initialize(IServiceCommand cmd)
+    public void Initialize(ServiceCommand cmd)
     {
         // Migrations are performed before we process command line arguments because we cannot instantiate any service
         // objects via the DI container before migration logic is performed. This is due to the fact that migration

@@ -1,9 +1,12 @@
-﻿using System.IO.Abstractions;
+﻿using System.IO.Abstractions.TestingHelpers;
+using AutoFixture.NUnit3;
 using CliFx.Infrastructure;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
-using Serilog;
+using TestLibrary.AutoFixture;
+using TrashLib;
 
 // ReSharper disable MethodHasAsyncOverload
 
@@ -13,32 +16,33 @@ namespace Recyclarr.Tests.Command;
 [Parallelizable(ParallelScope.All)]
 public class CreateConfigCommandTest
 {
-    [Test]
-    public async Task CreateConfig_DefaultPath_FileIsCreated()
+    [Test, AutoMockData]
+    public async Task Config_file_created_when_using_default_path(
+        [Frozen] IAppPaths paths,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        CreateConfigCommand cmd)
     {
-        var logger = Substitute.For<ILogger>();
-        var filesystem = Substitute.For<IFileSystem>();
-        var cmd = new CreateConfigCommand(logger, filesystem);
+        const string ymlPath = "path/recyclarr.yml";
+        paths.ConfigPath.Returns(ymlPath);
+        await cmd.ExecuteAsync(Substitute.For<IConsole>());
 
-        await cmd.ExecuteAsync(Substitute.For<IConsole>()).ConfigureAwait(false);
-
-        filesystem.File.Received().Exists(Arg.Is<string>(s => s.EndsWith("recyclarr.yml")));
-        filesystem.File.Received().WriteAllText(Arg.Is<string>(s => s.EndsWith("recyclarr.yml")), Arg.Any<string>());
+        var file = fs.GetFile(ymlPath);
+        file.Should().NotBeNull();
+        file.Contents.Should().NotBeEmpty();
     }
 
-    [Test]
-    public async Task CreateConfig_SpecifyPath_FileIsCreated()
+    [Test, AutoMockData]
+    public async Task CreateConfig_SpecifyPath_FileIsCreated(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        CreateConfigCommand cmd)
     {
-        var logger = Substitute.For<ILogger>();
-        var filesystem = Substitute.For<IFileSystem>();
-        var cmd = new CreateConfigCommand(logger, filesystem)
-        {
-            Path = "some/other/path.yml"
-        };
+        const string ymlPath = "some/other/path.yml";
+        cmd.Path = ymlPath;
 
         await cmd.ExecuteAsync(Substitute.For<IConsole>()).ConfigureAwait(false);
 
-        filesystem.File.Received().Exists(Arg.Is("some/other/path.yml"));
-        filesystem.File.Received().WriteAllText(Arg.Is("some/other/path.yml"), Arg.Any<string>());
+        var file = fs.GetFile(ymlPath);
+        file.Should().NotBeNull();
+        file.Contents.Should().NotBeEmpty();
     }
 }

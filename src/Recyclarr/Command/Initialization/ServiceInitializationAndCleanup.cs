@@ -15,7 +15,7 @@ public class ServiceInitializationAndCleanup : IServiceInitializationAndCleanup
         _cleaners = cleaners;
     }
 
-    public async Task Execute(IServiceCommand cmd, Func<Task> logic)
+    public async Task Execute(ServiceCommand cmd, Func<Task> logic)
     {
         try
         {

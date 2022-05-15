@@ -1,19 +1,24 @@
 using System.IO.Abstractions;
+using TrashLib;
 
 namespace Recyclarr.Logging;
 
 public class LogJanitor : ILogJanitor
 {
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fs;
+    private readonly IAppPaths _paths;
 
-    public LogJanitor(IFileSystem fileSystem)
+    public LogJanitor(IFileSystem fs, IAppPaths paths)
     {
-        _fileSystem = fileSystem;
+        _fs = fs;
+        _paths = paths;
     }
 
     public void DeleteOldestLogFiles(int numberOfNewestToKeep)
     {
-        foreach (var file in _fileSystem.DirectoryInfo.FromDirectoryName(AppPaths.LogDirectory).GetFiles()
+        var dir = _fs.Directory.CreateDirectory(_paths.LogDirectory);
+
+        foreach (var file in dir.GetFiles()
                      .OrderByDescending(f => f.Name)
                      .Skip(numberOfNewestToKeep))
         {

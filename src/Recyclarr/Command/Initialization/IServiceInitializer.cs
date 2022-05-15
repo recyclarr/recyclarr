@@ -2,5 +2,5 @@
 
 public interface IServiceInitializer
 {
-    void Initialize(IServiceCommand cmd);
+    void Initialize(ServiceCommand cmd);
 }

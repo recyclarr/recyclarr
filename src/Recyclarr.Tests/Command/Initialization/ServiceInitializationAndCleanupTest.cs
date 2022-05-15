@@ -13,7 +13,7 @@ public class ServiceInitializationAndCleanupTest
 {
     [Test, AutoMockData]
     public async Task Cleanup_happens_when_exception_occurs_in_action(
-        IServiceCommand cmd,
+        ServiceCommand cmd,
         IServiceCleaner cleaner)
     {
         var sut = new ServiceInitializationAndCleanup(
@@ -28,7 +28,7 @@ public class ServiceInitializationAndCleanupTest
 
     [Test, AutoMockData]
     public async Task Cleanup_happens_when_exception_occurs_in_init(
-        IServiceCommand cmd,
+        ServiceCommand cmd,
         IServiceInitializer init,
         IServiceCleaner cleaner)
     {

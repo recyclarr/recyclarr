@@ -6,7 +6,6 @@ using NUnit.Framework;
 using TestLibrary.AutoFixture;
 using TrashLib.Config;
 using TrashLib.Config.Settings;
-using TrashLib.Radarr.Config;
 using YamlDotNet.Serialization;
 
 namespace TrashLib.Tests.Config.Settings;
@@ -18,7 +17,7 @@ public class SettingsPersisterTest
     [Test, AutoMockData]
     public void Load_should_create_settings_file_if_not_exists(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fileSystem,
-        [Frozen] IResourcePaths paths,
+        [Frozen] IAppPaths paths,
         SettingsPersister sut)
     {
         paths.SettingsPath.Returns("test_path");
@@ -33,7 +32,7 @@ public class SettingsPersisterTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fileSystem,
         [Frozen(Matching.ImplementedInterfaces)] YamlSerializerFactory serializerFactory,
         [Frozen(Matching.ImplementedInterfaces)] SettingsProvider settingsProvider,
-        [Frozen] IResourcePaths paths,
+        [Frozen] IAppPaths paths,
         SettingsPersister sut)
     {
         paths.SettingsPath.Returns("test_path");
@@ -48,7 +47,7 @@ public class SettingsPersisterTest
     public void Load_data_correctly_when_file_exists(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fileSystem,
         [Frozen] IYamlSerializerFactory serializerFactory,
-        [Frozen] IResourcePaths paths,
+        [Frozen] IAppPaths paths,
         SettingsPersister sut)
     {
         // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects;

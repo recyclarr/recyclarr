@@ -2,7 +2,6 @@ using Common;
 using LibGit2Sharp;
 using Serilog;
 using TrashLib.Config.Settings;
-using TrashLib.Radarr.Config;
 using VersionControl;
 
 namespace TrashLib.Repo;
@@ -16,7 +15,7 @@ public class RepoUpdater : IRepoUpdater
 
     public RepoUpdater(
         ILogger log,
-        IResourcePaths paths,
+        IAppPaths paths,
         IGitRepositoryFactory repositoryFactory,
         IFileUtilities fileUtils,
         ISettingsProvider settingsProvider)
@@ -25,7 +24,7 @@ public class RepoUpdater : IRepoUpdater
         _repositoryFactory = repositoryFactory;
         _fileUtils = fileUtils;
         _settingsProvider = settingsProvider;
-        RepoPath = paths.RepoPath;
+        RepoPath = paths.RepoDirectory;
     }
 
     public string RepoPath { get; }

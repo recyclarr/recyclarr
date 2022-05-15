@@ -1,17 +1,16 @@
 using System.IO.Abstractions;
-using TrashLib.Radarr.Config;
 
 namespace TrashLib.Config.Settings;
 
 public class SettingsPersister : ISettingsPersister
 {
-    private readonly IResourcePaths _paths;
+    private readonly IAppPaths _paths;
     private readonly ISettingsProvider _settingsProvider;
     private readonly IYamlSerializerFactory _serializerFactory;
     private readonly IFileSystem _fileSystem;
 
     public SettingsPersister(
-        IResourcePaths paths,
+        IAppPaths paths,
         ISettingsProvider settingsProvider,
         IYamlSerializerFactory serializerFactory,
         IFileSystem fileSystem)

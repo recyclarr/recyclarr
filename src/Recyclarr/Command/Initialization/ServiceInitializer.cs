@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using TrashLib;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
@@ -18,22 +19,25 @@ internal class ServiceInitializer : IServiceInitializer
     private readonly ISettingsPersister _settingsPersister;
     private readonly ISettingsProvider _settingsProvider;
     private readonly IRepoUpdater _repoUpdater;
+    private readonly IAppPaths _paths;
 
     public ServiceInitializer(
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ISettingsPersister settingsPersister,
         ISettingsProvider settingsProvider,
-        IRepoUpdater repoUpdater)
+        IRepoUpdater repoUpdater,
+        IAppPaths paths)
     {
         _log = log;
         _loggingLevelSwitch = loggingLevelSwitch;
         _settingsPersister = settingsPersister;
         _settingsProvider = settingsProvider;
         _repoUpdater = repoUpdater;
+        _paths = paths;
     }
 
-    public void Initialize(IServiceCommand cmd)
+    public void Initialize(ServiceCommand cmd)
     {
         // Must happen first because everything can use the logger.
         _loggingLevelSwitch.MinimumLevel = cmd.Debug ? LogEventLevel.Debug : LogEventLevel.Information;
@@ -43,6 +47,11 @@ internal class ServiceInitializer : IServiceInitializer
 
         SetupHttp();
         _repoUpdater.UpdateRepo();
+
+        if (!cmd.Config.Any())
+        {
+            cmd.Config = new[] {_paths.ConfigPath};
+        }
     }
 
     private void SetupHttp()
