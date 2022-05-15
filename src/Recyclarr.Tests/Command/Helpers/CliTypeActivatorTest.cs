@@ -23,8 +23,9 @@ public class CliTypeActivatorTest
     {
         public bool Preview => false;
         public bool Debug => false;
-        public ICollection<string>? Config => null;
+        public ICollection<string> Config => new List<string>();
         public string CacheStoragePath => "";
+        public string Name => "";
     }
 
     [Test]

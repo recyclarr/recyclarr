@@ -82,7 +82,6 @@ public class ReleaseProfileListerTest
         console.ReadOutputString().Should().ContainAll(expectedOutput.SelectMany(x => x));
     }
 
-
     [Test, AutoMockData]
     public void Release_profile_trash_id_is_used_to_look_up_data(
         [Frozen] ISonarrGuideService guide,

@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using System.Text;
 using Autofac;
+using Autofac.Core;
+using Autofac.Core.Activators.Reflection;
 using CliFx;
 using CliFx.Infrastructure;
 using Recyclarr.Command.Helpers;
-using Recyclarr.Migration;
 
 namespace Recyclarr;
 
@@ -20,39 +21,35 @@ internal static class Program
 
         var console = _container.Resolve<IConsole>();
 
-        try
-        {
-            var migration = _container.Resolve<IMigrationExecutor>();
-            migration.PerformAllMigrationSteps();
-        }
-        catch (MigrationException e)
-        {
-            var msg = new StringBuilder();
-            msg.AppendLine("Fatal exception during migration step. Details are below.\n");
-            msg.AppendLine($"Step That Failed:  {e.OperationDescription}");
-            msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
-
-            if (e.Remediation.Any())
-            {
-                msg.AppendLine("\nPossible remediation steps:");
-                foreach (var remedy in e.Remediation)
-                {
-                    msg.AppendLine($" - {remedy}");
-                }
-            }
-
-            await console.Error.WriteAsync(msg);
-            return 1;
-        }
-
-        return await new CliApplicationBuilder()
-            .AddCommandsFromThisAssembly()
+        var status = await new CliApplicationBuilder()
+            .AddCommands(GetRegisteredCommandTypes())
             .SetExecutableName(ExecutableName)
             .SetVersion(BuildVersion())
             .UseTypeActivator(type => CliTypeActivator.ResolveType(_container, type))
             .UseConsole(console)
             .Build()
             .RunAsync();
+
+        // Log cleanup happens here instead of ServiceBase or other objects because we want it to run only once before
+        // application exit, not per-service.
+        var logJanitor = _container.Resolve<ILogJanitor>();
+        logJanitor.DeleteOldestLogFiles(20);
+
+        return status;
+    }
+
+    private static IEnumerable<Type> GetRegisteredCommandTypes()
+    {
+        if (_container is null)
+        {
+            throw new NullReferenceException("DI Container was null during migration process");
+        }
+
+        return _container.ComponentRegistry.Registrations
+            .SelectMany(x => x.Services)
+            .OfType<TypedService>()
+            .Select(x => x.ServiceType)
+            .Where(x => x.IsAssignableTo<ICommand>());
     }
 
     private static string BuildVersion()

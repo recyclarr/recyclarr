@@ -1,30 +1,16 @@
+using System.Text;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
-using Common.Networking;
-using Flurl.Http;
-using Flurl.Http.Configuration;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using TrashLib.Config.Settings;
-using TrashLib.Extensions;
-using TrashLib.Repo;
-using YamlDotNet.Core;
+using Recyclarr.Migration;
 
 namespace Recyclarr.Command;
 
 public abstract class ServiceCommand : ICommand, IServiceCommand
 {
-    private readonly ILogger _log;
-    private readonly LoggingLevelSwitch _loggingLevelSwitch;
-    private readonly ILogJanitor _logJanitor;
-    private readonly ISettingsPersister _settingsPersister;
-    private readonly ISettingsProvider _settingsProvider;
-    private readonly IRepoUpdater _repoUpdater;
+    private readonly IMigrationExecutor _migration;
 
     [CommandOption("preview", 'p', Description =
         "Only display the processed markdown results without making any API calls.")]
@@ -41,93 +27,52 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         new List<string> {AppPaths.DefaultConfigPath};
 
     public abstract string CacheStoragePath { get; }
+    public abstract string Name { get; }
 
-    protected ServiceCommand(
-        ILogger log,
-        LoggingLevelSwitch loggingLevelSwitch,
-        ILogJanitor logJanitor,
-        ISettingsPersister settingsPersister,
-        ISettingsProvider settingsProvider,
-        IRepoUpdater repoUpdater)
+    protected ServiceCommand(IMigrationExecutor migration)
     {
-        _loggingLevelSwitch = loggingLevelSwitch;
-        _logJanitor = logJanitor;
-        _settingsPersister = settingsPersister;
-        _settingsProvider = settingsProvider;
-        _repoUpdater = repoUpdater;
-        _log = log;
+        _migration = migration;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
     {
-        // Must happen first because everything can use the logger.
-        _loggingLevelSwitch.MinimumLevel = Debug ? LogEventLevel.Debug : LogEventLevel.Information;
+        // Stuff that needs to happen pre-service-initialization goes here
 
-        // Has to happen right after logging because stuff below may use settings.
-        _settingsPersister.Load();
+        // Migrations are performed before we process command line arguments because we cannot instantiate any service
+        // objects via the DI container before migration logic is performed. This is due to the fact that migration
+        // steps may alter important files and directories which those services may depend on.
+        PerformMigrations();
 
-        SetupHttp();
-        _repoUpdater.UpdateRepo();
-
-        try
-        {
-            await Process();
-        }
-        catch (YamlException e)
-        {
-            var inner = e.InnerException;
-            if (inner == null)
-            {
-                throw;
-            }
-
-            _log.Error("Found Unrecognized YAML Property: {ErrorMsg}", inner.Message);
-            _log.Error("Please remove the property quoted in the above message from your YAML file");
-            throw new CommandException("Exiting due to invalid configuration");
-        }
-        catch (Exception e) when (e is not CommandException)
-        {
-            _log.Error(e, "Unrecoverable Exception");
-            ExitDueToFailure();
-        }
-        finally
-        {
-            _logJanitor.DeleteOldestLogFiles(20);
-        }
+        // Initialize command services and execute business logic (system environment changes should be done by this
+        // point)
+        await Process();
     }
 
-    private void SetupHttp()
+    private void PerformMigrations()
     {
-        FlurlHttp.Configure(settings =>
+        try
         {
-            var jsonSettings = new JsonSerializerSettings
+            _migration.PerformAllMigrationSteps();
+        }
+        catch (MigrationException e)
+        {
+            var msg = new StringBuilder();
+            msg.AppendLine("Fatal exception during migration step. Details are below.\n");
+            msg.AppendLine($"Step That Failed:  {e.OperationDescription}");
+            msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
+
+            if (e.Remediation.Any())
             {
-                // This is important. If any DTOs are missing members, say, if Radarr or Sonarr adds one in a future
-                // version, this needs to fail to indicate that a software change is required. Otherwise, we lose
-                // state between when we request settings, and re-apply them again with a few properties modified.
-                MissingMemberHandling = MissingMemberHandling.Error,
-
-                // This makes sure that null properties, such as maxSize and preferredSize in Radarr
-                // Quality Definitions, do not get written out to JSON request bodies.
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
-            settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
-            FlurlLogging.SetupLogging(settings, _log);
-
-            if (!_settingsProvider.Settings.EnableSslCertificateValidation)
-            {
-                _log.Warning(
-                    "Security Risk: Certificate validation is being DISABLED because setting `enable_ssl_certificate_validation` is set to `false`");
-                settings.HttpClientFactory = new UntrustedCertClientFactory();
+                msg.AppendLine("\nPossible remediation steps:");
+                foreach (var remedy in e.Remediation)
+                {
+                    msg.AppendLine($" - {remedy}");
+                }
             }
-        });
+
+            throw new CommandException(msg.ToString());
+        }
     }
 
     protected abstract Task Process();
-
-    protected static void ExitDueToFailure()
-    {
-        throw new CommandException("Exiting due to previous exception");
-    }
 }

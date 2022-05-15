@@ -7,6 +7,7 @@ using CliFx;
 using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
+using Recyclarr.Command.Services;
 using Recyclarr.Config;
 using Recyclarr.Migration;
 using Serilog;
@@ -60,9 +61,13 @@ public static class CompositionRoot
 
     private static void CommandRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterType<SonarrService>();
+        builder.RegisterType<RadarrService>();
+        builder.RegisterType<ServiceInitialization>().As<IServiceInitialization>();
+
         // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-            .Where(t => t.IsAssignableTo(typeof(ICommand)));
+            .AssignableTo<ICommand>();
 
         // Used to access the chosen command class. This is assigned from CliTypeActivator
         //
