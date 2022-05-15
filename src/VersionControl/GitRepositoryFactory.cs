@@ -36,7 +36,7 @@ public class GitRepositoryFactory : IGitRepositoryFactory
 
         var progress = new ProgressBar
         {
-            Description = "Fetching guide data"
+            Description = "Fetching guide data\n"
         };
 
         _staticWrapper.Clone(repoUrl, repoPath, new CloneOptions
