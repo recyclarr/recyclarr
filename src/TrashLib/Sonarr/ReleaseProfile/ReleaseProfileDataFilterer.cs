@@ -73,11 +73,8 @@ public class ReleaseProfileDataFilterer
         if (profileFilter.Include.Any())
         {
             _log.Debug("Using inclusion filter");
-            return new ReleaseProfileData
+            return selectedProfile with
             {
-                TrashId = selectedProfile.TrashId,
-                Name = selectedProfile.Name,
-                IncludePreferredWhenRenaming = selectedProfile.IncludePreferredWhenRenaming,
                 Required = IncludeTerms(selectedProfile.Required, profileFilter.Include),
                 Ignored = IncludeTerms(selectedProfile.Ignored, profileFilter.Include),
                 Preferred = IncludeTerms(selectedProfile.Preferred, profileFilter.Include)
@@ -87,11 +84,8 @@ public class ReleaseProfileDataFilterer
         if (profileFilter.Exclude.Any())
         {
             _log.Debug("Using exclusion filter");
-            return new ReleaseProfileData
+            return selectedProfile with
             {
-                TrashId = selectedProfile.TrashId,
-                Name = selectedProfile.Name,
-                IncludePreferredWhenRenaming = selectedProfile.IncludePreferredWhenRenaming,
                 Required = ExcludeTerms(selectedProfile.Required, profileFilter.Exclude),
                 Ignored = ExcludeTerms(selectedProfile.Ignored, profileFilter.Exclude),
                 Preferred = ExcludeTerms(selectedProfile.Preferred, profileFilter.Exclude)
