@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Text;
 using Autofac;
 using Autofac.Core;
-using Autofac.Core.Activators.Reflection;
 using CliFx;
 using CliFx.Infrastructure;
 using Recyclarr.Command.Helpers;

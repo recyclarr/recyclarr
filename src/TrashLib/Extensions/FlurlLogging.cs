@@ -8,7 +8,7 @@ public static class FlurlLogging
 {
     public static void SetupLogging(FlurlHttpSettings settings, ILogger log, Func<Url, Url>? urlInterceptor = null)
     {
-        urlInterceptor ??= url => url;
+        urlInterceptor ??= SanitizeUrl;
 
         settings.BeforeCall = call =>
         {
@@ -26,9 +26,21 @@ public static class FlurlLogging
         settings.OnRedirect = call =>
         {
             log.Warning("HTTP Redirect received; this indicates a problem with your URL and/or reverse proxy: {Url}",
-                call.Redirect.Url);
+                urlInterceptor(call.Redirect.Url));
 
             call.Redirect.Follow = false;
         };
+    }
+
+    public static Url SanitizeUrl(Url url)
+    {
+        // Replace hostname and API key for user privacy
+        url.Host = "hostname";
+        if (url.QueryParams.Contains("apikey"))
+        {
+            url.QueryParams.AddOrReplace("apikey", "SNIP");
+        }
+
+        return url;
     }
 }

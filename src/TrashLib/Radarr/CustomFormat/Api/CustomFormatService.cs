@@ -1,3 +1,4 @@
+using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config.Services;
@@ -49,5 +50,5 @@ internal class CustomFormatService : ICustomFormatService
             .DeleteAsync();
     }
 
-    private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
+    private Url BuildRequest() => _serverInfo.BuildRequest();
 }

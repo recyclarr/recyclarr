@@ -1,8 +1,8 @@
-using Flurl.Http;
+using Flurl;
 
 namespace TrashLib.Config.Services;
 
 public interface IServerInfo
 {
-    IFlurlRequest BuildRequest();
+    Url BuildRequest();
 }

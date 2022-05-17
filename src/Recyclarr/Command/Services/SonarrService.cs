@@ -2,6 +2,7 @@
 using Recyclarr.Command.Helpers;
 using Recyclarr.Config;
 using Serilog;
+using TrashLib.Extensions;
 using TrashLib.Sonarr;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
@@ -58,7 +59,7 @@ public class SonarrService : ServiceBase<ISonarrCommand>
 
         foreach (var config in _configLoader.LoadMany(cmd.Config, "sonarr"))
         {
-            _log.Information("Processing server {Url}", config.BaseUrl);
+            _log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
 
             if (config.ReleaseProfiles.Count > 0)
             {

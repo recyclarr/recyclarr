@@ -1,4 +1,5 @@
-﻿using Flurl.Http;
+﻿using Flurl;
+using Flurl.Http;
 using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;
 
@@ -29,5 +30,5 @@ internal class QualityDefinitionService : IQualityDefinitionService
             .ReceiveJson<List<RadarrQualityDefinitionItem>>();
     }
 
-    private IFlurlRequest BuildRequest() => _serverInfo.BuildRequest();
+    private Url BuildRequest() => _serverInfo.BuildRequest();
 }

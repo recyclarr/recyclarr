@@ -1,6 +1,7 @@
 ﻿using Recyclarr.Command.Helpers;
 using Recyclarr.Config;
 using Serilog;
+using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.QualityDefinition;
@@ -32,7 +33,7 @@ public class RadarrService : ServiceBase<IRadarrCommand>
     {
         foreach (var config in _configLoader.LoadMany(cmd.Config, "radarr"))
         {
-            _log.Information("Processing server {Url}", config.BaseUrl);
+            _log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
 
             if (config.QualityDefinition != null)
             {

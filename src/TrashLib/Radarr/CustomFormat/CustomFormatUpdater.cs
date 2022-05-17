@@ -1,5 +1,6 @@
 ﻿using Common.Extensions;
 using Serilog;
+using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Processors;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
@@ -182,7 +183,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_guideProcessor.ConfigData.Count == 0)
         {
             Log.Error("Guide processing yielded no custom formats for configured instance host {BaseUrl}",
-                config.BaseUrl);
+                FlurlLogging.SanitizeUrl(config.BaseUrl));
             return false;
         }
 
