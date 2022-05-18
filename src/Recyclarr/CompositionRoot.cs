@@ -2,6 +2,7 @@
 using System.Reflection;
 using Autofac;
 using Autofac.Core.Activators.Reflection;
+using Autofac.Extras.Ordering;
 using CliFx;
 using CliFx.Infrastructure;
 using Common;
@@ -79,6 +80,9 @@ public static class CompositionRoot
 
     public static IContainer Setup(ContainerBuilder builder)
     {
+        // Needed for Autofac.Extras.Ordering
+        builder.RegisterSource<OrderedRegistrationSource>();
+
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.RegisterType<FileUtilities>().As<IFileUtilities>();
         builder.RegisterType<SystemConsole>().As<IConsole>().SingleInstance();

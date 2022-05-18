@@ -5,14 +5,16 @@ using TrashLib.ExceptionTypes;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;
 using TrashLib.Sonarr.Config;
+using TrashLib.Sonarr.ReleaseProfile.Filters;
 using TrashLib.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Sonarr.ReleaseProfile;
 
-internal class ReleaseProfileUpdater : IReleaseProfileUpdater
+public class ReleaseProfileUpdater : IReleaseProfileUpdater
 {
     private readonly ISonarrApi _api;
     private readonly ISonarrCompatibility _compatibility;
+    private readonly IReleaseProfileFilterPipeline _pipeline;
     private readonly ISonarrGuideService _guide;
     private readonly ILogger _log;
 
@@ -20,12 +22,14 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
         ILogger logger,
         ISonarrGuideService guide,
         ISonarrApi api,
-        ISonarrCompatibility compatibility)
+        ISonarrCompatibility compatibility,
+        IReleaseProfileFilterPipeline pipeline)
     {
         _log = logger;
         _guide = guide;
         _api = api;
         _compatibility = compatibility;
+        _pipeline = pipeline;
     }
 
     public async Task Process(bool isPreview, SonarrConfiguration config)
@@ -33,7 +37,6 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
         var profilesFromGuide = _guide.GetReleaseProfileData();
 
         var filteredProfiles = new List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)>();
-        var filterer = new ReleaseProfileDataFilterer(_log);
 
         var configProfiles = config.ReleaseProfiles.SelectMany(x => x.TrashIds.Select(y => (TrashId: y, Config: x)));
         foreach (var (trashId, configProfile) in configProfiles)
@@ -49,15 +52,7 @@ internal class ReleaseProfileUpdater : IReleaseProfileUpdater
             _log.Debug("Found Release Profile: {ProfileName} ({TrashId})", selectedProfile.Name,
                 selectedProfile.TrashId);
 
-            if (configProfile.Filter != null)
-            {
-                _log.Debug("This profile will be filtered");
-                var newProfile = filterer.FilterProfile(selectedProfile, configProfile.Filter);
-                if (newProfile is not null)
-                {
-                    selectedProfile = newProfile;
-                }
-            }
+            selectedProfile = _pipeline.Process(selectedProfile, configProfile);
 
             if (isPreview)
             {

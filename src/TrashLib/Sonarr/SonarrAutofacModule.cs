@@ -1,8 +1,10 @@
 using Autofac;
+using Autofac.Extras.Ordering;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.QualityDefinition;
 using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Sonarr.ReleaseProfile.Filters;
 using TrashLib.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Sonarr;
@@ -21,6 +23,14 @@ public class SonarrAutofacModule : Module
         builder.RegisterType<LocalRepoReleaseProfileJsonParser>().As<ISonarrGuideService>();
         builder.RegisterType<SonarrReleaseProfileCompatibilityHandler>()
             .As<ISonarrReleaseProfileCompatibilityHandler>();
+        builder.RegisterType<ReleaseProfileFilterPipeline>().As<IReleaseProfileFilterPipeline>();
+
+        // Release Profile Filters (ORDER MATTERS!)
+        builder.RegisterTypes(
+                typeof(IncludeExcludeFilter),
+                typeof(StrictNegativeScoresFilter))
+            .As<IReleaseProfileFilter>()
+            .OrderByRegistration();
 
         // Quality Definition Support
         builder.RegisterType<SonarrQualityDefinitionUpdater>().As<ISonarrQualityDefinitionUpdater>();

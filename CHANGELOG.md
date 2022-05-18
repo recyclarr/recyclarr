@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Sonarr: `strict_negative_scores` works again (broke in v2.0 release)
+
 ## [2.0.0] - 2022-05-13
 
 This release contains **BREAKING CHANGES**. See the [Upgrade Guide] for required changes you need to
