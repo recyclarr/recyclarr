@@ -23,7 +23,7 @@ A schema file is provided for `settings.yml` to help assist in editing the file.
 add the below snippet to the first line in your `settings.yml` file:
 
 ```yml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/rcdailey/recyclarr/master/schemas/settings-schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
 ```
 
 If you use VS Code to edit your settings file and install the [YAML extension][yaml], it will

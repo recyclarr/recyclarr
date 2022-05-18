@@ -97,5 +97,5 @@ These are explained in more detail on the [Migration System] page.
 - Migration steps have been added. See the `v2.0` migration steps documented on the [Migration
   System] page.
 
-[Configuration Reference]: https://github.com/rcdailey/recyclarr/wiki/Configuration-Reference
-[Migration System]: https://github.com/rcdailey/recyclarr/wiki/Migration-System
+[Configuration Reference]: https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
+[Migration System]: https://github.com/recyclarr/recyclarr/wiki/Migration-System

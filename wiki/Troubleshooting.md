@@ -76,5 +76,5 @@ Below is a list of locations where you can find the log directory depending on p
     sudo dnf install openssl1.1
     ```
 
-[#42]: https://github.com/rcdailey/recyclarr/issues/42
-[#54]: https://github.com/rcdailey/recyclarr/issues/54
+[#42]: https://github.com/recyclarr/recyclarr/issues/42
+[#54]: https://github.com/recyclarr/recyclarr/issues/54

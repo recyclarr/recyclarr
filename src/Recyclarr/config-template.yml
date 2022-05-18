@@ -5,7 +5,7 @@
 # Many optional settings have been omitted to keep this template simple.
 #
 # For more details on the configuration, see the Configuration Reference on the wiki here:
-# https://github.com/rcdailey/recyclarr/wiki/Configuration-Reference
+# https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
 
 # Configuration specific to Sonarr
 sonarr:

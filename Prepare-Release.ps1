@@ -8,9 +8,9 @@ $version = dotnet-gitversion /showvariable SemVer
 
 Install-Module -Name ChangelogManagement
 Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
-    FirstRelease = "https://github.com/rcdailey/recyclarr/releases/tag/v{CUR}"
-    NormalRelease = "https://github.com/rcdailey/recyclarr/compare/v{PREV}...v{CUR}"
-    Unreleased = "https://github.com/rcdailey/recyclarr/compare/v{CUR}...HEAD"
+    FirstRelease = "https://github.com/recyclarr/recyclarr/releases/tag/v{CUR}"
+    NormalRelease = "https://github.com/recyclarr/recyclarr/compare/v{PREV}...v{CUR}"
+    Unreleased = "https://github.com/recyclarr/recyclarr/compare/v{CUR}...HEAD"
 }
 
 # Read & Write the file after updating the changelog to force a newline at the end of the file. The

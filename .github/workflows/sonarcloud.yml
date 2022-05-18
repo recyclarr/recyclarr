@@ -47,8 +47,8 @@ jobs:
       - name: Begin Sonar Scanner
         run: >
           dotnet sonarscanner begin
-          -o:"rcdailey"
-          -k:"rcdailey_recyclarr"
+          -o:"recyclarr"
+          -k:"recyclarr_recyclarr"
           -n:"Recyclarr"
           -v:"${{ steps.gitversion.outputs.fullSemVer }}"
           -d:sonar.login="${{ secrets.SONAR_TOKEN }}"

@@ -35,10 +35,10 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
   profile. These lists of terms can be used to include or exclude specific optionals, for example.
 - [Migration System] that is responsible for performing one-time upgrade tasks as needed.
 
-[#17]: https://github.com/rcdailey/recyclarr/issues/17
-[Upgrade Guide]: https://github.com/rcdailey/recyclarr/wiki/Upgrade-Guide
+[#17]: https://github.com/recyclarr/recyclarr/issues/17
+[Upgrade Guide]: https://github.com/recyclarr/recyclarr/wiki/Upgrade-Guide
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
-[Migration System]: https://github.com/rcdailey/recyclarr/wiki/Migration-System
+[Migration System]: https://github.com/recyclarr/recyclarr/wiki/Migration-System
 
 ## [1.8.2] - 2022-03-06
 
@@ -84,8 +84,8 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - Sometimes the "Requesting and parsing guide markdown" step would appear stuck and fail after
   several minutes. Many changes have been made to try to alleviate this.
 
-[setref]: https://github.com/rcdailey/recyclarr/wiki/Settings-Reference
-[#20]: https://github.com/rcdailey/recyclarr/issues/20
+[setref]: https://github.com/recyclarr/recyclarr/wiki/Settings-Reference
+[#20]: https://github.com/recyclarr/recyclarr/issues/20
 
 ## [1.6.6] - 2021-10-30
 
@@ -107,8 +107,8 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - libgit2sharp PDB is no longer required with trash.exe on Windows ([#15])
 - Unexpected character error due to breaking change in Sonarr API ([#16])
 
-[#15]: https://github.com/rcdailey/recyclarr/issues/15
-[#16]: https://github.com/rcdailey/recyclarr/issues/16
+[#15]: https://github.com/recyclarr/recyclarr/issues/15
+[#16]: https://github.com/recyclarr/recyclarr/issues/16
 
 ## [1.6.3] - 2021-07-31
 
@@ -229,7 +229,7 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - New configuration for Sonarr release profiles that allows all optional terms to be synced. Look
   for `filter` in the [Configuration Reference] for more details.
 
-[Configuration Reference]: https://github.com/rcdailey/recyclarr/wiki/Configuration-Reference
+[Configuration Reference]: https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
 
 ## [1.2.0] - 2021-04-19
 
@@ -255,7 +255,7 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 
 See the [Python Migration Guide][py-mig] for details on how to update your YAML configuration.
 
-[py-mig]: https://github.com/rcdailey/recyclarr/wiki/Python-Migration-Guide
+[py-mig]: https://github.com/recyclarr/recyclarr/wiki/Python-Migration-Guide
 
 ### Added
 
@@ -268,29 +268,29 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/rcdailey/recyclarr/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/rcdailey/recyclarr/compare/v1.8.2...v2.0.0
-[1.8.2]: https://github.com/rcdailey/recyclarr/compare/v1.8.1...v1.8.2
-[1.8.1]: https://github.com/rcdailey/recyclarr/compare/v1.8.0...v1.8.1
-[1.8.0]: https://github.com/rcdailey/recyclarr/compare/v1.7.0...v1.8.0
-[1.7.0]: https://github.com/rcdailey/recyclarr/compare/v1.6.6...v1.7.0
-[1.6.6]: https://github.com/rcdailey/recyclarr/compare/v1.6.5...v1.6.6
-[1.6.5]: https://github.com/rcdailey/recyclarr/compare/v1.6.4...v1.6.5
-[1.6.4]: https://github.com/rcdailey/recyclarr/compare/v1.6.3...v1.6.4
-[1.6.3]: https://github.com/rcdailey/recyclarr/compare/v1.6.2...v1.6.3
-[1.6.2]: https://github.com/rcdailey/recyclarr/compare/v1.6.1...v1.6.2
-[1.6.1]: https://github.com/rcdailey/recyclarr/compare/v1.6.0...v1.6.1
-[1.6.0]: https://github.com/rcdailey/recyclarr/compare/v1.5.1...v1.6.0
-[1.5.1]: https://github.com/rcdailey/recyclarr/compare/v1.5.0...v1.5.1
-[1.5.0]: https://github.com/rcdailey/recyclarr/compare/v1.4.2...v1.5.0
-[1.4.2]: https://github.com/rcdailey/recyclarr/compare/v1.4.1...v1.4.2
-[1.4.1]: https://github.com/rcdailey/recyclarr/compare/v1.4.0...v1.4.1
-[1.4.0]: https://github.com/rcdailey/recyclarr/compare/v1.3.3...v1.4.0
-[1.3.3]: https://github.com/rcdailey/recyclarr/compare/v1.3.2...v1.3.3
-[1.3.2]: https://github.com/rcdailey/recyclarr/compare/v1.3.1...v1.3.2
-[1.3.1]: https://github.com/rcdailey/recyclarr/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/rcdailey/recyclarr/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/rcdailey/recyclarr/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/rcdailey/recyclarr/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/rcdailey/recyclarr/compare/v0.1.0...v1.0.0
-[0.1.0]: https://github.com/rcdailey/recyclarr/releases/tag/v0.1.0
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/recyclarr/recyclarr/compare/v1.8.2...v2.0.0
+[1.8.2]: https://github.com/recyclarr/recyclarr/compare/v1.8.1...v1.8.2
+[1.8.1]: https://github.com/recyclarr/recyclarr/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/recyclarr/recyclarr/compare/v1.7.0...v1.8.0
+[1.7.0]: https://github.com/recyclarr/recyclarr/compare/v1.6.6...v1.7.0
+[1.6.6]: https://github.com/recyclarr/recyclarr/compare/v1.6.5...v1.6.6
+[1.6.5]: https://github.com/recyclarr/recyclarr/compare/v1.6.4...v1.6.5
+[1.6.4]: https://github.com/recyclarr/recyclarr/compare/v1.6.3...v1.6.4
+[1.6.3]: https://github.com/recyclarr/recyclarr/compare/v1.6.2...v1.6.3
+[1.6.2]: https://github.com/recyclarr/recyclarr/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/recyclarr/recyclarr/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/recyclarr/recyclarr/compare/v1.5.1...v1.6.0
+[1.5.1]: https://github.com/recyclarr/recyclarr/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/recyclarr/recyclarr/compare/v1.4.2...v1.5.0
+[1.4.2]: https://github.com/recyclarr/recyclarr/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/recyclarr/recyclarr/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/recyclarr/recyclarr/compare/v1.3.3...v1.4.0
+[1.3.3]: https://github.com/recyclarr/recyclarr/compare/v1.3.2...v1.3.3
+[1.3.2]: https://github.com/recyclarr/recyclarr/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/recyclarr/recyclarr/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/recyclarr/recyclarr/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/recyclarr/recyclarr/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/recyclarr/recyclarr/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/recyclarr/recyclarr/compare/v0.1.0...v1.0.0
+[0.1.0]: https://github.com/recyclarr/recyclarr/releases/tag/v0.1.0

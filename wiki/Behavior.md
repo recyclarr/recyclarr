@@ -25,4 +25,4 @@ The name is generated as follows:
 
 See the [Migration System] page.
 
-[Migration System]: https://github.com/rcdailey/recyclarr/wiki/Migration-System
+[Migration System]: https://github.com/recyclarr/recyclarr/wiki/Migration-System
