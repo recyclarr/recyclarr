@@ -20,7 +20,7 @@ jobs:
         uses: Andrew-Chen-Wang/github-wiki-action@v2
         env:
           WIKI_DIR: wiki/
-          GH_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_MAIL: ${{ secrets.EMAIL }}
           GH_NAME: ${{ github.repository_owner }}
           EXCLUDED_FILES: "*.json"

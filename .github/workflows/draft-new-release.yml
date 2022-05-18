@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0 # avoid shallow clone for NBGV
-          token: ${{ secrets.PAT }} # Allows git push
+          token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
 
       - name: Set up NBGV
         uses: dotnet/nbgv@master
@@ -46,14 +46,14 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         id: cpr
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           delete-branch: true
           base: master
 
       - name: Enable Pull Request Automerge
         uses: peter-evans/enable-pull-request-automerge@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
           merge-method: merge
           title: "Preparation for Release: ${{ env.VERSION }}"

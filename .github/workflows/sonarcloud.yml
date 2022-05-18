@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOTNET_ROLL_FORWARD: LatestMajor
-      GITHUB_TOKEN: ${{ secrets.PAT }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Get Source Code
         uses: actions/checkout@v2
