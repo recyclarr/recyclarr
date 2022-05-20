@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-05-19
+
 ### Fixed
 
 - Sonarr: `strict_negative_scores` works again (broke in v2.0 release)
@@ -272,7 +274,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/recyclarr/recyclarr/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/recyclarr/recyclarr/compare/v1.8.2...v2.0.0
 [1.8.2]: https://github.com/recyclarr/recyclarr/compare/v1.8.1...v1.8.2
 [1.8.1]: https://github.com/recyclarr/recyclarr/compare/v1.8.0...v1.8.1
