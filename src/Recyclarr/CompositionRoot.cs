@@ -10,6 +10,7 @@ using Recyclarr.Command.Helpers;
 using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;
 using Recyclarr.Config;
+using Recyclarr.Logging;
 using Recyclarr.Migration;
 using Serilog;
 using Serilog.Core;
@@ -31,19 +32,8 @@ public static class CompositionRoot
     {
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
-        builder.Register(c =>
-            {
-                var logPath = Path.Combine(AppPaths.LogDirectory,
-                    $"trash_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
-
-                const string consoleTemplate = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
-
-                return new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Console(outputTemplate: consoleTemplate, levelSwitch: c.Resolve<LoggingLevelSwitch>())
-                    .WriteTo.File(logPath)
-                    .CreateLogger();
-            })
+        builder.RegisterType<LoggerFactory>();
+        builder.Register(c => c.Resolve<LoggerFactory>().Create())
             .As<ILogger>()
             .SingleInstance();
     }

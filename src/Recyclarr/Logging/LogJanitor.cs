@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 
-namespace Recyclarr;
+namespace Recyclarr.Logging;
 
 public class LogJanitor : ILogJanitor
 {

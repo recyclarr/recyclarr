@@ -1,4 +1,6 @@
-﻿namespace Recyclarr.Command.Initialization;
+﻿using Recyclarr.Logging;
+
+namespace Recyclarr.Command.Initialization;
 
 internal class OldLogFileCleaner : IServiceCleaner
 {

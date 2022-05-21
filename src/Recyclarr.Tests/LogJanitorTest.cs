@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.Logging;
 
 namespace Recyclarr.Tests;
 
