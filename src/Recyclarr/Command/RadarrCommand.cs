@@ -1,7 +1,7 @@
 ﻿using CliFx.Attributes;
 using JetBrains.Annotations;
+using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;
-using Recyclarr.Migration;
 
 namespace Recyclarr.Command;
 
@@ -16,8 +16,8 @@ internal class RadarrCommand : ServiceCommand, IRadarrCommand
 
     public override string Name => "Radarr";
 
-    public RadarrCommand(IMigrationExecutor migration, Lazy<RadarrService> service)
-        : base(migration)
+    public RadarrCommand(IServiceInitializationAndCleanup init, Lazy<RadarrService> service)
+        : base(init)
     {
         _service = service;
     }

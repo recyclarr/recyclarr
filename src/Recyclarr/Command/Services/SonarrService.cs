@@ -1,5 +1,4 @@
 ﻿using CliFx.Exceptions;
-using Recyclarr.Command.Helpers;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
@@ -20,12 +19,10 @@ public class SonarrService : ServiceBase<ISonarrCommand>
 
     public SonarrService(
         ILogger log,
-        IServiceInitialization serviceInitialization,
         IConfigurationLoader<SonarrConfiguration> configLoader,
         Func<IReleaseProfileUpdater> profileUpdaterFactory,
         Func<ISonarrQualityDefinitionUpdater> qualityUpdaterFactory,
         IReleaseProfileLister lister)
-        : base(log, serviceInitialization)
     {
         _log = log;
         _configLoader = configLoader;

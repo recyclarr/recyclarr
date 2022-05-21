@@ -7,6 +7,7 @@ using CliFx;
 using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
+using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;
 using Recyclarr.Config;
 using Recyclarr.Migration;
@@ -63,7 +64,7 @@ public static class CompositionRoot
     {
         builder.RegisterType<SonarrService>();
         builder.RegisterType<RadarrService>();
-        builder.RegisterType<ServiceInitialization>().As<IServiceInitialization>();
+        builder.RegisterType<ServiceInitializer>().As<IServiceInitializer>();
 
         // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
@@ -98,13 +99,13 @@ public static class CompositionRoot
 
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
-
         SetupLogging(builder);
 
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
+        builder.RegisterModule<InitializationAutofacModule>();
 
         builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
 

@@ -1,7 +1,7 @@
 ﻿using CliFx.Attributes;
 using JetBrains.Annotations;
+using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;
-using Recyclarr.Migration;
 
 namespace Recyclarr.Command;
 
@@ -27,8 +27,8 @@ internal class SonarrCommand : ServiceCommand, ISonarrCommand
 
     public override string Name => "Sonarr";
 
-    public SonarrCommand(IMigrationExecutor migration, Lazy<SonarrService> service)
-        : base(migration)
+    public SonarrCommand(IServiceInitializationAndCleanup init, Lazy<SonarrService> service)
+        : base(init)
     {
         _service = service;
     }

@@ -1,5 +1,4 @@
-﻿using Recyclarr.Command.Helpers;
-using Recyclarr.Config;
+﻿using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
 using TrashLib.Radarr.Config;
@@ -17,11 +16,9 @@ public class RadarrService : ServiceBase<IRadarrCommand>
 
     public RadarrService(
         ILogger log,
-        IServiceInitialization serviceInitialization,
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
         Func<ICustomFormatUpdater> customFormatUpdaterFactory)
-        : base(log, serviceInitialization)
     {
         _log = log;
         _configLoader = configLoader;

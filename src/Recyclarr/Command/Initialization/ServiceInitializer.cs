@@ -9,9 +9,9 @@ using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
 
-namespace Recyclarr.Command.Helpers;
+namespace Recyclarr.Command.Initialization;
 
-internal class ServiceInitialization : IServiceInitialization
+internal class ServiceInitializer : IServiceInitializer
 {
     private readonly ILogger _log;
     private readonly LoggingLevelSwitch _loggingLevelSwitch;
@@ -19,7 +19,7 @@ internal class ServiceInitialization : IServiceInitialization
     private readonly ISettingsProvider _settingsProvider;
     private readonly IRepoUpdater _repoUpdater;
 
-    public ServiceInitialization(
+    public ServiceInitializer(
         ILogger log,
         LoggingLevelSwitch loggingLevelSwitch,
         ISettingsPersister settingsPersister,

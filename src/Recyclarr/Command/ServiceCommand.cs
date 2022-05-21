@@ -1,17 +1,14 @@
-using System.Text;
 using CliFx;
 using CliFx.Attributes;
-using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
-using Recyclarr.Migration;
+using Recyclarr.Command.Initialization;
 
 namespace Recyclarr.Command;
 
 public abstract class ServiceCommand : ICommand, IServiceCommand
 {
-    private readonly IMigrationExecutor _migration;
-    private readonly ILogJanitor _logJanitor;
+    private readonly IServiceInitializationAndCleanup _init;
 
     [CommandOption("preview", 'p', Description =
         "Only display the processed markdown results without making any API calls.")]
@@ -30,53 +27,13 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
     public abstract string CacheStoragePath { get; }
     public abstract string Name { get; }
 
-    protected ServiceCommand(IMigrationExecutor migration, ILogJanitor logJanitor)
+    protected ServiceCommand(IServiceInitializationAndCleanup init)
     {
-        _migration = migration;
-        _logJanitor = logJanitor;
+        _init = init;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
-    {
-        // Stuff that needs to happen pre-service-initialization goes here
-
-        // Migrations are performed before we process command line arguments because we cannot instantiate any service
-        // objects via the DI container before migration logic is performed. This is due to the fact that migration
-        // steps may alter important files and directories which those services may depend on.
-        PerformMigrations();
-
-        // Initialize command services and execute business logic (system environment changes should be done by this
-        // point)
-        await Process();
-
-        _logJanitor.DeleteOldestLogFiles(20);
-    }
-
-    private void PerformMigrations()
-    {
-        try
-        {
-            _migration.PerformAllMigrationSteps();
-        }
-        catch (MigrationException e)
-        {
-            var msg = new StringBuilder();
-            msg.AppendLine("Fatal exception during migration step. Details are below.\n");
-            msg.AppendLine($"Step That Failed:  {e.OperationDescription}");
-            msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
-
-            if (e.Remediation.Any())
-            {
-                msg.AppendLine("\nPossible remediation steps:");
-                foreach (var remedy in e.Remediation)
-                {
-                    msg.AppendLine($" - {remedy}");
-                }
-            }
-
-            throw new CommandException(msg.ToString());
-        }
-    }
+        => await _init.Execute(this, Process);
 
     protected abstract Task Process();
 }
