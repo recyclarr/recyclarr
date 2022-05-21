@@ -21,22 +21,22 @@ public class ReleaseProfileDataFilterer
     }
 
     public ReadOnlyCollection<TermData> ExcludeTerms(IEnumerable<TermData> terms,
-        IEnumerable<string> includeFilter)
+        IEnumerable<string> excludeFilter)
     {
         return terms
-            .ExceptBy(includeFilter, x => x.TrashId, StringComparer.InvariantCultureIgnoreCase)
+            .Where(x => !excludeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase))
             .IsValid(new TermDataValidator(), (e, x) => LogInvalidTerm(e, $"Exclude: {x}"))
             .ToList().AsReadOnly();
     }
 
     public ReadOnlyCollection<PreferredTermData> ExcludeTerms(IEnumerable<PreferredTermData> terms,
-        IReadOnlyCollection<string> includeFilter)
+        IReadOnlyCollection<string> excludeFilter)
     {
         return terms
             .Select(x => new PreferredTermData
             {
                 Score = x.Score,
-                Terms = ExcludeTerms(x.Terms, includeFilter)
+                Terms = ExcludeTerms(x.Terms, excludeFilter)
             })
             .IsValid(new PreferredTermDataValidator(), (e, x) => LogInvalidTerm(e, $"Exclude Preferred: {x}"))
             .ToList()
@@ -47,9 +47,8 @@ public class ReleaseProfileDataFilterer
         IEnumerable<string> includeFilter)
     {
         return terms
-            .IntersectBy(includeFilter, x => x.TrashId, StringComparer.InvariantCultureIgnoreCase)
-            .IsValid(new TermDataValidator(),
-                (e, x) => LogInvalidTerm(e, $"Include: {x}"))
+            .Where(x => includeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase))
+            .IsValid(new TermDataValidator(), (e, x) => LogInvalidTerm(e, $"Include: {x}"))
             .ToList().AsReadOnly();
     }
 
