@@ -29,11 +29,6 @@ internal static class Program
             .Build()
             .RunAsync();
 
-        // Log cleanup happens here instead of ServiceBase or other objects because we want it to run only once before
-        // application exit, not per-service.
-        var logJanitor = _container.Resolve<ILogJanitor>();
-        logJanitor.DeleteOldestLogFiles(20);
-
         return status;
     }
 

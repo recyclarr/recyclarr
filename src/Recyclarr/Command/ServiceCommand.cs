@@ -11,6 +11,7 @@ namespace Recyclarr.Command;
 public abstract class ServiceCommand : ICommand, IServiceCommand
 {
     private readonly IMigrationExecutor _migration;
+    private readonly ILogJanitor _logJanitor;
 
     [CommandOption("preview", 'p', Description =
         "Only display the processed markdown results without making any API calls.")]
@@ -29,9 +30,10 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
     public abstract string CacheStoragePath { get; }
     public abstract string Name { get; }
 
-    protected ServiceCommand(IMigrationExecutor migration)
+    protected ServiceCommand(IMigrationExecutor migration, ILogJanitor logJanitor)
     {
         _migration = migration;
+        _logJanitor = logJanitor;
     }
 
     public async ValueTask ExecuteAsync(IConsole console)
@@ -46,6 +48,8 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         // Initialize command services and execute business logic (system environment changes should be done by this
         // point)
         await Process();
+
+        _logJanitor.DeleteOldestLogFiles(20);
     }
 
     private void PerformMigrations()
