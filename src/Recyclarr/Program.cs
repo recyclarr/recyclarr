@@ -49,9 +49,10 @@ internal static class Program
     private static string BuildVersion()
     {
         var builder = new StringBuilder($"v{GitVersionInformation.MajorMinorPatch}");
-        if (!string.IsNullOrEmpty(GitVersionInformation.BuildMetaData))
+        var metadata = GitVersionInformation.FullBuildMetaData;
+        if (!string.IsNullOrEmpty(metadata))
         {
-            builder.Append(" (Build {GitVersionInformation.BuildMetaData})");
+            builder.Append($" ({metadata})");
         }
 
         return builder.ToString();
