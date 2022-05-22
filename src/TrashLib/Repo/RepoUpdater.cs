@@ -9,6 +9,7 @@ namespace TrashLib.Repo;
 public class RepoUpdater : IRepoUpdater
 {
     private readonly ILogger _log;
+    private readonly IAppPaths _paths;
     private readonly IGitRepositoryFactory _repositoryFactory;
     private readonly IFileUtilities _fileUtils;
     private readonly ISettingsProvider _settingsProvider;
@@ -21,13 +22,13 @@ public class RepoUpdater : IRepoUpdater
         ISettingsProvider settingsProvider)
     {
         _log = log;
+        _paths = paths;
         _repositoryFactory = repositoryFactory;
         _fileUtils = fileUtils;
         _settingsProvider = settingsProvider;
-        RepoPath = paths.RepoDirectory;
     }
 
-    public string RepoPath { get; }
+    public string RepoPath => _paths.RepoDirectory;
 
     public void UpdateRepo()
     {

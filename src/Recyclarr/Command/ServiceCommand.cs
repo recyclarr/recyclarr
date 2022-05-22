@@ -23,7 +23,12 @@ public abstract class ServiceCommand : ICommand, IServiceCommand
         "If not specified, the script will look for `recyclarr.yml` in the same directory as the executable.")]
     public ICollection<string> Config { get; [UsedImplicitly] set; } = new List<string>();
 
-    public abstract string CacheStoragePath { get; protected init; }
+    [CommandOption("app-data", Description =
+        "Explicitly specify the location of the recyclarr application data directory. " +
+        "Mainly for usage in Docker; not recommended for normal use.")]
+    public string? AppDataDirectory { get; [UsedImplicitly] set; }
+
+    public abstract string CacheStoragePath { get; [UsedImplicitly] protected init; }
     public abstract string Name { get; }
 
     protected ServiceCommand(IServiceInitializationAndCleanup init)

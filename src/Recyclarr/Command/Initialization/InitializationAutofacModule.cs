@@ -14,6 +14,7 @@ public class InitializationAutofacModule : Module
 
         // Initialization Services
         builder.RegisterTypes(
+                typeof(InitializeAppDataPath),
                 typeof(ServiceInitializer),
                 typeof(ServicePreInitializer))
             .As<IServiceInitializer>()
