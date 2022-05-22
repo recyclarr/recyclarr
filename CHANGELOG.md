@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `--app-data` option for overriding the location of the application data directory.
+
 ### Fixed
 
 - Version information in help output has been fixed.

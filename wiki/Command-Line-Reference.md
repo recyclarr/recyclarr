@@ -91,6 +91,12 @@ By default, Info, Warning and Error log levels are displayed in the console. Thi
 Debug level logs to be displayed. This is designed for debugging and development purposes and
 generally will be too noisy for normal program usage.
 
+### `--app-data`
+
+Overrides the normal, default location of the [[application data directory|File-Structure]]. Note
+that this option is mainly intended for usage in the official Docker image. It is not intended for
+normal use outside of that.
+
 ## Sonarr
 
 ### `--list-release-profiles`
