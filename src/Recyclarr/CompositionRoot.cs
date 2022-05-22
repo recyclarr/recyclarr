@@ -8,6 +8,7 @@ using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
 using Recyclarr.Command.Initialization;
+using Recyclarr.Command.Initialization.Init;
 using Recyclarr.Command.Services;
 using Recyclarr.Config;
 using Recyclarr.Logging;

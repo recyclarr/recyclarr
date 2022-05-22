@@ -2,7 +2,7 @@
 using CliFx.Exceptions;
 using Recyclarr.Migration;
 
-namespace Recyclarr.Command.Initialization;
+namespace Recyclarr.Command.Initialization.Init;
 
 internal class ServicePreInitializer : IServiceInitializer
 {

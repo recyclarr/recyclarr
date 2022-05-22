@@ -3,6 +3,8 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
 using Recyclarr.Command.Initialization;
+using Recyclarr.Command.Initialization.Cleanup;
+using Recyclarr.Command.Initialization.Init;
 using TestLibrary.AutoFixture;
 
 namespace Recyclarr.Tests.Command.Initialization;

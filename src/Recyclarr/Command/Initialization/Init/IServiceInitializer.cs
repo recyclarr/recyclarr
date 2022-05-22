@@ -1,4 +1,4 @@
-﻿namespace Recyclarr.Command.Initialization;
+﻿namespace Recyclarr.Command.Initialization.Init;
 
 public interface IServiceInitializer
 {

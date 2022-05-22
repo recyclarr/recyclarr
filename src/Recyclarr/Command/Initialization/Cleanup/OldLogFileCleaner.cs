@@ -1,6 +1,6 @@
 ﻿using Recyclarr.Logging;
 
-namespace Recyclarr.Command.Initialization;
+namespace Recyclarr.Command.Initialization.Cleanup;
 
 internal class OldLogFileCleaner : IServiceCleaner
 {

@@ -10,7 +10,7 @@ using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
 
-namespace Recyclarr.Command.Initialization;
+namespace Recyclarr.Command.Initialization.Init;
 
 internal class ServiceInitializer : IServiceInitializer
 {
