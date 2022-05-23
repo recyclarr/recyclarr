@@ -12,9 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New `--app-data` option for overriding the location of the application data directory.
 
+### Changed
+
+- The default location for the default YAML file (`recyclarr.yml`) has been changed to the
+  [application data directory](appdata). This is the same location of the `settings.yml` file.
+
+### Deprecated
+
+- The `recyclarr.yml` file should no longer be located adjacent to the `recyclarr` executable.
+
 ### Fixed
 
 - Version information in help output has been fixed.
+
+[appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
 
 ## [2.0.2] - 2022-05-20
 

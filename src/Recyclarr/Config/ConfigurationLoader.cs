@@ -28,9 +28,9 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
         _deserializer = yamlFactory.CreateDeserializer();
     }
 
-    public IEnumerable<T> Load(string propertyName, string configSection)
+    public IEnumerable<T> Load(string file, string configSection)
     {
-        using var stream = _fileSystem.File.OpenText(propertyName);
+        using var stream = _fileSystem.File.OpenText(file);
         return LoadFromStream(stream, configSection);
     }
 

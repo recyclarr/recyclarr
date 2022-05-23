@@ -9,4 +9,5 @@ public interface IAppPaths
     string LogDirectory { get; }
     string RepoDirectory { get; }
     string CacheDirectory { get; }
+    string DefaultConfigFilename { get; }
 }

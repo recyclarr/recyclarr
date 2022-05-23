@@ -8,5 +8,6 @@ public class CommonAutofacModule : Module
     {
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<FileUtilities>().As<IFileUtilities>();
+        builder.RegisterType<AppContextProxy>().As<IAppContext>();
     }
 }

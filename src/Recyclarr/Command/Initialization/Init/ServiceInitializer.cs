@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using TrashLib;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
@@ -19,7 +18,7 @@ internal class ServiceInitializer : IServiceInitializer
     private readonly ISettingsPersister _settingsPersister;
     private readonly ISettingsProvider _settingsProvider;
     private readonly IRepoUpdater _repoUpdater;
-    private readonly IAppPaths _paths;
+    private readonly IConfigurationFinder _configFinder;
 
     public ServiceInitializer(
         ILogger log,
@@ -27,14 +26,14 @@ internal class ServiceInitializer : IServiceInitializer
         ISettingsPersister settingsPersister,
         ISettingsProvider settingsProvider,
         IRepoUpdater repoUpdater,
-        IAppPaths paths)
+        IConfigurationFinder configFinder)
     {
         _log = log;
         _loggingLevelSwitch = loggingLevelSwitch;
         _settingsPersister = settingsPersister;
         _settingsProvider = settingsProvider;
         _repoUpdater = repoUpdater;
-        _paths = paths;
+        _configFinder = configFinder;
     }
 
     public void Initialize(ServiceCommand cmd)
@@ -50,7 +49,7 @@ internal class ServiceInitializer : IServiceInitializer
 
         if (!cmd.Config.Any())
         {
-            cmd.Config = new[] {_paths.ConfigPath};
+            cmd.Config = new[] {_configFinder.FindConfigPath()};
         }
     }
 

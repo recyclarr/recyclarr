@@ -45,6 +45,7 @@ public static class CompositionRoot
 
         builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
         builder.RegisterType<AppPaths>().As<IAppPaths>().SingleInstance();
+        builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())

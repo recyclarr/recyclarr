@@ -3,7 +3,7 @@ using TrashLib;
 
 namespace Recyclarr;
 
-internal class AppPaths : IAppPaths
+public class AppPaths : IAppPaths
 {
     private readonly IFileSystem _fs;
 
@@ -12,10 +12,12 @@ internal class AppPaths : IAppPaths
         _fs = fs;
     }
 
+    public string DefaultConfigFilename => "recyclarr.yml";
+
     public void SetAppDataPath(string path) => AppDataPath = path;
 
     public string AppDataPath { get; private set; } = "";
-    public string ConfigPath => _fs.Path.Combine(AppContext.BaseDirectory, "recyclarr.yml");
+    public string ConfigPath => _fs.Path.Combine(AppDataPath, DefaultConfigFilename);
     public string SettingsPath => _fs.Path.Combine(AppDataPath, "settings.yml");
     public string LogDirectory => _fs.Path.Combine(AppDataPath, "logs");
     public string RepoDirectory => _fs.Path.Combine(AppDataPath, "repo");
