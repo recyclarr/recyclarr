@@ -111,8 +111,8 @@ linux, I think you can handle what needs to be done :-)*
 Recyclarr requires a YAML configuration file in order to work. Run the steps below if you want to
 get started with a minimal configuration file.
 
-- Run `recyclarr create-config` to create a starter `recyclarr.yml` file in the same directory as the
-  executable. You can also use `--path` to customize the filename and location.
+- Run `recyclarr create-config` to create a starter `recyclarr.yml` file in the [application data
+  directory][appdata]. You can also use `--path` to customize the filename and location.
 - Open the generated YAML file from the previous step. At a minimum you must update the `base_url`
   and `api_key` settings for each service that you want to use. Change/delete other parts of the
   file as you see fit.
@@ -122,10 +122,12 @@ The last step above will do a "basic" sync from the guides to Sonarr and/or Rada
 config is very minimal. See the next section for further reading and links to the wiki for
 additional topics and more advanced customization.
 
-Lastly, each subcommand supports printing help on the command line. Simply run `recyclarr --help` for
-the main help output and a list of subcommands. You can then see the help for each subcommand by
+Lastly, each subcommand supports printing help on the command line. Simply run `recyclarr --help`
+for the main help output and a list of subcommands. You can then see the help for each subcommand by
 running `recyclarr [subcommand] --help`, where `[subcommand]` is one of those subcommands (e.g.
 `sonarr`)
+
+[appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
 
 ### Read the Documentation
 

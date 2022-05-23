@@ -17,7 +17,7 @@ multiple ways, offering a lot of flexibility:
   present).
 
 > **Remember**: If you do not specify the `--config` argument, the program will look for
-> `recyclarr.yml` in the same directory where the executable lives.
+> `recyclarr.yml` in the [[application data directory|File-Structure]].
 
 # YAML Reference
 

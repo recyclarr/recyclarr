@@ -18,8 +18,8 @@ These are optional arguments shared by *all* subcommands.
 
 One or more paths to YAML configuration files. Only the relevant configuration section for the
 specified subcommand will be read from each file. If this argument is not specified, a single
-default configuration file named `recyclarr.yml` will be used. It must be in the same directory as the
-`recyclarr` executable.
+default configuration file named `recyclarr.yml` will be used. It must be in the [[application data
+directory|File-Structure]].
 
 **Command Line Examples**:
 
