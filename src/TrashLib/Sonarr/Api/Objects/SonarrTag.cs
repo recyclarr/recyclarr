@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Sonarr.Api.Objects;
+namespace TrashLib.Sonarr.Api.Objects;
 
 public class SonarrTag
 {

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using FluentValidation;
 using TrashLib.Config;
 using TrashLib.Config.Services;

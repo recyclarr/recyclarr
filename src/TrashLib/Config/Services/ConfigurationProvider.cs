@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Config.Services;
+namespace TrashLib.Config.Services;
 
 internal class ConfigurationProvider : IConfigurationProvider
 {

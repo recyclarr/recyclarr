@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Api;

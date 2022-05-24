@@ -1,4 +1,4 @@
-﻿using System.Reactive.Linq;
+using System.Reactive.Linq;
 using Common.Extensions;
 using Serilog;
 using TrashLib.ExceptionTypes;

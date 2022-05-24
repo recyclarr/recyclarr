@@ -1,4 +1,4 @@
-﻿using AutoFixture.NUnit3;
+using AutoFixture.NUnit3;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;

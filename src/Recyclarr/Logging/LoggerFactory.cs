@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Serilog;
 using Serilog.Core;
 using TrashLib;

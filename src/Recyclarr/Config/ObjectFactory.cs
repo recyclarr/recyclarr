@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 

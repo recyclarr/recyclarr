@@ -1,4 +1,4 @@
-﻿using TrashLib.Radarr.Config;
+using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;

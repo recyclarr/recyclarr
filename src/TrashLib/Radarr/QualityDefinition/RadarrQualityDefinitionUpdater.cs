@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.QualityDefinition.Api;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;

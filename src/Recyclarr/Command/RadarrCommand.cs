@@ -1,4 +1,4 @@
-﻿using CliFx.Attributes;
+using CliFx.Attributes;
 using JetBrains.Annotations;
 using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Services;

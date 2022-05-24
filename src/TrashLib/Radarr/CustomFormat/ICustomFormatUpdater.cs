@@ -1,4 +1,4 @@
-﻿using TrashLib.Radarr.Config;
+using TrashLib.Radarr.Config;
 
 namespace TrashLib.Radarr.CustomFormat;
 

@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace TrashLib.Sonarr.ReleaseProfile;

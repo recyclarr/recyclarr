@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Filters;

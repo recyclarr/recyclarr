@@ -1,4 +1,4 @@
-﻿using Flurl;
+using Flurl;
 using Flurl.Http;
 using TrashLib.Config.Services;
 using TrashLib.Radarr.QualityDefinition.Api.Objects;

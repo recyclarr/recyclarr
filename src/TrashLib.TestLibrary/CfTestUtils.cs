@@ -1,4 +1,4 @@
-﻿using TrashLib.Radarr.CustomFormat.Models;
+using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.TestLibrary;
 

@@ -1,4 +1,4 @@
-﻿using Common.Extensions;
+using Common.Extensions;
 using Serilog;
 using TrashLib.Extensions;
 using TrashLib.Radarr.Config;

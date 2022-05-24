@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Serilog;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;

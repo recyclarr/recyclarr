@@ -1,4 +1,4 @@
-﻿using MoreLinq.Extensions;
+using MoreLinq.Extensions;
 using Recyclarr.Command.Initialization.Cleanup;
 using Recyclarr.Command.Initialization.Init;
 

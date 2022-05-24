@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using Common;
 using FluentAssertions;

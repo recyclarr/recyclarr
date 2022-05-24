@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Autofac.Extras.Ordering;
 using Recyclarr.Command.Initialization.Cleanup;
 using Recyclarr.Command.Initialization.Init;

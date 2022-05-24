@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using TrashLib.Cache;
 
 namespace TrashLib.Radarr.CustomFormat.Models.Cache;

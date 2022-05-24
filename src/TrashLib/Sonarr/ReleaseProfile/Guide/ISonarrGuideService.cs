@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Sonarr.ReleaseProfile.Guide;
+namespace TrashLib.Sonarr.ReleaseProfile.Guide;
 
 public interface ISonarrGuideService
 {

@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Radarr.QualityDefinition;
+namespace TrashLib.Radarr.QualityDefinition;
 
 public interface IRadarrQualityDefinitionGuideParser
 {

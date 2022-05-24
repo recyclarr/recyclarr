@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Cache;
+namespace TrashLib.Cache;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal sealed class CacheObjectNameAttribute : Attribute

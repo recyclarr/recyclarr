@@ -1,4 +1,4 @@
-﻿using Common.Networking;
+using Common.Networking;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Newtonsoft.Json;

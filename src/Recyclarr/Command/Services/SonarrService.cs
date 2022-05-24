@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using CliFx.Exceptions;
 using Recyclarr.Config;
 using Serilog;

@@ -1,4 +1,4 @@
-﻿namespace TrashLib;
+namespace TrashLib;
 
 public interface IAppPaths
 {

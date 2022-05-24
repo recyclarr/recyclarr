@@ -1,4 +1,4 @@
-﻿namespace Common;
+namespace Common;
 
 internal class DefaultEnvironment : IEnvironment
 {

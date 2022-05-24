@@ -1,4 +1,4 @@
-﻿namespace Recyclarr.Command.Helpers;
+namespace Recyclarr.Command.Helpers;
 
 public class ActiveServiceCommandProvider : IActiveServiceCommandProvider
 {

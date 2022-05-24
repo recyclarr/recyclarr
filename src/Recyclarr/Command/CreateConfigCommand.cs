@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;

@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Sonarr.QualityDefinition;
+namespace TrashLib.Sonarr.QualityDefinition;
 
 public enum SonarrQualityDefinitionType
 {

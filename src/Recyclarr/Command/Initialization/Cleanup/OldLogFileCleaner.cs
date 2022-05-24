@@ -1,4 +1,4 @@
-﻿using Recyclarr.Logging;
+using Recyclarr.Logging;
 
 namespace Recyclarr.Command.Initialization.Cleanup;
 

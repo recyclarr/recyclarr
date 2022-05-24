@@ -1,4 +1,4 @@
-﻿using TrashLib.Sonarr.QualityDefinition;
+using TrashLib.Sonarr.QualityDefinition;
 
 namespace TrashLib.Radarr.QualityDefinition;
 

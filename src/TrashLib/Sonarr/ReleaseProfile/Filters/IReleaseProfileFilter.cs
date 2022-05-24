@@ -1,4 +1,4 @@
-﻿using TrashLib.Sonarr.Config;
+using TrashLib.Sonarr.Config;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Filters;
 

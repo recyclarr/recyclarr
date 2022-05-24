@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Radarr.CustomFormat.Models;
+namespace TrashLib.Radarr.CustomFormat.Models;
 
 public record FormatMappingEntry(ProcessedCustomFormatData CustomFormat, int Score);
 

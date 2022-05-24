@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using CliFx.Attributes;
 using JetBrains.Annotations;
 using Recyclarr.Command.Initialization;

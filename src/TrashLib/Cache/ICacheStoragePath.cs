@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Cache;
+namespace TrashLib.Cache;
 
 public interface ICacheStoragePath
 {

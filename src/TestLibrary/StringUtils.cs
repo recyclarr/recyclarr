@@ -1,4 +1,4 @@
-﻿using Common.Extensions;
+using Common.Extensions;
 
 namespace TestLibrary;
 

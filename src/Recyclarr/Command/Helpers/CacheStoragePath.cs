@@ -1,4 +1,4 @@
-﻿using TrashLib.Cache;
+using TrashLib.Cache;
 
 namespace Recyclarr.Command.Helpers;
 

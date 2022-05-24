@@ -1,4 +1,4 @@
-﻿namespace TrashLib.Sonarr.Api.Schemas;
+namespace TrashLib.Sonarr.Api.Schemas;
 
 public static class SonarrReleaseProfileSchema
 {

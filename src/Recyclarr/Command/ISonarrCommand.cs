@@ -1,4 +1,4 @@
-﻿namespace Recyclarr.Command;
+namespace Recyclarr.Command;
 
 public interface ISonarrCommand : IServiceCommand
 {

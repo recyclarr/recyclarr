@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Common;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;

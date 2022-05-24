@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 

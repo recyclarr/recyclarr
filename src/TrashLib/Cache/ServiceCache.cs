@@ -1,4 +1,4 @@
-﻿using System.Data.HashFunction.FNV;
+using System.Data.HashFunction.FNV;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Text;
