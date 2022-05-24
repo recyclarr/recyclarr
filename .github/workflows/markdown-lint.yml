@@ -3,7 +3,9 @@ name: Markdown Lint
 
 on:
   push:
+    paths: ["**.md"]
   pull_request:
+    paths: ["**.md"]
 
 env:
   dotnetVersion: "6.0.x"
