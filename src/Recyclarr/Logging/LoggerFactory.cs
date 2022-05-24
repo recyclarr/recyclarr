@@ -1,33 +1,27 @@
-using System.IO.Abstractions;
 using Serilog;
 using Serilog.Core;
-using TrashLib;
 
 namespace Recyclarr.Logging;
 
 public class LoggerFactory
 {
-    private readonly IFileSystem _fs;
-    private readonly IAppPaths _paths;
     private readonly LoggingLevelSwitch _logLevel;
+    private readonly IDelayedFileSink _fileSink;
 
-    public LoggerFactory(IFileSystem fs, IAppPaths paths, LoggingLevelSwitch logLevel)
+    public LoggerFactory(LoggingLevelSwitch logLevel, IDelayedFileSink fileSink)
     {
-        _fs = fs;
-        _paths = paths;
         _logLevel = logLevel;
+        _fileSink = fileSink;
     }
 
     public ILogger Create()
     {
-        var logPath = _fs.Path.Combine(_paths.LogDirectory, $"trash_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
-
         const string consoleTemplate = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
         return new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console(outputTemplate: consoleTemplate, levelSwitch: _logLevel)
-            .WriteTo.File(logPath)
+            .WriteTo.Sink(_fileSink)
             .CreateLogger();
     }
 }

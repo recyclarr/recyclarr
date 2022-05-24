@@ -16,6 +16,7 @@ public class AppPaths : IAppPaths
 
     public string DefaultConfigFilename => "recyclarr.yml";
 
+    public bool IsAppDataPathValid => _appDataPath is not null;
     public void SetAppDataPath(string path) => _appDataPath = path;
 
     [SuppressMessage("Design", "CA1024:Use properties where appropriate")]

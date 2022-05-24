@@ -10,4 +10,5 @@ public interface IAppPaths
     string RepoDirectory { get; }
     string CacheDirectory { get; }
     string DefaultConfigFilename { get; }
+    bool IsAppDataPathValid { get; }
 }

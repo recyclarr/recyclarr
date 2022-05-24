@@ -32,6 +32,7 @@ public static class CompositionRoot
     private static void SetupLogging(ContainerBuilder builder)
     {
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
+        builder.RegisterType<DelayedFileSink>().As<IDelayedFileSink>();
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<LoggerFactory>();
         builder.Register(c => c.Resolve<LoggerFactory>().Create())
