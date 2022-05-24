@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Version information in help output has been fixed.
+- If a HOME directory is not available, throw an error to the user (use `--app-data` instead).
+- Create `$HOME/.config` (on Linux) if it does not exist.
 
 [appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
 

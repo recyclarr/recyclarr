@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using TrashLib;
 
@@ -6,6 +7,7 @@ namespace Recyclarr;
 public class AppPaths : IAppPaths
 {
     private readonly IFileSystem _fs;
+    private string? _appDataPath;
 
     public AppPaths(IFileSystem fs)
     {
@@ -14,12 +16,15 @@ public class AppPaths : IAppPaths
 
     public string DefaultConfigFilename => "recyclarr.yml";
 
-    public void SetAppDataPath(string path) => AppDataPath = path;
+    public void SetAppDataPath(string path) => _appDataPath = path;
 
-    public string AppDataPath { get; private set; } = "";
-    public string ConfigPath => _fs.Path.Combine(AppDataPath, DefaultConfigFilename);
-    public string SettingsPath => _fs.Path.Combine(AppDataPath, "settings.yml");
-    public string LogDirectory => _fs.Path.Combine(AppDataPath, "logs");
-    public string RepoDirectory => _fs.Path.Combine(AppDataPath, "repo");
-    public string CacheDirectory => _fs.Path.Combine(AppDataPath, "cache");
+    [SuppressMessage("Design", "CA1024:Use properties where appropriate")]
+    public string GetAppDataPath()
+        => _appDataPath ?? throw new DirectoryNotFoundException("Application data directory not set!");
+
+    public string ConfigPath => _fs.Path.Combine(GetAppDataPath(), DefaultConfigFilename);
+    public string SettingsPath => _fs.Path.Combine(GetAppDataPath(), "settings.yml");
+    public string LogDirectory => _fs.Path.Combine(GetAppDataPath(), "logs");
+    public string RepoDirectory => _fs.Path.Combine(GetAppDataPath(), "repo");
+    public string CacheDirectory => _fs.Path.Combine(GetAppDataPath(), "cache");
 }

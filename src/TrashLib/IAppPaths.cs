@@ -3,7 +3,7 @@ namespace TrashLib;
 public interface IAppPaths
 {
     void SetAppDataPath(string path);
-    string AppDataPath { get; }
+    string GetAppDataPath();
     string ConfigPath { get; }
     string SettingsPath { get; }
     string LogDirectory { get; }
