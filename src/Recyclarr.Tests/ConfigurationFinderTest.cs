@@ -21,7 +21,6 @@ public class ConfigurationFinderTest
         ConfigurationFinder sut)
     {
         paths.DefaultConfigFilename.Returns("recyclarr.yml");
-        paths.ConfigPath.Returns(@"app\data");
         appContext.BaseDirectory.Returns(@"base\path");
         fs.AddFile(@"base\path\recyclarr.yml", new MockFileData(""));
 
@@ -38,7 +37,6 @@ public class ConfigurationFinderTest
         ConfigurationFinder sut)
     {
         paths.ConfigPath.Returns(@"app\data\recyclarr.yml");
-        appContext.BaseDirectory.Returns(@"base\path");
 
         var path = sut.FindConfigPath();
 
@@ -53,9 +51,7 @@ public class ConfigurationFinderTest
         ConfigurationFinder sut)
     {
         paths.DefaultConfigFilename.Returns("recyclarr.yml");
-        paths.ConfigPath.Returns(@"app\data");
         appContext.BaseDirectory.Returns(@"base\path");
-
         fs.AddFile(@"base\path\recyclarr.yml", new MockFileData(""));
         fs.AddFile(@"app\data\recyclarr.yml", new MockFileData(""));
 
