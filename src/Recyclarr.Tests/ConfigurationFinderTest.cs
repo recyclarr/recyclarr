@@ -20,13 +20,16 @@ public class ConfigurationFinderTest
         [Frozen] IAppPaths paths,
         ConfigurationFinder sut)
     {
+        var basePath = fs.Path.Combine("base", "path");
+        var baseYaml = fs.Path.Combine(basePath, "recyclarr.yml");
+
         paths.DefaultConfigFilename.Returns("recyclarr.yml");
-        appContext.BaseDirectory.Returns(@"base\path");
-        fs.AddFile(@"base\path\recyclarr.yml", new MockFileData(""));
+        appContext.BaseDirectory.Returns(basePath);
+        fs.AddFile(baseYaml, new MockFileData(""));
 
         var path = sut.FindConfigPath();
 
-        path.Should().EndWith(@"base\path\recyclarr.yml");
+        path.Should().EndWith(baseYaml);
     }
 
     [Test, AutoMockData]
@@ -36,11 +39,13 @@ public class ConfigurationFinderTest
         [Frozen] IAppPaths paths,
         ConfigurationFinder sut)
     {
-        paths.ConfigPath.Returns(@"app\data\recyclarr.yml");
+        var appYaml = fs.Path.Combine("app", "data", "recyclarr.yml");
+
+        paths.ConfigPath.Returns(appYaml);
 
         var path = sut.FindConfigPath();
 
-        path.Should().EndWith(@"app\data\recyclarr.yml");
+        path.Should().EndWith(appYaml);
     }
 
     [Test, AutoMockData]
@@ -50,13 +55,18 @@ public class ConfigurationFinderTest
         [Frozen] IAppPaths paths,
         ConfigurationFinder sut)
     {
+        var appPath = fs.Path.Combine("app", "data");
+        var basePath = fs.Path.Combine("base", "path");
+        var baseYaml = fs.Path.Combine(basePath, "recyclarr.yml");
+        var appYaml = fs.Path.Combine(appPath, "recyclarr.yml");
+
         paths.DefaultConfigFilename.Returns("recyclarr.yml");
-        appContext.BaseDirectory.Returns(@"base\path");
-        fs.AddFile(@"base\path\recyclarr.yml", new MockFileData(""));
-        fs.AddFile(@"app\data\recyclarr.yml", new MockFileData(""));
+        appContext.BaseDirectory.Returns(basePath);
+        fs.AddFile(baseYaml, new MockFileData(""));
+        fs.AddFile(appYaml, new MockFileData(""));
 
         var path = sut.FindConfigPath();
 
-        path.Should().EndWith(@"base\path\recyclarr.yml");
+        path.Should().EndWith(baseYaml);
     }
 }

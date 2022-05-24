@@ -23,7 +23,7 @@ public class ConfigurationFinder : IConfigurationFinder
     public string FindConfigPath()
     {
         var newPath = _paths.ConfigPath;
-        var oldPath = _fs.Path.Join(_appContext.BaseDirectory, _paths.DefaultConfigFilename);
+        var oldPath = _fs.Path.Combine(_appContext.BaseDirectory, _paths.DefaultConfigFilename);
 
         if (!_fs.File.Exists(oldPath))
         {
