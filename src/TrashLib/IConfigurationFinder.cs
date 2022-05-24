@@ -1,4 +1,4 @@
-﻿namespace Recyclarr;
+﻿namespace TrashLib;
 
 public interface IConfigurationFinder
 {
