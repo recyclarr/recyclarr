@@ -1,24 +1,28 @@
 using System.Text;
+using CliFx;
+using CliFx.Attributes;
 using CliFx.Exceptions;
+using CliFx.Infrastructure;
+using JetBrains.Annotations;
 using Recyclarr.Migration;
 
-namespace Recyclarr.Command.Initialization.Init;
+namespace Recyclarr.Command;
 
-internal class ServicePreInitializer : IServiceInitializer
+[Command("migrate", Description = "Perform any migration steps that may be needed between versions")]
+[UsedImplicitly]
+public class MigrateCommand : ICommand
 {
     private readonly IMigrationExecutor _migration;
 
-    public ServicePreInitializer(IMigrationExecutor migration)
+    public MigrateCommand(IMigrationExecutor migration)
     {
         _migration = migration;
     }
 
-    public void Initialize(ServiceCommand cmd)
+    public ValueTask ExecuteAsync(IConsole console)
     {
-        // Migrations are performed before we process command line arguments because we cannot instantiate any service
-        // objects via the DI container before migration logic is performed. This is due to the fact that migration
-        // steps may alter important files and directories which those services may depend on.
         PerformMigrations();
+        return ValueTask.CompletedTask;
     }
 
     private void PerformMigrations()

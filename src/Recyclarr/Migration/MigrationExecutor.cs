@@ -1,3 +1,4 @@
+using CliFx.Exceptions;
 using CliFx.Infrastructure;
 
 namespace Recyclarr.Migration;
@@ -38,6 +39,32 @@ public class MigrationExecutor : IMigrationExecutor
             }
 
             _console.Output.WriteLine($"Migrate: {step.Description}");
+        }
+    }
+
+    public void CheckNeededMigrations()
+    {
+        var neededMigrationSteps = _migrationSteps.Where(x => x.CheckIfNeeded()).ToList();
+        if (neededMigrationSteps.Count == 0)
+        {
+            return;
+        }
+
+        var wereAnyRequired = false;
+
+        foreach (var step in neededMigrationSteps)
+        {
+            var requiredText = step.Required ? "Required" : "Not Required";
+            _console.Output.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
+            wereAnyRequired |= step.Required;
+        }
+
+        _console.Output.WriteLine(
+            "\nRun the `migrate` subcommand to perform the above migration steps automatically\n");
+
+        if (wereAnyRequired)
+        {
+            throw new CommandException("Some migrations above are REQUIRED. Application will now exit.");
         }
     }
 }

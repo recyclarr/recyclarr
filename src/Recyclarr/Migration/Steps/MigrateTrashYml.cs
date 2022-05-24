@@ -3,9 +3,6 @@ using JetBrains.Annotations;
 
 namespace Recyclarr.Migration.Steps;
 
-/// <summary>
-///     Rename `trash.yml` to `recyclarr.yml`.
-/// </summary>
 /// <remarks>
 ///     Implemented on 4/30/2022.
 /// </remarks>
@@ -21,6 +18,7 @@ public class MigrateTrashYml : IMigrationStep
     public int Order => 10;
     public string Description { get; }
     public IReadOnlyCollection<string> Remediation { get; }
+    public bool Required => true;
 
     public MigrateTrashYml(IFileSystem fileSystem)
     {
@@ -32,7 +30,7 @@ public class MigrateTrashYml : IMigrationStep
             $"Ensure Recyclarr has permission to create {_newConfigPath}"
         };
 
-        Description = $"Migration from `{_oldConfigPath}` to `{_newConfigPath}`";
+        Description = $"Rename default YAML config from `{_oldConfigPath}` to `{_newConfigPath}`";
     }
 
     public bool CheckIfNeeded() => _fileSystem.File.Exists(_oldConfigPath);

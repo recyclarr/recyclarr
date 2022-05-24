@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `--app-data` option for overriding the location of the application data directory.
+- New `migrate` subcommand which may be used to perform migration steps manually.
 
 ### Changed
 
 - The default location for the default YAML file (`recyclarr.yml`) has been changed to the
   [application data directory](appdata). This is the same location of the `settings.yml` file.
+- Automatic migration has been removed. Instead, the `migrate` subcommand should be used.
 
 ### Deprecated
 

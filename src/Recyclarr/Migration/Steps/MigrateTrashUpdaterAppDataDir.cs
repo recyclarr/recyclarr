@@ -3,9 +3,6 @@ using JetBrains.Annotations;
 
 namespace Recyclarr.Migration.Steps;
 
-/// <summary>
-///     Rename `trash.yml` to `recyclarr.yml`.
-/// </summary>
 /// <remarks>
 ///     Implemented on 4/30/2022.
 /// </remarks>
@@ -24,6 +21,7 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
     public int Order => 20;
     public string Description { get; }
     public IReadOnlyCollection<string> Remediation { get; }
+    public bool Required => true;
 
     public MigrateTrashUpdaterAppDataDir(IFileSystem fileSystem)
     {

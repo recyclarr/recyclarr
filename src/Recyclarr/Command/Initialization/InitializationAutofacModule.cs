@@ -16,7 +16,7 @@ public class InitializationAutofacModule : Module
         builder.RegisterTypes(
                 typeof(InitializeAppDataPath),
                 typeof(ServiceInitializer),
-                typeof(ServicePreInitializer))
+                typeof(CheckMigrationNeeded))
             .As<IServiceInitializer>()
             .OrderByRegistration();
 
