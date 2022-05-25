@@ -36,14 +36,22 @@ public class InitializeAppDataPath : IServiceInitializer
 
             // Set app data path to application directory value (e.g. `$HOME/.config` on Linux) and ensure it is
             // created.
-            _paths.SetAppDataPath(_env.GetFolderPath(Environment.SpecialFolder.ApplicationData,
-                Environment.SpecialFolderOption.Create));
+            var appData = _env.GetFolderPath(
+                Environment.SpecialFolder.ApplicationData,
+                Environment.SpecialFolderOption.Create);
 
-            return;
+            _paths.SetAppDataPath(_fs.Path.Combine(appData, "recyclarr"));
+        }
+        else
+        {
+            // Ensure user-specified app data directory is created and use it.
+            _fs.Directory.CreateDirectory(cmd.AppDataDirectory);
+            _paths.SetAppDataPath(cmd.AppDataDirectory);
         }
 
-        // Ensure user-specified app data directory is created and use it.
-        _fs.Directory.CreateDirectory(cmd.AppDataDirectory);
-        _paths.SetAppDataPath(cmd.AppDataDirectory);
+        // Initialize other directories used throughout the application
+        _fs.Directory.CreateDirectory(_paths.RepoDirectory);
+        _fs.Directory.CreateDirectory(_paths.CacheDirectory);
+        _fs.Directory.CreateDirectory(_paths.LogDirectory);
     }
 }

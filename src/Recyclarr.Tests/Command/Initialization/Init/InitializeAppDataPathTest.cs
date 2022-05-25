@@ -1,5 +1,7 @@
+using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using Common;
+using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
@@ -17,6 +19,7 @@ public class InitializeAppDataPathTest
     public void Use_default_app_data_if_not_specified(
         [Frozen] IEnvironment env,
         [Frozen] IAppPaths paths,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         SonarrCommand cmd,
         InitializeAppDataPath sut)
     {
@@ -26,7 +29,7 @@ public class InitializeAppDataPathTest
         sut.Initialize(cmd);
 
         env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
-        paths.Received().SetAppDataPath("app_data");
+        paths.Received().SetAppDataPath(fs.Path.Combine("app_data", "recyclarr"));
     }
 
     [Test, AutoMockData]
@@ -38,5 +41,26 @@ public class InitializeAppDataPathTest
         cmd.AppDataDirectory = "path";
         sut.Initialize(cmd);
         paths.Received().SetAppDataPath("path");
+    }
+
+    [Test, AutoMockData]
+    public void All_directories_are_created(
+        [Frozen] IEnvironment env,
+        [Frozen] IAppPaths paths,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        SonarrCommand cmd,
+        InitializeAppDataPath sut)
+    {
+        sut.Initialize(cmd);
+
+        var expectedDirs = new[]
+        {
+            paths.LogDirectory,
+            paths.RepoDirectory,
+            paths.CacheDirectory
+        };
+
+        fs.AllDirectories.Select(x => fs.Path.GetFileName(x))
+            .Should().IntersectWith(expectedDirs);
     }
 }
