@@ -5,23 +5,26 @@ namespace Recyclarr.Logging;
 
 public class LoggerFactory
 {
-    private readonly LoggingLevelSwitch _logLevel;
-    private readonly IDelayedFileSink _fileSink;
+    private const string ConsoleTemplate = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
 
-    public LoggerFactory(LoggingLevelSwitch logLevel, IDelayedFileSink fileSink)
+    private readonly LoggingLevelSwitch _logLevel;
+    private readonly Func<IDelayedFileSink> _fileSinkFactory;
+
+    public LoggerFactory(LoggingLevelSwitch logLevel, Func<IDelayedFileSink> fileSinkFactory)
     {
         _logLevel = logLevel;
-        _fileSink = fileSink;
+        _fileSinkFactory = fileSinkFactory;
     }
 
     public ILogger Create()
     {
-        const string consoleTemplate = "[{Level:u3}] {Message:lj}{NewLine}{Exception}";
+        var fileSink = _fileSinkFactory();
+        fileSink.SetTemplate(ConsoleTemplate);
 
         return new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.Console(outputTemplate: consoleTemplate, levelSwitch: _logLevel)
-            .WriteTo.Sink(_fileSink)
+            .WriteTo.Console(outputTemplate: ConsoleTemplate, levelSwitch: _logLevel)
+            .WriteTo.Sink(fileSink)
             .CreateLogger();
     }
 }
