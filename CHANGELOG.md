@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version information in help output has been fixed.
 - If a HOME directory is not available, throw an error to the user (use `--app-data` instead).
 - Create `$HOME/.config` (on Linux) if it does not exist.
+- Smarter migration logic in the `trash-updater` migration step that does a directory merge instead
+  of a straight move. This is designed to fail less in cases such as `recyclarr` directory already
+  existing.
 
 [appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
 

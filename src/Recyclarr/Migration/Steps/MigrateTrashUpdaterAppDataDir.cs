@@ -1,5 +1,7 @@
 using System.IO.Abstractions;
+using Common.Extensions;
 using JetBrains.Annotations;
+using TrashLib;
 
 namespace Recyclarr.Migration.Steps;
 
@@ -9,37 +11,35 @@ namespace Recyclarr.Migration.Steps;
 [UsedImplicitly]
 public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 {
-    private readonly IFileSystem _fileSystem;
-
-    private readonly string _oldPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "trash-updater");
-
-    // Do not use AppPaths class here since that may change yet again in the future and break this migration step.
-    private readonly string _newPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "recyclarr");
+    private readonly IFileSystem _fs;
+    private readonly Lazy<string> _newPath, _oldPath;
 
     public int Order => 20;
-    public string Description { get; }
-    public IReadOnlyCollection<string> Remediation { get; }
     public bool Required => true;
 
-    public MigrateTrashUpdaterAppDataDir(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-        Remediation = new[]
-        {
-            $"Check if `{_newPath}` already exists. If so, manually copy settings you want and then delete `{_oldPath}` to fix the error.",
-            $"Ensure Recyclarr has permission to recursively delete {_oldPath}",
-            $"Ensure Recyclarr has permission to create {_newPath}"
-        };
+    public string Description
+        => $"Merge files from old app data directory `{GetOldPath()}` into `{GetNewPath()}` and delete old directory";
 
-        Description = $"Rename app data directory from `{_oldPath}` to `{_newPath}`";
+    public IReadOnlyCollection<string> Remediation => new[]
+    {
+        $"Check if `{GetNewPath()}` already exists. If so, manually copy all files from `{GetOldPath()}` and delete it to fix the error.",
+        $"Ensure Recyclarr has permission to recursively delete {GetOldPath()}",
+        $"Ensure Recyclarr has permission to create and move files into {GetNewPath()}"
+    };
+
+    private string GetNewPath() => _newPath.Value;
+    private string GetOldPath() => _oldPath.Value;
+
+    public MigrateTrashUpdaterAppDataDir(IFileSystem fs, IAppPaths paths)
+    {
+        _fs = fs;
+
+        // Will be something like `/home/user/.config/recyclarr`.
+        _newPath = new Lazy<string>(paths.GetAppDataPath);
+        _oldPath = new Lazy<string>(() => _fs.Path.Combine(_fs.Path.GetDirectoryName(GetNewPath()), "trash-updater"));
     }
 
-    public bool CheckIfNeeded() => _fileSystem.Directory.Exists(_oldPath);
+    public bool CheckIfNeeded() => _fs.Directory.Exists(GetOldPath());
 
-    public void Execute()
-    {
-        _fileSystem.Directory.Move(_oldPath, _newPath);
-    }
+    public void Execute() => _fs.MergeDirectory(GetOldPath(), GetNewPath());
 }

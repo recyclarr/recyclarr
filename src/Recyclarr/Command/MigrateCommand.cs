@@ -4,6 +4,7 @@ using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
+using Recyclarr.Command.Initialization;
 using Recyclarr.Migration;
 
 namespace Recyclarr.Command;
@@ -13,14 +14,17 @@ namespace Recyclarr.Command;
 public class MigrateCommand : ICommand
 {
     private readonly IMigrationExecutor _migration;
+    private readonly IDefaultAppDataSetup _appDataSetup;
 
-    public MigrateCommand(IMigrationExecutor migration)
+    public MigrateCommand(IMigrationExecutor migration, IDefaultAppDataSetup appDataSetup)
     {
         _migration = migration;
+        _appDataSetup = appDataSetup;
     }
 
     public ValueTask ExecuteAsync(IConsole console)
     {
+        _appDataSetup.SetupDefaultPath();
         PerformMigrations();
         return ValueTask.CompletedTask;
     }

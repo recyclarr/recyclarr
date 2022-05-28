@@ -5,6 +5,7 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
+using Recyclarr.Command.Initialization;
 using Recyclarr.Command.Initialization.Init;
 using TestLibrary.AutoFixture;
 using TrashLib;
@@ -20,9 +21,11 @@ public class InitializeAppDataPathTest
         [Frozen] IEnvironment env,
         [Frozen] IAppPaths paths,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] DefaultAppDataSetup appDataSetup,
         SonarrCommand cmd,
         InitializeAppDataPath sut)
     {
+        paths.DefaultAppDataDirectoryName.Returns("recyclarr");
         env.GetFolderPath(Arg.Any<Environment.SpecialFolder>(), Arg.Any<Environment.SpecialFolderOption>())
             .Returns("app_data");
 

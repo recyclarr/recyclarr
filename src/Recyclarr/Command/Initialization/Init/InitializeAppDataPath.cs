@@ -10,12 +10,18 @@ public class InitializeAppDataPath : IServiceInitializer
     private readonly IFileSystem _fs;
     private readonly IAppPaths _paths;
     private readonly IEnvironment _env;
+    private readonly IDefaultAppDataSetup _appDataSetup;
 
-    public InitializeAppDataPath(IFileSystem fs, IAppPaths paths, IEnvironment env)
+    public InitializeAppDataPath(
+        IFileSystem fs,
+        IAppPaths paths,
+        IEnvironment env,
+        IDefaultAppDataSetup appDataSetup)
     {
         _fs = fs;
         _paths = paths;
         _env = env;
+        _appDataSetup = appDataSetup;
     }
 
     public void Initialize(ServiceCommand cmd)
@@ -36,11 +42,7 @@ public class InitializeAppDataPath : IServiceInitializer
 
             // Set app data path to application directory value (e.g. `$HOME/.config` on Linux) and ensure it is
             // created.
-            var appData = _env.GetFolderPath(
-                Environment.SpecialFolder.ApplicationData,
-                Environment.SpecialFolderOption.Create);
-
-            _paths.SetAppDataPath(_fs.Path.Combine(appData, "recyclarr"));
+            _appDataSetup.SetupDefaultPath(true);
         }
         else
         {

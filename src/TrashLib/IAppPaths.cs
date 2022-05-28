@@ -11,4 +11,5 @@ public interface IAppPaths
     string CacheDirectory { get; }
     string DefaultConfigFilename { get; }
     bool IsAppDataPathValid { get; }
+    string DefaultAppDataDirectoryName { get; }
 }

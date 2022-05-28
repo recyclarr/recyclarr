@@ -11,12 +11,13 @@ public class InitializationAutofacModule : Module
     {
         base.Load(builder);
         builder.RegisterType<ServiceInitializationAndCleanup>().As<IServiceInitializationAndCleanup>();
+        builder.RegisterType<DefaultAppDataSetup>().As<IDefaultAppDataSetup>();
 
         // Initialization Services
         builder.RegisterTypes(
                 typeof(InitializeAppDataPath),
-                typeof(ServiceInitializer),
-                typeof(CheckMigrationNeeded))
+                typeof(CheckMigrationNeeded),
+                typeof(ServiceInitializer))
             .As<IServiceInitializer>()
             .OrderByRegistration();
 

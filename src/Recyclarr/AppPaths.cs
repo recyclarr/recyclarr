@@ -15,6 +15,7 @@ public class AppPaths : IAppPaths
     }
 
     public string DefaultConfigFilename => "recyclarr.yml";
+    public string DefaultAppDataDirectoryName => "recyclarr";
 
     public bool IsAppDataPathValid => _appDataPath is not null;
     public void SetAppDataPath(string path) => _appDataPath = path;

@@ -12,14 +12,15 @@ namespace Recyclarr.Tests.Migration.Steps;
 [Parallelizable(ParallelScope.All)]
 public class MigrateTrashUpdaterAppDataDirTest
 {
-    private static readonly string BasePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    private const string BasePath = "base_path";
 
     [Test, AutoMockData]
     public void Migration_check_returns_true_if_trash_updater_dir_exists(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         MigrateTrashUpdaterAppDataDir sut)
     {
-        fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
+        fs.AddDirectory(fs.Path.Combine(paths.BasePath, "trash-updater"));
         sut.CheckIfNeeded().Should().BeTrue();
     }
 
@@ -39,7 +40,7 @@ public class MigrateTrashUpdaterAppDataDirTest
         fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
         fs.AddDirectory(Path.Combine(BasePath, "recyclarr"));
 
-        var act = () => sut.Execute();
+        var act = sut.Execute;
 
         act.Should().Throw<IOException>();
     }
@@ -47,12 +48,15 @@ public class MigrateTrashUpdaterAppDataDirTest
     [Test, AutoMockData]
     public void Migration_success(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         MigrateTrashUpdaterAppDataDir sut)
     {
-        fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
+        // Add file instead of directory since the migration step only operates on files
+        fs.AddFile(fs.Path.Combine(paths.BasePath, "trash-updater", "1", "2", "test.txt"), new MockFileData(""));
 
         sut.Execute();
 
-        fs.AllDirectories.Should().ContainSingle(x => Regex.IsMatch(x, @"[/\\]recyclarr$"));
+        fs.AllDirectories.Should().NotContain(x => x.Contains("trash-updater"));
+        fs.AllFiles.Should().Contain(x => Regex.IsMatch(x, @"[/\\]recyclarr[/\\]1[/\\]2[/\\]test.txt$"));
     }
 }
