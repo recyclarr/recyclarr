@@ -36,10 +36,10 @@ public class MigrationExecutorTest
 
         step.CheckIfNeeded().Returns(false);
 
-        executor.PerformAllMigrationSteps();
+        executor.PerformAllMigrationSteps(false);
 
         step.Received().CheckIfNeeded();
-        step.DidNotReceive().Execute();
+        step.DidNotReceive().Execute(null);
     }
 
     [Test]
@@ -51,10 +51,10 @@ public class MigrationExecutorTest
 
         step.CheckIfNeeded().Returns(true);
 
-        executor.PerformAllMigrationSteps();
+        executor.PerformAllMigrationSteps(false);
 
         step.Received().CheckIfNeeded();
-        step.Received().Execute();
+        step.Received().Execute(null);
     }
 
     [Test]
@@ -75,7 +75,7 @@ public class MigrationExecutorTest
 
         var executor = new MigrationExecutor(steps, console);
 
-        executor.PerformAllMigrationSteps();
+        executor.PerformAllMigrationSteps(false);
 
         Received.InOrder(() =>
         {
@@ -93,9 +93,9 @@ public class MigrationExecutorTest
         var executor = new MigrationExecutor(new[] {step}, console);
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute()).Throw(new ArgumentException("test message"));
+        step.When(x => x.Execute(null)).Throw(new ArgumentException("test message"));
 
-        var act = () => executor.PerformAllMigrationSteps();
+        var act = () => executor.PerformAllMigrationSteps(false);
 
         act.Should().Throw<MigrationException>().Which.OriginalException.Message.Should().Be("test message");
     }
@@ -109,9 +109,9 @@ public class MigrationExecutorTest
         var exception = new MigrationException(new Exception(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute()).Throw(exception);
+        step.When(x => x.Execute(null)).Throw(exception);
 
-        var act = () => executor.PerformAllMigrationSteps();
+        var act = () => executor.PerformAllMigrationSteps(false);
 
         act.Should().Throw<MigrationException>().Which.Should().Be(exception);
     }

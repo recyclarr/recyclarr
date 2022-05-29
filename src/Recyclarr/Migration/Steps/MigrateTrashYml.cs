@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using CliFx.Infrastructure;
 using JetBrains.Annotations;
 
 namespace Recyclarr.Migration.Steps;
@@ -35,7 +36,7 @@ public class MigrateTrashYml : IMigrationStep
 
     public bool CheckIfNeeded() => _fileSystem.File.Exists(_oldConfigPath);
 
-    public void Execute()
+    public void Execute(IConsole? console)
     {
         _fileSystem.File.Move(_oldConfigPath, _newConfigPath);
     }

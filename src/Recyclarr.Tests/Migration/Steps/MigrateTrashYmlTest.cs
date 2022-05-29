@@ -38,7 +38,7 @@ public class MigrateTrashYmlTest
     {
         fs.AddFile(Path.Combine(BasePath, "recyclarr.yml"), MockFileData.NullObject);
 
-        var act = () => sut.Execute();
+        var act = () => sut.Execute(null);
 
         act.Should().Throw<IOException>();
     }
@@ -51,7 +51,7 @@ public class MigrateTrashYmlTest
         const string expectedData = "fake contents";
         fs.AddFile(Path.Combine(BasePath, "trash.yml"), expectedData);
 
-        sut.Execute();
+        sut.Execute(null);
 
         fs.AllFiles.Should().ContainSingle(x => Regex.IsMatch(x, @"[/\\]recyclarr\.yml$"));
     }

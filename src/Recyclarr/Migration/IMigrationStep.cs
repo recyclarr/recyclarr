@@ -1,3 +1,5 @@
+using CliFx.Infrastructure;
+
 namespace Recyclarr.Migration;
 
 public interface IMigrationStep
@@ -7,5 +9,5 @@ public interface IMigrationStep
     IReadOnlyCollection<string> Remediation { get; }
     bool Required { get; }
     bool CheckIfNeeded();
-    void Execute();
+    void Execute(IConsole? console);
 }

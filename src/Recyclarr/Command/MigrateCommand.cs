@@ -16,6 +16,10 @@ public class MigrateCommand : ICommand
     private readonly IMigrationExecutor _migration;
     private readonly IDefaultAppDataSetup _appDataSetup;
 
+    [CommandOption("debug", 'd', Description =
+        "Display additional logs useful for development/debug purposes.")]
+    public bool Debug { get; [UsedImplicitly] set; } = false;
+
     public MigrateCommand(IMigrationExecutor migration, IDefaultAppDataSetup appDataSetup)
     {
         _migration = migration;
@@ -33,7 +37,7 @@ public class MigrateCommand : ICommand
     {
         try
         {
-            _migration.PerformAllMigrationSteps();
+            _migration.PerformAllMigrationSteps(Debug);
         }
         catch (MigrationException e)
         {

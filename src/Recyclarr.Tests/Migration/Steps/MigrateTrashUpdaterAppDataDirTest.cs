@@ -40,7 +40,7 @@ public class MigrateTrashUpdaterAppDataDirTest
         fs.AddDirectory(Path.Combine(BasePath, "trash-updater"));
         fs.AddDirectory(Path.Combine(BasePath, "recyclarr"));
 
-        var act = sut.Execute;
+        var act = () => sut.Execute(null);
 
         act.Should().Throw<IOException>();
     }
@@ -54,7 +54,7 @@ public class MigrateTrashUpdaterAppDataDirTest
         // Add file instead of directory since the migration step only operates on files
         fs.AddFile(fs.Path.Combine(paths.BasePath, "trash-updater", "1", "2", "test.txt"), new MockFileData(""));
 
-        sut.Execute();
+        sut.Execute(null);
 
         fs.AllDirectories.Should().NotContain(x => x.Contains("trash-updater"));
         fs.AllFiles.Should().Contain(x => Regex.IsMatch(x, @"[/\\]recyclarr[/\\]1[/\\]2[/\\]test.txt$"));

@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using CliFx.Infrastructure;
 using Common.Extensions;
 using JetBrains.Annotations;
 using TrashLib;
@@ -41,5 +42,5 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 
     public bool CheckIfNeeded() => _fs.Directory.Exists(GetOldPath());
 
-    public void Execute() => _fs.MergeDirectory(GetOldPath(), GetNewPath());
+    public void Execute(IConsole? console) => _fs.MergeDirectory(GetOldPath(), GetNewPath());
 }

@@ -14,7 +14,7 @@ public class MigrationExecutor : IMigrationExecutor
         _migrationSteps = migrationSteps.OrderBy(x => x.Order).ToList();
     }
 
-    public void PerformAllMigrationSteps()
+    public void PerformAllMigrationSteps(bool withDiagnostics)
     {
         _console.Output.WriteLine("Performing migration steps...");
 
@@ -31,7 +31,7 @@ public class MigrationExecutor : IMigrationExecutor
 
             try
             {
-                step.Execute();
+                step.Execute(withDiagnostics ? _console : null);
             }
             catch (Exception e) when (e is not MigrationException)
             {
