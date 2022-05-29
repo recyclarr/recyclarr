@@ -2,13 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr</AssemblyName>
-
-    <!-- Publish Settings -->
-    <PublishSingleFile>true</PublishSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
-    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
