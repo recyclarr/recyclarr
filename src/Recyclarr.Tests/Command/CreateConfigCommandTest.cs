@@ -30,19 +30,4 @@ public class CreateConfigCommandTest
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }
-
-    [Test, AutoMockData]
-    public async Task CreateConfig_SpecifyPath_FileIsCreated(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        CreateConfigCommand cmd)
-    {
-        const string ymlPath = "some/other/path.yml";
-        cmd.Path = ymlPath;
-
-        await cmd.ExecuteAsync(Substitute.For<IConsole>()).ConfigureAwait(false);
-
-        var file = fs.GetFile(ymlPath);
-        file.Should().NotBeNull();
-        file.Contents.Should().NotBeEmpty();
-    }
 }

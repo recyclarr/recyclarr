@@ -1,5 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using System.Text.RegularExpressions;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;

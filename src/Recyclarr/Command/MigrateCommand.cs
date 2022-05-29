@@ -28,7 +28,7 @@ public class MigrateCommand : ICommand
 
     public ValueTask ExecuteAsync(IConsole console)
     {
-        _appDataSetup.SetupDefaultPath();
+        _appDataSetup.SetupDefaultPath(null, false);
         PerformMigrations();
         return ValueTask.CompletedTask;
     }

@@ -2,5 +2,5 @@ namespace Recyclarr.Command.Initialization;
 
 public interface IDefaultAppDataSetup
 {
-    void SetupDefaultPath(bool forceCreate = false);
+    void SetupDefaultPath(string? appDataDirectoryOverride, bool forceCreate);
 }

@@ -36,11 +36,11 @@ public class CreateConfigCommand : ICommand
 
     public ValueTask ExecuteAsync(IConsole console)
     {
-        _appDataSetup.SetupDefaultPath();
+        _appDataSetup.SetupDefaultPath(Path, true);
 
         var reader = new ResourceDataReader(typeof(Program));
         var ymlData = reader.ReadData("config-template.yml");
-        var path = Path ?? _paths.ConfigPath;
+        var path = _paths.ConfigPath;
 
         if (_fs.File.Exists(path))
         {
