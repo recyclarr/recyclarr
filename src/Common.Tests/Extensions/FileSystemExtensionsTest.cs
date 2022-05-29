@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Common.Extensions;
 using FluentAssertions;
 using NUnit.Framework;
+using TestLibrary;
 
 namespace Common.Tests.Extensions;
 
@@ -21,19 +22,6 @@ public class FileSystemExtensionsTest
         });
     }
 
-    private static ICollection<string> NormalizePaths(IEnumerable<string> paths)
-        => paths.Select(NormalizePath).ToList();
-
-    private static string NormalizePath(string path)
-    {
-        if (MockUnixSupport.IsUnixPlatform())
-        {
-            return Regex.Replace(path, @"^C:\\", "/").Replace("\\", "/");
-        }
-
-        return Regex.Replace(path, @"^/", @"C:\").Replace("/", "\\");
-    }
-
     private static MockFileSystem NewMockFileSystem(IEnumerable<string> files, string cwd)
     {
         return NewMockFileSystem(files, Array.Empty<string>(), cwd);
@@ -45,13 +33,13 @@ public class FileSystemExtensionsTest
         var fileData = files.Select(x => (x, new MockFileData("")));
 
         return new MockFileSystem(fileData.Concat(dirData)
-            .ToDictionary(x => x.Item1, y => y.Item2), NormalizePath(cwd));
+            .ToDictionary(x => x.Item1, y => y.Item2), FileUtils.NormalizePath(cwd));
     }
 
     [Test]
     public void Merge_directories_works()
     {
-        var files = NormalizePaths(new[]
+        var files = FileUtils.NormalizePaths(new[]
         {
             @"path1\1\file1.txt",
             @"path1\1\file2.txt",
@@ -59,7 +47,7 @@ public class FileSystemExtensionsTest
             @"path1\file4.txt"
         });
 
-        var dirs = NormalizePaths(new[]
+        var dirs = FileUtils.NormalizePaths(new[]
         {
             @"path1\empty1",
             @"path1\empty2",
@@ -80,7 +68,7 @@ public class FileSystemExtensionsTest
     [Test]
     public void Fail_if_file_already_exists()
     {
-        var files = NormalizePaths(new[]
+        var files = FileUtils.NormalizePaths(new[]
         {
             @"path1\1\file1.txt",
             @"path1\1\file2.txt",
@@ -97,12 +85,12 @@ public class FileSystemExtensionsTest
     [Test]
     public void Fail_if_directory_exists_where_file_goes()
     {
-        var files = NormalizePaths(new[]
+        var files = FileUtils.NormalizePaths(new[]
         {
             @"path1\1\file1"
         });
 
-        var dirs = NormalizePaths(new[]
+        var dirs = FileUtils.NormalizePaths(new[]
         {
             @"path2\1\file1"
         });
