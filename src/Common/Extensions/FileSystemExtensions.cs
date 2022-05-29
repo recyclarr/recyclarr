@@ -18,16 +18,35 @@ public static class FileSystemExtensions
 
         foreach (var dir in directories)
         {
+            console?.Output.WriteLine($" - Attributes: {dir.Attributes}");
+
+            // Is it a symbolic link?
+            if ((dir.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                var newPath = RelocatePath(dir.FullName, targetDir, destDir);
+                fs.Directory.CreateDirectory(fs.Path.GetDirectoryName(newPath));
+                console?.Output.WriteLine($" - Symlink:  {dir.FullName} :: TO :: {newPath}");
+                dir.MoveTo(newPath);
+                continue;
+            }
+
+            // For real directories, move all the files inside
             foreach (var file in dir.EnumerateFiles())
             {
-                var newPath = Regex.Replace(file.FullName, $"^{Regex.Escape(targetDir)}", destDir);
+                var newPath = RelocatePath(file.FullName, targetDir, destDir);
                 fs.Directory.CreateDirectory(fs.Path.GetDirectoryName(newPath));
                 console?.Output.WriteLine($" - Moving:   {file.FullName} :: TO :: {newPath}");
                 file.MoveTo(newPath);
             }
 
+            // Delete the directory now that it is empty.
             console?.Output.WriteLine($" - Deleting: {dir.FullName}");
             dir.Delete();
         }
+    }
+
+    private static string RelocatePath(string path, string oldDir, string newDir)
+    {
+        return Regex.Replace(path, $"^{Regex.Escape(oldDir)}", newDir);
     }
 }
