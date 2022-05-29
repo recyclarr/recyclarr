@@ -42,5 +42,5 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 
     public bool CheckIfNeeded() => _fs.Directory.Exists(GetOldPath());
 
-    public void Execute(IConsole? console) => _fs.MergeDirectory(GetOldPath(), GetNewPath());
+    public void Execute(IConsole? console) => _fs.MergeDirectory(GetOldPath(), GetNewPath(), console);
 }

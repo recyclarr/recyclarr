@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Autofac" />
+    <PackageReference Include="CliFx" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Newtonsoft.Json" />

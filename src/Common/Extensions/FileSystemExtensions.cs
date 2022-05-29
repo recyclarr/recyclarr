@@ -1,11 +1,12 @@
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
+using CliFx.Infrastructure;
 
 namespace Common.Extensions;
 
 public static class FileSystemExtensions
 {
-    public static void MergeDirectory(this IFileSystem fs, string targetDir, string destDir)
+    public static void MergeDirectory(this IFileSystem fs, string targetDir, string destDir, IConsole? console = null)
     {
         targetDir = fs.Path.GetFullPath(targetDir);
         destDir = fs.Path.GetFullPath(destDir);
@@ -21,9 +22,11 @@ public static class FileSystemExtensions
             {
                 var newPath = Regex.Replace(file.FullName, $"^{Regex.Escape(targetDir)}", destDir);
                 fs.Directory.CreateDirectory(fs.Path.GetDirectoryName(newPath));
+                console?.Output.WriteLine($" - Moving:   {file.FullName} :: TO :: {newPath}");
                 file.MoveTo(newPath);
             }
 
+            console?.Output.WriteLine($" - Deleting: {dir.FullName}");
             dir.Delete();
         }
     }
