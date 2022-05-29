@@ -4,6 +4,7 @@ using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
 using Recyclarr.Migration.Steps;
+using TestLibrary;
 using TestLibrary.AutoFixture;
 
 namespace Recyclarr.Tests.Migration.Steps;
@@ -52,11 +53,19 @@ public class MigrateTrashUpdaterAppDataDirTest
         MigrateTrashUpdaterAppDataDir sut)
     {
         // Add file instead of directory since the migration step only operates on files
-        fs.AddFile(fs.Path.Combine(paths.BasePath, "trash-updater", "1", "2", "test.txt"), new MockFileData(""));
+        fs.AddFileNoData($"{paths.BasePath}/trash-updater/settings.yml");
+        fs.AddFileNoData($"{paths.BasePath}/trash-updater/recyclarr.yml");
+        fs.AddFileNoData($"{paths.BasePath}/trash-updater/this-gets-ignored.yml");
+        fs.AddDirectory2($"{paths.BasePath}/trash-updater/repo");
+        fs.AddDirectory2($"{paths.BasePath}/trash-updater/cache");
+        fs.AddFileNoData($"{paths.BasePath}/trash-updater/cache/sonarr/test.txt");
 
         sut.Execute(null);
 
         fs.AllDirectories.Should().NotContain(x => x.Contains("trash-updater"));
-        fs.AllFiles.Should().Contain(x => Regex.IsMatch(x, @"[/\\]recyclarr[/\\]1[/\\]2[/\\]test.txt$"));
+        fs.AllFiles.Should().BeEquivalentTo(
+            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/settings.yml"),
+            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/recyclarr.yml"),
+            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/cache/sonarr/test.txt"));
     }
 }

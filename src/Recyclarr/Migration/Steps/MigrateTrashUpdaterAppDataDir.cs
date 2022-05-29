@@ -42,5 +42,25 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 
     public bool CheckIfNeeded() => _fs.Directory.Exists(GetOldPath());
 
-    public void Execute(IConsole? console) => _fs.MergeDirectory(GetOldPath(), GetNewPath(), console);
+    public void Execute(IConsole? console)
+    {
+        _fs.MergeDirectory(
+            _fs.Path.Combine(GetOldPath(), "cache"),
+            _fs.Path.Combine(GetNewPath(), "cache"),
+            console);
+
+        MoveFile("recyclarr.yml");
+        MoveFile("settings.yml");
+
+        _fs.Directory.Delete(GetOldPath(), true);
+    }
+
+    private void MoveFile(string file)
+    {
+        var recyclarrYaml = _fs.FileInfo.FromFileName(_fs.Path.Combine(GetOldPath(), file));
+        if (recyclarrYaml.Exists)
+        {
+            recyclarrYaml.MoveTo(_fs.Path.Combine(GetNewPath(), file));
+        }
+    }
 }
