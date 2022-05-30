@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2] - 2022-05-29
+
 ### Fixed
 
 - `create-config` would fail with `--path` specified.
@@ -319,7 +321,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/recyclarr/recyclarr/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/recyclarr/recyclarr/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/recyclarr/recyclarr/compare/v2.0.2...v2.1.0
 [2.0.2]: https://github.com/recyclarr/recyclarr/compare/v2.0.1...v2.0.2
