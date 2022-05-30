@@ -44,15 +44,27 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 
     public void Execute(IConsole? console)
     {
-        _fs.MergeDirectory(
-            _fs.Path.Combine(GetOldPath(), "cache"),
-            _fs.Path.Combine(GetNewPath(), "cache"),
-            console);
-
+        MoveDirectory("cache", console);
         MoveFile("recyclarr.yml");
         MoveFile("settings.yml");
 
-        _fs.Directory.Delete(GetOldPath(), true);
+        var oldDir = _fs.DirectoryInfo.FromDirectoryName(GetOldPath());
+        if (oldDir.Exists)
+        {
+            oldDir.Delete(true);
+        }
+    }
+
+    private void MoveDirectory(string directory, IConsole? console)
+    {
+        var oldPath = _fs.Path.Combine(GetOldPath(), directory);
+        if (_fs.Directory.Exists(oldPath))
+        {
+            _fs.MergeDirectory(
+                oldPath,
+                _fs.Path.Combine(GetNewPath(), directory),
+                console);
+        }
     }
 
     private void MoveFile(string file)
