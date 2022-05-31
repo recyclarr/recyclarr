@@ -48,15 +48,31 @@ Formerly named "Trash Updater".
 - Option to enable automatic deletion custom formats in Radarr when they are removed from config or
   the guide.
 
-## Requirements
+### Requirements & Notices
 
-Before installing & running Recyclarr, please review the requirements below.
+Before installing & running Recyclarr, please review the requirements & special notices below.
 
 - Minimum Supported Sonarr Version: `3.0.4.1098`
 - Minimum Supported Radarr Version: `3.*`
-- OpenSSL 1.x required on Linux
+- Do not run Notifiarr's Trash Guides Integration in conjunction with Recyclarr's Custom Format
+  synchronization. In general, you should not have two different tools updating the same data in
+  Radarr or Sonarr.
 
-## Installation
+## Docker Installation
+
+It is recommended to use the Docker Image to install Recyclarr. Using this method, you get to enjoy
+an easier installation process without having to worry about things like file locations,
+dependencies, etc. The official docker image can be run with:
+
+```sh
+docker run ghcr.io/recyclarr/recyclarr
+```
+
+See the [Docker wiki page][docker] for more setup details.
+
+[docker]: https://github.com/recyclarr/recyclarr/wiki/Docker
+
+## Manual Installation
 
 Simply download the latest release for your platform using the table below. The download itself is
 just a ZIP file with a single executable in it. You can put this executable anywhere you want and
@@ -83,14 +99,11 @@ run it.
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
 release notes and older releases.
 
-### Important Notices
-
-- For Sonarr support to work, you must be running version `3.0.4.1098` or greater.
-- Do not run Notifiarr's Trash Guides Integration in conjunction with Recyclarr's Custom Format
-  synchronization. In general, you should not have two different tools updating the same data in
-  Radarr.
-
 [rp]: https://github.com/recyclarr/recyclarr/releases
+
+### Prerequisites
+
+- OpenSSL 1.x required on Linux
 
 ### Special Note about Linux
 
