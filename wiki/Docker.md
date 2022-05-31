@@ -49,6 +49,27 @@ Here is a breakdown of the above YAML:
   [tini](https://github.com/krallin/tini). Please visit that repo to understand the benefits in
   detail, if you're interested.
 
+## Tags
+
+Tags for the docker image are broken down into the various components of the semantic version number
+following the format of `X.Y.Z`, where:
+
+- `X`: Represents a *major* release containing breaking changes.
+- `Y`: Represents a *feature* release.
+- `Z`: Represents a *bugfix* release.
+
+The structure of the tags are described by the following table. Assume for example purposes we're
+talking about `v2.1.2`. The table is sorted by *risk* in descending order. In other words, if you
+value *stability* the most,  you want the bottom row. If you value being on *the bleeding edge*
+(highest risk), you want the top row.
+
+| Tag      | Description                                                             |
+| -------- | ----------------------------------------------------------------------- |
+| `latest` | Latest release, no matter what, including breaking changes              |
+| `2`      | Latest *feature* and *bugfix* release; manual update for major releases |
+| `2.1`    | Latest *bugfix* release; manual update if you want new features         |
+| `2.1.2`  | Exact release; no automatic updates                                     |
+
 ## Configuration
 
 ### Volumes
