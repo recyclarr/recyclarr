@@ -4,11 +4,13 @@ name: Docker Image
 on:
   push:
     paths:
-      - 'docker/**'
+      - docker/**
+      - .github/workflows/docker.yml
 
   pull_request:
     paths:
-      - 'docker/**'
+      - docker/**
+      - .github/workflows/docker.yml
 
   release:
     types: [ published ]
