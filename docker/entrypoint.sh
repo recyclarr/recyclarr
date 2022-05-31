@@ -5,7 +5,7 @@ if [ ! -f "$HOME/recyclarr.yml" ]; then
     su-exec recyclarr recyclarr create-config --path "$HOME"
 fi
 
-appdata="--app-data \"$HOME\""
+appdata="--app-data $HOME"
 
 # If the script has any arguments, invoke the CLI instead. This allows the image to be used as a CLI
 # with something like:
