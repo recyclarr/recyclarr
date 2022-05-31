@@ -16,17 +16,18 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: A release version of Recyclarr to build the image for.
+        description: Release Tag
         required: true
         type: string
       should_publish:
-        description: If enabled, the image will get published to GHCR.
+        description: Publish Image to GHCR?
         required: false
         default: false
         type: boolean
 
 env:
   SHOULD_PUBLISH: ${{ github.event_name == 'release' || github.event.inputs.should_publish == 'true' }}
+  VERSION: ${{ github.event.release.tag_name || github.event.inputs.release_tag }}
 
 jobs:
   docker:
@@ -49,9 +50,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=semver,pattern={{major}}.{{minor}}.{{patch}},value=${{ github.event.release.tag_name }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ github.event.release.tag_name }}
-            type=semver,pattern={{major}},value=${{ github.event.release.tag_name }}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}},value=${{ env.VERSION }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.VERSION }}
+            type=semver,pattern={{major}},value=${{ env.VERSION }}
 
       - name: Login to GHCR
         if: env.SHOULD_PUBLISH
@@ -69,7 +70,7 @@ jobs:
           no-cache: true
           build-args: |
             REPOSITORY=${{ github.repository }}
-            ${{ github.event.release.tag_name && format('RELEASE_TAG={0}', github.event.release.tag_name) }}
+            ${{ env.VERSION && format('RELEASE_TAG={0}', env.VERSION) }}
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
