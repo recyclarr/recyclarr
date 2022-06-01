@@ -1,10 +1,14 @@
 using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
+using System.IO.Abstractions.TestingHelpers;
+using AutoFixture.NUnit3;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
+using TestLibrary.AutoFixture;
 using TestLibrary.NSubstitute;
 using TrashLib.Cache;
 using TrashLib.Config.Services;
@@ -72,23 +76,29 @@ public class ServiceCacheTest
         result.Should().BeNull();
     }
 
-    [Test]
-    public void Loading_with_attribute_parses_correctly()
+    [Test, AutoMockData]
+    public void Loading_with_attribute_parses_correctly(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IServiceConfiguration config,
+        [Frozen] ICacheStoragePath storage,
+        ServiceCache sut)
     {
-        var ctx = new Context();
+        const string testJson = @"{'test_value': 'Foo'}";
 
-        ctx.StoragePath.Path.Returns("testpath");
+        storage.Path.Returns("testpath");
+        config.BaseUrl.Returns("http://localhost:1234");
 
-        dynamic testJson = new {TestValue = "Foo"};
-        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-        ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
-            .Returns(_ => JsonConvert.SerializeObject(testJson));
+        var testJsonPath = fs.CurrentDirectory()
+            .SubDirectory("testpath")
+            .SubDirectory("be8fbc8f")
+            .File($"{ValidObjectName}.json").FullName;
 
-        var obj = ctx.Cache.Load<ObjectWithAttribute>();
+        fs.AddFile(testJsonPath, new MockFileData(testJson));
+
+        var obj = sut.Load<ObjectWithAttribute>();
 
         obj.Should().NotBeNull();
         obj!.TestValue.Should().Be("Foo");
-        ctx.Filesystem.File.Received().ReadAllText(Path.Combine("testpath", "be8fbc8f", $"{ValidObjectName}.json"));
     }
 
     [Test]
@@ -126,22 +136,28 @@ public class ServiceCacheTest
             .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
     }
 
-    [Test]
-    public void Saving_with_attribute_parses_correctly()
+    [Test, AutoMockData]
+    public void Saving_with_attribute_parses_correctly(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IServiceConfiguration config,
+        [Frozen] ICacheStoragePath storage,
+        ServiceCache sut)
     {
-        var ctx = new Context();
+        storage.Path.Returns("testpath");
+        config.BaseUrl.Returns("http://localhost:1234");
 
-        ctx.StoragePath.Path.Returns("testpath");
+        var testJsonPath = fs.CurrentDirectory()
+            .SubDirectory("testpath")
+            .SubDirectory("be8fbc8f")
+            .File($"{ValidObjectName}.json").FullName;
 
-        ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-        var expectedParentDirectory = Path.Combine("testpath", "be8fbc8f");
-        ctx.Filesystem.Directory.Received().CreateDirectory(expectedParentDirectory);
-
-        dynamic expectedJson = new {TestValue = "Foo"};
-        var expectedPath = Path.Combine(expectedParentDirectory, $"{ValidObjectName}.json");
-        ctx.Filesystem.File.Received()
-            .WriteAllText(expectedPath, JsonConvert.SerializeObject(expectedJson, ctx.JsonSettings));
+        var expectedFile = fs.GetFile(testJsonPath);
+        expectedFile.Should().NotBeNull();
+        expectedFile.TextContents.Should().Be(@"{
+  ""test_value"": ""Foo""
+}");
     }
 
     [Test]
@@ -168,29 +184,23 @@ public class ServiceCacheTest
             .WithMessage("CacheObjectNameAttribute is missing*");
     }
 
-    [Test]
-    public void Switching_config_and_base_url_should_yield_different_cache_paths()
+    [Test, AutoMockData]
+    public void Switching_config_and_base_url_should_yield_different_cache_paths(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IConfigurationProvider provider,
+        ServiceCache sut)
     {
-        var ctx = new Context();
-        ctx.StoragePath.Path.Returns("testpath");
+        provider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
 
-        var actualPaths = new List<string>();
-
-        dynamic testJson = new {TestValue = "Foo"};
-        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-        ctx.Filesystem.File.ReadAllText(Arg.Do<string>(s => actualPaths.Add(s)))
-            .Returns(_ => JsonConvert.SerializeObject(testJson));
-
-        ctx.Cache.Load<ObjectWithAttribute>();
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
         // Change the active config & base URL so we get a different path
-        ctx.ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-        ctx.ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
+        provider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
 
-        ctx.Cache.Load<ObjectWithAttribute>();
+        sut.Save(new ObjectWithAttribute {TestValue = "Bar"});
 
-        actualPaths.Count.Should().Be(2);
-        actualPaths.Should().OnlyHaveUniqueItems();
+        fs.AllFiles.Should().HaveCount(2)
+            .And.AllSatisfy(x => x.Should().EndWith("json"));
     }
 
     [Test]

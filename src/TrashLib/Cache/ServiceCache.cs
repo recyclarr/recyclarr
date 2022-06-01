@@ -4,30 +4,40 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using TrashLib.Config.Services;
 
 namespace TrashLib.Cache;
 
-internal class ServiceCache : IServiceCache
+public class ServiceCache : IServiceCache
 {
     private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
     private readonly IConfigurationProvider _configProvider;
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fs;
     private readonly IFNV1a _hash;
     private readonly ICacheStoragePath _storagePath;
+    private readonly JsonSerializerSettings _jsonSettings;
 
-    public ServiceCache(IFileSystem fileSystem, ICacheStoragePath storagePath,
+    public ServiceCache(
+        IFileSystem fs,
+        ICacheStoragePath storagePath,
         IConfigurationProvider configProvider,
         ILogger log)
     {
-        _fileSystem = fileSystem;
+        _fs = fs;
         _storagePath = storagePath;
         _configProvider = configProvider;
         Log = log;
         _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
+        _jsonSettings = new JsonSerializerSettings
+        {
+            Formatting = Formatting.Indented,
+            ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new SnakeCaseNamingStrategy()
+            }
+        };
     }
 
     private ILogger Log { get; }
@@ -35,16 +45,16 @@ internal class ServiceCache : IServiceCache
     public T? Load<T>() where T : class
     {
         var path = PathFromAttribute<T>();
-        if (!_fileSystem.File.Exists(path))
+        if (!_fs.File.Exists(path))
         {
             return null;
         }
 
-        var json = _fileSystem.File.ReadAllText(path);
+        var json = _fs.File.ReadAllText(path);
 
         try
         {
-            return JObject.Parse(json).ToObject<T>();
+            return JsonConvert.DeserializeObject<T>(json, _jsonSettings);
         }
         catch (JsonException e)
         {
@@ -57,15 +67,8 @@ internal class ServiceCache : IServiceCache
     public void Save<T>(T obj) where T : class
     {
         var path = PathFromAttribute<T>();
-        _fileSystem.Directory.CreateDirectory(Path.GetDirectoryName(path));
-        _fileSystem.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings
-        {
-            Formatting = Formatting.Indented,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new SnakeCaseNamingStrategy()
-            }
-        }));
+        _fs.Directory.CreateDirectory(_fs.Path.GetDirectoryName(path));
+        _fs.File.WriteAllText(path, JsonConvert.SerializeObject(obj, _jsonSettings));
     }
 
     private static string GetCacheObjectNameAttribute<T>()
@@ -93,6 +96,6 @@ internal class ServiceCache : IServiceCache
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
 
-        return Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
+        return _fs.Path.Combine(_storagePath.Path, BuildServiceGuid(), objectName + ".json");
     }
 }
