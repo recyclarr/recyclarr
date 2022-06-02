@@ -19,7 +19,7 @@ public class MigrateTrashYmlTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         MigrateTrashYml sut)
     {
-        fs.AddFile(Path.Combine(BasePath, "trash.yml"), MockFileData.NullObject);
+        fs.AddFile(Path.Combine(BasePath, "trash.yml"), new MockFileData(""));
         sut.CheckIfNeeded().Should().BeTrue();
     }
 
@@ -36,7 +36,7 @@ public class MigrateTrashYmlTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         MigrateTrashYml sut)
     {
-        fs.AddFile(Path.Combine(BasePath, "recyclarr.yml"), MockFileData.NullObject);
+        fs.AddFile(Path.Combine(BasePath, "recyclarr.yml"), new MockFileData(""));
 
         var act = () => sut.Execute(null);
 
