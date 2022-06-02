@@ -57,6 +57,7 @@
     <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
