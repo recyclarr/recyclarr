@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Renamed the "EVO (no WEB-DL)" custom format to "EVO (no WEBDL)" in the config template. (#77)
+- Radarr: `delete_old_custom_formats` works again. (#71)
 
 [Docker]: https://github.com/recyclarr/recyclarr/wiki/Docker
 
