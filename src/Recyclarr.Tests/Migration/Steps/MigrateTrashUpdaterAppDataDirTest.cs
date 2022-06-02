@@ -1,7 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Migration.Steps;
 using TestLibrary;

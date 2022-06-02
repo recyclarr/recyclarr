@@ -3,8 +3,6 @@ using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
@@ -26,14 +24,6 @@ public class ServiceCacheTest
             Filesystem = fs ?? Substitute.For<IFileSystem>();
             StoragePath = Substitute.For<ICacheStoragePath>();
             ConfigProvider = Substitute.For<IConfigurationProvider>();
-            JsonSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
 
             // Set up a default for the active config's base URL. This is used to generate part of the path
             ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
@@ -42,7 +32,6 @@ public class ServiceCacheTest
             Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
         }
 
-        public JsonSerializerSettings JsonSettings { get; }
         public ServiceCache Cache { get; }
         public IConfigurationProvider ConfigProvider { get; }
         public ICacheStoragePath StoragePath { get; }
