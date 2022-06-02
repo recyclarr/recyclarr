@@ -16,7 +16,7 @@
     <PackageReference Update="FluentValidation" Version="11.*" />
     <PackageReference Update="Flurl" Version="3.*" />
     <PackageReference Update="Flurl.Http" Version="3.*" />
-    <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
+    <PackageReference Update="GitHubActionsTestLogger" Version="2.*" />
     <PackageReference Update="GitVersion.MsBuild" Version="5.*" />
     <PackageReference Update="JetBrains.Annotations" Version="*" />
     <PackageReference Update="LibGit2Sharp" Version="0.27.*-*" />
