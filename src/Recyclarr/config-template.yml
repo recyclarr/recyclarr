@@ -48,7 +48,7 @@ radarr:
       # Do NOT use the heading names here, those do not work! These are case-insensitive.
       - names:
           - BR-DISK
-          - EVO (no WEB-DL)
+          - EVO (no WEBDL)
           - LQ
           - x265 (720/1080p)
           - 3D
