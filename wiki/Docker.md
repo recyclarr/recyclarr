@@ -26,8 +26,6 @@ services:
     networks: [recyclarr]
     volumes:
       - ./config:/config
-    environment:
-      CRON_SCHEDULE: "* * * * *"
 ```
 
 Here is a breakdown of the above YAML:
