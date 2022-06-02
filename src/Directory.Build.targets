@@ -13,7 +13,7 @@
     <PackageReference Update="coverlet.collector" Version="3.*" />
     <PackageReference Update="FluentAssertions" Version="6.*" />
     <PackageReference Update="FluentAssertions.Json" Version="6.*" />
-    <PackageReference Update="FluentValidation" Version="10.*" />
+    <PackageReference Update="FluentValidation" Version="11.*" />
     <PackageReference Update="Flurl" Version="3.*" />
     <PackageReference Update="Flurl.Http" Version="3.*" />
     <PackageReference Update="GitHubActionsTestLogger" Version="1.*" />
