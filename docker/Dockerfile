@@ -7,7 +7,7 @@ ARG TARGETPLATFORM
 ARG REPOSITORY=recyclarr/recyclarr
 ARG BUILD_FROM_BRANCH
 
-COPY --chmod=544 ./scripts/*.sh .
+COPY --chmod=544 ./scripts/build/*.sh .
 
 RUN apk add unzip
 RUN ./build.sh
@@ -31,6 +31,6 @@ RUN set -ex; \
     adduser --disabled-password --no-create-home recyclarr;
 
 COPY --chown=recyclarr:recyclarr --chmod=544 --from=build /build/recyclarr /usr/local/bin
-COPY --chown=recyclarr:recyclarr --chmod=544 entrypoint.sh /
+COPY --chown=recyclarr:recyclarr --chmod=544 ./scripts/prod/*.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]
