@@ -3,6 +3,7 @@ name: Docker Image
 
 on:
   push:
+    tags-ignore: ['*']
     paths:
       - docker/**
       - .github/workflows/docker.yml
