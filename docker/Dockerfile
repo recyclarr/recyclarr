@@ -12,7 +12,7 @@ RUN apk add unzip
 RUN ./build.sh
 
 #############################################################################
-FROM alpine
+FROM alpine AS final
 
 # Required by environment and/or dotnet
 ENV HOME=/config \
