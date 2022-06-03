@@ -1,11 +1,9 @@
 #!/bin/sh
 set -e
 
-if [ ! -f "$HOME/recyclarr.yml" ]; then
-    su-exec recyclarr recyclarr create-config --path "$HOME/recyclarr.yml"
+if [ ! -f "$RECYCLARR_APP_DATA/recyclarr.yml" ]; then
+    su-exec recyclarr recyclarr create-config
 fi
-
-appdata="--app-data $HOME"
 
 # If the script has any arguments, invoke the CLI instead. This allows the image to be used as a CLI
 # with something like:
@@ -15,10 +13,10 @@ appdata="--app-data $HOME"
 # ```
 #
 if [ "$#" -gt 0 ]; then
-    su-exec recyclarr recyclarr "$@" $appdata
+    su-exec recyclarr recyclarr "$@"
 else
     echo "Creating crontab file..."
-    echo "$CRON_SCHEDULE recyclarr sonarr $appdata; recyclarr radarr $appdata" \
+    echo "$CRON_SCHEDULE recyclarr sonarr; recyclarr radarr" \
         | crontab -u recyclarr -
 
     crontab -l -u recyclarr

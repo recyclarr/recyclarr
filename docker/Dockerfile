@@ -16,7 +16,7 @@ RUN ./build.sh
 FROM alpine AS final
 
 # Required by environment and/or dotnet
-ENV HOME=/config \
+ENV RECYCLARR_APP_DATA=/config \
     DOTNET_BUNDLE_EXTRACT_BASE_DIR=/tmp/.net \
     # Environment variables used by the entrypoint script. These may be overridden from `docker run`
     # as needed.
@@ -28,7 +28,7 @@ VOLUME /config
 
 RUN set -ex; \
     apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
-    adduser --disabled-password --home "$HOME" recyclarr;
+    adduser --disabled-password --no-create-home recyclarr;
 
 COPY --chown=recyclarr:recyclarr --chmod=544 --from=build /build/recyclarr /usr/local/bin
 COPY --chown=recyclarr:recyclarr --chmod=544 entrypoint.sh /
