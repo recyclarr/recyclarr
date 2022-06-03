@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using CliFx.Exceptions;
 using Common;
+using Serilog;
 using TrashLib;
 
 namespace Recyclarr.Command.Initialization;
@@ -10,12 +11,14 @@ public class DefaultAppDataSetup : IDefaultAppDataSetup
     private readonly IEnvironment _env;
     private readonly IAppPaths _paths;
     private readonly IFileSystem _fs;
+    private readonly ILogger _log;
 
-    public DefaultAppDataSetup(IEnvironment env, IAppPaths paths, IFileSystem fs)
+    public DefaultAppDataSetup(IEnvironment env, IAppPaths paths, IFileSystem fs, ILogger log)
     {
         _env = env;
         _paths = paths;
         _fs = fs;
+        _log = log;
     }
 
     public void SetupDefaultPath(string? appDataDirectoryOverride, bool forceCreate)
@@ -55,5 +58,7 @@ public class DefaultAppDataSetup : IDefaultAppDataSetup
             var dir = _fs.Directory.CreateDirectory(appDataDirectoryOverride);
             _paths.SetAppDataPath(dir.FullName);
         }
+
+        _log.Debug("App Data Dir: {AppData}", _paths.GetAppDataPath());
     }
 }
