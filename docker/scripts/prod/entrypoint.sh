@@ -16,8 +16,7 @@ if [ "$#" -gt 0 ]; then
     su-exec recyclarr recyclarr "$@"
 else
     echo "Creating crontab file..."
-    echo "$CRON_SCHEDULE recyclarr sonarr; recyclarr radarr" \
-        | crontab -u recyclarr -
+    echo "$CRON_SCHEDULE /cron.sh" | crontab -u recyclarr -
 
     crontab -l -u recyclarr
 
