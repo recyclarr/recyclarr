@@ -5,8 +5,9 @@ WORKDIR /build
 ARG RELEASE_TAG=latest
 ARG TARGETPLATFORM
 ARG REPOSITORY=recyclarr/recyclarr
+ARG BUILD_FROM_BRANCH
 
-COPY --chmod=544 ./build.sh .
+COPY --chmod=544 ./scripts/*.sh .
 
 RUN apk add unzip
 RUN ./build.sh
