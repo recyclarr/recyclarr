@@ -26,6 +26,8 @@ services:
     networks: [recyclarr]
     volumes:
       - ./config:/config
+    environment:
+      - TZ=America/Santiago
 ```
 
 Here is a breakdown of the above YAML:
@@ -80,6 +82,8 @@ value *stability* the most,  you want the bottom row. If you value being on *the
 
 - `CRON_SCHEDULE` (Default: `@daily`)<br>
   Standard cron syntax for how often you want Recyclarr to run (see [Cron Mode](#cron-mode)).
+- `TZ` (Default: UTC)
+  The time zone you want to use for Recyclarr's local time in the container.
 
 ## Modes
 

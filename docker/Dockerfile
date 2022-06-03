@@ -45,7 +45,7 @@ ENV HOME=/config \
 VOLUME /config
 
 RUN set -ex; \
-    apk add --no-cache busybox-suid su-exec libstdc++; \
+    apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
     adduser --disabled-password --home "$HOME" recyclarr;
 
 COPY --chown=recyclarr:recyclarr --chmod=544 --from=build /build/recyclarr /usr/local/bin

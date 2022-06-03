@@ -19,3 +19,4 @@ services:
       - ./config:/config
     environment:
       CRON_SCHEDULE: "* * * * *"
+      TZ: America/Chicago
