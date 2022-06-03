@@ -7,8 +7,10 @@ Before we get into the details of how to use the Docker image, I want to start w
 personally hardly ever run `docker` commands directly. Instead, I use `docker compose` mainly
 because the `docker-compose.yml` file is a fantastic way to keep configuration details in one place.
 Thus, for the remainder of this page, all instruction and advice will be based on the example YAML
-below. I highly recommend you set up your own `docker-compose.yml` this way. I understand there will
-be minor differences for everyone's use case, but it should mostly be taken verbatim.
+below. I highly recommend you set up your own `docker-compose.yml` this way.
+
+Note that the below example should not be used verbatim. It's meant for example purposes only. Copy
+& paste it but make the appropriate and necessary changes to it for your specific use case.
 
 ```yml
 version: '3'
@@ -28,6 +30,8 @@ services:
       - ./config:/config
     environment:
       - TZ=America/Santiago
+      - PUID=$DOCKER_UID
+      - PGID=$DOCKER_GID
 ```
 
 Here is a breakdown of the above YAML:
@@ -48,6 +52,7 @@ Here is a breakdown of the above YAML:
   run `docker compose down` or `docker compose stop`. Internally, this runs Recyclarr using
   [tini](https://github.com/krallin/tini). Please visit that repo to understand the benefits in
   detail, if you're interested.
+- Stuff under `environment` is documented in the Environment section below.
 
 ## Tags
 
@@ -82,8 +87,17 @@ value *stability* the most,  you want the bottom row. If you value being on *the
 
 - `CRON_SCHEDULE` (Default: `@daily`)<br>
   Standard cron syntax for how often you want Recyclarr to run (see [Cron Mode](#cron-mode)).
-- `TZ` (Default: UTC)
+
+- `TZ` (Default: `UTC`)<br>
   The time zone you want to use for Recyclarr's local time in the container.
+
+- `PUID` (Default: `1000`)<br>
+  The UID for the internal non-root user in the container. Match this to a UID on your host system
+  if you're using a directory-mounted volume for `/config`.
+
+- `PGID` (Default: `1000`)<br>
+  The GID for the internal non-root user's group in the container. Match this to a GID on your host
+  system if you're using a directory-mounted volume for `/config`.
 
 ## Modes
 

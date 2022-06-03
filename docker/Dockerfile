@@ -22,13 +22,18 @@ ENV RECYCLARR_APP_DATA=/config \
     # as needed.
     CRON_SCHEDULE="@daily" \
     # The GLOBALIZATION variable is so that we do not need libicu installed (saves us ~40MB).
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true \
+    # User can specify their own UID/GID for the 'recyclarr' user if they want
+    PUID=1000 \
+    PGID=1000
 
 VOLUME /config
 
 RUN set -ex; \
+    cat /etc/passwd; \
     apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
-    adduser --disabled-password --no-create-home recyclarr;
+    addgroup --gid $PGID recyclarr; \
+    adduser --uid $PUID --ingroup recyclarr --disabled-password --no-create-home recyclarr;
 
 COPY --chown=recyclarr:recyclarr --chmod=544 --from=build /build/recyclarr /usr/local/bin
 COPY --chown=recyclarr:recyclarr --chmod=544 ./scripts/prod/*.sh /
