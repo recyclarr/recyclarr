@@ -1,3 +1,5 @@
+using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using CliFx.Infrastructure;
@@ -24,6 +26,25 @@ public class CreateConfigCommandTest
     {
         const string ymlPath = "path/recyclarr.yml";
         paths.ConfigPath.Returns(ymlPath);
+        await cmd.ExecuteAsync(Substitute.For<IConsole>());
+
+        var file = fs.GetFile(ymlPath);
+        file.Should().NotBeNull();
+        file.Contents.Should().NotBeEmpty();
+    }
+
+    [Test, AutoMockData]
+    public async Task Config_file_created_when_using_user_specified_path(
+        [Frozen] IAppPaths paths,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        CreateConfigCommand cmd)
+    {
+        var ymlPath = fs.CurrentDirectory()
+            .SubDirectory("user")
+            .SubDirectory("specified")
+            .File("file.yml").FullName;
+
+        cmd.Path = ymlPath;
         await cmd.ExecuteAsync(Substitute.For<IConsole>());
 
         var file = fs.GetFile(ymlPath);

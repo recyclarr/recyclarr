@@ -2,7 +2,7 @@
 set -e
 
 if [ ! -f "$HOME/recyclarr.yml" ]; then
-    su-exec recyclarr recyclarr create-config --path "$HOME"
+    su-exec recyclarr recyclarr create-config --path "$HOME/recyclarr.yml"
 fi
 
 appdata="--app-data $HOME"
