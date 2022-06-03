@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Docker support! Image name is `ghcr.io/recyclarr/recyclarr`. See the [Docker] wiki page for more
   information.
+- Global app data path support via environment variable named `RECYCLARR_APP_DATA`. The path
+  specified here will be used as the app data path for every invocation of `recyclarr` as if
+  `--app-data` were specified.
 
 ### Fixed
 

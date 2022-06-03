@@ -97,6 +97,10 @@ Overrides the normal, default location of the [[application data directory|File-
 that this option is mainly intended for usage in the official Docker image. It is not intended for
 normal use outside of that.
 
+If you'd like this behavior globally for all commands without having to specify this option, define
+an environment variable named `RECYCLARR_APP_DATA` with the same path. Note that if you have both
+set, `--app-data` always takes precedence.
+
 ## Sonarr
 
 ### `--list-release-profiles`

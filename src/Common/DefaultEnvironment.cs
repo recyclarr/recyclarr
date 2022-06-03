@@ -11,4 +11,9 @@ internal class DefaultEnvironment : IEnvironment
     {
         return Environment.GetFolderPath(folder, option);
     }
+
+    public string? GetEnvironmentVariable(string variable)
+    {
+        return Environment.GetEnvironmentVariable(variable);
+    }
 }

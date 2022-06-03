@@ -20,6 +20,9 @@ public class DefaultAppDataSetup : IDefaultAppDataSetup
 
     public void SetupDefaultPath(string? appDataDirectoryOverride, bool forceCreate)
     {
+        // If a specific app data directory is not provided, use the following environment variable to find the path.
+        appDataDirectoryOverride ??= _env.GetEnvironmentVariable("RECYCLARR_APP_DATA");
+
         // If the user did not explicitly specify an app data directory, perform some system introspection to verify if
         // the user has a home directory.
         if (string.IsNullOrEmpty(appDataDirectoryOverride))
@@ -49,8 +52,8 @@ public class DefaultAppDataSetup : IDefaultAppDataSetup
         else
         {
             // Ensure user-specified app data directory is created and use it.
-            _fs.Directory.CreateDirectory(appDataDirectoryOverride);
-            _paths.SetAppDataPath(appDataDirectoryOverride);
+            var dir = _fs.Directory.CreateDirectory(appDataDirectoryOverride);
+            _paths.SetAppDataPath(dir.FullName);
         }
     }
 }
