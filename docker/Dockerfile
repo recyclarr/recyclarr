@@ -29,13 +29,9 @@ ENV RECYCLARR_APP_DATA=/config \
 
 VOLUME /config
 
-RUN set -ex; \
-    cat /etc/passwd; \
-    apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
-    addgroup --gid $PGID recyclarr; \
-    adduser --uid $PUID --ingroup recyclarr --disabled-password --no-create-home recyclarr;
+RUN apk add --no-cache busybox-suid su-exec libstdc++ tzdata;
 
-COPY --chown=recyclarr:recyclarr --chmod=544 --from=build /build/recyclarr /usr/local/bin
-COPY --chown=recyclarr:recyclarr --chmod=544 ./scripts/prod/*.sh /
+COPY --chmod=755 --from=build /build/recyclarr /usr/local/bin
+COPY --chmod=755 ./scripts/prod/*.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]

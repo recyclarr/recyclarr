@@ -8,7 +8,6 @@ networks:
 services:
   recyclarr:
     image: ghcr.io/recyclarr/recyclarr
-    container_name: recyclarr
     build:
       context: .
       args:

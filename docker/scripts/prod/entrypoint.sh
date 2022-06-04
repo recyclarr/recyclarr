@@ -1,8 +1,12 @@
 #!/bin/sh
 set -e
 
+userspec="$PUID:$PGID"
+
+chown "$userspec" "$RECYCLARR_APP_DATA"
+
 if [ ! -f "$RECYCLARR_APP_DATA/recyclarr.yml" ]; then
-    su-exec recyclarr recyclarr create-config
+    su-exec "$userspec" recyclarr create-config
 fi
 
 # If the script has any arguments, invoke the CLI instead. This allows the image to be used as a CLI
@@ -13,12 +17,12 @@ fi
 # ```
 #
 if [ "$#" -gt 0 ]; then
-    su-exec recyclarr recyclarr "$@"
+    su-exec "$userspec" recyclarr "$@"
 else
     echo "Creating crontab file..."
-    echo "$CRON_SCHEDULE /cron.sh" | crontab -u recyclarr -
+    echo "$CRON_SCHEDULE su-exec \"$userspec\" /cron.sh" | crontab -
 
-    crontab -l -u recyclarr
+    crontab -l
 
     echo "Starting cron daemon..."
     exec crond -f
