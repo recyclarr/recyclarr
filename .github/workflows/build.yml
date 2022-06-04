@@ -15,8 +15,33 @@ env:
   dotnetVersion: "6.0.x"
 
 jobs:
+  test:
+    name: Test
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+
+      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Test
+        run: dotnet test src --configuration Release --logger GitHubActions
+
   build:
     name: Build
+    needs: test
     strategy:
       fail-fast: true
       matrix:
@@ -45,9 +70,6 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Test
-        run: dotnet test src --configuration Release --logger GitHubActions
-
       - name: Publish
         shell: pwsh
         run: ci/Publish.ps1 ${{ matrix.runtime }}
@@ -59,19 +81,16 @@ jobs:
           path: publish/${{ matrix.runtime }}/*
 
   smoke:
-    name: Smoke Test
+    name: Smoke
     needs: build
     strategy:
       fail-fast: false
       matrix:
         include:
-          - image: windows-latest
-            runtime: win-x64
-          - image: ubuntu-latest
-            runtime: linux-x64
-          - image: macos-latest
-            runtime: osx-x64
-    runs-on: ${{ matrix.image }}
+          - {os: windows-latest, runtime: win-x64}
+          - {os: ubuntu-latest, runtime: linux-x64}
+          - {os: macos-latest, runtime: osx-x64}
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
