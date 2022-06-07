@@ -14,13 +14,25 @@ public static class FlurlLogging
         {
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Request: {Method} {Url}", call.HttpRequestMessage.Method, url);
+
+            var body = call.RequestBody;
+            if (body is not null)
+            {
+                log.Debug("HTTP Body:\n{Body}", body);
+            }
         };
 
-        settings.AfterCall = call =>
+        settings.AfterCallAsync = async call =>
         {
             var statusCode = call.Response?.StatusCode.ToString() ?? "(No response)";
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Response: {Status} {Method} {Url}", statusCode, call.HttpRequestMessage.Method, url);
+
+            var content = call.Response?.ResponseMessage.Content;
+            if (content is not null)
+            {
+                log.Debug("HTTP Body:\n{Body}", await content.ReadAsStringAsync());
+            }
         };
 
         settings.OnRedirect = call =>
