@@ -1,6 +1,6 @@
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Common.Extensions;
-using Flurl.Http;
 
 namespace TrashLib.Sonarr.QualityDefinition;
 
@@ -11,11 +11,24 @@ internal class SonarrQualityDefinitionGuideParser : ISonarrQualityDefinitionGuid
     private readonly Regex _regexTableRow =
         new(@"\| *(.*?) *\| *([\d.]+) *\| *([\d.]+) *\|", RegexOptions.Compiled);
 
+    private readonly IFileSystem _fs;
+    private readonly IAppPaths _paths;
+
+    public SonarrQualityDefinitionGuideParser(IFileSystem fs, IAppPaths paths)
+    {
+        _fs = fs;
+        _paths = paths;
+    }
+
     public async Task<string> GetMarkdownData()
     {
-        return await
-            "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Sonarr/Sonarr-Quality-Settings-File-Size.md"
-                .GetStringAsync();
+        var repoDir = _fs.DirectoryInfo.FromDirectoryName(_paths.RepoDirectory);
+        var file = repoDir
+            .SubDirectory("docs")
+            .SubDirectory("Sonarr")
+            .File("Sonarr-Quality-Settings-File-Size.md").OpenText();
+
+        return await file.ReadToEndAsync();
     }
 
     public IDictionary<SonarrQualityDefinitionType, List<SonarrQualityData>> ParseMarkdown(string markdown)

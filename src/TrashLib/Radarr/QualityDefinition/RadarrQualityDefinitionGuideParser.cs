@@ -1,21 +1,33 @@
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Common.Extensions;
-using Flurl.Http;
 
 namespace TrashLib.Radarr.QualityDefinition;
 
 internal class RadarrQualityDefinitionGuideParser : IRadarrQualityDefinitionGuideParser
 {
+    private readonly IFileSystem _fs;
+    private readonly IAppPaths _paths;
     private readonly Regex _regexHeader = new(@"^#+", RegexOptions.Compiled);
 
     private readonly Regex _regexTableRow =
         new(@"\| *(.*?) *\| *([\d.]+) *\| *([\d.]+) *\|", RegexOptions.Compiled);
 
+    public RadarrQualityDefinitionGuideParser(IFileSystem fs, IAppPaths paths)
+    {
+        _fs = fs;
+        _paths = paths;
+    }
+
     public async Task<string> GetMarkdownData()
     {
-        return await
-            "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/Radarr/Radarr-Quality-Settings-File-Size.md"
-                .GetStringAsync();
+        var repoDir = _fs.DirectoryInfo.FromDirectoryName(_paths.RepoDirectory);
+        var file = repoDir
+            .SubDirectory("docs")
+            .SubDirectory("Radarr")
+            .File("Radarr-Quality-Settings-File-Size.md").OpenText();
+
+        return await file.ReadToEndAsync();
     }
 
     public IDictionary<RadarrQualityDefinitionType, List<RadarrQualityData>> ParseMarkdown(string markdown)
