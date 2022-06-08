@@ -61,11 +61,6 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
             parser.SkipThisAndNestedEvents();
         }
 
-        if (validConfigs.Count == 0)
-        {
-            throw new ConfigurationException(configSection, typeof(T), "There are no configured instances defined");
-        }
-
         return validConfigs;
     }
 

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Do not exit when a YAML config has no sonarr or radarr section.
+
 ## [2.2.0] - 2022-06-03
 
 ### Added
