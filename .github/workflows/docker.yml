@@ -29,8 +29,8 @@ on:
         type: boolean
 
 env:
-  SHOULD_PUBLISH: ${{ github.event_name == 'release' || github.event.inputs.should_publish == 'true' }}
-  VERSION: ${{ github.event.release.tag_name || github.event.inputs.release_tag }}
+  SHOULD_PUBLISH: ${{ github.event_name == 'release' || inputs.should_publish == 'true' }}
+  VERSION: ${{ github.event.release.tag_name || inputs.release_tag }}
 
 jobs:
   docker:
