@@ -48,7 +48,7 @@ Formerly named "Trash Updater".
 - Option to enable automatic deletion custom formats in Radarr when they are removed from config or
   the guide.
 
-### Requirements & Notices
+## Requirements & Notices
 
 Before installing & running Recyclarr, please review the requirements & special notices below.
 
