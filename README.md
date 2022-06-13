@@ -11,42 +11,25 @@ guides to your Sonarr/Radarr instances.
 
 Formerly named "Trash Updater".
 
-## Sonarr Features
+## Features
 
-### Release Profiles
+The following information can be synced to \*arr services from the TRaSH Guides. For a more detailed
+features list, see the [Features] page.
 
-- "Preferred", "Must Not Contain", and "Must Contain" terms from guides are reflected in
-  corresponding release profile fields in Sonarr.
-- "Include Preferred when Renaming" is properly checked/unchecked depending on explicit mention of
-  this in the guides.
-- Profiles get created if they do not exist, or updated if they already exist. Profiles get a unique
-  name based on the guide and this name is used to find them in subsequent runs.
-- Tags can be added to any updated or created profiles. Tags are created for you if they do not
-  exist.
-- Ability to convert preferred with negative scores to "Must not contain" terms.
-- Terms mentioned as "optional" in the guide can be selectively included or excluded; based entirely
-  on user preference.
-- Convenient command line options to get information from the guide to more easily add it to your
-  YAML configuration.
+[Features]: https://github.com/recyclarr/recyclarr/wiki/Features
 
-### Quality Definitions
+**Sonarr**:
 
-- Anime and Series (Non-Anime) quality definitions from the guide.
-- "Hybrid" type supported that is a mixture of both.
+- Sync Release Profiles from the guide.
+- Sync Quality Definitions (sizes) from the guide.
+- Add Tags to Release Profiles.
+- Assign scores from the guide to quality profiles.
 
-## Radarr Features
+**Radarr**:
 
-### Quality Definitions
-
-- Movie quality definition from the guide
-
-### Custom Formats
-
-- A user-specified list of custom formats are synchronized to Radarr from the TRaSH guides.
-- Scores from the guides can be synchronized to quality profiles of your choosing.
-- User can specify their own scores for custom formats (instead of using the guide score).
-- Option to enable automatic deletion custom formats in Radarr when they are removed from config or
-  the guide.
+- Sync Custom Formats from the guide.
+- Sync Quality Definitions from the guide.
+- Assign CF scores to quality profile (manual or use values from the guide).
 
 ## Requirements & Notices
 
