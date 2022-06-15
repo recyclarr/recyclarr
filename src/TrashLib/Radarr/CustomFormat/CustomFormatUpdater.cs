@@ -189,9 +189,8 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
         if (_guideProcessor.CustomFormatsWithoutScore.Count > 0)
         {
-            Log.Warning("The below custom formats have no score in the guide or YAML " +
-                        "config and will be skipped (remove them from your config or specify a " +
-                        "score to fix this warning)");
+            Log.Information("The below custom formats have no score in the guide or in your YAML config. They will " +
+                            "still be synced to Radarr, but no score will be set in your chosen quality profiles");
             foreach (var tuple in _guideProcessor.CustomFormatsWithoutScore)
             {
                 Log.Warning("{CfList}", tuple);
