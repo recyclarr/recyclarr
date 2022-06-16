@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Do not exit when a YAML config has no sonarr or radarr section.
 - Sonarr: Invalid release profile JSON files no longer cause the program to exit. Instead, it just
   skips them and prints a warning to the user. (#87)
+- Radarr: Do not crash when `quality_profiles` is empty. (#89)
 
 ## [2.2.0] - 2022-06-03
 
