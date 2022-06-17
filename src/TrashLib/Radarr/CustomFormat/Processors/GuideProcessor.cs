@@ -17,7 +17,7 @@ internal class GuideProcessor : IGuideProcessor
 {
     private readonly IRadarrGuideService _guideService;
     private readonly Func<IGuideProcessorSteps> _stepsFactory;
-    private IList<string>? _guideCustomFormatJson;
+    private IList<CustomFormatData>? _guideCustomFormatJson;
     private IGuideProcessorSteps _steps;
 
     public GuideProcessor(IRadarrGuideService guideService, Func<IGuideProcessorSteps> stepsFactory)
@@ -55,7 +55,7 @@ internal class GuideProcessor : IGuideProcessor
     {
         if (_guideCustomFormatJson == null)
         {
-            _guideCustomFormatJson = _guideService.GetCustomFormatJson().ToList();
+            _guideCustomFormatJson = _guideService.GetCustomFormatData().ToList();
         }
 
         // Step 1: Process and filter the custom formats from the guide.

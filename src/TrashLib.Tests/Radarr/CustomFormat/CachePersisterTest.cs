@@ -31,7 +31,8 @@ public class CachePersisterTest
 
     private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
     {
-        return new ProcessedCustomFormatData(cfName, trashId, new JObject())
+        var cf = new CustomFormatData(cfName, trashId, null, new JObject());
+        return new ProcessedCustomFormatData(cf)
         {
             CacheEntry = new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId}
         };
@@ -127,7 +128,8 @@ public class CachePersisterTest
 
         var customFormatData = new List<ProcessedCustomFormatData>
         {
-            new("", "trashid", new JObject()) {CacheEntry = new TrashIdMapping("trashid", "cfname", 10)}
+            new(new CustomFormatData("", "trashid", null, new JObject()))
+                {CacheEntry = new TrashIdMapping("trashid", "cfname", 10)}
         };
 
         ctx.Persister.Update(customFormatData);

@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
@@ -21,7 +20,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "id1", new JObject()) {Score = null}
+                    NewCf.Processed("name1", "id1")
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -46,7 +45,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("", "id1", new JObject()) {Score = 100}
+                    NewCf.Processed("", "id1", 100)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -75,7 +74,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("", "id1", new JObject()) {Score = 100}
+                    NewCf.Processed("", "id1", 100)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -110,7 +109,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "id1", new JObject()) {Score = 0}
+                    NewCf.Processed("name1", "id1", 0)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {

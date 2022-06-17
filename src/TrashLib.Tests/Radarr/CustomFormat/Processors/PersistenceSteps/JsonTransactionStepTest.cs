@@ -6,6 +6,7 @@ using TestLibrary.FluentAssertions;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.TestLibrary;
 
 /* Sample Custom Format response from Radarr API
 {
@@ -71,7 +72,7 @@ public class JsonTransactionStepTest
 
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            new(guideCfName, "", guideCfData) {CacheEntry = cacheEntry}
+            NewCf.Processed(guideCfName, "", guideCfData, cacheEntry)
         };
 
         var processor = new JsonTransactionStep();
@@ -173,12 +174,9 @@ public class JsonTransactionStepTest
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            new("created", "", guideCfData![0]),
-            new("updated_different_name", "", guideCfData[1])
-            {
-                CacheEntry = new TrashIdMapping("", "", 2)
-            },
-            new("no_change", "", guideCfData[2])
+            NewCf.Processed("created", "", guideCfData![0]),
+            NewCf.Processed("updated_different_name", "", guideCfData[1], new TrashIdMapping("", "", 2)),
+            NewCf.Processed("no_change", "", guideCfData[2])
         };
 
         var processor = new JsonTransactionStep();
@@ -289,7 +287,7 @@ public class JsonTransactionStepTest
 
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            new("updated", "", guideCfData) {CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 1}}
+            NewCf.Processed("updated", "", guideCfData, new TrashIdMapping("", "") {CustomFormatId = 1})
         };
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
@@ -408,8 +406,8 @@ public class JsonTransactionStepTest
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            new("updated", "", guideCfData![0]),
-            new("no_change", "", guideCfData[1])
+            NewCf.Processed("updated", "", guideCfData![0]),
+            NewCf.Processed("no_change", "", guideCfData[1])
         };
 
         var processor = new JsonTransactionStep();

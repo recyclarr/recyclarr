@@ -6,19 +6,19 @@ namespace TrashLib.Radarr.CustomFormat.Models;
 
 public class ProcessedCustomFormatData
 {
-    public ProcessedCustomFormatData(string name, string trashId, JObject json)
+    private readonly CustomFormatData _data;
+
+    public ProcessedCustomFormatData(CustomFormatData data)
     {
-        Name = name;
-        TrashId = trashId;
-        Json = json;
+        _data = data;
+        Json = _data.ExtraJson;
     }
 
-    public string Name { get; }
-    public string TrashId { get; }
-    public int? Score { get; init; }
+    public string Name => _data.Name;
+    public string TrashId => _data.TrashId;
+    public int? Score => _data.Score;
     public JObject Json { get; set; }
     public TrashIdMapping? CacheEntry { get; set; }
-
     public string CacheAwareName => CacheEntry?.CustomFormatName ?? Name;
 
     public void SetCache(int customFormatId)

@@ -34,6 +34,9 @@ public class GuideProcessorTest
 
         public ResourceDataReader Data { get; }
 
+        public CustomFormatData ReadCustomFormat(string textFile) =>
+            LocalRepoCustomFormatJsonParser.ParseCustomFormatData(ReadText(textFile));
+
         public string ReadText(string textFile) => Data.ReadData(textFile);
         public JObject ReadJson(string jsonFile) => JObject.Parse(ReadText(jsonFile));
     }
@@ -47,12 +50,12 @@ public class GuideProcessorTest
         var guideProcessor = new GuideProcessor(guideService, () => new TestGuideProcessorSteps());
 
         // simulate guide data
-        guideService.GetCustomFormatJson().Returns(new[]
+        guideService.GetCustomFormatData().Returns(new[]
         {
-            ctx.ReadText("ImportableCustomFormat1.json"),
-            ctx.ReadText("ImportableCustomFormat2.json"),
-            ctx.ReadText("NoScore.json"),
-            ctx.ReadText("WontBeInConfig.json")
+            ctx.ReadCustomFormat("ImportableCustomFormat1.json"),
+            ctx.ReadCustomFormat("ImportableCustomFormat2.json"),
+            ctx.ReadCustomFormat("NoScore.json"),
+            ctx.ReadCustomFormat("WontBeInConfig.json")
         });
 
         // Simulate user config in YAML
@@ -82,21 +85,14 @@ public class GuideProcessorTest
 
         var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
         {
-            new("Surround Sound", "43bb5f09c79641e7a22e48d440bd8868", ctx.ReadJson(
-                "ImportableCustomFormat1_Processed.json"))
-            {
-                Score = 500
-            },
-            new("DTS-HD/DTS:X", "4eb3c272d48db8ab43c2c85283b69744", ctx.ReadJson(
-                "ImportableCustomFormat2_Processed.json"))
-            {
-                Score = 480
-            },
-            new("No Score", "abc", JObject.FromObject(new {name = "No Score"}))
+            NewCf.Processed("Surround Sound", "43bb5f09c79641e7a22e48d440bd8868", 500,
+                ctx.ReadJson("ImportableCustomFormat1_Processed.json")),
+            NewCf.Processed("DTS-HD/DTS:X", "4eb3c272d48db8ab43c2c85283b69744", 480,
+                ctx.ReadJson("ImportableCustomFormat2_Processed.json")),
+            NewCf.Processed("No Score", "abc")
         };
 
-        guideProcessor.ProcessedCustomFormats.Should()
-            .BeEquivalentTo(expectedProcessedCustomFormatData, op => op.Using(new JsonEquivalencyStep()));
+        guideProcessor.ProcessedCustomFormats.Should().BeEquivalentTo(expectedProcessedCustomFormatData);
 
         guideProcessor.ConfigData.Should()
             .BeEquivalentTo(new List<ProcessedConfigData>

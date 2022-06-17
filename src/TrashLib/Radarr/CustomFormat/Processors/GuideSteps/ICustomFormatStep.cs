@@ -11,6 +11,6 @@ public interface ICustomFormatStep
     IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
     IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-    void Process(IEnumerable<string> customFormatGuideData,
+    void Process(IList<CustomFormatData> customFormatGuideData,
         IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache);
 }
