@@ -27,7 +27,9 @@ public class GitRepositoryFactory : IGitRepositoryFactory
             DeleteAndCloneRepo(repoUrl, repoPath, branch);
         }
 
-        return _repoFactory(repoPath);
+        var repo = _repoFactory(repoPath);
+        repo.SetRemote("origin", repoUrl);
+        return repo;
     }
 
     private void DeleteAndCloneRepo(string repoUrl, string repoPath, string branch)

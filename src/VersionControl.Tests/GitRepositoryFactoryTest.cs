@@ -47,4 +47,13 @@ public class GitRepositoryFactoryTest
         fileUtils.DidNotReceiveWithAnyArgs().DeleteReadOnlyDirectory(default!);
         wrapper.DidNotReceiveWithAnyArgs().Clone(default!, default!, default!);
     }
+
+    [Test, AutoMockData]
+    public void Set_remote_when_creating_repository(
+        [Frozen] IGitRepository repo,
+        GitRepositoryFactory sut)
+    {
+        sut.CreateAndCloneIfNeeded("repo_url", "repo_path", "branch");
+        repo.Received().SetRemote("origin", "repo_url");
+    }
 }
