@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2022-06-18
+
 ### Changed
 
 - Radarr: Reword the warning about missing scores for CFs to make it more clear that having no score
@@ -353,7 +355,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/recyclarr/recyclarr/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/recyclarr/recyclarr/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/recyclarr/recyclarr/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/recyclarr/recyclarr/compare/v2.1.0...v2.1.1
