@@ -151,8 +151,8 @@ Prints a list of all terms (that have been assigned their own Trash IDs) for the
 with the specified Trash ID. Use the `--list-release-profiles` option to first get a list of the
 [available Sonarr Release Profiles][sonarrjson] from the TRaSH Guides. Copy one of the Trash ID
 values from there and provide it as the argument to this command to get its list of terms. The terms
-are printed in YAML format, ready to be copied & pasted directly into your `recyclarr.yml` file. Here is
-an example of the output you will see:
+are printed in YAML format, ready to be copied & pasted directly into your `recyclarr.yml` file.
+Here is an example of the output you will see:
 
 ```txt
 ./trash sonarr --list-terms 76e060895c5b8a765c310933da0a5357
