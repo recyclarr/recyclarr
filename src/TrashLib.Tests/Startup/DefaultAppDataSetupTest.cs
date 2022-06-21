@@ -6,10 +6,10 @@ using Common;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.Command.Initialization;
 using TestLibrary.AutoFixture;
+using TrashLib.Startup;
 
-namespace Recyclarr.Tests.Command.Initialization;
+namespace TrashLib.Tests.Startup;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
