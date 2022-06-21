@@ -1,11 +1,16 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using MudBlazor.Services;
+using Recyclarr.Gui;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+    .ConfigureContainer<ContainerBuilder>(CompositionRoot.Setup);
 
 var app = builder.Build();
 
