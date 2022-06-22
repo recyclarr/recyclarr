@@ -4,6 +4,7 @@ using Common.FluentValidation;
 using MoreLinq;
 using Newtonsoft.Json;
 using Serilog;
+using TrashLib.Startup;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Guide;
 

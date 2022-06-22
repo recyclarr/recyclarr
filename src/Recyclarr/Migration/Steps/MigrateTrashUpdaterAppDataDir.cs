@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using CliFx.Infrastructure;
 using Common.Extensions;
 using JetBrains.Annotations;
-using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr.Migration.Steps;
 

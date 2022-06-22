@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using TrashLib;
 using TrashLib.Cache;
+using TrashLib.Startup;
 
 namespace Recyclarr.Command.Helpers;
 

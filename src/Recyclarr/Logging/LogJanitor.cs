@@ -1,4 +1,4 @@
-using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr.Logging;
 

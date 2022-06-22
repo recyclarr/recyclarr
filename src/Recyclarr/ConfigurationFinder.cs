@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Common;
 using Serilog;
 using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr;
 
