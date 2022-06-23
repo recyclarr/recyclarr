@@ -32,4 +32,8 @@ internal class RadarrCommand : ServiceCommand, IRadarrCommand
     {
         await _service.Value.Execute(this);
     }
+
+    [CommandOption("list-custom-formats", Description =
+        "List available custom formats from the guide in YAML format.")]
+    public bool ListCustomFormats { get; [UsedImplicitly] set; }
 }

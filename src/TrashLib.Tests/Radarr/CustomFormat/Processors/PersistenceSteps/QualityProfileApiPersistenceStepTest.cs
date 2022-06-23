@@ -47,11 +47,8 @@ public class QualityProfileApiPersistenceStepTest
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
             {
-                "profile1", CfTestUtils.NewMapping(
-                    new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
-                    {
-                        CacheEntry = new TrashIdMapping("", "") {CustomFormatId = 4}
-                    }, 100))
+                "profile1", CfTestUtils.NewMapping(new FormatMappingEntry(
+                    NewCf.Processed("", "", new TrashIdMapping("", "") {CustomFormatId = 4}), 100))
             }
         };
 
@@ -112,10 +109,7 @@ public class QualityProfileApiPersistenceStepTest
         {
             {
                 "profile1", CfTestUtils.NewMappingWithReset(
-                    new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
-                    {
-                        CacheEntry = new TrashIdMapping("", "", 2)
-                    }, 100))
+                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 2)), 100))
             }
         };
 
@@ -188,21 +182,12 @@ public class QualityProfileApiPersistenceStepTest
         {
             {
                 "profile1", CfTestUtils.NewMapping(
-                    new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
-                    {
-                        // First match by ID
-                        CacheEntry = new TrashIdMapping("", "", 4)
-                    }, 100),
-                    new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
-                    {
-                        // Should NOT match because we do not use names to assign scores
-                        CacheEntry = new TrashIdMapping("", "BR-DISK")
-                    }, 101),
-                    new FormatMappingEntry(new ProcessedCustomFormatData("", "", new JObject())
-                    {
-                        // Second match by ID
-                        CacheEntry = new TrashIdMapping("", "", 1)
-                    }, 102))
+                    // First match by ID
+                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 4)), 100),
+                    // Should NOT match because we do not use names to assign scores
+                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "BR-DISK")), 101),
+                    // Second match by ID
+                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 1)), 102))
             }
         };
 

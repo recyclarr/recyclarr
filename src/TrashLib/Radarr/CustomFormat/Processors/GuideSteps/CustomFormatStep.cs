@@ -1,5 +1,4 @@
 using Common.Extensions;
-using Newtonsoft.Json.Linq;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
@@ -18,8 +17,10 @@ internal class CustomFormatStep : ICustomFormatStep
     public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache => _deletedCustomFormatsInCache;
     public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats => _duplicatedCustomFormats;
 
-    public void Process(IEnumerable<string> customFormatGuideData,
-        IReadOnlyCollection<CustomFormatConfig> config, CustomFormatCache? cache)
+    public void Process(
+        IList<CustomFormatData> customFormatGuideData,
+        IReadOnlyCollection<CustomFormatConfig> config,
+        CustomFormatCache? cache)
     {
         var processedCfs = customFormatGuideData
             .Select(cf => ProcessCustomFormatData(cf, cache))
@@ -94,27 +95,12 @@ internal class CustomFormatStep : ICustomFormatStep
         _processedCustomFormats.RemoveAll(cf => DuplicatedCustomFormats.ContainsKey(cf.Name));
     }
 
-    private static ProcessedCustomFormatData ProcessCustomFormatData(string guideData, CustomFormatCache? cache)
+    private static ProcessedCustomFormatData ProcessCustomFormatData(CustomFormatData cf,
+        CustomFormatCache? cache)
     {
-        var obj = JObject.Parse(guideData);
-        var name = obj.ValueOrThrow<string>("name");
-        var trashId = obj.ValueOrThrow<string>("trash_id");
-        int? finalScore = null;
-
-        if (obj.TryGetValue("trash_score", out var score))
+        return new ProcessedCustomFormatData(cf)
         {
-            finalScore = (int) score;
-            obj.Property("trash_score")?.Remove();
-        }
-
-        // Remove trash_id, it's metadata that is not meant for Radarr itself
-        // Radarr supposedly drops this anyway, but I prefer it to be removed by TrashUpdater
-        obj.Property("trash_id")?.Remove();
-
-        return new ProcessedCustomFormatData(name, trashId, obj)
-        {
-            Score = finalScore,
-            CacheEntry = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == trashId)
+            CacheEntry = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == cf.TrashId)
         };
     }
 

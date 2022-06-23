@@ -1,10 +1,10 @@
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using TrashLib.Radarr.CustomFormat.Api;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Processors.PersistenceSteps;
 
@@ -14,10 +14,7 @@ public class CustomFormatApiPersistenceStepTest
 {
     private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
     {
-        return new ProcessedCustomFormatData(cfName, trashId, new JObject())
-        {
-            CacheEntry = new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId}
-        };
+        return NewCf.Processed(cfName, trashId, new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId});
     }
 
     [Test]

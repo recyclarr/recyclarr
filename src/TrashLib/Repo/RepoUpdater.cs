@@ -54,6 +54,8 @@ public class RepoUpdater : IRepoUpdater
         var cloneUrl = repoSettings.CloneUrl;
         const string branch = "master";
 
+        _log.Debug("Using Branch & Clone URL: {Branch}, {Url}", branch, cloneUrl);
+
         try
         {
             using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath, branch);

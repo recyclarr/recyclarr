@@ -13,6 +13,7 @@ public class RadarrService : ServiceBase<IRadarrCommand>
 {
     private readonly IConfigurationLoader<RadarrConfiguration> _configLoader;
     private readonly Func<ICustomFormatUpdater> _customFormatUpdaterFactory;
+    private readonly ICustomFormatLister _lister;
     private readonly IFileSystem _fs;
     private readonly IAppPaths _paths;
     private readonly ILogger _log;
@@ -23,6 +24,7 @@ public class RadarrService : ServiceBase<IRadarrCommand>
         IConfigurationLoader<RadarrConfiguration> configLoader,
         Func<IRadarrQualityDefinitionUpdater> qualityUpdaterFactory,
         Func<ICustomFormatUpdater> customFormatUpdaterFactory,
+        ICustomFormatLister lister,
         IFileSystem fs,
         IAppPaths paths)
     {
@@ -30,6 +32,7 @@ public class RadarrService : ServiceBase<IRadarrCommand>
         _configLoader = configLoader;
         _qualityUpdaterFactory = qualityUpdaterFactory;
         _customFormatUpdaterFactory = customFormatUpdaterFactory;
+        _lister = lister;
         _fs = fs;
         _paths = paths;
     }
@@ -38,6 +41,12 @@ public class RadarrService : ServiceBase<IRadarrCommand>
 
     protected override async Task Process(IRadarrCommand cmd)
     {
+        if (cmd.ListCustomFormats)
+        {
+            _lister.ListCustomFormats();
+            return;
+        }
+
         foreach (var config in _configLoader.LoadMany(cmd.Config, "radarr"))
         {
             _log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));

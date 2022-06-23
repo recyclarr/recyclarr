@@ -7,19 +7,28 @@ related to that service, such as parsing relevant TRaSH guides and invoking API 
 settings on that instance. As always, the `--help` option may be specified following a subcommand to
 see more information directly in your terminal.
 
-- `sonarr`: Update release profiles and quality definitions on configured Sonarr instances.
-- `radarr`: Update custom formats and quality definitions on configured Radarr instances.
+| Subcommand      | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| `sonarr`        | Update release profiles and quality definitions on configured Sonarr instances. |
+| `radarr`        | Update custom formats and quality definitions on configured Radarr instances.   |
+| `create-config` | Create a starter `recyclarr.yml` config file.                                   |
+| `migrate`       | Perform migration steps that may be needed after upgrades.                      |
 
 ## Common Arguments
 
-These are optional arguments shared by *all* subcommands.
+These are optional arguments shared by *all* service subcommands. At the moment, this includes:
+
+- `radarr`
+- `sonarr`
+
+Other non-service subcommands, like `create-config`, will not accept these arguments.
 
 ### `--config`
 
 One or more paths to YAML configuration files. Only the relevant configuration section for the
 specified subcommand will be read from each file. If this argument is not specified, a single
-default configuration file named `recyclarr.yml` will be used. It must be in the [[application data
-directory|File-Structure]].
+default configuration file named `recyclarr.yml` will be used. It must be in the [application data
+directory][appdata].
 
 **Command Line Examples**:
 
@@ -101,12 +110,12 @@ If you'd like this behavior globally for all commands without having to specify 
 an environment variable named `RECYCLARR_APP_DATA` with the same path. Note that if you have both
 set, `--app-data` always takes precedence.
 
-## Sonarr
+## Subcommand: `sonarr`
 
 ### `--list-release-profiles`
 
 Prints a list of all [available Sonarr Release Profiles][sonarrjson] from the TRaSH Guides in YAML
-format, ready to be copied & pasted directly into your `trash.yml` file. Here is an example of the
+format, ready to be copied & pasted directly into your `recyclarr.yml` file. Here is an example of the
 output you will see:
 
 ```txt
@@ -124,7 +133,7 @@ List of Release Profiles in the TRaSH Guides:
 The above Release Profiles are in YAML format and ready to be copied & pasted under the `trash_ids:` property.
 ```
 
-You can copy & paste these directly into your `trash.yml` like this:
+You can copy & paste these directly into your `recyclarr.yml` like this:
 
 ```yml
 sonarr:
@@ -142,8 +151,8 @@ Prints a list of all terms (that have been assigned their own Trash IDs) for the
 with the specified Trash ID. Use the `--list-release-profiles` option to first get a list of the
 [available Sonarr Release Profiles][sonarrjson] from the TRaSH Guides. Copy one of the Trash ID
 values from there and provide it as the argument to this command to get its list of terms. The terms
-are printed in YAML format, ready to be copied & pasted directly into your `trash.yml` file. Here is
-an example of the output you will see:
+are printed in YAML format, ready to be copied & pasted directly into your `recyclarr.yml` file.
+Here is an example of the output you will see:
 
 ```txt
 ./trash sonarr --list-terms 76e060895c5b8a765c310933da0a5357
@@ -186,3 +195,66 @@ sonarr:
 ```
 
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
+
+## Subcommand: `radarr`
+
+### `--list-custom-formats`
+
+Prints a list of all [available Radarr Custom Formats][radarrjson] from the TRaSH Guides in YAML
+format, ready to be copied & pasted directly into your `recyclarr.yml` file. Here is an example of
+the output you will see:
+
+```txt
+./trash radarr --list-custom-formats
+
+List of Custom Formats in the TRaSH Guides:
+
+          - b124be9b146540f8e62f98fe32e49a2a # 1.0 Mono
+          - 820b09bb9acbfde9c35c71e0e565dad8 # 1080p
+          - 89dac1be53d5268a7e10a19d3c896826 # 2.0 Stereo
+          - fb392fb0d61a010ae38e49ceaa24a1ef # 2160p
+          - 205125755c411c3b8622ca3175d27b37 # 3.0 Sound
+
+The above Custom Formats are in YAML format and ready to be copied & pasted under the `trash_ids:` property.
+```
+
+You can copy & paste these directly into your `recyclarr.yml` like this:
+
+```yml
+radarr:
+  - base_url: http://127.0.0.1:7878
+    api_key: 2424b3643507485ea2e06382d3f0b8a3
+    custom_formats:
+      - trash_ids:
+          - b124be9b146540f8e62f98fe32e49a2a # 1.0 Mono
+          - 820b09bb9acbfde9c35c71e0e565dad8 # 1080p
+```
+
+## Subcommand: `create-config`
+
+Create a starter `recyclarr.yml` config file. The location of this file the [application data
+directory][appdata].
+
+### `--path`
+
+The absolute or relative path to the YAML file you want to create. The contents will be the same,
+the only difference is where the data gets written.
+
+Example:
+
+```sh
+./recyclarr create-config --path ~/myconfig.yml
+```
+
+## Subcommand: `migrate`
+
+Used to perform migration steps that may be needed after upgrades. Visit the [[Migration System]]
+page to read more about it.
+
+### `--debug`
+
+By default, Info, Warning and Error log levels are displayed in the console. This option enables
+Debug level logs to be displayed. This is designed for debugging and development purposes and
+generally will be too noisy for normal program usage.
+
+[appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure

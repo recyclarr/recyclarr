@@ -5,6 +5,7 @@ using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps;
 
@@ -17,14 +18,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "id1", JObject.FromObject(new {name = "name1"}))
-            {
-                Score = 100
-            },
-            new("name3", "id3", JObject.FromObject(new {name = "name3"}))
-            {
-                CacheEntry = new TrashIdMapping("id3", "name1")
-            }
+            NewCf.Processed("name1", "id1", 100),
+            NewCf.Processed("name3", "id3", new TrashIdMapping("id3", "name1"))
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -56,8 +51,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "", new JObject()),
-            new("name2", "", new JObject())
+            NewCf.Processed("name1", ""),
+            NewCf.Processed("name2", "")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -78,7 +73,7 @@ public class ConfigStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "", new JObject())
+                    NewCf.Processed("name1", "")
                 }
             }
         }, op => op
@@ -91,8 +86,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "", new JObject()),
-            new("name2", "", new JObject())
+            NewCf.Processed("name1", ""),
+            NewCf.Processed("name2", "")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -115,7 +110,7 @@ public class ConfigStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    new("name1", "", new JObject())
+                    NewCf.Processed("name1", "")
                 }
             }
         }, op => op
@@ -128,7 +123,7 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "id1", new JObject())
+            NewCf.Processed("name1", "id1")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -158,7 +153,7 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "id1", new JObject())
+            NewCf.Processed("name1", "id1")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -184,12 +179,9 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            new("name1", "id1", JObject.FromObject(new {name = "name1"}))
-            {
-                Score = 100
-            },
-            new("name3", "id3", JObject.FromObject(new {name = "name3"})),
-            new("name4", "id4", new JObject())
+            NewCf.Processed("name1", "id1", 100),
+            NewCf.Processed("name3", "id3"),
+            NewCf.Processed("name4", "id4")
         };
 
         var testConfig = new CustomFormatConfig[]

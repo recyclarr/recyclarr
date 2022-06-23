@@ -8,11 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Radarr: New `--list-custom-formats` CLI option for getting a flat list of all CFs in the guide in
+  YAML format, ready to copy & paste.
+
+## [2.2.1] - 2022-06-18
+
+### Changed
+
+- Radarr: Reword the warning about missing scores for CFs to make it more clear that having no score
+  does not prevent CFs from being synced.
+
 ### Fixed
 
 - Do not exit when a YAML config has no sonarr or radarr section.
 - Sonarr: Invalid release profile JSON files no longer cause the program to exit. Instead, it just
   skips them and prints a warning to the user. (#87)
+- Radarr: Do not crash when `quality_profiles` is empty. (#89)
+- Settings: Use repo URL after initial clone (#90)
 
 ## [2.2.0] - 2022-06-03
 
@@ -346,7 +360,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/recyclarr/recyclarr/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/recyclarr/recyclarr/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/recyclarr/recyclarr/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/recyclarr/recyclarr/compare/v2.1.0...v2.1.1

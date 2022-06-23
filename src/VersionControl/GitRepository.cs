@@ -40,4 +40,9 @@ public sealed class GitRepository : IGitRepository
         var commit = _repo.Value.Branches[toBranch].Tip;
         _repo.Value.Reset(ResetMode.Hard, commit);
     }
+
+    public void SetRemote(string name, string newUrl)
+    {
+        _repo.Value.Network.Remotes.Update(name, updater => updater.Url = newUrl);
+    }
 }

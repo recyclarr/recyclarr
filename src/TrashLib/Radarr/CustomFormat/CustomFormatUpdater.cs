@@ -144,8 +144,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
             foreach (var (cfName, dupes) in _guideProcessor.DuplicatedCustomFormats)
             {
-                Log.Warning("{CfName} is duplicated {DupeTimes} with the following Trash IDs:", cfName,
-                    dupes.Count);
+                Log.Warning("{CfName} is duplicated {DupeTimes} with the following Trash IDs:", cfName, dupes.Count);
                 foreach (var cf in dupes)
                 {
                     Log.Warning(" - {TrashId}", cf.TrashId);
@@ -189,12 +188,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
         if (_guideProcessor.CustomFormatsWithoutScore.Count > 0)
         {
-            Log.Warning("The below custom formats have no score in the guide or YAML " +
-                        "config and will be skipped (remove them from your config or specify a " +
-                        "score to fix this warning)");
+            Log.Information("The below custom formats have no score in the guide or in your YAML config. They will " +
+                            "still be synced to Radarr, but no score will be set in your chosen quality profiles");
             foreach (var tuple in _guideProcessor.CustomFormatsWithoutScore)
             {
-                Log.Warning("{CfList}", tuple);
+                Log.Information("{CfList}", tuple);
             }
 
             Console.WriteLine("");

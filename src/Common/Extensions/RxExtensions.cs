@@ -43,4 +43,11 @@ public static class RxExtensions
             }
         });
     }
+
+    // Borrowed from: https://stackoverflow.com/a/59434717/157971
+    public static IObservable<T> NotNull<T>(this IObservable<T?> observable)
+        where T : class
+    {
+        return observable.Where(x => x is not null).Select(x => x!);
+    }
 }
