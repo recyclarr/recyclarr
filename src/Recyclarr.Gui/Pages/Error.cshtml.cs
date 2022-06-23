@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Diagnostics;
 
 namespace Recyclarr.Gui.Pages
 {
@@ -11,13 +11,6 @@ namespace Recyclarr.Gui.Pages
         public string? RequestId { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-        private readonly ILogger<ErrorModel> _logger;
-
-        public ErrorModel(ILogger<ErrorModel> logger)
-        {
-            _logger = logger;
-        }
 
         public void OnGet()
         {
