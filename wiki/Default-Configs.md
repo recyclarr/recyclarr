@@ -8,6 +8,7 @@ For more details on the configuration, see the Configuration Reference on the wi
 <https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference>
 
 Streaming Optimized Radarr Config
+
 ```
 radarr:
 # Set the URL/API Key to your actual instance
@@ -53,7 +54,9 @@ radarr:
           - 1c7d7b04b15cc53ea61204bebbcc1ee2 # HQ 0
           - 403f3f6266b90439cacc1e07cae4dc2d # HQ-Remux 0
 ```
+
 Hybrid Sonarr Config
+
 ```
 sonarr:
     # Set the URL/API Key to your actual instance
@@ -95,7 +98,9 @@ sonarr:
             - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-
         tags: [tv]
 ```
+
 Anime Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/>
+
 ```
 sonarr:
     # Set the URL/API Key to your actual instance
@@ -117,7 +122,9 @@ sonarr:
           include:
             - cec8880b847dd5d31d29167ee0112b57 # Golden rule
 ```
+
 Standard Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/>
+
 ```
 sonarr:
     # Set the URL/API Key to your actual instance
