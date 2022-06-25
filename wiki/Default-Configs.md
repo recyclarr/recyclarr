@@ -5,7 +5,7 @@ for your environment. You can only have one config applied to a single Sonarr or
 Update the values below as needed for your instances. You will be required to update the API Key
 and URL for each instance you want to use.
 For more details on the configuration, see the Configuration Reference on the wiki here:
-https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
+<https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference>
 
 Streaming Optimized Radarr Config
 ```
@@ -95,7 +95,7 @@ sonarr:
             - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-
         tags: [tv]
 ```
-Anime Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/
+Anime Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/>
 ```
 sonarr:
     # Set the URL/API Key to your actual instance
@@ -117,7 +117,7 @@ sonarr:
           include:
             - cec8880b847dd5d31d29167ee0112b57 # Golden rule
 ```
-Standard Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
+Standard Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/>
 ```
 sonarr:
     # Set the URL/API Key to your actual instance
