@@ -9,7 +9,7 @@ For more details on the configuration, see the Configuration Reference on the wi
 
 Streaming Optimized Radarr Config
 
-```
+```YAML
 radarr:
 # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxxX:7878 #Place your Ronarr Url here
@@ -57,7 +57,7 @@ radarr:
 
 Hybrid Sonarr Config
 
-```
+```YAML
 sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
@@ -101,7 +101,7 @@ sonarr:
 
 Anime Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/>
 
-```
+```YAML
 sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
@@ -125,7 +125,7 @@ sonarr:
 
 Standard Sonarr Config <https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/>
 
-```
+```YAML
 sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
