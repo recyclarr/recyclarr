@@ -73,5 +73,3 @@ Hybrid Sonarr Config
             - 19cd5ecc0a24bf493a75e80a51974cdd # Dislike retagged groups
             - 6a7b462c6caee4a991a9d8aa38ce2405 # Dislike release ending: en
             - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-```
-            
-            
