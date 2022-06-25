@@ -1,7 +1,11 @@
 ###### Default Recyclarr Configs
 
-The following configs are starter configs to use with Recyclarr. You can use each section as needed for your environment. You can only have one config applied to a single Sonarr or Radarr Instance. Update the values below as needed for your instances. You will be required to update the API Key and URL for each instance you want to use.
-For more details on the configuration, see the Configuration Reference on the wiki here: https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
+The following configs are starter configs to use with Recyclarr. You can use each section as needed
+for your environment. You can only have one config applied to a single Sonarr or Radarr Instance.
+Update the values below as needed for your instances. You will be required to update the API Key
+and URL for each instance you want to use.
+For more details on the configuration, see the Configuration Reference on the wiki here:
+https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
 
 Streaming Optimized Radarr Config
 ```
