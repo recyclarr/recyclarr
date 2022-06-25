@@ -16,9 +16,7 @@ Streaming Optimized
           - 26fa26253af4001701fedb56cec376dc # HQ-WEBDL
 #Misc
           - e7718d7a3ce595f289bfee26adc178f5 # Repack/Proper
-          - 9170d55c319f4fe40da8711ba9d8050d # x265
-          - 2899d84dc9372de3408e6d8cc18e9666 # x264
-          - 0d91270a7255a1e388fa85e959f359d8 # FreeLeech
+          - 0d91270a7255a1e388fa85e959f359d8 # FreeLeech (use if you want to prefer FreeLeech in a tie breaker situation)
           - 4a3b087eea2ce012fcc1ce319259a3be #Anime Dual Audio (If using anime in a hybrid instance tags should be used)
 #Streaming Services
           - b3b3a6ac74ecbd56bcdbefa4799fb9df #Amazon
