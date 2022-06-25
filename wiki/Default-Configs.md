@@ -96,7 +96,7 @@ Anime Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegE
     api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
     # Quality definitions from the guide to sync to Sonarr. Choice: anime, series, hybrid
-    quality_definition: hybrid
+    quality_definition: anime
 
     # Release profiles from the guide to sync to Sonarr.
     # You can optionally add tags and make negative scores strictly ignored
