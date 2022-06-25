@@ -1,11 +1,8 @@
 Streaming Optimized 
-
-
-
 ```radarr:
 # Set the URL/API Key to your actual instance
-  - base_url: http://192.168.1.X:7878/radarr
-    api_key:
+  - base_url: http://xxx.xxx.xxx.xxxX:7878 #Place your Ronarr Url here
+    api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     quality_definition:
       type: movie
     # Custom Format Settings
@@ -42,4 +39,39 @@ Streaming Optimized
             reset_unmatched_scores: true
       - trash_ids:
           - 1c7d7b04b15cc53ea61204bebbcc1ee2 # HQ 0
-          - 403f3f6266b90439cacc1e07cae4dc2d # HQ-Remux 0```
+          - 403f3f6266b90439cacc1e07cae4dc2d # HQ-Remux 0
+```
+Hybrid Sonarr Config
+```sonarr:
+    # Set the URL/API Key to your actual instance
+  - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
+    api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    # Quality definitions from the guide to sync to Sonarr. Choice: anime, series, hybrid
+    quality_definition: hybrid
+
+    # Release profiles from the guide to sync to Sonarr.
+    # You can optionally add tags and make negative scores strictly ignored
+    release_profiles:
+      # Series
+      - trash_ids:
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
+          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
+          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
+          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
+          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
+      - trash_ids: [76e060895c5b8a765c310933da0a5357] # Optionals
+        filter:
+          include:
+            - cec8880b847dd5d31d29167ee0112b57 # Golden rule
+            - f3f0f3691c6a1988d4a02963e69d11f2 # Ignore The Group -SCENE
+            - 436f5a7d08fbf02ba25cb5e5dfe98e55 # Ignore Dolby Vision without HDR10 fallback.
+            - 6f2aefa61342a63387f2a90489e90790 # Dislike retags: rartv, rarbg, eztv, TGx
+            - 19cd5ecc0a24bf493a75e80a51974cdd # Dislike retagged groups
+            - 6a7b462c6caee4a991a9d8aa38ce2405 # Dislike release ending: en
+            - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-```
+            
+            
