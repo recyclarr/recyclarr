@@ -4,7 +4,8 @@ The following configs are starter configs to use with Recyclarr. You can use eac
 For more details on the configuration, see the Configuration Reference on the wiki here: https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
 
 Streaming Optimized Radarr Config
-```radarr:
+```
+radarr:
 # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxxX:7878 #Place your Ronarr Url here
     api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -49,7 +50,8 @@ Streaming Optimized Radarr Config
           - 403f3f6266b90439cacc1e07cae4dc2d # HQ-Remux 0
 ```
 Hybrid Sonarr Config
-```sonarr:
+```
+sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
     api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -90,7 +92,8 @@ Hybrid Sonarr Config
         tags: [tv]
 ```
 Anime Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx-Anime/
-```sonarr:
+```
+sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
     api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -111,7 +114,8 @@ Anime Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegE
             - cec8880b847dd5d31d29167ee0112b57 # Golden rule
 ```
 Standard Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
-``````sonarr:
+```
+sonarr:
     # Set the URL/API Key to your actual instance
   - base_url: http://xxx.xxx.xxx.xxx:8989 #Place your Sonarr Url here
     api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -139,4 +143,5 @@ Standard Sonarr Config https://trash-guides.info/Sonarr/Sonarr-Release-Profile-R
             - 6f2aefa61342a63387f2a90489e90790 # Dislike retags: rartv, rarbg, eztv, TGx
             - 19cd5ecc0a24bf493a75e80a51974cdd # Dislike retagged groups
             - 6a7b462c6caee4a991a9d8aa38ce2405 # Dislike release ending: en
-            - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-```
+            - 236a3626a07cacf5692c73cc947bc280 # Dislike release containing: 1-
+```
