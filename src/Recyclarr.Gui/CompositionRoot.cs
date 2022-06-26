@@ -8,6 +8,13 @@ namespace Recyclarr.Gui;
 
 public static class CompositionRoot
 {
+    public static IContainer Setup()
+    {
+        var builder = new ContainerBuilder();
+        Setup(builder);
+        return builder.Build();
+    }
+
     public static void Setup(ContainerBuilder builder)
     {
         builder.RegisterLogger();

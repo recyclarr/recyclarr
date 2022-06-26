@@ -2,13 +2,12 @@ using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Common.Extensions;
+using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Startup;
 
 namespace TrashLib.Radarr.CustomFormat.Guide;
 
-public record CustomFormatGroupItem(string Name, string Anchor);
-
-public class CustomFormatGroupParser
+public class CustomFormatGroupParser : ICustomFormatGroupParser
 {
     private readonly IAppPaths _paths;
     private static readonly Regex TableRegex = new(@"^\s*\|(.*)\|\s*$");
