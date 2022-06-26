@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Common;
 using LibGit2Sharp;
 using Serilog;
@@ -28,7 +29,7 @@ public class RepoUpdater : IRepoUpdater
         _settingsProvider = settingsProvider;
     }
 
-    public string RepoPath => _paths.RepoDirectory;
+    public IDirectoryInfo RepoPath => _paths.RepoDirectory;
 
     public void UpdateRepo()
     {
@@ -38,7 +39,7 @@ public class RepoUpdater : IRepoUpdater
         if (exception is not null)
         {
             _log.Information("Deleting local git repo and retrying git operation...");
-            _fileUtils.DeleteReadOnlyDirectory(RepoPath);
+            _fileUtils.DeleteReadOnlyDirectory(RepoPath.FullName);
 
             exception = CheckoutAndUpdateRepo();
             if (exception is not null)
@@ -58,7 +59,7 @@ public class RepoUpdater : IRepoUpdater
 
         try
         {
-            using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath, branch);
+            using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
             repo.ForceCheckout(branch);
             repo.Fetch();
             repo.ResetHard($"origin/{branch}");

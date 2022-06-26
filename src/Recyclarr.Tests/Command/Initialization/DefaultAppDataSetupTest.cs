@@ -7,9 +7,7 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command.Initialization;
-using TestLibrary;
 using TestLibrary.AutoFixture;
-using TrashLib;
 
 namespace Recyclarr.Tests.Command.Initialization;
 
@@ -21,55 +19,71 @@ public class DefaultAppDataSetupTest
     public void Initialize_using_default_path(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
-        [Frozen] IAppPaths paths,
         DefaultAppDataSetup sut)
     {
         env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
 
-        paths.DefaultAppDataDirectoryName.Returns("app_data");
-        env.GetFolderPath(Arg.Any<Environment.SpecialFolder>(), Arg.Any<Environment.SpecialFolderOption>())
-            .Returns(FileUtils.NormalizePath("base/path"));
+        var basePath = fs.CurrentDirectory()
+            .SubDirectory("base")
+            .SubDirectory("path");
 
-        sut.SetupDefaultPath(null, false);
+        env.GetFolderPath(default, default).ReturnsForAnyArgs(basePath.FullName);
 
-        paths.Received().SetAppDataPath(FileUtils.NormalizePath("base/path/app_data"));
+        var paths = sut.CreateAppPaths();
+
+        paths.AppDataDirectory.FullName.Should().Be(basePath.SubDirectory("recyclarr").FullName);
     }
 
     [Test, AutoMockData]
     public void Initialize_using_path_override(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths paths,
         DefaultAppDataSetup sut)
     {
-        var overridePath = FileUtils.NormalizePath("/override/path");
-        sut.SetupDefaultPath(overridePath, false);
+        var overridePath = fs.CurrentDirectory()
+            .SubDirectory("override")
+            .SubDirectory("path");
 
-        paths.Received().SetAppDataPath(overridePath);
-        fs.AllDirectories.Should().Contain(overridePath);
+        var paths = sut.CreateAppPaths(overridePath.FullName);
+
+        paths.AppDataDirectory.FullName.Should().Be(overridePath.FullName);
     }
 
     [Test, AutoMockData]
     public void Force_creation_uses_correct_behavior_when_disabled(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
         DefaultAppDataSetup sut)
     {
-        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        var overridePath = fs.CurrentDirectory()
+            .SubDirectory("override")
+            .SubDirectory("path");
 
-        sut.SetupDefaultPath(null, false);
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        env.GetFolderPath(default).ReturnsForAnyArgs(overridePath.FullName);
+
+        sut.CreateAppPaths(null, false);
 
         env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.None);
+        fs.AllDirectories.Should().NotContain(overridePath.FullName);
     }
 
     [Test, AutoMockData]
     public void Force_creation_uses_correct_behavior_when_enabled(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
         DefaultAppDataSetup sut)
     {
-        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        var overridePath = fs.CurrentDirectory()
+            .SubDirectory("override")
+            .SubDirectory("path");
 
-        sut.SetupDefaultPath(null, true);
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        env.GetFolderPath(default).ReturnsForAnyArgs(overridePath.FullName);
+
+        sut.CreateAppPaths();
 
         env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
+        fs.AllDirectories.Should().NotContain(overridePath.FullName);
     }
 
     [Test, AutoMockData]
@@ -85,7 +99,7 @@ public class DefaultAppDataSetupTest
 
         env.GetEnvironmentVariable(default!).ReturnsForAnyArgs(expectedPath);
 
-        sut.SetupDefaultPath(null, true);
+        sut.CreateAppPaths();
 
         env.Received().GetEnvironmentVariable("RECYCLARR_APP_DATA");
         fs.AllDirectories.Should().Contain(expectedPath);
@@ -102,7 +116,7 @@ public class DefaultAppDataSetupTest
             .SubDirectory("var")
             .SubDirectory("path").FullName;
 
-        sut.SetupDefaultPath(expectedPath, true);
+        sut.CreateAppPaths(expectedPath);
 
         env.DidNotReceiveWithAnyArgs().GetEnvironmentVariable(default!);
         fs.AllDirectories.Should().Contain(expectedPath);

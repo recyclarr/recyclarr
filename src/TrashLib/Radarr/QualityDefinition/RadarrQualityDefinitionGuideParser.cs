@@ -6,22 +6,20 @@ namespace TrashLib.Radarr.QualityDefinition;
 
 internal class RadarrQualityDefinitionGuideParser : IRadarrQualityDefinitionGuideParser
 {
-    private readonly IFileSystem _fs;
     private readonly IAppPaths _paths;
     private readonly Regex _regexHeader = new(@"^#+", RegexOptions.Compiled);
 
     private readonly Regex _regexTableRow =
         new(@"\| *(.*?) *\| *([\d.]+) *\| *([\d.]+) *\|", RegexOptions.Compiled);
 
-    public RadarrQualityDefinitionGuideParser(IFileSystem fs, IAppPaths paths)
+    public RadarrQualityDefinitionGuideParser(IAppPaths paths)
     {
-        _fs = fs;
         _paths = paths;
     }
 
     public async Task<string> GetMarkdownData()
     {
-        var repoDir = _fs.DirectoryInfo.FromDirectoryName(_paths.RepoDirectory);
+        var repoDir = _paths.RepoDirectory;
         var file = repoDir
             .SubDirectory("docs")
             .SubDirectory("Radarr")

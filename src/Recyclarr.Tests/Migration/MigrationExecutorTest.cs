@@ -1,4 +1,3 @@
-using Autofac;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
@@ -15,7 +14,7 @@ public class MigrationExecutorTest
     [Test]
     public void Migration_steps_are_in_expected_order()
     {
-        var container = CompositionRoot.Setup();
+        var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default);
         var steps = container.Resolve<IEnumerable<IMigrationStep>>();
         var orderedSteps = steps.OrderBy(x => x.Order).Select(x => x.GetType()).ToList();
         orderedSteps.Should().BeEquivalentTo(

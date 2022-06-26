@@ -11,20 +11,18 @@ namespace TrashLib.Radarr.CustomFormat.Guide;
 
 public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
 {
-    private readonly IFileSystem _fs;
     private readonly IAppPaths _paths;
     private readonly ILogger _log;
 
-    public LocalRepoCustomFormatJsonParser(IFileSystem fs, IAppPaths paths, ILogger log)
+    public LocalRepoCustomFormatJsonParser(IAppPaths paths, ILogger log)
     {
-        _fs = fs;
         _paths = paths;
         _log = log;
     }
 
     public IEnumerable<CustomFormatData> GetCustomFormatData()
     {
-        var jsonDir = _fs.DirectoryInfo.FromDirectoryName(_paths.RepoDirectory)
+        var jsonDir = _paths.RepoDirectory
             .SubDirectory("docs")
             .SubDirectory("json")
             .SubDirectory("radarr");

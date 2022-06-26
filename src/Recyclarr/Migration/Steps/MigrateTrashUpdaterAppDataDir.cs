@@ -13,34 +13,44 @@ namespace Recyclarr.Migration.Steps;
 public class MigrateTrashUpdaterAppDataDir : IMigrationStep
 {
     private readonly IFileSystem _fs;
-    private readonly Lazy<string> _newPath, _oldPath;
+    private readonly IAppPaths _paths;
 
     public int Order => 20;
     public bool Required => true;
 
     public string Description
-        => $"Merge files from old app data directory `{GetOldPath()}` into `{GetNewPath()}` and delete old directory";
+        => $"Merge files from old app data directory `{OldPath}` into `{NewPath}` and delete old directory";
 
     public IReadOnlyCollection<string> Remediation => new[]
     {
-        $"Check if `{GetNewPath()}` already exists. If so, manually copy all files from `{GetOldPath()}` and delete it to fix the error.",
-        $"Ensure Recyclarr has permission to recursively delete {GetOldPath()}",
-        $"Ensure Recyclarr has permission to create and move files into {GetNewPath()}"
+        $"Check if `{NewPath}` already exists. If so, manually copy all files from `{OldPath}` and delete it to fix the error.",
+        $"Ensure Recyclarr has permission to recursively delete {OldPath}",
+        $"Ensure Recyclarr has permission to create and move files into {NewPath}"
     };
-
-    private string GetNewPath() => _newPath.Value;
-    private string GetOldPath() => _oldPath.Value;
 
     public MigrateTrashUpdaterAppDataDir(IFileSystem fs, IAppPaths paths)
     {
         _fs = fs;
-
-        // Will be something like `/home/user/.config/recyclarr`.
-        _newPath = new Lazy<string>(paths.GetAppDataPath);
-        _oldPath = new Lazy<string>(() => _fs.Path.Combine(_fs.Path.GetDirectoryName(GetNewPath()), "trash-updater"));
+        _paths = paths;
     }
 
-    public bool CheckIfNeeded() => _fs.Directory.Exists(GetOldPath());
+    public IDirectoryInfo NewPath
+    {
+        get
+        {
+            // Will be something like `/home/user/.config/recyclarr`.
+            var path = _paths.AppDataDirectory;
+            path.Refresh();
+            return path;
+        }
+    }
+
+    public IDirectoryInfo OldPath => NewPath.Parent.SubDirectory("trash-updater");
+
+    public bool CheckIfNeeded()
+    {
+        return OldPath.Exists;
+    }
 
     public void Execute(IConsole? console)
     {
@@ -48,31 +58,30 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
         MoveFile("recyclarr.yml");
         MoveFile("settings.yml");
 
-        var oldDir = _fs.DirectoryInfo.FromDirectoryName(GetOldPath());
-        if (oldDir.Exists)
+        if (OldPath.Exists)
         {
-            oldDir.Delete(true);
+            OldPath.Delete(true);
         }
     }
 
     private void MoveDirectory(string directory, IConsole? console)
     {
-        var oldPath = _fs.Path.Combine(GetOldPath(), directory);
-        if (_fs.Directory.Exists(oldPath))
+        var oldPath = OldPath.SubDirectory(directory);
+        if (oldPath.Exists)
         {
             _fs.MergeDirectory(
                 oldPath,
-                _fs.Path.Combine(GetNewPath(), directory),
+                NewPath.SubDirectory(directory),
                 console);
         }
     }
 
     private void MoveFile(string file)
     {
-        var recyclarrYaml = _fs.FileInfo.FromFileName(_fs.Path.Combine(GetOldPath(), file));
+        var recyclarrYaml = OldPath.File(file);
         if (recyclarrYaml.Exists)
         {
-            recyclarrYaml.MoveTo(_fs.Path.Combine(GetNewPath(), file));
+            recyclarrYaml.MoveTo(NewPath.File(file).FullName);
         }
     }
 }

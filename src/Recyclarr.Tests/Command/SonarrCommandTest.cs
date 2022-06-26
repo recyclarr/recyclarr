@@ -1,45 +1,45 @@
 using AutoFixture.NUnit3;
 using CliFx.Exceptions;
+using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
-using Recyclarr.Command.Services;
 using TestLibrary.AutoFixture;
 using TrashLib.Sonarr;
 
-namespace Recyclarr.Tests.Command.Services;
+namespace Recyclarr.Tests.Command;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
-public class SonarrServiceTest
+// Cannot be parallelized due to static CompositionRoot property
+public class SonarrCommandTest
 {
     [Test, AutoMockData]
     public async Task List_terms_without_value_fails(
-        [Frozen] ISonarrCommand cmd,
-        SonarrService sut)
+        IConsole console,
+        SonarrCommand sut)
     {
-        cmd.ListReleaseProfiles.Returns(false);
+        sut.ListReleaseProfiles = false;
 
         // When `--list-terms` is specified on the command line without a value, it gets a `null` value assigned.
-        cmd.ListTerms.Returns((string?) null);
+        sut.ListTerms = null;
 
-        var act = () => sut.Execute(cmd);
+        var act = async () => await sut.ExecuteAsync(console);
 
         await act.Should().ThrowAsync<CommandException>();
     }
 
     [Test, AutoMockData]
     public async Task List_terms_with_empty_value_fails(
-        [Frozen] ISonarrCommand cmd,
-        SonarrService sut)
+        IConsole console,
+        SonarrCommand sut)
     {
-        cmd.ListReleaseProfiles.Returns(false);
+        sut.ListReleaseProfiles = false;
 
         // If the user specifies a blank string as the value, it should still fail.
-        cmd.ListTerms.Returns("");
+        sut.ListTerms = "";
 
-        var act = () => sut.Execute(cmd);
+        var act = async () => await sut.ExecuteAsync(console);
 
         await act.Should().ThrowAsync<CommandException>();
     }
@@ -47,14 +47,16 @@ public class SonarrServiceTest
     [Test, AutoMockData]
     public async Task List_terms_uses_specified_trash_id(
         [Frozen] IReleaseProfileLister lister,
-        [Frozen] ISonarrCommand cmd,
-        SonarrService sut)
+        IConsole console,
+        ICompositionRoot compositionRoot,
+        SonarrCommand sut)
     {
-        cmd.ListReleaseProfiles.Returns(false);
+        BaseCommand.CompositionRoot = compositionRoot;
+        sut.ListReleaseProfiles = false;
 
-        cmd.ListTerms.Returns("some_id");
+        sut.ListTerms = "some_id";
 
-        await sut.Execute(cmd);
+        await sut.ExecuteAsync(console);
 
         lister.Received().ListTerms("some_id");
     }
@@ -62,13 +64,16 @@ public class SonarrServiceTest
     [Test, AutoMockData]
     public async Task List_release_profiles_is_invoked(
         [Frozen] IReleaseProfileLister lister,
-        [Frozen] ISonarrCommand cmd,
-        SonarrService sut)
+        IConsole console,
+        ICompositionRoot compositionRoot,
+        SonarrCommand sut)
     {
-        cmd.ListReleaseProfiles.Returns(true);
-        cmd.ListTerms.Returns((string?) null);
+        BaseCommand.CompositionRoot = compositionRoot;
 
-        await sut.Execute(cmd);
+        sut.ListReleaseProfiles = true;
+        sut.ListTerms = null;
+
+        await sut.ExecuteAsync(console);
 
         lister.Received().ListReleaseProfiles();
     }

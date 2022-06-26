@@ -2,7 +2,9 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Core;
+using CliFx.Infrastructure;
 using FluentAssertions;
+using NSubstitute;
 using NUnit.Framework;
 using VersionControl;
 
@@ -33,7 +35,7 @@ public class CompositionRootTest
     {
         var act = () =>
         {
-            using var container = CompositionRoot.Setup();
+            using var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
             service.Instantiate(container);
         };
 
@@ -47,11 +49,11 @@ public class CompositionRootTest
     )]
     private sealed class ConcreteTypeEnumerator : IEnumerable
     {
-        private readonly IContainer _container;
+        private readonly ILifetimeScope _container;
 
         public ConcreteTypeEnumerator()
         {
-            _container = CompositionRoot.Setup();
+            _container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
         }
 
         public IEnumerator GetEnumerator()
@@ -70,7 +72,7 @@ public class CompositionRootTest
     [TestCaseSource(typeof(ConcreteTypeEnumerator))]
     public void Service_should_be_instantiable(Type service)
     {
-        using var container = CompositionRoot.Setup();
+        using var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
         container.Invoking(c => c.Resolve(service))
             .Should().NotThrow()
             .And.NotBeNull();

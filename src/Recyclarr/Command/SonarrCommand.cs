@@ -1,19 +1,20 @@
-using System.IO.Abstractions;
 using CliFx.Attributes;
+using CliFx.Exceptions;
 using JetBrains.Annotations;
-using Recyclarr.Command.Initialization;
-using Recyclarr.Command.Services;
-using TrashLib;
+using Recyclarr.Config;
+using Serilog;
+using TrashLib.Extensions;
+using TrashLib.Sonarr;
+using TrashLib.Sonarr.Config;
+using TrashLib.Sonarr.QualityDefinition;
+using TrashLib.Sonarr.ReleaseProfile;
 
 namespace Recyclarr.Command;
 
 [Command("sonarr", Description = "Perform operations on a Sonarr instance")]
 [UsedImplicitly]
-public class SonarrCommand : ServiceCommand, ISonarrCommand
+public class SonarrCommand : ServiceCommand
 {
-    private readonly Lazy<SonarrService> _service;
-    private readonly string? _cacheStoragePath;
-
     [CommandOption("list-release-profiles", Description =
         "List available release profiles from the guide in YAML format.")]
     public bool ListReleaseProfiles { get; [UsedImplicitly] set; }
@@ -25,26 +26,52 @@ public class SonarrCommand : ServiceCommand, ISonarrCommand
         "Note that not every release profile has terms that may be filtered.")]
     public string? ListTerms { get; [UsedImplicitly] set; } = "empty";
 
-    public sealed override string CacheStoragePath
-    {
-        get => _cacheStoragePath ?? _service.Value.DefaultCacheStoragePath;
-        protected init => _cacheStoragePath = value;
-    }
-
     public override string Name => "Sonarr";
 
-    public SonarrCommand(
-        IServiceInitializationAndCleanup init,
-        Lazy<SonarrService> service,
-        IFileSystem fs,
-        IAppPaths paths)
-        : base(init)
+    public override async Task Process(IServiceLocatorProxy container)
     {
-        _service = service;
-    }
+        await base.Process(container);
 
-    protected override async Task Process()
-    {
-        await _service.Value.Execute(this);
+        var lister = container.Resolve<IReleaseProfileLister>();
+        var profileUpdaterFactory = container.Resolve<Func<IReleaseProfileUpdater>>();
+        var qualityUpdaterFactory = container.Resolve<Func<ISonarrQualityDefinitionUpdater>>();
+        var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
+        var log = container.Resolve<ILogger>();
+
+        if (ListReleaseProfiles)
+        {
+            lister.ListReleaseProfiles();
+            return;
+        }
+
+        if (ListTerms != "empty")
+        {
+            if (!string.IsNullOrEmpty(ListTerms))
+            {
+                lister.ListTerms(ListTerms);
+            }
+            else
+            {
+                throw new CommandException(
+                    "The --list-terms option was specified without a Release Profile Trash ID specified");
+            }
+
+            return;
+        }
+
+        foreach (var config in configLoader.LoadMany(Config, "sonarr"))
+        {
+            log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
+
+            if (config.ReleaseProfiles.Count > 0)
+            {
+                await profileUpdaterFactory().Process(Preview, config);
+            }
+
+            if (config.QualityDefinition.HasValue)
+            {
+                await qualityUpdaterFactory().Process(Preview, config);
+            }
+        }
     }
 }

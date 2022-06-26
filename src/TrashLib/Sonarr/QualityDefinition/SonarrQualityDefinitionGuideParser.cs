@@ -11,18 +11,16 @@ internal class SonarrQualityDefinitionGuideParser : ISonarrQualityDefinitionGuid
     private readonly Regex _regexTableRow =
         new(@"\| *(.*?) *\| *([\d.]+) *\| *([\d.]+) *\|", RegexOptions.Compiled);
 
-    private readonly IFileSystem _fs;
     private readonly IAppPaths _paths;
 
-    public SonarrQualityDefinitionGuideParser(IFileSystem fs, IAppPaths paths)
+    public SonarrQualityDefinitionGuideParser(IAppPaths paths)
     {
-        _fs = fs;
         _paths = paths;
     }
 
     public async Task<string> GetMarkdownData()
     {
-        var repoDir = _fs.DirectoryInfo.FromDirectoryName(_paths.RepoDirectory);
+        var repoDir = _paths.RepoDirectory;
         var file = repoDir
             .SubDirectory("docs")
             .SubDirectory("Sonarr")

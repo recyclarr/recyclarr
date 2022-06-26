@@ -12,10 +12,9 @@ public static class NSubstituteFixture
             OmitAutoProperties = true
         };
 
-        fixture.Customize(new AutoNSubstituteCustomization
-        {
-            ConfigureMembers = true
-        });
+        fixture
+            .Customize(new AutoNSubstituteCustomization {ConfigureMembers = true})
+            .Customize(new MockFileSystemSpecimenBuilder());
 
         return fixture;
     }

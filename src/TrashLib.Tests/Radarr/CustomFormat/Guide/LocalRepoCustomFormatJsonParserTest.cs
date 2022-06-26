@@ -1,10 +1,9 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.TestLibrary;
@@ -17,16 +16,15 @@ public class LocalRepoCustomFormatJsonParserTest
 {
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
-        [Frozen] IAppPaths paths,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         LocalRepoCustomFormatJsonParser sut)
     {
-        var jsonDir = fs.CurrentDirectory()
+        var jsonDir = paths.RepoDirectory
             .SubDirectory("docs")
             .SubDirectory("json")
             .SubDirectory("radarr");
 
-        paths.RepoDirectory.Returns(fs.CurrentDirectory().FullName);
         fs.AddFile(jsonDir.File("first.json").FullName, new MockFileData("{'name':'first','trash_id':'1'}"));
         fs.AddFile(jsonDir.File("second.json").FullName, new MockFileData("{'name':'second','trash_id':'2'}"));
 

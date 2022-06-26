@@ -1,7 +1,9 @@
+using System.IO.Abstractions;
+
 namespace TrashLib.Repo;
 
 public interface IRepoUpdater
 {
-    string RepoPath { get; }
+    IDirectoryInfo RepoPath { get; }
     void UpdateRepo();
 }

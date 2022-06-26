@@ -57,7 +57,9 @@ public class FileSystemExtensionsTest
 
         var fs = NewMockFileSystem(files, dirs, @"C:\root\path");
 
-        fs.MergeDirectory("path1", "path2");
+        fs.MergeDirectory(
+            fs.DirectoryInfo.FromDirectoryName("path1"),
+            fs.DirectoryInfo.FromDirectoryName("path2"));
 
         fs.AllDirectories.Select(MockUnixSupport.Path).Should()
             .NotContain(x => x.Contains("path1") || x.Contains("empty"));
@@ -77,7 +79,9 @@ public class FileSystemExtensionsTest
 
         var fs = NewMockFileSystem(files, @"C:\root\path");
 
-        var act = () => fs.MergeDirectory("path1", "path2");
+        var act = () => fs.MergeDirectory(
+            fs.DirectoryInfo.FromDirectoryName("path1"),
+            fs.DirectoryInfo.FromDirectoryName("path2"));
 
         act.Should().Throw<IOException>();
     }
@@ -97,7 +101,9 @@ public class FileSystemExtensionsTest
 
         var fs = NewMockFileSystem(files, dirs, @"C:\root\path");
 
-        var act = () => fs.MergeDirectory("path1", "path2");
+        var act = () => fs.MergeDirectory(
+            fs.DirectoryInfo.FromDirectoryName("path1"),
+            fs.DirectoryInfo.FromDirectoryName("path2"));
 
         act.Should().Throw<IOException>();
     }

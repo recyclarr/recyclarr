@@ -20,12 +20,13 @@ public class ConfigurationFinder : IConfigurationFinder
         _fs = fs;
     }
 
-    public string FindConfigPath()
+    public IFileInfo FindConfigPath()
     {
         var newPath = _paths.ConfigPath;
-        var oldPath = _fs.Path.Combine(_appContext.BaseDirectory, _paths.DefaultConfigFilename);
+        var oldPath = _fs.DirectoryInfo.FromDirectoryName(_appContext.BaseDirectory)
+            .File(AppPaths.DefaultConfigFilename);
 
-        if (!_fs.File.Exists(oldPath))
+        if (!oldPath.Exists)
         {
             return newPath;
         }

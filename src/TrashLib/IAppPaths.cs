@@ -1,15 +1,13 @@
+using System.IO.Abstractions;
+
 namespace TrashLib;
 
 public interface IAppPaths
 {
-    void SetAppDataPath(string path);
-    string GetAppDataPath();
-    string ConfigPath { get; }
-    string SettingsPath { get; }
-    string LogDirectory { get; }
-    string RepoDirectory { get; }
-    string CacheDirectory { get; }
-    string DefaultConfigFilename { get; }
-    bool IsAppDataPathValid { get; }
-    string DefaultAppDataDirectoryName { get; }
+    IDirectoryInfo AppDataDirectory { get; }
+    IFileInfo ConfigPath { get; }
+    IFileInfo SettingsPath { get; }
+    IDirectoryInfo LogDirectory { get; }
+    IDirectoryInfo RepoDirectory { get; }
+    IDirectoryInfo CacheDirectory { get; }
 }

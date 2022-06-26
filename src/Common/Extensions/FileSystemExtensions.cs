@@ -6,14 +6,12 @@ namespace Common.Extensions;
 
 public static class FileSystemExtensions
 {
-    public static void MergeDirectory(this IFileSystem fs, string targetDir, string destDir, IConsole? console = null)
+    public static void MergeDirectory(this IFileSystem fs, IDirectoryInfo targetDir, IDirectoryInfo destDir,
+        IConsole? console = null)
     {
-        targetDir = fs.Path.GetFullPath(targetDir);
-        destDir = fs.Path.GetFullPath(destDir);
-
-        var directories = fs.DirectoryInfo.FromDirectoryName(targetDir)
+        var directories = targetDir
             .EnumerateDirectories("*", SearchOption.AllDirectories)
-            .Append(fs.DirectoryInfo.FromDirectoryName(targetDir))
+            .Append(targetDir)
             .OrderByDescending(x => x.FullName.Count(y => y is '/' or '\\'));
 
         foreach (var dir in directories)
@@ -23,7 +21,7 @@ public static class FileSystemExtensions
             // Is it a symbolic link?
             if ((dir.Attributes & FileAttributes.ReparsePoint) != 0)
             {
-                var newPath = RelocatePath(dir.FullName, targetDir, destDir);
+                var newPath = RelocatePath(dir.FullName, targetDir.FullName, destDir.FullName);
                 fs.Directory.CreateDirectory(fs.Path.GetDirectoryName(newPath));
                 console?.Output.WriteLine($" - Symlink:  {dir.FullName} :: TO :: {newPath}");
                 dir.MoveTo(newPath);
@@ -33,7 +31,7 @@ public static class FileSystemExtensions
             // For real directories, move all the files inside
             foreach (var file in dir.EnumerateFiles())
             {
-                var newPath = RelocatePath(file.FullName, targetDir, destDir);
+                var newPath = RelocatePath(file.FullName, targetDir.FullName, destDir.FullName);
                 fs.Directory.CreateDirectory(fs.Path.GetDirectoryName(newPath));
                 console?.Output.WriteLine($" - Moving:   {file.FullName} :: TO :: {newPath}");
                 file.MoveTo(newPath);

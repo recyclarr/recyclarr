@@ -25,7 +25,6 @@
     <PackageReference Update="morelinq" Version="3.*" />
     <PackageReference Update="Newtonsoft.Json" Version="13.*" />
     <PackageReference Update="Newtonsoft.Json.Schema" Version="3.*" />
-    <PackageReference Update="NSubstitute" Version="4.*" />
     <PackageReference Update="NSubstitute.Analyzers.CSharp" Version="1.*" />
     <PackageReference Update="NUnit" Version="3.*" />
     <PackageReference Update="NUnit.Analyzers" Version="3.*" />
@@ -41,6 +40,15 @@
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="TestableIO.System.IO.Abstractions.Extensions" Version="1.*" />
     <PackageReference Update="YamlDotNet" Version="11.*" />
+
+    <!--
+    Cannot upgrade until these are resolved:
+    - https://github.com/nsubstitute/NSubstitute/pull/683
+    - https://github.com/nsubstitute/NSubstitute/issues/685
+    - https://github.com/MRCollective/AutofacContrib.NSubstitute/issues/65
+    -->
+    <PackageReference Update="NSubstitute" Version="4.2.2" />
+
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">

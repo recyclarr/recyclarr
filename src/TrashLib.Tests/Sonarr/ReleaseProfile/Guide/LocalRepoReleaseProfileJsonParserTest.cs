@@ -1,11 +1,10 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using Newtonsoft.Json;
-using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.TestLibrary;
 using TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Sonarr.ReleaseProfile;
@@ -19,8 +18,8 @@ public class LocalRepoReleaseProfileJsonParserTest
 {
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
-        [Frozen] IAppPaths paths,
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fileSystem,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         LocalRepoReleaseProfileJsonParser sut)
     {
         static ReleaseProfileData MakeMockObject(string term) => new()
@@ -39,9 +38,13 @@ public class LocalRepoReleaseProfileJsonParserTest
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");
 
-        paths.RepoDirectory.Returns("");
-        fileSystem.AddFile("docs/json/sonarr/first.json", MockFileData(mockData1));
-        fileSystem.AddFile("docs/json/sonarr/second.json", MockFileData(mockData2));
+        var baseDir = paths.RepoDirectory
+            .SubDirectory("docs")
+            .SubDirectory("json")
+            .SubDirectory("sonarr");
+
+        fs.AddFile(baseDir.File("first.json").FullName, MockFileData(mockData1));
+        fs.AddFile(baseDir.File("second.json").FullName, MockFileData(mockData2));
 
         var results = sut.GetReleaseProfileData();
 
@@ -55,11 +58,10 @@ public class LocalRepoReleaseProfileJsonParserTest
     [Test, AutoMockData]
     public void Json_exceptions_do_not_interrupt_parsing_other_files(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths paths,
+        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         LocalRepoReleaseProfileJsonParser sut)
     {
-        paths.RepoDirectory.Returns("");
-        var rootPath = fs.CurrentDirectory()
+        var rootPath = paths.RepoDirectory
             .SubDirectory("docs")
             .SubDirectory("json")
             .SubDirectory("sonarr");

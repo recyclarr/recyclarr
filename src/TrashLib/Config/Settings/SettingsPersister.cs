@@ -1,5 +1,3 @@
-using System.IO.Abstractions;
-
 namespace TrashLib.Config.Settings;
 
 public class SettingsPersister : ISettingsPersister
@@ -7,18 +5,15 @@ public class SettingsPersister : ISettingsPersister
     private readonly IAppPaths _paths;
     private readonly ISettingsProvider _settingsProvider;
     private readonly IYamlSerializerFactory _serializerFactory;
-    private readonly IFileSystem _fileSystem;
 
     public SettingsPersister(
         IAppPaths paths,
         ISettingsProvider settingsProvider,
-        IYamlSerializerFactory serializerFactory,
-        IFileSystem fileSystem)
+        IYamlSerializerFactory serializerFactory)
     {
         _paths = paths;
         _settingsProvider = settingsProvider;
         _serializerFactory = serializerFactory;
-        _fileSystem = fileSystem;
     }
 
     public void Load()
@@ -30,12 +25,13 @@ public class SettingsPersister : ISettingsPersister
 
     private string LoadOrCreateSettingsFile()
     {
-        if (!_fileSystem.File.Exists(_paths.SettingsPath))
+        if (!_paths.SettingsPath.Exists)
         {
             CreateDefaultSettingsFile();
         }
 
-        return _fileSystem.File.ReadAllText(_paths.SettingsPath);
+        using var stream = _paths.SettingsPath.OpenText();
+        return stream.ReadToEnd();
     }
 
     private void CreateDefaultSettingsFile()
@@ -47,6 +43,8 @@ public class SettingsPersister : ISettingsPersister
             "# For the settings file reference guide, visit the link to the wiki below:\n" +
             "# https://github.com/recyclarr/recyclarr/wiki/Settings-Reference\n";
 
-        _fileSystem.File.WriteAllText(_paths.SettingsPath, fileData);
+        _paths.SettingsPath.Directory.Create();
+        using var stream = _paths.SettingsPath.CreateText();
+        stream.Write(fileData);
     }
 }

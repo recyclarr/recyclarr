@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
     <ProjectReference Include="..\TrashLib.TestLibrary\TrashLib.TestLibrary.csproj" />
     <ProjectReference Include="..\TrashLib\TrashLib.csproj" />

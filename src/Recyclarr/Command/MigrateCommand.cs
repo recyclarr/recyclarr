@@ -1,43 +1,27 @@
 using System.Text;
-using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
-using CliFx.Infrastructure;
 using JetBrains.Annotations;
-using Recyclarr.Command.Initialization;
 using Recyclarr.Migration;
 
 namespace Recyclarr.Command;
 
 [Command("migrate", Description = "Perform any migration steps that may be needed between versions")]
 [UsedImplicitly]
-public class MigrateCommand : ICommand
+public class MigrateCommand : BaseCommand
 {
-    private readonly IMigrationExecutor _migration;
-    private readonly IDefaultAppDataSetup _appDataSetup;
+    [CommandOption("app-data", Description =
+        "Explicitly specify the location of the recyclarr application data directory. " +
+        "Mainly for usage in Docker; not recommended for normal use.")]
+    public override string? AppDataDirectory { get; set; }
 
-    [CommandOption("debug", 'd', Description =
-        "Display additional logs useful for development/debug purposes.")]
-    public bool Debug { get; [UsedImplicitly] set; } = false;
-
-    public MigrateCommand(IMigrationExecutor migration, IDefaultAppDataSetup appDataSetup)
+    public override Task Process(IServiceLocatorProxy container)
     {
-        _migration = migration;
-        _appDataSetup = appDataSetup;
-    }
+        var migration = container.Resolve<IMigrationExecutor>();
 
-    public ValueTask ExecuteAsync(IConsole console)
-    {
-        _appDataSetup.SetupDefaultPath(null, false);
-        PerformMigrations();
-        return ValueTask.CompletedTask;
-    }
-
-    private void PerformMigrations()
-    {
         try
         {
-            _migration.PerformAllMigrationSteps(Debug);
+            migration.PerformAllMigrationSteps(Debug);
         }
         catch (MigrationException e)
         {
@@ -57,5 +41,7 @@ public class MigrateCommand : ICommand
 
             throw new CommandException(msg.ToString());
         }
+
+        return Task.CompletedTask;
     }
 }

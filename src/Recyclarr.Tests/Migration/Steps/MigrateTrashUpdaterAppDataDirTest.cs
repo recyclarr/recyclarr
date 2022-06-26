@@ -1,8 +1,10 @@
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
 using Recyclarr.Migration.Steps;
+using Recyclarr.TestLibrary;
 using TestLibrary;
 using TestLibrary.AutoFixture;
 
@@ -14,17 +16,15 @@ public class MigrateTrashUpdaterAppDataDirTest
 {
     [Test, AutoMockData]
     public void Migration_check_returns_true_if_trash_updater_dir_exists(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         MigrateTrashUpdaterAppDataDir sut)
     {
-        fs.AddDirectory(fs.Path.Combine(paths.BasePath, "trash-updater"));
+        paths.AppDataDirectory.Parent.SubDirectory("trash-updater").Create();
         sut.CheckIfNeeded().Should().BeTrue();
     }
 
     [Test, AutoMockData]
     public void Migration_check_returns_false_if_trash_updater_dir_doesnt_exists(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         MigrateTrashUpdaterAppDataDir sut)
     {
         sut.CheckIfNeeded().Should().BeFalse();
@@ -36,8 +36,8 @@ public class MigrateTrashUpdaterAppDataDirTest
         [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         MigrateTrashUpdaterAppDataDir sut)
     {
-        fs.AddFileNoData($"{paths.BasePath}/trash-updater/recyclarr.yml");
-        fs.AddFileNoData($"{paths.BasePath}/recyclarr/recyclarr.yml");
+        fs.AddFileNoData(sut.OldPath.File("recyclarr.yml"));
+        fs.AddFileNoData(sut.NewPath.File("recyclarr.yml"));
 
         var act = () => sut.Execute(null);
 
@@ -51,20 +51,23 @@ public class MigrateTrashUpdaterAppDataDirTest
         MigrateTrashUpdaterAppDataDir sut)
     {
         // Add file instead of directory since the migration step only operates on files
-        fs.AddFileNoData($"{paths.BasePath}/trash-updater/settings.yml");
-        fs.AddFileNoData($"{paths.BasePath}/trash-updater/recyclarr.yml");
-        fs.AddFileNoData($"{paths.BasePath}/trash-updater/this-gets-ignored.yml");
-        fs.AddDirectory2($"{paths.BasePath}/trash-updater/repo");
-        fs.AddDirectory2($"{paths.BasePath}/trash-updater/cache");
-        fs.AddFileNoData($"{paths.BasePath}/trash-updater/cache/sonarr/test.txt");
+        var baseDir = sut.OldPath;
+        fs.AddFileNoData(baseDir.File("settings.yml"));
+        fs.AddFileNoData(baseDir.File("recyclarr.yml"));
+        fs.AddFileNoData(baseDir.File("this-gets-ignored.yml"));
+        fs.AddDirectory(baseDir.SubDirectory("repo"));
+        fs.AddDirectory(baseDir.SubDirectory("cache"));
+        fs.AddFileNoData(baseDir.File("cache/sonarr/test.txt"));
 
         sut.Execute(null);
 
+        var expectedBase = sut.NewPath;
+
         fs.AllDirectories.Should().NotContain(x => x.Contains("trash-updater"));
         fs.AllFiles.Should().BeEquivalentTo(
-            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/settings.yml"),
-            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/recyclarr.yml"),
-            FileUtils.NormalizePath($"/{paths.BasePath}/recyclarr/cache/sonarr/test.txt"));
+            expectedBase.File("settings.yml").FullName,
+            expectedBase.File("recyclarr.yml").FullName,
+            expectedBase.SubDirectory("cache").SubDirectory("sonarr").File("test.txt").FullName);
     }
 
     [Test, AutoMockData]

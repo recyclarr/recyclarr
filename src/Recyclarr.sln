@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl", "VersionCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl.Tests", "VersionControl.Tests\VersionControl.Tests.csproj", "{F81C7EA3-4ACA-4171-8A60-531F129A33C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TestLibrary", "Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{77D1C695-94D4-46A9-8F12-41E54AF97750}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
