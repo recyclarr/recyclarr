@@ -4,64 +4,7 @@
 &amp;lt;/profile&amp;gt;&lt;/IDEA_SETTINGS&gt;&lt;/Profile&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=MyFullCleanup/@EntryIndexedValue"></s:String>
 	<s:Boolean x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=MyFullCleanup/@EntryIndexRemoved">True</s:Boolean>
-	<s:String x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=RecyclarrCleanup/@EntryIndexedValue">&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;Profile name="RecyclarrCleanup"&gt;&lt;CSCodeStyleAttributes ArrangeTypeAccessModifier="True" ArrangeTypeMemberAccessModifier="True" SortModifiers="True" RemoveRedundantParentheses="True" AddMissingParentheses="True" ArrangeBraces="True" ArrangeAttributes="True" ArrangeArgumentsStyle="True" ArrangeCodeBodyStyle="False" ArrangeVarStyle="True" ArrangeTrailingCommas="True" ArrangeObjectCreation="True" ArrangeDefaultValue="True" /&gt;&lt;CppAddOverrideSpecifier&gt;True&lt;/CppAddOverrideSpecifier&gt;&lt;CppReplaceImportDirective&gt;True&lt;/CppReplaceImportDirective&gt;&lt;CppSortMemberInitializers&gt;True&lt;/CppSortMemberInitializers&gt;&lt;RemoveCodeRedundancies&gt;True&lt;/RemoveCodeRedundancies&gt;&lt;CSUseAutoProperty&gt;True&lt;/CSUseAutoProperty&gt;&lt;CSMakeFieldReadonly&gt;True&lt;/CSMakeFieldReadonly&gt;&lt;CSMakeAutoPropertyGetOnly&gt;True&lt;/CSMakeAutoPropertyGetOnly&gt;&lt;CSArrangeQualifiers&gt;True&lt;/CSArrangeQualifiers&gt;&lt;CSFixBuiltinTypeReferences&gt;True&lt;/CSFixBuiltinTypeReferences&gt;&lt;CSOptimizeUsings&gt;&lt;OptimizeUsings&gt;True&lt;/OptimizeUsings&gt;&lt;EmbraceInRegion&gt;False&lt;/EmbraceInRegion&gt;&lt;RegionName&gt;&lt;/RegionName&gt;&lt;/CSOptimizeUsings&gt;&lt;CSReformatCode&gt;True&lt;/CSReformatCode&gt;&lt;CSharpFormatDocComments&gt;True&lt;/CSharpFormatDocComments&gt;&lt;IDEA_SETTINGS&gt;&amp;lt;profile version="1.0"&amp;gt;&#xD;
-  &amp;lt;option name="myName" value="RecyclarrCleanup" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="ES6ShorthandObjectProperty" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="JSArrowFunctionBracesCanBeRemoved" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="JSPrimitiveTypeWrapperUsage" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="JSRemoveUnnecessaryParentheses" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="JSUnnecessarySemicolon" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="TypeScriptExplicitMemberType" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="UnnecessaryContinueJS" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="UnnecessaryLabelJS" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="UnnecessaryLabelOnBreakStatementJS" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="UnnecessaryLabelOnContinueStatementJS" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-  &amp;lt;inspection_tool class="UnnecessaryReturnJS" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
-&amp;lt;/profile&amp;gt;&lt;/IDEA_SETTINGS&gt;&lt;CSShortenReferences&gt;True&lt;/CSShortenReferences&gt;&lt;CSUpdateFileHeader&gt;True&lt;/CSUpdateFileHeader&gt;&lt;RIDER_SETTINGS&gt;&amp;lt;profile&amp;gt;&#xD;
-  &amp;lt;Language id="CSS"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="EditorConfig"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="HTML"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-    &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="Ini"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="JSON"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="JavaScript"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-    &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="Markdown"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="Properties"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;true&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="RELAX-NG"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="SQL"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="XML"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-    &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-  &amp;lt;Language id="yaml"&amp;gt;&#xD;
-    &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
-  &amp;lt;/Language&amp;gt;&#xD;
-&amp;lt;/profile&amp;gt;&lt;/RIDER_SETTINGS&gt;&lt;XAMLCollapseEmptyTags&gt;False&lt;/XAMLCollapseEmptyTags&gt;&lt;CppCodeStyleCleanupDescriptor ArrangeAuto="False" ArrangeBraces="False" ArrangeCVQualifiers="False" ArrangeFunctionDeclarations="False" ArrangeNestedNamespaces="False" ArrangeOverridingFunctions="False" ArrangeSlashesInIncludeDirectives="False" ArrangeTypeAliases="False" SortIncludeDirectives="False" SortMemberInitializers="False" /&gt;&lt;CppRemoveCastDescriptor&gt;False&lt;/CppRemoveCastDescriptor&gt;&lt;CppTypeTraitAliasDescriptor&gt;False&lt;/CppTypeTraitAliasDescriptor&gt;&lt;CppReplaceTieWithStructuredBindingDescriptor&gt;False&lt;/CppReplaceTieWithStructuredBindingDescriptor&gt;&lt;/Profile&gt;</s:String>
+	
 	<s:String x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=TrashUpdaterCleanup/@EntryIndexedValue">&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;Profile name="TrashUpdaterCleanup"&gt;&lt;CSCodeStyleAttributes ArrangeTypeAccessModifier="True" ArrangeTypeMemberAccessModifier="True" SortModifiers="True" RemoveRedundantParentheses="True" AddMissingParentheses="True" ArrangeBraces="True" ArrangeArgumentsStyle="True" ArrangeVarStyle="True" ArrangeTrailingCommas="True" ArrangeObjectCreation="True" ArrangeDefaultValue="True" /&gt;&lt;Xaml.RemoveRedundantNamespaceAlias&gt;True&lt;/Xaml.RemoveRedundantNamespaceAlias&gt;&lt;AspOptimizeRegisterDirectives&gt;True&lt;/AspOptimizeRegisterDirectives&gt;&lt;CppAddOverrideSpecifier&gt;True&lt;/CppAddOverrideSpecifier&gt;&lt;CppReplaceImportDirective&gt;True&lt;/CppReplaceImportDirective&gt;&lt;CppSortMemberInitializers&gt;True&lt;/CppSortMemberInitializers&gt;&lt;RemoveCodeRedundancies&gt;True&lt;/RemoveCodeRedundancies&gt;&lt;CSUseAutoProperty&gt;True&lt;/CSUseAutoProperty&gt;&lt;CSMakeFieldReadonly&gt;True&lt;/CSMakeFieldReadonly&gt;&lt;CSMakeAutoPropertyGetOnly&gt;True&lt;/CSMakeAutoPropertyGetOnly&gt;&lt;CSArrangeQualifiers&gt;True&lt;/CSArrangeQualifiers&gt;&lt;CSFixBuiltinTypeReferences&gt;True&lt;/CSFixBuiltinTypeReferences&gt;&lt;CSOptimizeUsings&gt;&lt;OptimizeUsings&gt;True&lt;/OptimizeUsings&gt;&lt;/CSOptimizeUsings&gt;&lt;CSReformatCode&gt;True&lt;/CSReformatCode&gt;&lt;CSharpFormatDocComments&gt;True&lt;/CSharpFormatDocComments&gt;&lt;IDEA_SETTINGS&gt;&amp;lt;profile version="1.0"&amp;gt;&#xD;
   &amp;lt;option name="myName" value="TrashUpdaterCleanup" /&amp;gt;&#xD;
   &amp;lt;inspection_tool class="ES6ShorthandObjectProperty" enabled="false" level="WARNING" enabled_by_default="false" /&amp;gt;&#xD;
@@ -84,8 +27,8 @@
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="HTML"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
+    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="Ini"&amp;gt;&#xD;
@@ -95,8 +38,8 @@
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="JavaScript"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
+    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="Markdown"&amp;gt;&#xD;
@@ -109,8 +52,8 @@
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="XML"&amp;gt;&#xD;
-    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;OptimizeImports&amp;gt;false&amp;lt;/OptimizeImports&amp;gt;&#xD;
+    &amp;lt;Rearrange&amp;gt;false&amp;lt;/Rearrange&amp;gt;&#xD;
     &amp;lt;Reformat&amp;gt;false&amp;lt;/Reformat&amp;gt;&#xD;
   &amp;lt;/Language&amp;gt;&#xD;
   &amp;lt;Language id="yaml"&amp;gt;&#xD;
