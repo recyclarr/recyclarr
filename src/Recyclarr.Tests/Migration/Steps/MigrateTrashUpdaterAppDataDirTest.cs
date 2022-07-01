@@ -4,9 +4,9 @@ using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
 using Recyclarr.Migration.Steps;
-using Recyclarr.TestLibrary;
 using TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.TestLibrary;
 
 namespace Recyclarr.Tests.Migration.Steps;
 

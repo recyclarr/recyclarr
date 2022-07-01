@@ -4,11 +4,11 @@ using AutoFixture.NUnit3;
 using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Recyclarr.TestLibrary;
 using TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Sonarr.ReleaseProfile;
 using TrashLib.Sonarr.ReleaseProfile.Guide;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile.Guide;
 

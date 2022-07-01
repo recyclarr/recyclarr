@@ -7,8 +7,8 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.TestLibrary;
 
 // ReSharper disable MethodHasAsyncOverload
 

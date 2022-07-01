@@ -3,10 +3,10 @@ using AutoFixture.NUnit3;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Config;
 using TrashLib.Config.Settings;
+using TrashLib.TestLibrary;
 using YamlDotNet.Serialization;
 
 namespace TrashLib.Tests.Config.Settings;

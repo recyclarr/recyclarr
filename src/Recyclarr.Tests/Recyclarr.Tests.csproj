@@ -7,5 +7,6 @@
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr\Recyclarr.csproj" />
+    <ProjectReference Include="..\TrashLib.TestLibrary\TrashLib.TestLibrary.csproj" />
   </ItemGroup>
 </Project>

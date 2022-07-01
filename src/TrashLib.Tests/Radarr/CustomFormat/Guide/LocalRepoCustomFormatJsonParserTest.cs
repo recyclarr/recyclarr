@@ -3,7 +3,6 @@ using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.TestLibrary;

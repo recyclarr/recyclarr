@@ -5,8 +5,8 @@ using FluentAssertions;
 using MoreLinq.Extensions;
 using NUnit.Framework;
 using Recyclarr.Logging;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.TestLibrary;
 
 namespace Recyclarr.Tests;
 

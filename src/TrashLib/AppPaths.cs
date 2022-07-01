@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
-using TrashLib;
 
-namespace Recyclarr;
+namespace TrashLib;
 
 public class AppPaths : IAppPaths
 {

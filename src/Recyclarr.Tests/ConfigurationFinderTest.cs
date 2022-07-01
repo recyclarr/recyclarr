@@ -6,8 +6,8 @@ using Common;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.TestLibrary;
 
 namespace Recyclarr.Tests;
 

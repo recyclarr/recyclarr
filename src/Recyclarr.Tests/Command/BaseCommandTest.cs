@@ -5,8 +5,8 @@ using CliFx.Infrastructure;
 using FluentAssertions;
 using NUnit.Framework;
 using Recyclarr.Command;
-using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.TestLibrary;
 
 namespace Recyclarr.Tests.Command;
 
