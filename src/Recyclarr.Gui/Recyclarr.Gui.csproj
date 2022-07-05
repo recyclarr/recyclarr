@@ -6,12 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="AutofacSerilogIntegration" Version="5.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="AutofacSerilogIntegration" Version="5.*" />
     <PackageReference Include="MudBlazor" Version="6.*" />
     <PackageReference Include="ReactiveUI.Blazor" Version="18.*" />
-    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.*" />
   </ItemGroup>
 
   <ItemGroup>
