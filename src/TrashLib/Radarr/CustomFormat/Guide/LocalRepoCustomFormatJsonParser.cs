@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using TrashLib.Radarr.CustomFormat.Models;
+using TrashLib.Startup;
 
 namespace TrashLib.Radarr.CustomFormat.Guide;
 

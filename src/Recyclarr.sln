@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl.Tests", "Ver
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TestLibrary", "Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{77D1C695-94D4-46A9-8F12-41E54AF97750}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

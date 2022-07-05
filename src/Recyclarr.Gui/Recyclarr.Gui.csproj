@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <Using Remove="Microsoft.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="AutofacSerilogIntegration" Version="5.*" />
+    <PackageReference Include="MudBlazor" Version="6.*" />
+    <PackageReference Include="ReactiveUI.Blazor" Version="18.*" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
+    <ProjectReference Include="..\VersionControl\VersionControl.csproj" />
+  </ItemGroup>
+
+</Project>

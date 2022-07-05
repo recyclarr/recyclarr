@@ -3,6 +3,7 @@ using Common;
 using LibGit2Sharp;
 using Serilog;
 using TrashLib.Config.Settings;
+using TrashLib.Startup;
 using VersionControl;
 
 namespace TrashLib.Repo;

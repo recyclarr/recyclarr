@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using TrashLib.Startup;
 
 namespace TrashLib;
 

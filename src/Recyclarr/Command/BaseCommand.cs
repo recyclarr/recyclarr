@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using Recyclarr.Logging;
 using Serilog;
 using Serilog.Events;
-using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr.Command;
 

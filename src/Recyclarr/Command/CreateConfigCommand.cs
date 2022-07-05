@@ -4,7 +4,7 @@ using CliFx.Exceptions;
 using Common;
 using JetBrains.Annotations;
 using Serilog;
-using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr.Command;
 

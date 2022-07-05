@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Common.Extensions;
+using TrashLib.Startup;
 
 namespace TrashLib.Sonarr.QualityDefinition;
 

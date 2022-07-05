@@ -1,9 +1,8 @@
 using System.IO.Abstractions;
 using CliFx.Exceptions;
 using Common;
-using TrashLib;
 
-namespace Recyclarr.Command.Initialization;
+namespace TrashLib.Startup;
 
 public class DefaultAppDataSetup
 {

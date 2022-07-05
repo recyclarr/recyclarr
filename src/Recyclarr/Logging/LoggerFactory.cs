@@ -1,11 +1,11 @@
 using System.IO.Abstractions;
 using Serilog;
 using Serilog.Events;
-using TrashLib;
+using TrashLib.Startup;
 
 namespace Recyclarr.Logging;
 
-public class LoggerFactory
+internal class LoggerFactory
 {
     private readonly IAppPaths _paths;
 

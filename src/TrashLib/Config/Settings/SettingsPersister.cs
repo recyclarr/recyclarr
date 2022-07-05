@@ -1,3 +1,5 @@
+using TrashLib.Startup;
+
 namespace TrashLib.Config.Settings;
 
 public class SettingsPersister : ISettingsPersister
