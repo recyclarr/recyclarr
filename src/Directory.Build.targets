@@ -1,7 +1,7 @@
 <Project>
   <ItemGroup>
     <PackageReference Update="Autofac" Version="6.*" />
-    <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="7.*" />
+    <PackageReference Update="Autofac.Extensions.DependencyInjection" Version="8.*" />
     <PackageReference Update="Autofac.Extras.AggregateService" Version="6.*" />
     <PackageReference Update="Autofac.Extras.Ordering" Version="4.*" />
     <PackageReference Update="AutofacContrib.NSubstitute" Version="7.*" />
