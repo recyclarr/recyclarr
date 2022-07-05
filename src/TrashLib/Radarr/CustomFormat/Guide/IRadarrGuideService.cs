@@ -4,5 +4,5 @@ namespace TrashLib.Radarr.CustomFormat.Guide;
 
 public interface IRadarrGuideService
 {
-    IEnumerable<CustomFormatData> GetCustomFormatData();
+    ICollection<CustomFormatData> GetCustomFormatData();
 }

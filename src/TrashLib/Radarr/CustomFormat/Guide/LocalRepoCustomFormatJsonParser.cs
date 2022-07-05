@@ -20,7 +20,7 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
         _log = log;
     }
 
-    public IEnumerable<CustomFormatData> GetCustomFormatData()
+    public ICollection<CustomFormatData> GetCustomFormatData()
     {
         var jsonDir = _paths.RepoDirectory
             .SubDirectory("docs")
