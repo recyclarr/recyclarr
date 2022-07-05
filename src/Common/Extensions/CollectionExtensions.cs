@@ -32,4 +32,10 @@ public static class CollectionExtensions
             destination.Add(item);
         }
     }
+
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> observable)
+        where T : class
+    {
+        return observable.Where(x => x is not null).Select(x => x!);
+    }
 }
