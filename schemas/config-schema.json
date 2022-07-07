@@ -55,6 +55,7 @@
                 },
                 "filter": {
                   "type": "object",
+                  "additionalProperties": false,
                   "description": "Defines various ways that release profile terms from the guide are synchronized with Sonarr.",
                   "oneOf": [
                     {"required": ["include"]},
@@ -99,6 +100,8 @@
             "description": "The API key from Radarr."
           },
           "quality_definition": {
+            "type": "object",
+            "additionalProperties": false,
             "required": ["type"],
             "properties": {
               "type": {
@@ -123,8 +126,8 @@
             "minItems": 1,
             "items": {
               "type": "object",
-              "description": "A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
               "additionalProperties": false,
+              "description": "A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
               "anyOf": [
                 {"required": ["trash_ids"]},
                 {"required": ["names"]}
@@ -132,8 +135,8 @@
               "properties": {
                 "names": {
                   "type": "array",
-                  "description": "A list of one or more custom format names to synchronize to Radarr. The names must be taken from the JSON itself in the guide.",
                   "uniqueItems": true,
+                  "description": "A list of one or more custom format names to synchronize to Radarr. The names must be taken from the JSON itself in the guide.",
                   "minItems": 1,
                   "items": {
                     "type": "string"
