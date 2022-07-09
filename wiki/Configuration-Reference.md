@@ -215,14 +215,13 @@ Synchronization]] page.
   custom formats to. The child properties documented below apply to each element of this list.
 
   > **Note:** Even though `names` and `trash_ids` below are marked *optional*, at least one of them
-  > is required. For example, if `names` is empty you must use `trash_ids` and vice versa.
+  > is required. For example, if `names` is empty you must use `trash_ids` and vice versa. You can
+  > also use both together if you want.
   >
-  > When would you use `names` or `trash_ids`? Rule of thumb: Stick to `names`. It's more user
-  > friendly than IDs, because you can look at a name and know what custom format it is referring
-  > to. The IDs are there for certain corner cases (you can read more about those in the relevant
-  > bullet point below).
+  > **Advice:** When would you use `names` or `trash_ids`? Rule of thumb: Stick to `trash_ids`. It's
+  > more robust and immune to breaking than using names. Names can change, Trash IDs never change.
 
-  - `names` (Optional; *Default: `trash_ids` is required*)<br>
+  - `names` (Optional; *`trash_ids` is required if not used*)<br>
     A list of one or more custom format names to synchronize to Radarr. The names *must* be taken
     from the JSON itself in the guide, for example:
 
@@ -241,15 +240,7 @@ Synchronization]] page.
       - TrueHD ATMOS
     ```
 
-    > **A Few Things to Remember**
-    >
-    > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
-    >   you remove them from this list.
-    > - It's OK for the same custom format to exist in multiple lists of `names`. Recyclarr will
-    >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
-    >   assign it to different profiles with different scores.
-
-  - `trash_ids` (Optional; *Default: `names` is required*)<br>
+  - `trash_ids` (Optional; *`names` is required if not used*)<br>
     A list of one or more Trash IDs of custom formats to synchronize to Radarr. The IDs *must* be
     taken from the value of the `"trash_id"` property in the JSON itself. It will look like the
     following:
@@ -260,29 +251,22 @@ Synchronization]] page.
     }
     ```
 
-    Normally you should be using `names` to specify which custom formats you want. There are a few
-    rare cases where you might prefer (or need) to use the ID instead:
-
-    - Sometimes there are custom formats in the guide with the same name, such as "DoVi". In this
-      case, Recyclarr will issue you a warning instructing you to use the Trash ID instead of the
-      name to resolve the ambiguity.
-    - Trash IDs never change. Custom format names can change. Recyclarr keeps an internal cache of
-      every custom format its seen to reduce the need for your config names to be updated. But it's
-      not 100% fool proof. Using the ID could mean less config maintenance for you in the long run
-      at the expense of readability.
-
-    Most of the rules and semantics are identical to the `names` property, which is documented
-    above. Just apply that logic to the ID instead of the name.
-
-    Lastly, as a tip, to ease the readability concerns of using IDs instead of names, leave a
-    comment beside the Trash ID in your configuration so it can be easily identified later. For
-    example:
+    **TIP:** To ease the readability concerns of using IDs instead of names, leave a comment beside
+    the Trash ID in your configuration so it can be easily identified later. For example:
 
     ```yml
     trash_ids:
       - 5d96ce331b98e077abb8ceb60553aa16 # dovi
       - a570d4a0e56a2874b64e5bfa55202a1b # flac
     ```
+
+    > **A Few Things to Remember**
+    >
+    > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
+    >   you remove them from this list.
+    > - It's OK for the same custom format to exist in multiple lists of `names`. Recyclarr will
+    >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
+    >   assign it to different profiles with different scores.
 
   - `quality_profiles` (Optional; *Default: No quality profiles are changed*)<br>
     One or more quality profiles to update with the scores from the custom formats listed above.
