@@ -11,7 +11,7 @@ volumes:
 
 services:
   radarr1:
-    image: ghcr.io/hotio/radarr
+    image: ghcr.io/hotio/radarr:nightly
     networks:
       recyclarr:
         aliases:
@@ -25,7 +25,7 @@ services:
       - TZ=America/Chicago
 
   radarr2:
-    image: ghcr.io/hotio/radarr:nightly
+    image: ghcr.io/hotio/radarr
     networks:
       recyclarr:
         aliases:
