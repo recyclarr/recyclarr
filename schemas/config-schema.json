@@ -127,7 +127,7 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "description": "A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
+              "description": "A list of one or more sets of custom formats each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
               "anyOf": [
                 {"required": ["trash_ids"]},
                 {"required": ["names"]}

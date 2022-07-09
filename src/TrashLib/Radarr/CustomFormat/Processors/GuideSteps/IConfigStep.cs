@@ -9,5 +9,5 @@ public interface IConfigStep
     IReadOnlyCollection<ProcessedConfigData> ConfigData { get; }
 
     void Process(IReadOnlyCollection<ProcessedCustomFormatData> processedCfs,
-        IEnumerable<CustomFormatConfig> config);
+        IReadOnlyCollection<CustomFormatConfig> config);
 }

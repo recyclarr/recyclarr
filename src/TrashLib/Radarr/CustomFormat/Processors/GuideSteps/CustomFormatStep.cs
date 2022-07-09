@@ -5,7 +5,7 @@ using TrashLib.Radarr.CustomFormat.Models.Cache;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
 
-internal class CustomFormatStep : ICustomFormatStep
+public class CustomFormatStep : ICustomFormatStep
 {
     private readonly List<(string, string)> _customFormatsWithOutdatedNames = new();
     private readonly List<ProcessedCustomFormatData> _processedCustomFormats = new();

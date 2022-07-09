@@ -4,6 +4,7 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
+using Serilog;
 using TestLibrary.FluentAssertions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Guide;
@@ -21,7 +22,7 @@ public class GuideProcessorTest
     private class TestGuideProcessorSteps : IGuideProcessorSteps
     {
         public ICustomFormatStep CustomFormat { get; } = new CustomFormatStep();
-        public IConfigStep Config { get; } = new ConfigStep();
+        public IConfigStep Config { get; } = new ConfigStep(Substitute.For<ILogger>());
         public IQualityProfileStep QualityProfile { get; } = new QualityProfileStep();
     }
 

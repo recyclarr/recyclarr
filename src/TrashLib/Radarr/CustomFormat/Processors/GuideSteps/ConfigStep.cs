@@ -1,20 +1,35 @@
 using Common.Extensions;
+using Serilog;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 
 namespace TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
 
-internal class ConfigStep : IConfigStep
+public class ConfigStep : IConfigStep
 {
+    private readonly ILogger _log;
     private readonly List<ProcessedConfigData> _configData = new();
     private readonly List<string> _customFormatsNotInGuide = new();
 
     public IReadOnlyCollection<string> CustomFormatsNotInGuide => _customFormatsNotInGuide;
     public IReadOnlyCollection<ProcessedConfigData> ConfigData => _configData;
 
-    public void Process(IReadOnlyCollection<ProcessedCustomFormatData> processedCfs,
-        IEnumerable<CustomFormatConfig> config)
+    public ConfigStep(ILogger log)
     {
+        _log = log;
+    }
+
+    public void Process(
+        IReadOnlyCollection<ProcessedCustomFormatData> processedCfs,
+        IReadOnlyCollection<CustomFormatConfig> config)
+    {
+        if (config.SelectMany(x => x.Names).Any())
+        {
+            _log.Warning(
+                "`names` list for `custom_formats` is deprecated and will be removed in the future; use " +
+                "`trash_ids` instead");
+        }
+
         foreach (var singleConfig in config)
         {
             var validCfs = new List<ProcessedCustomFormatData>();

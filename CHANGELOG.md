@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - JSON Schema added to the config template YAML file.
+- `names` list under `custom_formats` in config YAML is now deprecated. Use `trash_ids` to list your
+  custom formats instead.
 
 ## [2.2.1] - 2022-06-18
 

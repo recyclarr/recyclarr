@@ -11,7 +11,7 @@
 
 # Configuration specific to Sonarr
 sonarr:
-    # Set the URL/API Key to your actual instance
+  # Set the URL/API Key to your actual instance
   - base_url: http://localhost:8989
     api_key: f7e74ba6c80046e39e076a27af5a8444
 
@@ -46,19 +46,17 @@ radarr:
     delete_old_custom_formats: false
 
     custom_formats:
-      # A list of custom formats to sync to Radarr. Must match the "name" in the importable JSON.
-      # Do NOT use the heading names here, those do not work! These are case-insensitive.
-      - names:
-          - BR-DISK
-          - EVO (no WEBDL)
-          - LQ
-          - x265 (720/1080p)
-          - 3D
+      # A list of custom formats to sync to Radarr. Must match the "trash_id" in the guide JSON.
+      - trash_ids:
+          - ed38b889b31be83fda192888e2286d83 # BR-DISK
+          - 90cedc1fea7ea5d11298bebd3d1d3223 # EVO (no WEBDL)
+          - 90a6f9a284dff5103f6346090e6280c8 # LQ
+          - dc98083864ea246d05a42df0d05f81cc # x265 (720/1080p)
+          - b8cd450cbfa689c0259a01d9e29ba3d6 # 3D
 
         # Uncomment the below properties to specify one or more quality profiles that should be
         # updated with scores from the guide for each custom format. Without this, custom formats
         # are synced to Radarr but no scores are set in any quality profiles.
-
 #        quality_profiles:
 #          - name: Quality Profile 1
 #          - name: Quality Profile 2

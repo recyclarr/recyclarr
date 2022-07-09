@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using TestLibrary.AutoFixture;
 using TestLibrary.FluentAssertions;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
@@ -61,8 +62,8 @@ public class CustomFormatStepTest
         });
     }
 
-    [Test]
-    public void Cache_entry_is_not_set_when_id_is_different()
+    [Test, AutoMockData]
+    public void Cache_entry_is_not_set_when_id_is_different(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -82,7 +83,6 @@ public class CustomFormatStepTest
             }
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, testCache);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -95,8 +95,8 @@ public class CustomFormatStepTest
             });
     }
 
-    [Test]
-    public void Cfs_not_in_config_are_skipped()
+    [Test, AutoMockData]
+    public void Cfs_not_in_config_are_skipped(CustomFormatStep processor)
     {
         var ctx = new Context();
         var testConfig = new List<CustomFormatConfig>
@@ -104,7 +104,6 @@ public class CustomFormatStepTest
             new() {Names = new List<string> {"name1", "name3"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -118,8 +117,8 @@ public class CustomFormatStepTest
             });
     }
 
-    [Test]
-    public void Config_cfs_in_different_sections_are_processed()
+    [Test, AutoMockData]
+    public void Config_cfs_in_different_sections_are_processed(CustomFormatStep processor)
     {
         var ctx = new Context();
         var testConfig = new List<CustomFormatConfig>
@@ -128,7 +127,6 @@ public class CustomFormatStepTest
             new() {Names = new List<string> {"name2"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -143,8 +141,8 @@ public class CustomFormatStepTest
             op => op.Using(new JsonEquivalencyStep()));
     }
 
-    [Test]
-    public void Custom_format_is_deleted_if_in_config_and_cache_but_not_in_guide()
+    [Test, AutoMockData]
+    public void Custom_format_is_deleted_if_in_config_and_cache_but_not_in_guide(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -161,7 +159,6 @@ public class CustomFormatStepTest
             TrashIdMappings = new Collection<TrashIdMapping> {new("id1000", "name1")}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, testCache);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -174,8 +171,8 @@ public class CustomFormatStepTest
         });
     }
 
-    [Test]
-    public void Custom_format_is_deleted_if_not_in_config_but_in_cache_and_in_guide()
+    [Test, AutoMockData]
+    public void Custom_format_is_deleted_if_not_in_config_but_in_cache_and_in_guide(CustomFormatStep processor)
     {
         var cache = new CustomFormatCache
         {
@@ -187,7 +184,6 @@ public class CustomFormatStepTest
             new("3D", "id1", null, new JObject())
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideCfs, Array.Empty<CustomFormatConfig>(), cache);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -196,8 +192,8 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should().BeEmpty();
     }
 
-    [Test]
-    public void Custom_format_name_in_cache_is_updated_if_renamed_in_guide_and_config()
+    [Test, AutoMockData]
+    public void Custom_format_name_in_cache_is_updated_if_renamed_in_guide_and_config(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -214,7 +210,6 @@ public class CustomFormatStepTest
             TrashIdMappings = new Collection<TrashIdMapping> {new("id1", "name1")}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, testCache);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -225,8 +220,8 @@ public class CustomFormatStepTest
             .BeEquivalentTo(new TrashIdMapping("id1", "name2"));
     }
 
-    [Test]
-    public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list()
+    [Test, AutoMockData]
+    public void Duplicates_are_recorded_and_removed_from_processed_custom_formats_list(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -239,7 +234,6 @@ public class CustomFormatStepTest
             new() {Names = new List<string> {"name1"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, null);
 
         //Dictionary<string, List<ProcessedCustomFormatData>>
@@ -255,8 +249,8 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should().BeEmpty();
     }
 
-    [Test]
-    public void Match_cf_names_regardless_of_case_in_config()
+    [Test, AutoMockData]
+    public void Match_cf_names_regardless_of_case_in_config(CustomFormatStep processor)
     {
         var ctx = new Context();
         var testConfig = new List<CustomFormatConfig>
@@ -264,7 +258,6 @@ public class CustomFormatStepTest
             new() {Names = new List<string> {"name1", "NAME1"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -277,8 +270,8 @@ public class CustomFormatStepTest
             op => op.Using(new JsonEquivalencyStep()));
     }
 
-    [Test]
-    public void Match_custom_format_using_trash_id()
+    [Test, AutoMockData]
+    public void Match_custom_format_using_trash_id(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -291,7 +284,6 @@ public class CustomFormatStepTest
             new() {TrashIds = new List<string> {"id2"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, null);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -304,8 +296,8 @@ public class CustomFormatStepTest
             });
     }
 
-    [Test]
-    public void Non_existent_cfs_in_config_are_skipped()
+    [Test, AutoMockData]
+    public void Non_existent_cfs_in_config_are_skipped(CustomFormatStep processor)
     {
         var ctx = new Context();
         var testConfig = new List<CustomFormatConfig>
@@ -313,7 +305,6 @@ public class CustomFormatStepTest
             new() {Names = new List<string> {"doesnt_exist"}}
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(ctx.TestGuideData, testConfig, new CustomFormatCache());
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();
@@ -322,8 +313,8 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should().BeEmpty();
     }
 
-    [Test]
-    public void Score_from_json_takes_precedence_over_score_from_guide()
+    [Test, AutoMockData]
+    public void Score_from_json_takes_precedence_over_score_from_guide(CustomFormatStep processor)
     {
         var guideData = new List<CustomFormatData>
         {
@@ -342,7 +333,6 @@ public class CustomFormatStepTest
             }
         };
 
-        var processor = new CustomFormatStep();
         processor.Process(guideData, testConfig, null);
 
         processor.DuplicatedCustomFormats.Should().BeEmpty();

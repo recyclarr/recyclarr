@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using TestLibrary.AutoFixture;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
@@ -13,8 +14,8 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps;
 [Parallelizable(ParallelScope.All)]
 public class ConfigStepTest
 {
-    [Test]
-    public void Cache_names_are_used_instead_of_name_in_json_data()
+    [Test, AutoMockData]
+    public void Cache_names_are_used_instead_of_name_in_json_data(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -30,7 +31,6 @@ public class ConfigStepTest
             }
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEmpty();
@@ -46,8 +46,8 @@ public class ConfigStepTest
             .WhenTypeIs<JToken>());
     }
 
-    [Test]
-    public void Custom_formats_missing_from_config_are_skipped()
+    [Test, AutoMockData]
+    public void Custom_formats_missing_from_config_are_skipped(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -63,7 +63,6 @@ public class ConfigStepTest
             }
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEmpty();
@@ -81,8 +80,8 @@ public class ConfigStepTest
             .WhenTypeIs<JToken>());
     }
 
-    [Test]
-    public void Custom_formats_missing_from_guide_are_added_to_not_in_guide_list()
+    [Test, AutoMockData]
+    public void Custom_formats_missing_from_guide_are_added_to_not_in_guide_list(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -98,7 +97,6 @@ public class ConfigStepTest
             }
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEquivalentTo(new List<string> {"name3"}, op => op
@@ -118,8 +116,8 @@ public class ConfigStepTest
             .WhenTypeIs<JToken>());
     }
 
-    [Test]
-    public void Duplicate_config_name_and_id_are_ignored()
+    [Test, AutoMockData]
+    public void Duplicate_config_name_and_id_are_ignored(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -135,7 +133,6 @@ public class ConfigStepTest
             }
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEmpty();
@@ -148,8 +145,8 @@ public class ConfigStepTest
         });
     }
 
-    [Test]
-    public void Duplicate_config_names_are_ignored()
+    [Test, AutoMockData]
+    public void Duplicate_config_names_are_ignored(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -161,7 +158,6 @@ public class ConfigStepTest
             new() {Names = new List<string> {"name1", "name1"}}
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEmpty();
@@ -174,8 +170,8 @@ public class ConfigStepTest
         });
     }
 
-    [Test]
-    public void Find_custom_formats_by_name_and_trash_id()
+    [Test, AutoMockData]
+    public void Find_custom_formats_by_name_and_trash_id(ConfigStep processor)
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
@@ -197,7 +193,6 @@ public class ConfigStepTest
             }
         };
 
-        var processor = new ConfigStep();
         processor.Process(testProcessedCfs, testConfig);
 
         processor.CustomFormatsNotInGuide.Should().BeEmpty();

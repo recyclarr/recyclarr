@@ -210,35 +210,9 @@ Synchronization]] page.
   Radarr **will not be deleted** if you enable this setting.
 
 - `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
-  A list of one or more sets of custom formats (by name and/or trash_id), each with an optional set
-  of quality profiles names that identify which quality profiles to assign the scores for those
-  custom formats to. The child properties documented below apply to each element of this list.
-
-  > **Note:** Even though `names` and `trash_ids` below are marked *optional*, at least one of them
-  > is required. For example, if `names` is empty you must use `trash_ids` and vice versa. You can
-  > also use both together if you want.
-  >
-  > **Advice:** When would you use `names` or `trash_ids`? Rule of thumb: Stick to `trash_ids`. It's
-  > more robust and immune to breaking than using names. Names can change, Trash IDs never change.
-
-  - `names` (Optional; *`trash_ids` is required if not used*)<br>
-    A list of one or more custom format names to synchronize to Radarr. The names *must* be taken
-    from the JSON itself in the guide, for example:
-
-    ```json
-    {
-      "trash_id": "496f355514737f7d83bf7aa4d24f8169",
-      "name": "TrueHD ATMOS",
-      "includeCustomFormatWhenRenaming": false
-    }
-    ```
-
-    You take the value of `"name"` above and add it to the list of names like so:
-
-    ```yml
-    names:
-      - TrueHD ATMOS
-    ```
+  A list of one or more sets of custom formats each with an optional set of quality profiles names
+  that identify which quality profiles to assign the scores for those custom formats to. The child
+  properties documented below apply to each element of this list.
 
   - `trash_ids` (Optional; *`names` is required if not used*)<br>
     A list of one or more Trash IDs of custom formats to synchronize to Radarr. The IDs *must* be
@@ -264,7 +238,7 @@ Synchronization]] page.
     >
     > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
     >   you remove them from this list.
-    > - It's OK for the same custom format to exist in multiple lists of `names`. Recyclarr will
+    > - It's OK for the same custom format to exist in multiple lists of `trash_ids`. Recyclarr will
     >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
     >   assign it to different profiles with different scores.
 
