@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+
 # A starter config to use with Recyclarr. Most values are set to "reasonable defaults". Update the
 # values below as needed for your instance. You will be required to update the API Key and URL for
 # each instance you want to use.

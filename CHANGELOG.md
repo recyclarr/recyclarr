@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Radarr: New `--list-custom-formats` CLI option for getting a flat list of all CFs in the guide in
   YAML format, ready to copy & paste.
 
+### Changed
+
+- JSON Schema added to the config template YAML file.
+
 ## [2.2.1] - 2022-06-18
 
 ### Changed
