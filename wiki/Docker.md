@@ -137,6 +137,16 @@ docker compose run --rm recyclarr radarr --preview --debug
 **TIP:** The `--rm` option ensures the container is deleted after it runs (without it, your list of
 stopped containers will start to grow the more often you run it manually).
 
+#### Warning about `docker exec`
+
+I will not support any usage of `docker exec`, for now. It's far too error prone and can result in
+mixed file permissions in Recyclarr's app data directory (the `/config` volume). Please use `docker
+run --rm` instead (documented in the previous section).
+
+When you run `docker exec` without the `--user` option, commands are executed as the internal root
+user. If you absolutely insist on using this command, ensure you specify a user & group that matches
+the `PUID` & `PGID` environment variables.
+
 ### Cron Mode
 
 In this mode, no immediate action is performed. Rather, the container remains alive and continuously
