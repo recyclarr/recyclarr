@@ -29,7 +29,9 @@ ENV RECYCLARR_APP_DATA=/config \
 
 VOLUME /config
 
-RUN apk add --no-cache busybox-suid su-exec libstdc++ tzdata;
+RUN set -e; \
+    apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
+    mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR"
 
 COPY --chmod=755 --from=build /build/recyclarr /usr/local/bin
 COPY --chmod=755 ./scripts/prod/*.sh /
