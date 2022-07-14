@@ -21,8 +21,8 @@ internal class LoggerFactory
         var logPath = _paths.LogDirectory.File($"trash_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
 
         return new LoggerConfiguration()
-            .MinimumLevel.Is(level)
-            .WriteTo.Console(outputTemplate: ConsoleTemplate)
+            .MinimumLevel.Is(LogEventLevel.Debug)
+            .WriteTo.Console(outputTemplate: ConsoleTemplate, restrictedToMinimumLevel: level)
             .WriteTo.File(logPath.FullName)
             .CreateLogger();
     }
