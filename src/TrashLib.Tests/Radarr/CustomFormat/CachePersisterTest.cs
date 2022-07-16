@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
@@ -9,6 +8,7 @@ using TrashLib.Radarr.CustomFormat;
 using TrashLib.Radarr.CustomFormat.Models;
 using TrashLib.Radarr.CustomFormat.Models.Cache;
 using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat;
 
@@ -27,15 +27,6 @@ public class CachePersisterTest
 
         public CachePersister Persister { get; }
         public IServiceCache ServiceCache { get; }
-    }
-
-    private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
-    {
-        var cf = new CustomFormatData(cfName, trashId, null, new JObject());
-        return new ProcessedCustomFormatData(cf)
-        {
-            CacheEntry = new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId}
-        };
     }
 
     [TestCase(CustomFormatCache.LatestVersion - 1)]
@@ -124,12 +115,11 @@ public class CachePersisterTest
 
         // Update with new cached items
         var results = new CustomFormatTransactionData();
-        results.NewCustomFormats.Add(QuickMakeCf("cfname", "trashid", 10));
+        results.NewCustomFormats.Add(NewCf.Processed("cfname", "file", "trashid", 10));
 
         var customFormatData = new List<ProcessedCustomFormatData>
         {
-            new(new CustomFormatData("", "trashid", null, new JObject()))
-                {CacheEntry = new TrashIdMapping("trashid", "cfname", 10)}
+            NewCf.Processed("", "file", "trashid", new TrashIdMapping("trashid", "cfname", 10))
         };
 
         ctx.Persister.Update(customFormatData);

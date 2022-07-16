@@ -36,7 +36,7 @@ public class GuideProcessorTest
         public ResourceDataReader Data { get; }
 
         public CustomFormatData ReadCustomFormat(string textFile) =>
-            LocalRepoCustomFormatJsonParser.ParseCustomFormatData(ReadText(textFile));
+            LocalRepoCustomFormatJsonParser.ParseCustomFormatData(ReadText(textFile), Path.GetFileName(textFile));
 
         public string ReadText(string textFile) => Data.ReadData(textFile);
         public JObject ReadJson(string jsonFile) => JObject.Parse(ReadText(jsonFile));
@@ -86,11 +86,19 @@ public class GuideProcessorTest
 
         var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("Surround Sound", "43bb5f09c79641e7a22e48d440bd8868", 500,
+            NewCf.Processed("Surround Sound",
+                "ImportableCustomFormat1_Processed",
+                "43bb5f09c79641e7a22e48d440bd8868",
+                500,
                 ctx.ReadJson("ImportableCustomFormat1_Processed.json")),
-            NewCf.Processed("DTS-HD/DTS:X", "4eb3c272d48db8ab43c2c85283b69744", 480,
+
+            NewCf.Processed("DTS-HD/DTS:X",
+                "ImportableCustomFormat2_Processed",
+                "4eb3c272d48db8ab43c2c85283b69744",
+                480,
                 ctx.ReadJson("ImportableCustomFormat2_Processed.json")),
-            NewCf.Processed("No Score", "abc")
+
+            NewCf.Processed("No Score", "nofile", "abc")
         };
 
         guideProcessor.ProcessedCustomFormats.Should().BeEquivalentTo(expectedProcessedCustomFormatData);

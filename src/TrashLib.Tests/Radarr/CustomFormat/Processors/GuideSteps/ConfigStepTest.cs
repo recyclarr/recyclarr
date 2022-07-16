@@ -19,8 +19,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", "id1", 100),
-            NewCf.Processed("name3", "id3", new TrashIdMapping("id3", "name1"))
+            NewCf.Processed("name1", "file1", "id1", 100),
+            NewCf.Processed("name3", "file3", "id3", new TrashIdMapping("id3", "name1"))
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -51,8 +51,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", ""),
-            NewCf.Processed("name2", "")
+            NewCf.Processed("name1", "", ""),
+            NewCf.Processed("name2", "", "")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -72,7 +72,7 @@ public class ConfigStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "")
+                    NewCf.Processed("name1", "", "")
                 }
             }
         }, op => op
@@ -85,8 +85,8 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", ""),
-            NewCf.Processed("name2", "")
+            NewCf.Processed("name1", "", ""),
+            NewCf.Processed("name2", "", "")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -108,7 +108,7 @@ public class ConfigStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "")
+                    NewCf.Processed("name1", "", "")
                 }
             }
         }, op => op
@@ -121,7 +121,7 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", "id1")
+            NewCf.Processed("name1", "file1", "id1")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -150,7 +150,7 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", "id1")
+            NewCf.Processed("name1", "file1", "id1")
         };
 
         var testConfig = new CustomFormatConfig[]
@@ -175,9 +175,9 @@ public class ConfigStepTest
     {
         var testProcessedCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", "id1", 100),
-            NewCf.Processed("name3", "id3"),
-            NewCf.Processed("name4", "id4")
+            NewCf.Processed("name1", "file1", "id1", 100),
+            NewCf.Processed("name3", "file3", "id3"),
+            NewCf.Processed("name4", "file4", "id4")
         };
 
         var testConfig = new CustomFormatConfig[]

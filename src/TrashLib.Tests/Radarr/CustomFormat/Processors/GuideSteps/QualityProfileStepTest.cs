@@ -20,7 +20,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "id1")
+                    NewCf.Processed("name1", "file1", "id1")
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -45,7 +45,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("", "id1", 100)
+                    NewCf.Processed("", "", "id1", 100)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -74,7 +74,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("", "id1", 100)
+                    NewCf.Processed("", "", "id1", 100)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
@@ -109,7 +109,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "id1", 0)
+                    NewCf.Processed("name1", "file1", "id1", 0)
                 },
                 QualityProfiles = new List<QualityProfileConfig>
                 {

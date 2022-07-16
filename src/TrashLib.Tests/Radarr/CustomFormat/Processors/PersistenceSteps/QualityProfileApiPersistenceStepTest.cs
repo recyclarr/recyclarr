@@ -48,7 +48,7 @@ public class QualityProfileApiPersistenceStepTest
         {
             {
                 "profile1", CfTestUtils.NewMapping(new FormatMappingEntry(
-                    NewCf.Processed("", "", new TrashIdMapping("", "") {CustomFormatId = 4}), 100))
+                    NewCf.Processed("", "", "", new TrashIdMapping("", "") {CustomFormatId = 4}), 100))
             }
         };
 
@@ -109,7 +109,7 @@ public class QualityProfileApiPersistenceStepTest
         {
             {
                 "profile1", CfTestUtils.NewMappingWithReset(
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 2)), 100))
+                    new FormatMappingEntry(NewCf.Processed("", "", "", new TrashIdMapping("", "", 2)), 100))
             }
         };
 
@@ -183,11 +183,11 @@ public class QualityProfileApiPersistenceStepTest
             {
                 "profile1", CfTestUtils.NewMapping(
                     // First match by ID
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 4)), 100),
+                    new FormatMappingEntry(NewCf.Processed("", "", "", new TrashIdMapping("", "", 4)), 100),
                     // Should NOT match because we do not use names to assign scores
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "BR-DISK")), 101),
+                    new FormatMappingEntry(NewCf.Processed("", "", "", new TrashIdMapping("", "BR-DISK")), 101),
                     // Second match by ID
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 1)), 102))
+                    new FormatMappingEntry(NewCf.Processed("", "", "", new TrashIdMapping("", "", 1)), 102))
             }
         };
 

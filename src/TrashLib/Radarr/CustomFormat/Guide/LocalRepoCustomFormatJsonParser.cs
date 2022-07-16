@@ -14,11 +14,13 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
 {
     private readonly IAppPaths _paths;
     private readonly ILogger _log;
+    private readonly IFileSystem _fs;
 
-    public LocalRepoCustomFormatJsonParser(IAppPaths paths, ILogger log)
+    public LocalRepoCustomFormatJsonParser(IAppPaths paths, ILogger log, IFileSystem fs)
     {
         _paths = paths;
         _log = log;
+        _fs = fs;
     }
 
     public ICollection<CustomFormatData> GetCustomFormatData()
@@ -40,7 +42,7 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
     {
         return Observable.Using(file.OpenText, x => x.ReadToEndAsync().ToObservable())
             .Do(_ => _log.Debug("Parsing CF Json: {Name}", file.Name))
-            .Select(ParseCustomFormatData)
+            .Select(x => ParseCustomFormatData(x, _fs.Path.GetFileNameWithoutExtension(file.Name)))
             .Catch((JsonException e) =>
             {
                 _log.Warning("Failed to parse JSON file: {File} ({Reason})", file.Name, e.Message);
@@ -48,7 +50,7 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
             });
     }
 
-    public static CustomFormatData ParseCustomFormatData(string guideData)
+    public static CustomFormatData ParseCustomFormatData(string guideData, string fileName)
     {
         var obj = JObject.Parse(guideData);
 
@@ -66,6 +68,6 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
         // Radarr supposedly drops this anyway, but I prefer it to be removed.
         obj.Property("trash_id")?.Remove();
 
-        return new CustomFormatData(name, trashId, finalScore, obj);
+        return new CustomFormatData(name, fileName, trashId, finalScore, obj);
     }
 }

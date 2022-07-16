@@ -22,15 +22,15 @@ public class CustomFormatListerTest
     {
         var testData = new[]
         {
-            NewCf.Data("First", "123"),
-            NewCf.Data("Second", "456")
+            NewCf.Data("First", "file1", "123"),
+            NewCf.Data("Second", "file2", "456")
         };
 
         guide.GetCustomFormatData().Returns(testData);
 
         sut.ListCustomFormats();
 
-        console.ReadOutputString().Should().ContainAll(
-            testData.SelectMany(x => new[] {x.Name, x.TrashId}));
+        console.ReadOutputString().Should()
+            .ContainAll(testData.SelectMany(x => new[] {x.Name, x.TrashId}));
     }
 }

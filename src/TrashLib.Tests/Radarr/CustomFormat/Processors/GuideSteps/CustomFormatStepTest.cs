@@ -20,9 +20,9 @@ public class CustomFormatStepTest
     {
         public List<CustomFormatData> TestGuideData { get; } = new()
         {
-            NewCf.Data("name1", "id1"),
-            NewCf.Data("name2", "id2"),
-            NewCf.Data("name3", "id3")
+            NewCf.Data("name1", "file1", "id1"),
+            NewCf.Data("name2", "file2", "id2"),
+            NewCf.Data("name3", "file3", "id3")
         };
     }
 
@@ -47,7 +47,7 @@ public class CustomFormatStepTest
 
         var testGuideData = new List<CustomFormatData>
         {
-            NewCf.Data(variableCfName, "id1")
+            NewCf.Data(variableCfName, "", "id1")
         };
 
         var processor = new CustomFormatStep();
@@ -58,7 +58,7 @@ public class CustomFormatStepTest
         processor.DeletedCustomFormatsInCache.Should().BeEmpty();
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed(variableCfName, "id1", testCache.TrashIdMappings[0])
+            NewCf.Processed(variableCfName, "", "id1", testCache.TrashIdMappings[0])
         });
     }
 
@@ -67,7 +67,7 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            NewCf.Data("name1", "id1")
+            NewCf.Data("name1", "file1", "id1")
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -91,7 +91,7 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should()
             .BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name1", "id1")
+                NewCf.Processed("name1", "file1", "id1")
             });
     }
 
@@ -112,8 +112,8 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should()
             .BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name1", "id1"),
-                NewCf.Processed("name3", "id3")
+                NewCf.Processed("name1", "file1", "id1"),
+                NewCf.Processed("name3", "file3", "id3")
             });
     }
 
@@ -134,9 +134,9 @@ public class CustomFormatStepTest
         processor.DeletedCustomFormatsInCache.Should().BeEmpty();
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name1", "id1"),
-                NewCf.Processed("name2", "id2"),
-                NewCf.Processed("name3", "id3")
+                NewCf.Processed("name1", "file1", "id1"),
+                NewCf.Processed("name2", "file2", "id2"),
+                NewCf.Processed("name3", "file3", "id3")
             },
             op => op.Using(new JsonEquivalencyStep()));
     }
@@ -146,7 +146,7 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            NewCf.Data("name1", "id1")
+            NewCf.Data("name1", "file1", "id1")
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -167,7 +167,7 @@ public class CustomFormatStepTest
             .BeEquivalentTo(new[] {new TrashIdMapping("id1000", "name1")});
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("name1", "id1")
+            NewCf.Processed("name1", "file1", "id1")
         });
     }
 
@@ -181,7 +181,7 @@ public class CustomFormatStepTest
 
         var guideCfs = new List<CustomFormatData>
         {
-            new("3D", "id1", null, new JObject())
+            new("3D", "file1", "id1", null, new JObject())
         };
 
         processor.Process(guideCfs, Array.Empty<CustomFormatConfig>(), cache);
@@ -197,7 +197,7 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            new("name2", "id1", null, new JObject())
+            new("name2", "", "id1", null, new JObject())
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -225,8 +225,8 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            NewCf.Data("name1", "id1"),
-            NewCf.Data("name1", "id2")
+            NewCf.Data("name1", "", "id1"),
+            NewCf.Data("name1", "", "id2")
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -241,8 +241,8 @@ public class CustomFormatStepTest
             .ContainKey("name1").WhoseValue.Should()
             .BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name1", "id1"),
-                NewCf.Processed("name1", "id2")
+                NewCf.Processed("name1", "", "id1"),
+                NewCf.Processed("name1", "", "id2")
             });
         processor.CustomFormatsWithOutdatedNames.Should().BeEmpty();
         processor.DeletedCustomFormatsInCache.Should().BeEmpty();
@@ -265,7 +265,7 @@ public class CustomFormatStepTest
         processor.DeletedCustomFormatsInCache.Should().BeEmpty();
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name1", "id1")
+                NewCf.Processed("name1", "", "id1")
             },
             op => op.Using(new JsonEquivalencyStep()));
     }
@@ -275,8 +275,8 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            NewCf.Data("name1", "id1"),
-            NewCf.Data("name2", "id2")
+            NewCf.Data("name1", "", "id1"),
+            NewCf.Data("name2", "", "id2")
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -292,7 +292,7 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should()
             .BeEquivalentTo(new List<ProcessedCustomFormatData>
             {
-                NewCf.Processed("name2", "id2")
+                NewCf.Processed("name2", "", "id2")
             });
     }
 
@@ -318,7 +318,7 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            NewCf.Data("name1", "id1", 100)
+            NewCf.Data("name1", "", "id1", 100)
         };
 
         var testConfig = new List<CustomFormatConfig>
@@ -341,7 +341,7 @@ public class CustomFormatStepTest
         processor.ProcessedCustomFormats.Should()
             .BeEquivalentTo(new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "id1", 100)
+                    NewCf.Processed("name1", "", "id1", 100)
                 },
                 op => op.Using(new JsonEquivalencyStep()));
     }
