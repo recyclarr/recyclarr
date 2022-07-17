@@ -1,0 +1,24 @@
+@page "/custom-format"
+@inherits ReactiveInjectableComponentBase<CustomFormatViewModel>
+
+@if (ViewModel is null)
+{
+    return;
+}
+
+<MudPaper>
+    <CustomFormatGroup ViewModel="@ViewModel.Groups[0]" />
+</MudPaper>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (ViewModel != null)
+        {
+            await ViewModel.OnInit.Execute();
+        }
+    }
+
+}

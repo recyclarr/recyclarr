@@ -1,0 +1,20 @@
+@inherits ReactiveComponentBase<CustomFormatGroupViewModel>
+
+@if (ViewModel is null)
+{
+    return;
+}
+
+<MudPaper>
+    <h1>@ViewModel.GroupName</h1>
+
+    @foreach (var cf in ViewModel.CustomFormats)
+    {
+        <h2>@cf.Name</h2>
+    }
+</MudPaper>
+
+
+@code {
+
+}

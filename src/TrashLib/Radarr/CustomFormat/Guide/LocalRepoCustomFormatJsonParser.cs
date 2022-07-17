@@ -23,7 +23,7 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
         _fs = fs;
     }
 
-    public ICollection<CustomFormatData> GetCustomFormatData()
+    public IObservable<CustomFormatData> GetCustomFormatData()
     {
         var jsonDir = _paths.RepoDirectory
             .SubDirectory("docs")
@@ -33,9 +33,7 @@ public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
         return jsonDir.EnumerateFiles("*.json").ToObservable()
             .Select(x => Observable.Defer(() => LoadJsonFromFile(x)))
             .Merge(8)
-            .NotNull()
-            .ToEnumerable()
-            .ToList();
+            .NotNull();
     }
 
     private IObservable<CustomFormatData?> LoadJsonFromFile(IFileInfo file)
