@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JSON Schema added to the config template YAML file.
 - `names` list under `custom_formats` in config YAML is now deprecated. Use `trash_ids` to list your
   custom formats instead.
+- Docker: The image is now rootless. The `PUID` and `PGID` environment variables are no longer used.
+  See the [Docker] wiki page for more details.
 
 ### Fixed
 
