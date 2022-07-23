@@ -33,7 +33,7 @@ on:
         type: boolean
 
 env:
-  SHOULD_PUBLISH: ${{ github.event_name == 'release' || inputs.should_publish == 'true' || github.event.push.ref == 'refs/heads/master' }}
+  SHOULD_PUBLISH: ${{ github.event_name == 'release' || inputs.should_publish == 'true' || github.event.ref == 'refs/heads/master' }}
   VERSION: ${{ github.event.release.tag_name || inputs.release_tag }}
 
 jobs:
