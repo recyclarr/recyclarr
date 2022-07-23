@@ -70,6 +70,7 @@ value *stability* the most,  you want the bottom row. If you value being on *the
 
 | Tag      | Description                                                             |
 | -------- | ----------------------------------------------------------------------- |
+| `edge`   | Docker-only changes that have not yet been released                     |
 | `latest` | Latest release, no matter what, including breaking changes              |
 | `2`      | Latest *feature* and *bugfix* release; manual update for major releases |
 | `2.1`    | Latest *bugfix* release; manual update if you want new features         |
