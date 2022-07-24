@@ -25,13 +25,12 @@ services:
     image: ghcr.io/recyclarr/recyclarr
     container_name: recyclarr
     init: true
+    user: 1000:1000
     networks: [recyclarr]
     volumes:
       - ./config:/config
     environment:
       - TZ=America/Santiago
-      - PUID=$DOCKER_UID
-      - PGID=$DOCKER_GID
 ```
 
 Here is a breakdown of the above YAML:
@@ -52,7 +51,10 @@ Here is a breakdown of the above YAML:
   run `docker compose down` or `docker compose stop`. Internally, this runs Recyclarr using
   [tini](https://github.com/krallin/tini). Please visit that repo to understand the benefits in
   detail, if you're interested.
-- Stuff under `environment` is documented in the Environment section below.
+- `user`<br>
+  Optional User and Group ID you want to run the container as. Recyclarr will run using this UID:GID
+  and any files it creates in your `/config` volume will also be owned by this user and group. The
+  default for this, if not specified, is `1000:1000`.
 
 ## Tags
 
@@ -92,21 +94,12 @@ value *stability* the most,  you want the bottom row. If you value being on *the
 - `TZ` (Default: `UTC`)<br>
   The time zone you want to use for Recyclarr's local time in the container.
 
-- `PUID` (Default: `1000`)<br>
-  The UID for the internal non-root user in the container. Match this to a UID on your host system
-  if you're using a directory-mounted volume for `/config`.
-
-- `PGID` (Default: `1000`)<br>
-  The GID for the internal non-root user's group in the container. Match this to a GID on your host
-  system if you're using a directory-mounted volume for `/config`.
-
 ## Modes
 
 The docker container can operate in one of two different ways, which are documented below.
 
-**TIP:** The first time you run Recyclarr in docker, it will automatically run the `create-config`
-subcommand to create your `recyclarr.yml` file in the `/config` directory (in the container) if that
-file does not exist yet.
+**NOTE:** `recyclarr.yml` does not exist the first time you run the container. You will get an error
+until you either copy it manually into the volume or run `recyclarr create-config` manually.
 
 ### Manual Mode
 
@@ -144,9 +137,10 @@ I will not support any usage of `docker exec`, for now. It's far too error prone
 mixed file permissions in Recyclarr's app data directory (the `/config` volume). Please use `docker
 run --rm` instead (documented in the previous section).
 
-When you run `docker exec` without the `--user` option, commands are executed as the internal root
-user. If you absolutely insist on using this command, ensure you specify a user & group that matches
-the `PUID` & `PGID` environment variables.
+When you run `docker exec` without the `--user` option, commands are executed as the default
+internal user, which is `1000:1000`. If you absolutely insist on using this command, ensure you
+specify the `--user` option using the same UID:GID that you use in `docker run` and that matches
+your volume's file ownership.
 
 ### Cron Mode
 
@@ -169,3 +163,13 @@ docker compose up -d
 ```
 
 This runs it without any subcommand or options, which will result in this mode being used.
+
+## Permission Issues
+
+The `/config` volume is very sensitive to user changes in the container. For example, if you first
+run the container using `user: 1000:1000` and then run a second time using `user: 1500:1500`, you
+are likely to get errors. This is because files that Recyclarr creates are owned by the user & group
+you specify. Not all files can be used by multiple users.
+
+If you change your user and/or group IDs, it is your responsibility to update the permissions of
+files in the `/config` volume so that they match.

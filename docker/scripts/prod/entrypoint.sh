@@ -1,12 +1,14 @@
 #!/bin/sh
 set -e
 
-userspec="$PUID:$PGID"
+if [[ ! -z ${PUID+x} ]]; then
+    echo 'PUID is no longer supported. Use `--user` instead.'
+    exit 1
+fi
 
-chown "$userspec" "$RECYCLARR_APP_DATA"
-
-if [ ! -f "$RECYCLARR_APP_DATA/recyclarr.yml" ]; then
-    su-exec "$userspec" recyclarr create-config
+if [[ ! -z ${PGID+x} ]]; then
+    echo 'PGID is no longer supported. Use `--user` instead.'
+    exit 1
 fi
 
 # If the script has any arguments, invoke the CLI instead. This allows the image to be used as a CLI
@@ -17,10 +19,10 @@ fi
 # ```
 #
 if [ "$#" -gt 0 ]; then
-    su-exec "$userspec" recyclarr "$@"
+    recyclarr "$@"
 else
     echo "Creating crontab file..."
-    echo "$CRON_SCHEDULE su-exec \"$userspec\" /cron.sh" | crontab -
+    echo "$CRON_SCHEDULE /cron.sh" | crontab -
 
     crontab -l
 

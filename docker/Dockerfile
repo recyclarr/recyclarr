@@ -22,18 +22,16 @@ ENV RECYCLARR_APP_DATA=/config \
     # as needed.
     CRON_SCHEDULE="@daily" \
     # The GLOBALIZATION variable is so that we do not need libicu installed (saves us ~40MB).
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true \
-    # User can specify their own UID/GID for the 'recyclarr' user if they want
-    PUID=1000 \
-    PGID=1000
-
-VOLUME /config
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
 
 RUN set -e; \
-    apk add --no-cache busybox-suid su-exec libstdc++ tzdata; \
+    apk add --no-cache libstdc++ tzdata; \
     mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR"
 
-COPY --chmod=755 --from=build /build/recyclarr /usr/local/bin
-COPY --chmod=755 ./scripts/prod/*.sh /
+COPY --chmod=555 --from=build /build/recyclarr /usr/local/bin
+COPY --chmod=555 ./scripts/prod/*.sh /
+
+USER 1000:1000
+VOLUME /config
 
 ENTRYPOINT ["/entrypoint.sh"]
