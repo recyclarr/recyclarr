@@ -8,7 +8,7 @@ networks:
 services:
   recyclarr:
     image: ghcr.io/recyclarr/recyclarr
-    user: 1000:1000
+    user: $DOCKER_UID:$DOCKER_GID
     build:
       context: .
       args:
