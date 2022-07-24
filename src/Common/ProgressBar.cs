@@ -1,6 +1,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
+using CliFx.Infrastructure;
 
 namespace Common;
 
@@ -9,6 +10,7 @@ namespace Common;
 /// </summary>
 public sealed class ProgressBar //: IProgress<double>
 {
+    private readonly IConsole _console;
     private readonly TimeSpan _animationInterval = TimeSpan.FromSeconds(1.0 / 8);
     private const string Animation = @"|/-\";
     private int _animationIndex;
@@ -17,12 +19,14 @@ public sealed class ProgressBar //: IProgress<double>
     public IObserver<float> ReportProgress => _reportProgress;
     public string Description { get; set; } = "";
 
-    public ProgressBar()
+    public ProgressBar(IConsole console)
     {
+        _console = console;
+
         // A progress bar is only for temporary display in a console window.
         // If the console output is redirected to a file, draw nothing.
         // Otherwise, we'll end up with a lot of garbage in the target file.
-        if (!Console.IsOutputRedirected)
+        if (!_console.IsOutputRedirected)
         {
             _reportProgress.Sample(_animationInterval)
                 .Select(CalculateText)
@@ -43,7 +47,7 @@ public sealed class ProgressBar //: IProgress<double>
         return $"[{progressBlocks}{progressBlocksUnfilled}] {percent,3}% {currentAnimationFrame} {Description}";
     }
 
-    private static void UpdateText(int previousTextLength, string text)
+    private void UpdateText(int previousTextLength, string text)
     {
         var outputBuilder = new StringBuilder();
         outputBuilder.Append('\r');
@@ -56,6 +60,6 @@ public sealed class ProgressBar //: IProgress<double>
             outputBuilder.Append(' ', lengthDifference);
         }
 
-        Console.Write(outputBuilder);
+        _console.Output.Write(outputBuilder);
     }
 }

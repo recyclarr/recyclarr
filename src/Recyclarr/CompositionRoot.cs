@@ -50,6 +50,7 @@ internal class CompositionRoot : ICompositionRoot
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
+        builder.RegisterType<ProgressBar>();
 
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);

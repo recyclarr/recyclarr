@@ -9,15 +9,18 @@ public class GitRepositoryFactory : IGitRepositoryFactory
     private readonly IFileUtilities _fileUtils;
     private readonly IRepositoryStaticWrapper _staticWrapper;
     private readonly Func<string, IGitRepository> _repoFactory;
+    private readonly Func<ProgressBar> _progressBarFactory;
 
     public GitRepositoryFactory(
         IFileUtilities fileUtils,
         IRepositoryStaticWrapper staticWrapper,
-        Func<string, IGitRepository> repoFactory)
+        Func<string, IGitRepository> repoFactory,
+        Func<ProgressBar> progressBarFactory)
     {
         _fileUtils = fileUtils;
         _staticWrapper = staticWrapper;
         _repoFactory = repoFactory;
+        _progressBarFactory = progressBarFactory;
     }
 
     public IGitRepository CreateAndCloneIfNeeded(string repoUrl, string repoPath, string branch)
@@ -36,10 +39,8 @@ public class GitRepositoryFactory : IGitRepositoryFactory
     {
         _fileUtils.DeleteReadOnlyDirectory(repoPath);
 
-        var progress = new ProgressBar
-        {
-            Description = "Fetching guide data\n"
-        };
+        var progress = _progressBarFactory();
+        progress.Description = "Fetching guide data\n";
 
         _staticWrapper.Clone(repoUrl, repoPath, new CloneOptions
         {

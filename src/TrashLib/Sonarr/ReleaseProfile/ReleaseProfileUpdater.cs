@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
 using TrashLib.ExceptionTypes;
@@ -15,6 +16,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
     private readonly ISonarrApi _api;
     private readonly ISonarrCompatibility _compatibility;
     private readonly IReleaseProfileFilterPipeline _pipeline;
+    private readonly IConsole _console;
     private readonly ISonarrGuideService _guide;
     private readonly ILogger _log;
 
@@ -23,13 +25,15 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         ISonarrGuideService guide,
         ISonarrApi api,
         ISonarrCompatibility compatibility,
-        IReleaseProfileFilterPipeline pipeline)
+        IReleaseProfileFilterPipeline pipeline,
+        IConsole console)
     {
         _log = logger;
         _guide = guide;
         _api = api;
         _compatibility = compatibility;
         _pipeline = pipeline;
+        _console = console;
     }
 
     public async Task Process(bool isPreview, SonarrConfiguration config)
@@ -56,7 +60,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
 
             if (isPreview)
             {
-                Utils.PrintTermsAndScores(selectedProfile);
+                PrintTermsAndScores(selectedProfile);
                 continue;
             }
 
@@ -64,6 +68,59 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         }
 
         await ProcessReleaseProfiles(filteredProfiles);
+    }
+
+    private void PrintTermsAndScores(ReleaseProfileData profile)
+    {
+        void PrintPreferredTerms(string title, IReadOnlyCollection<PreferredTermData> preferredTerms)
+        {
+            if (preferredTerms.Count <= 0)
+            {
+                return;
+            }
+
+            _console.Output.WriteLine($"  {title}:");
+            foreach (var (score, terms) in preferredTerms)
+            {
+                foreach (var term in terms)
+                {
+                    _console.Output.WriteLine($"    {score,-10} {term}");
+                }
+            }
+
+            _console.Output.WriteLine("");
+        }
+
+        void PrintTerms(string title, IReadOnlyCollection<TermData> terms)
+        {
+            if (terms.Count == 0)
+            {
+                return;
+            }
+
+            _console.Output.WriteLine($"  {title}:");
+            foreach (var term in terms)
+            {
+                _console.Output.WriteLine($"    {term}");
+            }
+
+            _console.Output.WriteLine("");
+        }
+
+        _console.Output.WriteLine("");
+
+        _console.Output.WriteLine(profile.Name);
+
+        _console.Output.WriteLine("  Include Preferred when Renaming?");
+        _console.Output.WriteLine("    " +
+                                  (profile.IncludePreferredWhenRenaming ? "YES" : "NO"));
+        _console.Output.WriteLine("");
+
+        PrintTerms("Must Contain", profile.Required);
+        PrintTerms("Must Not Contain", profile.Ignored);
+        PrintPreferredTerms("Preferred", profile.Preferred);
+
+        _console.Output.WriteLine("");
     }
 
     private async Task ProcessReleaseProfiles(

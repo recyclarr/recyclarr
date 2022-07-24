@@ -1,3 +1,4 @@
+using CliFx.Infrastructure;
 using Serilog;
 using TrashLib.Radarr.Config;
 using TrashLib.Radarr.QualityDefinition.Api;
@@ -8,14 +9,19 @@ namespace TrashLib.Radarr.QualityDefinition;
 internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
 {
     private readonly IQualityDefinitionService _api;
+    private readonly IConsole _console;
     private readonly IRadarrQualityDefinitionGuideParser _parser;
 
-    public RadarrQualityDefinitionUpdater(ILogger logger, IRadarrQualityDefinitionGuideParser parser,
-        IQualityDefinitionService api)
+    public RadarrQualityDefinitionUpdater(
+        ILogger logger,
+        IRadarrQualityDefinitionGuideParser parser,
+        IQualityDefinitionService api,
+        IConsole console)
     {
         Log = logger;
         _parser = parser;
         _api = api;
+        _console = console;
     }
 
     private ILogger Log { get; }
@@ -53,19 +59,19 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
         await ProcessQualityDefinition(selectedQuality);
     }
 
-    private static void PrintQualityPreview(IEnumerable<RadarrQualityData> quality)
+    private void PrintQualityPreview(IEnumerable<RadarrQualityData> quality)
     {
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
         const string format = "{0,-20} {1,-10} {2,-15} {3,-15}";
-        Console.WriteLine(format, "Quality", "Min", "Max", "Preferred");
-        Console.WriteLine(format, "-------", "---", "---", "---------");
+        _console.Output.WriteLine(format, "Quality", "Min", "Max", "Preferred");
+        _console.Output.WriteLine(format, "-------", "---", "---", "---------");
 
         foreach (var q in quality)
         {
-            Console.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
+            _console.Output.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
         }
 
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
     }
 
     private async Task ProcessQualityDefinition(IEnumerable<RadarrQualityData> guideQuality)
@@ -99,7 +105,7 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
                 continue;
             }
 
-            // Not using the original list again, so it's OK to modify the definition reftype objects in-place.
+            // Not using the original list again, so it's OK to modify the definition ref type objects in-place.
             entry.MinSize = qualityData.MinForApi;
             entry.MaxSize = qualityData.MaxForApi;
             entry.PreferredSize = qualityData.PreferredForApi;

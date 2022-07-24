@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using CliFx.Infrastructure;
 using Serilog;
 using TrashLib.Sonarr.Api;
 using TrashLib.Sonarr.Api.Objects;
@@ -9,15 +10,20 @@ namespace TrashLib.Sonarr.QualityDefinition;
 internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
 {
     private readonly ISonarrApi _api;
+    private readonly IConsole _console;
     private readonly ISonarrQualityDefinitionGuideParser _parser;
     private readonly Regex _regexHybrid = new(@"720|1080", RegexOptions.Compiled);
 
-    public SonarrQualityDefinitionUpdater(ILogger logger, ISonarrQualityDefinitionGuideParser parser,
-        ISonarrApi api)
+    public SonarrQualityDefinitionUpdater(
+        ILogger logger,
+        ISonarrQualityDefinitionGuideParser parser,
+        ISonarrApi api,
+        IConsole console)
     {
         Log = logger;
         _parser = parser;
         _api = api;
+        _console = console;
     }
 
     private ILogger Log { get; }
@@ -87,19 +93,19 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
         return hybrid;
     }
 
-    private static void PrintQualityPreview(IEnumerable<SonarrQualityData> quality)
+    private void PrintQualityPreview(IEnumerable<SonarrQualityData> quality)
     {
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
         const string format = "{0,-20} {1,-10} {2,-15}";
-        Console.WriteLine(format, "Quality", "Min", "Max");
-        Console.WriteLine(format, "-------", "---", "---");
+        _console.Output.WriteLine(format, "Quality", "Min", "Max");
+        _console.Output.WriteLine(format, "-------", "---", "---");
 
         foreach (var q in quality)
         {
-            Console.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax);
+            _console.Output.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax);
         }
 
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
     }
 
     private async Task ProcessQualityDefinition(IEnumerable<SonarrQualityData> guideQuality)
@@ -132,7 +138,7 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
                 continue;
             }
 
-            // Not using the original list again, so it's OK to modify the definition reftype objects in-place.
+            // Not using the original list again, so it's OK to modify the definition ref type objects in-place.
             entry.MinSize = qualityData.MinForApi;
             entry.MaxSize = qualityData.MaxForApi;
             newQuality.Add(entry);

@@ -1,3 +1,4 @@
+using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
 using TrashLib.Extensions;
@@ -12,17 +13,20 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
     private readonly ICachePersister _cache;
     private readonly IGuideProcessor _guideProcessor;
     private readonly IPersistenceProcessor _persistenceProcessor;
+    private readonly IConsole _console;
 
     public CustomFormatUpdater(
         ILogger log,
         ICachePersister cache,
         IGuideProcessor guideProcessor,
-        IPersistenceProcessor persistenceProcessor)
+        IPersistenceProcessor persistenceProcessor,
+        IConsole console)
     {
         Log = log;
         _cache = cache;
         _guideProcessor = guideProcessor;
         _persistenceProcessor = persistenceProcessor;
+        _console = console;
     }
 
     private ILogger Log { get; }
@@ -133,7 +137,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private bool ValidateGuideDataAndCheckShouldProceed(RadarrConfiguration config)
     {
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
 
         if (_guideProcessor.DuplicatedCustomFormats.Count > 0)
         {
@@ -151,7 +155,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 }
             }
 
-            Console.WriteLine("");
+            _console.Output.WriteLine("");
         }
 
         if (_guideProcessor.CustomFormatsNotInGuide.Count > 0)
@@ -162,7 +166,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                         "warning");
             Log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
 
-            Console.WriteLine("");
+            _console.Output.WriteLine("");
         }
 
         var cfsWithoutQualityProfiles = _guideProcessor.ConfigData
@@ -175,7 +179,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
             Log.Debug("These custom formats will be uploaded but are not associated to a quality profile in the " +
                       "config file: {UnassociatedCfs}", cfsWithoutQualityProfiles);
 
-            Console.WriteLine("");
+            _console.Output.WriteLine("");
         }
 
         // No CFs are defined in this item, or they are all invalid. Skip this whole instance.
@@ -195,7 +199,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 Log.Information("{CfList}", tuple);
             }
 
-            Console.WriteLine("");
+            _console.Output.WriteLine("");
         }
 
         if (_guideProcessor.CustomFormatsWithOutdatedNames.Count > 0)
@@ -209,7 +213,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 Log.Warning(" - '{OldName}' -> '{NewName}'", oldName, newName);
             }
 
-            Console.WriteLine("");
+            _console.Output.WriteLine("");
         }
 
         return true;
@@ -217,34 +221,34 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private void PreviewCustomFormats()
     {
-        Console.WriteLine("");
-        Console.WriteLine("=========================================================");
-        Console.WriteLine("            >>> Custom Formats From Guide <<<            ");
-        Console.WriteLine("=========================================================");
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
+        _console.Output.WriteLine("=========================================================");
+        _console.Output.WriteLine("            >>> Custom Formats From Guide <<<            ");
+        _console.Output.WriteLine("=========================================================");
+        _console.Output.WriteLine("");
 
         const string format = "{0,-30} {1,-35}";
-        Console.WriteLine(format, "Custom Format", "Trash ID");
-        Console.WriteLine(string.Concat(Enumerable.Repeat('-', 1 + 30 + 35)));
+        _console.Output.WriteLine(format, "Custom Format", "Trash ID");
+        _console.Output.WriteLine(string.Concat(Enumerable.Repeat('-', 1 + 30 + 35)));
 
         foreach (var cf in _guideProcessor.ProcessedCustomFormats)
         {
-            Console.WriteLine(format, cf.Name, cf.TrashId);
+            _console.Output.WriteLine(format, cf.Name, cf.TrashId);
         }
 
-        Console.WriteLine("");
-        Console.WriteLine("=========================================================");
-        Console.WriteLine("      >>> Quality Profile Assignments & Scores <<<       ");
-        Console.WriteLine("=========================================================");
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
+        _console.Output.WriteLine("=========================================================");
+        _console.Output.WriteLine("      >>> Quality Profile Assignments & Scores <<<       ");
+        _console.Output.WriteLine("=========================================================");
+        _console.Output.WriteLine("");
 
         const string profileFormat = "{0,-18} {1,-20} {2,-8}";
-        Console.WriteLine(profileFormat, "Profile", "Custom Format", "Score");
-        Console.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
+        _console.Output.WriteLine(profileFormat, "Profile", "Custom Format", "Score");
+        _console.Output.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
 
         foreach (var (profileName, scoreMap) in _guideProcessor.ProfileScores)
         {
-            Console.WriteLine(profileFormat, profileName, "", "");
+            _console.Output.WriteLine(profileFormat, profileName, "", "");
 
             foreach (var (customFormat, score) in scoreMap.Mapping)
             {
@@ -258,10 +262,10 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                     continue;
                 }
 
-                Console.WriteLine(profileFormat, "", matchingCf.Name, score);
+                _console.Output.WriteLine(profileFormat, "", matchingCf.Name, score);
             }
         }
 
-        Console.WriteLine("");
+        _console.Output.WriteLine("");
     }
 }
