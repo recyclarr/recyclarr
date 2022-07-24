@@ -70,9 +70,14 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
+      - name: Determine if single file build or not
+        if: contains(matrix.runtime, 'musl')
+        id: single_file
+        run: echo '::set-output name=arg::-noSingleFile'
+
       - name: Publish
         shell: pwsh
-        run: ci/Publish.ps1 ${{ matrix.runtime }}
+        run: ci/Publish.ps1 ${{ matrix.runtime }} ${{ steps.single_file.outputs.arg }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

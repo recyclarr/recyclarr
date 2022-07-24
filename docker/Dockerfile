@@ -16,7 +16,8 @@ RUN ./build.sh
 FROM alpine AS final
 
 # Required by environment and/or dotnet
-ENV RECYCLARR_APP_DATA=/config \
+ENV PATH="${PATH}:/app/recyclarr" \
+    RECYCLARR_APP_DATA=/config \
     CRON_SCHEDULE="@daily" \
     DOTNET_BUNDLE_EXTRACT_BASE_DIR=/tmp/.net \
     # The GLOBALIZATION variable is so that we do not need libicu installed (saves us ~40MB).
@@ -26,7 +27,7 @@ RUN set -ex; \
     apk add --no-cache bash libstdc++ tzdata supercronic; \
     mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR";
 
-COPY --chmod=555 --from=build /build/recyclarr /usr/local/bin
+COPY --from=build /build/publish /app/recyclarr/
 COPY --chmod=555 ./scripts/prod/*.sh /
 
 USER 1000:1000

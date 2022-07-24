@@ -11,4 +11,4 @@ fi
 
 # Download and extract the recyclarr binary from the release
 wget --quiet -O recyclarr.zip "https://github.com/$REPOSITORY/releases/$download_path/recyclarr-$runtime.zip"
-unzip recyclarr.zip
+unzip recyclarr.zip -d publish

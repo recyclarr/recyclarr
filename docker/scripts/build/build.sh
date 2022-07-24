@@ -14,3 +14,5 @@ if [ -z "$BUILD_FROM_BRANCH" ]; then
 else
     . ./build-using-clone.sh
 fi
+
+chmod a+rx publish/recyclarr
