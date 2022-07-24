@@ -34,7 +34,7 @@ internal class CompositionRoot : ICompositionRoot
     public IServiceLocatorProxy Setup(ContainerBuilder builder, string? appDataDir, IConsole console,
         LogEventLevel logLevel)
     {
-        builder.RegisterInstance(console).As<IConsole>();
+        builder.RegisterInstance(console).As<IConsole>().ExternallyOwned();
 
         RegisterAppPaths(builder, appDataDir);
         RegisterLogger(builder, logLevel);
