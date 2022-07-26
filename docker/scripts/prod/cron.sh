@@ -1,6 +1,4 @@
-#!/bin/sh
-set -e
-
+#!/usr/bin/env bash
 echo
 echo "-------------------------------------------------------------"
 echo " Executing Cron Tasks: $(date)"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 if [[ ! -z ${PUID+x} ]]; then

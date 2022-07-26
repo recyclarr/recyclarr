@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -ex
 
 git clone -b $BUILD_FROM_BRANCH "https://github.com/$REPOSITORY.git" source

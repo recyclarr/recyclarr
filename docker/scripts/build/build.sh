@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -ex
 
 # Determine the runtime from the target platform provided by Docker Buildx

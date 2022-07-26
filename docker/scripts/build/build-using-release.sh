@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -ex
 
 # The download path is a bit different when using the latest release instead of a specific
