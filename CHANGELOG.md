@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Radarr: New `--list-custom-formats` CLI option for getting a flat list of all CFs in the guide in
   YAML format, ready to copy & paste.
+- Docker: New `edge` tag for experimental and potentially unstable builds on `master`. Includes both
+  the latest Docker and Recyclarr changes to allow users to try them out before an official release.
 
 ### Changed
 
