@@ -58,9 +58,9 @@ jobs:
         run: |
           regex="[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"
           if [[ '${{ env.VERSION }}' =~ $regex ]]; then
-            echo ::set-output name=match::true
+            echo '::set-output name=match::true'
           else
-            echo ::set-output name=match::false
+            echo '::set-output name=match::false'
           fi
 
       - name: Set Version Tags
