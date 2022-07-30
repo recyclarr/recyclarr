@@ -40,7 +40,7 @@ jobs:
         run: dotnet test src --configuration Release --logger GitHubActions
 
   build:
-    name: Build
+    name: Build Non-MUSL
     needs: test
     strategy:
       fail-fast: true
@@ -53,9 +53,6 @@ jobs:
           - linux-arm64
           - osx-x64
           - osx-arm64
-          - linux-musl-x64
-          - linux-musl-arm
-          - linux-musl-arm64
     # Must run on Windows so that version info gets properly set in host EXE. See:
     # https://github.com/dotnet/runtime/issues/3828
     runs-on: windows-latest
@@ -70,14 +67,9 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Determine if single file build or not
-        if: contains(matrix.runtime, 'musl')
-        id: single_file
-        run: echo '::set-output name=arg::-noSingleFile'
-
       - name: Publish
         shell: pwsh
-        run: ci/Publish.ps1 ${{ matrix.runtime }} ${{ steps.single_file.outputs.arg }}
+        run: ci/Publish.ps1 ${{ matrix.runtime }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -92,9 +84,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: windows-latest, runtime: win-x64}
-          - {os: ubuntu-latest, runtime: linux-x64}
-          - {os: macos-latest, runtime: osx-x64}
+          - { os: windows-latest, runtime: win-x64 }
+          - { os: ubuntu-latest, runtime: linux-x64 }
+          - { os: macos-latest, runtime: osx-x64 }
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -109,9 +101,44 @@ jobs:
         shell: pwsh
         run: ci/SmokeTest.ps1 ./recyclarr
 
+  # NOTE: This is duplicated from the 'build' job. Sadly, reusable workflows cannot be invoked from
+  # matrix jobs. See here:
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#limitations
+  musl:
+    name: Build MUSL
+    needs: test
+    strategy:
+      fail-fast: true
+      matrix:
+        runtime:
+          - linux-musl-x64
+          - linux-musl-arm
+          - linux-musl-arm64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+
+      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Publish
+        shell: pwsh
+        run: ci/Publish.ps1 ${{ matrix.runtime }} -noSingleFile
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: recyclarr-${{ matrix.runtime }}
+          path: publish/${{ matrix.runtime }}/*
+
   release:
     name: Release
-    needs: smoke
+    needs: [smoke, musl]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -154,12 +181,17 @@ jobs:
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 
+  docker:
+    name: Docker
+    needs: musl
+    uses: ./.github/workflows/docker.yml
+
   # The main purpose of this job is to group all the other jobs together into one single job status
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
   # jobs in a workflow to ensure they all pass.
   check:
     if: always()
-    name: Check Build Succeeds
+    name: Report Build Status
     needs: [build, smoke]
     runs-on: ubuntu-latest
     steps:

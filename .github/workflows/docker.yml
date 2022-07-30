@@ -2,39 +2,10 @@
 name: Docker Image
 
 on:
-  push:
-    # Tags are explicitly ignored on push. We still want branches to be processed, but they won't if
-    # the `branches` property is missing. See more detail here:
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushbranchestagsbranches-ignoretags-ignore
-    tags-ignore: ["*"]
-    branches: ["*"]
-    paths:
-      - docker/**
-      - .github/workflows/docker.yml
-
-  pull_request:
-    paths:
-      - docker/**
-      - .github/workflows/docker.yml
-
-  release:
-    types: [published]
-
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: Release Tag
-        required: true
-        type: string
-      should_publish:
-        description: Publish Image to GHCR?
-        required: false
-        default: false
-        type: boolean
+  workflow_call:
 
 env:
-  SHOULD_PUBLISH: ${{ github.event_name == 'release' || inputs.should_publish == 'true' || github.event.ref == 'refs/heads/master' }}
-  VERSION: ${{ github.event.release.tag_name || inputs.release_tag }}
+  SHOULD_PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' }}
 
 jobs:
   docker:
@@ -50,24 +21,19 @@ jobs:
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v2
-        with:
-          buildkitd-flags: --debug
+        # with:
+        #   buildkitd-flags: --debug
 
-      - name: Check if tag is a version number
+      - name: Check Version
         id: check_version
-        run: |
-          regex="[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"
-          if [[ '${{ env.VERSION }}' =~ $regex ]]; then
-            echo '::set-output name=match::true'
-          else
-            echo '::set-output name=match::false'
-          fi
+        shell: pwsh
+        run: ci/Test-Version.ps1 ${{ github.ref_name }}
 
-      - name: Set Version Tags
+      - name: Set Docker Tags
         id: meta
         uses: docker/metadata-action@v4
         env:
-          SEMVER: type=semver,enable=${{ steps.check_version.outputs.match }},value=${{ env.VERSION }}
+          SEMVER: type=semver,enable=${{ steps.check_version.outputs.match }},value=${{ github.ref_name }}
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -76,10 +42,10 @@ jobs:
             ${{ env.SEMVER }},pattern={{major}}.{{minor}}
             ${{ env.SEMVER }},pattern={{major}}
 
-      - name: Enable building from source
-        id: info
-        if: ${{ github.event.ref == 'refs/heads/master' }}
-        run: echo '::set-output name=build_from_branch::master'
+      - name: Grab Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: docker/artifacts
 
       - name: Login to GHCR
         if: env.SHOULD_PUBLISH
@@ -95,10 +61,6 @@ jobs:
           context: ./docker
           push: ${{ env.SHOULD_PUBLISH }}
           no-cache: true
-          build-args: |
-            REPOSITORY=${{ github.repository }}
-            ${{ env.VERSION && format('RELEASE_TAG={0}', env.VERSION) }}
-            BUILD_FROM_BRANCH=${{ steps.info.outputs.build_from_branch }}
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

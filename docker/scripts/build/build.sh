@@ -9,10 +9,8 @@ case "$TARGETPLATFORM" in
     *) echo >&2 "ERROR: Unsupported target platform: $TARGETPLATFORM"; exit 1 ;;
 esac
 
-if [ -z "$BUILD_FROM_BRANCH" ]; then
-    . ./build-using-release.sh
-else
-    . ./build-using-clone.sh
-fi
+path="artifacts/recyclarr-$runtime/"
+
+mv "$path" publish
 
 chmod a+rx publish/recyclarr

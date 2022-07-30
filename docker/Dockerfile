@@ -2,14 +2,12 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
 
 WORKDIR /build
 
-ARG RELEASE_TAG=latest
 ARG TARGETPLATFORM
-ARG REPOSITORY=recyclarr/recyclarr
-ARG BUILD_FROM_BRANCH
 
 RUN apk add unzip bash
 
 COPY --chmod=544 ./scripts/build/*.sh .
+COPY ./artifacts ./artifacts
 RUN ./build.sh
 
 #############################################################################
