@@ -66,7 +66,6 @@ run it.
 | ---------- | ---------------- | -------------------------------------- |
 | Windows    | ---              | [x64][win-x64], [arm64][win-arm64]     |
 | Linux      | [arm][linux-arm] | [x64][linux-x64], [arm64][linux-arm64] |
-| Linux MUSL | [arm][musl-arm]  | [x64][musl-x64], [arm64][musl-arm64]   |
 | Mac OS     | ---              | [x64][osx-x64], [arm64][osx-arm64]     |
 
 [win-x64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-win-x64.zip
@@ -74,14 +73,11 @@ run it.
 [linux-x64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-x64.zip
 [linux-arm64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-arm64.zip
 [linux-arm]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-arm.zip
-[musl-x64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-musl-x64.zip
-[musl-arm64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-musl-arm64.zip
-[musl-arm]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-linux-musl-arm.zip
 [osx-x64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-osx-x64.zip
 [osx-arm64]: https://github.com/recyclarr/recyclarr/releases/latest/download/recyclarr-osx-arm64.zip
 
 The above links are from the latest release on the [releases page][rp]. Feel free to visit there for
-release notes and older releases.
+release notes, additional architectures and platforms, and older releases.
 
 [rp]: https://github.com/recyclarr/recyclarr/releases
 
