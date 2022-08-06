@@ -37,6 +37,7 @@ Before installing & running Recyclarr, please review the requirements & special 
 
 - Minimum Supported Sonarr Version: `3.0.4.1098`
 - Minimum Supported Radarr Version: `3.*`
+- Sonarr v4 is **not supported yet**.
 - Do not run Notifiarr's Trash Guides Integration in conjunction with Recyclarr's Custom Format
   synchronization. In general, you should not have two different tools updating the same data in
   Radarr or Sonarr.
