@@ -5,7 +5,7 @@ networks:
 
 services:
   recyclarr:
-    image: ghcr.io/recyclarr/recyclarr
+    image: ghcr.io/recyclarr/recyclarr:edge
     user: $DOCKER_UID:$DOCKER_GID
     build:
       context: .
