@@ -7,13 +7,14 @@ that everyone should follow.
    [the Ideas discussion board][ideas] and open a thread there, or create a new issue. I ask that
    you do this to avoid the potential of rejecting work already done in a pull request.
 
-1. **For Markdown changes,** Any and all changes must pass configured [markdownlint] rules (see the
+1. **For Markdown changes,** any and all changes must pass configured [markdownlint] rules (see the
    `.markdownlint.json` files in this repository for project-specific adjustments to those rules).
 
 1. **For C# changes,** code must conform to the project's style. My day to day coding is done in
    Jetbrains Rider. If using that IDE, doing a simple [Code Cleanup] on modified source files should
-   be enough. If you're using Visual Studio or some other editor, you are on your own. Formatting
-   rules are stored in `src/.editorconfig` and `src/TrashUpdater.sln.DotSettings`.
+   be enough. Make sure to select the "Recyclarr Cleanup" profile when you do the code cleanup. If
+   you're using Visual Studio or some other editor, you are on your own. Formatting rules are stored
+   in `src/.editorconfig` and `src/Recyclarr.sln.DotSettings`.
 
 [ideas]: https://github.com/recyclarr/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
@@ -70,3 +71,42 @@ locally to these steps:
 | `linux/arm/v7`  | `linux-musl-arm`   |
 | `linux/arm64`   | `linux-musl-arm64` |
 | `linux/amd64`   | `linux-musl-x64`   |
+
+## Release Process
+
+Release numbering follows [Semantic Versioning][semver]. The [GitVersion] package is used in .NET
+projects to automatically version the executable according to [Conventional Commits][commits] rules
+in conjunction with semantic versioning.
+
+The goal is to allow commit messages to drive the way the semantic version number is advanced during
+development. When a feature is implemented, the corresponding commit results in the minor version
+number component being advanced by 1. Similarly, the patch portion is advanced by 1 when a bugfix is
+committed.
+
+To make a release, follow these steps:
+
+1. Prerequisite tooling must be installed first. Run the `Install-Script-Dependencies.ps1`
+   powershell script to acquire them. It's also a good idea to occassionally run this for upgrade
+   purposes, too.
+1. Run `Prepare-Release.ps1`. This will do the following:
+   1. Update the changelog for the release according to [Keep a Changelog][changelog] rules.
+   1. Commit the changelog updates.
+   1. Create a tag for the release (using GitVersion).
+1. Use Git to push the new tag and commits on `master` upstream where the Github Workflows will take
+   over.
+
+The Github Workflows manage the release process after the push by doing the following:
+
+1. Compile the .NET projects.
+1. Create a [Github Release][release] with the .NET artifacts attached.
+1. Build and publish a new Docker image to the [Github Container Registry][ghcr]
+1. Send a release notification to the `#related-announcements` channel in the official [TRaSH Guides
+   Discord][discord].
+
+[semver]: https://semver.org/
+[GitVersion]: https://gitversion.net/
+[commits]: https://www.conventionalcommits.org/en/v1.0.0/
+[changelog]: https://keepachangelog.com/en/1.0.0/
+[release]: https://github.com/recyclarr/recyclarr/releases
+[ghcr]: https://github.com/recyclarr/recyclarr/pkgs/container/recyclarr
+[discord]: https://discord.com/invite/Vau8dZ3
