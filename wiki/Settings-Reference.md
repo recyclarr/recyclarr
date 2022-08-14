@@ -1,7 +1,8 @@
 This page contains the YAML reference for Recyclarr settings. Settings support was introduced in
 version `1.7.0`.
 
-The `settings.yml` file is located in the following locations depending on your platform:
+The `settings.yml` file is located in the following locations (by default) depending on your
+platform:
 
 | Platform | Location                                               |
 | -------- | ------------------------------------------------------ |
@@ -36,6 +37,7 @@ page.
 
 Table of Contents
 
+- [Global Settings](#global-settings)
 - [Repository Settings](#repository-settings)
 
 ## Global Settings
@@ -52,14 +54,27 @@ enable_ssl_certificate_validation: true
 
 ## Repository Settings
 
+**NOTE**: Never edit files in the locally cloned repo managed by Recyclarr. It will always destroy
+local changes in that repository.
+
 ```yml
 repository:
   clone_url: https://github.com/TRaSH-/Guides.git
+  branch: master
+  sha1: e27659e3f90d9b60c1f0b0f204b2530bb2299b41
 ```
 
-- `clone_url`<br>
+- `clone_url` *(Default: `https://github.com/TRaSH-/Guides.git`)*<br>
   A URL compatible with `git clone` that is used to clone the [Trash Guides
   repository][official_repo]. This setting exists for enthusiasts that may want to instead have
   Recyclarr pull data from a fork instead of the official repository.
+
+- `branch` *(Default: `master`)*<br>
+  The name of a branch to check out in the repository.
+
+- `sha1` *(Default: empty)*<br>
+  A SHA1 (commit hash) in Git to use. If specified, it overrides the `branch` setting. This SHA1 is
+  passed to `git reset --hard` to force your local clone to this specific revision in the
+  repository. If not specified, only the `branch` controls what revision is used in the repo.
 
 [official_repo]: https://github.com/TRaSH-/Guides

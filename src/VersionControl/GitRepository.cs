@@ -1,3 +1,4 @@
+using Common.Extensions;
 using LibGit2Sharp;
 
 namespace VersionControl;
@@ -35,9 +36,10 @@ public sealed class GitRepository : IGitRepository
         Commands.Fetch(_repo.Value, origin.Name, origin.FetchRefSpecs.Select(s => s.Specification), null, "");
     }
 
-    public void ResetHard(string toBranch)
+    public void ResetHard(string toBranchOrSha1)
     {
-        var commit = _repo.Value.Branches[toBranch].Tip;
+        var branch = _repo.Value.Branches.FirstOrDefault(b => b.FriendlyName.ContainsIgnoreCase(toBranchOrSha1));
+        var commit = branch is not null ? branch.Tip : _repo.Value.Lookup<Commit>(toBranchOrSha1);
         _repo.Value.Reset(ResetMode.Hard, commit);
     }
 

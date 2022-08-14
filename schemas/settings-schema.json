@@ -1,24 +1,12 @@
 {
-  "$schema": "http://json-schema.org/draft-06/schema#",
-  "$ref": "#/definitions/Settings",
-  "definitions": {
-    "Settings": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "Recyclarr Settings",
-      "description": "Optional settings to control the behavior of Recyclarr",
-      "properties": {
-        "repository": {
-          "$ref": "#/definitions/Repository"
-        },
-        "enable_ssl_certificate_validation": {
-          "type": "boolean",
-          "title": "Allow SSL certificate validation for Sonarr & Radarr",
-          "description": "If set to `false`, SSL certificates are not validated. This is useful if you are connecting to a Sonarr or Radarr instance using `https` and it is set up with self-signed certificates. Note that disabling this setting is a **security risk** and should be avoided unless you are absolutely sure what you are doing."
-        }
-      }
-    },
-    "Repository": {
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json",
+  "type": "object",
+  "title": "Recyclarr Settings",
+  "description": "Optional settings to control the behavior of Recyclarr",
+  "additionalProperties": false,
+  "properties": {
+    "repository": {
       "type": "object",
       "additionalProperties": false,
       "title": "Settings for the git repo",
@@ -26,20 +14,26 @@
       "properties": {
         "clone_url": {
           "type": "string",
-          "title": "Clone URL to the trash guides git repository",
-          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Recyclarr pull data from a fork instead of the official repository.",
           "format": "uri",
-          "qt-uri-protocols": [
-            "http",
-            "https",
-            "ssh",
-            "git"
-          ],
-          "qt-uri-extensions": [
-            ".git"
-          ]
+          "title": "Clone URL to the trash guides git repository",
+          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Recyclarr pull data from a fork instead of the official repository."
+        },
+        "branch": {
+          "type": "string",
+          "title": "The name of a branch to check out in the repository"
+        },
+        "sha1": {
+          "type": "string",
+          "title": "A SHA1 (commit hash) in Git to use",
+          "description": "If specified, it overrides the `branch` setting. This SHA1 is passed to `git reset --hard` to force your local clone to this specific revision in the repository. If not specified, only the `branch` controls what revision is used in the repo."
         }
       }
+    },
+    "enable_ssl_certificate_validation": {
+      "type": "boolean",
+      "title": "Allow SSL certificate validation for Sonarr & Radarr",
+      "description": "If set to `false`, SSL certificates are not validated. This is useful if you are connecting to a Sonarr or Radarr instance using `https` and it is set up with self-signed certificates. Note that disabling this setting is a **security risk** and should be avoided unless you are absolutely sure what you are doing.",
+      "default": false
     }
   }
 }

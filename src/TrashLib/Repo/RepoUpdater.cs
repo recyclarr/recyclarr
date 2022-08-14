@@ -54,16 +54,20 @@ public class RepoUpdater : IRepoUpdater
     {
         var repoSettings = _settingsProvider.Settings.Repository;
         var cloneUrl = repoSettings.CloneUrl;
-        const string branch = "master";
+        var branch = repoSettings.Branch;
 
         _log.Debug("Using Branch & Clone URL: {Branch}, {Url}", branch, cloneUrl);
+        if (repoSettings.Sha1 is not null)
+        {
+            _log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
+        }
 
         try
         {
             using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
             repo.ForceCheckout(branch);
             repo.Fetch();
-            repo.ResetHard($"origin/{branch}");
+            repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
         }
         catch (LibGit2SharpException e)
         {

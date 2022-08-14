@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   YAML format, ready to copy & paste.
 - Docker: New `edge` tag for experimental and potentially unstable builds on `master`. Includes both
   the latest Docker and Recyclarr changes to allow users to try them out before an official release.
+- Settings: New `branch` and `sha1` Repository settings. (#27)
 
 ### Changed
 
