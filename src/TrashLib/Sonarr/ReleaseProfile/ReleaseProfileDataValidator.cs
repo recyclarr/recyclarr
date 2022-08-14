@@ -15,6 +15,7 @@ internal class PreferredTermDataValidator : AbstractValidator<PreferredTermData>
     public PreferredTermDataValidator()
     {
         RuleFor(x => x.Terms).NotEmpty();
+        RuleForEach(x => x.Terms).SetValidator(new TermDataValidator());
     }
 }
 

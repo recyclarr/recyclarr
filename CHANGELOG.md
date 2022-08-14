@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker: Resolved errors related to `/tmp/.net` directory not existing.
 - An exception that says "Cannot write to a closed TextWriter" would sometimes occur at the end of
   running a command.
+- Sonarr: Validate the TRaSH Guide data better to avoid uploading bad/empty data to Sonarr.
 
 ## [2.2.1] - 2022-06-18
 

@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
 using Common.Extensions;
-using Common.FluentValidation;
 using MoreLinq;
 using Newtonsoft.Json;
 using Serilog;
+using TrashLib.Sonarr.ReleaseProfile.Filters;
 using TrashLib.Startup;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Guide;
@@ -32,9 +32,12 @@ public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
         var tasks = jsonDir.GetFiles("*.json")
             .Select(f => LoadAndParseFile(f, converter));
 
-        return Task.WhenAll(tasks).Result
+        var data = Task.WhenAll(tasks).Result
             // Make non-nullable type and filter out null values
             .Choose(x => x is not null ? (true, x) : default);
+
+        var validator = new ReleaseProfileDataValidationFilterer(_log);
+        return validator.FilterProfiles(data);
     }
 
     private async Task<ReleaseProfileData?> LoadAndParseFile(IFileInfo file, params JsonConverter[] converters)
@@ -71,8 +74,6 @@ public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
 
     public IReadOnlyCollection<ReleaseProfileData> GetReleaseProfileData()
     {
-        return _data.Value
-            .IsValid(new ReleaseProfileDataValidator())
-            .ToList();
+        return _data.Value.ToList();
     }
 }

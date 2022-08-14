@@ -1,69 +1,58 @@
 using System.Collections.ObjectModel;
-using Common.FluentValidation;
-using FluentValidation.Results;
 using Serilog;
 using TrashLib.Sonarr.Config;
 
-namespace TrashLib.Sonarr.ReleaseProfile;
+namespace TrashLib.Sonarr.ReleaseProfile.Filters;
 
 public class ReleaseProfileDataFilterer
 {
     private readonly ILogger _log;
+    private readonly ReleaseProfileDataValidationFilterer _validator;
 
     public ReleaseProfileDataFilterer(ILogger log)
     {
         _log = log;
-    }
-
-    private void LogInvalidTerm(List<ValidationFailure> failures, string filterDescription)
-    {
-        _log.Debug("Validation failed on term data ({Filter}): {Failures}", filterDescription, failures);
+        _validator = new ReleaseProfileDataValidationFilterer(log);
     }
 
     public ReadOnlyCollection<TermData> ExcludeTerms(IEnumerable<TermData> terms,
         IEnumerable<string> excludeFilter)
     {
-        return terms
-            .Where(x => !excludeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase))
-            .IsValid(new TermDataValidator(), (e, x) => LogInvalidTerm(e, $"Exclude: {x}"))
-            .ToList().AsReadOnly();
+        var result = terms.Where(x => !excludeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase));
+        return _validator.FilterTerms(result).ToList().AsReadOnly();
     }
 
     public ReadOnlyCollection<PreferredTermData> ExcludeTerms(IEnumerable<PreferredTermData> terms,
         IReadOnlyCollection<string> excludeFilter)
     {
-        return terms
+        var result = terms
             .Select(x => new PreferredTermData
             {
                 Score = x.Score,
                 Terms = ExcludeTerms(x.Terms, excludeFilter)
-            })
-            .IsValid(new PreferredTermDataValidator(), (e, x) => LogInvalidTerm(e, $"Exclude Preferred: {x}"))
-            .ToList()
-            .AsReadOnly();
+            });
+
+        return _validator.FilterTerms(result).ToList().AsReadOnly();
     }
 
     public ReadOnlyCollection<TermData> IncludeTerms(IEnumerable<TermData> terms,
         IEnumerable<string> includeFilter)
     {
-        return terms
-            .Where(x => includeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase))
-            .IsValid(new TermDataValidator(), (e, x) => LogInvalidTerm(e, $"Include: {x}"))
-            .ToList().AsReadOnly();
+        var result = terms.Where(x => includeFilter.Contains(x.TrashId, StringComparer.InvariantCultureIgnoreCase));
+        return _validator.FilterTerms(result).ToList().AsReadOnly();
     }
 
     public ReadOnlyCollection<PreferredTermData> IncludeTerms(IEnumerable<PreferredTermData> terms,
         IReadOnlyCollection<string> includeFilter)
     {
-        return terms
+        var result = terms
             .Select(x => new PreferredTermData
             {
                 Score = x.Score,
                 Terms = IncludeTerms(x.Terms, includeFilter)
-            })
-            .IsValid(new PreferredTermDataValidator(), (e, x) => LogInvalidTerm(e, $"Include Preferred {x}"))
-            .ToList()
-            .AsReadOnly();
+            });
+
+        return _validator.FilterTerms(result).ToList().AsReadOnly();
     }
 
     public ReleaseProfileData? FilterProfile(ReleaseProfileData selectedProfile,

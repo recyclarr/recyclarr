@@ -3,6 +3,7 @@ using NUnit.Framework;
 using TestLibrary.AutoFixture;
 using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Sonarr.ReleaseProfile.Filters;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile;
 

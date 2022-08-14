@@ -13,11 +13,6 @@ public class ReleaseProfileFilterPipeline : IReleaseProfileFilterPipeline
 
     public ReleaseProfileData Process(ReleaseProfileData profile, ReleaseProfileConfig config)
     {
-        foreach (var filter in _filters)
-        {
-            profile = filter.Transform(profile, config);
-        }
-
-        return profile;
+        return _filters.Aggregate(profile, (current, filter) => filter.Transform(current, config));
     }
 }
