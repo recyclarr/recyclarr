@@ -39,7 +39,7 @@
     <PackageReference Update="System.IO.Abstractions.TestingHelpers" Version="17.*" />
     <PackageReference Update="System.Reactive" Version="5.*" />
     <PackageReference Update="TestableIO.System.IO.Abstractions.Extensions" Version="1.*" />
-    <PackageReference Update="YamlDotNet" Version="11.*" />
+    <PackageReference Update="YamlDotNet" Version="12.*" />
 
     <!--
     Cannot upgrade until these are resolved:
