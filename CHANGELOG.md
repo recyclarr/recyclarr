@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Use the new paths for custom format and release profile JSON files in the guide.
+
 ## [2.3.0] - 2022-08-14
 
 ### Added
