@@ -5,7 +5,7 @@ using TrashLib.Sonarr.Config;
 using TrashLib.Sonarr.ReleaseProfile;
 using TrashLib.Sonarr.ReleaseProfile.Filters;
 
-namespace TrashLib.Tests.Sonarr.ReleaseProfile;
+namespace TrashLib.Tests.Sonarr.ReleaseProfile.Filters;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
