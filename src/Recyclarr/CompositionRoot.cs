@@ -43,13 +43,13 @@ internal class CompositionRoot : ICompositionRoot
         builder.RegisterModule<RadarrAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
+        builder.RegisterModule<RepoAutofacModule>();
 
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
-        builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
         builder.RegisterType<ProgressBar>();
 
         ConfigurationRegistrations(builder);

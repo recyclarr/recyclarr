@@ -3,34 +3,33 @@ using Common.Extensions;
 using MoreLinq;
 using Newtonsoft.Json;
 using Serilog;
+using TrashLib.Repo;
 using TrashLib.Sonarr.ReleaseProfile.Filters;
-using TrashLib.Startup;
 
 namespace TrashLib.Sonarr.ReleaseProfile.Guide;
 
 public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
 {
-    private readonly IAppPaths _paths;
+    private readonly IRepoPathsFactory _pathFactory;
     private readonly ILogger _log;
+    private readonly IFileSystem _fs;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
 
-    public LocalRepoReleaseProfileJsonParser(IAppPaths paths, ILogger log)
+    public LocalRepoReleaseProfileJsonParser(IRepoPathsFactory pathFactory, ILogger log, IFileSystem fs)
     {
-        _paths = paths;
+        _pathFactory = pathFactory;
         _log = log;
+        _fs = fs;
         _data = new Lazy<IEnumerable<ReleaseProfileData>>(GetReleaseProfileDataImpl);
     }
 
     private IEnumerable<ReleaseProfileData> GetReleaseProfileDataImpl()
     {
         var converter = new TermDataConverter();
-        var jsonDir = _paths.RepoDirectory
-            .SubDirectory("docs")
-            .SubDirectory("json")
-            .SubDirectory("sonarr");
-
-        var tasks = jsonDir.GetFiles("*.json")
-            .Select(f => LoadAndParseFile(f, converter));
+        var paths = _pathFactory.Create();
+        var tasks = paths.SonarrReleaseProfilePaths
+            .SelectMany(x => x.GetFiles("*.json"))
+            .Select(x => LoadAndParseFile(x, converter));
 
         var data = Task.WhenAll(tasks).Result
             // Make non-nullable type and filter out null values

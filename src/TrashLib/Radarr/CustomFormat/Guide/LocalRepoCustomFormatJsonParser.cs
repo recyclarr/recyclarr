@@ -6,29 +6,28 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using TrashLib.Radarr.CustomFormat.Models;
-using TrashLib.Startup;
+using TrashLib.Repo;
 
 namespace TrashLib.Radarr.CustomFormat.Guide;
 
 public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
 {
-    private readonly IAppPaths _paths;
+    private readonly IRepoPathsFactory _pathsFactory;
     private readonly ILogger _log;
 
-    public LocalRepoCustomFormatJsonParser(IAppPaths paths, ILogger log)
+    public LocalRepoCustomFormatJsonParser(IRepoPathsFactory pathsFactory, ILogger log)
     {
-        _paths = paths;
+        _pathsFactory = pathsFactory;
         _log = log;
     }
 
     public ICollection<CustomFormatData> GetCustomFormatData()
     {
-        var jsonDir = _paths.RepoDirectory
-            .SubDirectory("docs")
-            .SubDirectory("json")
-            .SubDirectory("radarr");
+        var paths = _pathsFactory.Create();
+        var jsonFiles = paths.RadarrCustomFormatPaths
+            .SelectMany(x => x.GetFiles("*.json"));
 
-        return jsonDir.EnumerateFiles("*.json").ToObservable()
+        return jsonFiles.ToObservable()
             .Select(x => Observable.Defer(() => LoadJsonFromFile(x)))
             .Merge(8)
             .NotNull()

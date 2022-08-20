@@ -3,12 +3,14 @@ using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using Newtonsoft.Json;
+using NSubstitute;
 using NUnit.Framework;
 using TestLibrary;
 using TestLibrary.AutoFixture;
+using TrashLib.Repo;
 using TrashLib.Sonarr.ReleaseProfile;
 using TrashLib.Sonarr.ReleaseProfile.Guide;
-using TrashLib.TestLibrary;
+using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile.Guide;
 
@@ -19,7 +21,8 @@ public class LocalRepoReleaseProfileJsonParserTest
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
+        [Frozen] IAppPaths appPaths,
+        [Frozen] IRepoPaths repoPaths,
         LocalRepoReleaseProfileJsonParser sut)
     {
         static ReleaseProfileData MakeMockObject(string term) => new()
@@ -38,13 +41,15 @@ public class LocalRepoReleaseProfileJsonParserTest
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");
 
-        var baseDir = paths.RepoDirectory
+        var baseDir = appPaths.RepoDirectory
             .SubDirectory("docs")
             .SubDirectory("json")
             .SubDirectory("sonarr");
 
         fs.AddFile(baseDir.File("first.json").FullName, MockFileData(mockData1));
         fs.AddFile(baseDir.File("second.json").FullName, MockFileData(mockData2));
+
+        repoPaths.SonarrReleaseProfilePaths.Returns(new[] {baseDir});
 
         var results = sut.GetReleaseProfileData();
 
@@ -58,10 +63,11 @@ public class LocalRepoReleaseProfileJsonParserTest
     [Test, AutoMockData]
     public void Json_exceptions_do_not_interrupt_parsing_other_files(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
+        [Frozen] IAppPaths appPaths,
+        [Frozen] IRepoPaths repoPaths,
         LocalRepoReleaseProfileJsonParser sut)
     {
-        var rootPath = paths.RepoDirectory
+        var rootPath = appPaths.RepoDirectory
             .SubDirectory("docs")
             .SubDirectory("json")
             .SubDirectory("sonarr");
@@ -79,6 +85,8 @@ public class LocalRepoReleaseProfileJsonParserTest
 
         fs.AddFile(rootPath.File("0_bad_data.json").FullName, MockData.FromString(badData));
         fs.AddFile(rootPath.File("1_good_data.json").FullName, MockData.FromJson(goodData));
+
+        repoPaths.SonarrReleaseProfilePaths.Returns(new[] {rootPath});
 
         var results = sut.GetReleaseProfileData();
 
