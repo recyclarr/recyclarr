@@ -10,7 +10,7 @@
     <PackageReference Include="AutofacSerilogIntegration" Version="5.*" />
     <PackageReference Include="MudBlazor" Version="6.*" />
     <PackageReference Include="ReactiveUI.Blazor" Version="18.*" />
-    <PackageReference Include="Serilog.AspNetCore" Version="5.*" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.*" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.*" />
   </ItemGroup>
 
