@@ -164,12 +164,28 @@ docker compose up -d
 
 This runs it without any subcommand or options, which will result in this mode being used.
 
-## Permission Issues
+## Troubleshooting
+
+### Permission Issues
 
 The `/config` volume is very sensitive to user changes in the container. For example, if you first
 run the container using `user: 1000:1000` and then run a second time using `user: 1500:1500`, you
 are likely to get errors. This is because files that Recyclarr creates are owned by the user & group
 you specify. Not all files can be used by multiple users.
 
-If you change your user and/or group IDs, it is your responsibility to update the permissions of
-files in the `/config` volume so that they match.
+If you change your user and/or group IDs, it is your responsibility to update the ownership of files
+in the `/config` volume so that they match the UID and GID you are specifying. This can be done
+through the `chown` command and may require root permissions on your host system.
+
+### Error Messages
+
+Below is a list of error messages you may encounter along with possible solutions.
+
+- Permission Denied on `FETCH_HEAD`
+
+  ```txt
+  LibGit2Sharp.LockedFileException: failed open - '/config/repo/.git/FETCH_HEAD' is locked: Permission denied
+  ```
+
+  This is due to inconsistent permissions in your `/config` volume. See the "Permission Issues"
+  section at the start of the Troubleshooting section for the solution.

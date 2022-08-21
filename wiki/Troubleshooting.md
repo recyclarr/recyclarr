@@ -1,3 +1,8 @@
+The troubleshooting steps documented here are for the non-docker version of Recyclarr (running it
+directly on a host machine). The [Docker] page has troubleshooting steps as well.
+
+[Docker]: https://github.com/recyclarr/recyclarr/wiki/Docker
+
 # Obtaining Debug Logs
 
 Recyclarr always outputs logs as files in a directory on your filesystem. Each execution of
