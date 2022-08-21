@@ -1,5 +1,7 @@
-Reference documentation for the YAML configuration. For various examples, see the [[Configuration
-Examples]] page.
+Reference documentation for the YAML configuration. For various examples, see the [Configuration
+Examples] page.
+
+[Configuration Examples]: https://github.com/recyclarr/recyclarr/wiki/Configuration-Examples
 
 # Summary
 
@@ -17,7 +19,9 @@ multiple ways, offering a lot of flexibility:
   present).
 
 > **Remember**: If you do not specify the `--config` argument, the program will look for
-> `recyclarr.yml` in the [[application data directory|File-Structure]].
+> `recyclarr.yml` in the [application data directory][FileStructure].
+
+[FileStructure]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
 
 # YAML Reference
 
