@@ -8,8 +8,8 @@ using NUnit.Framework;
 using TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Repo;
-using TrashLib.Sonarr.ReleaseProfile;
-using TrashLib.Sonarr.ReleaseProfile.Guide;
+using TrashLib.Services.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile.Guide;

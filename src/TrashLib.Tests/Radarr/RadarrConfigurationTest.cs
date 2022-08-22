@@ -4,9 +4,9 @@ using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
 using TrashLib.Config;
-using TrashLib.Radarr;
-using TrashLib.Radarr.Config;
-using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Services.Radarr;
+using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Tests.Radarr;
 

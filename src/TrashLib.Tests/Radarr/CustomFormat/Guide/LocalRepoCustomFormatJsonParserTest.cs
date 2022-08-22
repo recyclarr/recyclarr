@@ -5,8 +5,8 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Radarr.CustomFormat.Guide;
 using TrashLib.Repo;
+using TrashLib.Services.Radarr.CustomFormat.Guide;
 using TrashLib.Startup;
 using TrashLib.TestLibrary;
 

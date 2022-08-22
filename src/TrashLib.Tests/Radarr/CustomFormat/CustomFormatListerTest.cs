@@ -4,8 +4,8 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Radarr.CustomFormat;
-using TrashLib.Radarr.CustomFormat.Guide;
+using TrashLib.Services.Radarr.CustomFormat;
+using TrashLib.Services.Radarr.CustomFormat.Guide;
 using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat;

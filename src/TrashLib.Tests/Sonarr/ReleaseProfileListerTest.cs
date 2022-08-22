@@ -4,9 +4,9 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Sonarr;
-using TrashLib.Sonarr.ReleaseProfile;
-using TrashLib.Sonarr.ReleaseProfile.Guide;
+using TrashLib.Services.Sonarr;
+using TrashLib.Services.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Tests.Sonarr;
 

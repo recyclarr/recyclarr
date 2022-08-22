@@ -6,7 +6,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
 using TestLibrary.AutoFixture;
-using TrashLib.Sonarr;
+using TrashLib.Services.Sonarr;
 
 namespace Recyclarr.Tests.Command;
 

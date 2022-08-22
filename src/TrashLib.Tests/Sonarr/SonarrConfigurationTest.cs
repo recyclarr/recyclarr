@@ -3,8 +3,8 @@ using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
 using TrashLib.Config;
-using TrashLib.Sonarr;
-using TrashLib.Sonarr.Config;
+using TrashLib.Services.Sonarr;
+using TrashLib.Services.Sonarr.Config;
 
 namespace TrashLib.Tests.Sonarr;
 

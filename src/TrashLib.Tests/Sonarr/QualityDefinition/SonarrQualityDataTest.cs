@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Sonarr.QualityDefinition;
+using TrashLib.Services.Sonarr.QualityDefinition;
 
 namespace TrashLib.Tests.Sonarr.QualityDefinition;
 

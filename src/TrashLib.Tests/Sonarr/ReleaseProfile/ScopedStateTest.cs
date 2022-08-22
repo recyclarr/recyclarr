@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr.ReleaseProfile;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile;
 

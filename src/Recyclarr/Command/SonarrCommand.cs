@@ -4,10 +4,10 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
-using TrashLib.Sonarr;
-using TrashLib.Sonarr.Config;
-using TrashLib.Sonarr.QualityDefinition;
-using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr;
+using TrashLib.Services.Sonarr.Config;
+using TrashLib.Services.Sonarr.QualityDefinition;
+using TrashLib.Services.Sonarr.ReleaseProfile;
 
 namespace Recyclarr.Command;
 

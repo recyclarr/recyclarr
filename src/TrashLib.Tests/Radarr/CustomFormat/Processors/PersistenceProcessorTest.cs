@@ -3,11 +3,11 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using TrashLib.Config.Services;
-using TrashLib.Radarr.Config;
-using TrashLib.Radarr.CustomFormat.Api;
-using TrashLib.Radarr.CustomFormat.Models;
-using TrashLib.Radarr.CustomFormat.Models.Cache;
-using TrashLib.Radarr.CustomFormat.Processors;
+using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.Radarr.CustomFormat.Api;
+using TrashLib.Services.Radarr.CustomFormat.Models;
+using TrashLib.Services.Radarr.CustomFormat.Models.Cache;
+using TrashLib.Services.Radarr.CustomFormat.Processors;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Processors;
 

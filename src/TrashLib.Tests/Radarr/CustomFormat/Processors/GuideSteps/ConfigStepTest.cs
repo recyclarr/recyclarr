@@ -2,10 +2,10 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Radarr.Config;
-using TrashLib.Radarr.CustomFormat.Models;
-using TrashLib.Radarr.CustomFormat.Models.Cache;
-using TrashLib.Radarr.CustomFormat.Processors.GuideSteps;
+using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.Radarr.CustomFormat.Models;
+using TrashLib.Services.Radarr.CustomFormat.Models.Cache;
+using TrashLib.Services.Radarr.CustomFormat.Processors.GuideSteps;
 using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Processors.GuideSteps;

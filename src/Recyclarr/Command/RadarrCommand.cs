@@ -3,9 +3,9 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
-using TrashLib.Radarr.Config;
-using TrashLib.Radarr.CustomFormat;
-using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.Radarr.CustomFormat;
+using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace Recyclarr.Command;
 

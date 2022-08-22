@@ -1,8 +1,8 @@
 using FluentAssertions;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Sonarr.ReleaseProfile;
-using TrashLib.Sonarr.ReleaseProfile.Filters;
+using TrashLib.Services.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile.Filters;
 

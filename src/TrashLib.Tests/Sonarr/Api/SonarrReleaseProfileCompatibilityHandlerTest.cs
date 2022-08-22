@@ -6,9 +6,9 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
-using TrashLib.Sonarr;
-using TrashLib.Sonarr.Api;
-using TrashLib.Sonarr.Api.Objects;
+using TrashLib.Services.Sonarr;
+using TrashLib.Services.Sonarr.Api;
+using TrashLib.Services.Sonarr.Api.Objects;
 using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr.Api;

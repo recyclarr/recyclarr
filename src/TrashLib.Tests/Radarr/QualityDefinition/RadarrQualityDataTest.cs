@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Tests.Radarr.QualityDefinition;
 

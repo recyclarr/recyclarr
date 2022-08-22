@@ -5,10 +5,10 @@ using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using TrashLib.Cache;
-using TrashLib.Radarr.CustomFormat;
-using TrashLib.Radarr.CustomFormat.Models;
-using TrashLib.Radarr.CustomFormat.Models.Cache;
-using TrashLib.Radarr.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.Services.Radarr.CustomFormat;
+using TrashLib.Services.Radarr.CustomFormat.Models;
+using TrashLib.Services.Radarr.CustomFormat.Models.Cache;
+using TrashLib.Services.Radarr.CustomFormat.Processors.PersistenceSteps;
 
 namespace TrashLib.Tests.Radarr.CustomFormat;
 

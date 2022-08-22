@@ -4,7 +4,7 @@ using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
-using TrashLib.Radarr.CustomFormat.Guide;
+using TrashLib.Services.Radarr.CustomFormat.Guide;
 using TrashLib.Startup;
 
 namespace TrashLib.Tests.Radarr.CustomFormat.Guide;
