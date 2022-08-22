@@ -6,13 +6,11 @@ namespace TrashLib.Repo;
 public class RepoPathsFactory : IRepoPathsFactory
 {
     private readonly IAppPaths _paths;
-    private readonly IFileSystem _fs;
     private readonly Lazy<RepoMetadata> _metadata;
 
-    public RepoPathsFactory(IRepoMetadataParser parser, IAppPaths paths, IFileSystem fs)
+    public RepoPathsFactory(IRepoMetadataParser parser, IAppPaths paths)
     {
         _paths = paths;
-        _fs = fs;
         _metadata = new Lazy<RepoMetadata>(parser.Deserialize);
     }
 

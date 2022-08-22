@@ -12,14 +12,12 @@ public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
 {
     private readonly IRepoPathsFactory _pathFactory;
     private readonly ILogger _log;
-    private readonly IFileSystem _fs;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
 
-    public LocalRepoReleaseProfileJsonParser(IRepoPathsFactory pathFactory, ILogger log, IFileSystem fs)
+    public LocalRepoReleaseProfileJsonParser(IRepoPathsFactory pathFactory, ILogger log)
     {
         _pathFactory = pathFactory;
         _log = log;
-        _fs = fs;
         _data = new Lazy<IEnumerable<ReleaseProfileData>>(GetReleaseProfileDataImpl);
     }
 
