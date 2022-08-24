@@ -34,6 +34,6 @@ public class SonarrAutofacModule : Module
 
         // Quality Definition Support
         builder.RegisterType<SonarrQualityDefinitionUpdater>().As<ISonarrQualityDefinitionUpdater>();
-        builder.RegisterType<SonarrQualityDefinitionGuideParser>().As<ISonarrQualityDefinitionGuideParser>();
+        builder.RegisterType<SonarrQualityGuideParser>().As<ISonarrQualityGuideParser>();
     }
 }

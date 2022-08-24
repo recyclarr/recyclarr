@@ -1,4 +1,5 @@
 using CliFx.Infrastructure;
+using Common.Extensions;
 using Serilog;
 using TrashLib.Services.Radarr.Config;
 using TrashLib.Services.Radarr.QualityDefinition.Api;
@@ -8,58 +9,65 @@ namespace TrashLib.Services.Radarr.QualityDefinition;
 
 internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
 {
+    private readonly ILogger _log;
     private readonly IQualityDefinitionService _api;
     private readonly IConsole _console;
-    private readonly IRadarrQualityDefinitionGuideParser _parser;
+    private readonly IRadarrQualityGuideParser _parser;
 
     public RadarrQualityDefinitionUpdater(
         ILogger logger,
-        IRadarrQualityDefinitionGuideParser parser,
+        IRadarrQualityGuideParser parser,
         IQualityDefinitionService api,
         IConsole console)
     {
-        Log = logger;
+        _log = logger;
         _parser = parser;
         _api = api;
         _console = console;
     }
 
-    private ILogger Log { get; }
-
     public async Task Process(bool isPreview, RadarrConfiguration config)
     {
-        Log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition!.Type);
-        var qualityDefinitions = _parser.ParseMarkdown(await _parser.GetMarkdownData());
+        _log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition!.Type);
+        var qualityDefinitions = _parser.GetQualities();
+        var qualityTypeInConfig = config.QualityDefinition!.Type;
 
-        var selectedQuality = qualityDefinitions[config.QualityDefinition!.Type];
+        var selectedQuality = qualityDefinitions
+            .FirstOrDefault(x => x.Type.EqualsIgnoreCase(qualityTypeInConfig));
+
+        if (selectedQuality == null)
+        {
+            _log.Error("The specified quality definition type does not exist: {Type}", qualityTypeInConfig);
+            return;
+        }
 
         // Fix an out of range ratio and warn the user
         if (config.QualityDefinition.PreferredRatio is < 0 or > 1)
         {
             var clampedRatio = Math.Clamp(config.QualityDefinition.PreferredRatio, 0, 1);
-            Log.Warning("Your `preferred_ratio` of {CurrentRatio} is out of range. " +
-                        "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
+            _log.Warning("Your `preferred_ratio` of {CurrentRatio} is out of range. " +
+                         "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
                 config.QualityDefinition.PreferredRatio, clampedRatio);
 
             config.QualityDefinition.PreferredRatio = clampedRatio;
         }
 
         // Apply a calculated preferred size
-        foreach (var quality in selectedQuality)
+        foreach (var quality in selectedQuality.Qualities)
         {
             quality.Preferred = quality.InterpolatedPreferred(config.QualityDefinition.PreferredRatio);
         }
 
         if (isPreview)
         {
-            PrintQualityPreview(selectedQuality);
+            PrintQualityPreview(selectedQuality.Qualities);
             return;
         }
 
-        await ProcessQualityDefinition(selectedQuality);
+        await ProcessQualityDefinition(selectedQuality.Qualities);
     }
 
-    private void PrintQualityPreview(IEnumerable<RadarrQualityData> quality)
+    private void PrintQualityPreview(IEnumerable<RadarrQualityItem> quality)
     {
         _console.Output.WriteLine("");
         const string format = "{0,-20} {1,-10} {2,-15} {3,-15}";
@@ -68,22 +76,22 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
 
         foreach (var q in quality)
         {
-            _console.Output.WriteLine(format, q.Name, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
+            _console.Output.WriteLine(format, q.Quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
         }
 
         _console.Output.WriteLine("");
     }
 
-    private async Task ProcessQualityDefinition(IEnumerable<RadarrQualityData> guideQuality)
+    private async Task ProcessQualityDefinition(IEnumerable<RadarrQualityItem> guideQuality)
     {
         var serverQuality = await _api.GetQualityDefinition();
         await UpdateQualityDefinition(serverQuality, guideQuality);
     }
 
     private async Task UpdateQualityDefinition(IReadOnlyCollection<RadarrQualityDefinitionItem> serverQuality,
-        IEnumerable<RadarrQualityData> guideQuality)
+        IEnumerable<RadarrQualityItem> guideQuality)
     {
-        static bool QualityIsDifferent(RadarrQualityDefinitionItem a, RadarrQualityData b)
+        static bool QualityIsDifferent(RadarrQualityDefinitionItem a, RadarrQualityItem b)
         {
             return b.IsMinDifferent(a.MinSize) ||
                    b.IsMaxDifferent(a.MaxSize) ||
@@ -93,10 +101,10 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
         var newQuality = new List<RadarrQualityDefinitionItem>();
         foreach (var qualityData in guideQuality)
         {
-            var entry = serverQuality.FirstOrDefault(q => q.Quality?.Name == qualityData.Name);
+            var entry = serverQuality.FirstOrDefault(q => q.Quality?.Name == qualityData.Quality);
             if (entry == null)
             {
-                Log.Warning("Server lacks quality definition for {Quality}; it will be skipped", qualityData.Name);
+                _log.Warning("Server lacks quality definition for {Quality}; it will be skipped", qualityData.Quality);
                 continue;
             }
 
@@ -111,12 +119,12 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
             entry.PreferredSize = qualityData.PreferredForApi;
             newQuality.Add(entry);
 
-            Log.Debug("Setting Quality " +
-                      "[Name: {Name}] [Source: {Source}] [Min: {Min}] [Max: {Max}] [Preferred: {Preferred}]",
+            _log.Debug("Setting Quality " +
+                       "[Name: {Name}] [Source: {Source}] [Min: {Min}] [Max: {Max}] [Preferred: {Preferred}]",
                 entry.Quality?.Name, entry.Quality?.Source, entry.MinSize, entry.MaxSize, entry.PreferredSize);
         }
 
         await _api.UpdateQualityDefinition(newQuality);
-        Log.Information("Number of updated qualities: {Count}", newQuality.Count);
+        _log.Information("Number of updated qualities: {Count}", newQuality.Count);
     }
 }

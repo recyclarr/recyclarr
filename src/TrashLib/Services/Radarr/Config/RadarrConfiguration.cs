@@ -1,6 +1,5 @@
 using JetBrains.Annotations;
 using TrashLib.Config.Services;
-using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Services.Radarr.Config;
 
@@ -31,9 +30,6 @@ public class QualityProfileConfig
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public class QualityDefinitionConfig
 {
-    // -1 does not map to a valid enumerator. this is to force validation to fail if it is not set from YAML.
-    // All of this craziness is to avoid making the enum type nullable.
-    public RadarrQualityDefinitionType Type { get; init; } = (RadarrQualityDefinitionType) (-1);
-
+    public string Type { get; init; } = "";
     public decimal PreferredRatio { get; set; } = 1.0m;
 }

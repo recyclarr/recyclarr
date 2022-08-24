@@ -46,6 +46,6 @@ internal class QualityDefinitionConfigValidator : AbstractValidator<QualityDefin
 {
     public QualityDefinitionConfigValidator(IRadarrValidationMessages messages)
     {
-        RuleFor(x => x.Type).IsInEnum().WithMessage(messages.QualityDefinitionType);
+        RuleFor(x => x.Type).NotEmpty().WithMessage(messages.QualityDefinitionType);
     }
 }

@@ -68,7 +68,7 @@ public class SonarrCommand : ServiceCommand
                 await profileUpdaterFactory().Process(Preview, config);
             }
 
-            if (config.QualityDefinition.HasValue)
+            if (!string.IsNullOrEmpty(config.QualityDefinition))
             {
                 await qualityUpdaterFactory().Process(Preview, config);
             }

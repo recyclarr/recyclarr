@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Quality definition data is now pulled from JSON files.
+
 ## [2.3.1] - 2022-08-20
 
 ### Changed

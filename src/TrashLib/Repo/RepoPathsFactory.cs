@@ -27,6 +27,9 @@ public class RepoPathsFactory : IRepoPathsFactory
         var metadata = _metadata.Value;
         return new RepoPaths(
             ToDirectoryInfoList(metadata.JsonPaths.Radarr.CustomFormats),
-            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.ReleaseProfiles));
+            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.ReleaseProfiles),
+            ToDirectoryInfoList(metadata.JsonPaths.Radarr.Qualities),
+            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities)
+        );
     }
 }

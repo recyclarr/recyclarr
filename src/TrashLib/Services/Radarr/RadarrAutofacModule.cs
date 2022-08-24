@@ -28,7 +28,7 @@ public class RadarrAutofacModule : Module
 
         // Quality Definition Support
         builder.RegisterType<RadarrQualityDefinitionUpdater>().As<IRadarrQualityDefinitionUpdater>();
-        builder.RegisterType<RadarrQualityDefinitionGuideParser>().As<IRadarrQualityDefinitionGuideParser>();
+        builder.RegisterType<RadarrQualityGuideParser>().As<IRadarrQualityGuideParser>();
 
         // Custom Format Support
         builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();

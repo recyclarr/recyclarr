@@ -6,7 +6,6 @@ using NUnit.Framework;
 using TrashLib.Config;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
-using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Tests.Radarr;
 
@@ -95,7 +94,7 @@ public class RadarrConfigurationTest
             },
             QualityDefinition = new QualityDefinitionConfig
             {
-                Type = RadarrQualityDefinitionType.Movie
+                Type = "movie"
             }
         };
 
