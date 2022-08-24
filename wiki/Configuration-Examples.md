@@ -137,21 +137,21 @@ radarr:
 
     custom_formats:
       # Advanced Audio from the guide
-      - names:
-          - TrueHD ATMOS
-          - DTS X
-          - ATMOS (undefined)
-          - DD+ ATMOS
-          - TrueHD
-          - DTS-HD MA
-          - FLAC
-          - PCM
-          - DTS-HD HRA
-          - DD+
-          - DTS-ES
-          - DTS
-          - AAC
-          - DD
+      - trash_ids:
+        - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
+        - 2f22d89048b01681dde8afe203bf2e95 #DTS X
+        - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
+        - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
+        - 3cafb66171b47f226146a0770576870f #TrueHD
+        - dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA
+        - a570d4a0e56a2874b64e5bfa55202a1b #FLAC
+        - e7c2fcae07cbada050a0af3357491d7b #PCM
+        - 8e109e50e0a0b83a5098b056e13bf6db #DTS-HD HRA
+        - 185f1dd7264c4562b9022d963ac37424 #DD+
+        - f9f847ac70a0af62ea4a08280b859636 #DTS-ES
+        - 1c1a4c5e823891c75bc50380a6866f73 #DTS
+        - 240770601cc226190c367ef59aba7463 #AAC
+        - c2998bd0d90ed5621d8df281e839436e #DD
         quality_profiles:
           - name: SD
 ```
@@ -170,27 +170,27 @@ radarr:
     api_key: 87674e2c316645ed85696a91a3d41988
 
     custom_formats:
-      - names: [TrueHD ATMOS]
+      - trash_ids: [496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS]
         quality_profiles:
           - name: SD
             score: 100
-      - names: [DTS X]
+      - trash_ids: [2f22d89048b01681dde8afe203bf2e95 #DTS X]
         quality_profiles:
           - name: SD
             score: 200
-      - names: [ATMOS (undefined)]
+      - trash_ids: [417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)]
         quality_profiles:
           - name: SD
             score: 300
-      - names: [TrueHD]
+      - trash_ids: [3cafb66171b47f226146a0770576870f #TrueHD]
         quality_profiles:
           - name: SD
             score: 400
-      - names: [DTS-HD MA]
+      - trash_ids: [dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA]
         quality_profiles:
           - name: SD
             score: 500
-      - names: [FLAC]
+      - trash_ids: [a570d4a0e56a2874b64e5bfa55202a1b #FLAC]
         quality_profiles:
           - name: SD
             score: 600
@@ -210,12 +210,12 @@ radarr:
     api_key: 87674e2c316645ed85696a91a3d41988
 
     custom_formats:
-      - names:
-          - TrueHD ATMOS
-          - DTS X
-          - ATMOS (undefined)
-          - DD+ ATMOS
-          - TrueHD
+      - trash_ids:
+          - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
+          - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
+          - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
+          - 3cafb66171b47f226146a0770576870f #TrueHD
         quality_profiles:
           - name: SD
           - name: Ultra-HD
@@ -232,54 +232,17 @@ radarr:
     api_key: 87674e2c316645ed85696a91a3d41988
 
     custom_formats:
-      - names:
-          - TrueHD ATMOS
-          - DTS X
-          - ATMOS (undefined)
-          - DD+ ATMOS
-          - TrueHD
+      - trash_ids:
+          - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
+          - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
+          - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
+          - 3cafb66171b47f226146a0770576870f #TrueHD
         quality_profiles:
           - name: SD
             score: 100 # This score is assigned to all 5 CFs in this profile
           - name: Ultra-HD # Still uses scores from the guide
 ```
-
-## Resolving ambiguity between custom formats with the same name
-
-Normally when you want a custom format, you list it by name under the `names` property, like so:
-
-```yml
-radarr:
-  - base_url: http://localhost:7878
-    api_key: 87674e2c316645ed85696a91a3d41988
-
-    custom_formats:
-      - names:
-          - FLAC
-          - DoVi
-```
-
-However, especially in the case of DoVi, there are actually two custom formats with this name in the
-guide. You'll get a warning from Recyclarr stating that it couldn't pick which one you wanted, so it
-was skipped. To fix this, simply use `trash_ids` and refer to it by an ID. IDs are never duplicated
-in the guide and also never change, so it's a robust and effective way to identify custom formats.
-The downside is that they are less readable than a name, but using comments can help with that. The
-example below demonstrates how to do this.
-
-```yml
-radarr:
-  - base_url: http://localhost:7878
-    api_key: 87674e2c316645ed85696a91a3d41988
-
-    custom_formats:
-      - names:
-          - FLAC
-      - trash_ids:
-          - 5d96ce331b98e077abb8ceb60553aa16 # DoVi
-```
-
-Where do you get the Trash ID? That's from the `"trash_id"` property of the actual JSON for the
-custom format in the guide.
 
 ## Scores in a quality profile should be set to zero if it wasn't listed in config
 
@@ -293,9 +256,9 @@ radarr:
     api_key: 87674e2c316645ed85696a91a3d41988
 
     custom_formats:
-      - names:
-          - DTS X
-          - TrueHD
+      - trash_ids:
+          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
+          - 3cafb66171b47f226146a0770576870f #TrueHD
         quality_profiles:
           - name: SD
             reset_unmatched_scores: true
@@ -303,7 +266,7 @@ radarr:
 ```
 
 Let's say you have three custom formats added to Radarr: "DTS X", "TrueHD", and "DoVi". Since only
-the first two are listed in the `names` array, what happens to "DoVi"? Since two quality profiles
+the first two are listed in the `trash_ids` array, what happens to "DoVi"? Since two quality profiles
 are specified above, each with a different setting for `reset_unmatched_scores`, the behavior will
 be different:
 
@@ -311,7 +274,7 @@ be different:
 - The `Ultra-HD` profile's score for "DoVi" will never be altered.
 
 The `reset_unmatched_scores` setting basically determines how scores are handled for custom formats
-that exist in Radarr but are not in the list of `names` in config. As shown in the example above,
+that exist in Radarr but are not in the list of `trash_ids` in config. As shown in the example above,
 you set it to `true` which results in unmatched scores being set to `0`, or you can set it to
 `false` (or leave it omitted) in which case Recyclarr will not alter the value.
 

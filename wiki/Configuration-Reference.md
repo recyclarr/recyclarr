@@ -150,19 +150,24 @@ radarr:
     # Custom Format Settings
     delete_old_custom_formats: false
     custom_formats:
-      - names:
-          - BR-DISK
-          - EVO (no WEB-DL)
-          - LQ
-          - x265 (720/1080p)
-          - 3D
+      - trash_ids:
+        - ed38b889b31be83fda192888e2286d83 #BR-DISK
+        - 90cedc1fea7ea5d11298bebd3d1d3223 #EVO (no WEBDL)
+        - 90a6f9a284dff5103f6346090e6280c8 #LQ
+        - dc98083864ea246d05a42df0d05f81cc #x265 (720/1080p)
+        - b8cd450cbfa689c0259a01d9e29ba3d6 #3D
+        - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5 #No-RlsGroup
+        - 7357cf5161efbf8c4d5d0c30b4815ee2 #Obfuscated
+        - 5c44f52a8714fdd79bb4d98e2673be1f #Retags
+        - b6832f586342ef70d9c128d40c07b872 #Bad Dual Groups
+        - 923b6abef9b17f937fab56cfcf89e1f1 #DV (WEBDL)
         quality_profiles:
           - name: HD-1080p
           - name: HD-720p2
             score: -1000
-      - names:
-          - TrueHD ATMOS
-          - DTS X
+      - trash_ids:
+          - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
         quality_profiles:
           - name: SD
 ```
