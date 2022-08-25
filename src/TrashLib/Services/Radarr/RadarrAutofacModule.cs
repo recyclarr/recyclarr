@@ -33,7 +33,7 @@ public class RadarrAutofacModule : Module
         builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
         builder.RegisterType<LocalRepoRadarrGuideService>().As<IRadarrGuideService>();
         builder.RegisterType<CachePersister>().As<ICachePersister>();
-        builder.RegisterType<CustomFormatLister>().As<ICustomFormatLister>();
+        builder.RegisterType<RadarrGuideDataLister>().As<IRadarrGuideDataLister>();
 
         // Guide Processor
 

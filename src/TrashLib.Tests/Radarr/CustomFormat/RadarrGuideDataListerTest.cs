@@ -12,13 +12,13 @@ namespace TrashLib.Tests.Radarr.CustomFormat;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class CustomFormatListerTest
+public class RadarrGuideDataListerTest
 {
     [Test, AutoMockData]
     public void Custom_formats_appear_in_console_output(
         [Frozen] IRadarrGuideService guide,
         [Frozen(Matching.ImplementedInterfaces)] FakeInMemoryConsole console,
-        CustomFormatLister sut)
+        RadarrGuideDataLister sut)
     {
         var testData = new[]
         {

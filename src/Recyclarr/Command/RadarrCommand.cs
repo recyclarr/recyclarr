@@ -17,13 +17,17 @@ internal class RadarrCommand : ServiceCommand
         "List available custom formats from the guide in YAML format.")]
     public bool ListCustomFormats { get; [UsedImplicitly] set; }
 
+    [CommandOption("list-qualities", Description =
+        "List available quality definition types from the guide.")]
+    public bool ListQualities { get; [UsedImplicitly] set; }
+
     public override string Name => "Radarr";
 
     public override async Task Process(IServiceLocatorProxy container)
     {
         await base.Process(container);
 
-        var lister = container.Resolve<ICustomFormatLister>();
+        var lister = container.Resolve<IRadarrGuideDataLister>();
         var log = container.Resolve<ILogger>();
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<IRadarrQualityDefinitionUpdater>>();
@@ -32,6 +36,12 @@ internal class RadarrCommand : ServiceCommand
         if (ListCustomFormats)
         {
             lister.ListCustomFormats();
+            return;
+        }
+
+        if (ListQualities)
+        {
+            lister.ListQualities();
             return;
         }
 

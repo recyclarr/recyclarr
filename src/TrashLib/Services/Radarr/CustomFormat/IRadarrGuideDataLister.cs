@@ -1,6 +1,7 @@
 namespace TrashLib.Services.Radarr.CustomFormat;
 
-public interface ICustomFormatLister
+public interface IRadarrGuideDataLister
 {
     void ListCustomFormats();
+    void ListQualities();
 }
