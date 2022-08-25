@@ -230,6 +230,20 @@ radarr:
           - 820b09bb9acbfde9c35c71e0e565dad8 # 1080p
 ```
 
+### `--list-qualities`
+
+Print a list of all available types of quality definitions. The "type" of a quality definition comes
+from JSON files in the guide and this type is used in the configuration YAML for the
+`quality_definition` property:
+
+```yml
+quality_definition:
+  type: movie
+```
+
+Above, `movie` would only be valid if that type appeared in the list output by the `radarr`
+subcommand run with this argument.
+
 ## Subcommand: `create-config`
 
 Create a starter `recyclarr.yml` config file. The location of this file the [application data
