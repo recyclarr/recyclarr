@@ -4,10 +4,10 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
-using TrashLib.Sonarr;
-using TrashLib.Sonarr.Config;
-using TrashLib.Sonarr.QualityDefinition;
-using TrashLib.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr;
+using TrashLib.Services.Sonarr.Config;
+using TrashLib.Services.Sonarr.QualityDefinition;
+using TrashLib.Services.Sonarr.ReleaseProfile;
 
 namespace Recyclarr.Command;
 
@@ -26,13 +26,17 @@ public class SonarrCommand : ServiceCommand
         "Note that not every release profile has terms that may be filtered.")]
     public string? ListTerms { get; [UsedImplicitly] set; } = "empty";
 
+    [CommandOption("list-qualities", Description =
+        "List available quality definition types from the guide.")]
+    public bool ListQualities { get; [UsedImplicitly] set; }
+
     public override string Name => "Sonarr";
 
     public override async Task Process(IServiceLocatorProxy container)
     {
         await base.Process(container);
 
-        var lister = container.Resolve<IReleaseProfileLister>();
+        var lister = container.Resolve<ISonarrGuideDataLister>();
         var profileUpdaterFactory = container.Resolve<Func<IReleaseProfileUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<ISonarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
@@ -41,6 +45,12 @@ public class SonarrCommand : ServiceCommand
         if (ListReleaseProfiles)
         {
             lister.ListReleaseProfiles();
+            return;
+        }
+
+        if (ListQualities)
+        {
+            lister.ListQualities();
             return;
         }
 
@@ -68,7 +78,7 @@ public class SonarrCommand : ServiceCommand
                 await profileUpdaterFactory().Process(Preview, config);
             }
 
-            if (config.QualityDefinition.HasValue)
+            if (!string.IsNullOrEmpty(config.QualityDefinition))
             {
                 await qualityUpdaterFactory().Process(Preview, config);
             }

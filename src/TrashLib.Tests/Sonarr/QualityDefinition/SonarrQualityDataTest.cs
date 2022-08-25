@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Sonarr.QualityDefinition;
+using TrashLib.Services.Common.QualityDefinition;
 
 namespace TrashLib.Tests.Sonarr.QualityDefinition;
 
@@ -14,9 +14,9 @@ public class SonarrQualityDataTest
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
         new object?[] {100m, null, true},
-        new object?[] {SonarrQualityData.MaxUnlimitedThreshold, null, false},
-        new object?[] {SonarrQualityData.MaxUnlimitedThreshold - 1, null, true},
-        new object?[] {SonarrQualityData.MaxUnlimitedThreshold, SonarrQualityData.MaxUnlimitedThreshold, true}
+        new object?[] {QualityItem.MaxUnlimitedThreshold, null, false},
+        new object?[] {QualityItem.MaxUnlimitedThreshold - 1, null, true},
+        new object?[] {QualityItem.MaxUnlimitedThreshold, QualityItem.MaxUnlimitedThreshold, true}
     };
 
     private static readonly object[] MinTestValues =
@@ -30,7 +30,7 @@ public class SonarrQualityDataTest
     public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
         bool isDifferent)
     {
-        var data = new SonarrQualityData {Max = guideValue};
+        var data = new QualityItem("", 0, guideValue);
         data.IsMaxDifferent(radarrValue)
             .Should().Be(isDifferent);
     }
@@ -39,7 +39,7 @@ public class SonarrQualityDataTest
     public void MinDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal radarrValue,
         bool isDifferent)
     {
-        var data = new SonarrQualityData {Min = guideValue};
+        var data = new QualityItem("", guideValue, 0);
         data.IsMinDifferent(radarrValue)
             .Should().Be(isDifferent);
     }
@@ -47,16 +47,16 @@ public class SonarrQualityDataTest
     [Test]
     public void AnnotatedMax_OutsideThreshold_EqualsSameValueWithUnlimited()
     {
-        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold;
-        var data = new SonarrQualityData {Max = testVal};
+        const decimal testVal = QualityItem.MaxUnlimitedThreshold;
+        var data = new QualityItem("", 0, testVal);
         data.AnnotatedMax.Should().Be($"{testVal} (Unlimited)");
     }
 
     [Test]
     public void AnnotatedMax_WithinThreshold_EqualsSameStringValue()
     {
-        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 1;
-        var data = new SonarrQualityData {Max = testVal};
+        const decimal testVal = QualityItem.MaxUnlimitedThreshold - 1;
+        var data = new QualityItem("", 0, testVal);
         data.AnnotatedMax.Should().Be($"{testVal}");
     }
 
@@ -64,38 +64,38 @@ public class SonarrQualityDataTest
     public void AnnotatedMin_NoThreshold_EqualsSameValue()
     {
         const decimal testVal = 10m;
-        var data = new SonarrQualityData {Max = testVal};
+        var data = new QualityItem("", 0, testVal);
         data.AnnotatedMax.Should().Be($"{testVal}");
     }
 
     [Test]
     public void Max_AboveThreshold_EqualsSameValue()
     {
-        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
-        var data = new SonarrQualityData {Max = testVal};
+        const decimal testVal = QualityItem.MaxUnlimitedThreshold + 1;
+        var data = new QualityItem("", 0, testVal);
         data.Max.Should().Be(testVal);
     }
 
     [Test]
     public void MaxForApi_AboveThreshold_EqualsNull()
     {
-        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold + 1;
-        var data = new SonarrQualityData {Max = testVal};
+        const decimal testVal = QualityItem.MaxUnlimitedThreshold + 1;
+        var data = new QualityItem("", 0, testVal);
         data.MaxForApi.Should().Be(null);
     }
 
     [Test]
     public void MaxForApi_HighestWithinThreshold_EqualsSameValue()
     {
-        const decimal testVal = SonarrQualityData.MaxUnlimitedThreshold - 0.1m;
-        var data = new SonarrQualityData {Max = testVal};
+        const decimal testVal = QualityItem.MaxUnlimitedThreshold - 0.1m;
+        var data = new QualityItem("", 0, testVal);
         data.MaxForApi.Should().Be(testVal).And.Be(data.Max);
     }
 
     [Test]
     public void MaxForApi_LowestWithinThreshold_EqualsSameValue()
     {
-        var data = new SonarrQualityData {Max = 0};
+        var data = new QualityItem("", 0, 0);
         data.MaxForApi.Should().Be(0);
     }
 }

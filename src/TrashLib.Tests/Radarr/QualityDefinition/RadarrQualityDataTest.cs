@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Tests.Radarr.QualityDefinition;
 
@@ -14,17 +14,17 @@ public class RadarrQualityDataTest
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
         new object?[] {100m, null, true},
-        new object?[] {RadarrQualityData.PreferredUnlimitedThreshold, null, false},
-        new object?[] {RadarrQualityData.PreferredUnlimitedThreshold - 1, null, true},
+        new object?[] {RadarrQualityItem.PreferredUnlimitedThreshold, null, false},
+        new object?[] {RadarrQualityItem.PreferredUnlimitedThreshold - 1, null, true},
         new object?[]
-            {RadarrQualityData.PreferredUnlimitedThreshold, RadarrQualityData.PreferredUnlimitedThreshold, true}
+            {RadarrQualityItem.PreferredUnlimitedThreshold, RadarrQualityItem.PreferredUnlimitedThreshold, true}
     };
 
     [TestCaseSource(nameof(PreferredTestValues))]
     public void PreferredDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
         bool isDifferent)
     {
-        var data = new RadarrQualityData {Preferred = guideValue};
+        var data = new RadarrQualityItem("", 0, 0, guideValue);
         data.IsPreferredDifferent(radarrValue)
             .Should().Be(isDifferent);
     }
@@ -35,19 +35,19 @@ public class RadarrQualityDataTest
         {
             400m,
             1.0m,
-            RadarrQualityData.PreferredUnlimitedThreshold
+            RadarrQualityItem.PreferredUnlimitedThreshold
         },
         new[]
         {
-            RadarrQualityData.PreferredUnlimitedThreshold,
+            RadarrQualityItem.PreferredUnlimitedThreshold,
             1.0m,
-            RadarrQualityData.PreferredUnlimitedThreshold
+            RadarrQualityItem.PreferredUnlimitedThreshold
         },
         new[]
         {
-            RadarrQualityData.PreferredUnlimitedThreshold - 1m,
+            RadarrQualityItem.PreferredUnlimitedThreshold - 1m,
             1.0m,
-            RadarrQualityData.PreferredUnlimitedThreshold - 1m
+            RadarrQualityItem.PreferredUnlimitedThreshold - 1m
         },
         new[]
         {
@@ -67,54 +67,54 @@ public class RadarrQualityDataTest
     public void InterpolatedPreferred_VariousValues_ExpectedResults(decimal max, decimal ratio,
         decimal expectedResult)
     {
-        var data = new RadarrQualityData {Min = 0, Max = max};
+        var data = new RadarrQualityItem("", 0, max, 0);
         data.InterpolatedPreferred(ratio).Should().Be(expectedResult);
     }
 
     [Test]
     public void AnnotatedPreferred_OutsideThreshold_EqualsSameValueWithUnlimited()
     {
-        const decimal testVal = RadarrQualityData.PreferredUnlimitedThreshold;
-        var data = new RadarrQualityData {Preferred = testVal};
+        const decimal testVal = RadarrQualityItem.PreferredUnlimitedThreshold;
+        var data = new RadarrQualityItem("", 0, 0, testVal);
         data.AnnotatedPreferred.Should().Be($"{testVal} (Unlimited)");
     }
 
     [Test]
     public void AnnotatedPreferred_WithinThreshold_EqualsSameStringValue()
     {
-        const decimal testVal = RadarrQualityData.PreferredUnlimitedThreshold - 1;
-        var data = new RadarrQualityData {Preferred = testVal};
+        const decimal testVal = RadarrQualityItem.PreferredUnlimitedThreshold - 1;
+        var data = new RadarrQualityItem("", 0, 0, testVal);
         data.AnnotatedPreferred.Should().Be($"{testVal}");
     }
 
     [Test]
     public void Preferred_AboveThreshold_EqualsSameValue()
     {
-        const decimal testVal = RadarrQualityData.PreferredUnlimitedThreshold + 1;
-        var data = new RadarrQualityData {Preferred = testVal};
+        const decimal testVal = RadarrQualityItem.PreferredUnlimitedThreshold + 1;
+        var data = new RadarrQualityItem("", 0, 0, testVal);
         data.Preferred.Should().Be(testVal);
     }
 
     [Test]
     public void PreferredForApi_AboveThreshold_EqualsNull()
     {
-        const decimal testVal = RadarrQualityData.PreferredUnlimitedThreshold + 1;
-        var data = new RadarrQualityData {Preferred = testVal};
+        const decimal testVal = RadarrQualityItem.PreferredUnlimitedThreshold + 1;
+        var data = new RadarrQualityItem("", 0, 0, testVal);
         data.PreferredForApi.Should().Be(null);
     }
 
     [Test]
     public void PreferredForApi_HighestWithinThreshold_EqualsSameValue()
     {
-        const decimal testVal = RadarrQualityData.PreferredUnlimitedThreshold - 0.1m;
-        var data = new RadarrQualityData {Preferred = testVal};
+        const decimal testVal = RadarrQualityItem.PreferredUnlimitedThreshold - 0.1m;
+        var data = new RadarrQualityItem("", 0, 0, testVal);
         data.PreferredForApi.Should().Be(testVal).And.Be(data.Preferred);
     }
 
     [Test]
     public void PreferredForApi_LowestWithinThreshold_EqualsSameValue()
     {
-        var data = new RadarrQualityData {Preferred = 0};
+        var data = new RadarrQualityItem("", 0, 0, 0);
         data.PreferredForApi.Should().Be(0);
     }
 }

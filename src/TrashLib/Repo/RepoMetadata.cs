@@ -1,11 +1,13 @@
 namespace TrashLib.Repo;
 
 public record RadarrMetadata(
-    IReadOnlyCollection<string> CustomFormats
+    IReadOnlyCollection<string> CustomFormats,
+    IReadOnlyCollection<string> Qualities
 );
 
 public record SonarrMetadata(
-    IReadOnlyCollection<string> ReleaseProfiles
+    IReadOnlyCollection<string> ReleaseProfiles,
+    IReadOnlyCollection<string> Qualities
 );
 
 public record JsonPaths(

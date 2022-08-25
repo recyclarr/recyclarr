@@ -6,7 +6,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
 using TestLibrary.AutoFixture;
-using TrashLib.Sonarr;
+using TrashLib.Services.Sonarr;
 
 namespace Recyclarr.Tests.Command;
 
@@ -46,7 +46,7 @@ public class SonarrCommandTest
 
     [Test, AutoMockData]
     public async Task List_terms_uses_specified_trash_id(
-        [Frozen] IReleaseProfileLister lister,
+        [Frozen] ISonarrGuideDataLister lister,
         IConsole console,
         ICompositionRoot compositionRoot,
         SonarrCommand sut)
@@ -63,7 +63,7 @@ public class SonarrCommandTest
 
     [Test, AutoMockData]
     public async Task List_release_profiles_is_invoked(
-        [Frozen] IReleaseProfileLister lister,
+        [Frozen] ISonarrGuideDataLister lister,
         IConsole console,
         ICompositionRoot compositionRoot,
         SonarrCommand sut)

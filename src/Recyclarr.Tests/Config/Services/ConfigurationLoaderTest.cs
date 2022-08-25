@@ -17,7 +17,7 @@ using TestLibrary.AutoFixture;
 using TestLibrary.NSubstitute;
 using TrashLib.Config;
 using TrashLib.Config.Services;
-using TrashLib.Sonarr.Config;
+using TrashLib.Services.Sonarr.Config;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 

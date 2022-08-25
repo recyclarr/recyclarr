@@ -4,9 +4,8 @@ using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
 using TrashLib.Config;
-using TrashLib.Radarr;
-using TrashLib.Radarr.Config;
-using TrashLib.Radarr.QualityDefinition;
+using TrashLib.Services.Radarr;
+using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Tests.Radarr;
 
@@ -95,7 +94,7 @@ public class RadarrConfigurationTest
             },
             QualityDefinition = new QualityDefinitionConfig
             {
-                Type = RadarrQualityDefinitionType.Movie
+                Type = "movie"
             }
         };
 

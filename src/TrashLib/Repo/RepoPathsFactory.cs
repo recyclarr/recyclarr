@@ -6,13 +6,11 @@ namespace TrashLib.Repo;
 public class RepoPathsFactory : IRepoPathsFactory
 {
     private readonly IAppPaths _paths;
-    private readonly IFileSystem _fs;
     private readonly Lazy<RepoMetadata> _metadata;
 
-    public RepoPathsFactory(IRepoMetadataParser parser, IAppPaths paths, IFileSystem fs)
+    public RepoPathsFactory(IRepoMetadataParser parser, IAppPaths paths)
     {
         _paths = paths;
-        _fs = fs;
         _metadata = new Lazy<RepoMetadata>(parser.Deserialize);
     }
 
@@ -29,6 +27,9 @@ public class RepoPathsFactory : IRepoPathsFactory
         var metadata = _metadata.Value;
         return new RepoPaths(
             ToDirectoryInfoList(metadata.JsonPaths.Radarr.CustomFormats),
-            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.ReleaseProfiles));
+            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.ReleaseProfiles),
+            ToDirectoryInfoList(metadata.JsonPaths.Radarr.Qualities),
+            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities)
+        );
     }
 }
