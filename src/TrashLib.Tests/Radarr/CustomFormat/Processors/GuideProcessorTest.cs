@@ -36,7 +36,7 @@ public class GuideProcessorTest
         public ResourceDataReader Data { get; }
 
         public CustomFormatData ReadCustomFormat(string textFile) =>
-            LocalRepoCustomFormatJsonParser.ParseCustomFormatData(ReadText(textFile));
+            LocalRepoRadarrGuideService.ParseCustomFormatData(ReadText(textFile));
 
         public string ReadText(string textFile) => Data.ReadData(textFile);
         public JObject ReadJson(string jsonFile) => JObject.Parse(ReadText(jsonFile));

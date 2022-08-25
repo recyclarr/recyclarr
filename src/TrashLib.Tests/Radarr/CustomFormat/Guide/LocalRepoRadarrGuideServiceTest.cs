@@ -14,14 +14,14 @@ namespace TrashLib.Tests.Radarr.CustomFormat.Guide;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class LocalRepoCustomFormatJsonParserTest
+public class LocalRepoRadarrGuideServiceTest
 {
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths appPaths,
         [Frozen] IRepoPaths repoPaths,
-        LocalRepoCustomFormatJsonParser sut)
+        LocalRepoRadarrGuideService sut)
     {
         var jsonDir = appPaths.RepoDirectory
             .SubDirectory("docs")

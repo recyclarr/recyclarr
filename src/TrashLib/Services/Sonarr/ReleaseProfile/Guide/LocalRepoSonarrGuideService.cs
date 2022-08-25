@@ -4,22 +4,29 @@ using MoreLinq;
 using Newtonsoft.Json;
 using Serilog;
 using TrashLib.Repo;
+using TrashLib.Services.Common.QualityDefinition;
+using TrashLib.Services.Sonarr.QualityDefinition;
 using TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 
 namespace TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
-public class LocalRepoReleaseProfileJsonParser : ISonarrGuideService
+public class LocalRepoSonarrGuideService : ISonarrGuideService
 {
     private readonly IRepoPathsFactory _pathFactory;
     private readonly ILogger _log;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
+    private readonly QualityGuideParser<SonarrQualityData> _parser;
 
-    public LocalRepoReleaseProfileJsonParser(IRepoPathsFactory pathFactory, ILogger log)
+    public LocalRepoSonarrGuideService(IRepoPathsFactory pathFactory, ILogger log)
     {
         _pathFactory = pathFactory;
         _log = log;
         _data = new Lazy<IEnumerable<ReleaseProfileData>>(GetReleaseProfileDataImpl);
+        _parser = new QualityGuideParser<SonarrQualityData>(log);
     }
+
+    public ICollection<SonarrQualityData> GetQualities()
+        => _parser.GetQualities(_pathFactory.Create().SonarrQualityPaths);
 
     private IEnumerable<ReleaseProfileData> GetReleaseProfileDataImpl()
     {

@@ -2,6 +2,7 @@ using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
 using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.Radarr.CustomFormat.Guide;
 using TrashLib.Services.Radarr.QualityDefinition.Api;
 using TrashLib.Services.Radarr.QualityDefinition.Api.Objects;
 
@@ -12,16 +13,16 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
     private readonly ILogger _log;
     private readonly IQualityDefinitionService _api;
     private readonly IConsole _console;
-    private readonly IRadarrQualityGuideParser _parser;
+    private readonly IRadarrGuideService _guide;
 
     public RadarrQualityDefinitionUpdater(
         ILogger logger,
-        IRadarrQualityGuideParser parser,
+        IRadarrGuideService guide,
         IQualityDefinitionService api,
         IConsole console)
     {
         _log = logger;
-        _parser = parser;
+        _guide = guide;
         _api = api;
         _console = console;
     }
@@ -29,7 +30,7 @@ internal class RadarrQualityDefinitionUpdater : IRadarrQualityDefinitionUpdater
     public async Task Process(bool isPreview, RadarrConfiguration config)
     {
         _log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition!.Type);
-        var qualityDefinitions = _parser.GetQualities();
+        var qualityDefinitions = _guide.GetQualities();
         var qualityTypeInConfig = config.QualityDefinition!.Type;
 
         var selectedQuality = qualityDefinitions

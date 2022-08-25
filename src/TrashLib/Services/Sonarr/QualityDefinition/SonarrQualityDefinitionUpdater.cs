@@ -6,6 +6,7 @@ using TrashLib.Services.Common.QualityDefinition;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
 using TrashLib.Services.Sonarr.Config;
+using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
 namespace TrashLib.Services.Sonarr.QualityDefinition;
 
@@ -14,17 +15,17 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
     private readonly ILogger _log;
     private readonly ISonarrApi _api;
     private readonly IConsole _console;
-    private readonly ISonarrQualityGuideParser _parser;
+    private readonly ISonarrGuideService _guide;
     private readonly Regex _regexHybrid = new(@"720|1080", RegexOptions.Compiled);
 
     public SonarrQualityDefinitionUpdater(
         ILogger logger,
-        ISonarrQualityGuideParser parser,
+        ISonarrGuideService guide,
         ISonarrApi api,
         IConsole console)
     {
         _log = logger;
-        _parser = parser;
+        _guide = guide;
         _api = api;
         _console = console;
     }
@@ -45,7 +46,7 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
     public async Task Process(bool isPreview, SonarrConfiguration config)
     {
         _log.Information("Processing Quality Definition: {QualityDefinition}", config.QualityDefinition);
-        var qualityDefinitions = _parser.GetQualities();
+        var qualityDefinitions = _guide.GetQualities();
         var qualityTypeInConfig = config.QualityDefinition;
 
         // var qualityDefinitions = _parser.ParseMarkdown(await _parser.GetMarkdownData());

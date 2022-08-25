@@ -6,20 +6,27 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 using TrashLib.Repo;
+using TrashLib.Services.Common.QualityDefinition;
 using TrashLib.Services.Radarr.CustomFormat.Models;
+using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Services.Radarr.CustomFormat.Guide;
 
-public class LocalRepoCustomFormatJsonParser : IRadarrGuideService
+public class LocalRepoRadarrGuideService : IRadarrGuideService
 {
     private readonly IRepoPathsFactory _pathsFactory;
     private readonly ILogger _log;
+    private readonly QualityGuideParser<RadarrQualityData> _parser;
 
-    public LocalRepoCustomFormatJsonParser(IRepoPathsFactory pathsFactory, ILogger log)
+    public LocalRepoRadarrGuideService(IRepoPathsFactory pathsFactory, ILogger log)
     {
         _pathsFactory = pathsFactory;
         _log = log;
+        _parser = new QualityGuideParser<RadarrQualityData>(log);
     }
+
+    public ICollection<RadarrQualityData> GetQualities()
+        => _parser.GetQualities(_pathsFactory.Create().RadarrQualityPaths);
 
     public ICollection<CustomFormatData> GetCustomFormatData()
     {

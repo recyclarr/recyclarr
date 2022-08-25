@@ -28,11 +28,10 @@ public class RadarrAutofacModule : Module
 
         // Quality Definition Support
         builder.RegisterType<RadarrQualityDefinitionUpdater>().As<IRadarrQualityDefinitionUpdater>();
-        builder.RegisterType<RadarrQualityGuideParser>().As<IRadarrQualityGuideParser>();
 
         // Custom Format Support
         builder.RegisterType<CustomFormatUpdater>().As<ICustomFormatUpdater>();
-        builder.RegisterType<LocalRepoCustomFormatJsonParser>().As<IRadarrGuideService>();
+        builder.RegisterType<LocalRepoRadarrGuideService>().As<IRadarrGuideService>();
         builder.RegisterType<CachePersister>().As<ICachePersister>();
         builder.RegisterType<CustomFormatLister>().As<ICustomFormatLister>();
 

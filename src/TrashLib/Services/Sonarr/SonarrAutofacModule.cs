@@ -20,7 +20,7 @@ public class SonarrAutofacModule : Module
 
         // Release Profile Support
         builder.RegisterType<ReleaseProfileUpdater>().As<IReleaseProfileUpdater>();
-        builder.RegisterType<LocalRepoReleaseProfileJsonParser>().As<ISonarrGuideService>();
+        builder.RegisterType<LocalRepoSonarrGuideService>().As<ISonarrGuideService>();
         builder.RegisterType<SonarrReleaseProfileCompatibilityHandler>()
             .As<ISonarrReleaseProfileCompatibilityHandler>();
         builder.RegisterType<ReleaseProfileFilterPipeline>().As<IReleaseProfileFilterPipeline>();
@@ -34,6 +34,5 @@ public class SonarrAutofacModule : Module
 
         // Quality Definition Support
         builder.RegisterType<SonarrQualityDefinitionUpdater>().As<ISonarrQualityDefinitionUpdater>();
-        builder.RegisterType<SonarrQualityGuideParser>().As<ISonarrQualityGuideParser>();
     }
 }

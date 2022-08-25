@@ -16,14 +16,14 @@ namespace TrashLib.Tests.Sonarr.ReleaseProfile.Guide;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class LocalRepoReleaseProfileJsonParserTest
+public class LocalRepoSonarrGuideServiceTest
 {
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths appPaths,
         [Frozen] IRepoPaths repoPaths,
-        LocalRepoReleaseProfileJsonParser sut)
+        LocalRepoSonarrGuideService sut)
     {
         static ReleaseProfileData MakeMockObject(string term) => new()
         {
@@ -65,7 +65,7 @@ public class LocalRepoReleaseProfileJsonParserTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths appPaths,
         [Frozen] IRepoPaths repoPaths,
-        LocalRepoReleaseProfileJsonParser sut)
+        LocalRepoSonarrGuideService sut)
     {
         var rootPath = appPaths.RepoDirectory
             .SubDirectory("docs")
