@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Radarr: New `--list-qualities` argument to get a list of quality definition types from the guide.
+- New `--list-qualities` argument for `sonarr` and `radarr` subcommands that may be used to get a
+  list of quality definition types from the guide.
 
 ### Changed
 

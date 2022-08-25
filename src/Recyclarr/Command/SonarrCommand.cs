@@ -26,6 +26,10 @@ public class SonarrCommand : ServiceCommand
         "Note that not every release profile has terms that may be filtered.")]
     public string? ListTerms { get; [UsedImplicitly] set; } = "empty";
 
+    [CommandOption("list-qualities", Description =
+        "List available quality definition types from the guide.")]
+    public bool ListQualities { get; [UsedImplicitly] set; }
+
     public override string Name => "Sonarr";
 
     public override async Task Process(IServiceLocatorProxy container)
@@ -41,6 +45,12 @@ public class SonarrCommand : ServiceCommand
         if (ListReleaseProfiles)
         {
             lister.ListReleaseProfiles();
+            return;
+        }
+
+        if (ListQualities)
+        {
+            lister.ListQualities();
             return;
         }
 
