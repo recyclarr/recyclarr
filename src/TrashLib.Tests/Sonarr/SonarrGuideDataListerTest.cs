@@ -12,13 +12,13 @@ namespace TrashLib.Tests.Sonarr;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ReleaseProfileListerTest
+public class SonarrGuideDataListerTest
 {
     [Test, AutoMockData]
     public void Release_profiles_appear_in_console_output(
         [Frozen] ISonarrGuideService guide,
         [Frozen(Matching.ImplementedInterfaces)] FakeInMemoryConsole console,
-        ReleaseProfileLister sut)
+        SonarrGuideDataLister sut)
     {
         var testData = new[]
         {
@@ -38,7 +38,7 @@ public class ReleaseProfileListerTest
     public void Terms_appear_in_console_output(
         [Frozen] ISonarrGuideService guide,
         [Frozen(Matching.ImplementedInterfaces)] FakeInMemoryConsole console,
-        ReleaseProfileLister sut)
+        SonarrGuideDataLister sut)
     {
         var requiredData = new[]
         {
@@ -85,7 +85,7 @@ public class ReleaseProfileListerTest
     [Test, AutoMockData]
     public void Release_profile_trash_id_is_used_to_look_up_data(
         [Frozen] ISonarrGuideService guide,
-        ReleaseProfileLister sut)
+        SonarrGuideDataLister sut)
     {
         sut.ListTerms("098");
         guide.Received().GetUnfilteredProfileById("098");

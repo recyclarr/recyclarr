@@ -32,7 +32,7 @@ public class SonarrCommand : ServiceCommand
     {
         await base.Process(container);
 
-        var lister = container.Resolve<IReleaseProfileLister>();
+        var lister = container.Resolve<ISonarrGuideDataLister>();
         var profileUpdaterFactory = container.Resolve<Func<IReleaseProfileUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<ISonarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();

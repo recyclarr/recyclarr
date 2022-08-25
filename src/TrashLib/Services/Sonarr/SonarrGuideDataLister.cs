@@ -8,13 +8,13 @@ using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 namespace TrashLib.Services.Sonarr;
 
 [UsedImplicitly]
-public class ReleaseProfileLister : IReleaseProfileLister
+public class SonarrGuideDataLister : ISonarrGuideDataLister
 {
     private readonly IConsole _console;
     private readonly ISonarrGuideService _guide;
     private readonly ILogger _log;
 
-    public ReleaseProfileLister(IConsole console, ISonarrGuideService guide, ILogger log)
+    public SonarrGuideDataLister(IConsole console, ISonarrGuideService guide, ILogger log)
     {
         _console = console;
         _guide = guide;

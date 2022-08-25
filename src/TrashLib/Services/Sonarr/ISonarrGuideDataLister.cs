@@ -1,6 +1,6 @@
 namespace TrashLib.Services.Sonarr;
 
-public interface IReleaseProfileLister
+public interface ISonarrGuideDataLister
 {
     void ListReleaseProfiles();
     void ListTerms(string releaseProfileId);
