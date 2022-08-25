@@ -196,6 +196,19 @@ sonarr:
 
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
 
+### `--list-qualities`
+
+Print a list of all available types of quality definitions. The "type" of a quality definition comes
+from JSON files in the guide and this type is used in the configuration YAML for the
+`quality_definition` property:
+
+```yml
+quality_definition: series
+```
+
+Above, `series` would only be valid if that type appeared in the list output by the `sonarr`
+subcommand run with this argument.
+
 ## Subcommand: `radarr`
 
 ### `--list-custom-formats`
