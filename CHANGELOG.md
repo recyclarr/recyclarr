@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.1] - 2022-08-26
+
 ### Fixed
 
 - Radarr: Custom formats were always showing up as changed in the logs (#109)
@@ -401,7 +403,8 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v2.4.1...HEAD
+[2.4.1]: https://github.com/recyclarr/recyclarr/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/recyclarr/recyclarr/compare/v2.3.1...v2.4.0
 [2.3.1]: https://github.com/recyclarr/recyclarr/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/recyclarr/recyclarr/compare/v2.2.1...v2.3.0
