@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Common.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -65,12 +66,16 @@ public class LocalRepoRadarrGuideService : IRadarrGuideService
         if (obj.TryGetValue("trash_score", out var score))
         {
             finalScore = (int) score;
-            obj.Property("trash_score")?.Remove();
         }
 
-        // Remove trash_id, it's metadata that is not meant for Radarr itself
-        // Radarr supposedly drops this anyway, but I prefer it to be removed.
-        obj.Property("trash_id")?.Remove();
+        // Remove any properties starting with "trash_". Those are metadata that are not meant for Radarr itself Radarr
+        // supposedly drops this anyway, but I prefer it to be removed. ToList() is important here since removing the
+        // property itself modifies the collection, and we don't want the collection to get modified while still looping
+        // over it.
+        foreach (var trashProperty in obj.Properties().Where(x => Regex.IsMatch(x.Name, @"^trash_")).ToList())
+        {
+            trashProperty.Remove();
+        }
 
         return new CustomFormatData(name, trashId, finalScore, obj);
     }

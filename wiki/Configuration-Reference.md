@@ -80,22 +80,16 @@ sonarr:
 
 ### Quality Definition Settings
 
-- `quality_definition` (Optional; *Default: No quality definitions are synced*)<br>
-  The quality definition [from the TRaSH Guide's Quality Settings page][sonarr_quality] that should
-  be parsed and uploaded to Sonarr. Only the below values are permitted here.
+- `quality_definition` (Optional)<br>
+  A quality definition type found by running the `recyclarr sonarr --list-qualities` command that
+  identifies the quality size settings that should be parsed and uploaded to Sonarr.
 
-  - `anime` Represents the "Sonarr Quality Definitions" table specifically for Anime
-
-  - `series` Represents the "Sonarr Quality Definitions" table intended for normal TV Series.
-    Sometimes referred to as non-anime.
-
-  - `hybrid` A combination of both the `anime` and `series` tables that is calculated by comparing
-    each row and taking both the smallest minimum and largest maximum values. The purpose of the
-    Hybrid type is to build the most permissive quality definition that the guide will allow. It's a
-    good idea to use this one if you want more releases to be blocked by your release profiles
-    instead of quality.
-
-[sonarr_quality]: https://trash-guides.info/Sonarr/Sonarr-Quality-Settings-File-Size/
+  There's one special case type here that won't appear in the output of the above command, nor is it
+  one that exists in the guide: `hybrid`. It is a combination of both the `anime` and `series`
+  quality definitions that is calculated by comparing each quality and taking both the smallest
+  minimum and largest maximum values. The purpose of the `hybrid` type is to build the most
+  permissive quality definition that the guide will allow. It's a good idea to use this one if you
+  want more releases to be blocked by your release profiles instead of quality.
 
 ### Release Profile Settings
 
@@ -185,16 +179,13 @@ radarr:
 
 ### Quality Definition Settings
 
-- `quality_definition` (Optional; *Default: No quality definitions are synced*)<br>
+- `quality_definition` (Optional)<br>
   Specify information related to Radarr quality definition processing here. Only the following child
-  properties are permitted.
+  properties are permitted. If not specified, no quality definitions will be synced.
 
   - `type` **(Required)**<br>
-    The quality definition from the [Radarr Quality Settings (File Size)][radarr_quality] page in
-    the TRaSH Guides that should be parsed and uploaded to Radarr. Only the below values are
-    permitted here.
-    - `movie`: Currently the only supported type. Represents the only table on that page and is
-      intended for general use with all movies in Radarr.
+    A quality definition type found by running the `recyclarr radarr --list-qualities` command that
+    identifies the quality size settings that should be parsed and uploaded to Radarr.
 
   - `preferred_ratio` (Optional; *Default: `1.0`*)<br>
     A value `0.0` to `1.0` that represents the percentage (interpolated) position of that middle
@@ -204,8 +195,6 @@ radarr:
 
     Any value less than `0` or greater than `1` will result in a warning log printed and the value
     will be clamped.
-
-[radarr_quality]: https://trash-guides.info/Radarr/Radarr-Quality-Settings-File-Size/
 
 ### Custom Format Settings
 
