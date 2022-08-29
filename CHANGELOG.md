@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Docker: Fix `/config` permissions when not using bind-mount for the volume.
+- Docker: Fix `/config` permissions when not using bind-mount for the volume. (#111)
 
 ### Security
 
