@@ -16,6 +16,13 @@
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
+  <!-- Following found during vulerabilities Code Scan  -->
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Net.Uri" />
+    <PackageReference Include="System.Net.RegularExpressions" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
