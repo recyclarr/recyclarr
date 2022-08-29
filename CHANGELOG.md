@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Docker: Fix `/config` permissions when not using bind-mount for the volume.
+
 ## [2.4.1] - 2022-08-26
 
 ### Fixed
