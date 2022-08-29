@@ -2,11 +2,9 @@
 name: Sonarcloud
 
 on:
+  # Do not run on pull-request because the required tokens
+  # cannot be read from there.
   push:
-    paths-ignore:
-      - "wiki/**"
-      - "**.md"
-  pull_request:
     paths-ignore:
       - "wiki/**"
       - "**.md"
