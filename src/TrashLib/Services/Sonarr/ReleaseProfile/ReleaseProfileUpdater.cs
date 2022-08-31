@@ -13,17 +13,19 @@ namespace TrashLib.Services.Sonarr.ReleaseProfile;
 
 public class ReleaseProfileUpdater : IReleaseProfileUpdater
 {
-    private readonly ISonarrApi _api;
+    private readonly IReleaseProfileApiService _releaseProfileApi;
     private readonly ISonarrCompatibility _compatibility;
     private readonly IReleaseProfileFilterPipeline _pipeline;
     private readonly IConsole _console;
     private readonly ISonarrGuideService _guide;
+    private readonly ISonarrApi _api;
     private readonly ILogger _log;
 
     public ReleaseProfileUpdater(
         ILogger logger,
         ISonarrGuideService guide,
         ISonarrApi api,
+        IReleaseProfileApiService releaseProfileApi,
         ISonarrCompatibility compatibility,
         IReleaseProfileFilterPipeline pipeline,
         IConsole console)
@@ -31,6 +33,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         _log = logger;
         _guide = guide;
         _api = api;
+        _releaseProfileApi = releaseProfileApi;
         _compatibility = compatibility;
         _pipeline = pipeline;
         _console = console;
@@ -131,7 +134,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         // Obtain all of the existing release profiles first. If any were previously created by our program
         // here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
         // (but with some differences, since there have likely been updates since the last run).
-        var existingProfiles = await _api.GetReleaseProfiles();
+        var existingProfiles = await _releaseProfileApi.GetReleaseProfiles();
 
         foreach (var (profile, tags) in profilesAndTags)
         {
@@ -174,7 +177,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         foreach (var profile in sonarrProfilesToDelete)
         {
             _log.Information("Deleting old Trash release profile: {ProfileName}", profile.Name);
-            await _api.DeleteReleaseProfile(profile.Id);
+            await _releaseProfileApi.DeleteReleaseProfile(profile.Id);
         }
     }
 
@@ -246,13 +249,13 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
     {
         _log.Debug("Update existing profile with id {ProfileId}", profileToUpdate.Id);
         SetupProfileRequestObject(profileToUpdate, profile, tagIds);
-        await _api.UpdateReleaseProfile(profileToUpdate);
+        await _releaseProfileApi.UpdateReleaseProfile(profileToUpdate);
     }
 
     private async Task CreateNewProfile(string title, ReleaseProfileData profile, IReadOnlyCollection<int> tagIds)
     {
         var newProfile = new SonarrReleaseProfile {Name = title, Enabled = true};
         SetupProfileRequestObject(newProfile, profile, tagIds);
-        await _api.CreateReleaseProfile(newProfile);
+        await _releaseProfileApi.CreateReleaseProfile(newProfile);
     }
 }

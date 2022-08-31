@@ -14,6 +14,7 @@ public class SonarrAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterType<SonarrApi>().As<ISonarrApi>();
+        builder.RegisterType<ReleaseProfileApiService>().As<IReleaseProfileApiService>();
         builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
         builder.RegisterType<SonarrCompatibility>().As<ISonarrCompatibility>().SingleInstance();
         builder.RegisterType<SonarrGuideDataLister>().As<ISonarrGuideDataLister>();
