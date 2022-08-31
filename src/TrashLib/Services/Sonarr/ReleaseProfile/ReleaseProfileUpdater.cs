@@ -41,6 +41,8 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
 
     public async Task Process(bool isPreview, SonarrConfiguration config)
     {
+        await DoVersionEnforcement(config);
+
         var profilesFromGuide = _guide.GetReleaseProfileData();
 
         var filteredProfiles = new List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)>();
@@ -129,8 +131,6 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
     private async Task ProcessReleaseProfiles(
         List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)> profilesAndTags)
     {
-        await DoVersionEnforcement();
-
         // Obtain all of the existing release profiles first. If any were previously created by our program
         // here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
         // (but with some differences, since there have likely been updates since the last run).
@@ -196,7 +196,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
             .ToList();
     }
 
-    private async Task DoVersionEnforcement()
+    private async Task DoVersionEnforcement(SonarrConfiguration config)
     {
         var capabilities = await _compatibility.Capabilities.LastAsync();
         if (!capabilities.SupportsNamedReleaseProfiles)
@@ -204,6 +204,11 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
             throw new VersionException(
                 $"Your Sonarr version {capabilities.Version} does not meet the minimum " +
                 $"required version of {_compatibility.MinimumVersion} to use this program");
+        }
+
+        if (capabilities.SupportsCustomFormats && config.ReleaseProfiles.Any())
+        {
+            throw new VersionException("Sonarr v4 does not support Release Profiles. Please use Sonarr v3 instead.");
         }
     }
 

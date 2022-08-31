@@ -10,4 +10,6 @@ public interface ISonarrApi
 
     Task<IList<SonarrQualityDefinitionItem>> UpdateQualityDefinition(
         IReadOnlyCollection<SonarrQualityDefinitionItem> newQuality);
+
+    Task<Version> GetVersion();
 }

@@ -14,6 +14,15 @@ public class SonarrApi : ISonarrApi
         _serverInfo = serverInfo;
     }
 
+    public async Task<Version> GetVersion()
+    {
+        var response = await BaseUrl()
+            .AppendPathSegment("system/status")
+            .GetJsonAsync();
+
+        return new Version(response.version);
+    }
+
     public async Task<IList<SonarrTag>> GetTags()
     {
         return await BaseUrl()

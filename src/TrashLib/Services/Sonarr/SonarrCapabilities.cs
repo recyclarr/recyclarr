@@ -1,18 +1,10 @@
 namespace TrashLib.Services.Sonarr;
 
-public record SonarrCapabilities
+public record SonarrCapabilities(Version Version)
 {
-    public SonarrCapabilities()
+    public SonarrCapabilities() : this(new Version())
     {
-        Version = new Version();
     }
-
-    public SonarrCapabilities(Version version)
-    {
-        Version = version;
-    }
-
-    public Version Version { get; }
 
     public bool SupportsNamedReleaseProfiles { get; init; }
 
@@ -21,4 +13,6 @@ public record SonarrCapabilities
     //
     // [deed85d2f]: https://github.com/Sonarr/Sonarr/commit/deed85d2f9147e6180014507ef4f5af3695b0c61
     public bool ArraysNeededForReleaseProfileRequiredAndIgnored { get; init; }
+
+    public bool SupportsCustomFormats { get; init; }
 }
