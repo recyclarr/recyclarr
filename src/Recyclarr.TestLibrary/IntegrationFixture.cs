@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
+using Autofac.Features.ResolveAnything;
 using CliFx.Infrastructure;
 using NUnit.Framework;
 using Serilog.Events;
@@ -18,6 +19,7 @@ public abstract class IntegrationFixture
         _container = compRoot.Setup(default, new FakeConsole(), LogEventLevel.Debug).Container
             .BeginLifetimeScope(builder =>
             {
+                builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
                 builder.RegisterInstance(Fs).As<IFileSystem>();
             });
     }
