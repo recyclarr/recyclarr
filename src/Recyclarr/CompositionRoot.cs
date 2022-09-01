@@ -24,7 +24,7 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr;
 
-internal class CompositionRoot : ICompositionRoot
+public class CompositionRoot : ICompositionRoot
 {
     public IServiceLocatorProxy Setup(string? appDataDir, IConsole console, LogEventLevel logLevel)
     {

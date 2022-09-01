@@ -18,6 +18,5 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().InstancePerLifetimeScope();
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().InstancePerLifetimeScope();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
-        builder.RegisterType<SettingsPersister>().As<ISettingsPersister>();
     }
 }
