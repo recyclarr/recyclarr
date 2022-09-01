@@ -3,10 +3,9 @@ using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
-using Recyclarr.Logging;
-using Serilog;
+using MoreLinq.Extensions;
+using Recyclarr.Command.Setup;
 using Serilog.Events;
-using TrashLib.Startup;
 
 namespace Recyclarr.Command;
 
@@ -34,20 +33,17 @@ public abstract class BaseCommand : ICommand
 
         using var container = CompositionRoot.Setup(AppDataDirectory, console, logLevel);
 
-        var paths = container.Resolve<IAppPaths>();
-        var janitor = container.Resolve<ILogJanitor>();
-        var log = container.Resolve<ILogger>();
+        var tasks = container.Resolve<IOrderedEnumerable<IBaseCommandSetupTask>>().ToArray();
+        tasks.ForEach(x => x.OnStart());
 
-        log.Debug("App Data Dir: {AppData}", paths.AppDataDirectory);
-
-        // Initialize other directories used throughout the application
-        paths.RepoDirectory.Create();
-        paths.CacheDirectory.Create();
-        paths.LogDirectory.Create();
-
-        await Process(container);
-
-        janitor.DeleteOldestLogFiles(20);
+        try
+        {
+            await Process(container);
+        }
+        finally
+        {
+            tasks.Reverse().ForEach(x => x.OnFinish());
+        }
     }
 
     public abstract Task Process(IServiceLocatorProxy container);

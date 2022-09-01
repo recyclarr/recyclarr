@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Settings: New `log_janitor` setting that allows you to specify how many log files are kept when
+  cleaning up (deleting) old log files. See the [Settings Reference] wiki page for more details.
+
 ### Fixed
 
 - Docker: Fix `/config` permissions when not using bind-mount for the volume. (#111)
@@ -23,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [CVE-2019-0980]: https://avd.aquasec.com/nvd/cve-2019-0981
 [CVE-2019-0820]: https://avd.aquasec.com/nvd/cve-2019-0820
 [CVE-2019-0657]: https://avd.aquasec.com/nvd/cve-2019-0657
+[Settings Reference]: https://github.com/recyclarr/recyclarr/wiki/Settings-Reference
 
 ## [2.4.1] - 2022-08-26
 

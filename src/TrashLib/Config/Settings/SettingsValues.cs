@@ -7,8 +7,14 @@ public record TrashRepository
     public string? Sha1 { get; init; }
 }
 
+public record LogJanitorSettings
+{
+    public int MaxFiles { get; init; } = 20;
+}
+
 public record SettingsValues
 {
     public TrashRepository Repository { get; init; } = new();
     public bool EnableSslCertificateValidation { get; init; } = true;
+    public LogJanitorSettings LogJanitor { get; init; } = new();
 }

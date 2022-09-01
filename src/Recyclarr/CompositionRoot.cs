@@ -7,6 +7,7 @@ using CliFx;
 using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
+using Recyclarr.Command.Setup;
 using Recyclarr.Config;
 using Recyclarr.Logging;
 using Recyclarr.Migration;
@@ -94,6 +95,12 @@ public class CompositionRoot : ICompositionRoot
 
     private static void CommandRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterTypes(
+                typeof(AppPathSetupTask),
+                typeof(JanitorCleanupTask))
+            .As<IBaseCommandSetupTask>()
+            .OrderByRegistration();
+
         // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<ICommand>();
