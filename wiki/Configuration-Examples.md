@@ -159,8 +159,8 @@ radarr:
 ## Manually assign different scores to multiple custom formats
 
 Scenario: *"I want to synchronize custom formats to Radarr. I also do not want to use the scores in
-the guide. Instead, I want to assign my own distinct score to each custom format in a single quality
-profile."*
+the guide for some of the CFs. Instead, I want to assign my own distinct score to some custom
+formats in a single quality profile."*
 
 Solution:
 
@@ -170,30 +170,27 @@ radarr:
     api_key: 87674e2c316645ed85696a91a3d41988
 
     custom_formats:
-      - trash_ids: [496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS]
+      # Take scores in the guide for these 3
+      - trash_ids:
+          - 3cafb66171b47f226146a0770576870f #TrueHD
+          - dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA
+          - a570d4a0e56a2874b64e5bfa55202a1b #FLAC
+        quality_profiles:
+          - name: SD
+
+      # Assign manual scores to the 3 below CFs, each added to the same profile
+      - trash_ids: [496f355514737f7d83bf7aa4d24f8169] #TrueHD ATMOS
         quality_profiles:
           - name: SD
             score: 100
-      - trash_ids: [2f22d89048b01681dde8afe203bf2e95 #DTS X]
+      - trash_ids: [2f22d89048b01681dde8afe203bf2e95] #DTS X
         quality_profiles:
           - name: SD
             score: 200
-      - trash_ids: [417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)]
+      - trash_ids: [417804f7f2c4308c1f4c5d380d4c4475] #ATMOS (undefined)
         quality_profiles:
           - name: SD
             score: 300
-      - trash_ids: [3cafb66171b47f226146a0770576870f #TrueHD]
-        quality_profiles:
-          - name: SD
-            score: 400
-      - trash_ids: [dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA]
-        quality_profiles:
-          - name: SD
-            score: 500
-      - trash_ids: [a570d4a0e56a2874b64e5bfa55202a1b #FLAC]
-        quality_profiles:
-          - name: SD
-            score: 600
 ```
 
 The configuration is structured around assigning multiple custom formats the same way to just a few
