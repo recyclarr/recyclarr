@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using Serilog;
 using TrashLib.Repo;
 using TrashLib.Services.Common.QualityDefinition;
+using TrashLib.Services.CustomFormat.Guide;
+using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.Sonarr.QualityDefinition;
 using TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 
@@ -12,26 +14,37 @@ namespace TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
 public class LocalRepoSonarrGuideService : ISonarrGuideService
 {
-    private readonly IRepoPathsFactory _pathFactory;
+    private readonly IRepoPathsFactory _pathsFactory;
     private readonly ILogger _log;
+    private readonly ICustomFormatLoader _cfLoader;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
     private readonly QualityGuideParser<SonarrQualityData> _parser;
 
-    public LocalRepoSonarrGuideService(IRepoPathsFactory pathFactory, ILogger log)
+    public LocalRepoSonarrGuideService(
+        IRepoPathsFactory pathsFactory,
+        ILogger log,
+        ICustomFormatLoader cfLoader)
     {
-        _pathFactory = pathFactory;
+        _pathsFactory = pathsFactory;
         _log = log;
+        _cfLoader = cfLoader;
         _data = new Lazy<IEnumerable<ReleaseProfileData>>(GetReleaseProfileDataImpl);
         _parser = new QualityGuideParser<SonarrQualityData>(log);
     }
 
     public ICollection<SonarrQualityData> GetQualities()
-        => _parser.GetQualities(_pathFactory.Create().SonarrQualityPaths);
+        => _parser.GetQualities(_pathsFactory.Create().SonarrQualityPaths);
+
+    public IEnumerable<CustomFormatData> GetCustomFormatData()
+    {
+        var paths = _pathsFactory.Create();
+        return _cfLoader.LoadAllCustomFormatsAtPaths(paths.SonarrCustomFormatPaths);
+    }
 
     private IEnumerable<ReleaseProfileData> GetReleaseProfileDataImpl()
     {
         var converter = new TermDataConverter();
-        var paths = _pathFactory.Create();
+        var paths = _pathsFactory.Create();
         var tasks = paths.SonarrReleaseProfilePaths
             .SelectMany(x => x.GetFiles("*.json"))
             .Select(x => LoadAndParseFile(x, converter));

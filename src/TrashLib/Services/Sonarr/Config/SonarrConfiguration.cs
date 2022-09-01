@@ -1,10 +1,12 @@
 using TrashLib.Config.Services;
+using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Services.Sonarr.Config;
 
 public class SonarrConfiguration : ServiceConfiguration
 {
     public IList<ReleaseProfileConfig> ReleaseProfiles { get; init; } = Array.Empty<ReleaseProfileConfig>();
+    public ICollection<CustomFormatConfig> CustomFormats { get; init; } = new List<CustomFormatConfig>();
     public string QualityDefinition { get; init; } = "";
 }
 

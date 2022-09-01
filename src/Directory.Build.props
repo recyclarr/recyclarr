@@ -37,10 +37,7 @@
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
   </ItemGroup>
 
-  <PropertyGroup Condition="$(ProjectName.EndsWith('.Tests'))">
-  </PropertyGroup>
-
-  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('.TestLibrary'))">
     <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
     <PackageReference Include="AutoFixture" PrivateAssets="All" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="All" />
@@ -61,7 +58,7 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
+  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('.TestLibrary'))">
     <EmbeddedResource Include="**\Data\*" />
   </ItemGroup>
 </Project>

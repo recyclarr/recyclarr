@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
+using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Config;
 using TrashLib.Services.Sonarr.QualityDefinition;
@@ -30,6 +31,10 @@ public class SonarrCommand : ServiceCommand
         "List available quality definition types from the guide.")]
     public bool ListQualities { get; [UsedImplicitly] set; }
 
+    [CommandOption("list-custom-formats", Description =
+        "List available custom formats from the guide in YAML format.")]
+    public bool ListCustomFormats { get; [UsedImplicitly] set; }
+
     public override string Name => "Sonarr";
 
     public override async Task Process(IServiceLocatorProxy container)
@@ -41,6 +46,7 @@ public class SonarrCommand : ServiceCommand
         var qualityUpdaterFactory = container.Resolve<Func<ISonarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
         var log = container.Resolve<ILogger>();
+        var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
 
         if (ListReleaseProfiles)
         {
@@ -51,6 +57,12 @@ public class SonarrCommand : ServiceCommand
         if (ListQualities)
         {
             lister.ListQualities();
+            return;
+        }
+
+        if (ListCustomFormats)
+        {
+            lister.ListCustomFormats();
             return;
         }
 
@@ -81,6 +93,11 @@ public class SonarrCommand : ServiceCommand
             if (!string.IsNullOrEmpty(config.QualityDefinition))
             {
                 await qualityUpdaterFactory().Process(Preview, config);
+            }
+
+            if (config.CustomFormats.Count > 0)
+            {
+                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats);
             }
         }
     }
