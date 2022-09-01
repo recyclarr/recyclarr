@@ -9,14 +9,15 @@ using Serilog.Events;
 namespace Recyclarr.TestLibrary;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public abstract class IntegrationFixture
+public abstract class IntegrationFixture : IDisposable
 {
     private readonly ILifetimeScope _container;
+    private readonly FakeConsole _console = new();
 
     protected IntegrationFixture()
     {
         var compRoot = new CompositionRoot();
-        _container = compRoot.Setup(default, new FakeConsole(), LogEventLevel.Debug).Container
+        _container = compRoot.Setup(default, _console, LogEventLevel.Debug).Container
             .BeginLifetimeScope(builder =>
             {
                 builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
@@ -35,5 +36,22 @@ public abstract class IntegrationFixture
     protected T Resolve<T>() where T : notnull
     {
         return _container.Resolve<T>();
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposing)
+        {
+            return;
+        }
+
+        _container.Dispose();
+        _console.Dispose();
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
