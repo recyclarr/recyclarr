@@ -55,7 +55,7 @@ internal class CompositionRoot : ICompositionRoot
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
 
-        builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
+        builder.Register(_ => AutoMapperConfig.Setup()).InstancePerLifetimeScope();
 
         return new ServiceLocatorProxy(builder.Build());
     }
@@ -66,7 +66,7 @@ internal class CompositionRoot : ICompositionRoot
         builder.RegisterType<LoggerFactory>();
         builder.Register(c => c.Resolve<LoggerFactory>().Create(logLevel))
             .As<ILogger>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 
     private void RegisterAppPaths(ContainerBuilder builder, string? appDataDir)
@@ -77,7 +77,7 @@ internal class CompositionRoot : ICompositionRoot
 
         builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths(appDataDir))
             .As<IAppPaths>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 
     private static void ConfigurationRegistrations(ContainerBuilder builder)
@@ -104,6 +104,6 @@ internal class CompositionRoot : ICompositionRoot
         // the wrong configuration when multiple instances are used.
         builder.RegisterType<ActiveServiceCommandProvider>()
             .As<IActiveServiceCommandProvider>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 }

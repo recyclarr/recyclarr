@@ -16,7 +16,7 @@ public class SonarrAutofacModule : Module
         builder.RegisterType<SonarrApi>().As<ISonarrApi>();
         builder.RegisterType<ReleaseProfileApiService>().As<IReleaseProfileApiService>();
         builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
-        builder.RegisterType<SonarrCompatibility>().As<ISonarrCompatibility>().SingleInstance();
+        builder.RegisterType<SonarrCompatibility>().As<ISonarrCompatibility>().InstancePerLifetimeScope();
         builder.RegisterType<SonarrGuideDataLister>().As<ISonarrGuideDataLister>();
 
         // Release Profile Support
