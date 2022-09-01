@@ -21,11 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - Several vulnerabilities addressed (Thanks to @snoopy82481): [CVE-2018-8292], [CVE-2019-0980],
-  [CVE-2019-0980], [CVE-2019-0820], [CVE-2019-0657]. (#112)
+  [CVE-2019-0981], [CVE-2019-0820], [CVE-2019-0657]. (#112)
 
 [CVE-2018-8292]: https://avd.aquasec.com/nvd/cve-2018-8292
 [CVE-2019-0980]: https://avd.aquasec.com/nvd/cve-2019-0980
-[CVE-2019-0980]: https://avd.aquasec.com/nvd/cve-2019-0981
+[CVE-2019-0981]: https://avd.aquasec.com/nvd/cve-2019-0981
 [CVE-2019-0820]: https://avd.aquasec.com/nvd/cve-2019-0820
 [CVE-2019-0657]: https://avd.aquasec.com/nvd/cve-2019-0657
 [Settings Reference]: https://github.com/recyclarr/recyclarr/wiki/Settings-Reference
