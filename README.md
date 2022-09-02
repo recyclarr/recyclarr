@@ -6,8 +6,8 @@
 [![GitHub release](https://img.shields.io/github/release/recyclarr/recyclarr.svg)](https://github.com/recyclarr/recyclarr/releases/)
 [![Support Server](https://img.shields.io/discord/492590071455940612.svg?color=7289da&label=TRaSH-Guides&logo=discord&style=flat-square)](https://discord.com/invite/Vau8dZ3)
 
-A command-line application that will automatically synchronize recommended settings from TRaSH
-guides to your Sonarr/Radarr instances.
+A command-line application that will automatically synchronize recommended settings from the [TRaSH
+guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
 
 Formerly named "Trash Updater".
 
