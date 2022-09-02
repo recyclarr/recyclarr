@@ -2,6 +2,7 @@ Pages of Interest:
 
 - [[Command Line Reference]]
 - [[Configuration Reference]]
+- [[Configuration Examples]]
 - [[Settings Reference]]
 - [[Upgrade Guide]]
 - [[Behavior]]
