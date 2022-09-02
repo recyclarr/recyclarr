@@ -23,7 +23,7 @@ public sealed class AutoMockDataAttribute : AutoDataAttribute
     {
         var method = testFixtureClass.GetMethod(methodName,
             BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-        var getContainer = method?.CreateDelegate<Func<IContainer>>();
+        var getContainer = method?.CreateDelegate<Func<ILifetimeScope>>();
         if (getContainer is null)
         {
             throw new ArgumentException("Unable to find method on test fixture. Method must be non-public to be found.",

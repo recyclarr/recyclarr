@@ -9,6 +9,6 @@ public class RepoAutofacModule : Module
         base.Load(builder);
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
         builder.RegisterType<RepoMetadataParser>().As<IRepoMetadataParser>();
-        builder.RegisterType<RepoPathsFactory>().As<IRepoPathsFactory>().SingleInstance();
+        builder.RegisterType<RepoPathsFactory>().As<IRepoPathsFactory>().InstancePerLifetimeScope();
     }
 }

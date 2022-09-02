@@ -18,6 +18,6 @@ public static class CompositionRoot
         builder.RegisterType<DefaultAppDataSetup>();
         builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
             .As<IAppPaths>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 }

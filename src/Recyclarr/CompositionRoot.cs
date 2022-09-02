@@ -7,6 +7,7 @@ using CliFx;
 using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
+using Recyclarr.Command.Setup;
 using Recyclarr.Config;
 using Recyclarr.Logging;
 using Recyclarr.Migration;
@@ -24,7 +25,7 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr;
 
-internal class CompositionRoot : ICompositionRoot
+public class CompositionRoot : ICompositionRoot
 {
     public IServiceLocatorProxy Setup(string? appDataDir, IConsole console, LogEventLevel logLevel)
     {
@@ -55,7 +56,7 @@ internal class CompositionRoot : ICompositionRoot
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
 
-        builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
+        builder.Register(_ => AutoMapperConfig.Setup()).InstancePerLifetimeScope();
 
         return new ServiceLocatorProxy(builder.Build());
     }
@@ -66,7 +67,7 @@ internal class CompositionRoot : ICompositionRoot
         builder.RegisterType<LoggerFactory>();
         builder.Register(c => c.Resolve<LoggerFactory>().Create(logLevel))
             .As<ILogger>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 
     private void RegisterAppPaths(ContainerBuilder builder, string? appDataDir)
@@ -77,7 +78,7 @@ internal class CompositionRoot : ICompositionRoot
 
         builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths(appDataDir))
             .As<IAppPaths>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 
     private static void ConfigurationRegistrations(ContainerBuilder builder)
@@ -94,6 +95,12 @@ internal class CompositionRoot : ICompositionRoot
 
     private static void CommandRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterTypes(
+                typeof(AppPathSetupTask),
+                typeof(JanitorCleanupTask))
+            .As<IBaseCommandSetupTask>()
+            .OrderByRegistration();
+
         // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<ICommand>();
@@ -104,6 +111,6 @@ internal class CompositionRoot : ICompositionRoot
         // the wrong configuration when multiple instances are used.
         builder.RegisterType<ActiveServiceCommandProvider>()
             .As<IActiveServiceCommandProvider>()
-            .SingleInstance();
+            .InstancePerLifetimeScope();
     }
 }

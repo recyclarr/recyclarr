@@ -65,7 +65,6 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
     public override Task Process(IServiceLocatorProxy container)
     {
         var log = container.Resolve<ILogger>();
-        var settingsPersister = container.Resolve<ISettingsPersister>();
         var settingsProvider = container.Resolve<ISettingsProvider>();
         var repoUpdater = container.Resolve<IRepoUpdater>();
         var configFinder = container.Resolve<IConfigurationFinder>();
@@ -76,9 +75,6 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
 
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
-
-        // Stuff below may use settings.
-        settingsPersister.Load();
 
         SetupHttp(log, settingsProvider);
         repoUpdater.UpdateRepo();

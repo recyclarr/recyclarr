@@ -15,9 +15,8 @@ public class ConfigAutofacModule : Module
             .AsClosedTypesOf(typeof(IValidator<>))
             .AsImplementedInterfaces();
 
-        builder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().SingleInstance();
-        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
+        builder.RegisterType<ConfigurationProvider>().As<IConfigurationProvider>().InstancePerLifetimeScope();
+        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().InstancePerLifetimeScope();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
-        builder.RegisterType<SettingsPersister>().As<ISettingsPersister>();
     }
 }

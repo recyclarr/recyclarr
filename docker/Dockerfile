@@ -23,7 +23,8 @@ ENV PATH="${PATH}:/app/recyclarr" \
 
 RUN set -ex; \
     apk add --no-cache bash libstdc++ tzdata supercronic; \
-    mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR";
+    mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR"; \
+    mkdir -p /config && chown 1000:1000 /config;
 
 COPY --from=build /build/publish /app/recyclarr/
 COPY --chmod=555 ./scripts/prod/*.sh /

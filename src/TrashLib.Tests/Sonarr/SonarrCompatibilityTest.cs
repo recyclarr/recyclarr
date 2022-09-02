@@ -1,4 +1,5 @@
 using System.Reactive.Linq;
+using AutoFixture.NUnit3;
 using AutoMapper;
 using FluentAssertions;
 using Newtonsoft.Json;
@@ -6,16 +7,20 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
+using TestLibrary.AutoFixture;
+using TrashLib.ExceptionTypes;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
+using TrashLib.Services.Sonarr.Config;
+using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Startup;
 
-namespace TrashLib.Tests.Sonarr.Api;
+namespace TrashLib.Tests.Sonarr;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class SonarrReleaseProfileCompatibilityHandlerTest
+public class SonarrCompatibilityTest
 {
     private class TestContext : IDisposable
     {
@@ -110,5 +115,41 @@ public class SonarrReleaseProfileCompatibilityHandlerTest
         var result = await sut.CompatibleReleaseProfileForSendingAsync(data);
 
         result.Should().BeEquivalentTo(data);
+    }
+
+    [Test, AutoMockData]
+    public async Task Failure_when_release_profiles_used_with_sonarr_v4(
+        [Frozen] ISonarrApi api,
+        [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
+        ReleaseProfileUpdater updater)
+    {
+        api.GetVersion().Returns(new Version(4, 0));
+
+        var config = new SonarrConfiguration
+        {
+            ReleaseProfiles = new List<ReleaseProfileConfig> {new()}
+        };
+
+        var act = () => updater.Process(false, config);
+
+        await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v4*");
+    }
+
+    [Test, AutoMockData]
+    public async Task No_failure_when_release_profiles_used_with_sonarr_v3(
+        [Frozen] ISonarrApi api,
+        [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
+        ReleaseProfileUpdater updater)
+    {
+        api.GetVersion().Returns(new Version(3, 9));
+
+        var config = new SonarrConfiguration
+        {
+            ReleaseProfiles = new List<ReleaseProfileConfig> {new()}
+        };
+
+        var act = () => updater.Process(false, config);
+
+        await act.Should().NotThrowAsync();
     }
 }

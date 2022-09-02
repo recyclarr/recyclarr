@@ -6,9 +6,9 @@ namespace TestLibrary.AutoFixture;
 
 public class AutofacSpecimenBuilder : ISpecimenBuilder
 {
-    private readonly IContainer _container;
+    private readonly ILifetimeScope _container;
 
-    public AutofacSpecimenBuilder(IContainer container)
+    public AutofacSpecimenBuilder(ILifetimeScope container)
     {
         _container = container;
     }

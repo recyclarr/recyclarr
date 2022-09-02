@@ -2,4 +2,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr\Recyclarr.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" PrivateAssets="All" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
 </Project>

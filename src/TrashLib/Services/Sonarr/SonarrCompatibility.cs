@@ -1,8 +1,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using Flurl.Http;
 using Serilog;
-using TrashLib.Config.Services;
+using TrashLib.Services.Sonarr.Api;
 
 namespace TrashLib.Services.Sonarr;
 
@@ -10,15 +9,11 @@ public class SonarrCompatibility : ISonarrCompatibility
 {
     private readonly ILogger _log;
 
-    public SonarrCompatibility(IServerInfo serverInfo, ILogger log)
+    public SonarrCompatibility(ISonarrApi api, ILogger log)
     {
         _log = log;
-        Capabilities = Observable.FromAsync(
-                async () => await serverInfo.BuildRequest()
-                    .AppendPathSegment("system/status")
-                    .GetJsonAsync(), NewThreadScheduler.Default)
+        Capabilities = Observable.FromAsync(async () => await api.GetVersion(), NewThreadScheduler.Default)
             .Timeout(TimeSpan.FromSeconds(15))
-            .Select(x => new Version(x.version))
             .Select(BuildCapabilitiesObject)
             .Replay(1)
             .AutoConnect();
@@ -36,7 +31,10 @@ public class SonarrCompatibility : ISonarrCompatibility
                 version >= MinimumVersion,
 
             ArraysNeededForReleaseProfileRequiredAndIgnored =
-                version >= new Version("3.0.6.1355")
+                version >= new Version("3.0.6.1355"),
+
+            SupportsCustomFormats =
+                version >= new Version(4, 0)
         };
     }
 }

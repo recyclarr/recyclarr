@@ -18,7 +18,7 @@ services:
         aliases:
           - radarr_latest
     ports:
-      - 7878:7878
+      - 7879:7878
     volumes:
       - radarr_latest:/config
     environment:
@@ -31,7 +31,7 @@ services:
         aliases:
           - radarr_nightly
     ports:
-      - 7879:7878
+      - 7878:7878
     volumes:
       - radarr_nightly:/config
       - ./certs:/certs:ro
@@ -45,7 +45,7 @@ services:
         aliases:
           - sonarr_latest
     ports:
-      - 8989:8989
+      - 8990:8989
     volumes:
       - sonarr_latest:/config
     environment:
@@ -58,7 +58,7 @@ services:
         aliases:
           - sonarr_nightly
     ports:
-      - 8990:8989
+      - 8989:8989
     volumes:
       - sonarr_nightly:/config
     environment:
