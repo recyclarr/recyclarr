@@ -26,7 +26,7 @@
             "description": "The API key from Sonarr."
           },
           "quality_definition": {
-            "enum": ["hybrid", "anime", "series"]
+            "type": "string"
           },
           "release_profiles": {
             "type": "array",
@@ -105,8 +105,7 @@
             "required": ["type"],
             "properties": {
               "type": {
-                "type": "string",
-                "enum": ["movie"]
+                "type": "string"
               },
               "preferred_ratio": {
                 "type": "number",
