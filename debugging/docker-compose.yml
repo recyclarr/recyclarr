@@ -6,60 +6,37 @@ networks:
 
 volumes:
   radarr_nightly:
-  radarr_latest:
   sonarr_nightly:
-  sonarr_latest:
+  sonarr_v4:
 
 services:
-  radarr_latest:
-    image: ghcr.io/hotio/radarr
-    networks:
-      recyclarr:
-        aliases:
-          - radarr_latest
-    ports:
-      - 7879:7878
-    volumes:
-      - radarr_latest:/config
-    environment:
-      - TZ=America/Chicago
-
   radarr_nightly:
     image: ghcr.io/hotio/radarr:nightly
-    networks:
-      recyclarr:
-        aliases:
-          - radarr_nightly
-    ports:
-      - 7878:7878
+    container_name: radarr_nightly
+    networks: [recyclarr]
+    ports: [7878:7878]
     volumes:
       - radarr_nightly:/config
       - ./certs:/certs:ro
     environment:
       - TZ=America/Chicago
 
-  sonarr_latest:
-    image: ghcr.io/hotio/sonarr
-    networks:
-      recyclarr:
-        aliases:
-          - sonarr_latest
-    ports:
-      - 8990:8989
+  sonarr_nightly:
+    image: ghcr.io/hotio/sonarr:nightly
+    container_name: sonarr_nightly
+    networks: [recyclarr]
+    ports: [8989:8989]
     volumes:
-      - sonarr_latest:/config
+      - sonarr_nightly:/config
     environment:
       - TZ=America/Chicago
 
-  sonarr_nightly:
-    image: ghcr.io/hotio/sonarr:nightly
-    networks:
-      recyclarr:
-        aliases:
-          - sonarr_nightly
-    ports:
-      - 8989:8989
+  sonarr_v4:
+    image: ghcr.io/hotio/sonarr:v4
+    container_name: sonarr_v4
+    networks: [recyclarr]
+    ports: [8990:8989]
     volumes:
-      - sonarr_nightly:/config
+      - sonarr_v4:/config
     environment:
       - TZ=America/Chicago

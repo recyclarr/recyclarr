@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TestLibrary", "Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.TestLibrary", "Common.TestLibrary\Common.TestLibrary.csproj", "{A92321B5-2796-467B-B5A5-2BFC41167A25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

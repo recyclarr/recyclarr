@@ -1,4 +1,8 @@
 * text=auto
 
+# Files that require LF line endings
 *.sh eol=lf
 Dockerfile eol=lf
+
+# Ignore whitespace in these files
+*.sln -whitespace

@@ -1,8 +1,9 @@
 using Flurl;
+using TrashLib.Extensions;
 
 namespace TrashLib.Config.Services;
 
-internal class ServerInfo : IServerInfo
+public class ServerInfo : IServerInfo
 {
     private readonly IConfigurationProvider _config;
 
@@ -20,4 +21,6 @@ internal class ServerInfo : IServerInfo
             .AppendPathSegment("api/v3")
             .SetQueryParams(new {apikey = apiKey});
     }
+
+    public string SanitizedBaseUrl => FlurlLogging.SanitizeUrl(_config.ActiveConfiguration.BaseUrl);
 }

@@ -8,4 +8,5 @@ public interface IRepoPaths
     IReadOnlyCollection<IDirectoryInfo> SonarrReleaseProfilePaths { get; }
     IReadOnlyCollection<IDirectoryInfo> SonarrQualityPaths { get; }
     IReadOnlyCollection<IDirectoryInfo> RadarrQualityPaths { get; }
+    IReadOnlyCollection<IDirectoryInfo> SonarrCustomFormatPaths { get; }
 }

@@ -9,6 +9,12 @@ public class ResourceDataReader
     private readonly string? _namespace;
     private readonly string _subdirectory;
 
+    public ResourceDataReader(Assembly assembly, string subdirectory = "")
+    {
+        _subdirectory = subdirectory;
+        _assembly = assembly;
+    }
+
     public ResourceDataReader(Type typeWithNamespaceToUse, string subdirectory = "")
     {
         _subdirectory = subdirectory;
@@ -18,20 +24,47 @@ public class ResourceDataReader
 
     public string ReadData(string filename)
     {
+        var resourcePath = BuildResourceName(filename);
+        var foundResource = FindResourcePath(resourcePath);
+        return GetResourceData(foundResource);
+    }
+
+    private string BuildResourceName(string filename)
+    {
         var nameBuilder = new StringBuilder();
-        nameBuilder.Append(_namespace);
-        if (!string.IsNullOrEmpty(_subdirectory))
+
+        if (!string.IsNullOrEmpty(_namespace))
         {
-            nameBuilder.Append($".{_subdirectory}");
+            nameBuilder.Append($"{_namespace}.");
         }
 
-        nameBuilder.Append($".{filename}");
-
-        var resourceName = nameBuilder.ToString();
-        using var stream = _assembly?.GetManifestResourceStream(resourceName);
-        if (stream == null)
+        if (!string.IsNullOrEmpty(_subdirectory))
         {
-            throw new ArgumentException($"Embedded resource not found: {resourceName}");
+            nameBuilder.Append($"{_subdirectory}.");
+        }
+
+        nameBuilder.Append(filename);
+        return nameBuilder.ToString();
+    }
+
+    private string FindResourcePath(string resourcePath)
+    {
+        var foundResource = _assembly?.GetManifestResourceNames()
+            .FirstOrDefault(x => x.EndsWith(resourcePath));
+        if (foundResource is null)
+        {
+            throw new ArgumentException($"Embedded resource not found: {resourcePath}");
+        }
+
+        return foundResource;
+    }
+
+    private string GetResourceData(string resourcePath)
+    {
+        using var stream = _assembly?.GetManifestResourceStream(resourcePath);
+        if (stream is null)
+        {
+            throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");
         }
 
         using var reader = new StreamReader(stream);

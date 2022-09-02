@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings: New `log_janitor` setting that allows you to specify how many log files are kept when
   cleaning up (deleting) old log files. See the [Settings Reference] wiki page for more details.
   (#91)
+- Sonarr: Custom Formats can now be synced to Version 4.
 
 ### Fixed
 

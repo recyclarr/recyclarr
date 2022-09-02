@@ -19,7 +19,7 @@ public class SettingsPersisterTest
         [Frozen] IAppPaths paths,
         SettingsProvider sut)
     {
-        var settings = sut.Settings;
+        _ = sut.Settings;
 
         fileSystem.AllFiles.Should().ContainSingle(paths.SettingsPath.FullName);
     }

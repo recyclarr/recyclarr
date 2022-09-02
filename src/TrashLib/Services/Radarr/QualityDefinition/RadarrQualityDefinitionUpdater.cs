@@ -2,7 +2,6 @@ using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
 using TrashLib.Services.Radarr.Config;
-using TrashLib.Services.Radarr.CustomFormat.Guide;
 using TrashLib.Services.Radarr.QualityDefinition.Api;
 using TrashLib.Services.Radarr.QualityDefinition.Api.Objects;
 

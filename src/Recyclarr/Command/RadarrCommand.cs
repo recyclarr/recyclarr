@@ -3,8 +3,9 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
+using TrashLib.Services.CustomFormat;
+using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
-using TrashLib.Services.Radarr.CustomFormat;
 using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace Recyclarr.Command;
@@ -32,6 +33,7 @@ internal class RadarrCommand : ServiceCommand
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<IRadarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
+        var guideService = container.Resolve<IRadarrGuideService>();
 
         if (ListCustomFormats)
         {
@@ -56,7 +58,7 @@ internal class RadarrCommand : ServiceCommand
 
             if (config.CustomFormats.Count > 0)
             {
-                await customFormatUpdaterFactory().Process(Preview, config);
+                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats, guideService);
             }
         }
     }

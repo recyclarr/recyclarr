@@ -12,7 +12,7 @@ namespace Recyclarr.Tests;
 public class ServiceCompatibilityIntegrationTest : IntegrationFixture
 {
     [Test]
-    public void Load_data_correctly_when_file_exists()
+    public void Load_settings_yml_correctly_when_file_exists()
     {
         var sut = Resolve<ISettingsProvider>();
         var paths = Resolve<IAppPaths>();
