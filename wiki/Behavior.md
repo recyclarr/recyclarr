@@ -30,6 +30,7 @@ See the [Migration System] page.
 ## Radarr
 
 ### Custom format synchronization
+
 Custom format synchronization is broken up into three categories
 
 - Creation: Custom formats that are in the guide but do not exist in Radarr are **created**.
