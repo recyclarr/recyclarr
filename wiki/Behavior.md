@@ -29,7 +29,7 @@ See the [Migration System] page.
 
 ## Radarr
 
-### Custom format synchronization
+### Custom Format Synchronization
 
 Custom format synchronization is broken up into three categories
 
