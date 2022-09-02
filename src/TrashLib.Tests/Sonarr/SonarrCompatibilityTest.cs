@@ -9,6 +9,7 @@ using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
 using TrashLib.ExceptionTypes;
+using TrashLib.Services.Radarr.Config;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
@@ -146,6 +147,42 @@ public class SonarrCompatibilityTest
         var config = new SonarrConfiguration
         {
             ReleaseProfiles = new List<ReleaseProfileConfig> {new()}
+        };
+
+        var act = () => updater.Process(false, config);
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Test, AutoMockData]
+    public async Task Failure_when_custom_formats_used_with_sonarr_v3(
+        [Frozen] ISonarrApi api,
+        [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
+        ReleaseProfileUpdater updater)
+    {
+        api.GetVersion().Returns(new Version(3, 9));
+
+        var config = new SonarrConfiguration
+        {
+            CustomFormats = new List<CustomFormatConfig> {new()}
+        };
+
+        var act = () => updater.Process(false, config);
+
+        await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v3*custom format*use*v4*");
+    }
+
+    [Test, AutoMockData]
+    public async Task No_failure_when_custom_formats_used_with_sonarr_v4(
+        [Frozen] ISonarrApi api,
+        [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
+        ReleaseProfileUpdater updater)
+    {
+        api.GetVersion().Returns(new Version(4, 0));
+
+        var config = new SonarrConfiguration
+        {
+            CustomFormats = new List<CustomFormatConfig> {new()}
         };
 
         var act = () => updater.Process(false, config);
