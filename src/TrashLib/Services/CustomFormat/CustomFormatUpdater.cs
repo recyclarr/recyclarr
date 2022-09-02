@@ -4,7 +4,6 @@ using Serilog;
 using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Processors;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
-using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Services.CustomFormat;
 

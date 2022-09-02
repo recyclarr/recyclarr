@@ -50,6 +50,8 @@ public class ConfigurationLoaderTest
     {
         public string BaseUrl => "";
         public string ApiKey => "";
+        public ICollection<CustomFormatConfig> CustomFormats => new List<CustomFormatConfig>();
+        public bool DeleteOldCustomFormats => false;
     }
 
     [Test, AutoMockData(typeof(ConfigurationLoaderTest), nameof(BuildContainer))]

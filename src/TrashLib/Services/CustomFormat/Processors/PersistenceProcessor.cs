@@ -3,7 +3,6 @@ using TrashLib.Services.CustomFormat.Api;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
-using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Services.CustomFormat.Processors;
 
@@ -61,7 +60,7 @@ internal class PersistenceProcessor : IPersistenceProcessor
         _steps.JsonTransactionStep.Process(guideCfs, radarrCfs);
 
         // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
-        var config = (RadarrConfiguration) _configProvider.ActiveConfiguration;
+        var config = _configProvider.ActiveConfiguration;
         if (config.DeleteOldCustomFormats)
         {
             _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, radarrCfs);

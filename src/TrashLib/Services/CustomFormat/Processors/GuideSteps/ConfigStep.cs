@@ -1,7 +1,7 @@
 using Common.Extensions;
 using Serilog;
+using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Models;
-using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Services.CustomFormat.Processors.GuideSteps;
 

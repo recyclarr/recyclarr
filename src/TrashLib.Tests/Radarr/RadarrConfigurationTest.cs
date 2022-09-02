@@ -4,6 +4,7 @@ using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
 

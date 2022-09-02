@@ -1,8 +1,8 @@
+using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.GuideSteps;
 using TrashLib.Services.Radarr;
-using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Services.CustomFormat.Processors;
 

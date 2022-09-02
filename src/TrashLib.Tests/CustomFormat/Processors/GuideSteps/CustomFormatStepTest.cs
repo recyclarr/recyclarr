@@ -4,10 +4,10 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
 using TestLibrary.FluentAssertions;
+using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.GuideSteps;
-using TrashLib.Services.Radarr.Config;
 using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.CustomFormat.Processors.GuideSteps;

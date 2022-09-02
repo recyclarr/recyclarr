@@ -6,12 +6,12 @@ using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using TestLibrary.FluentAssertions;
+using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Guide;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Processors;
 using TrashLib.Services.CustomFormat.Processors.GuideSteps;
 using TrashLib.Services.Radarr;
-using TrashLib.Services.Radarr.Config;
 using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.CustomFormat.Processors;

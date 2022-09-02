@@ -1,6 +1,7 @@
 using Common.FluentValidation;
 using FluentValidation;
 using JetBrains.Annotations;
+using TrashLib.Config.Services;
 
 namespace TrashLib.Services.Radarr.Config;
 
