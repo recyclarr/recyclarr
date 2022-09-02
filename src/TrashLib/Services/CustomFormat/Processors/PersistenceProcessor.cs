@@ -52,18 +52,18 @@ internal class PersistenceProcessor : IPersistenceProcessor
         IEnumerable<TrashIdMapping> deletedCfsInCache,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
     {
-        var radarrCfs = await _customFormatService.GetCustomFormats();
+        var serviceCfs = await _customFormatService.GetCustomFormats();
 
         // Step 1: Match CFs between the guide & Radarr and merge the data. The goal is to retain as much of the
         // original data from Radarr as possible. There are many properties in the response JSON that we don't
         // directly care about. We keep those and just update the ones we do care about.
-        _steps.JsonTransactionStep.Process(guideCfs, radarrCfs);
+        _steps.JsonTransactionStep.Process(guideCfs, serviceCfs);
 
         // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
         var config = _configProvider.ActiveConfiguration;
         if (config.DeleteOldCustomFormats)
         {
-            _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, radarrCfs);
+            _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, serviceCfs);
         }
 
         // Step 2: For each merged CF, persist it to Radarr via its API. This will involve a combination of updates

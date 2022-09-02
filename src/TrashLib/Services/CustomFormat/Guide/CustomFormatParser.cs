@@ -20,10 +20,10 @@ public class CustomFormatParser : ICustomFormatParser
             finalScore = (int) score;
         }
 
-        // Remove any properties starting with "trash_". Those are metadata that are not meant for Radarr itself Radarr
-        // supposedly drops this anyway, but I prefer it to be removed. ToList() is important here since removing the
-        // property itself modifies the collection, and we don't want the collection to get modified while still looping
-        // over it.
+        // Remove any properties starting with "trash_". Those are metadata that are not meant for the remote service
+        // itself. The service supposedly drops this anyway, but I prefer it to be removed. ToList() is important here
+        // since removing the property itself modifies the collection, and we don't want the collection to get modified
+        // while still looping over it.
         foreach (var trashProperty in obj.Properties().Where(x => Regex.IsMatch(x.Name, @"^trash_")).ToList())
         {
             trashProperty.Remove();

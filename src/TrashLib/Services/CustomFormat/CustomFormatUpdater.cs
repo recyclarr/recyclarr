@@ -2,6 +2,7 @@ using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
 using TrashLib.Config.Services;
+using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat.Processors;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 
@@ -33,11 +34,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private ILogger Log { get; }
 
-    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> customFormats)
+    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> customFormats, IGuideService guideService)
     {
         _cache.Load();
 
-        await _guideProcessor.BuildGuideDataAsync(customFormats, _cache.CfCache);
+        await _guideProcessor.BuildGuideDataAsync(customFormats, _cache.CfCache, guideService);
 
         if (!ValidateGuideDataAndCheckShouldProceed())
         {
@@ -129,7 +130,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         var totalCount = created.Count + updated.Count;
         if (totalCount > 0)
         {
-            Log.Information("Total of {Count} custom formats synced to Radarr", totalCount);
+            Log.Information("Total of {Count} custom formats were synced", totalCount);
         }
         else
         {
@@ -195,7 +196,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_guideProcessor.CustomFormatsWithoutScore.Count > 0)
         {
             Log.Information("The below custom formats have no score in the guide or in your YAML config. They will " +
-                            "still be synced to Radarr, but no score will be set in your chosen quality profiles");
+                            "still be synced, but no score will be set in your chosen quality profiles");
             foreach (var tuple in _guideProcessor.CustomFormatsWithoutScore)
             {
                 Log.Information("{CfList}", tuple);

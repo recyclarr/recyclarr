@@ -33,6 +33,7 @@ internal class RadarrCommand : ServiceCommand
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<IRadarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
+        var guideService = container.Resolve<IRadarrGuideService>();
 
         if (ListCustomFormats)
         {
@@ -57,7 +58,7 @@ internal class RadarrCommand : ServiceCommand
 
             if (config.CustomFormats.Count > 0)
             {
-                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats);
+                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats, guideService);
             }
         }
     }

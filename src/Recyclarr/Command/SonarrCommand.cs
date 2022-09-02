@@ -9,6 +9,7 @@ using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Config;
 using TrashLib.Services.Sonarr.QualityDefinition;
 using TrashLib.Services.Sonarr.ReleaseProfile;
+using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
 namespace Recyclarr.Command;
 
@@ -47,6 +48,7 @@ public class SonarrCommand : ServiceCommand
         var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
         var log = container.Resolve<ILogger>();
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
+        var guideService = container.Resolve<ISonarrGuideService>();
 
         if (ListReleaseProfiles)
         {
@@ -97,7 +99,7 @@ public class SonarrCommand : ServiceCommand
 
             if (config.CustomFormats.Count > 0)
             {
-                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats);
+                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats, guideService);
             }
         }
     }

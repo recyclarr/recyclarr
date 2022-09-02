@@ -19,15 +19,15 @@ internal class JsonTransactionStep : IJsonTransactionStep
     public CustomFormatTransactionData Transactions { get; } = new();
 
     public void Process(IEnumerable<ProcessedCustomFormatData> guideCfs,
-        IReadOnlyCollection<JObject> radarrCfs)
+        IReadOnlyCollection<JObject> serviceCfs)
     {
-        foreach (var (guideCf, radarrCf) in guideCfs
-                     .Select(gcf => (GuideCf: gcf, RadarrCf: FindRadarrCf(radarrCfs, gcf))))
+        foreach (var (guideCf, serviceCf) in guideCfs
+                     .Select(gcf => (GuideCf: gcf, ServiceCf: FindServiceCf(serviceCfs, gcf))))
         {
-            var guideCfJson = BuildNewRadarrCf(guideCf.Json);
+            var guideCfJson = BuildNewServiceCf(guideCf.Json);
 
             // no match; we add this CF as brand new
-            if (radarrCf == null)
+            if (serviceCf == null)
             {
                 guideCf.Json = guideCfJson;
                 Transactions.NewCustomFormats.Add(guideCf);
@@ -35,8 +35,8 @@ internal class JsonTransactionStep : IJsonTransactionStep
             // found match in radarr CFs; update the existing CF
             else
             {
-                guideCf.Json = (JObject) radarrCf.DeepClone();
-                UpdateRadarrCf(guideCf.Json, guideCfJson);
+                guideCf.Json = (JObject) serviceCf.DeepClone();
+                UpdateServiceCf(guideCf.Json, guideCfJson);
 
                 // Set the cache for use later (like updating scores) if it hasn't been updated already.
                 // This handles CFs that already exist in Radarr but aren't cached (they will be added to cache
@@ -46,7 +46,7 @@ internal class JsonTransactionStep : IJsonTransactionStep
                     guideCf.SetCache(guideCf.Json.Value<int>("id"));
                 }
 
-                if (!JToken.DeepEquals(radarrCf, guideCf.Json))
+                if (!JToken.DeepEquals(serviceCf, guideCf.Json))
                 {
                     Transactions.UpdatedCustomFormats.Add(guideCf);
                 }
@@ -58,96 +58,96 @@ internal class JsonTransactionStep : IJsonTransactionStep
         }
     }
 
-    public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> radarrCfs)
+    public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> serviceCfs)
     {
-        var cfs = radarrCfs.ToList();
+        var cfs = serviceCfs.ToList();
 
         // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
         // FindRadarrCf() specifies 'null' for name because we should never delete unless an ID is found
         foreach (var del in deletedCfsInCache.Where(
-                     del => FindRadarrCf(cfs, del.CustomFormatId, null) != null))
+                     del => FindServiceCf(cfs, del.CustomFormatId, null) != null))
         {
             Transactions.DeletedCustomFormatIds.Add(del);
         }
     }
 
-    private static JObject? FindRadarrCf(IReadOnlyCollection<JObject> radarrCfs, ProcessedCustomFormatData guideCf)
+    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, ProcessedCustomFormatData guideCf)
     {
-        return FindRadarrCf(radarrCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
+        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
     }
 
-    private static JObject? FindRadarrCf(IReadOnlyCollection<JObject> radarrCfs, int? cfId, string? cfName)
+    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId, string? cfName)
     {
         JObject? match = null;
 
         // Try to find match in cache first
         if (cfId != null)
         {
-            match = radarrCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
+            match = serviceCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
         }
 
         // If we don't find by ID, search by name (if a name was given)
         if (match == null && cfName != null)
         {
-            match = radarrCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Value<string>("name")));
+            match = serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Value<string>("name")));
         }
 
         return match;
     }
 
-    private static void UpdateRadarrCf(JObject cfToModify, JObject cfToMergeFrom)
+    private static void UpdateServiceCf(JObject cfToModify, JObject cfToMergeFrom)
     {
         MergeProperties(cfToModify, cfToMergeFrom, JTokenType.Array);
 
-        var radarrSpecs = cfToModify["specifications"]?.Children<JObject>() ?? new JEnumerable<JObject>();
+        var serviceSpecs = cfToModify["specifications"]?.Children<JObject>() ?? new JEnumerable<JObject>();
         var guideSpecs = cfToMergeFrom["specifications"]?.Children<JObject>() ?? new JEnumerable<JObject>();
 
         var matchedGuideSpecs = guideSpecs
-            .GroupBy(gs => radarrSpecs.FirstOrDefault(gss => KeyMatch(gss, gs, "name")))
-            .SelectMany(kvp => kvp.Select(gs => new {GuideSpec = gs, RadarrSpec = kvp.Key}));
+            .GroupBy(gs => serviceSpecs.FirstOrDefault(gss => KeyMatch(gss, gs, "name")))
+            .SelectMany(kvp => kvp.Select(gs => new {GuideSpec = gs, ServiceSpec = kvp.Key}));
 
-        var newRadarrSpecs = new JArray();
+        var newServiceSpecs = new JArray();
 
         foreach (var match in matchedGuideSpecs)
         {
-            if (match.RadarrSpec != null)
+            if (match.ServiceSpec != null)
             {
-                MergeProperties(match.RadarrSpec, match.GuideSpec);
-                newRadarrSpecs.Add(match.RadarrSpec);
+                MergeProperties(match.ServiceSpec, match.GuideSpec);
+                newServiceSpecs.Add(match.ServiceSpec);
             }
             else
             {
-                newRadarrSpecs.Add(match.GuideSpec);
+                newServiceSpecs.Add(match.GuideSpec);
             }
         }
 
-        cfToModify["specifications"] = newRadarrSpecs;
+        cfToModify["specifications"] = newServiceSpecs;
     }
 
     private static bool KeyMatch(JObject left, JObject right, string keyName)
         => left.Value<string>(keyName) == right.Value<string>(keyName);
 
-    private static void MergeProperties(JObject radarrCf, JObject guideCfJson,
+    private static void MergeProperties(JObject serviceCf, JObject guideCfJson,
         JTokenType exceptType = JTokenType.None)
     {
         foreach (var guideProp in guideCfJson.Properties().Where(p => p.Value.Type != exceptType))
         {
             if (guideProp.Value.Type == JTokenType.Array &&
-                radarrCf.TryGetValue(guideProp.Name, out var radarrArray))
+                serviceCf.TryGetValue(guideProp.Name, out var serviceArray))
             {
-                ((JArray) radarrArray).Merge(guideProp.Value, new JsonMergeSettings
+                ((JArray) serviceArray).Merge(guideProp.Value, new JsonMergeSettings
                 {
                     MergeArrayHandling = MergeArrayHandling.Merge
                 });
             }
             else
             {
-                radarrCf[guideProp.Name] = guideProp.Value;
+                serviceCf[guideProp.Name] = guideProp.Value;
             }
         }
     }
 
-    private static JObject BuildNewRadarrCf(JObject jsonPayload)
+    private static JObject BuildNewServiceCf(JObject jsonPayload)
     {
         // Information on required fields from nitsua
         /*

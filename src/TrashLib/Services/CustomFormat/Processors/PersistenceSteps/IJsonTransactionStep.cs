@@ -9,7 +9,7 @@ public interface IJsonTransactionStep
     CustomFormatTransactionData Transactions { get; }
 
     void Process(IEnumerable<ProcessedCustomFormatData> guideCfs,
-        IReadOnlyCollection<JObject> radarrCfs);
+        IReadOnlyCollection<JObject> serviceCfs);
 
-    void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> radarrCfs);
+    void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> serviceCfs);
 }

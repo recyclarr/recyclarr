@@ -1,8 +1,8 @@
 using TrashLib.Config.Services;
+using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.GuideSteps;
-using TrashLib.Services.Radarr;
 
 namespace TrashLib.Services.CustomFormat.Processors;
 
@@ -15,14 +15,12 @@ public interface IGuideProcessorSteps
 
 internal class GuideProcessor : IGuideProcessor
 {
-    private readonly IRadarrGuideService _guideService;
     private readonly Func<IGuideProcessorSteps> _stepsFactory;
     private IList<CustomFormatData>? _guideCustomFormatJson;
     private IGuideProcessorSteps _steps;
 
-    public GuideProcessor(IRadarrGuideService guideService, Func<IGuideProcessorSteps> stepsFactory)
+    public GuideProcessor(Func<IGuideProcessorSteps> stepsFactory)
     {
-        _guideService = guideService;
         _stepsFactory = stepsFactory;
         _steps = stepsFactory();
     }
@@ -51,12 +49,10 @@ internal class GuideProcessor : IGuideProcessor
     public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
         => _steps.CustomFormat.DuplicatedCustomFormats;
 
-    public Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache)
+    public Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
+        IGuideService guideService)
     {
-        if (_guideCustomFormatJson == null)
-        {
-            _guideCustomFormatJson = _guideService.GetCustomFormatData().ToList();
-        }
+        _guideCustomFormatJson ??= guideService.GetCustomFormatData().ToList();
 
         var listOfConfigs = config.ToList();
 

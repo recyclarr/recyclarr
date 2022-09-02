@@ -16,13 +16,13 @@ internal class QualityProfileApiPersistenceStep : IQualityProfileApiPersistenceS
     public async Task Process(IQualityProfileService api,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> cfScores)
     {
-        var radarrProfiles = await api.GetQualityProfiles();
+        var serviceProfiles = await api.GetQualityProfiles();
 
         // Match quality profiles in Radarr to ones the user put in their config.
         // For each match, we return a tuple including the list of custom format scores ("formatItems").
         // Using GroupJoin() because we want a LEFT OUTER JOIN so we can list which quality profiles in config
         // do not match profiles in Radarr.
-        var profileScores = cfScores.GroupJoin(radarrProfiles,
+        var profileScores = cfScores.GroupJoin(serviceProfiles,
             s => s.Key,
             p => p.Value<string>("name"),
             (s, p) => (s.Key, s.Value, p.SelectMany(pi => pi.Children<JObject>("formatItems")).ToList()),

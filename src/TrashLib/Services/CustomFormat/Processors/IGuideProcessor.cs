@@ -1,4 +1,5 @@
 using TrashLib.Config.Services;
+using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 
@@ -15,6 +16,8 @@ internal interface IGuideProcessor
     IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
     IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
 
-    Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache);
+    Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
+        IGuideService guideService);
+
     void Reset();
 }

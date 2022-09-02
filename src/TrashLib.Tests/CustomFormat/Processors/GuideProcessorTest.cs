@@ -52,7 +52,7 @@ public class GuideProcessorTest
     {
         var ctx = new Context();
         var guideService = Substitute.For<IRadarrGuideService>();
-        var guideProcessor = new GuideProcessor(guideService, () => new TestGuideProcessorSteps());
+        var guideProcessor = new GuideProcessor(() => new TestGuideProcessorSteps());
 
         // simulate guide data
         guideService.GetCustomFormatData().Returns(new[]
@@ -86,7 +86,7 @@ public class GuideProcessorTest
             }
         };
 
-        await guideProcessor.BuildGuideDataAsync(config, null);
+        await guideProcessor.BuildGuideDataAsync(config, null, guideService);
 
         var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
         {

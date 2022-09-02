@@ -35,7 +35,7 @@ public class LocalRepoSonarrGuideService : ISonarrGuideService
     public ICollection<SonarrQualityData> GetQualities()
         => _parser.GetQualities(_pathsFactory.Create().SonarrQualityPaths);
 
-    public IEnumerable<CustomFormatData> GetCustomFormatData()
+    public ICollection<CustomFormatData> GetCustomFormatData()
     {
         var paths = _pathsFactory.Create();
         return _cfLoader.LoadAllCustomFormatsAtPaths(paths.SonarrCustomFormatPaths);

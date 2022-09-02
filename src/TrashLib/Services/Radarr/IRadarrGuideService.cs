@@ -1,10 +1,9 @@
-using TrashLib.Services.CustomFormat.Models;
+using TrashLib.Services.Common;
 using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace TrashLib.Services.Radarr;
 
-public interface IRadarrGuideService
+public interface IRadarrGuideService : IGuideService
 {
-    ICollection<CustomFormatData> GetCustomFormatData();
     ICollection<RadarrQualityData> GetQualities();
 }
