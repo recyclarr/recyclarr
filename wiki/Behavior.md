@@ -29,7 +29,8 @@ See the [Migration System] page.
 
 ## Radarr
 
-### Custom format synchronization is broken up into three categories
+### Custom format synchronization
+Custom format synchronization is broken up into three categories
 
 - Creation: Custom formats that are in the guide but do not exist in Radarr are **created**.
 - Updates: Custom formats that already exist in both the guide and in Radarr are **updated**.
@@ -43,9 +44,9 @@ See the [Migration System] page.
 > a custom format in the guide. In general, Recyclarr must have been the one to create a custom
 > format in order to do anything to it (update or delete).
 
-#### Cache
+### Cache
 
-##### Summary
+#### Summary
 
 The synchronization cache in Recyclarr allows it to more accurately detect changes to custom formats
 in the TRaSH guides. This mainly helps cover changes like renames.
@@ -61,7 +62,7 @@ The cache files are not meant to be edited by users. In general I recommend leav
 Recyclarr will manage it for you. However, sometimes a bug may cause an issue where deleting the
 cache directory will be a good way to recover.
 
-##### Custom Format Identification Behavior
+#### Custom Format Identification Behavior
 
 The cache stores and remembers the last known valid name for a custom format. If a custom format
 gets renamed in the Trash Guide, you don't need to immediately rename it in your YAML config. Trash
