@@ -31,9 +31,11 @@ Table of Contents
   - [Basic Settings](#basic-settings)
   - [Custom Format Settings](#custom-format-settings)
 - [Sonarr](#sonarr)
+  - [Custom Format Settings](#custom-format-settings-1)
   - [Quality Definition Settings](#quality-definition-settings)
   - [Release Profile Settings](#release-profile-settings)
 - [Radarr](#radarr)
+  - [Custom Format Settings](#custom-format-settings-2)
   - [Quality Definition Settings](#quality-definition-settings-1)
 
 ## All Services
@@ -147,6 +149,14 @@ sonarr:
         tags: [tv]
 ```
 
+### Custom Format Settings
+
+> ❗ **Notice** ❗<br>
+> Sonarr version 4 or greater is **required** for Custom Format support to work.
+
+See the [Custom Format Settings](#custom-format-settings) section under "All Services" at the top
+for more information.
+
 ### Quality Definition Settings
 
 - `quality_definition` (Optional)<br>
@@ -237,6 +247,11 @@ radarr:
         quality_profiles:
           - name: SD
 ```
+
+### Custom Format Settings
+
+See the [Custom Format Settings](#custom-format-settings) section under "All Services" at the top
+for more information.
 
 ### Quality Definition Settings
 
