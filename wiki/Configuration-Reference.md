@@ -52,6 +52,9 @@ The below settings are applicable to both Sonarr and Radarr.
 
 ### Custom Format Settings
 
+> ❗ **Notice** ❗<br>
+> For Sonarr: version 4 or greater is **required** for Custom Format support to work.
+
 For details on the way Custom Formats are synchronized, visit the [[Custom Format Synchronization]]
 page.
 
@@ -158,6 +161,9 @@ sonarr:
   want more releases to be blocked by your release profiles instead of quality.
 
 ### Release Profile Settings
+
+> 💀 **Deprecation Notice** 💀<br>
+> Release Profiles are deprecated and may not be used in Sonarr version 4 or greater!
 
 - `release_profiles` (Optional; *Default: No release profiles are synced*)<br>
   A list of release profiles to parse from the guide. Each object in this list supports the below
