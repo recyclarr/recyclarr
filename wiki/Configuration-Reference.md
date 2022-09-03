@@ -27,14 +27,91 @@ multiple ways, offering a lot of flexibility:
 
 Table of Contents
 
-- [Sonarr](#sonarr)
+- [All Services](#all-services)
   - [Basic Settings](#basic-settings)
+  - [Custom Format Settings](#custom-format-settings)
+- [Sonarr](#sonarr)
   - [Quality Definition Settings](#quality-definition-settings)
   - [Release Profile Settings](#release-profile-settings)
 - [Radarr](#radarr)
-  - [Basic Settings](#basic-settings-1)
   - [Quality Definition Settings](#quality-definition-settings-1)
-  - [Custom Format Settings](#custom-format-settings)
+
+## All Services
+
+The below settings are applicable to both Sonarr and Radarr.
+
+### Basic Settings
+
+- `base_url` **(Required)**<br>
+  The base URL of your instance. Basically this is the URL you bookmark to get to the front page.
+
+- `api_key` **(Required)**<br>
+  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
+  your API key by going to `Settings > General` and copy & paste the "API Key" under the "Security"
+  group/header.
+
+### Custom Format Settings
+
+For details on the way Custom Formats are synchronized, visit the [[Custom Format Synchronization]]
+page.
+
+- `delete_old_custom_formats` (Optional; *Default: `false`*)<br>
+  If enabled, custom formats that you remove from your YAML configuration OR that are removed from
+  the guide will be deleted from your Radarr instance. Note that this *only* applies to custom
+  formats that Recyclarr has synchronized to Radarr. Custom formats that you have added manually in
+  Radarr **will not be deleted** if you enable this setting.
+
+- `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
+  A list of one or more sets of custom formats each with an optional set of quality profiles names
+  that identify which quality profiles to assign the scores for those custom formats to. The child
+  properties documented below apply to each element of this list.
+
+  - `trash_ids` (Optional; *`names` is required if not used*)<br>
+    A list of one or more Trash IDs of custom formats to synchronize to Radarr. The IDs *must* be
+    taken from the value of the `"trash_id"` property in the JSON itself. It will look like the
+    following:
+
+    ```json
+    {
+      "trash_id": "496f355514737f7d83bf7aa4d24f8169",
+    }
+    ```
+
+    **TIP:** To ease the readability concerns of using IDs instead of names, leave a comment beside
+    the Trash ID in your configuration so it can be easily identified later. For example:
+
+    ```yml
+    trash_ids:
+      - 5d96ce331b98e077abb8ceb60553aa16 # dovi
+      - a570d4a0e56a2874b64e5bfa55202a1b # flac
+    ```
+
+    > **A Few Things to Remember**
+    >
+    > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
+    >   you remove them from this list.
+    > - It's OK for the same custom format to exist in multiple lists of `trash_ids`. Recyclarr will
+    >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
+    >   assign it to different profiles with different scores.
+
+  - `quality_profiles` (Optional; *Default: No quality profiles are changed*)<br>
+    One or more quality profiles to update with the scores from the custom formats listed above.
+    Scores are taken from the guide by default, with an option to override the score for all of
+    them. Each object in the list must use the properties below.
+
+    - `name` **(Required)**<br>
+      The name of one of the quality profiles in Radarr.
+
+    - `score` (Optional; *Default: Use scores from the guide*)<br>
+      A positive or negative number representing the score to apply to *all* custom formats listed
+      in the `names` list. A score of `0` is also acceptable, which effectively disables the custom
+      formats without having to delete them.
+
+    - `reset_unmatched_scores` (Optional; *Default: `false`*)<br>
+      If set to `true`, enables setting scores to `0` in quality profiles where either a name was
+      not mentioned in the `names` array *or* it was in that list but did not get a score (e.g. no
+      score in guide). If `false`, scores are never altered unless it is listed in the `names` array
+      *and* has a valid score to assign.
 
 ## Sonarr
 
@@ -66,17 +143,6 @@ sonarr:
             - f3f0f3691c6a1988d4a02963e69d11f2 # Ignore The Group -SCENE
         tags: [tv]
 ```
-
-### Basic Settings
-
-- `base_url` **(Required)**<br>
-  The base URL of your Sonarr instance. Basically this is the URL you bookmark to get to the front
-  page.
-
-- `api_key` **(Required)**<br>
-  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
-  your API key by going to `Sonarr > Settings > General` and copy & paste the "API Key" under the
-  "Security" group/header.
 
 ### Quality Definition Settings
 
@@ -166,17 +232,6 @@ radarr:
           - name: SD
 ```
 
-### Basic Settings
-
-- `base_url` **(Required)**<br>
-  The base URL of your Radarr instance. Basically this is the URL you bookmark to get to the front
-  page.
-
-- `api_key` **(Required)**<br>
-  The API key that Recyclarr should use to synchronize settings to your instance. You can obtain
-  your API key by going to `Radarr > Settings > General` and copy & paste the "API Key" under the
-  "Security" group/header.
-
 ### Quality Definition Settings
 
 - `quality_definition` (Optional)<br>
@@ -195,66 +250,3 @@ radarr:
 
     Any value less than `0` or greater than `1` will result in a warning log printed and the value
     will be clamped.
-
-### Custom Format Settings
-
-For details on the way Custom Formats are synchronized to Radarr, visit the [[Custom Format
-Synchronization]] page.
-
-- `delete_old_custom_formats` (Optional; *Default: `false`*)<br>
-  If enabled, custom formats that you remove from your YAML configuration OR that are removed from
-  the guide will be deleted from your Radarr instance. Note that this *only* applies to custom
-  formats that Recyclarr has synchronized to Radarr. Custom formats that you have added manually in
-  Radarr **will not be deleted** if you enable this setting.
-
-- `custom_formats` (Optional; *Default: No custom formats are synced*)<br>
-  A list of one or more sets of custom formats each with an optional set of quality profiles names
-  that identify which quality profiles to assign the scores for those custom formats to. The child
-  properties documented below apply to each element of this list.
-
-  - `trash_ids` (Optional; *`names` is required if not used*)<br>
-    A list of one or more Trash IDs of custom formats to synchronize to Radarr. The IDs *must* be
-    taken from the value of the `"trash_id"` property in the JSON itself. It will look like the
-    following:
-
-    ```json
-    {
-      "trash_id": "496f355514737f7d83bf7aa4d24f8169",
-    }
-    ```
-
-    **TIP:** To ease the readability concerns of using IDs instead of names, leave a comment beside
-    the Trash ID in your configuration so it can be easily identified later. For example:
-
-    ```yml
-    trash_ids:
-      - 5d96ce331b98e077abb8ceb60553aa16 # dovi
-      - a570d4a0e56a2874b64e5bfa55202a1b # flac
-    ```
-
-    > **A Few Things to Remember**
-    >
-    > - If `delete_old_custom_formats` is set to true, custom formats are **deleted** in Radarr if
-    >   you remove them from this list.
-    > - It's OK for the same custom format to exist in multiple lists of `trash_ids`. Recyclarr will
-    >   only ever synchronize it once. Allowing it to be specified multiple times allows you to
-    >   assign it to different profiles with different scores.
-
-  - `quality_profiles` (Optional; *Default: No quality profiles are changed*)<br>
-    One or more quality profiles to update with the scores from the custom formats listed above.
-    Scores are taken from the guide by default, with an option to override the score for all of
-    them. Each object in the list must use the properties below.
-
-    - `name` **(Required)**<br>
-      The name of one of the quality profiles in Radarr.
-
-    - `score` (Optional; *Default: Use scores from the guide*)<br>
-      A positive or negative number representing the score to apply to *all* custom formats listed
-      in the `names` list. A score of `0` is also acceptable, which effectively disables the custom
-      formats without having to delete them.
-
-    - `reset_unmatched_scores` (Optional; *Default: `false`*)<br>
-      If set to `true`, enables setting scores to `0` in quality profiles where either a name was
-      not mentioned in the `names` array *or* it was in that list but did not get a score (e.g. no
-      score in guide). If `false`, scores are never altered unless it is listed in the `names` array
-      *and* has a valid score to assign.
