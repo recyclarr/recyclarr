@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
-using TrashLib.Services.Radarr.CustomFormat.Models;
-using TrashLib.Services.Radarr.CustomFormat.Models.Cache;
+using TrashLib.Services.CustomFormat.Models;
+using TrashLib.Services.CustomFormat.Models.Cache;
 
 namespace TrashLib.TestLibrary;
 

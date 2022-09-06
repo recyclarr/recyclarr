@@ -6,5 +6,6 @@ public record RepoPaths(
     IReadOnlyCollection<IDirectoryInfo> RadarrCustomFormatPaths,
     IReadOnlyCollection<IDirectoryInfo> SonarrReleaseProfilePaths,
     IReadOnlyCollection<IDirectoryInfo> RadarrQualityPaths,
-    IReadOnlyCollection<IDirectoryInfo> SonarrQualityPaths
+    IReadOnlyCollection<IDirectoryInfo> SonarrQualityPaths,
+    IReadOnlyCollection<IDirectoryInfo> SonarrCustomFormatPaths
 ) : IRepoPaths;

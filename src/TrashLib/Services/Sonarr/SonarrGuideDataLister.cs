@@ -3,6 +3,7 @@ using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using MoreLinq;
 using Serilog;
+using TrashLib.Services.Common;
 using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
@@ -14,13 +15,21 @@ public class SonarrGuideDataLister : ISonarrGuideDataLister
     private readonly IConsole _console;
     private readonly ISonarrGuideService _guide;
     private readonly ILogger _log;
+    private readonly IGuideDataLister _guideLister;
 
-    public SonarrGuideDataLister(IConsole console, ISonarrGuideService guide, ILogger log)
+    public SonarrGuideDataLister(
+        IConsole console,
+        ISonarrGuideService guide,
+        ILogger log,
+        IGuideDataLister guideLister)
     {
         _console = console;
         _guide = guide;
         _log = log;
+        _guideLister = guideLister;
     }
+
+    public void ListCustomFormats() => _guideLister.ListCustomFormats(_guide.GetCustomFormatData());
 
     public void ListReleaseProfiles()
     {

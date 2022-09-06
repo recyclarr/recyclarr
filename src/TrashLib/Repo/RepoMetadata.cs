@@ -7,7 +7,8 @@ public record RadarrMetadata(
 
 public record SonarrMetadata(
     IReadOnlyCollection<string> ReleaseProfiles,
-    IReadOnlyCollection<string> Qualities
+    IReadOnlyCollection<string> Qualities,
+    IReadOnlyCollection<string> CustomFormats
 );
 
 public record JsonPaths(

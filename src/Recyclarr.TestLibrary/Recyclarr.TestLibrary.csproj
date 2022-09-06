@@ -1,9 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Common.TestLibrary\Common.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr\Recyclarr.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NUnit" PrivateAssets="All" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 </Project>

@@ -16,7 +16,10 @@ using Serilog.Events;
 using TrashLib;
 using TrashLib.Cache;
 using TrashLib.Config;
+using TrashLib.Config.Services;
 using TrashLib.Repo;
+using TrashLib.Services.Common;
+using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Sonarr;
 using TrashLib.Startup;
@@ -45,12 +48,15 @@ public class CompositionRoot : ICompositionRoot
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
+        builder.RegisterModule<CustomFormatAutofacModule>();
+        builder.RegisterModule<GuideServicesAutofacModule>();
 
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
+        builder.RegisterType<ServerInfo>().As<IServerInfo>();
         builder.RegisterType<ProgressBar>();
 
         ConfigurationRegistrations(builder);
