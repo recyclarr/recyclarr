@@ -34,11 +34,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private ILogger Log { get; }
 
-    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> customFormats, IGuideService guideService)
+    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, IGuideService guideService)
     {
         _cache.Load();
 
-        await _guideProcessor.BuildGuideDataAsync(customFormats, _cache.CfCache, guideService);
+        await _guideProcessor.BuildGuideDataAsync(configs, _cache.CfCache, guideService);
 
         if (!ValidateGuideDataAndCheckShouldProceed())
         {

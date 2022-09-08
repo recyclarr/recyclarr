@@ -87,7 +87,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         return Task.CompletedTask;
     }
 
-    private void SetupHttp(ILogger log, ISettingsProvider settingsProvider)
+    private static void SetupHttp(ILogger log, ISettingsProvider settingsProvider)
     {
         FlurlHttp.Configure(settings =>
         {

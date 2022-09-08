@@ -296,7 +296,7 @@ public class JsonTransactionStepTest
         processor.Process(guideCfs, radarrCfs!);
         processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
-        var expectedJson = @"{
+        const string expectedJson = @"{
   'id': 1,
   'name': 'updated',
   'specifications': [{

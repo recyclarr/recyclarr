@@ -49,7 +49,6 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
         var qualityDefinitions = _guide.GetQualities();
         var qualityTypeInConfig = config.QualityDefinition;
 
-        // var qualityDefinitions = _parser.ParseMarkdown(await _parser.GetMarkdownData());
         SonarrQualityData? selectedQuality;
 
         if (config.QualityDefinition.EqualsIgnoreCase("hybrid"))
@@ -88,7 +87,6 @@ internal class SonarrQualityDefinitionUpdater : ISonarrQualityDefinitionUpdater
         IReadOnlyCollection<QualityItem> anime,
         IReadOnlyCollection<QualityItem> series)
     {
-        // todo Verify anime & series are the same length? Probably not, because we might not care about some rows anyway.
         _log.Information(
             "Notice: Hybrid only functions on 720/1080 qualities and uses non-anime values for the rest (e.g. 2160)");
 

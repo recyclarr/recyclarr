@@ -44,7 +44,7 @@ public class ScopedState<T>
         return prevCount != StackSize;
     }
 
-    private class Node
+    private sealed class Node
     {
         public Node(T value, int scope)
         {
