@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING**: Completely removed support for `names` under `custom_formats` in `recyclarr.yml`.
+  Note that this had already been deprecated for quite some time.
+
 ## [2.6.1] - 2022-10-15
 
 ### Fixed

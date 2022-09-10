@@ -4,7 +4,6 @@ using FluentAssertions;
 using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
-using Serilog;
 using TestLibrary.FluentAssertions;
 using TrashLib.Config.Services;
 using TrashLib.Services.CustomFormat.Guide;
@@ -23,7 +22,7 @@ public class GuideProcessorTest
     private class TestGuideProcessorSteps : IGuideProcessorSteps
     {
         public ICustomFormatStep CustomFormat { get; } = new CustomFormatStep();
-        public IConfigStep Config { get; } = new ConfigStep(Substitute.For<ILogger>());
+        public IConfigStep Config { get; } = new ConfigStep();
         public IQualityProfileStep QualityProfile { get; } = new QualityProfileStep();
     }
 
@@ -68,7 +67,13 @@ public class GuideProcessorTest
         {
             new()
             {
-                Names = new List<string> {"Surround SOUND", "DTS-HD/DTS:X", "no score", "not in guide 1"},
+                TrashIds = new List<string>
+                {
+                    "43bb5f09c79641e7a22e48d440bd8868", // Surround SOUND
+                    "4eb3c272d48db8ab43c2c85283b69744", // DTS-HD/DTS:X
+                    "abc", // no score
+                    "not in guide 1"
+                },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
                     new() {Name = "profile1"},
@@ -77,7 +82,11 @@ public class GuideProcessorTest
             },
             new()
             {
-                Names = new List<string> {"no score", "not in guide 2"},
+                TrashIds = new List<string>
+                {
+                    "abc", // no score
+                    "not in guide 2"
+                },
                 QualityProfiles = new List<QualityProfileConfig>
                 {
                     new() {Name = "profile3"},
@@ -97,7 +106,8 @@ public class GuideProcessorTest
             NewCf.Processed("No Score", "abc")
         };
 
-        guideProcessor.ProcessedCustomFormats.Should().BeEquivalentTo(expectedProcessedCustomFormatData);
+        guideProcessor.ProcessedCustomFormats.Should()
+            .BeEquivalentTo(expectedProcessedCustomFormatData, op => op.Using(new JsonEquivalencyStep()));
 
         guideProcessor.ConfigData.Should()
             .BeEquivalentTo(new List<ProcessedConfigData>

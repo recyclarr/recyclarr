@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
@@ -65,7 +64,7 @@ internal class JsonTransactionStep : IJsonTransactionStep
         // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
         // FindRadarrCf() specifies 'null' for name because we should never delete unless an ID is found
         foreach (var del in deletedCfsInCache.Where(
-                     del => FindServiceCf(cfs, del.CustomFormatId, null) != null))
+                     del => FindServiceCf(cfs, del.CustomFormatId) != null))
         {
             Transactions.DeletedCustomFormatIds.Add(del);
         }
@@ -73,10 +72,10 @@ internal class JsonTransactionStep : IJsonTransactionStep
 
     private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, ProcessedCustomFormatData guideCf)
     {
-        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
+        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId);
     }
 
-    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId, string? cfName)
+    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId)
     {
         JObject? match = null;
 
@@ -84,12 +83,6 @@ internal class JsonTransactionStep : IJsonTransactionStep
         if (cfId != null)
         {
             match = serviceCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
-        }
-
-        // If we don't find by ID, search by name (if a name was given)
-        if (match == null && cfName != null)
-        {
-            match = serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Value<string>("name")));
         }
 
         return match;

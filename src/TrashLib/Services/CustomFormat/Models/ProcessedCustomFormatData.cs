@@ -19,11 +19,10 @@ public class ProcessedCustomFormatData
     public int? Score => _data.Score;
     public JObject Json { get; set; }
     public TrashIdMapping? CacheEntry { get; set; }
-    public string CacheAwareName => CacheEntry?.CustomFormatName ?? Name;
 
     public void SetCache(int customFormatId)
     {
-        CacheEntry ??= new TrashIdMapping(TrashId, Name);
+        CacheEntry ??= new TrashIdMapping(TrashId);
         CacheEntry.CustomFormatId = customFormatId;
     }
 

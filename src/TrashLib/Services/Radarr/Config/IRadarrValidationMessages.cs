@@ -4,7 +4,7 @@ public interface IRadarrValidationMessages
 {
     string BaseUrl { get; }
     string ApiKey { get; }
-    string CustomFormatNamesAndIds { get; }
+    string CustomFormatTrashIds { get; }
     string QualityProfileName { get; }
     string QualityDefinitionType { get; }
 }

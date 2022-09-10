@@ -13,8 +13,6 @@ internal interface IGuideProcessor
     IDictionary<string, QualityProfileCustomFormatScoreMapping> ProfileScores { get; }
     IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore { get; }
     IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
-    IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
-    IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
     IReadOnlyDictionary<string, Dictionary<string, HashSet<int>>> DuplicateScores { get; }
 
     Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,

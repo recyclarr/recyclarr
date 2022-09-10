@@ -44,12 +44,6 @@ internal class GuideProcessor : IGuideProcessor
     public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache
         => _steps.CustomFormat.DeletedCustomFormatsInCache;
 
-    public IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames
-        => _steps.CustomFormat.CustomFormatsWithOutdatedNames;
-
-    public IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats
-        => _steps.CustomFormat.DuplicatedCustomFormats;
-
     public Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
         IGuideService guideService)
     {

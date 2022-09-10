@@ -8,8 +8,8 @@ internal class RadarrValidationMessages : IRadarrValidationMessages
     public string ApiKey =>
         "Property 'api_key' is required";
 
-    public string CustomFormatNamesAndIds =>
-        "'custom_formats' elements must contain at least one element in either 'names' or 'trash_ids'";
+    public string CustomFormatTrashIds =>
+        "'custom_formats' elements must contain at least one element under 'trash_ids'";
 
     public string QualityProfileName =>
         "'name' is required for elements under 'quality_profiles'";

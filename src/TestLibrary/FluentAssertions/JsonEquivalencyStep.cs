@@ -1,3 +1,4 @@
+using FluentAssertions;
 using FluentAssertions.Equivalency;
 using FluentAssertions.Json;
 using Newtonsoft.Json.Linq;
@@ -16,7 +17,9 @@ public class JsonEquivalencyStep : IEquivalencyStep
         }
 
         ((JToken) comparands.Subject!).Should().BeEquivalentTo(
-            (JToken) comparands.Expectation, context.Reason.FormattedMessage, context.Reason.Arguments);
+            (JToken) comparands.Expectation,
+            context.Reason.FormattedMessage,
+            context.Reason.Arguments);
 
         return EquivalencyResult.AssertionCompleted;
     }

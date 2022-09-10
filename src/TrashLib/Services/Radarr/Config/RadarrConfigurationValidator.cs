@@ -27,8 +27,7 @@ internal class CustomFormatConfigValidator : AbstractValidator<CustomFormatConfi
         IRadarrValidationMessages messages,
         IValidator<QualityProfileConfig> qualityProfileConfigValidator)
     {
-        RuleFor(x => x.Names).NotEmpty().When(x => x.TrashIds.Count == 0)
-            .WithMessage(messages.CustomFormatNamesAndIds);
+        RuleFor(x => x.TrashIds).NotEmpty().WithMessage(messages.CustomFormatTrashIds);
         RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileConfigValidator);
     }
 }

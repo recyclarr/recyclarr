@@ -32,7 +32,7 @@ public class RadarrConfigurationTest
     };
 
     [TestCaseSource(nameof(NameOrIdsTestData))]
-    public void Custom_format_is_valid_with_one_of_either_names_or_trash_id(Collection<string> namesList,
+    public void Custom_format_is_valid_with_trash_id(Collection<string> namesList,
         Collection<string> trashIdsList)
     {
         var config = new RadarrConfiguration
@@ -41,7 +41,7 @@ public class RadarrConfigurationTest
             BaseUrl = "required value",
             CustomFormats = new List<CustomFormatConfig>
             {
-                new() {Names = namesList, TrashIds = trashIdsList}
+                new() {TrashIds = trashIdsList}
             }
         };
 
@@ -65,7 +65,7 @@ public class RadarrConfigurationTest
         {
             "Property 'base_url' is required",
             "Property 'api_key' is required",
-            "'custom_formats' elements must contain at least one element in either 'names' or 'trash_ids'",
+            "'custom_formats' elements must contain at least one element under 'trash_ids'",
             "'name' is required for elements under 'quality_profiles'",
             "'type' is required for 'quality_definition'"
         };
@@ -86,7 +86,7 @@ public class RadarrConfigurationTest
             {
                 new()
                 {
-                    Names = new List<string> {"required value"},
+                    TrashIds = new List<string> {"required value"},
                     QualityProfiles = new List<QualityProfileConfig>
                     {
                         new() {Name = "required value"}

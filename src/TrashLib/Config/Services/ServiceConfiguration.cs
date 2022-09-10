@@ -13,7 +13,6 @@ public abstract class ServiceConfiguration : IServiceConfiguration
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public class CustomFormatConfig
 {
-    public ICollection<string> Names { get; init; } = new List<string>();
     public ICollection<string> TrashIds { get; init; } = new List<string>();
     public ICollection<QualityProfileConfig> QualityProfiles { get; init; } = new List<QualityProfileConfig>();
 }

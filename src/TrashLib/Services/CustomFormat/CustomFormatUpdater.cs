@@ -120,7 +120,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (deleted.Count > 0)
         {
             _log.Information("Deleted {Count} Custom Formats: {CustomFormats}", deleted.Count,
-                deleted.Select(r => r.CustomFormatName));
+                deleted.Select(r => r.TrashId));
         }
 
         var totalCount = created.Count + updated.Count;
@@ -138,31 +138,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
     {
         _console.Output.WriteLine("");
 
-        if (_guideProcessor.DuplicatedCustomFormats.Count > 0)
-        {
-            _log.Warning("One or more of the custom formats you want are duplicated in the guide. These custom " +
-                         "formats WILL BE SKIPPED. Recyclarr is not able to choose which one you actually " +
-                         "wanted. To resolve this ambiguity, use the `trash_ids` property in your YML " +
-                         "configuration to refer to the custom format using its Trash ID instead of its name");
-
-            foreach (var (cfName, dupes) in _guideProcessor.DuplicatedCustomFormats)
-            {
-                _log.Warning("{CfName} is duplicated {DupeTimes} with the following Trash IDs:", cfName, dupes.Count);
-                foreach (var cf in dupes)
-                {
-                    _log.Warning(" - {TrashId}", cf.TrashId);
-                }
-            }
-
-            _console.Output.WriteLine("");
-        }
-
         if (_guideProcessor.CustomFormatsNotInGuide.Count > 0)
         {
             _log.Warning("The Custom Formats below do not exist in the guide and will " +
-                         "be skipped. Names must match the 'name' field in the actual JSON, not the header in " +
-                         "the guide! Either fix the names or remove them from your YAML config to resolve this " +
-                         "warning");
+                        "be skipped. Trash IDs must match what is listed in the output when using the " +
+                        "`--list-custom-formats` option");
             _log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
 
             _console.Output.WriteLine("");
@@ -216,20 +196,6 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 "When the same CF is specified multiple times with different scores in the same quality profile, " +
                 "only the score from the first occurrence is used. To resolve the duplication warnings above, " +
                 "remove the duplicate trash IDs from your YAML config");
-
-            _console.Output.WriteLine("");
-        }
-
-        if (_guideProcessor.CustomFormatsWithOutdatedNames.Count > 0)
-        {
-            _log.Warning("One or more custom format names in your YAML config have been renamed in the guide and " +
-                         "are outdated. Each outdated name will be listed below. These custom formats will refuse " +
-                         "to sync if your cache is deleted. To fix this warning, rename each one to its new name");
-
-            foreach (var (oldName, newName) in _guideProcessor.CustomFormatsWithOutdatedNames)
-            {
-                _log.Warning(" - '{OldName}' -> '{NewName}'", oldName, newName);
-            }
 
             _console.Output.WriteLine("");
         }
