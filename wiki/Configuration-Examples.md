@@ -6,7 +6,6 @@ Various scenarios supported using flexible configuration structure:
 - [Synchronize a lot of custom formats for a single quality profile](#synchronize-a-lot-of-custom-formats-for-a-single-quality-profile)
 - [Manually assign different scores to multiple custom formats](#manually-assign-different-scores-to-multiple-custom-formats)
 - [Assign custom format scores the same way to multiple quality profiles](#assign-custom-format-scores-the-same-way-to-multiple-quality-profiles)
-- [Resolving ambiguity between custom formats with the same name](#resolving-ambiguity-between-custom-formats-with-the-same-name)
 - [Scores in a quality profile should be set to zero if it wasn't listed in config](#scores-in-a-quality-profile-should-be-set-to-zero-if-it-wasnt-listed-in-config)
 
 ## Update as much as possible in both Sonarr and Radarr with a single config
