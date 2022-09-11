@@ -1,8 +1,8 @@
 Various scenarios supported using flexible configuration structure:
 
 - [Update as much as possible in both Sonarr and Radarr with a single config](#update-as-much-as-possible-in-both-sonarr-and-radarr-with-a-single-config)
-- [Selectively update different parts of Sonarr](#selectively-update-different-parts-of-sonarr)
-- [Update multiple Sonarr instances in a single YAML config](#update-multiple-sonarr-instances-in-a-single-yaml-config)
+- [Selectively update different parts of Sonarr v3](#selectively-update-different-parts-of-sonarr-v3)
+- [Update Sonarr v3 and v4 instances in a single YAML config](#update-sonarr-v3-and-v4-instances-in-a-single-yaml-config)
 - [Synchronize a lot of custom formats for a single quality profile](#synchronize-a-lot-of-custom-formats-for-a-single-quality-profile)
 - [Manually assign different scores to multiple custom formats](#manually-assign-different-scores-to-multiple-custom-formats)
 - [Assign custom format scores the same way to multiple quality profiles](#assign-custom-format-scores-the-same-way-to-multiple-quality-profiles)
@@ -45,7 +45,9 @@ recyclarr sonarr && recyclarr radarr
 This scenario is pretty ideal for a cron job you have running regularly and you want it to update
 everything possible in one go.
 
-## Selectively update different parts of Sonarr
+## Selectively update different parts of Sonarr v3
+
+***NOTE:** The official Docker container does not support multiple configuration files*
 
 Say you want to update Sonarr release profiles from the guide, but not the quality definitions.
 There's no command line option to control this, so how do you do it?
@@ -88,21 +90,25 @@ you run the program:
 recyclarr sonarr --config sonarr-release-profiles.yml sonarr-quality-definition.yml
 ```
 
-## Update multiple Sonarr instances in a single YAML config
+## Update Sonarr v3 and v4 instances in a single YAML config
 
-If you have two instances of Sonarr that you'd like to update from a single run of the updater using
-one YAML file, you can do that by simply specifying both in the list under the `sonarr` property:
+If you have two instances of Sonarr, one v3 and one v4, that you'd like to update from a single run
+using one YAML file, you can do that by simply specifying both in the list under the `sonarr`
+property:
 
 ```yml
 sonarr:
-  - base_url: http://instance_one:8989
+  - base_url: http://sonarr_v4:8989
     api_key: f7e74ba6c80046e39e076a27af5a8444
     quality_definition: anime
-    release_profiles:
+    custom_formats:
       - trash_ids:
-          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
-          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
-  - base_url: http://instance_two:8989
+          - 949c16fe0a8147f50ba82cc2df9411c9 # Anime BD Tier 01 (Top SeaDex Muxers)
+          - ed7f1e315e000aef424a58517fa48727 # Anime BD Tier 02 (SeaDex Muxers)
+          - 096e406c92baa713da4a72d88030b815 # Anime BD Tier 03 (SeaDex Muxers)
+        quality_profiles:
+          - name: Anime Subs
+  - base_url: http://sonarr_v3:8989
     api_key: bf99da49d0b0488ea34e4464aa63a0e5
     quality_definition: series
     release_profiles:
@@ -114,13 +120,12 @@ sonarr:
 
 In the example above, two separate instances, each with its own API key, will be updated. One
 instance is for Anime only. The other is for Series (TV) only. And since I'm using two instances, I
-don't bother with tags, so I am able to leave those elements out.
+don't bother with tags, so I am able to leave those elements out. Recyclarr knows when it's talking
+to either a v3 or v4 instance of Sonarr and will correctly anticipate either `release_profiles` or
+`custom_formats` (respectively).
 
 When you run `recyclarr sonarr` (specify `--config` if you aren't using the default `recyclarr.yml`)
 it will update both instances.
-
-You can also split theses two instances across different YAML files if you do not want both to
-update at the same time. There's an example of how to do that in a different section of this page.
 
 ## Synchronize a lot of custom formats for a single quality profile
 
@@ -137,29 +142,29 @@ radarr:
     custom_formats:
       # Advanced Audio from the guide
       - trash_ids:
-        - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
-        - 2f22d89048b01681dde8afe203bf2e95 #DTS X
-        - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
-        - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
-        - 3cafb66171b47f226146a0770576870f #TrueHD
-        - dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA
-        - a570d4a0e56a2874b64e5bfa55202a1b #FLAC
-        - e7c2fcae07cbada050a0af3357491d7b #PCM
-        - 8e109e50e0a0b83a5098b056e13bf6db #DTS-HD HRA
-        - 185f1dd7264c4562b9022d963ac37424 #DD+
-        - f9f847ac70a0af62ea4a08280b859636 #DTS-ES
-        - 1c1a4c5e823891c75bc50380a6866f73 #DTS
-        - 240770601cc226190c367ef59aba7463 #AAC
-        - c2998bd0d90ed5621d8df281e839436e #DD
+        - 496f355514737f7d83bf7aa4d24f8169 # TrueHD ATMOS
+        - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+        - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
+        - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
+        - 3cafb66171b47f226146a0770576870f # TrueHD
+        - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
+        - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
+        - e7c2fcae07cbada050a0af3357491d7b # PCM
+        - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
+        - 185f1dd7264c4562b9022d963ac37424 # DD+
+        - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
+        - 1c1a4c5e823891c75bc50380a6866f73 # DTS
+        - 240770601cc226190c367ef59aba7463 # AAC
+        - c2998bd0d90ed5621d8df281e839436e # DD
         quality_profiles:
           - name: SD
 ```
 
 ## Manually assign different scores to multiple custom formats
 
-Scenario: *"I want to synchronize custom formats to Radarr. I also do not want to use the scores in
-the guide for some of the CFs. Instead, I want to assign my own distinct score to some custom
-formats in a single quality profile."*
+Scenario: *"I want to synchronize custom formats to Radarr or Sonarr. I also do not want to use the
+scores in the guide for some of the CFs. Instead, I want to assign my own distinct score to some
+custom formats in a single quality profile."*
 
 Solution:
 
@@ -171,22 +176,22 @@ radarr:
     custom_formats:
       # Take scores in the guide for these 3
       - trash_ids:
-          - 3cafb66171b47f226146a0770576870f #TrueHD
-          - dcf3ec6938fa32445f590a4da84256cd #DTS-HD MA
-          - a570d4a0e56a2874b64e5bfa55202a1b #FLAC
+          - 3cafb66171b47f226146a0770576870f # TrueHD
+          - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
+          - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
         quality_profiles:
           - name: SD
 
       # Assign manual scores to the 3 below CFs, each added to the same profile
-      - trash_ids: [496f355514737f7d83bf7aa4d24f8169] #TrueHD ATMOS
+      - trash_ids: [496f355514737f7d83bf7aa4d24f8169] # TrueHD ATMOS
         quality_profiles:
           - name: SD
             score: 100
-      - trash_ids: [2f22d89048b01681dde8afe203bf2e95] #DTS X
+      - trash_ids: [2f22d89048b01681dde8afe203bf2e95] # DTS X
         quality_profiles:
           - name: SD
             score: 200
-      - trash_ids: [417804f7f2c4308c1f4c5d380d4c4475] #ATMOS (undefined)
+      - trash_ids: [417804f7f2c4308c1f4c5d380d4c4475] # ATMOS (undefined)
         quality_profiles:
           - name: SD
             score: 300
@@ -207,11 +212,11 @@ radarr:
 
     custom_formats:
       - trash_ids:
-          - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
-          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
-          - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
-          - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
-          - 3cafb66171b47f226146a0770576870f #TrueHD
+          - 496f355514737f7d83bf7aa4d24f8169 # TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+          - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
+          - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
+          - 3cafb66171b47f226146a0770576870f # TrueHD
         quality_profiles:
           - name: SD
           - name: Ultra-HD
@@ -229,11 +234,11 @@ radarr:
 
     custom_formats:
       - trash_ids:
-          - 496f355514737f7d83bf7aa4d24f8169 #TrueHD ATMOS
-          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
-          - 417804f7f2c4308c1f4c5d380d4c4475 #ATMOS (undefined)
-          - 1af239278386be2919e1bcee0bde047e #DD+ ATMOS
-          - 3cafb66171b47f226146a0770576870f #TrueHD
+          - 496f355514737f7d83bf7aa4d24f8169 # TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+          - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
+          - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
+          - 3cafb66171b47f226146a0770576870f # TrueHD
         quality_profiles:
           - name: SD
             score: 100 # This score is assigned to all 5 CFs in this profile
@@ -242,9 +247,9 @@ radarr:
 
 ## Scores in a quality profile should be set to zero if it wasn't listed in config
 
-Scenario: *"I completely rely on Recyclarr to set scores on my quality profiles. I never plan to
-manually set scores on those profiles. If I alter which custom format scores get assigned to a
-quality profile, the old scores should be set back to 0 automatically for me."*
+Scenario: *"I want only the custom formats I assign to a quality profile to be assigned scores.
+Scores for other custom formats, **including those I manually assign**, should be reset back to
+zero."*
 
 ```yml
 radarr:
@@ -253,25 +258,28 @@ radarr:
 
     custom_formats:
       - trash_ids:
-          - 2f22d89048b01681dde8afe203bf2e95 #DTS X
-          - 3cafb66171b47f226146a0770576870f #TrueHD
+          - 1c7d7b04b15cc53ea61204bebbcc1ee2 # HQ
+
+      - trash_ids:
+          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+          - 3cafb66171b47f226146a0770576870f # TrueHD
         quality_profiles:
           - name: SD
             reset_unmatched_scores: true
           - name: Ultra-HD
 ```
 
-Let's say you have three custom formats added to Radarr: "DTS X", "TrueHD", and "DoVi". Since only
-the first two are listed in the `trash_ids` array, what happens to "DoVi"? Since two quality profiles
-are specified above, each with a different setting for `reset_unmatched_scores`, the behavior will
-be different:
+Let's say you have three custom formats added to Radarr: "DTS X", "TrueHD", and "HD". Since only the
+first two are listed in the `trash_ids` array, what happens to "HD"? Since two quality profiles are
+specified above, each with a different setting for `reset_unmatched_scores`, the behavior will be
+different:
 
-- The `SD` profile will always have the score for "DoVi" set to zero (`0`).
-- The `Ultra-HD` profile's score for "DoVi" will never be altered.
+- The `SD` quality profile will always have the score for "HD" set to zero (`0`).
+- The `Ultra-HD` quality profile's score for "HD" will never be altered.
 
 The `reset_unmatched_scores` setting basically determines how scores are handled for custom formats
-that exist in Radarr but are not in the list of `trash_ids` in config. As shown in the example above,
-you set it to `true` which results in unmatched scores being set to `0`, or you can set it to
+that exist in Radarr but are not in the list of `trash_ids` in config. As shown in the example
+above, you set it to `true` which results in unmatched scores being set to `0`, or you can set it to
 `false` (or leave it omitted) in which case Recyclarr will not alter the value.
 
 Which one should you use? That depends on how much control you want Recyclarr to have. If you use
