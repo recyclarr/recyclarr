@@ -20,7 +20,8 @@ features list, see the [Features] page.
 
 **Sonarr**:
 
-- Sync Release Profiles from the guide.
+- Sync Release Profiles from the guide to Sonarr v3.
+- Supports Sonarr v4 Custom Formats.
 - Sync Quality Definitions (sizes) from the guide.
 - Add Tags to Release Profiles.
 - Assign scores from the guide to quality profiles.
@@ -37,7 +38,7 @@ Before installing & running Recyclarr, please review the requirements & special 
 
 - Minimum Supported Sonarr Version: `3.0.4.1098`
 - Minimum Supported Radarr Version: `3.*`
-- Sonarr v4 is **not supported yet**.
+- Sonarr `4.0` or greater is required for custom format support.
 - Do not run Notifiarr's Trash Guides Integration in conjunction with Recyclarr's Custom Format
   synchronization. In general, you should not have two different tools updating the same data in
   Radarr or Sonarr.
