@@ -19,6 +19,7 @@ public class JanitorCleanupTask : IBaseCommandSetupTask
 
     public void OnStart()
     {
+        // No work to do for this event
     }
 
     public void OnFinish()

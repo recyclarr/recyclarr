@@ -17,8 +17,8 @@ public class ServiceCompatibilityIntegrationTest : IntegrationFixture
         var sut = Resolve<ISettingsProvider>();
         var paths = Resolve<IAppPaths>();
 
-        // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects;
-        // this test only ensures that the data deserialized is from the actual correct file.
+        // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects.
+        // This test only ensures that the data deserialized is from the actual correct file.
         const string yamlData = @"
 repository:
   clone_url: http://the_url.com

@@ -67,7 +67,7 @@ public class CompositionRoot : ICompositionRoot
         return new ServiceLocatorProxy(builder.Build());
     }
 
-    private void RegisterLogger(ContainerBuilder builder, LogEventLevel logLevel)
+    private static void RegisterLogger(ContainerBuilder builder, LogEventLevel logLevel)
     {
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
         builder.RegisterType<LoggerFactory>();
@@ -76,7 +76,7 @@ public class CompositionRoot : ICompositionRoot
             .InstancePerLifetimeScope();
     }
 
-    private void RegisterAppPaths(ContainerBuilder builder, string? appDataDir)
+    private static void RegisterAppPaths(ContainerBuilder builder, string? appDataDir)
     {
         builder.RegisterModule<CommonAutofacModule>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();

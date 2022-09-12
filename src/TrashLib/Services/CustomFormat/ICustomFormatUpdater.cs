@@ -5,5 +5,5 @@ namespace TrashLib.Services.CustomFormat;
 
 public interface ICustomFormatUpdater
 {
-    Task Process(bool isPreview, IEnumerable<CustomFormatConfig> config, IGuideService guideService);
+    Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, IGuideService guideService);
 }

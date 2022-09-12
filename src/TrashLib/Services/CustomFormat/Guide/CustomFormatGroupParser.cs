@@ -64,44 +64,38 @@ public class CustomFormatGroupParser
                 break;
             }
 
-            if (!line.Any())
+            if (line.Any())
             {
-                if (tableRows.Any())
+                var fields = GetTableRow(line);
+                if (fields.Any())
                 {
-                    break;
+                    tableRows.Add(fields);
+                    continue;
                 }
-
-                continue;
             }
 
-            var match = TableRegex.Match(line);
-            if (!match.Success)
+            if (tableRows.Any())
             {
-                if (tableRows.Any())
-                {
-                    break;
-                }
-
-                continue;
+                break;
             }
-
-            var tableRow = match.Groups[1].Value;
-            var fields = tableRow.Split('|').Select(x => x.Trim()).ToList();
-            if (!fields.Any())
-            {
-                if (tableRows.Any())
-                {
-                    break;
-                }
-
-                continue;
-            }
-
-            tableRows.Add(fields);
         }
 
         return tableRows
             // Filter out the `|---|---|---|` part of the table between the heading & data rows.
             .Where(x => !Regex.IsMatch(x[0], @"^-+$"));
+    }
+
+    private static List<string> GetTableRow(string line)
+    {
+        var fields = new List<string>();
+
+        var match = TableRegex.Match(line);
+        if (match.Success)
+        {
+            var tableRow = match.Groups[1].Value;
+            fields = tableRow.Split('|').Select(x => x.Trim()).ToList();
+        }
+
+        return fields;
     }
 }

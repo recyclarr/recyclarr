@@ -26,5 +26,6 @@ public class AppPathSetupTask : IBaseCommandSetupTask
 
     public void OnFinish()
     {
+        // No work to do for this event
     }
 }
