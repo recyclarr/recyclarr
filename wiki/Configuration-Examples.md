@@ -142,20 +142,20 @@ radarr:
     custom_formats:
       # Advanced Audio from the guide
       - trash_ids:
-        - 496f355514737f7d83bf7aa4d24f8169 # TrueHD ATMOS
-        - 2f22d89048b01681dde8afe203bf2e95 # DTS X
-        - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
-        - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
-        - 3cafb66171b47f226146a0770576870f # TrueHD
-        - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
-        - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
-        - e7c2fcae07cbada050a0af3357491d7b # PCM
-        - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
-        - 185f1dd7264c4562b9022d963ac37424 # DD+
-        - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
-        - 1c1a4c5e823891c75bc50380a6866f73 # DTS
-        - 240770601cc226190c367ef59aba7463 # AAC
-        - c2998bd0d90ed5621d8df281e839436e # DD
+          - 496f355514737f7d83bf7aa4d24f8169 # TrueHD ATMOS
+          - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+          - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
+          - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
+          - 3cafb66171b47f226146a0770576870f # TrueHD
+          - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
+          - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
+          - e7c2fcae07cbada050a0af3357491d7b # PCM
+          - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
+          - 185f1dd7264c4562b9022d963ac37424 # DD+
+          - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
+          - 1c1a4c5e823891c75bc50380a6866f73 # DTS
+          - 240770601cc226190c367ef59aba7463 # AAC
+          - c2998bd0d90ed5621d8df281e839436e # DD
         quality_profiles:
           - name: SD
 ```
