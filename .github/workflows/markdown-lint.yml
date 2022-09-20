@@ -3,9 +3,13 @@ name: Markdown Lint
 
 on:
   push:
-    paths: ["**.md"]
+    paths:
+      - "**.md"
+      - .github/workflows/markdown-lint.yml
   pull_request:
-    paths: ["**.md"]
+    paths:
+      - "**.md"
+      - .github/workflows/markdown-lint.yml
 
 env:
   dotnetVersion: "6.0.x"
