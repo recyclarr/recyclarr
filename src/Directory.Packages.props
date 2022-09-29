@@ -1,0 +1,61 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- Central Package Versions -->
+  <ItemGroup>
+    <PackageVersion Include="Autofac" Version="6.4.0" />
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Autofac.Extras.AggregateService" Version="6.1.2" />
+    <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
+    <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
+    <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
+    <PackageVersion Include="AutoFixture" Version="4.17.0" />
+    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.17.0" />
+    <PackageVersion Include="AutoFixture.NUnit3" Version="4.17.0" />
+    <PackageVersion Include="AutoMapper" Version="11.0.1" />
+    <PackageVersion Include="CliFx" Version="2.3.0" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.2" />
+    <PackageVersion Include="FluentAssertions" Version="6.7.0" />
+    <PackageVersion Include="FluentAssertions.Json" Version="6.1.0" />
+    <PackageVersion Include="FluentValidation" Version="11.2.1" />
+    <PackageVersion Include="Flurl" Version="3.0.6" />
+    <PackageVersion Include="Flurl.Http" Version="3.2.4" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="2.0.1" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="5.10.3" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2022.1.0" />
+    <PackageVersion Include="LibGit2Sharp" Version="0.27.0-preview-0182" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
+    <PackageVersion Include="morelinq" Version="3.3.2" />
+    <PackageVersion Include="MudBlazor" Version="6.0.14" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
+    <PackageVersion Include="NSubstitute" Version="4.4.0" />
+    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.15" />
+    <PackageVersion Include="NUnit" Version="3.13.3" />
+    <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="18.3.1" />
+    <PackageVersion Include="Serilog" Version="2.11.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="6.0.1" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="4.0.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
+    <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
+    <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
+    <PackageVersion Include="System.IO.Abstractions" Version="17.1.1" />
+    <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="17.1.1" />
+    <PackageVersion Include="System.Reactive" Version="5.0.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.32" />
+    <PackageVersion Include="YamlDotNet" Version="12.0.0" />
+  </ItemGroup>
+
+  <!-- Following found during vulerabilities Code Scan  -->
+  <ItemGroup>
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
+    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+</Project>

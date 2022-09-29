@@ -1,39 +1,43 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr", "Recyclarr\Recyclarr.csproj", "{CD5C6F99-C587-4B7C-86AE-550FA4A5594A}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr", "Recyclarr\Recyclarr.csproj", "{CD5C6F99-C587-4B7C-86AE-550FA4A5594A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Tests", "Recyclarr.Tests\Recyclarr.Tests.csproj", "{217D5972-4BB7-4343-9043-C30BD9A1811E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Tests", "Recyclarr.Tests\Recyclarr.Tests.csproj", "{217D5972-4BB7-4343-9043-C30BD9A1811E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "TestLibrary\TestLibrary.csproj", "{49F28A82-468F-4C48-9A59-D41B8FE26D6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLibrary", "TestLibrary\TestLibrary.csproj", "{49F28A82-468F-4C48-9A59-D41B8FE26D6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary.Tests", "TestLibrary.Tests\TestLibrary.Tests.csproj", "{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLibrary.Tests", "TestLibrary.Tests\TestLibrary.Tests.csproj", "{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5-803F-41B3-92D8-4AD2B2E3E130}"
-ProjectSection(SolutionItems) = preProject
-	Directory.Build.props = Directory.Build.props
-	Directory.Build.targets = Directory.Build.targets
-	.editorconfig = .editorconfig
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{0720939D-1CA6-43D7-BBED-F8F894C4F562}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Tests", "Common.Tests\Common.Tests.csproj", "{0720939D-1CA6-43D7-BBED-F8F894C4F562}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib.TestLibrary", "TrashLib.TestLibrary\TrashLib.TestLibrary.csproj", "{33226068-65E3-4890-8671-59A56BA3F6F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrashLib.TestLibrary", "TrashLib.TestLibrary\TrashLib.TestLibrary.csproj", "{33226068-65E3-4890-8671-59A56BA3F6F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib", "TrashLib\TrashLib.csproj", "{4F6ACBA6-9A7D-487C-ACC1-787CCC90A381}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrashLib", "TrashLib\TrashLib.csproj", "{4F6ACBA6-9A7D-487C-ACC1-787CCC90A381}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrashLib.Tests", "TrashLib.Tests\TrashLib.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrashLib.Tests", "TrashLib.Tests\TrashLib.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl", "VersionControl\VersionControl.csproj", "{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VersionControl", "VersionControl\VersionControl.csproj", "{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VersionControl.Tests", "VersionControl.Tests\VersionControl.Tests.csproj", "{F81C7EA3-4ACA-4171-8A60-531F129A33C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VersionControl.Tests", "VersionControl.Tests\VersionControl.Tests.csproj", "{F81C7EA3-4ACA-4171-8A60-531F129A33C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TestLibrary", "Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{77D1C695-94D4-46A9-8F12-41E54AF97750}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.TestLibrary", "Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{77D1C695-94D4-46A9-8F12-41E54AF97750}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.TestLibrary", "Common.TestLibrary\Common.TestLibrary.csproj", "{A92321B5-2796-467B-B5A5-2BFC41167A25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.TestLibrary", "Common.TestLibrary\Common.TestLibrary.csproj", "{A92321B5-2796-467B-B5A5-2BFC41167A25}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,6 +102,10 @@ Global
 		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AFBE3E4F-DA4D-4EBD-8700-C3C42B59D6AB}
 	EndGlobalSection
 EndGlobal

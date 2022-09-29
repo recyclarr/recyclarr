@@ -8,7 +8,7 @@
     <DebugType>embedded</DebugType>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
-<!--    <DisableGitVersionTask>true</DisableGitVersionTask>-->
+    <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>
 
   <!--
