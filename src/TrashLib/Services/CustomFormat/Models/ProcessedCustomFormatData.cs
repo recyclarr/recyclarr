@@ -11,7 +11,7 @@ public class ProcessedCustomFormatData
     public ProcessedCustomFormatData(CustomFormatData data)
     {
         _data = data;
-        Json = _data.ExtraJson;
+        Json = _data.Json;
     }
 
     public string Name => _data.Name;

@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Serilog;
@@ -9,6 +8,7 @@ using TrashLib.Services.CustomFormat;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.CustomFormat;
 
@@ -31,7 +31,7 @@ public class CachePersisterTest
 
     private static ProcessedCustomFormatData QuickMakeCf(string cfName, string trashId, int cfId)
     {
-        var cf = new CustomFormatData(cfName, trashId, null, new JObject());
+        var cf = NewCf.Data(cfName, trashId);
         return new ProcessedCustomFormatData(cf)
         {
             CacheEntry = new TrashIdMapping(trashId, cfName) {CustomFormatId = cfId}
@@ -128,7 +128,7 @@ public class CachePersisterTest
 
         var customFormatData = new List<ProcessedCustomFormatData>
         {
-            new(new CustomFormatData("", "trashid", null, new JObject()))
+            new(NewCf.Data("", "trashid"))
                 {CacheEntry = new TrashIdMapping("trashid", "cfname", 10)}
         };
 

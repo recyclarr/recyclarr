@@ -26,6 +26,8 @@ public class LocalRepoRadarrGuideService : IRadarrGuideService
     public ICollection<CustomFormatData> GetCustomFormatData()
     {
         var paths = _pathsFactory.Create();
-        return _cfLoader.LoadAllCustomFormatsAtPaths(paths.RadarrCustomFormatPaths);
+        return _cfLoader.LoadAllCustomFormatsAtPaths(
+            paths.RadarrCustomFormatPaths,
+            paths.RadarrCollectionOfCustomFormats);
     }
 }

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- For both Sonarr and Radarr, the custom formats in the output of `--list-custom-formats` are now
+  grouped by their category, as determined by the tables at the top of the "Collection of custom
+  formats" pages in the guide for each service.
+
 ## [2.5.0] - 2022-09-11
 
 ### Added

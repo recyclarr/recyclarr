@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using FluentAssertions;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using TestLibrary.AutoFixture;
 using TestLibrary.FluentAssertions;
@@ -181,7 +180,7 @@ public class CustomFormatStepTest
 
         var guideCfs = new List<CustomFormatData>
         {
-            new("3D", "id1", null, new JObject())
+            NewCf.Data("3D", "id1")
         };
 
         processor.Process(guideCfs, Array.Empty<CustomFormatConfig>(), cache);
@@ -197,7 +196,7 @@ public class CustomFormatStepTest
     {
         var guideData = new List<CustomFormatData>
         {
-            new("name2", "id1", null, new JObject())
+            NewCf.Data("name2", "id1")
         };
 
         var testConfig = new List<CustomFormatConfig>

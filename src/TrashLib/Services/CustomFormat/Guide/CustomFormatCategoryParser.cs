@@ -1,34 +1,19 @@
-using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Common.Extensions;
-using TrashLib.Startup;
 
 namespace TrashLib.Services.CustomFormat.Guide;
 
-public record CustomFormatGroupItem(string Name, string Anchor);
-
-public class CustomFormatGroupParser
+public class CustomFormatCategoryParser : ICustomFormatCategoryParser
 {
-    private readonly IAppPaths _paths;
     private static readonly Regex TableRegex = new(@"^\s*\|(.*)\|\s*$");
     private static readonly Regex LinkRegex = new(@"^\[(.+?)\]\(#(.+?)\)$");
 
-    public CustomFormatGroupParser(IAppPaths paths)
+    public ICollection<CustomFormatCategoryItem> Parse(IFileInfo collectionOfCustomFormatsMdFile)
     {
-        _paths = paths;
-    }
-
-    public IDictionary<string, ReadOnlyCollection<CustomFormatGroupItem>> Parse()
-    {
-        var mdFile = _paths.RepoDirectory
-            .SubDirectory("docs")
-            .SubDirectory("Radarr")
-            .File("Radarr-collection-of-custom-formats.md");
-
         var columns = new List<List<string>>();
 
-        using var md = mdFile.OpenText();
+        using var md = collectionOfCustomFormatsMdFile.OpenText();
         while (!md.EndOfStream)
         {
             var rows = ParseTable(md);
@@ -41,15 +26,19 @@ public class CustomFormatGroupParser
                 .Select(x => x.ToList()));
         }
 
-        return columns.ToDictionary(
-            x => x[0],
-            x => x.Skip(1).Select(ParseLink).NotNull().ToList().AsReadOnly());
+        return columns
+            .GroupBy(x => x[0], x => x.Skip(1))
+            .SelectMany(x => x.SelectMany(y => y).Distinct().Select(y => ParseLink(x.Key, y)))
+            .NotNull()
+            .ToList();
     }
 
-    private static CustomFormatGroupItem? ParseLink(string markdownLink)
+    private static CustomFormatCategoryItem? ParseLink(string categoryName, string markdownLink)
     {
         var match = LinkRegex.Match(markdownLink);
-        return match.Success ? new CustomFormatGroupItem(match.Groups[1].Value, match.Groups[2].Value) : null;
+        return match.Success
+            ? new CustomFormatCategoryItem(categoryName, match.Groups[1].Value, match.Groups[2].Value)
+            : null;
     }
 
     private static IEnumerable<List<string>> ParseTable(TextReader stream)

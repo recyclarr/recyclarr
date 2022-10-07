@@ -4,5 +4,5 @@ namespace TrashLib.Services.CustomFormat.Guide;
 
 public interface ICustomFormatParser
 {
-    CustomFormatData ParseCustomFormatData(string guideData);
+    CustomFormatData ParseCustomFormatData(string guideData, string fileName);
 }

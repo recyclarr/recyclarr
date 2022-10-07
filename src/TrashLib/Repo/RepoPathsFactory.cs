@@ -24,13 +24,16 @@ public class RepoPathsFactory : IRepoPathsFactory
 
     public IRepoPaths Create()
     {
+        var docs = _paths.RepoDirectory.SubDirectory("docs");
         var metadata = _metadata.Value;
         return new RepoPaths(
             ToDirectoryInfoList(metadata.JsonPaths.Radarr.CustomFormats),
             ToDirectoryInfoList(metadata.JsonPaths.Sonarr.ReleaseProfiles),
             ToDirectoryInfoList(metadata.JsonPaths.Radarr.Qualities),
             ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities),
-            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.CustomFormats)
+            ToDirectoryInfoList(metadata.JsonPaths.Sonarr.CustomFormats),
+            docs.SubDirectory("Radarr").File("Radarr-collection-of-custom-formats.md"),
+            docs.SubDirectory("Sonarr").File("sonarr-collection-of-custom-formats.md")
         );
     }
 }

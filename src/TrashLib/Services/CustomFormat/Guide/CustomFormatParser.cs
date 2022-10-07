@@ -7,7 +7,7 @@ namespace TrashLib.Services.CustomFormat.Guide;
 
 public class CustomFormatParser : ICustomFormatParser
 {
-    public CustomFormatData ParseCustomFormatData(string guideData)
+    public CustomFormatData ParseCustomFormatData(string guideData, string fileName)
     {
         var obj = JObject.Parse(guideData);
 
@@ -29,6 +29,6 @@ public class CustomFormatParser : ICustomFormatParser
             trashProperty.Remove();
         }
 
-        return new CustomFormatData(name, trashId, finalScore, obj);
+        return new CustomFormatData(fileName, name, trashId, finalScore, obj);
     }
 }

@@ -14,11 +14,21 @@ public class GuideDataLister : IGuideDataLister
 
     public void ListCustomFormats(IEnumerable<CustomFormatData> customFormats)
     {
-        _console.Output.WriteLine("\nList of Custom Formats in the TRaSH Guides:\n");
+        _console.Output.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
 
-        foreach (var cf in customFormats)
+        var categories = customFormats
+            .ToLookup(x => x.Category)
+            .OrderBy(x => x.Key);
+
+        foreach (var cat in categories)
         {
-            _console.Output.WriteLine($"          - {cf.TrashId} # {cf.Name}");
+            var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
+            _console.Output.WriteLine($"\n{title}\n");
+
+            foreach (var cf in cat)
+            {
+                _console.Output.WriteLine($"          - {cf.TrashId} # {cf.Name}");
+            }
         }
 
         _console.Output.WriteLine(

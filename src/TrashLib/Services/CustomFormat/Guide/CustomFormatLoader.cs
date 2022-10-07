@@ -12,29 +12,44 @@ public class CustomFormatLoader : ICustomFormatLoader
 {
     private readonly ILogger _log;
     private readonly ICustomFormatParser _parser;
+    private readonly ICustomFormatCategoryParser _categoryParser;
 
-    public CustomFormatLoader(ILogger log, ICustomFormatParser parser)
+    public CustomFormatLoader(ILogger log, ICustomFormatParser parser, ICustomFormatCategoryParser categoryParser)
     {
         _log = log;
         _parser = parser;
+        _categoryParser = categoryParser;
     }
 
-    public ICollection<CustomFormatData> LoadAllCustomFormatsAtPaths(IEnumerable<IDirectoryInfo> jsonPaths)
+    public ICollection<CustomFormatData> LoadAllCustomFormatsAtPaths(
+        IEnumerable<IDirectoryInfo> jsonPaths,
+        IFileInfo collectionOfCustomFormats)
     {
+        var categories = _categoryParser.Parse(collectionOfCustomFormats).AsReadOnly();
         var jsonFiles = jsonPaths.SelectMany(x => x.GetFiles("*.json"));
         return jsonFiles.ToObservable()
-            .Select(x => Observable.Defer(() => LoadJsonFromFile(x)))
+            .Select(x => Observable.Defer(() => LoadJsonFromFile(x, categories)))
             .Merge(8)
             .NotNull()
             .ToEnumerable()
             .ToList();
     }
 
-    private IObservable<CustomFormatData?> LoadJsonFromFile(IFileInfo file)
+    private IObservable<CustomFormatData?> LoadJsonFromFile(IFileInfo file,
+        IReadOnlyCollection<CustomFormatCategoryItem> categories)
     {
         return Observable.Using(file.OpenText, x => x.ReadToEndAsync().ToObservable())
             .Do(_ => _log.Debug("Parsing CF Json: {Name}", file.Name))
-            .Select(_parser.ParseCustomFormatData)
+            .Select(x =>
+            {
+                var cf = _parser.ParseCustomFormatData(x, file.Name);
+                var matchingCategory = categories.FirstOrDefault(y =>
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(cf.FileName);
+                    return y.CfName.EqualsIgnoreCase(cf.Name) || y.CfAnchor.EqualsIgnoreCase(fileName);
+                });
+                return cf with {Category = matchingCategory?.CategoryName};
+            })
             .Catch((JsonException e) =>
             {
                 _log.Warning("Failed to parse JSON file: {File} ({Reason})", file.Name, e.Message);

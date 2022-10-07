@@ -30,5 +30,6 @@ public class CustomFormatAutofacModule : Module
         builder.RegisterType<JsonTransactionStep>().As<IJsonTransactionStep>();
         builder.RegisterType<CustomFormatApiPersistenceStep>().As<ICustomFormatApiPersistenceStep>();
         builder.RegisterType<QualityProfileApiPersistenceStep>().As<IQualityProfileApiPersistenceStep>();
+        builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
     }
 }

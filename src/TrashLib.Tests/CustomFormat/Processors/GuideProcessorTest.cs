@@ -39,7 +39,7 @@ public class GuideProcessorTest
         public CustomFormatData ReadCustomFormat(string textFile)
         {
             var parser = new CustomFormatParser();
-            return parser.ParseCustomFormatData(ReadText(textFile));
+            return parser.ParseCustomFormatData(ReadText(textFile), "");
         }
 
         public string ReadText(string textFile) => Data.ReadData(textFile);

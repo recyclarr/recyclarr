@@ -38,7 +38,9 @@ public class LocalRepoSonarrGuideService : ISonarrGuideService
     public ICollection<CustomFormatData> GetCustomFormatData()
     {
         var paths = _pathsFactory.Create();
-        return _cfLoader.LoadAllCustomFormatsAtPaths(paths.SonarrCustomFormatPaths);
+        return _cfLoader.LoadAllCustomFormatsAtPaths(
+            paths.SonarrCustomFormatPaths,
+            paths.SonarrCollectionOfCustomFormats);
     }
 
     private IEnumerable<ReleaseProfileData> GetReleaseProfileDataImpl()
