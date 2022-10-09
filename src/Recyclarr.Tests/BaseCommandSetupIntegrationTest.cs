@@ -35,7 +35,7 @@ log_janitor:
   max_files: {maxFiles}
 "));
 
-        for (var i = 0; i < maxFiles+20; ++i)
+        for (var i = 0; i < maxFiles + 20; ++i)
         {
             Fs.AddFile(paths.LogDirectory.File($"logfile-{i}.log").FullName, new MockFileData(""));
         }
@@ -54,7 +54,7 @@ log_janitor:
         var settingsProvider = Resolve<ISettingsProvider>();
         var maxFiles = settingsProvider.Settings.LogJanitor.MaxFiles;
 
-        for (var i = 0; i < maxFiles+20; ++i)
+        for (var i = 0; i < maxFiles + 20; ++i)
         {
             Fs.AddFile(paths.LogDirectory.File($"logfile-{i}.log").FullName, new MockFileData(""));
         }

@@ -209,7 +209,8 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         switch (capabilities.SupportsCustomFormats)
         {
             case true when config.ReleaseProfiles.Any():
-                throw new VersionException("Sonarr v4 does not support Release Profiles. Please use Sonarr v3 instead.");
+                throw new VersionException(
+                    "Sonarr v4 does not support Release Profiles. Please use Sonarr v3 instead.");
 
             case false when config.CustomFormats.Any():
                 throw new VersionException("Sonarr v3 does not support Custom Formats. Please use Sonarr v4 instead.");
