@@ -5,7 +5,7 @@ set -e
 if [ "$#" -gt 0 ]; then
     recyclarr "$@"
 else
-    echo "Starting cron schedule..."
+    echo "Starting cron schedule using: $CRON_SCHEDULE"
     echo "$CRON_SCHEDULE /cron.sh" > /tmp/crontab
     supercronic -passthrough-logs /tmp/crontab
 fi
