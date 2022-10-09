@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   grouped by their category, as determined by the tables at the top of the "Collection of custom
   formats" pages in the guide for each service.
 
+### Changed
+
+- Docker: `PUID` and `PGID` no longer cause a failure on container start up.
+
 ## [2.5.0] - 2022-09-11
 
 ### Added
