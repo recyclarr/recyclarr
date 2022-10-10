@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Docker: `PUID` and `PGID` no longer cause a failure on container start up.
 
+### Fixed
+
+- Use compact JSON for HTTP request/response body in debug log files. This makes logs much easier to
+  scroll through.
+
 ## [2.5.0] - 2022-09-11
 
 ### Added

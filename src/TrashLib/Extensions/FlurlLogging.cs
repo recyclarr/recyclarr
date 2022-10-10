@@ -1,5 +1,6 @@
 using Flurl;
 using Flurl.Http.Configuration;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace TrashLib.Extensions;
@@ -14,12 +15,7 @@ public static class FlurlLogging
         {
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Request: {Method} {Url}", call.HttpRequestMessage.Method, url);
-
-            var body = call.RequestBody;
-            if (body is not null)
-            {
-                log.Debug("HTTP Body:\n{Body}", body);
-            }
+            LogBody(log, call.RequestBody);
         };
 
         settings.AfterCallAsync = async call =>
@@ -31,7 +27,7 @@ public static class FlurlLogging
             var content = call.Response?.ResponseMessage.Content;
             if (content is not null)
             {
-                log.Debug("HTTP Body:\n{Body}", await content.ReadAsStringAsync());
+                LogBody(log, await content.ReadAsStringAsync());
             }
         };
 
@@ -42,6 +38,17 @@ public static class FlurlLogging
 
             call.Redirect.Follow = false;
         };
+    }
+
+    private static void LogBody(ILogger log, string? body)
+    {
+        if (body is null)
+        {
+            return;
+        }
+
+        body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body));
+        log.Debug("HTTP Body: {Body}", body);
     }
 
     public static Url SanitizeUrl(Url url)
