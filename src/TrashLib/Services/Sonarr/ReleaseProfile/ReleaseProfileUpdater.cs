@@ -1,8 +1,6 @@
-using System.Reactive.Linq;
 using CliFx.Infrastructure;
 using Common.Extensions;
 using Serilog;
-using TrashLib.ExceptionTypes;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
 using TrashLib.Services.Sonarr.Config;
@@ -14,7 +12,6 @@ namespace TrashLib.Services.Sonarr.ReleaseProfile;
 public class ReleaseProfileUpdater : IReleaseProfileUpdater
 {
     private readonly IReleaseProfileApiService _releaseProfileApi;
-    private readonly ISonarrCompatibility _compatibility;
     private readonly IReleaseProfileFilterPipeline _pipeline;
     private readonly IConsole _console;
     private readonly ISonarrGuideService _guide;
@@ -26,7 +23,6 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         ISonarrGuideService guide,
         ISonarrApi api,
         IReleaseProfileApiService releaseProfileApi,
-        ISonarrCompatibility compatibility,
         IReleaseProfileFilterPipeline pipeline,
         IConsole console)
     {
@@ -34,15 +30,12 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         _guide = guide;
         _api = api;
         _releaseProfileApi = releaseProfileApi;
-        _compatibility = compatibility;
         _pipeline = pipeline;
         _console = console;
     }
 
     public async Task Process(bool isPreview, SonarrConfiguration config)
     {
-        await DoVersionEnforcement(config);
-
         var profilesFromGuide = _guide.GetReleaseProfileData();
 
         var filteredProfiles = new List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)>();
@@ -194,27 +187,6 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
             .Where(t => tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
             .Select(t => t.Id)
             .ToList();
-    }
-
-    private async Task DoVersionEnforcement(SonarrConfiguration config)
-    {
-        var capabilities = await _compatibility.Capabilities.LastAsync();
-        if (!capabilities.SupportsNamedReleaseProfiles)
-        {
-            throw new VersionException(
-                $"Your Sonarr version {capabilities.Version} does not meet the minimum " +
-                $"required version of {_compatibility.MinimumVersion} to use this program");
-        }
-
-        switch (capabilities.SupportsCustomFormats)
-        {
-            case true when config.ReleaseProfiles.Any():
-                throw new VersionException(
-                    "Sonarr v4 does not support Release Profiles. Please use Sonarr v3 instead.");
-
-            case false when config.CustomFormats.Any():
-                throw new VersionException("Sonarr v3 does not support Custom Formats. Please use Sonarr v4 instead.");
-        }
     }
 
     private async Task CreateMissingTags(ICollection<SonarrTag> sonarrTags, IEnumerable<string> configTags)

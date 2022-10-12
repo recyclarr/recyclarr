@@ -49,6 +49,7 @@ public class SonarrCommand : ServiceCommand
         var log = container.Resolve<ILogger>();
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var guideService = container.Resolve<ISonarrGuideService>();
+        var versionEnforcement = container.Resolve<ISonarrVersionEnforcement>();
 
         if (ListReleaseProfiles)
         {
@@ -86,6 +87,8 @@ public class SonarrCommand : ServiceCommand
         foreach (var config in configLoader.LoadMany(Config, "sonarr"))
         {
             log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
+
+            await versionEnforcement.DoVersionEnforcement(config);
 
             if (config.ReleaseProfiles.Count > 0)
             {

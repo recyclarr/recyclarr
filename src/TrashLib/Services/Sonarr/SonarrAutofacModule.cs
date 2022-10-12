@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extras.Ordering;
+using Recyclarr.Command;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Config;
 using TrashLib.Services.Sonarr.QualityDefinition;
@@ -17,6 +18,7 @@ public class SonarrAutofacModule : Module
         builder.RegisterType<ReleaseProfileApiService>().As<IReleaseProfileApiService>();
         builder.RegisterType<SonarrValidationMessages>().As<ISonarrValidationMessages>();
         builder.RegisterType<SonarrCompatibility>().As<ISonarrCompatibility>().InstancePerLifetimeScope();
+        builder.RegisterType<SonarrVersionEnforcement>().As<ISonarrVersionEnforcement>();
         builder.RegisterType<SonarrGuideDataLister>().As<ISonarrGuideDataLister>();
 
         // Release Profile Support

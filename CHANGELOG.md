@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Use compact JSON for HTTP request/response body in debug log files. This makes logs much easier to
   scroll through.
+- Sonarr: Run version enforcement logic when using CFs instead of RPs.
 
 ## [2.5.0] - 2022-09-11
 

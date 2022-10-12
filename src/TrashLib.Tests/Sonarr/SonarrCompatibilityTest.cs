@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.Command;
 using TestLibrary.AutoFixture;
 using TrashLib.Config.Services;
 using TrashLib.ExceptionTypes;
@@ -14,7 +15,6 @@ using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
 using TrashLib.Services.Sonarr.Config;
-using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr;
@@ -122,7 +122,7 @@ public class SonarrCompatibilityTest
     public async Task Failure_when_release_profiles_used_with_sonarr_v4(
         [Frozen] ISonarrApi api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
-        ReleaseProfileUpdater updater)
+        SonarrVersionEnforcement enforcement)
     {
         api.GetVersion().Returns(new Version(4, 0));
 
@@ -131,7 +131,7 @@ public class SonarrCompatibilityTest
             ReleaseProfiles = new List<ReleaseProfileConfig> {new()}
         };
 
-        var act = () => updater.Process(false, config);
+        var act = () => enforcement.DoVersionEnforcement(config);
 
         await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v4*");
     }
@@ -140,7 +140,7 @@ public class SonarrCompatibilityTest
     public async Task No_failure_when_release_profiles_used_with_sonarr_v3(
         [Frozen] ISonarrApi api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
-        ReleaseProfileUpdater updater)
+        SonarrVersionEnforcement enforcement)
     {
         api.GetVersion().Returns(new Version(3, 9));
 
@@ -149,7 +149,7 @@ public class SonarrCompatibilityTest
             ReleaseProfiles = new List<ReleaseProfileConfig> {new()}
         };
 
-        var act = () => updater.Process(false, config);
+        var act = () => enforcement.DoVersionEnforcement(config);
 
         await act.Should().NotThrowAsync();
     }
@@ -158,7 +158,7 @@ public class SonarrCompatibilityTest
     public async Task Failure_when_custom_formats_used_with_sonarr_v3(
         [Frozen] ISonarrApi api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
-        ReleaseProfileUpdater updater)
+        SonarrVersionEnforcement enforcement)
     {
         api.GetVersion().Returns(new Version(3, 9));
 
@@ -167,7 +167,7 @@ public class SonarrCompatibilityTest
             CustomFormats = new List<CustomFormatConfig> {new()}
         };
 
-        var act = () => updater.Process(false, config);
+        var act = () => enforcement.DoVersionEnforcement(config);
 
         await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v3*custom format*use*v4*");
     }
@@ -176,7 +176,7 @@ public class SonarrCompatibilityTest
     public async Task No_failure_when_custom_formats_used_with_sonarr_v4(
         [Frozen] ISonarrApi api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
-        ReleaseProfileUpdater updater)
+        SonarrVersionEnforcement enforcement)
     {
         api.GetVersion().Returns(new Version(4, 0));
 
@@ -185,7 +185,7 @@ public class SonarrCompatibilityTest
             CustomFormats = new List<CustomFormatConfig> {new()}
         };
 
-        var act = () => updater.Process(false, config);
+        var act = () => enforcement.DoVersionEnforcement(config);
 
         await act.Should().NotThrowAsync();
     }
