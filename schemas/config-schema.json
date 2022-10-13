@@ -39,14 +39,7 @@
             "minItems": 1,
             "items": {
               "additionalProperties": false,
-              "anyOf": [
-                {
-                  "required": ["trash_ids"]
-                },
-                {
-                  "required": ["names"]
-                }
-              ],
+              "required": ["trash_ids"],
               "properties": {
                 "trash_ids": {
                   "$ref": "#/$defs/trash_ids_list"
@@ -171,24 +164,8 @@
         "type": "object",
         "additionalProperties": false,
         "description": "A list of one or more sets of custom formats each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
-        "anyOf": [
-          {
-            "required": ["trash_ids"]
-          },
-          {
-            "required": ["names"]
-          }
-        ],
+        "required": ["trash_ids"],
         "properties": {
-          "names": {
-            "type": "array",
-            "uniqueItems": true,
-            "description": "A list of one or more custom format names to synchronize to Radarr. The names must be taken from the JSON itself in the guide.",
-            "minItems": 1,
-            "items": {
-              "type": "string"
-            }
-          },
           "trash_ids": {
             "$ref": "#/$defs/trash_ids_list"
           },
@@ -204,11 +181,11 @@
                 },
                 "score": {
                   "type": "integer",
-                  "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the names list."
+                  "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."
                 },
                 "reset_unmatched_scores": {
                   "type": "boolean",
-                  "description": "If set to true, enables setting scores to 0 in quality profiles where either a name was not mentioned in the names array or it was in that list but did not get a score (e.g. no score in guide).",
+                  "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
                   "default": false
                 }
               }
