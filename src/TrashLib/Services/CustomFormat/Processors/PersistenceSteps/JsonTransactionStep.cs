@@ -80,7 +80,7 @@ internal class JsonTransactionStep : IJsonTransactionStep
         JObject? match = null;
 
         // Try to find match in cache first
-        if (cfId != null)
+        if (cfId is not null)
         {
             match = serviceCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
         }

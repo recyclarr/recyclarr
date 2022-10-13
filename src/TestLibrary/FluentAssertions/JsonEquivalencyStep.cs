@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentAssertions.Equivalency;
 using FluentAssertions.Json;
 using Newtonsoft.Json.Linq;

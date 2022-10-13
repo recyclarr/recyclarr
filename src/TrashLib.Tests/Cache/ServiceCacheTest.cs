@@ -1,16 +1,12 @@
-using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
+using System.Collections.ObjectModel;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using Serilog;
 using TestLibrary.AutoFixture;
-using TestLibrary.NSubstitute;
 using TrashLib.Cache;
-using TrashLib.Config.Services;
-using TrashLib.Services.Radarr.Config;
+using TrashLib.Services.CustomFormat.Models.Cache;
 
 namespace TrashLib.Tests.Cache;
 
@@ -18,22 +14,6 @@ namespace TrashLib.Tests.Cache;
 [Parallelizable(ParallelScope.All)]
 public class ServiceCacheTest
 {
-    private class Context
-    {
-        public Context(IFileSystem? fs = null)
-        {
-            Filesystem = fs ?? Substitute.For<IFileSystem>();
-            StoragePath = Substitute.For<ICacheStoragePath>();
-
-            var config = new RadarrConfiguration {BaseUrl = "http://localhost:1234"};
-            Cache = new ServiceCache(Filesystem, StoragePath, config, Substitute.For<ILogger>());
-        }
-
-        public ServiceCache Cache { get; }
-        public ICacheStoragePath StoragePath { get; }
-        public IFileSystem Filesystem { get; }
-    }
-
     private class ObjectWithoutAttribute
     {
     }
@@ -51,34 +31,27 @@ public class ServiceCacheTest
     {
     }
 
-    [Test]
-    public void Load_returns_null_when_file_does_not_exist()
+    [Test, AutoMockData]
+    public void Load_returns_null_when_file_does_not_exist(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        ServiceCache sut)
     {
-        var ctx = new Context();
-        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(false);
-
-        var result = ctx.Cache.Load<ObjectWithAttribute>();
+        var result = sut.Load<ObjectWithAttribute>();
         result.Should().BeNull();
     }
 
     [Test, AutoMockData]
     public void Loading_with_attribute_parses_correctly(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IServiceConfiguration config,
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
         const string testJson = @"{'test_value': 'Foo'}";
 
-        storage.Path.Returns("testpath");
-        config.BaseUrl.Returns("http://localhost:1234");
-
-        var testJsonPath = fs.CurrentDirectory()
-            .SubDirectory("testpath")
-            .SubDirectory("be8fbc8f")
-            .File($"{ValidObjectName}.json").FullName;
-
+        const string testJsonPath = "cacheFile.json";
         fs.AddFile(testJsonPath, new MockFileData(testJson));
+
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName(testJsonPath));
 
         var obj = sut.Load<ObjectWithAttribute>();
 
@@ -86,55 +59,51 @@ public class ServiceCacheTest
         obj!.TestValue.Should().Be("Foo");
     }
 
-    [Test]
-    public void Loading_with_invalid_object_name_throws()
+    [Test, AutoMockData]
+    public void Loading_with_invalid_object_name_throws(ServiceCache sut)
     {
-        var ctx = new Context();
-
-        Action act = () => ctx.Cache.Load<ObjectWithAttributeInvalidChars>();
+        Action act = () => sut.Load<ObjectWithAttributeInvalidChars>();
 
         act.Should()
             .Throw<ArgumentException>()
             .WithMessage("*'invalid+name' has unacceptable characters*");
     }
 
-    [Test]
-    public void Loading_without_attribute_throws()
+    [Test, AutoMockData]
+    public void Loading_without_attribute_throws(ServiceCache sut)
     {
-        var ctx = new Context();
-
-        Action act = () => ctx.Cache.Load<ObjectWithoutAttribute>();
+        Action act = () => sut.Load<ObjectWithoutAttribute>();
 
         act.Should()
             .Throw<ArgumentException>()
             .WithMessage("CacheObjectNameAttribute is missing*");
     }
 
-    [Test]
-    public void Properties_are_saved_using_snake_case()
+    [Test, AutoMockData]
+    public void Properties_are_saved_using_snake_case(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] ICacheStoragePath storage,
+        ServiceCache sut)
     {
-        var ctx = new Context();
-        ctx.StoragePath.Path.Returns("testpath");
-        ctx.Cache.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        storage.CalculatePath(default!).ReturnsForAnyArgs(_ => fs.FileInfo.FromFileName($"{ValidObjectName}.json"));
 
-        ctx.Filesystem.File.Received()
-            .WriteAllText(Arg.Any<string>(), Verify.That<string>(json => json.Should().Contain("\"test_value\"")));
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
+
+        fs.AllFiles.Should().ContainMatch($"*{ValidObjectName}.json");
+
+        var file = fs.GetFile(storage.CalculatePath("").FullName);
+        file.Should().NotBeNull();
+        file.TextContents.Should().Contain("\"test_value\"");
     }
 
     [Test, AutoMockData]
     public void Saving_with_attribute_parses_correctly(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IServiceConfiguration config,
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
-        storage.Path.Returns("testpath");
-        config.BaseUrl.Returns("http://localhost:1234");
-
-        var testJsonPath = fs.CurrentDirectory()
-            .SubDirectory("testpath")
-            .SubDirectory("be8fbc8f")
-            .File($"{ValidObjectName}.json").FullName;
+        const string testJsonPath = "cacheFile.json";
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName(testJsonPath));
 
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
@@ -145,24 +114,20 @@ public class ServiceCacheTest
 }");
     }
 
-    [Test]
-    public void Saving_with_invalid_object_name_throws()
+    [Test, AutoMockData]
+    public void Saving_with_invalid_object_name_throws(ServiceCache sut)
     {
-        var ctx = new Context();
-
-        var act = () => ctx.Cache.Save(new ObjectWithAttributeInvalidChars());
+        var act = () => sut.Save(new ObjectWithAttributeInvalidChars());
 
         act.Should()
             .Throw<ArgumentException>()
             .WithMessage("*'invalid+name' has unacceptable characters*");
     }
 
-    [Test]
-    public void Saving_without_attribute_throws()
+    [Test, AutoMockData]
+    public void Saving_without_attribute_throws(ServiceCache sut)
     {
-        var ctx = new Context();
-
-        var act = () => ctx.Cache.Save(new ObjectWithoutAttribute());
+        var act = () => sut.Save(new ObjectWithoutAttribute());
 
         act.Should()
             .Throw<ArgumentException>()
@@ -172,32 +137,66 @@ public class ServiceCacheTest
     [Test, AutoMockData]
     public void Switching_config_and_base_url_should_yield_different_cache_paths(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IServiceConfiguration config,
+        [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
-        config.BaseUrl.Returns("http://localhost:1234");
-
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("Foo.json"));
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-        // Change the active config & base URL so we get a different path
-        config.BaseUrl.Returns("http://localhost:5678");
-
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("Bar.json"));
         sut.Save(new ObjectWithAttribute {TestValue = "Bar"});
 
-        fs.AllFiles.Should().HaveCount(2)
-            .And.AllSatisfy(x => x.Should().EndWith("json"));
+        var expectedFiles = new[] {"*Foo.json", "*Bar.json"};
+        foreach (var expectedFile in expectedFiles)
+        {
+            fs.AllFiles.Should().ContainMatch(expectedFile);
+        }
     }
 
-    [Test]
-    public void When_cache_file_is_empty_do_not_throw()
+    [Test, AutoMockData]
+    public void When_cache_file_is_empty_do_not_throw(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] ICacheStoragePath storage,
+        ServiceCache sut)
     {
-        var ctx = new Context();
-        ctx.Filesystem.File.Exists(Arg.Any<string>()).Returns(true);
-        ctx.Filesystem.File.ReadAllText(Arg.Any<string>())
-            .Returns(_ => "");
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("cacheFile.json"));
+        fs.AddFile("cacheFile.json", new MockFileData(""));
 
-        Action act = () => ctx.Cache.Load<ObjectWithAttribute>();
+        Action act = () => sut.Load<ObjectWithAttribute>();
 
         act.Should().NotThrow();
+    }
+
+    [Test, AutoMockData]
+    public void Name_properties_get_truncated_on_load(
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] ICacheStoragePath storage,
+        ServiceCache sut)
+    {
+        const string cacheJson = @"
+{
+  'version': 1,
+  'trash_id_mappings': [
+    {
+      'custom_format_name': '4K Remaster',
+      'trash_id': 'eca37840c13c6ef2dd0262b141a5482f',
+      'custom_format_id': 4
+    }
+  ]
+}
+";
+
+        fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("cacheFile.json"));
+
+        var result = sut.Load<CustomFormatCache>();
+
+        result.Should().BeEquivalentTo(new CustomFormatCache
+        {
+            TrashIdMappings = new Collection<TrashIdMapping>
+            {
+                new("eca37840c13c6ef2dd0262b141a5482f", 4)
+            }
+        });
     }
 }

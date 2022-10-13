@@ -1,6 +1,8 @@
+using System.IO.Abstractions;
+
 namespace TrashLib.Cache;
 
 public interface ICacheStoragePath
 {
-    string Path { get; }
+    IFileInfo CalculatePath(string cacheObjectName);
 }

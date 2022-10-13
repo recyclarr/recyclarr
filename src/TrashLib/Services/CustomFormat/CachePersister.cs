@@ -6,7 +6,7 @@ using TrashLib.Services.CustomFormat.Models.Cache;
 
 namespace TrashLib.Services.CustomFormat;
 
-internal class CachePersister : ICachePersister
+public class CachePersister : ICachePersister
 {
     private readonly IServiceCache _cache;
 

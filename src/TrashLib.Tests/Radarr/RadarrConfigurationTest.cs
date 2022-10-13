@@ -25,15 +25,8 @@ public class RadarrConfigurationTest
         _container = builder.Build();
     }
 
-    private static readonly TestCaseData[] NameOrIdsTestData =
-    {
-        new(new Collection<string> {"name"}, new Collection<string>()),
-        new(new Collection<string>(), new Collection<string> {"trash_id"})
-    };
-
-    [TestCaseSource(nameof(NameOrIdsTestData))]
-    public void Custom_format_is_valid_with_trash_id(Collection<string> namesList,
-        Collection<string> trashIdsList)
+    [Test]
+    public void Custom_format_is_valid_with_trash_id()
     {
         var config = new RadarrConfiguration
         {
@@ -41,7 +34,7 @@ public class RadarrConfigurationTest
             BaseUrl = "required value",
             CustomFormats = new List<CustomFormatConfig>
             {
-                new() {TrashIds = trashIdsList}
+                new() {TrashIds = new Collection<string> {"trash_id"}}
             }
         };
 

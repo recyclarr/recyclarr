@@ -42,62 +42,6 @@ namespace TrashLib.Tests.CustomFormat.Processors.PersistenceSteps;
 [Parallelizable(ParallelScope.All)]
 public class JsonTransactionStepTest
 {
-    [TestCase(1, "cf2")]
-    [TestCase(2, "cf1")]
-    [TestCase(null, "cf1")]
-    public void Updates_using_combination_of_id_and_name(int? id, string guideCfName)
-    {
-        const string radarrCfData = @"{
-  'id': 1,
-  'name': 'cf1',
-  'specifications': [{
-    'name': 'spec1',
-    'fields': [{
-      'name': 'value',
-      'value': 'value1'
-    }]
-  }]
-}";
-        var guideCfData = JObject.Parse(@"{
-  'name': 'cf1',
-  'specifications': [{
-    'name': 'spec1',
-    'new': 'valuenew',
-    'fields': {
-      'value': 'value2'
-    }
-  }]
-}");
-        var cacheEntry = id != null ? new TrashIdMapping("") {CustomFormatId = id.Value} : null;
-
-        var guideCfs = new List<ProcessedCustomFormatData>
-        {
-            NewCf.Processed(guideCfName, "", guideCfData, cacheEntry)
-        };
-
-        var processor = new JsonTransactionStep();
-        processor.Process(guideCfs, new[] {JObject.Parse(radarrCfData)});
-
-        var expectedTransactions = new CustomFormatTransactionData();
-        expectedTransactions.UpdatedCustomFormats.Add(guideCfs[0]);
-        processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
-
-        const string expectedJsonData = @"{
-  'id': 1,
-  'name': 'cf1',
-  'specifications': [{
-    'name': 'spec1',
-    'new': 'valuenew',
-    'fields': [{
-      'name': 'value',
-      'value': 'value2'
-    }]
-  }]
-}";
-        processor.Transactions.UpdatedCustomFormats.First().Json.Should()
-            .BeEquivalentTo(JObject.Parse(expectedJsonData), op => op.Using(new JsonEquivalencyStep()));
-    }
-
     [Test]
     public void Combination_of_create_update_and_unchanged_and_verify_proper_json_merging()
     {
@@ -358,66 +302,5 @@ public class JsonTransactionStepTest
         var expectedTransactions = new CustomFormatTransactionData();
         expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", 2));
         processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
-    }
-
-    [Test]
-    public void Updated_and_unchanged_custom_formats_have_cache_entry_set_when_there_is_no_cache()
-    {
-        const string radarrCfData = @"[{
-  'id': 1,
-  'name': 'updated',
-  'specifications': [{
-    'name': 'spec2',
-    'fields': [{
-      'name': 'value',
-      'value': 'value1'
-    }]
-  }]
-}, {
-  'id': 2,
-  'name': 'no_change',
-  'specifications': [{
-    'name': 'spec4',
-    'negate': false,
-    'fields': [{
-      'name': 'value',
-      'value': 'value1'
-    }]
-  }]
-}]";
-        var guideCfData = JsonConvert.DeserializeObject<List<JObject>>(@"[{
-  'name': 'updated',
-  'specifications': [{
-    'name': 'spec2',
-    'fields': {
-      'value': 'value2'
-    }
-  }]
-}, {
-  'name': 'no_change',
-  'specifications': [{
-    'name': 'spec4',
-    'negate': false,
-    'fields': {
-      'value': 'value1'
-    }
-  }]
-}]");
-
-        var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
-        var guideCfs = new List<ProcessedCustomFormatData>
-        {
-            NewCf.Processed("updated", "", guideCfData![0]),
-            NewCf.Processed("no_change", "", guideCfData[1])
-        };
-
-        var processor = new JsonTransactionStep();
-        processor.Process(guideCfs, radarrCfs!);
-
-        processor.Transactions.UpdatedCustomFormats.First().CacheEntry.Should()
-            .BeEquivalentTo(new TrashIdMapping("", 1));
-
-        processor.Transactions.UnchangedCustomFormats.First().CacheEntry.Should()
-            .BeEquivalentTo(new TrashIdMapping("", 2));
     }
 }
