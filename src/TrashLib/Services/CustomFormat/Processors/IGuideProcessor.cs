@@ -15,6 +15,7 @@ internal interface IGuideProcessor
     IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
     IReadOnlyCollection<(string, string)> CustomFormatsWithOutdatedNames { get; }
     IDictionary<string, List<ProcessedCustomFormatData>> DuplicatedCustomFormats { get; }
+    IReadOnlyDictionary<string, Dictionary<string, HashSet<int>>> DuplicateScores { get; }
 
     Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
         IGuideService guideService);

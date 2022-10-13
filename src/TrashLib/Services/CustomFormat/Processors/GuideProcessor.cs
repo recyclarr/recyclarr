@@ -40,6 +40,9 @@ internal class GuideProcessor : IGuideProcessor
     public IReadOnlyCollection<(string name, string trashId, string profileName)> CustomFormatsWithoutScore
         => _steps.QualityProfile.CustomFormatsWithoutScore;
 
+    public IReadOnlyDictionary<string, Dictionary<string, HashSet<int>>> DuplicateScores
+        => _steps.QualityProfile.DuplicateScores;
+
     public IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache
         => _steps.CustomFormat.DeletedCustomFormatsInCache;
 

@@ -204,6 +204,25 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
             _console.Output.WriteLine("");
         }
 
+        if (_guideProcessor.DuplicateScores.Any())
+        {
+            foreach (var (profileName, duplicates) in _guideProcessor.DuplicateScores)
+            foreach (var (trashId, dupeScores) in duplicates)
+            {
+                _log.Warning(
+                    "Custom format with trash ID {TrashId} is duplicated {Count} times in quality profile " +
+                    "{ProfileName} with the following scores: {Scores}",
+                    trashId, dupeScores.Count, profileName, dupeScores);
+            }
+
+            _log.Warning(
+                "When the same CF is specified multiple times with different scores in the same quality profile, " +
+                "only the score from the first occurrence is used. To resolve the duplication warnings above, " +
+                "remove the duplicate trash IDs from your YAML config");
+
+            _console.Output.WriteLine("");
+        }
+
         if (_guideProcessor.CustomFormatsWithOutdatedNames.Count > 0)
         {
             _log.Warning("One or more custom format names in your YAML config have been renamed in the guide and " +
