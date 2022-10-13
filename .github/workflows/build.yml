@@ -185,6 +185,7 @@ jobs:
     name: Docker
     needs: musl
     uses: ./.github/workflows/docker.yml
+    secrets: inherit
 
   # The main purpose of this job is to group all the other jobs together into one single job status
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
