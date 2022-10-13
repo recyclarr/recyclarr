@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.Command;
 using TestLibrary.AutoFixture;
 using TrashLib.Config.Services;
 using TrashLib.ExceptionTypes;

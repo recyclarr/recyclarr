@@ -1,6 +1,5 @@
 using Autofac;
 using Autofac.Extras.Ordering;
-using Recyclarr.Command;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Config;
 using TrashLib.Services.Sonarr.QualityDefinition;

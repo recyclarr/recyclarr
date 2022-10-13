@@ -1,6 +1,6 @@
 using TrashLib.Services.Sonarr.Config;
 
-namespace Recyclarr.Command;
+namespace TrashLib.Services.Sonarr;
 
 public interface ISonarrVersionEnforcement
 {
