@@ -4,7 +4,7 @@ end_of_line = crlf
 trim_trailing_whitespace = true
 insert_final_newline = true
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 # Microsoft .NET properties
 csharp_indent_braces = false
@@ -2218,50 +2218,8 @@ resharper_xaml_xaml_xamarin_forms_data_type_and_binding_context_type_mismatched_
 resharper_xaml_x_key_attribute_disallowed_highlighting = error
 resharper_xunit_xunit_test_with_console_output_highlighting = warning
 
-[{*.yaml,*.yml}]
-indent_style = space
-indent_size = 2
-
-[*.{xml,xsd}]
-indent_style = space
-indent_size = 2
-
 [*.json]
-indent_style = space
-indent_size = 2
 ij_javascript_array_initializer_right_brace_on_new_line = false
 
-[{*.overridetasks,*.targets,*.tasks}]
-indent_style = space
-indent_size = 2
-
-[*.props]
-indent_style = space
-indent_size = 2
-
-[{*.androidproj,*.ccproj,*.csproj}]
-indent_style = space
-indent_size = 2
-
-[*.{appxmanifest,asax,ascx,aspx,axaml,build,cg,cginc,compute,cs,cshtml,dtd,hlsl,hlsli,hlslinc,master,nuspec,paml,razor,resw,resx,skin,usf,ush,vb,xaml,xamlx,xoml}]
-indent_style = space
-indent_size = 4
-tab_width = 4
-
-[{*.har,*.jsb2,*.jsb3,*.json,.babelrc,.eslintrc,.stylelintrc,bowerrc,jest.config}]
-indent_style = space
-indent_size = 2
-
-[*.{appxmanifest,asax,ascx,aspx,axaml,build,cg,cginc,compute,cs,cshtml,dtd,hlsl,hlsli,hlslinc,master,nuspec,paml,razor,resw,resx,skin,usf,ush,vb,xaml,xamlx,xoml,xsd}]
-indent_style = space
-indent_size = 4
-tab_width = 4
-
-[{*.ant,*.appxmanifest,*.axml,*.cscfg,*.csdef,*.disco,*.filelayout,*.fxml,*.jhm,*.jnlp,*.jrxml,*.manifest,*.myapp,*.nuspec,*.rng,*.stylecop,*.svcmap,*.tld,*.tps,*.wadcfgx,*.webref,*.wsdl,*.xml,*.xsd,*.xsl,*.xslt,*.xul,StyleCop.Cache}]
-indent_style = space
-indent_size = 2
-
 [*.{appxmanifest,asax,ascx,aspx,axaml,build,c,c++,cc,cginc,compute,cp,cpp,cs,cshtml,cu,cuh,cxx,dtd,fx,fxh,h,hh,hlsl,hlsli,hlslinc,hpp,hxx,inc,inl,ino,ipp,master,mpp,mq4,mq5,mqh,nuspec,paml,razor,resw,resx,skin,tpp,usf,ush,vb,xaml,xamlx,xoml,xsd}]
-indent_style = space
 indent_size = 4
-tab_width = 4
