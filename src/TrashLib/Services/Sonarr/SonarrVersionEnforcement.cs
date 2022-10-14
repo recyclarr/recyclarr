@@ -27,11 +27,11 @@ public class SonarrVersionEnforcement : ISonarrVersionEnforcement
         {
             case true when config.ReleaseProfiles.Any():
                 throw new VersionException(
-                    "Sonarr v4 does not support Release Profiles. Please use Sonarr v3 instead.");
+                    "Sonarr v4 does not support Release Profiles. Please use Custom Formats instead.");
 
             case false when config.CustomFormats.Any():
                 throw new VersionException(
-                    "Sonarr v3 does not support Custom Formats. Please use Sonarr v4 instead.");
+                    "Sonarr v3 does not support Custom Formats. Please use Release Profiles instead.");
         }
     }
 }
