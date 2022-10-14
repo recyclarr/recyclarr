@@ -13,13 +13,16 @@ if not webhook_url:
 
 changelog = sys.argv[3]
 if not changelog:
-    print('Pass changelog as third argument')
+    print('Pass path to changelog file as third argument')
     exit(1)
+
+with open(changelog, 'r') as f:
+    changelog_text = f.read()
 
 mkdown_desc = f'''
 **Release Notes**
 ```
-{changelog}
+{changelog_text}
 ```
 '''
 

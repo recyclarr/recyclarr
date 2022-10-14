@@ -20,12 +20,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - uses: octokit/request-action@v2.x
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          route: GET /repos/{org_repo}/releases/tags/{tag}
+          org_repo: ${{ github.repository }}
+          tag: ${{ env.TAG }}
+
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
+
       - run: pip install discord-webhook
+
+      # Write changelog to a file to avoid certain characters from being processed by the shell
+      - run: |
+          cat >changelog.txt <<"EOL"
+          ${{ fromJSON(steps.release.outputs.data).body }}
+          EOL
+
       - run: |
           python ci/notify/discord_notify.py \
-            '${{ github.event.release.tag_name }}' \
+            '${{ env.TAG }}' \
             '${{ secrets.DISCORD_WEBHOOK }}' \
-            '${{ github.event.release.body }}'
+            changelog.txt
