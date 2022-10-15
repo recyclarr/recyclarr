@@ -10,10 +10,10 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Recyclarr.Migration;
 using Serilog;
-using TrashLib;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
+using TrashLib.Startup;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Command;
@@ -72,7 +72,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         var log = container.Resolve<ILogger>();
         var settingsProvider = container.Resolve<ISettingsProvider>();
         var repoUpdater = container.Resolve<IRepoUpdater>();
-        var configFinder = container.Resolve<IConfigurationFinder>();
+        var paths = container.Resolve<IAppPaths>();
         var migration = container.Resolve<IMigrationExecutor>();
 
         // Will throw if migration is required, otherwise just a warning is issued.
@@ -83,7 +83,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
 
         if (!Config.Any())
         {
-            Config = new[] {configFinder.FindConfigPath().FullName};
+            Config = new[] {paths.ConfigPath.FullName};
         }
 
         return Task.CompletedTask;

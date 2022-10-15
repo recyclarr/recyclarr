@@ -8,10 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [Upgrade Guide][breaking3] for required changes
+you need to make.
+
 ### Removed
 
 - **BREAKING**: Completely removed support for `names` under `custom_formats` in `recyclarr.yml`.
   Note that this had already been deprecated for quite some time.
+- **BREAKING**: The deprecated feature that still allowed you to keep your `recyclarr.yml` next to
+the executable has been removed.
+
+[breaking3]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v3.0
 
 ## [2.6.1] - 2022-10-15
 

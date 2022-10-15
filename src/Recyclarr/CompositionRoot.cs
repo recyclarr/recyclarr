@@ -10,7 +10,6 @@ using Recyclarr.Command.Setup;
 using Recyclarr.Config;
 using Recyclarr.Logging;
 using Recyclarr.Migration;
-using TrashLib;
 using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Config.Services;
@@ -81,7 +80,6 @@ public class CompositionRoot : ICompositionRoot
         builder.RegisterModule<ConfigAutofacModule>();
 
         builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
-        builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())
