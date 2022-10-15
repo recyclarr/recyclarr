@@ -74,7 +74,7 @@ public class GuideProcessorTest
                     "abc", // no score
                     "not in guide 1"
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1"},
                     new() {Name = "profile2", Score = -1234}
@@ -87,7 +87,7 @@ public class GuideProcessorTest
                     "abc", // no score
                     "not in guide 2"
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile3"},
                     new() {Name = "profile4", Score = 5678}

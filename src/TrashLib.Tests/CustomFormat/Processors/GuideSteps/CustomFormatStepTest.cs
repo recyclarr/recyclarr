@@ -166,7 +166,7 @@ public class CustomFormatStepTest
             new()
             {
                 TrashIds = new List<string> {"id1"},
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile", Score = 200}
                 }
