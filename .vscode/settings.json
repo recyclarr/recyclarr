@@ -1,3 +1,5 @@
 {
-    "dotnet-test-explorer.testProjectPath": "**/*Tests.csproj"
+  "dotnet-test-explorer.testProjectPath": "**/*Tests.csproj",
+  "files.trimFinalNewlines": true,
+  "files.insertFinalNewline": true
 }
