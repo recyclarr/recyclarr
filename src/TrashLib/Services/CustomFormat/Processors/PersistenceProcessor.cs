@@ -18,20 +18,18 @@ internal class PersistenceProcessor : IPersistenceProcessor
     private readonly IServiceConfiguration _config;
     private readonly ICustomFormatService _customFormatService;
     private readonly IQualityProfileService _qualityProfileService;
-    private readonly Func<IPersistenceProcessorSteps> _stepsFactory;
-    private IPersistenceProcessorSteps _steps;
+    private readonly IPersistenceProcessorSteps _steps;
 
     public PersistenceProcessor(
         ICustomFormatService customFormatService,
         IQualityProfileService qualityProfileService,
         IServiceConfiguration config,
-        Func<IPersistenceProcessorSteps> stepsFactory)
+        IPersistenceProcessorSteps steps)
     {
         _customFormatService = customFormatService;
         _qualityProfileService = qualityProfileService;
-        _stepsFactory = stepsFactory;
         _config = config;
-        _steps = _stepsFactory();
+        _steps = steps;
     }
 
     public CustomFormatTransactionData Transactions
@@ -42,11 +40,6 @@ internal class PersistenceProcessor : IPersistenceProcessor
 
     public IReadOnlyCollection<string> InvalidProfileNames
         => _steps.ProfileQualityProfileApiPersister.InvalidProfileNames;
-
-    public void Reset()
-    {
-        _steps = _stepsFactory();
-    }
 
     public async Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
         IEnumerable<TrashIdMapping> deletedCfsInCache,

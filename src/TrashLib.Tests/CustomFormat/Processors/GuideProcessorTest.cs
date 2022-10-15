@@ -52,7 +52,7 @@ public class GuideProcessorTest
     {
         var ctx = new Context();
         var guideService = Substitute.For<IRadarrGuideService>();
-        var guideProcessor = new GuideProcessor(() => new TestGuideProcessorSteps());
+        var guideProcessor = new GuideProcessor(new TestGuideProcessorSteps());
 
         // simulate guide data
         guideService.GetCustomFormatData().Returns(new[]

@@ -13,6 +13,4 @@ public interface IPersistenceProcessor
     Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
         IEnumerable<TrashIdMapping> deletedCfsInCache,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores);
-
-    void Reset();
 }

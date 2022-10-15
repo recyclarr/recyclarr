@@ -19,6 +19,4 @@ internal interface IGuideProcessor
 
     Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
         IGuideService guideService);
-
-    void Reset();
 }

@@ -60,9 +60,6 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
             _cache.Update(_guideProcessor.ProcessedCustomFormats);
             _cache.Save();
         }
-
-        _persistenceProcessor.Reset();
-        _guideProcessor.Reset();
     }
 
     private void PrintQualityProfileUpdates()

@@ -15,14 +15,12 @@ public interface IGuideProcessorSteps
 
 internal class GuideProcessor : IGuideProcessor
 {
-    private readonly Func<IGuideProcessorSteps> _stepsFactory;
     private IList<CustomFormatData>? _guideCustomFormatJson;
-    private IGuideProcessorSteps _steps;
+    private readonly IGuideProcessorSteps _steps;
 
-    public GuideProcessor(Func<IGuideProcessorSteps> stepsFactory)
+    public GuideProcessor(IGuideProcessorSteps steps)
     {
-        _stepsFactory = stepsFactory;
-        _steps = stepsFactory();
+        _steps = steps;
     }
 
     public IReadOnlyCollection<ProcessedCustomFormatData> ProcessedCustomFormats
@@ -78,10 +76,5 @@ internal class GuideProcessor : IGuideProcessor
         _steps.QualityProfile.Process(_steps.Config.ConfigData);
 
         return Task.CompletedTask;
-    }
-
-    public void Reset()
-    {
-        _steps = _stepsFactory();
     }
 }

@@ -27,7 +27,7 @@ public class PersistenceProcessorTest
         var deletedCfsInCache = new Collection<TrashIdMapping>();
         var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-        var processor = new PersistenceProcessor(cfApi, qpApi, config, () => steps);
+        var processor = new PersistenceProcessor(cfApi, qpApi, config, steps);
         await processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
         steps.JsonTransactionStep.Received().RecordDeletions(Arg.Is(deletedCfsInCache), Arg.Any<List<JObject>>());
@@ -46,7 +46,7 @@ public class PersistenceProcessorTest
         var deletedCfsInCache = Array.Empty<TrashIdMapping>();
         var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-        var processor = new PersistenceProcessor(cfApi, qpApi, config, () => steps);
+        var processor = new PersistenceProcessor(cfApi, qpApi, config, steps);
         await processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
 
         steps.JsonTransactionStep.DidNotReceive()
