@@ -15,7 +15,7 @@ public interface IPersistenceProcessorSteps
 
 internal class PersistenceProcessor : IPersistenceProcessor
 {
-    private readonly IConfigurationProvider _configProvider;
+    private readonly IServiceConfiguration _config;
     private readonly ICustomFormatService _customFormatService;
     private readonly IQualityProfileService _qualityProfileService;
     private readonly Func<IPersistenceProcessorSteps> _stepsFactory;
@@ -24,13 +24,13 @@ internal class PersistenceProcessor : IPersistenceProcessor
     public PersistenceProcessor(
         ICustomFormatService customFormatService,
         IQualityProfileService qualityProfileService,
-        IConfigurationProvider configProvider,
+        IServiceConfiguration config,
         Func<IPersistenceProcessorSteps> stepsFactory)
     {
         _customFormatService = customFormatService;
         _qualityProfileService = qualityProfileService;
         _stepsFactory = stepsFactory;
-        _configProvider = configProvider;
+        _config = config;
         _steps = _stepsFactory();
     }
 
@@ -60,8 +60,7 @@ internal class PersistenceProcessor : IPersistenceProcessor
         _steps.JsonTransactionStep.Process(guideCfs, serviceCfs);
 
         // Step 1.1: Optionally record deletions of custom formats in cache but not in the guide
-        var config = _configProvider.ActiveConfiguration;
-        if (config.DeleteOldCustomFormats)
+        if (_config.DeleteOldCustomFormats)
         {
             _steps.JsonTransactionStep.RecordDeletions(deletedCfsInCache, serviceCfs);
         }

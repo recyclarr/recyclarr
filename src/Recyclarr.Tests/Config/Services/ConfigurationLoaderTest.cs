@@ -14,7 +14,6 @@ using NUnit.Framework;
 using Recyclarr.Config;
 using TestLibrary;
 using TestLibrary.AutoFixture;
-using TestLibrary.NSubstitute;
 using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Services.Sonarr.Config;
@@ -57,7 +56,6 @@ public class ConfigurationLoaderTest
     [Test, AutoMockData(typeof(ConfigurationLoaderTest), nameof(BuildContainer))]
     public void Load_many_iterations_of_config(
         [Frozen] IFileSystem fs,
-        [Frozen] IConfigurationProvider provider,
         ConfigurationLoader<SonarrConfiguration> loader)
     {
         static StreamReader MockYaml(params object[] args)
@@ -86,8 +84,6 @@ public class ConfigurationLoaderTest
         var actual = loader.LoadMany(fakeFiles, "sonarr").ToList();
 
         actual.Should().BeEquivalentTo(expected);
-        provider.Received(3).ActiveConfiguration =
-            Verify.That<SonarrConfiguration>(x => expected.Should().ContainEquivalentOf(x));
     }
 
     [Test, AutoMockData(typeof(ConfigurationLoaderTest), nameof(BuildContainer))]

@@ -1,7 +1,9 @@
+using Autofac;
 using CliFx.Attributes;
 using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
+using TrashLib.Config.Services;
 using TrashLib.Extensions;
 using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Radarr;
@@ -30,8 +32,6 @@ internal class RadarrCommand : ServiceCommand
 
         var lister = container.Resolve<IRadarrGuideDataLister>();
         var log = container.Resolve<ILogger>();
-        var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
-        var qualityUpdaterFactory = container.Resolve<Func<IRadarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
         var guideService = container.Resolve<IRadarrGuideService>();
 
@@ -49,16 +49,23 @@ internal class RadarrCommand : ServiceCommand
 
         foreach (var config in configLoader.LoadMany(Config, "radarr"))
         {
+            await using var scope = container.Container.BeginLifetimeScope(builder =>
+            {
+                builder.RegisterInstance(config).As<IServiceConfiguration>();
+            });
+
             log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
 
             if (config.QualityDefinition != null)
             {
-                await qualityUpdaterFactory().Process(Preview, config);
+                var updater = scope.Resolve<IRadarrQualityDefinitionUpdater>();
+                await updater.Process(Preview, config);
             }
 
             if (config.CustomFormats.Count > 0)
             {
-                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats, guideService);
+                var updater = scope.Resolve<ICustomFormatUpdater>();
+                await updater.Process(Preview, config.CustomFormats, guideService);
             }
         }
     }

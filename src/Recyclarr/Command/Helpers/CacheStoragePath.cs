@@ -7,14 +7,14 @@ namespace Recyclarr.Command.Helpers;
 public class CacheStoragePath : ICacheStoragePath
 {
     private readonly IAppPaths _paths;
-    private readonly IActiveServiceCommandProvider _serviceCommandProvider;
+    private readonly IServiceCommand _serviceCommand;
 
-    public CacheStoragePath(IAppPaths paths, IActiveServiceCommandProvider serviceCommandProvider)
+    public CacheStoragePath(IAppPaths paths, IServiceCommand serviceCommand)
     {
         _paths = paths;
-        _serviceCommandProvider = serviceCommandProvider;
+        _serviceCommand = serviceCommand;
     }
 
     public string Path => _paths.CacheDirectory
-        .SubDirectory(_serviceCommandProvider.ActiveCommand.Name.ToLower()).FullName;
+        .SubDirectory(_serviceCommand.Name.ToLower()).FullName;
 }

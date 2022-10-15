@@ -5,7 +5,7 @@ using TrashLib.Startup;
 
 namespace Recyclarr.Logging;
 
-internal class LoggerFactory
+public class LoggerFactory
 {
     private readonly IAppPaths _paths;
 

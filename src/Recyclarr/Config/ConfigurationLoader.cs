@@ -11,18 +11,15 @@ namespace Recyclarr.Config;
 public class ConfigurationLoader<T> : IConfigurationLoader<T>
     where T : IServiceConfiguration
 {
-    private readonly IConfigurationProvider _configProvider;
     private readonly IDeserializer _deserializer;
     private readonly IFileSystem _fileSystem;
     private readonly IValidator<T> _validator;
 
     public ConfigurationLoader(
-        IConfigurationProvider configProvider,
         IFileSystem fileSystem,
         IYamlSerializerFactory yamlFactory,
         IValidator<T> validator)
     {
-        _configProvider = configProvider;
         _fileSystem = fileSystem;
         _validator = validator;
         _deserializer = yamlFactory.CreateDeserializer();
@@ -82,7 +79,6 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
     {
         foreach (var config in configFiles.SelectMany(file => Load(file, configSection)))
         {
-            _configProvider.ActiveConfiguration = config;
             yield return config;
         }
     }

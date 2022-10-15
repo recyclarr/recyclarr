@@ -4,6 +4,7 @@ using CliFx.Exceptions;
 using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
+using TrashLib.Config.Services;
 using TrashLib.Extensions;
 using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Sonarr;
@@ -44,11 +45,8 @@ public class SonarrCommand : ServiceCommand
         await base.Process(container);
 
         var lister = container.Resolve<ISonarrGuideDataLister>();
-        var profileUpdaterFactory = container.Resolve<Func<IReleaseProfileUpdater>>();
-        var qualityUpdaterFactory = container.Resolve<Func<ISonarrQualityDefinitionUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
         var log = container.Resolve<ILogger>();
-        var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var guideService = container.Resolve<ISonarrGuideService>();
 
         if (ListReleaseProfiles)
@@ -86,26 +84,32 @@ public class SonarrCommand : ServiceCommand
 
         foreach (var config in configLoader.LoadMany(Config, "sonarr"))
         {
+            await using var scope = container.Container.BeginLifetimeScope(builder =>
+            {
+                builder.RegisterInstance(config).As<IServiceConfiguration>();
+            });
+
             log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
 
-            var scope = container.Container.BeginLifetimeScope();
             var versionEnforcement = scope.Resolve<ISonarrVersionEnforcement>();
-
             await versionEnforcement.DoVersionEnforcement(config);
 
             if (config.ReleaseProfiles.Count > 0)
             {
-                await profileUpdaterFactory().Process(Preview, config);
+                var updater = scope.Resolve<IReleaseProfileUpdater>();
+                await updater.Process(Preview, config);
             }
 
             if (!string.IsNullOrEmpty(config.QualityDefinition))
             {
-                await qualityUpdaterFactory().Process(Preview, config);
+                var updater = scope.Resolve<ISonarrQualityDefinitionUpdater>();
+                await updater.Process(Preview, config);
             }
 
             if (config.CustomFormats.Count > 0)
             {
-                await customFormatUpdaterFactory().Process(Preview, config.CustomFormats, guideService);
+                var updater = scope.Resolve<ICustomFormatUpdater>();
+                await updater.Process(Preview, config.CustomFormats, guideService);
             }
         }
     }

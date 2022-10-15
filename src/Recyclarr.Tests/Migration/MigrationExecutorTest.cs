@@ -1,9 +1,11 @@
+using Autofac;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
+using TrashLib.Startup;
 
 namespace Recyclarr.Tests.Migration;
 
@@ -14,7 +16,11 @@ public class MigrationExecutorTest
     [Test]
     public void Migration_steps_are_in_expected_order()
     {
-        var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default);
+        var container = new CompositionRoot().Setup(builder =>
+        {
+            builder.RegisterInstance(Substitute.For<IAppPaths>());
+        });
+
         var steps = container.Resolve<IEnumerable<IMigrationStep>>();
         var orderedSteps = steps.OrderBy(x => x.Order).Select(x => x.GetType()).ToList();
         orderedSteps.Should().BeEquivalentTo(

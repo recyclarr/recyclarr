@@ -168,7 +168,7 @@ public class SonarrCompatibilityTest
 
         var act = () => enforcement.DoVersionEnforcement(config);
 
-        await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v3*custom format*use*v4*");
+        await act.Should().ThrowAsync<VersionException>().WithMessage("Sonarr v3*");
     }
 
     [Test, AutoMockData]

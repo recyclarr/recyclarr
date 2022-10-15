@@ -4,15 +4,12 @@ using Autofac;
 using Autofac.Core.Activators.Reflection;
 using Autofac.Extras.Ordering;
 using CliFx;
-using CliFx.Infrastructure;
 using Common;
 using Recyclarr.Command.Helpers;
 using Recyclarr.Command.Setup;
 using Recyclarr.Config;
 using Recyclarr.Logging;
 using Recyclarr.Migration;
-using Serilog;
-using Serilog.Events;
 using TrashLib;
 using TrashLib.Cache;
 using TrashLib.Config;
@@ -30,18 +27,15 @@ namespace Recyclarr;
 
 public class CompositionRoot : ICompositionRoot
 {
-    public IServiceLocatorProxy Setup(string? appDataDir, IConsole console, LogEventLevel logLevel)
+    public IServiceLocatorProxy Setup(Action<ContainerBuilder>? extraRegistrations = null)
     {
-        return Setup(new ContainerBuilder(), appDataDir, console, logLevel);
+        return Setup(new ContainerBuilder(), extraRegistrations);
     }
 
-    public IServiceLocatorProxy Setup(ContainerBuilder builder, string? appDataDir, IConsole console,
-        LogEventLevel logLevel)
+    private IServiceLocatorProxy Setup(ContainerBuilder builder, Action<ContainerBuilder>? extraRegistrations = null)
     {
-        builder.RegisterInstance(console).As<IConsole>().ExternallyOwned();
-
-        RegisterAppPaths(builder, appDataDir);
-        RegisterLogger(builder, logLevel);
+        RegisterAppPaths(builder);
+        RegisterLogger(builder);
 
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
@@ -62,29 +56,24 @@ public class CompositionRoot : ICompositionRoot
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
 
-        builder.Register(_ => AutoMapperConfig.Setup()).InstancePerLifetimeScope();
+        builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
+
+        extraRegistrations?.Invoke(builder);
 
         return new ServiceLocatorProxy(builder.Build());
     }
 
-    private static void RegisterLogger(ContainerBuilder builder, LogEventLevel logLevel)
+    private static void RegisterLogger(ContainerBuilder builder)
     {
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
         builder.RegisterType<LoggerFactory>();
-        builder.Register(c => c.Resolve<LoggerFactory>().Create(logLevel))
-            .As<ILogger>()
-            .InstancePerLifetimeScope();
     }
 
-    private static void RegisterAppPaths(ContainerBuilder builder, string? appDataDir)
+    private static void RegisterAppPaths(ContainerBuilder builder)
     {
         builder.RegisterModule<CommonAutofacModule>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.RegisterType<DefaultAppDataSetup>();
-
-        builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths(appDataDir))
-            .As<IAppPaths>()
-            .InstancePerLifetimeScope();
     }
 
     private static void ConfigurationRegistrations(ContainerBuilder builder)
@@ -110,13 +99,5 @@ public class CompositionRoot : ICompositionRoot
         // Register all types deriving from CliFx's ICommand. These are all of our supported subcommands.
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<ICommand>();
-
-        // Used to access the chosen command class. This is assigned from CliTypeActivator
-        //
-        // note: Do not allow consumers to resolve IServiceConfiguration directly; if this gets cached they end up using
-        // the wrong configuration when multiple instances are used.
-        builder.RegisterType<ActiveServiceCommandProvider>()
-            .As<IActiveServiceCommandProvider>()
-            .InstancePerLifetimeScope();
     }
 }

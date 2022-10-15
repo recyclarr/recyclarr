@@ -1,3 +1,4 @@
+using Autofac;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -5,7 +6,10 @@ using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using MoreLinq.Extensions;
 using Recyclarr.Command.Setup;
+using Recyclarr.Logging;
+using Serilog;
 using Serilog.Events;
+using TrashLib.Startup;
 
 namespace Recyclarr.Command;
 
@@ -21,6 +25,10 @@ public abstract class BaseCommand : ICommand
 
     public static ICompositionRoot? CompositionRoot { get; set; }
 
+    protected virtual void RegisterServices(ContainerBuilder builder)
+    {
+    }
+
     public virtual async ValueTask ExecuteAsync(IConsole console)
     {
         // Must happen first because everything can use the logger.
@@ -31,7 +39,20 @@ public abstract class BaseCommand : ICommand
             throw new CommandException("CompositionRoot must not be null");
         }
 
-        using var container = CompositionRoot.Setup(AppDataDirectory, console, logLevel);
+        using var container = CompositionRoot.Setup(builder =>
+        {
+            builder.RegisterInstance(console).As<IConsole>().ExternallyOwned();
+
+            builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths(AppDataDirectory))
+                .As<IAppPaths>()
+                .SingleInstance();
+
+            builder.Register(c => c.Resolve<LoggerFactory>().Create(logLevel))
+                .As<ILogger>()
+                .SingleInstance();
+
+            RegisterServices(builder);
+        });
 
         var tasks = container.Resolve<IOrderedEnumerable<IBaseCommandSetupTask>>().ToArray();
         tasks.ForEach(x => x.OnStart());

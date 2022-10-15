@@ -1,4 +1,5 @@
 using System.Text;
+using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
@@ -7,7 +8,6 @@ using Flurl.Http;
 using Flurl.Http.Configuration;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Recyclarr.Command.Helpers;
 using Recyclarr.Migration;
 using Serilog;
 using TrashLib;
@@ -35,6 +35,11 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
     public override string? AppDataDirectory { get; [UsedImplicitly] set; }
 
     public abstract string Name { get; }
+
+    protected override void RegisterServices(ContainerBuilder builder)
+    {
+        builder.RegisterInstance(this).As<IServiceCommand>();
+    }
 
     public sealed override async ValueTask ExecuteAsync(IConsole console)
     {
@@ -68,10 +73,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         var settingsProvider = container.Resolve<ISettingsProvider>();
         var repoUpdater = container.Resolve<IRepoUpdater>();
         var configFinder = container.Resolve<IConfigurationFinder>();
-        var commandProvider = container.Resolve<IActiveServiceCommandProvider>();
         var migration = container.Resolve<IMigrationExecutor>();
-
-        commandProvider.ActiveCommand = this;
 
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();

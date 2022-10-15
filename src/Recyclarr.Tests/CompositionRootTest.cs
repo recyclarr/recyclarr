@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
+using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Core;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.Command;
+using Serilog;
+using TrashLib;
+using TrashLib.Config.Services;
+using TrashLib.Startup;
 using VersionControl;
 
 namespace Recyclarr.Tests;
@@ -35,7 +43,7 @@ public class CompositionRootTest
     {
         var act = () =>
         {
-            using var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
+            using var container = new CompositionRoot().Setup().Container;
             service.Instantiate(container);
         };
 
@@ -53,7 +61,7 @@ public class CompositionRootTest
 
         public ConcreteTypeEnumerator()
         {
-            _container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
+            _container = new CompositionRoot().Setup().Container;
         }
 
         public IEnumerator GetEnumerator()
@@ -69,12 +77,21 @@ public class CompositionRootTest
         }
     }
 
+    private static void RegisterAdditionalServices(ContainerBuilder builder)
+    {
+        var fs = new MockFileSystem();
+        builder.RegisterInstance(fs).As<IFileSystem>();
+        builder.RegisterInstance(new AppPaths(fs.CurrentDirectory())).As<IAppPaths>();
+        builder.RegisterInstance(Substitute.For<IConsole>());
+        builder.RegisterInstance(Substitute.For<ILogger>());
+        builder.RegisterInstance(Substitute.For<IServiceCommand>());
+        builder.RegisterInstance(Substitute.For<IServiceConfiguration>());
+    }
+
     [TestCaseSource(typeof(ConcreteTypeEnumerator))]
     public void Service_should_be_instantiable(Type service)
     {
-        using var container = new CompositionRoot().Setup("", Substitute.For<IConsole>(), default).Container;
-        container.Invoking(c => c.Resolve(service))
-            .Should().NotThrow()
-            .And.NotBeNull();
+        using var container = new CompositionRoot().Setup(RegisterAdditionalServices).Container;
+        container.Resolve(service).Should().NotBeNull();
     }
 }

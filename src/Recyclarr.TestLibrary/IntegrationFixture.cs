@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Features.ResolveAnything;
@@ -6,7 +7,10 @@ using CliFx.Infrastructure;
 using Common.TestLibrary;
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.Command;
+using Serilog;
 using Serilog.Events;
+using TrashLib;
 using TrashLib.Startup;
 using VersionControl;
 using VersionControl.Wrappers;
@@ -21,18 +25,30 @@ public abstract class IntegrationFixture : IDisposable
     protected IntegrationFixture()
     {
         var compRoot = new CompositionRoot();
-        _container = compRoot.Setup(default, Console, LogEventLevel.Debug).Container
-            .BeginLifetimeScope(builder =>
-            {
-                builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
-                builder.RegisterInstance(Fs).As<IFileSystem>();
+        _container = compRoot.Setup(builder =>
+        {
+            builder.RegisterInstance(Fs).As<IFileSystem>();
+            builder.RegisterInstance(new AppPaths(Fs.CurrentDirectory())).As<IAppPaths>();
+            builder.RegisterInstance(Console).As<IConsole>();
+            builder.Register(_ => CreateLogger()).As<ILogger>().SingleInstance();
 
-                RegisterMockFor<IGitRepository>(builder);
-                RegisterMockFor<IGitRepositoryFactory>(builder);
-                RegisterMockFor<IRepositoryStaticWrapper>(builder);
-            });
+            RegisterMockFor<IServiceCommand>(builder);
+            RegisterMockFor<IGitRepository>(builder);
+            RegisterMockFor<IGitRepositoryFactory>(builder);
+            RegisterMockFor<IRepositoryStaticWrapper>(builder);
+
+            builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
+        }).Container;
 
         SetupMetadataJson();
+    }
+
+    private static ILogger CreateLogger()
+    {
+        return new LoggerConfiguration()
+            .MinimumLevel.Is(LogEventLevel.Debug)
+            .WriteTo.Console()
+            .CreateLogger();
     }
 
     private void SetupMetadataJson()

@@ -10,6 +10,7 @@ using TestLibrary.AutoFixture;
 using TestLibrary.NSubstitute;
 using TrashLib.Cache;
 using TrashLib.Config.Services;
+using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Tests.Cache;
 
@@ -23,17 +24,12 @@ public class ServiceCacheTest
         {
             Filesystem = fs ?? Substitute.For<IFileSystem>();
             StoragePath = Substitute.For<ICacheStoragePath>();
-            ConfigProvider = Substitute.For<IConfigurationProvider>();
 
-            // Set up a default for the active config's base URL. This is used to generate part of the path
-            ConfigProvider.ActiveConfiguration = Substitute.For<IServiceConfiguration>();
-            ConfigProvider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
-
-            Cache = new ServiceCache(Filesystem, StoragePath, ConfigProvider, Substitute.For<ILogger>());
+            var config = new RadarrConfiguration {BaseUrl = "http://localhost:1234"};
+            Cache = new ServiceCache(Filesystem, StoragePath, config, Substitute.For<ILogger>());
         }
 
         public ServiceCache Cache { get; }
-        public IConfigurationProvider ConfigProvider { get; }
         public ICacheStoragePath StoragePath { get; }
         public IFileSystem Filesystem { get; }
     }
@@ -176,15 +172,15 @@ public class ServiceCacheTest
     [Test, AutoMockData]
     public void Switching_config_and_base_url_should_yield_different_cache_paths(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IConfigurationProvider provider,
+        [Frozen] IServiceConfiguration config,
         ServiceCache sut)
     {
-        provider.ActiveConfiguration.BaseUrl.Returns("http://localhost:1234");
+        config.BaseUrl.Returns("http://localhost:1234");
 
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
         // Change the active config & base URL so we get a different path
-        provider.ActiveConfiguration.BaseUrl.Returns("http://localhost:5678");
+        config.BaseUrl.Returns("http://localhost:5678");
 
         sut.Save(new ObjectWithAttribute {TestValue = "Bar"});
 

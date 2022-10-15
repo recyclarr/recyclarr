@@ -13,7 +13,7 @@ namespace TrashLib.Cache;
 public class ServiceCache : IServiceCache
 {
     private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
-    private readonly IConfigurationProvider _configProvider;
+    private readonly IServiceConfiguration _config;
     private readonly IFileSystem _fs;
     private readonly IFNV1a _hash;
     private readonly ICacheStoragePath _storagePath;
@@ -22,12 +22,12 @@ public class ServiceCache : IServiceCache
     public ServiceCache(
         IFileSystem fs,
         ICacheStoragePath storagePath,
-        IConfigurationProvider configProvider,
+        IServiceConfiguration config,
         ILogger log)
     {
         _fs = fs;
         _storagePath = storagePath;
-        _configProvider = configProvider;
+        _config = config;
         Log = log;
         _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
         _jsonSettings = new JsonSerializerSettings
@@ -84,7 +84,7 @@ public class ServiceCache : IServiceCache
 
     private string BuildServiceGuid()
     {
-        return _hash.ComputeHash(Encoding.ASCII.GetBytes(_configProvider.ActiveConfiguration.BaseUrl))
+        return _hash.ComputeHash(Encoding.ASCII.GetBytes(_config.BaseUrl))
             .AsHexString();
     }
 
