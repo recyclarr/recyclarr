@@ -186,7 +186,7 @@ public class ConfigStepTest
             {
                 Names = new List<string> {"name1", "name3"},
                 TrashIds = new List<string> {"id1", "id4"},
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1", Score = 50}
                 }

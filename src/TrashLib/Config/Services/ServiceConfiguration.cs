@@ -15,11 +15,11 @@ public class CustomFormatConfig
 {
     public ICollection<string> Names { get; init; } = new List<string>();
     public ICollection<string> TrashIds { get; init; } = new List<string>();
-    public ICollection<QualityProfileConfig> QualityProfiles { get; init; } = new List<QualityProfileConfig>();
+    public ICollection<QualityProfileScoreConfig> QualityProfiles { get; init; } = new List<QualityProfileScoreConfig>();
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class QualityProfileConfig
+public class QualityProfileScoreConfig
 {
     public string Name { get; init; } = "";
     public int? Score { get; init; }

@@ -25,18 +25,18 @@ internal class CustomFormatConfigValidator : AbstractValidator<CustomFormatConfi
 {
     public CustomFormatConfigValidator(
         IRadarrValidationMessages messages,
-        IValidator<QualityProfileConfig> qualityProfileConfigValidator)
+        IValidator<QualityProfileScoreConfig> qualityProfileScoreConfigValidator)
     {
         RuleFor(x => x.Names).NotEmpty().When(x => x.TrashIds.Count == 0)
             .WithMessage(messages.CustomFormatNamesAndIds);
-        RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileConfigValidator);
+        RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileScoreConfigValidator);
     }
 }
 
 [UsedImplicitly]
-internal class QualityProfileConfigValidator : AbstractValidator<QualityProfileConfig>
+internal class QualityProfileScoreConfigValidator : AbstractValidator<QualityProfileScoreConfig>
 {
-    public QualityProfileConfigValidator(IRadarrValidationMessages messages)
+    public QualityProfileScoreConfigValidator(IRadarrValidationMessages messages)
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage(messages.QualityProfileName);
     }

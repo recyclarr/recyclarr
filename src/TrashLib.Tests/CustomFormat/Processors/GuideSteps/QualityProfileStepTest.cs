@@ -22,7 +22,7 @@ public class QualityProfileStepTest
                 {
                     NewCf.Processed("name1", "id1")
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1"}
                 }
@@ -47,7 +47,7 @@ public class QualityProfileStepTest
                 {
                     NewCf.Processed("", "id1", 100)
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1", Score = 50}
                 }
@@ -76,7 +76,7 @@ public class QualityProfileStepTest
                 {
                     NewCf.Processed("", "id1", 100)
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1"},
                     new() {Name = "profile2", Score = null}
@@ -111,7 +111,7 @@ public class QualityProfileStepTest
                 {
                     NewCf.Processed("name1", "id1", 0)
                 },
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile1"}
                 }

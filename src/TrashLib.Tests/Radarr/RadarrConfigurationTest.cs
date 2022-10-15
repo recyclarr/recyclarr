@@ -87,7 +87,7 @@ public class RadarrConfigurationTest
                 new()
                 {
                     Names = new List<string> {"required value"},
-                    QualityProfiles = new List<QualityProfileConfig>
+                    QualityProfiles = new List<QualityProfileScoreConfig>
                     {
                         new() {Name = "required value"}
                     }

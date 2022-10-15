@@ -325,7 +325,7 @@ public class CustomFormatStepTest
             new()
             {
                 Names = new List<string> {"name1"},
-                QualityProfiles = new List<QualityProfileConfig>
+                QualityProfiles = new List<QualityProfileScoreConfig>
                 {
                     new() {Name = "profile", Score = 200}
                 }
