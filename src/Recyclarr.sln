@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLibrary.Tests", "TestLi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5-803F-41B3-92D8-4AD2B2E3E130}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
+		.editorconfig = ..\.editorconfig
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
