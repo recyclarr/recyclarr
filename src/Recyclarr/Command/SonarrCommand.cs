@@ -32,10 +32,12 @@ public class SonarrCommand : ServiceCommand
 
     [CommandOption("list-qualities", Description =
         "List available quality definition types from the guide.")]
+    // ReSharper disable once MemberCanBeProtected.Global
     public bool ListQualities { get; [UsedImplicitly] set; }
 
     [CommandOption("list-custom-formats", Description =
         "List available custom formats from the guide in YAML format.")]
+    // ReSharper disable once MemberCanBeProtected.Global
     public bool ListCustomFormats { get; [UsedImplicitly] set; }
 
     public override string Name => "Sonarr";

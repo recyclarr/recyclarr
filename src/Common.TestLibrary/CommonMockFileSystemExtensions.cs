@@ -2,6 +2,9 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+
 namespace Common.TestLibrary;
 
 public static class CommonMockFileSystemExtensions

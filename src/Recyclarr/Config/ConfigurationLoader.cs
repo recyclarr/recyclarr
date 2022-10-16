@@ -77,9 +77,6 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
 
     public IEnumerable<T> LoadMany(IEnumerable<string> configFiles, string configSection)
     {
-        foreach (var config in configFiles.SelectMany(file => Load(file, configSection)))
-        {
-            yield return config;
-        }
+        return configFiles.SelectMany(file => Load(file, configSection));
     }
 }

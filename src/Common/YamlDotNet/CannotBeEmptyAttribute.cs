@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Common.YamlDotNet;
 
 [AttributeUsage(AttributeTargets.Property)]
+// ReSharper disable once UnusedType.Global
 public sealed class CannotBeEmptyAttribute : RequiredAttribute
 {
     public override bool IsValid(object? value)

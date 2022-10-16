@@ -6,6 +6,7 @@ namespace Common.Extensions;
 
 public static class RxExtensions
 {
+    // ReSharper disable once UnusedMember.Global
     public static IObservable<T> Spy<T>(this IObservable<T> source, ILogger log, string? opName = null)
     {
         opName ??= "IObservable";

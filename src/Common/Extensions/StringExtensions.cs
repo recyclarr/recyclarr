@@ -1,5 +1,7 @@
 using System.Globalization;
 
+// ReSharper disable UnusedMember.Global
+
 namespace Common.Extensions;
 
 public static class StringExtensions

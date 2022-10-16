@@ -22,11 +22,13 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
 {
     [CommandOption("preview", 'p', Description =
         "Only display the processed markdown results without making any API calls.")]
+    // ReSharper disable once MemberCanBeProtected.Global
     public bool Preview { get; [UsedImplicitly] set; } = false;
 
     [CommandOption("config", 'c', Description =
         "One or more YAML config files to use. All configs will be used and settings are additive. " +
         "If not specified, the script will look for `recyclarr.yml` in the same directory as the executable.")]
+    // ReSharper disable once MemberCanBeProtected.Global
     public ICollection<string> Config { get; [UsedImplicitly] set; } = new List<string>();
 
     [CommandOption("app-data", Description =

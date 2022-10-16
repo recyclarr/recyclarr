@@ -30,6 +30,7 @@ public class MigrateCommand : BaseCommand
             msg.AppendLine($"Step That Failed:  {e.OperationDescription}");
             msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
 
+            // ReSharper disable once InvertIf
             if (e.Remediation.Any())
             {
                 msg.AppendLine("\nPossible remediation steps:");

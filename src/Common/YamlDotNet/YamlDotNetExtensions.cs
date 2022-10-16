@@ -2,6 +2,8 @@ using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NodeDeserializers;
 
+// ReSharper disable UnusedMember.Global
+
 namespace Common.YamlDotNet;
 
 public static class YamlDotNetExtensions
