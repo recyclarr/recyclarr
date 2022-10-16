@@ -14,8 +14,8 @@ on:
       - '**.cs'
 
 env:
-  MASTER_REF: ${{ github.ref == 'refs/heads/master' && github.event.before }}
-  BASE_REF: ${{ github.event.base_ref || github.event.pull_request.base.ref || 'master' }}
+  BASE_REF: ${{ github.ref == 'refs/heads/master' && github.event.before ||
+                (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
 
 jobs:
   inspect:
@@ -64,7 +64,7 @@ jobs:
         run: dotnet build src
 
       - name: Run Code Cleanup
-        run: ../ci/code_cleanup.sh "${{ env.MASTER_REF || env.BASE_REF }}"
+        run: ../ci/code_cleanup.sh "${{ env.BASE_REF }}"
         working-directory: src
 
       - name: Check Diff
