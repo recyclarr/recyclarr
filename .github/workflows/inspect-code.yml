@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Inspect Code
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["!**"]
+    paths:
+      - .github/workflows/inspect-code.yml
+      - '**.cs'
+  pull_request:
+    paths:
+      - .github/workflows/inspect-code.yml
+      - '**.cs'
+
+jobs:
+  inspect:
+    name: Resharper Inspect Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore
+        run: dotnet restore src
+
+      - name: Inspect Code
+        uses: rcdailey/resharper_inspectcode@include
+        with:
+          workingDirectory: src
+          solutionPath: Recyclarr.sln
+          minimumSeverity: warning
+          include: '**.cs'
+
+  cleanup:
+    name: Resharper Code Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install Resharper Tools
+        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools
+
+      - name: Build
+        run: dotnet build src
+
+      - name: Run Code Cleanup
+        run: ../ci/code_cleanup.sh
+        working-directory: src
+
+      - name: Check Diff
+        run: |
+          ci/diff_to_errors.sh
+          set -o pipefail
+          git diff --exit-code | tee code-cleanup.patch
+
+      - name: Publish Patch File
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: code-cleanup-patch-files
+          path: '*.patch'
