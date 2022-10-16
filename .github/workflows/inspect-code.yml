@@ -13,6 +13,10 @@ on:
       - .github/workflows/inspect-code.yml
       - '**.cs'
 
+env:
+  BASE_REF: ${{ github.ref == 'refs/heads/master' && github.event.before ||
+                (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
+
 jobs:
   inspect:
     name: Resharper Inspect Code
@@ -60,7 +64,7 @@ jobs:
         run: dotnet build src
 
       - name: Run Code Cleanup
-        run: ../ci/code_cleanup.sh
+        run: ../ci/code_cleanup.sh "${{ env.BASE_REF }}"
         working-directory: src
 
       - name: Check Diff
