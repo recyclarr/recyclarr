@@ -134,6 +134,12 @@
           },
           "custom_formats": {
             "$ref": "#/$defs/custom_formats"
+          },
+          "quality_groups": {
+            "$ref": "#/$defs/quality_groups"
+          },
+          "quality_profiles": {
+            "$ref": "#/$defs/quality_profiles"
           }
         }
       }
@@ -212,6 +218,54 @@
                   "default": false
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "quality_groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configure quality groups for use in quality profiles.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the Quality-Group"
+          },
+          "qualities": {
+            "type": "array",
+            "uniqueItems": true,
+            "description": "A list of one or more quality definitions to enable for the quality profile.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "quality_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Quality profile configuration",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the Quality-Profile"
+          },
+          "groups": {
+            "type": "array",
+            "uniqueItems": true,
+            "description": "A list of one or more quality definitions to enable for the quality profile.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
             }
           }
         }

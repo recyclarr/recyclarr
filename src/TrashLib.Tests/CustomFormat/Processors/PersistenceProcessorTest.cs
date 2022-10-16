@@ -7,6 +7,7 @@ using TrashLib.Services.CustomFormat.Api;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors;
+using TrashLib.Services.QualityProfile.Api;
 using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Tests.CustomFormat.Processors;

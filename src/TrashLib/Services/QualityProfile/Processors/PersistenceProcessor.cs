@@ -5,7 +5,7 @@ using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 using TrashLib.Services.QualityProfile.Api;
 
-namespace TrashLib.Services.CustomFormat.Processors;
+namespace TrashLib.Services.QualityProfile.Processors;
 
 public interface IPersistenceProcessorSteps
 {
@@ -53,6 +53,16 @@ internal class PersistenceProcessor : IPersistenceProcessor
         IEnumerable<TrashIdMapping> deletedCfsInCache,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
     {
+
+
+        // Step1: Get the QualityDefinitions from the server
+        // Step 2: Get the QualityProfiles from the server, get it's id
+        // Step 2a:  If a QualityProfile doesn't exist, then create it and get its id.
+        // Step 4: Generate the quality profile updates
+        // Step 5: Commit them to the server
+
+
+
         var serviceCfs = await _customFormatService.GetCustomFormats();
 
         // Step 1: Match CFs between the guide & Radarr and merge the data. The goal is to retain as much of the

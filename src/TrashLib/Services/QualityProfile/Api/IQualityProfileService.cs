@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 
-namespace TrashLib.Services.CustomFormat.Api;
+namespace TrashLib.Services.QualityProfile.Api;
 
 public interface IQualityProfileService
 {

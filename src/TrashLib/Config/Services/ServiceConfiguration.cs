@@ -7,6 +7,9 @@ public abstract class ServiceConfiguration : IServiceConfiguration
     public string BaseUrl { get; init; } = "";
     public string ApiKey { get; init; } = "";
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } = new List<CustomFormatConfig>();
+    public ICollection<QualityGroupConfig> QualityGroups { get; init; } = new List<QualityGroupConfig>();
+    public ICollection<QualityProfileConfig> QualityProfiles { get; init; } = new List<QualityProfileConfig>();
+
     public bool DeleteOldCustomFormats { get; init; }
 }
 
@@ -24,4 +27,18 @@ public class QualityProfileScoreConfig
     public string Name { get; init; } = "";
     public int? Score { get; init; }
     public bool ResetUnmatchedScores { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public class QualityGroupConfig
+{
+    public string Name { get; init; } = "";
+    public ICollection<String> Qualities { get; init; } = new List<String>();
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public class QualityProfileConfig
+{
+    public string Name { get; init; } = "";
+    public ICollection<String> Groups { get; init; } = new List<String>();
 }

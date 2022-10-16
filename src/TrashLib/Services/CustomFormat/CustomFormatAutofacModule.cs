@@ -5,6 +5,7 @@ using TrashLib.Services.CustomFormat.Guide;
 using TrashLib.Services.CustomFormat.Processors;
 using TrashLib.Services.CustomFormat.Processors.GuideSteps;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.Services.QualityProfile.Api;
 
 namespace TrashLib.Services.CustomFormat;
 

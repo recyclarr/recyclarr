@@ -4,6 +4,8 @@ using Recyclarr.Config;
 using Serilog;
 using TrashLib.Extensions;
 using TrashLib.Services.CustomFormat;
+using TrashLib.Services.QualityProfile;
+using TrashLib.Services.QualityProfile.Api;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
 using TrashLib.Services.Radarr.QualityDefinition;
@@ -32,6 +34,7 @@ internal class RadarrCommand : ServiceCommand
         var log = container.Resolve<ILogger>();
         var customFormatUpdaterFactory = container.Resolve<Func<ICustomFormatUpdater>>();
         var qualityUpdaterFactory = container.Resolve<Func<IRadarrQualityDefinitionUpdater>>();
+        var qualityProfileUpdaterFactory = container.Resolve<Func<IQualityProfileUpdater>>();
         var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
         var guideService = container.Resolve<IRadarrGuideService>();
 
@@ -54,6 +57,10 @@ internal class RadarrCommand : ServiceCommand
             if (config.QualityDefinition != null)
             {
                 await qualityUpdaterFactory().Process(Preview, config);
+            }
+
+            if (config.QualityProfiles.Count > 0) {
+                await qualityProfileUpdaterFactory().Process(Preview, config.QualityProfiles, config.QualityGroups);
             }
 
             if (config.CustomFormats.Count > 0)

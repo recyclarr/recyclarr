@@ -5,10 +5,10 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using TestLibrary.NSubstitute;
-using TrashLib.Services.CustomFormat.Api;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
 using TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
+using TrashLib.Services.QualityProfile.Api;
 using TrashLib.TestLibrary;
 
 namespace TrashLib.Tests.CustomFormat.Processors.PersistenceSteps;

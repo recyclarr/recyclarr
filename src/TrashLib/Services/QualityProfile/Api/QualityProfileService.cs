@@ -3,7 +3,7 @@ using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config.Services;
 
-namespace TrashLib.Services.CustomFormat.Api;
+namespace TrashLib.Services.QualityProfile.Api;
 
 internal class QualityProfileService : IQualityProfileService
 {

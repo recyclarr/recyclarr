@@ -20,6 +20,7 @@ using TrashLib.Config.Services;
 using TrashLib.Repo;
 using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat;
+using TrashLib.Services.QualityProfile;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Sonarr;
 using TrashLib.Startup;
@@ -49,6 +50,7 @@ public class CompositionRoot : ICompositionRoot
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
         builder.RegisterModule<CustomFormatAutofacModule>();
+        builder.RegisterModule<QualityProfileAutofacModule>();
         builder.RegisterModule<GuideServicesAutofacModule>();
 
         // Needed for Autofac.Extras.Ordering
