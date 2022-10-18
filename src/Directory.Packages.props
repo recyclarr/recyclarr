@@ -38,9 +38,9 @@
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="18.3.1" />
-    <PackageVersion Include="Serilog" Version="2.11.0" />
+    <PackageVersion Include="Serilog" Version="2.12.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="6.0.1" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="4.0.1" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
