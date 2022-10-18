@@ -49,7 +49,7 @@
     <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="17.2.3" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.32" />
-    <PackageVersion Include="YamlDotNet" Version="12.0.0" />
+    <PackageVersion Include="YamlDotNet" Version="12.0.2" />
   </ItemGroup>
 
   <!-- Following found during vulerabilities Code Scan  -->
