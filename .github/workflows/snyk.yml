@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Snyk
+
+on:
+  push:
+    paths:
+      - .github/workflows/snyk.yml
+      - "**.cs"
+      - "**.props"
+      - "**.sln"
+      - "**.csproj"
+  pull_request:
+    paths:
+      - .github/workflows/snyk.yml
+      - "**.cs"
+      - "**.props"
+      - "**.sln"
+      - "**.csproj"
+
+jobs:
+  snyk:
+    name: Snyk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Source Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: dotnet restore
+        run: dotnet restore
+
+      # No central package management support?
+      # https://github.com/snyk/snyk-nuget-plugin/issues/103
+      - name: Snyk Test
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            -d
+            --file=Recyclarr.sln
+            --sarif-file-output=snyk.sarif
+
+      - name: Snyk Monitor
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: >
+            --file=Recyclarr.sln
+
+      - name: Publish to Github CS
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+          category: snyk
