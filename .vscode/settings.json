@@ -1,0 +1,6 @@
+{
+  "dotnet-test-explorer.testProjectPath": "src/**/*Tests.csproj",
+  "files.trimFinalNewlines": true,
+  "files.insertFinalNewline": true,
+  "recyclarr.runtime": "linux-musl-x64"
+}

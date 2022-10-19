@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "radarr.run",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Recyclarr/bin/Debug/net6.0/recyclarr",
+      "args": [
+        "radarr"
+      ],
+      "cwd": "${workspaceFolder}/src/Recyclarr/bin/Debug/net6.0/",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ]
+}
