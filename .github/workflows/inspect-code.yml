@@ -68,7 +68,6 @@ jobs:
         working-directory: src
 
       - name: Check Diff
-        continue-on-error: true
         run: |
           ci/diff_to_errors.sh
           set -o pipefail
@@ -76,6 +75,7 @@ jobs:
 
       - name: Publish Patch File
         uses: actions/upload-artifact@v3
+        if: failure()
         with:
           name: code-cleanup-patch-files
           path: '*.patch'
