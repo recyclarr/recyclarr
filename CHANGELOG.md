@@ -8,8 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-This release contains **BREAKING CHANGES**. See the [Upgrade Guide][breaking3] for required changes
-you need to make.
+This release contains **BREAKING CHANGES**. See the [v3.0 Upgrade Guide][breaking3] for required
+changes you need to make.
+
+### Added
+
+- New `configs` subdirectory. Place your `*.yml` config files here and all of them will be
+  automatically loaded, as if you provided multiple paths to `--config`. The primary purpose of this
+  feature is to support multiple configuration files in Docker. See [the docs][yaml-config]
 
 ### Removed
 
@@ -23,6 +29,7 @@ the executable has been removed.
 - Sonarr: Run validation on Custom Formats configuration, if specified, to check for errors.
 
 [breaking3]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v3.0
+[yaml-config]: https://recyclarr.dev/wiki/file-structure#directory-configs
 
 ## [2.6.1] - 2022-10-15
 

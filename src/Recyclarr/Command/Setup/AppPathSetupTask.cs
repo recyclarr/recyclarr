@@ -22,6 +22,7 @@ public class AppPathSetupTask : IBaseCommandSetupTask
         _paths.RepoDirectory.Create();
         _paths.CacheDirectory.Create();
         _paths.LogDirectory.Create();
+        _paths.ConfigsDirectory.Create();
     }
 
     public void OnFinish()

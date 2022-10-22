@@ -20,4 +20,5 @@ public class AppPaths : IAppPaths
     public IDirectoryInfo LogDirectory => AppDataDirectory.SubDirectory("logs");
     public IDirectoryInfo RepoDirectory => AppDataDirectory.SubDirectory("repo");
     public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDirectory("cache");
+    public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDirectory("configs");
 }

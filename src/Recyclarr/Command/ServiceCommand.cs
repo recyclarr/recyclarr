@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Text;
 using Autofac;
 using CliFx.Attributes;
@@ -69,6 +70,23 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         }
     }
 
+    private static ICollection<string> FindAllConfigFiles(IAppPaths paths)
+    {
+        var configs = new List<string>();
+
+        if (paths.ConfigsDirectory.Exists)
+        {
+            configs.AddRange(paths.ConfigsDirectory.EnumerateFiles("*.yml").Select(x => x.FullName));
+        }
+
+        if (paths.ConfigPath.Exists)
+        {
+            configs.Add(paths.ConfigPath.FullName);
+        }
+
+        return configs;
+    }
+
     public override Task Process(ILifetimeScope container)
     {
         var log = container.Resolve<ILogger>();
@@ -85,8 +103,26 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
 
         if (!Config.Any())
         {
-            Config = new[] {paths.ConfigPath.FullName};
+            Config = FindAllConfigFiles(paths);
         }
+        else
+        {
+            var fs = container.Resolve<IFileSystem>();
+            var split = Config.ToLookup(x => fs.File.Exists(x));
+            foreach (var nonExistentConfig in split[false])
+            {
+                log.Warning("Configuration file does not exist {File}", nonExistentConfig);
+            }
+
+            Config = split[true].ToList();
+        }
+
+        if (Config.Count == 0)
+        {
+            throw new CommandException("No configuration YAML files found");
+        }
+
+        log.Debug("Using config files: {ConfigFiles}", Config);
 
         return Task.CompletedTask;
     }

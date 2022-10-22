@@ -10,4 +10,5 @@ public interface IAppPaths
     IDirectoryInfo LogDirectory { get; }
     IDirectoryInfo RepoDirectory { get; }
     IDirectoryInfo CacheDirectory { get; }
+    IDirectoryInfo ConfigsDirectory { get; }
 }
