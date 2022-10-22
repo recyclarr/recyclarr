@@ -73,7 +73,7 @@ the executable has been removed.
 [CVE-2019-0981]: https://avd.aquasec.com/nvd/cve-2019-0981
 [CVE-2019-0820]: https://avd.aquasec.com/nvd/cve-2019-0820
 [CVE-2019-0657]: https://avd.aquasec.com/nvd/cve-2019-0657
-[Settings Reference]: https://github.com/recyclarr/recyclarr/wiki/Settings-Reference
+[Settings Reference]: https://recyclarr.dev/wiki/reference/settings-reference
 
 ## [2.4.1] - 2022-08-26
 
@@ -155,7 +155,7 @@ the executable has been removed.
 - The `create-config` subcommand now accepts YAML files again (it was taking a directory before,
   which was wrong).
 
-[Docker]: https://github.com/recyclarr/recyclarr/wiki/Docker
+[Docker]: https://recyclarr.dev/wiki/installation/docker
 
 ## [2.1.2] - 2022-05-29
 
@@ -180,7 +180,7 @@ the executable has been removed.
 ### Changed
 
 - The default location for the default YAML file (`recyclarr.yml`) has been changed to the
-  [application data directory](appdata). This is the same location of the `settings.yml` file.
+  [application data directory][appdata]. This is the same location of the `settings.yml` file.
 - Automatic migration has been removed. Instead, the `migrate` subcommand should be used.
 
 ### Deprecated
@@ -196,7 +196,7 @@ the executable has been removed.
   of a straight move. This is designed to fail less in cases such as `recyclarr` directory already
   existing.
 
-[appdata]: https://github.com/recyclarr/recyclarr/wiki/File-Structure
+[appdata]: https://recyclarr.dev/wiki/file-structure
 
 ## [2.0.2] - 2022-05-20
 
@@ -238,9 +238,9 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - [Migration System] that is responsible for performing one-time upgrade tasks as needed.
 
 [#17]: https://github.com/recyclarr/recyclarr/issues/17
-[Upgrade Guide]: https://github.com/recyclarr/recyclarr/wiki/Upgrade-Guide
+[Upgrade Guide]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v2.0
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
-[Migration System]: https://github.com/recyclarr/recyclarr/wiki/Migration-System
+[Migration System]: https://recyclarr.dev/wiki/migration
 
 ## [1.8.2] - 2022-03-06
 
@@ -286,7 +286,7 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - Sometimes the "Requesting and parsing guide markdown" step would appear stuck and fail after
   several minutes. Many changes have been made to try to alleviate this.
 
-[setref]: https://github.com/recyclarr/recyclarr/wiki/Settings-Reference
+[setref]: https://recyclarr.dev/wiki/reference/settings-reference
 [#20]: https://github.com/recyclarr/recyclarr/issues/20
 
 ## [1.6.6] - 2021-10-30
@@ -431,7 +431,7 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 - New configuration for Sonarr release profiles that allows all optional terms to be synced. Look
   for `filter` in the [Configuration Reference] for more details.
 
-[Configuration Reference]: https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
+[Configuration Reference]: https://recyclarr.dev/wiki/reference/config-reference
 
 ## [1.2.0] - 2021-04-19
 
@@ -455,9 +455,7 @@ JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *ar
 
 ## [1.0.0] - 2021-04-14
 
-See the [Python Migration Guide][py-mig] for details on how to update your YAML configuration.
-
-[py-mig]: https://github.com/recyclarr/recyclarr/wiki/Python-Migration-Guide
+See the Python Migration Guide for details on how to update your YAML configuration.
 
 ### Added
 
@@ -509,4 +507,3 @@ See the [Python Migration Guide][py-mig] for details on how to update your YAML 
 [1.2.0]: https://github.com/recyclarr/recyclarr/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/recyclarr/recyclarr/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/recyclarr/recyclarr/compare/v0.1.0...v1.0.0
-[0.1.0]: https://github.com/recyclarr/recyclarr/releases/tag/v0.1.0
