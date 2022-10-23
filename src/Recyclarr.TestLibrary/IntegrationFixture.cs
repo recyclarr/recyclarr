@@ -20,12 +20,10 @@ namespace Recyclarr.TestLibrary;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public abstract class IntegrationFixture : IDisposable
 {
-    private readonly ILifetimeScope _container;
-
     protected IntegrationFixture()
     {
         var compRoot = new CompositionRoot();
-        _container = compRoot.Setup(builder =>
+        ServiceLocator = compRoot.Setup(builder =>
         {
             builder.RegisterInstance(Fs).As<IFileSystem>();
             builder.RegisterInstance(new AppPaths(Fs.CurrentDirectory())).As<IAppPaths>();
@@ -38,7 +36,7 @@ public abstract class IntegrationFixture : IDisposable
             RegisterMockFor<IRepositoryStaticWrapper>(builder);
 
             builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
-        }).Container;
+        });
 
         SetupMetadataJson();
     }
@@ -60,6 +58,7 @@ public abstract class IntegrationFixture : IDisposable
 
     protected MockFileSystem Fs { get; } = new();
     protected FakeInMemoryConsole Console { get; } = new();
+    protected IServiceLocatorProxy ServiceLocator { get; }
 
     private static void RegisterMockFor<T>(ContainerBuilder builder) where T : class
     {
@@ -68,13 +67,13 @@ public abstract class IntegrationFixture : IDisposable
 
     protected T Resolve<T>(Action<ContainerBuilder> customRegistrations) where T : notnull
     {
-        var childScope = _container.BeginLifetimeScope(customRegistrations);
+        var childScope = ServiceLocator.Container.BeginLifetimeScope(customRegistrations);
         return childScope.Resolve<T>();
     }
 
     protected T Resolve<T>() where T : notnull
     {
-        return _container.Resolve<T>();
+        return ServiceLocator.Resolve<T>();
     }
 
     protected virtual void Dispose(bool disposing)
@@ -84,7 +83,7 @@ public abstract class IntegrationFixture : IDisposable
             return;
         }
 
-        _container.Dispose();
+        ServiceLocator.Dispose();
         Console.Dispose();
     }
 
