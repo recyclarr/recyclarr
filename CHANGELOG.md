@@ -18,6 +18,10 @@ you need to make.
 - **BREAKING**: The deprecated feature that still allowed you to keep your `recyclarr.yml` next to
 the executable has been removed.
 
+### Fixed
+
+- Sonarr: Run validation on Custom Formats configuration, if specified, to check for errors.
+
 [breaking3]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v3.0
 
 ## [2.6.1] - 2022-10-15

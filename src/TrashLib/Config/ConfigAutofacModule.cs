@@ -1,6 +1,7 @@
 using System.Reflection;
 using Autofac;
 using FluentValidation;
+using TrashLib.Config.Services;
 using TrashLib.Config.Settings;
 using Module = Autofac.Module;
 
@@ -16,5 +17,6 @@ public class ConfigAutofacModule : Module
 
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
+        builder.RegisterType<ServiceValidationMessages>().As<IServiceValidationMessages>();
     }
 }

@@ -9,35 +9,11 @@ namespace TrashLib.Services.Radarr.Config;
 internal class RadarrConfigurationValidator : AbstractValidator<RadarrConfiguration>
 {
     public RadarrConfigurationValidator(
-        IRadarrValidationMessages messages,
-        IValidator<QualityDefinitionConfig> qualityDefinitionConfigValidator,
-        IValidator<CustomFormatConfig> customFormatConfigValidator)
+        IValidator<ServiceConfiguration> serviceConfigValidator,
+        IValidator<QualityDefinitionConfig> qualityDefinitionConfigValidator)
     {
-        RuleFor(x => x.BaseUrl).NotEmpty().WithMessage(messages.BaseUrl);
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage(messages.ApiKey);
+        Include(serviceConfigValidator);
         RuleFor(x => x.QualityDefinition).SetNonNullableValidator(qualityDefinitionConfigValidator);
-        RuleForEach(x => x.CustomFormats).SetValidator(customFormatConfigValidator);
-    }
-}
-
-[UsedImplicitly]
-internal class CustomFormatConfigValidator : AbstractValidator<CustomFormatConfig>
-{
-    public CustomFormatConfigValidator(
-        IRadarrValidationMessages messages,
-        IValidator<QualityProfileScoreConfig> qualityProfileScoreConfigValidator)
-    {
-        RuleFor(x => x.TrashIds).NotEmpty().WithMessage(messages.CustomFormatTrashIds);
-        RuleForEach(x => x.QualityProfiles).SetValidator(qualityProfileScoreConfigValidator);
-    }
-}
-
-[UsedImplicitly]
-internal class QualityProfileScoreConfigValidator : AbstractValidator<QualityProfileScoreConfig>
-{
-    public QualityProfileScoreConfigValidator(IRadarrValidationMessages messages)
-    {
-        RuleFor(x => x.Name).NotEmpty().WithMessage(messages.QualityProfileName);
     }
 }
 

@@ -1,30 +1,17 @@
 using System.Collections.ObjectModel;
-using Autofac;
 using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
-using TrashLib.Config;
+using Recyclarr.TestLibrary;
 using TrashLib.Config.Services;
-using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
 
 namespace TrashLib.Tests.Radarr;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class RadarrConfigurationTest
+public class RadarrConfigurationTest : IntegrationFixture
 {
-    private IContainer _container = default!;
-
-    [OneTimeSetUp]
-    public void Setup()
-    {
-        var builder = new ContainerBuilder();
-        builder.RegisterModule<ConfigAutofacModule>();
-        builder.RegisterModule<RadarrAutofacModule>();
-        _container = builder.Build();
-    }
-
     [Test]
     public void Custom_format_is_valid_with_trash_id()
     {
@@ -38,7 +25,7 @@ public class RadarrConfigurationTest
             }
         };
 
-        var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
         var result = validator.Validate(config);
 
         result.IsValid.Should().BeTrue();
@@ -50,7 +37,7 @@ public class RadarrConfigurationTest
     {
         // default construct which should yield default values (invalid) for all required properties
         var config = new RadarrConfiguration();
-        var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
 
         var result = validator.Validate(config);
 
@@ -92,7 +79,7 @@ public class RadarrConfigurationTest
             }
         };
 
-        var validator = _container.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
         var result = validator.Validate(config);
 
         result.IsValid.Should().BeTrue();

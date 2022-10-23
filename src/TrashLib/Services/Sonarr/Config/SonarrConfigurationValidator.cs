@@ -1,5 +1,6 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using TrashLib.Config.Services;
 
 namespace TrashLib.Services.Sonarr.Config;
 
@@ -8,10 +9,10 @@ internal class SonarrConfigurationValidator : AbstractValidator<SonarrConfigurat
 {
     public SonarrConfigurationValidator(
         ISonarrValidationMessages messages,
+        IValidator<ServiceConfiguration> serviceConfigValidator,
         IValidator<ReleaseProfileConfig> releaseProfileConfigValidator)
     {
-        RuleFor(x => x.BaseUrl).NotEmpty().WithMessage(messages.BaseUrl);
-        RuleFor(x => x.ApiKey).NotEmpty().WithMessage(messages.ApiKey);
+        Include(serviceConfigValidator);
         RuleForEach(x => x.ReleaseProfiles).SetValidator(releaseProfileConfigValidator);
     }
 }
