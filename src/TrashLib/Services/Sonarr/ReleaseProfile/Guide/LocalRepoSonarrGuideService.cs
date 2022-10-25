@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Common;
 using Common.Extensions;
 using MoreLinq;
 using Newtonsoft.Json;
@@ -47,8 +48,7 @@ public class LocalRepoSonarrGuideService : ISonarrGuideService
     {
         var converter = new TermDataConverter();
         var paths = _pathsFactory.Create();
-        var tasks = paths.SonarrReleaseProfilePaths
-            .SelectMany(x => x.GetFiles("*.json"))
+        var tasks = JsonUtils.GetJsonFilesInDirectories(paths.SonarrReleaseProfilePaths, _log)
             .Select(x => LoadAndParseFile(x, converter));
 
         var data = Task.WhenAll(tasks).Result

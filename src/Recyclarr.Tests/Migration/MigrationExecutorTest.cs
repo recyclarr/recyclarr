@@ -16,7 +16,7 @@ public class MigrationExecutorTest
     [Test]
     public void Migration_steps_are_in_expected_order()
     {
-        var container = new CompositionRoot().Setup(builder =>
+        var container = CompositionRoot.Setup(builder =>
         {
             builder.RegisterInstance(Substitute.For<IAppPaths>());
         });

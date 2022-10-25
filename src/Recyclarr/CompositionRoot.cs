@@ -24,14 +24,14 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr;
 
-public class CompositionRoot : ICompositionRoot
+public static class CompositionRoot
 {
-    public IServiceLocatorProxy Setup(Action<ContainerBuilder>? extraRegistrations = null)
+    public static ILifetimeScope Setup(Action<ContainerBuilder>? extraRegistrations = null)
     {
         return Setup(new ContainerBuilder(), extraRegistrations);
     }
 
-    private IServiceLocatorProxy Setup(ContainerBuilder builder, Action<ContainerBuilder>? extraRegistrations = null)
+    private static ILifetimeScope Setup(ContainerBuilder builder, Action<ContainerBuilder>? extraRegistrations = null)
     {
         RegisterAppPaths(builder);
         RegisterLogger(builder);
@@ -59,7 +59,7 @@ public class CompositionRoot : ICompositionRoot
 
         extraRegistrations?.Invoke(builder);
 
-        return new ServiceLocatorProxy(builder.Build());
+        return builder.Build();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)

@@ -28,7 +28,7 @@ internal class RadarrCommand : ServiceCommand
 
     public override string Name => "Radarr";
 
-    public override async Task Process(IServiceLocatorProxy container)
+    public override async Task Process(ILifetimeScope container)
     {
         await base.Process(container);
 
@@ -51,7 +51,7 @@ internal class RadarrCommand : ServiceCommand
 
         foreach (var config in configLoader.LoadMany(Config, "radarr"))
         {
-            await using var scope = container.Container.BeginLifetimeScope(builder =>
+            await using var scope = container.BeginLifetimeScope(builder =>
             {
                 builder.RegisterInstance(config).As<IServiceConfiguration>();
             });

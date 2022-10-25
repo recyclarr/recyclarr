@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using Common;
@@ -18,7 +19,7 @@ public class CreateConfigCommand : BaseCommand
         "directory")]
     public override string? AppDataDirectory { get; set; }
 
-    public override async Task Process(IServiceLocatorProxy container)
+    public override async Task Process(ILifetimeScope container)
     {
         var fs = container.Resolve<IFileSystem>();
         var paths = container.Resolve<IAppPaths>();

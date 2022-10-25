@@ -1,3 +1,4 @@
+using Autofac;
 using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
@@ -22,7 +23,7 @@ public class SonarrConfigurationTest : IntegrationFixture
             ReleaseProfiles = new[] {new ReleaseProfileConfig()}
         };
 
-        var validator = ServiceLocator.Resolve<IValidator<SonarrConfiguration>>();
+        var validator = Container.Resolve<IValidator<SonarrConfiguration>>();
 
         var result = validator.Validate(config);
 
@@ -50,7 +51,7 @@ public class SonarrConfigurationTest : IntegrationFixture
             }
         };
 
-        var validator = ServiceLocator.Resolve<IValidator<SonarrConfiguration>>();
+        var validator = Container.Resolve<IValidator<SonarrConfiguration>>();
         var result = validator.Validate(config);
 
         result.IsValid.Should().BeTrue();

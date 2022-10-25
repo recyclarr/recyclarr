@@ -43,7 +43,7 @@ public class CompositionRootTest
     {
         var act = () =>
         {
-            using var container = new CompositionRoot().Setup().Container;
+            using var container = CompositionRoot.Setup();
             service.Instantiate(container);
         };
 
@@ -61,7 +61,7 @@ public class CompositionRootTest
 
         public ConcreteTypeEnumerator()
         {
-            _container = new CompositionRoot().Setup().Container;
+            _container = CompositionRoot.Setup();
         }
 
         public IEnumerator GetEnumerator()
@@ -91,7 +91,7 @@ public class CompositionRootTest
     [TestCaseSource(typeof(ConcreteTypeEnumerator))]
     public void Service_should_be_instantiable(Type service)
     {
-        using var container = new CompositionRoot().Setup(RegisterAdditionalServices).Container;
+        using var container = CompositionRoot.Setup(RegisterAdditionalServices);
         container.Resolve(service).Should().NotBeNull();
     }
 }

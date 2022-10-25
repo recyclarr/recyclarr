@@ -1,3 +1,4 @@
+using Autofac;
 using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
@@ -16,7 +17,7 @@ public class ServiceConfigurationTest : IntegrationFixture
         // default construct which should yield default values (invalid) for all required properties
         var config = new ServiceConfiguration();
 
-        var validator = ServiceLocator.Resolve<IValidator<ServiceConfiguration>>();
+        var validator = Container.Resolve<IValidator<ServiceConfiguration>>();
 
         var result = validator.Validate(config);
 
@@ -45,7 +46,7 @@ public class ServiceConfigurationTest : IntegrationFixture
             }
         };
 
-        var validator = ServiceLocator.Resolve<IValidator<ServiceConfiguration>>();
+        var validator = Container.Resolve<IValidator<ServiceConfiguration>>();
 
         var result = validator.Validate(config);
 

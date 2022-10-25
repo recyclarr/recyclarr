@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Common;
 using Common.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -17,8 +18,7 @@ internal class QualityGuideParser<T> where T : class
 
     public ICollection<T> GetQualities(IEnumerable<IDirectoryInfo> jsonDirectories)
     {
-        return jsonDirectories
-            .SelectMany(x => x.GetFiles("*.json"))
+        return JsonUtils.GetJsonFilesInDirectories(jsonDirectories, _log)
             .Select(ParseQuality)
             .NotNull()
             .ToList();

@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
 using FluentAssertions;
@@ -10,7 +11,6 @@ using TestLibrary.AutoFixture;
 using TrashLib.Repo;
 using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
-using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr.ReleaseProfile.Guide;
 
@@ -21,7 +21,6 @@ public class LocalRepoSonarrGuideServiceTest
     [Test, AutoMockData]
     public void Get_custom_format_json_works(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
         [Frozen] IRepoPaths repoPaths,
         LocalRepoSonarrGuideService sut)
     {
@@ -40,11 +39,8 @@ public class LocalRepoSonarrGuideServiceTest
 
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");
-
-        var baseDir = appPaths.RepoDirectory
-            .SubDirectory("docs")
-            .SubDirectory("json")
-            .SubDirectory("sonarr");
+        var baseDir = fs.CurrentDirectory().SubDirectory("files");
+        baseDir.Create();
 
         fs.AddFile(baseDir.File("first.json").FullName, MockFileData(mockData1));
         fs.AddFile(baseDir.File("second.json").FullName, MockFileData(mockData2));
@@ -63,14 +59,11 @@ public class LocalRepoSonarrGuideServiceTest
     [Test, AutoMockData]
     public void Json_exceptions_do_not_interrupt_parsing_other_files(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IAppPaths appPaths,
         [Frozen] IRepoPaths repoPaths,
         LocalRepoSonarrGuideService sut)
     {
-        var rootPath = appPaths.RepoDirectory
-            .SubDirectory("docs")
-            .SubDirectory("json")
-            .SubDirectory("sonarr");
+        var rootPath = fs.CurrentDirectory().SubDirectory("files");
+        rootPath.Create();
 
         var badData = "# comment";
         var goodData = new ReleaseProfileData

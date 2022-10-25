@@ -69,7 +69,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         }
     }
 
-    public override Task Process(IServiceLocatorProxy container)
+    public override Task Process(ILifetimeScope container)
     {
         var log = container.Resolve<ILogger>();
         var settingsProvider = container.Resolve<ISettingsProvider>();

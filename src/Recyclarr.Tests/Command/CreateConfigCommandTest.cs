@@ -1,58 +1,43 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using CliFx.Infrastructure;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
-using TestLibrary.AutoFixture;
-using TrashLib.TestLibrary;
+using Recyclarr.TestLibrary;
 
 // ReSharper disable MethodHasAsyncOverload
 
 namespace Recyclarr.Tests.Command;
 
 [TestFixture]
-// Cannot be parallelized due to static CompositionRoot property
-public class CreateConfigCommandTest
+[Parallelizable(ParallelScope.All)]
+public class CreateConfigCommandTest : IntegrationFixture
 {
-    [Test, AutoMockData]
-    public async Task Config_file_created_when_using_default_path(
-        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        IServiceLocatorProxy container,
-        ICompositionRoot compositionRoot,
-        CreateConfigCommand sut)
+    [Test]
+    public async Task Config_file_created_when_using_default_path()
     {
-        BaseCommand.CompositionRoot = compositionRoot;
+        var sut = new CreateConfigCommand();
 
-        await sut.Process(container);
+        await sut.Process(Container);
 
-        var file = fs.GetFile(paths.ConfigPath.FullName);
+        var file = Fs.GetFile(Paths.ConfigPath.FullName);
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }
 
-    [Test, AutoMockData]
-    public async Task Config_file_created_when_using_user_specified_path(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
-        ICompositionRoot compositionRoot,
-        CreateConfigCommand sut)
+    [Test]
+    public async Task Config_file_created_when_using_user_specified_path()
     {
-        BaseCommand.CompositionRoot = compositionRoot;
-
-        var ymlPath = fs.CurrentDirectory()
+        var sut = new CreateConfigCommand();
+        var ymlPath = Fs.CurrentDirectory()
             .SubDirectory("user")
             .SubDirectory("specified")
             .File("file.yml").FullName;
 
         sut.AppDataDirectory = ymlPath;
-        await sut.ExecuteAsync(Substitute.For<IConsole>());
+        await sut.Process(Container);
 
-        var file = fs.GetFile(ymlPath);
+        var file = Fs.GetFile(ymlPath);
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }

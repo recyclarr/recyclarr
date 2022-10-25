@@ -1,4 +1,5 @@
 using System.Text;
+using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using JetBrains.Annotations;
@@ -15,7 +16,7 @@ public class MigrateCommand : BaseCommand
         "Mainly for usage in Docker; not recommended for normal use.")]
     public override string? AppDataDirectory { get; set; }
 
-    public override Task Process(IServiceLocatorProxy container)
+    public override Task Process(ILifetimeScope container)
     {
         var migration = container.Resolve<IMigrationExecutor>();
 

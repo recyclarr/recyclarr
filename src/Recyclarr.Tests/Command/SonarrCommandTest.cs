@@ -1,18 +1,19 @@
-using AutoFixture.NUnit3;
+using System.IO.Abstractions;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
+using Common.TestLibrary;
 using FluentAssertions;
-using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
+using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
-using TrashLib.Services.Sonarr;
+using TrashLib.Repo;
 
 namespace Recyclarr.Tests.Command;
 
 [TestFixture]
-// Cannot be parallelized due to static CompositionRoot property
-public class SonarrCommandTest
+[Parallelizable(ParallelScope.All)]
+public class SonarrCommandTest : IntegrationFixture
 {
     [Test, AutoMockData]
     public async Task List_terms_without_value_fails(
@@ -24,7 +25,7 @@ public class SonarrCommandTest
         // When `--list-terms` is specified on the command line without a value, it gets a `null` value assigned.
         sut.ListTerms = null;
 
-        var act = async () => await sut.ExecuteAsync(console);
+        var act = async () => await sut.Process(Container);
 
         await act.Should().ThrowAsync<CommandException>();
     }
@@ -39,42 +40,40 @@ public class SonarrCommandTest
         // If the user specifies a blank string as the value, it should still fail.
         sut.ListTerms = "";
 
-        var act = async () => await sut.ExecuteAsync(console);
+        var act = async () => await sut.Process(Container);
 
         await act.Should().ThrowAsync<CommandException>();
     }
 
-    [Test, AutoMockData]
-    public async Task List_terms_uses_specified_trash_id(
-        [Frozen] ISonarrGuideDataLister lister,
-        IConsole console,
-        ICompositionRoot compositionRoot,
-        SonarrCommand sut)
+    [Test]
+    public async Task List_terms_uses_specified_trash_id()
     {
-        BaseCommand.CompositionRoot = compositionRoot;
-        sut.ListReleaseProfiles = false;
+        var repoPaths = Resolve<IRepoPathsFactory>().Create();
+        var cfDir = repoPaths.SonarrReleaseProfilePaths.First();
+        Fs.AddFileFromResource(cfDir.File("optionals.json"), "optionals.json");
 
-        sut.ListTerms = "some_id";
+        var sut = new SonarrCommand
+        {
+            ListReleaseProfiles = false,
+            ListTerms = "76e060895c5b8a765c310933da0a5357"
+        };
 
-        await sut.ExecuteAsync(console);
+        await sut.Process(Container);
 
-        lister.Received().ListTerms("some_id");
+        Console.ReadOutputString().Should().Contain("List of Terms");
     }
 
-    [Test, AutoMockData]
-    public async Task List_release_profiles_is_invoked(
-        [Frozen] ISonarrGuideDataLister lister,
-        IConsole console,
-        ICompositionRoot compositionRoot,
-        SonarrCommand sut)
+    [Test]
+    public async Task List_release_profiles_is_invoked()
     {
-        BaseCommand.CompositionRoot = compositionRoot;
+        var sut = new SonarrCommand
+        {
+            ListReleaseProfiles = true,
+            ListTerms = null
+        };
 
-        sut.ListReleaseProfiles = true;
-        sut.ListTerms = null;
+        await sut.Process(Container);
 
-        await sut.ExecuteAsync(console);
-
-        lister.Received().ListReleaseProfiles();
+        Console.ReadOutputString().Should().Contain("List of Release Profiles");
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Autofac;
 using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
@@ -25,7 +26,7 @@ public class RadarrConfigurationTest : IntegrationFixture
             }
         };
 
-        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = Container.Resolve<IValidator<RadarrConfiguration>>();
         var result = validator.Validate(config);
 
         result.IsValid.Should().BeTrue();
@@ -37,7 +38,7 @@ public class RadarrConfigurationTest : IntegrationFixture
     {
         // default construct which should yield default values (invalid) for all required properties
         var config = new RadarrConfiguration();
-        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = Container.Resolve<IValidator<RadarrConfiguration>>();
 
         var result = validator.Validate(config);
 
@@ -79,7 +80,7 @@ public class RadarrConfigurationTest : IntegrationFixture
             }
         };
 
-        var validator = ServiceLocator.Resolve<IValidator<RadarrConfiguration>>();
+        var validator = Container.Resolve<IValidator<RadarrConfiguration>>();
         var result = validator.Validate(config);
 
         result.IsValid.Should().BeTrue();

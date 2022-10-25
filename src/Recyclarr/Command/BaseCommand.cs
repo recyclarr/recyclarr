@@ -1,7 +1,6 @@
 using Autofac;
 using CliFx;
 using CliFx.Attributes;
-using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using MoreLinq.Extensions;
@@ -23,8 +22,6 @@ public abstract class BaseCommand : ICommand
         "Display additional logs useful for development/debug purposes.")]
     public bool Debug { get; [UsedImplicitly] set; } = false;
 
-    public static ICompositionRoot? CompositionRoot { get; set; }
-
     protected virtual void RegisterServices(ContainerBuilder builder)
     {
     }
@@ -34,12 +31,7 @@ public abstract class BaseCommand : ICommand
         // Must happen first because everything can use the logger.
         var logLevel = Debug ? LogEventLevel.Debug : LogEventLevel.Information;
 
-        if (CompositionRoot is null)
-        {
-            throw new CommandException("CompositionRoot must not be null");
-        }
-
-        using var container = CompositionRoot.Setup(builder =>
+        await using var container = CompositionRoot.Setup(builder =>
         {
             builder.RegisterInstance(console).As<IConsole>().ExternallyOwned();
 
@@ -67,5 +59,5 @@ public abstract class BaseCommand : ICommand
         }
     }
 
-    public abstract Task Process(IServiceLocatorProxy container);
+    public abstract Task Process(ILifetimeScope container);
 }

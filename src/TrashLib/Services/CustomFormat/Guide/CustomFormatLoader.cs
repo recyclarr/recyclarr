@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using Common;
 using Common.Extensions;
 using Newtonsoft.Json;
 using Serilog;
@@ -26,7 +27,7 @@ public class CustomFormatLoader : ICustomFormatLoader
         IFileInfo collectionOfCustomFormats)
     {
         var categories = _categoryParser.Parse(collectionOfCustomFormats).AsReadOnly();
-        var jsonFiles = jsonPaths.SelectMany(x => x.GetFiles("*.json"));
+        var jsonFiles = JsonUtils.GetJsonFilesInDirectories(jsonPaths, _log);
         return jsonFiles.ToObservable()
             .Select(x => Observable.Defer(() => LoadJsonFromFile(x, categories)))
             .Merge(8)

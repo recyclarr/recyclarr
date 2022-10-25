@@ -8,6 +8,8 @@ public class RepoPathsFactory : IRepoPathsFactory
     private readonly IAppPaths _paths;
     private readonly Lazy<RepoMetadata> _metadata;
 
+    public RepoMetadata Metadata => _metadata.Value;
+
     public RepoPathsFactory(IRepoMetadataParser parser, IAppPaths paths)
     {
         _paths = paths;
@@ -18,7 +20,6 @@ public class RepoPathsFactory : IRepoPathsFactory
     {
         return listOfDirectories
             .Select(x => _paths.RepoDirectory.SubDirectory(x))
-            .Where(x => x.Exists)
             .ToList();
     }
 
