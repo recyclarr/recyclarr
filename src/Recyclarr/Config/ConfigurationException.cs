@@ -41,6 +41,8 @@ public class ConfigurationException : Exception
         const string delim = "\n   - ";
         var builder = new StringBuilder(
             $"An exception occurred while deserializing type '{DeserializableType}' for YML property '{PropertyName}'");
+
+        // ReSharper disable once InvertIf
         if (ErrorMessages.Count > 0)
         {
             builder.Append(":" + delim);

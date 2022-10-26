@@ -16,15 +16,17 @@ namespace Recyclarr.Command;
 [UsedImplicitly]
 internal class RadarrCommand : ServiceCommand
 {
+    // ReSharper disable MemberCanBePrivate.Global
+
     [CommandOption("list-custom-formats", Description =
         "List available custom formats from the guide in YAML format.")]
-    // ReSharper disable once MemberCanBePrivate.Global
     public bool ListCustomFormats { get; [UsedImplicitly] set; }
 
     [CommandOption("list-qualities", Description =
         "List available quality definition types from the guide.")]
-    // ReSharper disable once MemberCanBePrivate.Global
     public bool ListQualities { get; [UsedImplicitly] set; }
+
+    // ReSharper restore MemberCanBePrivate.Global
 
     public override string Name => "Radarr";
 
@@ -59,6 +61,8 @@ internal class RadarrCommand : ServiceCommand
 
             log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
 
+            // ReSharper disable InvertIf
+
             if (config.QualityDefinition != null)
             {
                 var updater = scope.Resolve<IRadarrQualityDefinitionUpdater>();
@@ -70,6 +74,8 @@ internal class RadarrCommand : ServiceCommand
                 var updater = scope.Resolve<ICustomFormatUpdater>();
                 await updater.Process(Preview, config.CustomFormats, guideService);
             }
+
+            // ReSharper restore InvertIf
         }
     }
 }

@@ -103,6 +103,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
             settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
             FlurlLogging.SetupLogging(settings, log);
 
+            // ReSharper disable once InvertIf
             if (!settingsProvider.Settings.EnableSslCertificateValidation)
             {
                 log.Warning(

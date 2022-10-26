@@ -19,6 +19,8 @@ namespace Recyclarr.Command;
 [UsedImplicitly]
 public class SonarrCommand : ServiceCommand
 {
+    // ReSharper disable MemberCanBePrivate.Global
+
     [CommandOption("list-release-profiles", Description =
         "List available release profiles from the guide in YAML format.")]
     public bool ListReleaseProfiles { get; [UsedImplicitly] set; }
@@ -32,13 +34,13 @@ public class SonarrCommand : ServiceCommand
 
     [CommandOption("list-qualities", Description =
         "List available quality definition types from the guide.")]
-    // ReSharper disable once MemberCanBeProtected.Global
     public bool ListQualities { get; [UsedImplicitly] set; }
 
     [CommandOption("list-custom-formats", Description =
         "List available custom formats from the guide in YAML format.")]
-    // ReSharper disable once MemberCanBeProtected.Global
     public bool ListCustomFormats { get; [UsedImplicitly] set; }
+
+    // ReSharper restore MemberCanBePrivate.Global
 
     public override string Name => "Sonarr";
 
@@ -97,6 +99,8 @@ public class SonarrCommand : ServiceCommand
             var versionEnforcement = scope.Resolve<ISonarrVersionEnforcement>();
             await versionEnforcement.DoVersionEnforcement(config);
 
+            // ReSharper disable InvertIf
+
             if (config.ReleaseProfiles.Count > 0)
             {
                 var updater = scope.Resolve<IReleaseProfileUpdater>();
@@ -114,6 +118,8 @@ public class SonarrCommand : ServiceCommand
                 var updater = scope.Resolve<ICustomFormatUpdater>();
                 await updater.Process(Preview, config.CustomFormats, guideService);
             }
+
+            // ReSharper restore InvertIf
         }
     }
 }

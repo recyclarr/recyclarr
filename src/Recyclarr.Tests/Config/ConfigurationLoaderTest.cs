@@ -125,7 +125,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
             Errors = {new ValidationFailure("PropertyName", "Test Validation Failure")}
         });
 
-        var testYml = @"
+        const string testYml = @"
 fubar:
 - api_key: abc
 ";
@@ -137,7 +137,7 @@ fubar:
     [Test, AutoMockData]
     public void Validation_success_does_not_throw(ConfigurationLoader<TestConfig> configLoader)
     {
-        var testYml = @"
+        const string testYml = @"
 fubar:
 - api_key: abc
 ";

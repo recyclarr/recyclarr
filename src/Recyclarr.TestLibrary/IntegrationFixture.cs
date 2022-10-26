@@ -45,6 +45,8 @@ public abstract class IntegrationFixture : IDisposable
         SetupMetadataJson();
     }
 
+    // ReSharper disable once VirtualMemberNeverOverridden.Global
+    // ReSharper disable once UnusedParameter.Global
     protected virtual void RegisterExtraTypes(ContainerBuilder builder)
     {
     }
@@ -63,17 +65,22 @@ public abstract class IntegrationFixture : IDisposable
         Fs.AddFileFromResource(metadataFile, "metadata.json");
     }
 
+    // ReSharper disable MemberCanBePrivate.Global
+
     protected MockFileSystem Fs { get; } = new();
     protected FakeInMemoryConsole Console { get; } = new();
     protected ILifetimeScope Container { get; }
     protected IAppPaths Paths { get; }
     protected ILogger Logger { get; }
 
+    // ReSharper restore MemberCanBePrivate.Global
+
     private static void RegisterMockFor<T>(ContainerBuilder builder) where T : class
     {
         builder.RegisterInstance(Substitute.For<T>()).As<T>();
     }
 
+    // ReSharper disable once UnusedMember.Global
     protected T Resolve<T>(Action<ContainerBuilder> customRegistrations) where T : notnull
     {
         var childScope = Container.BeginLifetimeScope(customRegistrations);
@@ -85,6 +92,7 @@ public abstract class IntegrationFixture : IDisposable
         return Container.Resolve<T>();
     }
 
+    // ReSharper disable once VirtualMemberNeverOverridden.Global
     protected virtual void Dispose(bool disposing)
     {
         if (!disposing)

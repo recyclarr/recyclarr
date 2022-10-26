@@ -20,6 +20,7 @@ public abstract class BaseCommand : ICommand
 
     [CommandOption("debug", 'd', Description =
         "Display additional logs useful for development/debug purposes.")]
+    // ReSharper disable once MemberCanBeProtected.Global
     public bool Debug { get; [UsedImplicitly] set; } = false;
 
     protected virtual void RegisterServices(ContainerBuilder builder)
