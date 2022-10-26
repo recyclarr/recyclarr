@@ -34,7 +34,6 @@ internal class RadarrCommand : ServiceCommand
 
         var lister = container.Resolve<IRadarrGuideDataLister>();
         var log = container.Resolve<ILogger>();
-        var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
         var guideService = container.Resolve<IRadarrGuideService>();
 
         if (ListCustomFormats)
@@ -49,7 +48,9 @@ internal class RadarrCommand : ServiceCommand
             return;
         }
 
-        foreach (var config in configLoader.LoadMany(Config, "radarr"))
+        var configFinder = container.Resolve<IConfigurationFinder>();
+        var configLoader = container.Resolve<IConfigurationLoader<RadarrConfiguration>>();
+        foreach (var config in configLoader.LoadMany(configFinder.GetConfigFiles(Config), "radarr"))
         {
             await using var scope = container.BeginLifetimeScope(builder =>
             {

@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.Text;
 using Autofac;
 using CliFx.Attributes;
@@ -14,7 +13,6 @@ using Serilog;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
-using TrashLib.Startup;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Command;
@@ -30,7 +28,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         "One or more YAML config files to use. All configs will be used and settings are additive. " +
         "If not specified, the script will look for `recyclarr.yml` in the same directory as the executable.")]
     // ReSharper disable once MemberCanBeProtected.Global
-    public ICollection<string> Config { get; [UsedImplicitly] set; } = new List<string>();
+    public IReadOnlyCollection<string> Config { get; [UsedImplicitly] set; } = new List<string>();
 
     [CommandOption("app-data", Description =
         "Explicitly specify the location of the recyclarr application data directory. " +
@@ -70,29 +68,11 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         }
     }
 
-    private static ICollection<string> FindAllConfigFiles(IAppPaths paths)
-    {
-        var configs = new List<string>();
-
-        if (paths.ConfigsDirectory.Exists)
-        {
-            configs.AddRange(paths.ConfigsDirectory.EnumerateFiles("*.yml").Select(x => x.FullName));
-        }
-
-        if (paths.ConfigPath.Exists)
-        {
-            configs.Add(paths.ConfigPath.FullName);
-        }
-
-        return configs;
-    }
-
     public override Task Process(ILifetimeScope container)
     {
         var log = container.Resolve<ILogger>();
         var settingsProvider = container.Resolve<ISettingsProvider>();
         var repoUpdater = container.Resolve<IRepoUpdater>();
-        var paths = container.Resolve<IAppPaths>();
         var migration = container.Resolve<IMigrationExecutor>();
 
         // Will throw if migration is required, otherwise just a warning is issued.
@@ -100,29 +80,6 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
 
         SetupHttp(log, settingsProvider);
         repoUpdater.UpdateRepo();
-
-        if (!Config.Any())
-        {
-            Config = FindAllConfigFiles(paths);
-        }
-        else
-        {
-            var fs = container.Resolve<IFileSystem>();
-            var split = Config.ToLookup(x => fs.File.Exists(x));
-            foreach (var nonExistentConfig in split[false])
-            {
-                log.Warning("Configuration file does not exist {File}", nonExistentConfig);
-            }
-
-            Config = split[true].ToList();
-        }
-
-        if (Config.Count == 0)
-        {
-            throw new CommandException("No configuration YAML files found");
-        }
-
-        log.Debug("Using config files: {ConfigFiles}", Config);
 
         return Task.CompletedTask;
     }

@@ -37,10 +37,16 @@ public abstract class IntegrationFixture : IDisposable
             RegisterMockFor<IGitRepositoryFactory>(builder);
             RegisterMockFor<IRepositoryStaticWrapper>(builder);
 
+            RegisterExtraTypes(builder);
+
             builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
         });
 
         SetupMetadataJson();
+    }
+
+    protected virtual void RegisterExtraTypes(ContainerBuilder builder)
+    {
     }
 
     private static ILogger CreateLogger()

@@ -47,7 +47,6 @@ public class SonarrCommand : ServiceCommand
         await base.Process(container);
 
         var lister = container.Resolve<ISonarrGuideDataLister>();
-        var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
         var log = container.Resolve<ILogger>();
         var guideService = container.Resolve<ISonarrGuideService>();
 
@@ -84,7 +83,9 @@ public class SonarrCommand : ServiceCommand
             return;
         }
 
-        foreach (var config in configLoader.LoadMany(Config, "sonarr"))
+        var configFinder = container.Resolve<IConfigurationFinder>();
+        var configLoader = container.Resolve<IConfigurationLoader<SonarrConfiguration>>();
+        foreach (var config in configLoader.LoadMany(configFinder.GetConfigFiles(Config), "sonarr"))
         {
             await using var scope = container.BeginLifetimeScope(builder =>
             {

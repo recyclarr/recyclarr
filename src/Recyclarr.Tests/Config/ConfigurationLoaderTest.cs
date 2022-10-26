@@ -18,7 +18,7 @@ using TestLibrary.AutoFixture;
 using TrashLib.Config.Services;
 using TrashLib.Services.Sonarr.Config;
 
-namespace Recyclarr.Tests.Config.Services;
+namespace Recyclarr.Tests.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

@@ -81,6 +81,7 @@ public static class CompositionRoot
         builder.RegisterModule<ConfigAutofacModule>();
 
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
+        builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())
