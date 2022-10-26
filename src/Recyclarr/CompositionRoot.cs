@@ -21,6 +21,7 @@ using TrashLib.Services.Sonarr;
 using TrashLib.Startup;
 using VersionControl;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.ObjectFactories;
 
 namespace Recyclarr;
 
@@ -79,7 +80,7 @@ public static class CompositionRoot
     {
         builder.RegisterModule<ConfigAutofacModule>();
 
-        builder.RegisterType<ObjectFactory>().As<IObjectFactory>();
+        builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())

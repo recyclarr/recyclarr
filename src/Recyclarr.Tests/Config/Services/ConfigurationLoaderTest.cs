@@ -1,7 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text;
-using Autofac;
 using AutoFixture.NUnit3;
 using Common;
 using Common.Extensions;
@@ -12,32 +13,21 @@ using JetBrains.Annotations;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Config;
-using TestLibrary;
+using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
-using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Services.Sonarr.Config;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.ObjectFactories;
 
 namespace Recyclarr.Tests.Config.Services;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigurationLoaderTest
+public class ConfigurationLoaderTest : IntegrationFixture
 {
     private static TextReader GetResourceData(string file)
     {
         var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
         return new StringReader(testData.ReadData(file));
-    }
-
-    private static IContainer BuildContainer()
-    {
-        var builder = new ContainerBuilder();
-        builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
-        builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
-        return builder.Build();
     }
 
     [UsedImplicitly]
@@ -53,26 +43,28 @@ public class ConfigurationLoaderTest
         public bool DeleteOldCustomFormats => false;
     }
 
-    [Test, AutoMockData(typeof(ConfigurationLoaderTest), nameof(BuildContainer))]
-    public void Load_many_iterations_of_config(
-        [Frozen] IFileSystem fs,
-        ConfigurationLoader<SonarrConfiguration> loader)
+    [Test]
+    public void Load_many_iterations_of_config()
     {
-        static StreamReader MockYaml(params object[] args)
+        static string MockYaml(params object[] args)
         {
             var str = new StringBuilder("sonarr:");
             const string templateYaml = "\n  - base_url: {0}\n    api_key: abc";
             str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p)));
-            return StreamBuilder.FromString(str.ToString());
+            return str.ToString();
         }
 
-        fs.File.OpenText(Arg.Any<string>()).Returns(MockYaml(1, 2), MockYaml(3));
-
-        var fakeFiles = new List<string>
+        var baseDir = Fs.CurrentDirectory();
+        var fileData = new (string, string)[]
         {
-            "config1.yml",
-            "config2.yml"
+            (baseDir.File("config1.yml").FullName, MockYaml(1, 2)),
+            (baseDir.File("config2.yml").FullName, MockYaml(3))
         };
+
+        foreach (var (file, data) in fileData)
+        {
+            Fs.AddFile(file, new MockFileData(data));
+        }
 
         var expected = new List<SonarrConfiguration>
         {
@@ -81,44 +73,45 @@ public class ConfigurationLoaderTest
             new() {ApiKey = "abc", BaseUrl = "3"}
         };
 
-        var actual = loader.LoadMany(fakeFiles, "sonarr").ToList();
+        var loader = Resolve<IConfigurationLoader<SonarrConfiguration>>();
+        var actual = loader.LoadMany(fileData.Select(x => x.Item1), "sonarr").ToList();
 
         actual.Should().BeEquivalentTo(expected);
     }
 
-    [Test, AutoMockData(typeof(ConfigurationLoaderTest), nameof(BuildContainer))]
-    public void Parse_using_stream(ConfigurationLoader<SonarrConfiguration> configLoader)
+    [Test]
+    public void Parse_using_stream()
     {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
         var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
-        configs.Should()
-            .BeEquivalentTo(new List<SonarrConfiguration>
+        configs.Should().BeEquivalentTo(new List<SonarrConfiguration>
+        {
+            new()
             {
-                new()
+                ApiKey = "95283e6b156c42f3af8a9b16173f876b",
+                BaseUrl = "http://localhost:8989",
+                ReleaseProfiles = new List<ReleaseProfileConfig>
                 {
-                    ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                    BaseUrl = "http://localhost:8989",
-                    ReleaseProfiles = new List<ReleaseProfileConfig>
+                    new()
                     {
-                        new()
+                        TrashIds = new[] {"123"},
+                        StrictNegativeScores = true,
+                        Tags = new List<string> {"anime"}
+                    },
+                    new()
+                    {
+                        TrashIds = new[] {"456"},
+                        StrictNegativeScores = false,
+                        Tags = new List<string>
                         {
-                            TrashIds = new[] {"123"},
-                            StrictNegativeScores = true,
-                            Tags = new List<string> {"anime"}
-                        },
-                        new()
-                        {
-                            TrashIds = new[] {"456"},
-                            StrictNegativeScores = false,
-                            Tags = new List<string>
-                            {
-                                "tv",
-                                "series"
-                            }
+                            "tv",
+                            "series"
                         }
                     }
                 }
-            });
+            }
+        });
     }
 
     [Test, AutoMockData]
