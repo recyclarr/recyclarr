@@ -17,6 +17,7 @@ public class AppPaths : IAppPaths
 
     public IFileInfo ConfigPath => AppDataDirectory.File(DefaultConfigFilename);
     public IFileInfo SettingsPath => AppDataDirectory.File("settings.yml");
+    public IFileInfo SecretsPath => AppDataDirectory.File("secrets.yml");
     public IDirectoryInfo LogDirectory => AppDataDirectory.SubDirectory("logs");
     public IDirectoryInfo RepoDirectory => AppDataDirectory.SubDirectory("repo");
     public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDirectory("cache");
