@@ -1,6 +1,7 @@
 using System.Reflection;
 using Autofac;
 using FluentValidation;
+using TrashLib.Config.Secrets;
 using TrashLib.Config.Services;
 using TrashLib.Config.Settings;
 using Module = Autofac.Module;
@@ -16,6 +17,7 @@ public class ConfigAutofacModule : Module
             .AsImplementedInterfaces();
 
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
+        builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<ServiceValidationMessages>().As<IServiceValidationMessages>();
     }

@@ -17,6 +17,7 @@ using Recyclarr.TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Config.Services;
 using TrashLib.Services.Sonarr.Config;
+using YamlDotNet.Core;
 
 namespace Recyclarr.Tests.Config;
 
@@ -143,5 +144,118 @@ fubar:
 ";
         Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "fubar");
         act.Should().NotThrow();
+    }
+
+    [Test]
+    public void Test_secret_loading()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+- api_key: !secret api_key
+  base_url: !secret 123GARBAGE_
+  release_profiles:
+      - trash_ids:
+          - !secret secret_rp
+";
+
+        const string secretsYml = @"
+api_key: 95283e6b156c42f3af8a9b16173f876b
+123GARBAGE_: 'https://radarr:7878'
+secret_rp: 1234567
+";
+
+        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+        var expected = new List<SonarrConfiguration>
+        {
+            new()
+            {
+                ApiKey = "95283e6b156c42f3af8a9b16173f876b",
+                BaseUrl = "https://radarr:7878",
+                ReleaseProfiles = new List<ReleaseProfileConfig>
+                {
+                    new()
+                    {
+                        TrashIds = new[] {"1234567"}
+                    }
+                }
+            }
+        };
+
+        var parsedSecret = configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        parsedSecret.Should().BeEquivalentTo(expected);
+    }
+
+    [Test]
+    public void Throw_when_referencing_invalid_secret()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+- api_key: !secret api_key
+  base_url: fake_url
+";
+
+        const string secretsYml = @"
+no_api_key: 95283e6b156c42f3af8a9b16173f876b
+";
+
+        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+
+        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        act.Should().Throw<YamlException>().WithMessage("api_key is not defined in secrets.yml.");
+    }
+
+    [Test]
+    public void Throw_when_referencing_secret_without_secrets_file()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+- api_key: !secret api_key
+  base_url: fake_url
+";
+
+        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        act.Should().Throw<YamlException>().WithMessage("api_key is not defined in secrets.yml.");
+    }
+
+    [Test]
+    public void Throw_when_secret_value_is_not_scalar()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+- api_key: !secret { property: value }
+  base_url: fake_url
+";
+
+        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        act.Should().Throw<YamlException>().WithMessage("Expected 'Scalar'*");
+    }
+
+    [Test]
+    public void Throw_when_expected_value_is_not_scalar()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+- api_key: fake_key
+  base_url: fake_url
+  release_profiles: !secret bogus_profile
+";
+
+        const string secretsYml = @"
+bogus_profile: 95283e6b156c42f3af8a9b16173f876b
+";
+
+        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        act.Should().Throw<YamlException>().WithMessage("Exception during deserialization");
     }
 }
