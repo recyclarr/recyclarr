@@ -3,13 +3,22 @@ name: Build & Test
 
 on:
   push:
-    paths-ignore:
-      - "wiki/**"
-      - "**.md"
+    paths:
+      - ".github/workflows/build.yml"
+      - ".github/workflows/docker.yml"
+      - "src/**"
+      - "schemas/**"
+      - "docker/**"
+      - "ci/**"
+
   pull_request:
-    paths-ignore:
-      - "wiki/**"
-      - "**.md"
+    paths:
+      - ".github/workflows/build.yml"
+      - ".github/workflows/docker.yml"
+      - "src/**"
+      - "schemas/**"
+      - "docker/**"
+      - "ci/**"
 
 env:
   dotnetVersion: "6.0.x"
