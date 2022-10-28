@@ -16,6 +16,9 @@ changes you need to make.
 - New `configs` subdirectory. Place your `*.yml` config files here and all of them will be
   automatically loaded, as if you provided multiple paths to `--config`. The primary purpose of this
   feature is to support multiple configuration files in Docker. See [the docs][yaml-config]
+- Secrets support. You can now store sensitive information from your configuration YAML such as
+  `api_key` and `base_url` in a `secrets.yml` file. See [the secrets docs][secrets] for more info.
+  Huge thanks to @voltron4lyfe for this one. (#105, #139)
 
 ### Removed
 
@@ -30,6 +33,7 @@ the executable has been removed.
 
 [breaking3]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v3.0
 [yaml-config]: https://recyclarr.dev/wiki/file-structure#directory-configs
+[secrets]: https://recyclarr.dev/wiki/reference/secrets-reference
 
 ## [2.6.1] - 2022-10-15
 
