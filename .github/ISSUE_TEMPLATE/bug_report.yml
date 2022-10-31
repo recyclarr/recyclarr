@@ -14,13 +14,13 @@ body:
       label: Current Behavior
       description: A concise description of what you're experiencing.
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: Steps To Reproduce
@@ -31,23 +31,30 @@ body:
         3. Run '...'
         4. See error...
     validations:
-      required: false
+      required: true
   - type: input
     attributes:
       label: Environment
       description: OS and version + Docker if you're using it.
     validations:
-      required: false
+      required: true
+  - type: input
+    attributes:
+      label: Recyclarr Version
+      description: What version of Recyclarr are you using?
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Configuration YAML
       description: >
         Provide your [redacted](https://recyclarr.dev/wiki/troubleshooting/#redact-config)
         `recyclarr.yml` (and others) here using [fenced code
-        blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)
+        blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
   - type: textarea
     attributes:
       label: Sonarr / Radarr Logs
       description: >
-        If the issue is related to an issue on the Sonarr or Radarr side, provide the logs here as an attachment
-        or [fenced code block](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+        If the issue is related to an issue on the Sonarr or Radarr side, provide the logs here as
+        an attachment or [fenced code
+        block](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).

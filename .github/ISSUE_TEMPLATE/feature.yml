@@ -1,0 +1,18 @@
+name: Feature Request
+description: Want to see a new feature or an improvement to existing feature?
+labels: [enhancement]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: >
+        Please search to see if an issue already exists for the feature/improvement you want.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: A concise description of what feature or improvement you want.
+    validations:
+      required: true
