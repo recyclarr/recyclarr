@@ -75,6 +75,8 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         var repoUpdater = container.Resolve<IRepoUpdater>();
         var migration = container.Resolve<IMigrationExecutor>();
 
+        log.Debug("Recyclarr Version: {Version}", GitVersionInformation.InformationalVersion);
+
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
