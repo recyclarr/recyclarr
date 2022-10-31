@@ -1,0 +1,49 @@
+name: Bug Report
+description: Create a report to help us improve
+labels: [bug]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: A concise description of what you're experiencing.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. In this environment...
+        2. With this config...
+        3. Run '...'
+        4. See error...
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Environment
+      description: OS and version + Docker if you're using it.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Your recyclarr.yml
+      description: |
+        Provide your [redacted](https://recyclarr.dev/wiki/troubleshooting/#redact-config)
+        `recyclarr.yml` here.
+      render: Markdown
+    validations:
+      required: false
