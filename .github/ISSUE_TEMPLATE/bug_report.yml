@@ -40,10 +40,14 @@ body:
       required: false
   - type: textarea
     attributes:
-      label: Your recyclarr.yml
-      description: |
+      label: Configuration YAML
+      description: >
         Provide your [redacted](https://recyclarr.dev/wiki/troubleshooting/#redact-config)
-        `recyclarr.yml` here.
-      render: Markdown
-    validations:
-      required: false
+        `recyclarr.yml` (and others) here using [fenced code
+        blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)
+  - type: textarea
+    attributes:
+      label: Sonarr / Radarr Logs
+      description: >
+        If the issue is related to an issue on the Sonarr or Radarr side, provide the logs here as an attachment
+        or [fenced code block](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
