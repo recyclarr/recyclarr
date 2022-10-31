@@ -44,6 +44,12 @@ body:
       description: What version of Recyclarr are you using?
     validations:
       required: true
+  - type: input
+    attributes:
+      label: Sonarr/Radarr Version
+      description: What version of Sonarr and/or Radarr are you using (if applicable)?
+    validations:
+      required: false
   - type: textarea
     attributes:
       label: Configuration YAML
