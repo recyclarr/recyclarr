@@ -18,6 +18,7 @@ using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Sonarr;
+using TrashLib.Services.System;
 using TrashLib.Startup;
 using VersionControl;
 using YamlDotNet.Serialization;
@@ -44,6 +45,7 @@ public static class CompositionRoot
         builder.RegisterModule<RepoAutofacModule>();
         builder.RegisterModule<CustomFormatAutofacModule>();
         builder.RegisterModule<GuideServicesAutofacModule>();
+        builder.RegisterModule<SystemServiceAutofacModule>();
 
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();

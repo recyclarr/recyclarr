@@ -1,30 +1,19 @@
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using Serilog;
-using TrashLib.Services.Sonarr.Api;
+using TrashLib.Services.System;
 
 namespace TrashLib.Services.Sonarr;
 
-public class SonarrCompatibility : ISonarrCompatibility
+public class SonarrCompatibility : ServiceCompatibility<SonarrCapabilities>, ISonarrCompatibility
 {
-    private readonly ILogger _log;
-
-    public SonarrCompatibility(ISonarrApi api, ILogger log)
+    public SonarrCompatibility(ISystemApiService api, ILogger log)
+        : base(api, log)
     {
-        _log = log;
-        Capabilities = Observable.FromAsync(async () => await api.GetVersion(), NewThreadScheduler.Default)
-            .Timeout(TimeSpan.FromSeconds(15))
-            .Select(BuildCapabilitiesObject)
-            .Replay(1)
-            .AutoConnect();
     }
 
-    public IObservable<SonarrCapabilities> Capabilities { get; }
     public Version MinimumVersion => new("3.0.4.1098");
 
-    private SonarrCapabilities BuildCapabilitiesObject(Version version)
+    protected override SonarrCapabilities BuildCapabilitiesObject(Version version)
     {
-        _log.Debug("Sonarr Version: {Version}", version);
         return new SonarrCapabilities(version)
         {
             SupportsNamedReleaseProfiles =

@@ -15,5 +15,6 @@ public class RadarrAutofacModule : Module
         builder.RegisterType<RadarrQualityDefinitionUpdater>().As<IRadarrQualityDefinitionUpdater>();
         builder.RegisterType<LocalRepoRadarrGuideService>().As<IRadarrGuideService>();
         builder.RegisterType<RadarrGuideDataLister>().As<IRadarrGuideDataLister>();
+        builder.RegisterType<RadarrCompatibility>();
     }
 }

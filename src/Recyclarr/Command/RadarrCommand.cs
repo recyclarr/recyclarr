@@ -1,3 +1,4 @@
+using System.Reactive.Linq;
 using Autofac;
 using CliFx.Attributes;
 using JetBrains.Annotations;
@@ -60,6 +61,12 @@ internal class RadarrCommand : ServiceCommand
             });
 
             log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
+
+            // There's no actual compatibility checks to perform yet. We directly access the RadarrCompatibility class,
+            // as opposed to a IRadarrVersionEnforcement object (like Sonarr does), simply to force the API invocation
+            // in Radarr to acquire and log version information.
+            var compatibility = scope.Resolve<RadarrCompatibility>();
+            await compatibility.Capabilities.LastAsync();
 
             // ReSharper disable InvertIf
 

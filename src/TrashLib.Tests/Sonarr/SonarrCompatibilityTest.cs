@@ -14,6 +14,8 @@ using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Api.Objects;
 using TrashLib.Services.Sonarr.Config;
+using TrashLib.Services.System;
+using TrashLib.Services.System.Dto;
 using TrashLib.Startup;
 
 namespace TrashLib.Tests.Sonarr;
@@ -119,11 +121,11 @@ public class SonarrCompatibilityTest
 
     [Test, AutoMockData]
     public async Task Failure_when_release_profiles_used_with_sonarr_v4(
-        [Frozen] ISonarrApi api,
+        [Frozen] ISystemApiService api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
         SonarrVersionEnforcement enforcement)
     {
-        api.GetVersion().Returns(new Version(4, 0));
+        api.GetStatus().Returns(new SystemStatus("Sonarr", "4.0"));
 
         var config = new SonarrConfiguration
         {
@@ -137,11 +139,11 @@ public class SonarrCompatibilityTest
 
     [Test, AutoMockData]
     public async Task No_failure_when_release_profiles_used_with_sonarr_v3(
-        [Frozen] ISonarrApi api,
+        [Frozen] ISystemApiService api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
         SonarrVersionEnforcement enforcement)
     {
-        api.GetVersion().Returns(new Version(3, 9));
+        api.GetStatus().Returns(new SystemStatus("Sonarr", "3.9"));
 
         var config = new SonarrConfiguration
         {
@@ -155,11 +157,11 @@ public class SonarrCompatibilityTest
 
     [Test, AutoMockData]
     public async Task Failure_when_custom_formats_used_with_sonarr_v3(
-        [Frozen] ISonarrApi api,
+        [Frozen] ISystemApiService api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
         SonarrVersionEnforcement enforcement)
     {
-        api.GetVersion().Returns(new Version(3, 9));
+        api.GetStatus().Returns(new SystemStatus("Sonarr", "3.9"));
 
         var config = new SonarrConfiguration
         {
@@ -173,11 +175,11 @@ public class SonarrCompatibilityTest
 
     [Test, AutoMockData]
     public async Task No_failure_when_custom_formats_used_with_sonarr_v4(
-        [Frozen] ISonarrApi api,
+        [Frozen] ISystemApiService api,
         [Frozen(Matching.ImplementedInterfaces)] SonarrCompatibility compatibility,
         SonarrVersionEnforcement enforcement)
     {
-        api.GetVersion().Returns(new Version(4, 0));
+        api.GetStatus().Returns(new SystemStatus("Sonarr", "4.0"));
 
         var config = new SonarrConfiguration
         {
