@@ -80,13 +80,6 @@ public abstract class IntegrationFixture : IDisposable
         builder.RegisterInstance(Substitute.For<T>()).As<T>();
     }
 
-    // ReSharper disable once UnusedMember.Global
-    protected T Resolve<T>(Action<ContainerBuilder> customRegistrations) where T : notnull
-    {
-        var childScope = Container.BeginLifetimeScope(customRegistrations);
-        return childScope.Resolve<T>();
-    }
-
     protected T Resolve<T>() where T : notnull
     {
         return Container.Resolve<T>();
