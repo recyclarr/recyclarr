@@ -39,7 +39,7 @@ good idea to occasionally run this for upgrade purposes, too.
 ## Docker Development
 
 The project's `Dockerfile` build requires the Recyclarr build output to be placed in a specific
-location in order to succeed. The location is below, relative to the clone root:
+location in order to succeed. The location is below, relative to the repository root:
 
 ```txt
 docker/artifacts/recyclarr-${{runtime}}
@@ -88,6 +88,31 @@ locally to these steps:
 | `linux/arm64`   | `linux-musl-arm64` |
 | `linux/amd64`   | `linux-musl-x64`   |
 
+## Conventional Commits
+
+This project uses and enforces a variation of [Conventional Commits][commits]. The below official
+commit types are used:
+
+Official:
+
+- `build`: Update project files, settings, etc.
+- `chore`: Anything not code related or that falls into other categories.
+- `ci`: Changes to CI/CD scripts or configuration.
+- `docs`: Updates to non-code documentation (markdown, readme, etc).
+- `feat`: A new feature was implemented.
+- `fix`: A defect or security issue was fixed.
+- `perf`: Change in code related to improving performance.
+- `refactor`: A code change that does not impact the observable functionality or shape of the apps.
+- `revert`: Prefix to be used for commits made by the `git revert` command.
+- `style`: A whitespace or code cleanup change in code.
+- `test`: Updates to unit test code only.
+
+Specialized:
+
+- `change`: Change to existing functionality.
+- `deprecate`: Deprecation of existing functionality.
+- `remove`: Removal of existing feature.
+
 ## Release Process
 
 Release numbering follows [Semantic Versioning][semver]. The [GitVersion] package is used in .NET
@@ -112,7 +137,8 @@ The Github Workflows manage the release process after the push by doing the foll
 
 1. Compile the .NET projects.
 1. Create a [Github Release][release] with the .NET artifacts attached.
-1. Build and publish a new Docker image to the [Github Container Registry][ghcr]
+1. Build and publish a new Docker image to the [Github Container Registry][ghcr] and [Docker
+   Hub][dockerhub].
 1. Send a release notification to the `#related-announcements` channel in the official [TRaSH Guides
    Discord][discord].
 
