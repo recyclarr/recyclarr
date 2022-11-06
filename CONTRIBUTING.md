@@ -4,8 +4,8 @@ First, thank you for your interest in contributing to my project. Below is a lis
 that everyone should follow.
 
 1. To avoid wasting your time and effort, please ensure all ideas get discussed first. Either visit
-   [the Ideas discussion board][ideas] and open a thread there, or create a new issue. I ask that
-   you do this to avoid the potential of rejecting work already done in a pull request.
+   [the Ideas discussion board][ideas] and open a thread there. I ask that you do this to avoid the
+   potential of rejecting work already done in a pull request.
 
 1. **For Markdown changes,** any and all changes must pass configured [markdownlint] rules (see the
    `.markdownlint.json` files in this repository for project-specific adjustments to those rules).
@@ -19,6 +19,22 @@ that everyone should follow.
 [ideas]: https://github.com/recyclarr/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
 [Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
+
+## Tooling Requirements
+
+The following tools are required:
+
+- .NET SDK 6.0 and tooling (e.g. `dotnet`)
+- Powershell v5.1 or greater
+- Docker CLI (Docker Desktop on Windows)
+
+The following tools are *highly recommended* but not strictly required:
+
+- Jetbrains Rider (IDE for editing C# code)
+- Visual Studio Code (install workspace-recommended extensions as well)
+
+Other required tooling can be installed via the `Install-Tooling.ps1` powershell script. It's also a
+good idea to occasionally run this for upgrade purposes, too.
 
 ## Docker Development
 
@@ -85,9 +101,6 @@ committed.
 
 To make a release, follow these steps:
 
-1. Prerequisite tooling must be installed first. Run the `Install-Script-Dependencies.ps1`
-   powershell script to acquire them. It's also a good idea to occassionally run this for upgrade
-   purposes, too.
 1. Run `Prepare-Release.ps1`. This will do the following:
    1. Update the changelog for the release according to [Keep a Changelog][changelog] rules.
    1. Commit the changelog updates.
