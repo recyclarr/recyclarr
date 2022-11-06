@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Common.Extensions;
 using Newtonsoft.Json.Linq;
 using TrashLib.Services.CustomFormat.Models;
 using TrashLib.Services.CustomFormat.Models.Cache;
@@ -72,10 +73,10 @@ internal class JsonTransactionStep : IJsonTransactionStep
 
     private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, ProcessedCustomFormatData guideCf)
     {
-        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId);
+        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
     }
 
-    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId)
+    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId, string? cfName = null)
     {
         JObject? match = null;
 
@@ -83,6 +84,12 @@ internal class JsonTransactionStep : IJsonTransactionStep
         if (cfId is not null)
         {
             match = serviceCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
+        }
+
+        // If we don't find by ID, search by name (if a name was given)
+        if (match is null && cfName is not null)
+        {
+            match = serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Value<string>("name")));
         }
 
         return match;
