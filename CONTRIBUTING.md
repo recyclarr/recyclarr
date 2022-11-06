@@ -110,3 +110,9 @@ The Github Workflows manage the release process after the push by doing the foll
 [release]: https://github.com/recyclarr/recyclarr/releases
 [ghcr]: https://github.com/recyclarr/recyclarr/pkgs/container/recyclarr
 [discord]: https://discord.com/invite/Vau8dZ3
+
+## Update `.gitignore`
+
+Execute the `Update-Gitignore.ps1` script using Powershell. The working directory *must* be the root
+of the repo. This will pull the latest relevant `.gitignore` patterns from
+[gitignore.io](https://gitignore.io) and commit them automatically to your current branch.
