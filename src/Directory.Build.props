@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>latestmajor</LangVersion>
     <Nullable>enable</Nullable>
     <WarningLevel>9999</WarningLevel>

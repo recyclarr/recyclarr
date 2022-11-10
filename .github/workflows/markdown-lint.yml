@@ -12,7 +12,7 @@ on:
       - .github/workflows/markdown-lint.yml
 
 env:
-  dotnetVersion: "6.0.x"
+  dotnetVersion: "7.0.x"
 
 jobs:
   markdownlint:
