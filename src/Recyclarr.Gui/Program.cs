@@ -15,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
+builder.Services.AddAutofac();
 
 builder.Host
-    .ConfigureServices(x => x.AddAutofac())
     .UseServiceProviderFactory(new AutofacServiceProviderFactory(CompositionRoot.Setup))
     .UseSerilog((_, provider, config) =>
     {
