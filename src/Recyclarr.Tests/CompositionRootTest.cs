@@ -13,8 +13,8 @@ using Recyclarr.Command;
 using Serilog;
 using TrashLib;
 using TrashLib.Config.Services;
+using TrashLib.Repo.VersionControl;
 using TrashLib.Startup;
-using VersionControl;
 
 namespace Recyclarr.Tests;
 

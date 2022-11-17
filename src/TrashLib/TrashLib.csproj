@@ -5,6 +5,7 @@
     <PackageReference Include="Autofac.Extras.Ordering" />
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="CliFx" />
+    <PackageReference Include="CliWrap" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />
@@ -19,6 +20,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    <ProjectReference Include="..\VersionControl\VersionControl.csproj" />
   </ItemGroup>
 </Project>

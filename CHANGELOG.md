@@ -20,9 +20,14 @@ changes you need to make.
   `api_key` and `base_url` in a `secrets.yml` file. See [the secrets docs][secrets] for more info.
   Huge thanks to @voltron4lyfe for this one. (#105, #139)
 - Named instances are now supported in configuration YAML.
+- New optional setting `repository.git_path` may be used to specify the path to a `git` executable.
+  If not used, `PATH` will be searched.
 
 ### Changed
 
+- **BREAKING**: Recyclarr now requires `git` to be installed on host systems when using manual
+  installation. If using Docker, there is no breaking change since git will be bundled with the
+  image.
 - Deprecated array-style instances in configuration YAML. Read more about this in the v3.0 Upgrade
   Guide.
 

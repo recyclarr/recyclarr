@@ -14,13 +14,13 @@ using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Config.Services;
 using TrashLib.Repo;
+using TrashLib.Repo.VersionControl;
 using TrashLib.Services.Common;
 using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.System;
 using TrashLib.Startup;
-using VersionControl;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 

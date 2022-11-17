@@ -5,5 +5,5 @@ namespace TrashLib.Repo;
 public interface IRepoUpdater
 {
     IDirectoryInfo RepoPath { get; }
-    void UpdateRepo();
+    Task UpdateRepo();
 }

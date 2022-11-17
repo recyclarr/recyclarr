@@ -29,10 +29,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrashLib", "TrashLib\TrashL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrashLib.Tests", "TrashLib.Tests\TrashLib.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VersionControl", "VersionControl\VersionControl.csproj", "{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VersionControl.Tests", "VersionControl.Tests\VersionControl.Tests.csproj", "{F81C7EA3-4ACA-4171-8A60-531F129A33C5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.TestLibrary", "Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{77D1C695-94D4-46A9-8F12-41E54AF97750}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
@@ -81,14 +77,6 @@ Global
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF5BB1A7-3D21-48CB-B6B0-526612B2D94D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F81C7EA3-4ACA-4171-8A60-531F129A33C5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77D1C695-94D4-46A9-8F12-41E54AF97750}.Release|Any CPU.ActiveCfg = Release|Any CPU

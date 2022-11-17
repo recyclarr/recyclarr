@@ -13,6 +13,7 @@ using Serilog;
 using TrashLib.Config.Settings;
 using TrashLib.Extensions;
 using TrashLib.Repo;
+using TrashLib.Repo.VersionControl;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Command;
@@ -62,13 +63,17 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
             throw new CommandException(
                 $"HTTP error while communicating with {Name}: {e.SanitizedExceptionMessage()}");
         }
+        catch (GitCmdException e)
+        {
+            await console.Output.WriteLineAsync(e.ToString());
+        }
         catch (Exception e) when (e is not CommandException)
         {
             throw new CommandException(e.ToString());
         }
     }
 
-    public override Task Process(ILifetimeScope container)
+    public override async Task Process(ILifetimeScope container)
     {
         var log = container.Resolve<ILogger>();
         var settingsProvider = container.Resolve<ISettingsProvider>();
@@ -81,9 +86,7 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         migration.CheckNeededMigrations();
 
         SetupHttp(log, settingsProvider);
-        repoUpdater.UpdateRepo();
-
-        return Task.CompletedTask;
+        await repoUpdater.UpdateRepo();
     }
 
     private static void SetupHttp(ILogger log, ISettingsProvider settingsProvider)
