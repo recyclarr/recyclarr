@@ -34,7 +34,7 @@ public sealed class GitRepository : IGitRepository
             .WithWorkingDirectory(_paths.RepoDirectory.FullName)
             .ExecuteAsync();
 
-        _log.Debug("{Output}", output.ToString());
+        _log.Debug("Command Output: {Output}", output.ToString().Trim());
 
         if (result.ExitCode != 0)
         {
