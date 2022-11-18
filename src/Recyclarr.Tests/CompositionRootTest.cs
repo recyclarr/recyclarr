@@ -47,7 +47,9 @@ public class CompositionRootTest
             service.Instantiate(container);
         };
 
-        act.Should().NotThrow();
+        // Do not use `NotThrow()` here because fluent assertions doesn't show the full exception details
+        // See: https://github.com/fluentassertions/fluentassertions/issues/2015
+        act(); //.Should().NotThrow();
     }
 
     // Warning CA1812 : CompositionRootTest.ConcreteTypeEnumerator is an internal class that is apparently never
