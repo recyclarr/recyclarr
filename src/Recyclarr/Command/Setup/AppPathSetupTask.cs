@@ -19,7 +19,7 @@ public class AppPathSetupTask : IBaseCommandSetupTask
         _log.Debug("App Data Dir: {AppData}", _paths.AppDataDirectory);
 
         // Initialize other directories used throughout the application
-        _paths.RepoDirectory.Create();
+        // Do not initialize the repo directory here; the GitRepositoryFactory handles that later.
         _paths.CacheDirectory.Create();
         _paths.LogDirectory.Create();
         _paths.ConfigsDirectory.Create();
