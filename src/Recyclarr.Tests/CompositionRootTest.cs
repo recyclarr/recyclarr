@@ -10,6 +10,7 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
+using Recyclarr.TestLibrary;
 using Serilog;
 using TrashLib;
 using TrashLib.Config.Services;
@@ -31,7 +32,7 @@ public static class FactoryForService<TService>
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class CompositionRootTest
+public class CompositionRootTest : IntegrationFixture
 {
     private static readonly List<ServiceFactoryWrapper> FactoryTests = new()
     {
@@ -43,8 +44,7 @@ public class CompositionRootTest
     {
         var act = () =>
         {
-            using var container = CompositionRoot.Setup();
-            service.Instantiate(container);
+            service.Instantiate(Container);
         };
 
         // Do not use `NotThrow()` here because fluent assertions doesn't show the full exception details
