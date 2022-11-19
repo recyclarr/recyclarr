@@ -60,7 +60,6 @@
     },
     "base_url": {
       "type": "string",
-      "pattern": "^https?",
       "description": "The base URL of your instance. Basically this is the URL you bookmark to get to the front page."
     },
     "delete_old_custom_formats": {
