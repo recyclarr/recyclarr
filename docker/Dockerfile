@@ -22,7 +22,7 @@ ENV PATH="${PATH}:/app/recyclarr" \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
 
 RUN set -ex; \
-    apk add --no-cache bash libstdc++ tzdata supercronic; \
+    apk add --no-cache bash libstdc++ tzdata supercronic git; \
     mkdir -p "$DOTNET_BUNDLE_EXTRACT_BASE_DIR" && chmod 777 "$DOTNET_BUNDLE_EXTRACT_BASE_DIR"; \
     mkdir -p /config && chown 1000:1000 /config;
 

@@ -11,9 +11,8 @@ using Recyclarr.Command;
 using Serilog;
 using Serilog.Events;
 using TrashLib;
+using TrashLib.Repo.VersionControl;
 using TrashLib.Startup;
-using VersionControl;
-using VersionControl.Wrappers;
 
 namespace Recyclarr.TestLibrary;
 
@@ -35,7 +34,6 @@ public abstract class IntegrationFixture : IDisposable
             RegisterMockFor<IServiceCommand>(builder);
             RegisterMockFor<IGitRepository>(builder);
             RegisterMockFor<IGitRepositoryFactory>(builder);
-            RegisterMockFor<IRepositoryStaticWrapper>(builder);
 
             RegisterExtraTypes(builder);
 

@@ -1,10 +1,9 @@
 using System.IO.Abstractions;
 using Common;
-using LibGit2Sharp;
 using Serilog;
 using TrashLib.Config.Settings;
+using TrashLib.Repo.VersionControl;
 using TrashLib.Startup;
-using VersionControl;
 
 namespace TrashLib.Repo;
 
@@ -32,17 +31,17 @@ public class RepoUpdater : IRepoUpdater
 
     public IDirectoryInfo RepoPath => _paths.RepoDirectory;
 
-    public void UpdateRepo()
+    public async Task UpdateRepo()
     {
         // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
         // fresh.
-        var exception = CheckoutAndUpdateRepo();
+        var exception = await CheckoutAndUpdateRepo();
         if (exception is not null)
         {
             _log.Information("Deleting local git repo and retrying git operation...");
             _fileUtils.DeleteReadOnlyDirectory(RepoPath.FullName);
 
-            exception = CheckoutAndUpdateRepo();
+            exception = await CheckoutAndUpdateRepo();
             if (exception is not null)
             {
                 throw exception;
@@ -50,7 +49,7 @@ public class RepoUpdater : IRepoUpdater
         }
     }
 
-    private Exception? CheckoutAndUpdateRepo()
+    private async Task<Exception?> CheckoutAndUpdateRepo()
     {
         var repoSettings = _settingsProvider.Settings.Repository;
         var cloneUrl = repoSettings.CloneUrl;
@@ -64,12 +63,12 @@ public class RepoUpdater : IRepoUpdater
 
         try
         {
-            using var repo = _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
-            repo.ForceCheckout(branch);
-            repo.Fetch();
-            repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
+            using var repo = await _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
+            await repo.ForceCheckout(branch);
+            await repo.Fetch();
+            await repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
         }
-        catch (LibGit2SharpException e)
+        catch (GitCmdException e)
         {
             _log.Error(e, "An exception occurred during git operations on path: {RepoPath}", RepoPath);
             return e;

@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\TrashLib\TrashLib.csproj" />
-    <ProjectReference Include="..\VersionControl\VersionControl.csproj" />
   </ItemGroup>
 
 </Project>
