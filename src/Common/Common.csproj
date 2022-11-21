@@ -6,8 +6,9 @@
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
-    <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="System.Reactive" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 </Project>

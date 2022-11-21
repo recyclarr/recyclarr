@@ -13,9 +13,10 @@
     <PackageReference Include="Newtonsoft.Json.Schema" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Data.HashFunction.FNV" />
-    <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
