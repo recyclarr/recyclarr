@@ -1,16 +1,22 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $true)]
-    [string] $runtime,
-    [Parameter()]
-    [switch] $noSingleFile
+    [string] $Runtime,
+
+    [string] $OutputDir,
+
+    [string] $Configuration = "Release",
+
+    [string] $BuildPath = "src\Recyclarr",
+
+    [switch] $NoSingleFile
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not $noSingleFile) {
+if (-not $NoSingleFile) {
+    $selfContained = "true"
     $singleFileArgs = @(
-        "--self-contained=true"
         "-p:PublishSingleFile=true"
         "-p:IncludeNativeLibrariesForSelfExtract=true"
         "-p:PublishReadyToRunComposite=true"
@@ -18,9 +24,17 @@ if (-not $noSingleFile) {
         "-p:EnableCompressionInSingleFile=true"
     )
 }
+else {
+    $selfContained = "false"
+}
 
-dotnet publish src\Recyclarr `
-    --output publish\$runtime `
-    --configuration Release `
-    --runtime $runtime `
+if (-not $OutputDir) {
+    $OutputDir = "publish\$Runtime"
+}
+
+dotnet publish $BuildPath `
+    --output $OutputDir `
+    --configuration $Configuration `
+    --runtime $Runtime `
+    --self-contained $selfContained `
     $singleFileArgs

@@ -78,7 +78,7 @@ jobs:
 
       - name: Publish
         shell: pwsh
-        run: ci/Publish.ps1 ${{ matrix.runtime }}
+        run: ci/Publish.ps1 -Runtime ${{ matrix.runtime }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -137,7 +137,7 @@ jobs:
 
       - name: Publish
         shell: pwsh
-        run: ci/Publish.ps1 ${{ matrix.runtime }} -noSingleFile
+        run: ci/Publish.ps1 -Runtime ${{ matrix.runtime }} -NoSingleFile
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

@@ -1,9 +1,14 @@
 [CmdletBinding()]
 param (
-    $runtime = "linux-musl-x64"
+    $Runtime = "linux-musl-x64"
 )
 
-$artifactDir="$PSScriptRoot\artifacts"
+$artifactsDir = "$PSScriptRoot\artifacts"
 
-Remove-Item $artifactDir -Recurse -Force -ErrorAction SilentlyContinue
-dotnet publish "$PSScriptRoot\..\src\Recyclarr" -o "$artifactDir\recyclarr-$runtime" -r $runtime
+Remove-Item $artifactsDir -Recurse -Force -ErrorAction SilentlyContinue
+
+Push-Location $PSScriptRoot\..
+& ci\Publish.ps1 -NoSingleFile `
+    -OutputDir "$artifactsDir\recyclarr-$Runtime" `
+    -Runtime $Runtime
+Pop-Location
