@@ -1,13 +1,14 @@
 using System.IO.Abstractions;
+using Common.Extensions;
 using Serilog;
 
 namespace Common;
 
 public static class JsonUtils
 {
-    public static IEnumerable<IFileInfo> GetJsonFilesInDirectories(IEnumerable<IDirectoryInfo> dirs, ILogger log)
+    public static IEnumerable<IFileInfo> GetJsonFilesInDirectories(IEnumerable<IDirectoryInfo?> dirs, ILogger log)
     {
-        var dirsThatExist = dirs.ToLookup(x => x.Exists);
+        var dirsThatExist = dirs.NotNull().ToLookup(x => x.Exists);
 
         foreach (var dir in dirsThatExist[false])
         {

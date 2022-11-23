@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
+using NSubstitute;
 using NUnit.Framework;
 using Serilog;
 using Serilog.Events;
@@ -90,5 +91,15 @@ public class JsonUtilsTest
             .Should().ContainSingle()
             .Which.RenderMessage()
             .Should().Match("*does_not_exist*");
+    }
+
+    [Test]
+    public void Null_paths_are_ignored()
+    {
+        var result = JsonUtils.GetJsonFilesInDirectories(
+            new IDirectoryInfo?[] {null, null},
+            Substitute.For<ILogger>());
+
+        result.Should().BeEmpty();
     }
 }

@@ -25,7 +25,7 @@ public class FileUtilities : IFileUtilities
 
         foreach (var fileName in Directory.EnumerateFiles(directory))
         {
-            var fileInfo = _fileSystem.FileInfo.FromFileName(fileName);
+            var fileInfo = _fileSystem.FileInfo.New(fileName);
             fileInfo.Attributes = FileAttributes.Normal;
             fileInfo.Delete();
         }

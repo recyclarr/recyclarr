@@ -18,7 +18,7 @@ public class DefaultAppDataSetup
     public IAppPaths CreateAppPaths(string? appDataDirectoryOverride = null, bool forceCreate = true)
     {
         var appDir = GetAppDataDirectory(appDataDirectoryOverride, forceCreate);
-        return new AppPaths(_fs.DirectoryInfo.FromDirectoryName(appDir));
+        return new AppPaths(_fs.DirectoryInfo.New(appDir));
     }
 
     private string GetAppDataDirectory(string? appDataDirectoryOverride, bool forceCreate)

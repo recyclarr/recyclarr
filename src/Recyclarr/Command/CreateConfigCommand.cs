@@ -3,6 +3,7 @@ using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using Common;
+using Common.Extensions;
 using JetBrains.Annotations;
 using Serilog;
 using TrashLib.Startup;
@@ -28,7 +29,7 @@ public class CreateConfigCommand : BaseCommand
         var reader = new ResourceDataReader(typeof(Program));
         var ymlData = reader.ReadData("config-template.yml");
         var configFile = AppDataDirectory is not null
-            ? fs.FileInfo.FromFileName(AppDataDirectory)
+            ? fs.FileInfo.New(AppDataDirectory)
             : paths.ConfigPath;
 
         if (configFile.Exists)
@@ -37,7 +38,7 @@ public class CreateConfigCommand : BaseCommand
                                        "delete/move the existing file and run this command again.");
         }
 
-        fs.Directory.CreateDirectory(configFile.DirectoryName);
+        configFile.CreateParentDirectory();
         await using var stream = configFile.CreateText();
         await stream.WriteAsync(ymlData);
         log.Information("Created configuration at: {Path}", configFile);
