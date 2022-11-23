@@ -1,17 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoFixture" />
-    <PackageReference Include="AutoFixture.AutoNSubstitute" />
-    <PackageReference Include="AutoFixture.NUnit3" />
-    <PackageReference Include="FluentAssertions" />
-    <PackageReference Include="FluentAssertions.Json" />
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
