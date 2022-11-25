@@ -48,30 +48,27 @@ docker/artifacts/recyclarr-${{runtime}}
 Where `${{runtime}}` is one of the runtimes compatible with `dotnet publish`, such as
 `linux-musl-x64`.
 
-There is a convenience script named `docker/Build-Artifacts.ps1` that will perform a build and place
-the output in the appropriate location for you. This simplifies the process of testing docker
-locally to these steps:
+There is a convenience script named `docker/BuildAndRun.ps1` that will perform the following steps:
 
-1. Run the convenience script to build and publish Recyclarr to the Docker artifacts directory:
+1. Delete the `docker/artifacts` directory, if it exists.
+1. Recompile Recyclarr and publish it to `docker/artifacts`.
+1. Pull and start the Sonarr & Radarr containers in the `debugging` directory.
+1. Build & run the `recyclarr` docker image.
 
-   ```sh
-   pwsh ci/Build-Artifacts.ps1
-   ```
+You may also provide runtime arguments to the `BuildAndRun.ps1` script to run it in manual mode
+instead of cron mode. Example:
 
-   > *Note:* The runtime defaults to `linux-musl-x64` but you can pass in an override as the first
-   > placeholder argument to the above command.
+```sh
+# Run `recyclarr radarr -h`:
+.\BuildAndRun.ps1 -RunArgs radarr,-h
+```
 
-1. Execute a Docker build locally via compose:
+If you want to run any part of this process manually, open up the `BuildAndRun.ps1` script to see
+what commands you need to run manually.
 
-   ```sh
-   docker compose build --no-cache --progress plain
-   ```
-
-1. Run the container to test it:
-
-   ```sh
-   docker compose run --rm recyclarr sonarr
-   ```
+> ⚠️ **Note** ⚠️<br/>
+> The runtime defaults to `linux-musl-x64` but you can pass in an override via the `-Runtime`
+> option.
 
 ### Build Arguments
 
