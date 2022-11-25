@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <LangVersion>latestmajor</LangVersion>
     <Nullable>enable</Nullable>
     <WarningLevel>9999</WarningLevel>
     <ImplicitUsings>enable</ImplicitUsings>
