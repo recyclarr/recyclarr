@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
-    [string] $Runtime = "linux-musl-x64",
-    [string[]] $RunArgs
+    [string[]] $RunArgs,
+    [string] $Runtime = "linux-musl-x64"
 )
 
 $ErrorActionPreference = "Stop"
