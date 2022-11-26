@@ -22,6 +22,8 @@ changes you need to make.
 - Named instances are now supported in configuration YAML.
 - New optional setting `repository.git_path` may be used to specify the path to a `git` executable.
   If not used, `PATH` will be searched.
+- Docker: New `RECYCLARR_CREATE_CONFIG` environment variable which, if set to `true`, will
+  automatically create `/config/recyclarr.yml` on container start up. Default is `false`.
 
 ### Changed
 
