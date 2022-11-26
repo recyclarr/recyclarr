@@ -38,3 +38,7 @@ dotnet publish $BuildPath `
     --runtime $Runtime `
     --self-contained $selfContained `
     $singleFileArgs
+
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet publish failed"
+}

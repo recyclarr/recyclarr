@@ -4,6 +4,8 @@ param (
     [string[]] $RunArgs
 )
 
+$ErrorActionPreference = "Stop"
+
 $artifactsDir = "$PSScriptRoot\artifacts"
 
 # Delete old build artifacts
@@ -24,6 +26,9 @@ finally {
 Push-Location "$PSScriptRoot\..\debugging"
 try {
     docker compose up -d --pull always
+    if ($LASTEXITCODE -ne 0) {
+        throw "docker compose up failed"
+    }
 }
 finally {
     Pop-Location
@@ -31,6 +36,13 @@ finally {
 
 # Finally, build the docker image and run it
 docker compose build
+if ($LASTEXITCODE -ne 0) {
+    throw "docker compose build failed"
+}
+
 # TODO: Use `--build` when it releases:
 # https://github.com/docker/compose/issues/10003
 docker compose run --rm recyclarr @RunArgs
+if ($LASTEXITCODE -ne 0) {
+    throw "docker compose run failed"
+}
