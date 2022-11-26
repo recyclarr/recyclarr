@@ -4,10 +4,15 @@
 # values below as needed for your instance. You will be required to update the API Key and URL for
 # each instance you want to use.
 #
-# Many optional settings have been omitted to keep this template simple.
+# Many optional settings have been omitted to keep this template simple. Note that there's no "one
+# size fits all" configuration. Please refer to the guide to understand how to build the appropriate
+# configuration based on your hardware setup and capabilities.
+#
+# For any lines that mention uncommenting YAML, you simply need to remove the leading hash (`#`).
+# The YAML comments will already be at the appropriate indentation.
 #
 # For more details on the configuration, see the Configuration Reference on the wiki here:
-# https://github.com/recyclarr/recyclarr/wiki/Configuration-Reference
+# https://recyclarr.dev/wiki/reference/config-reference
 
 # Configuration specific to Sonarr
 sonarr:
@@ -27,9 +32,9 @@ sonarr:
           - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
           - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
       # Anime (Uncomment below if you want it)
-#      - trash_ids:
-#          - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
-#          - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
+      #- trash_ids:
+      #    - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
+      #    - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
 
 # Configuration specific to Radarr.
 radarr:
@@ -57,8 +62,8 @@ radarr:
         # Uncomment the below properties to specify one or more quality profiles that should be
         # updated with scores from the guide for each custom format. Without this, custom formats
         # are synced to Radarr but no scores are set in any quality profiles.
-#        quality_profiles:
-#          - name: Quality Profile 1
-#          - name: Quality Profile 2
-#            #score: -9999 # Optional score to assign to all CFs. Overrides scores in the guide.
-#            #reset_unmatched_scores: true # Optionally set other scores to 0 if they are not listed in 'names' above.
+        #quality_profiles:
+        #  - name: Quality Profile 1
+        #  - name: Quality Profile 2
+        #    #score: -9999 # Optional score to assign to all CFs. Overrides scores in the guide.
+        #    #reset_unmatched_scores: true # Optionally set other scores to 0 if they are not listed in 'names' above.
