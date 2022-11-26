@@ -13,6 +13,7 @@ using Recyclarr.Migration;
 using TrashLib.Cache;
 using TrashLib.Config;
 using TrashLib.Config.Services;
+using TrashLib.Http;
 using TrashLib.Repo;
 using TrashLib.Repo.VersionControl;
 using TrashLib.Services.Common;
@@ -52,13 +53,15 @@ public static class CompositionRoot
 
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
-        builder.RegisterType<ServerInfo>().As<IServerInfo>();
+        builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
         builder.RegisterType<ProgressBar>();
 
         ConfigurationRegistrations(builder);
         CommandRegistrations(builder);
 
         builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
+
+        builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
 
         extraRegistrations?.Invoke(builder);
 

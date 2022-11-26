@@ -1,4 +1,3 @@
-using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config.Services;
@@ -8,24 +7,22 @@ namespace TrashLib.Services.CustomFormat.Api;
 
 internal class CustomFormatService : ICustomFormatService
 {
-    private readonly IServerInfo _serverInfo;
+    private readonly IServiceRequestBuilder _service;
 
-    public CustomFormatService(IServerInfo serverInfo)
+    public CustomFormatService(IServiceRequestBuilder service)
     {
-        _serverInfo = serverInfo;
+        _service = service;
     }
 
     public async Task<List<JObject>> GetCustomFormats()
     {
-        return await BuildRequest()
-            .AppendPathSegment("customformat")
+        return await _service.Request("customformat")
             .GetJsonAsync<List<JObject>>();
     }
 
     public async Task CreateCustomFormat(ProcessedCustomFormatData cf)
     {
-        var response = await BuildRequest()
-            .AppendPathSegment("customformat")
+        var response = await _service.Request("customformat")
             .PostJsonAsync(cf.Json)
             .ReceiveJson<JObject>();
 
@@ -37,18 +34,14 @@ internal class CustomFormatService : ICustomFormatService
 
     public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
     {
-        await BuildRequest()
-            .AppendPathSegment($"customformat/{cf.GetCustomFormatId()}")
+        await _service.Request("customformat", cf.GetCustomFormatId())
             .PutJsonAsync(cf.Json)
             .ReceiveJson<JObject>();
     }
 
     public async Task DeleteCustomFormat(int customFormatId)
     {
-        await BuildRequest()
-            .AppendPathSegment($"customformat/{customFormatId}")
+        await _service.Request("customformat", customFormatId)
             .DeleteAsync();
     }
-
-    private Url BuildRequest() => _serverInfo.BuildRequest();
 }

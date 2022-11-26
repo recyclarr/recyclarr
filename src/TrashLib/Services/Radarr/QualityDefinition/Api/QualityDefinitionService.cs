@@ -1,4 +1,3 @@
-using Flurl;
 using Flurl.Http;
 using TrashLib.Config.Services;
 using TrashLib.Services.Radarr.QualityDefinition.Api.Objects;
@@ -7,28 +6,24 @@ namespace TrashLib.Services.Radarr.QualityDefinition.Api;
 
 internal class QualityDefinitionService : IQualityDefinitionService
 {
-    private readonly IServerInfo _serverInfo;
+    private readonly IServiceRequestBuilder _service;
 
-    public QualityDefinitionService(IServerInfo serverInfo)
+    public QualityDefinitionService(IServiceRequestBuilder service)
     {
-        _serverInfo = serverInfo;
+        _service = service;
     }
 
     public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
     {
-        return await BuildRequest()
-            .AppendPathSegment("qualitydefinition")
+        return await _service.Request("qualitydefinition")
             .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
     }
 
     public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
         IList<RadarrQualityDefinitionItem> newQuality)
     {
-        return await BuildRequest()
-            .AppendPathSegment("qualityDefinition/update")
+        return await _service.Request("qualityDefinition", "update")
             .PutJsonAsync(newQuality)
             .ReceiveJson<List<RadarrQualityDefinitionItem>>();
     }
-
-    private Url BuildRequest() => _serverInfo.BuildRequest();
 }

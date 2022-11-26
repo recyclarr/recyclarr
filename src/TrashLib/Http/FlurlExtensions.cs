@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Flurl.Http;
 
-namespace TrashLib.Extensions;
+namespace TrashLib.Http;
 
 public static class FlurlExtensions
 {

@@ -8,21 +8,20 @@ namespace TrashLib.Services.Sonarr.Api;
 public class ReleaseProfileApiService : IReleaseProfileApiService
 {
     private readonly ISonarrReleaseProfileCompatibilityHandler _profileHandler;
-    private readonly IServerInfo _serverInfo;
+    private readonly IServiceRequestBuilder _service;
 
     public ReleaseProfileApiService(
         ISonarrReleaseProfileCompatibilityHandler profileHandler,
-        IServerInfo serverInfo)
+        IServiceRequestBuilder service)
     {
         _profileHandler = profileHandler;
-        _serverInfo = serverInfo;
+        _service = service;
     }
 
     public async Task UpdateReleaseProfile(SonarrReleaseProfile profile)
     {
         var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(profile);
-        await _serverInfo.BuildRequest()
-            .AppendPathSegment($"releaseprofile/{profile.Id}")
+        await _service.Request("releaseprofile", profile.Id)
             .PutJsonAsync(profileToSend);
     }
 
@@ -30,8 +29,7 @@ public class ReleaseProfileApiService : IReleaseProfileApiService
     {
         var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(profile);
 
-        var response = await _serverInfo.BuildRequest()
-            .AppendPathSegment("releaseprofile")
+        var response = await _service.Request("releaseprofile")
             .PostJsonAsync(profileToSend)
             .ReceiveJson<JObject>();
 
@@ -40,8 +38,7 @@ public class ReleaseProfileApiService : IReleaseProfileApiService
 
     public async Task<IList<SonarrReleaseProfile>> GetReleaseProfiles()
     {
-        var response = await _serverInfo.BuildRequest()
-            .AppendPathSegment("releaseprofile")
+        var response = await _service.Request("releaseprofile")
             .GetJsonAsync<List<JObject>>();
 
         return response
@@ -51,8 +48,7 @@ public class ReleaseProfileApiService : IReleaseProfileApiService
 
     public async Task DeleteReleaseProfile(int releaseProfileId)
     {
-        await _serverInfo.BuildRequest()
-            .AppendPathSegment($"releaseprofile/{releaseProfileId}")
+        await _service.Request("releaseprofile", releaseProfileId)
             .DeleteAsync();
     }
 }

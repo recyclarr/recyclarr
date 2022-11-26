@@ -3,15 +3,11 @@ using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
-using Common.Networking;
 using Flurl.Http;
-using Flurl.Http.Configuration;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Recyclarr.Migration;
 using Serilog;
-using TrashLib.Config.Settings;
-using TrashLib.Extensions;
+using TrashLib.Http;
 using TrashLib.Repo;
 using TrashLib.Repo.VersionControl;
 using YamlDotNet.Core;
@@ -76,7 +72,6 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
     public override async Task Process(ILifetimeScope container)
     {
         var log = container.Resolve<ILogger>();
-        var settingsProvider = container.Resolve<ISettingsProvider>();
         var repoUpdater = container.Resolve<IRepoUpdater>();
         var migration = container.Resolve<IMigrationExecutor>();
 
@@ -85,32 +80,6 @@ public abstract class ServiceCommand : BaseCommand, IServiceCommand
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        SetupHttp(log, settingsProvider);
         await repoUpdater.UpdateRepo();
-    }
-
-    private static void SetupHttp(ILogger log, ISettingsProvider settingsProvider)
-    {
-        FlurlHttp.Configure(settings =>
-        {
-            var jsonSettings = new JsonSerializerSettings
-            {
-                // This makes sure that null properties, such as maxSize and preferredSize in Radarr
-                // Quality Definitions, do not get written out to JSON request bodies.
-                NullValueHandling = NullValueHandling.Ignore
-            };
-
-            settings.JsonSerializer = new NewtonsoftJsonSerializer(jsonSettings);
-            FlurlLogging.SetupLogging(settings, log);
-
-            // ReSharper disable once InvertIf
-            if (!settingsProvider.Settings.EnableSslCertificateValidation)
-            {
-                log.Warning(
-                    "Security Risk: Certificate validation is being DISABLED because setting " +
-                    "`enable_ssl_certificate_validation` is set to `false`");
-                settings.HttpClientFactory = new UntrustedCertClientFactory();
-            }
-        });
     }
 }

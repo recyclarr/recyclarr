@@ -14,7 +14,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
     private readonly IGuideProcessor _guideProcessor;
     private readonly IPersistenceProcessor _persistenceProcessor;
     private readonly IConsole _console;
-    private readonly IServerInfo _serverInfo;
+    private readonly IServiceRequestBuilder _service;
     private readonly ILogger _log;
 
     public CustomFormatUpdater(
@@ -23,14 +23,14 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         IGuideProcessor guideProcessor,
         IPersistenceProcessor persistenceProcessor,
         IConsole console,
-        IServerInfo serverInfo)
+        IServiceRequestBuilder service)
     {
         _log = log;
         _cache = cache;
         _guideProcessor = guideProcessor;
         _persistenceProcessor = persistenceProcessor;
         _console = console;
-        _serverInfo = serverInfo;
+        _service = service;
     }
 
     public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, IGuideService guideService)
@@ -141,8 +141,8 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_guideProcessor.CustomFormatsNotInGuide.Count > 0)
         {
             _log.Warning("The Custom Formats below do not exist in the guide and will " +
-                        "be skipped. Trash IDs must match what is listed in the output when using the " +
-                        "`--list-custom-formats` option");
+                         "be skipped. Trash IDs must match what is listed in the output when using the " +
+                         "`--list-custom-formats` option");
             _log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
 
             _console.Output.WriteLine("");
@@ -165,7 +165,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_guideProcessor.ConfigData.Count == 0)
         {
             _log.Error("Guide processing yielded no custom formats for configured instance host {BaseUrl}",
-                _serverInfo.SanitizedBaseUrl);
+                _service.SanitizedBaseUrl);
             return false;
         }
 

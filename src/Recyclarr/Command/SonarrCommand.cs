@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using Recyclarr.Config;
 using Serilog;
 using TrashLib.Config.Services;
-using TrashLib.Extensions;
+using TrashLib.Http;
 using TrashLib.Services.CustomFormat;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Config;

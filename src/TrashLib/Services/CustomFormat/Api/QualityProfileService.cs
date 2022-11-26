@@ -1,4 +1,3 @@
-using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using TrashLib.Config.Services;
@@ -7,27 +6,23 @@ namespace TrashLib.Services.CustomFormat.Api;
 
 internal class QualityProfileService : IQualityProfileService
 {
-    private readonly IServerInfo _serverInfo;
+    private readonly IServiceRequestBuilder _service;
 
-    public QualityProfileService(IServerInfo serverInfo)
+    public QualityProfileService(IServiceRequestBuilder service)
     {
-        _serverInfo = serverInfo;
+        _service = service;
     }
 
     public async Task<List<JObject>> GetQualityProfiles()
     {
-        return await BuildRequest()
-            .AppendPathSegment("qualityprofile")
+        return await _service.Request("qualityprofile")
             .GetJsonAsync<List<JObject>>();
     }
 
     public async Task<JObject> UpdateQualityProfile(JObject profileJson, int id)
     {
-        return await BuildRequest()
-            .AppendPathSegment($"qualityprofile/{id}")
+        return await _service.Request("qualityprofile", id)
             .PutJsonAsync(profileJson)
             .ReceiveJson<JObject>();
     }
-
-    private Url BuildRequest() => _serverInfo.BuildRequest();
 }

@@ -3,7 +3,7 @@ using Flurl.Http.Configuration;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace TrashLib.Extensions;
+namespace TrashLib.Http;
 
 public static class FlurlLogging
 {
