@@ -1,6 +1,6 @@
 networks:
   recyclarr:
-    name: recyclarr
+    name: recyclarr_dev
     external: true
 
 services:
