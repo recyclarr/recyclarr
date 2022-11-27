@@ -19,20 +19,32 @@ public sealed class GitRepository : IGitRepository
         _gitPath = gitPath;
     }
 
-    private async Task RunGitCmd(string args)
+    private Task RunGitCmd(params string[] args)
+    {
+        return RunGitCmd((ICollection<string>) args);
+    }
+
+    private async Task RunGitCmd(ICollection<string> args)
     {
         _log.Debug("Executing command: git {Args}", args);
 
         var output = new StringBuilder();
         var error = new StringBuilder();
 
-        var result = await Cli.Wrap(_gitPath.Path)
+        var cli = Cli.Wrap(_gitPath.Path)
             .WithArguments(args)
             .WithValidation(CommandResultValidation.None)
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(output))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error))
-            .WithWorkingDirectory(_paths.RepoDirectory.FullName)
-            .ExecuteAsync();
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error));
+
+        if (_paths.RepoDirectory.Exists)
+        {
+            var workDir = _paths.RepoDirectory.FullName;
+            _log.Debug("Using working directory: {Dir}", workDir);
+            cli = cli.WithWorkingDirectory(workDir);
+        }
+
+        var result = await cli.ExecuteAsync();
 
         _log.Debug("Command Output: {Output}", output.ToString().Trim());
 
@@ -51,34 +63,33 @@ public sealed class GitRepository : IGitRepository
 
     public async Task ForceCheckout(string branch)
     {
-        await RunGitCmd($"checkout -f {branch}");
+        await RunGitCmd("checkout", "-f", branch);
     }
 
     public async Task Fetch(string remote = "origin")
     {
-        await RunGitCmd($"fetch {remote}");
+        await RunGitCmd("fetch", remote);
     }
 
     public async Task ResetHard(string toBranchOrSha1)
     {
-        await RunGitCmd($"reset --hard {toBranchOrSha1}");
+        await RunGitCmd("reset", "--hard", toBranchOrSha1);
     }
 
     public async Task SetRemote(string name, string newUrl)
     {
-        await RunGitCmd($"remote set-url {name} {newUrl}");
+        await RunGitCmd("remote", "set-url", name, newUrl);
     }
 
     public async Task Clone(string cloneUrl, string? branch = null)
     {
-        var args = new StringBuilder("clone");
+        var args = new List<string> {"clone"};
         if (branch is not null)
         {
-            args.Append($" -b {branch}");
+            args.AddRange(new[] {"-b", branch});
         }
 
-        _paths.RepoDirectory.Create();
-        args.Append($" {cloneUrl} .");
-        await RunGitCmd(args.ToString());
+        args.AddRange(new[] {cloneUrl, _paths.RepoDirectory.FullName});
+        await RunGitCmd(args);
     }
 }
