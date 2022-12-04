@@ -1,3 +1,4 @@
+using Common.Extensions;
 using TrashLib.Startup;
 
 namespace TrashLib.Config.Settings;
@@ -36,7 +37,7 @@ public class SettingsProvider : ISettingsProvider
             "# For the settings file reference guide, visit the link to the wiki below:\n" +
             "# https://github.com/recyclarr/recyclarr/wiki/Settings-Reference\n";
 
-        _paths.SettingsPath.Directory.Create();
+        _paths.SettingsPath.CreateParentDirectory();
         using var stream = _paths.SettingsPath.CreateText();
         stream.Write(fileData);
     }

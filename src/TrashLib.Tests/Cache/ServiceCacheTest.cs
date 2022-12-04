@@ -51,7 +51,7 @@ public class ServiceCacheTest
         const string testJsonPath = "cacheFile.json";
         fs.AddFile(testJsonPath, new MockFileData(testJson));
 
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName(testJsonPath));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
 
         var obj = sut.Load<ObjectWithAttribute>();
 
@@ -85,7 +85,7 @@ public class ServiceCacheTest
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(_ => fs.FileInfo.FromFileName($"{ValidObjectName}.json"));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(_ => fs.FileInfo.New($"{ValidObjectName}.json"));
 
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
@@ -103,7 +103,7 @@ public class ServiceCacheTest
         ServiceCache sut)
     {
         const string testJsonPath = "cacheFile.json";
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName(testJsonPath));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
 
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
@@ -140,10 +140,10 @@ public class ServiceCacheTest
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("Foo.json"));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("Foo.json"));
         sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
 
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("Bar.json"));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("Bar.json"));
         sut.Save(new ObjectWithAttribute {TestValue = "Bar"});
 
         var expectedFiles = new[] {"*Foo.json", "*Bar.json"};
@@ -159,7 +159,7 @@ public class ServiceCacheTest
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("cacheFile.json"));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
         fs.AddFile("cacheFile.json", new MockFileData(""));
 
         Action act = () => sut.Load<ObjectWithAttribute>();
@@ -187,7 +187,7 @@ public class ServiceCacheTest
 ";
 
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.FromFileName("cacheFile.json"));
+        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
 
         var result = sut.Load<CustomFormatCache>();
 

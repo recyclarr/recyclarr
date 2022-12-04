@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Common.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
@@ -55,7 +56,7 @@ public class ServiceCache : IServiceCache
     public void Save<T>(T obj) where T : class
     {
         var path = PathFromAttribute<T>();
-        path.Directory.Create();
+        path.CreateParentDirectory();
 
         var serializer = JsonSerializer.Create(_jsonSettings);
 
