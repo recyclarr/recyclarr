@@ -18,12 +18,12 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="5.11.1" />
     <PackageVersion Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageVersion Include="morelinq" Version="3.3.2" />
-    <PackageVersion Include="MudBlazor" Version="6.0.18" />
+    <PackageVersion Include="MudBlazor" Version="6.1.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="18.3.1" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.1" />
     <PackageVersion Include="Serilog" Version="2.12.0" />
-    <PackageVersion Include="Serilog.AspNetCore" Version="6.0.1" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
