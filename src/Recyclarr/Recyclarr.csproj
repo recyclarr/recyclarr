@@ -20,7 +20,6 @@
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
     <PackageReference Include="System.Net.Http" />
-    <PackageReference Include="System.Private.Uri" />
     <PackageReference Include="System.Text.RegularExpressions" />
   </ItemGroup>
 
