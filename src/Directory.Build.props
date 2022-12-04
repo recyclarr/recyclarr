@@ -8,6 +8,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <!--

@@ -1,7 +1,4 @@
 <Project>
-  <PropertyGroup>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-  </PropertyGroup>
   <!-- Central Package Versions -->
   <ItemGroup>
     <PackageVersion Include="Autofac" Version="6.4.0" />
