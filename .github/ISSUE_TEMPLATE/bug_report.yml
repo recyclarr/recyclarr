@@ -10,18 +10,17 @@ body:
         - label: I have searched the existing issues
           required: true
   - type: textarea
+    validations: { required: true }
     attributes:
       label: Current Behavior
       description: A concise description of what you're experiencing.
-    validations:
-      required: true
   - type: textarea
+    validations: { required: true }
     attributes:
       label: Expected Behavior
       description: A concise description of what you expected to happen.
-    validations:
-      required: true
   - type: textarea
+    validations: { required: true }
     attributes:
       label: Steps To Reproduce
       description: Steps to reproduce the behavior.
@@ -30,33 +29,45 @@ body:
         2. With this config...
         3. Run '...'
         4. See error...
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Environment
-      description: OS and version + Docker if you're using it.
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Recyclarr Version
-      description: What version of Recyclarr are you using?
-    validations:
-      required: true
-  - type: input
-    attributes:
-      label: Sonarr/Radarr Version
-      description: What version of Sonarr and/or Radarr are you using (if applicable)?
-    validations:
-      required: false
   - type: textarea
+    validations: { required: true }
+    attributes:
+      label: Environment & Versions
+      render: bash
+      description: |
+        Please provide information about your environment below. If certain information is not
+        relevant to your issue, you may omit it. Feel free to add more information than what is
+        shown here as well, especially if it's directly related to the issue and will help debug the
+        problem and/or find a solution.
+
+        Examples:
+
+        - Operating System: `Windows 10 / Ubuntu 22.04 / Docker`
+        - Recyclarr Version: `v3.0.0`
+        - Sonarr Version: `3.0.9.1549`
+        - Radarr Version: `4.3.0.6671`
+      value: |
+        - Operating System:
+        - Recyclarr Version:
+        - Sonarr Version:
+        - Radarr Version:
+  - type: textarea
+    validations: { required: true }
+    attributes:
+      label: Recyclarr Log File(s)
+      placeholder: Drag & Drop your Recyclarr log file(s) here.
+      description: >
+        Attach one or more [log files](https://recyclarr.dev/wiki/troubleshooting#obtaining-debug-logs)
+        that are relevant to the issue. Due to the size of these files, I do not recommend pasting
+        it here.
+  - type: textarea
+    validations: { required: true }
     attributes:
       label: Configuration YAML
+      render: YAML
       description: >
         Provide your [redacted](https://recyclarr.dev/wiki/troubleshooting/#redact-config)
-        `recyclarr.yml` (and others) here using [fenced code
-        blocks](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+        configuration YAML here (e.g. `recyclarr.yml`).
   - type: textarea
     attributes:
       label: Sonarr / Radarr Logs
