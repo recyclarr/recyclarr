@@ -1,13 +1,17 @@
 using Autofac;
 using CliFx;
 using CliFx.Attributes;
+using CliFx.Exceptions;
 using CliFx.Infrastructure;
+using Flurl.Http;
 using JetBrains.Annotations;
 using MoreLinq.Extensions;
 using Recyclarr.Command.Setup;
 using Recyclarr.Logging;
 using Serilog;
 using Serilog.Events;
+using TrashLib.Http;
+using TrashLib.Repo.VersionControl;
 using TrashLib.Startup;
 
 namespace Recyclarr.Command;
@@ -22,6 +26,8 @@ public abstract class BaseCommand : ICommand
         "Display additional logs useful for development/debug purposes.")]
     // ReSharper disable once MemberCanBeProtected.Global
     public bool Debug { get; [UsedImplicitly] set; } = false;
+
+    protected ILogger Logger { get; private set; } = Log.Logger;
 
     protected virtual void RegisterServices(ContainerBuilder builder)
     {
@@ -47,12 +53,33 @@ public abstract class BaseCommand : ICommand
             RegisterServices(builder);
         });
 
+        Logger = container.Resolve<ILogger>();
         var tasks = container.Resolve<IOrderedEnumerable<IBaseCommandSetupTask>>().ToArray();
         tasks.ForEach(x => x.OnStart());
 
         try
         {
             await Process(container);
+        }
+        catch (Exception e)
+        {
+            switch (e)
+            {
+                case GitCmdException e2:
+                    Logger.Error(e2, "Non-zero exit code {ExitCode} while executing Git command: {Error}",
+                        e2.ExitCode, e2.Error);
+                    break;
+
+                case FlurlHttpException e2:
+                    Logger.Error("HTTP error: {Message}", e2.SanitizedExceptionMessage());
+                    break;
+
+                default:
+                    Logger.Error(e, "Non-recoverable exception");
+                    break;
+            }
+
+            throw new CommandException("Exiting due to exception");
         }
         finally
         {

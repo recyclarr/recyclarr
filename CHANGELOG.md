@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Improved logging: theme changes, better exception handling, more detail written to log files.
+
 ## [3.0.0] - 2022-12-03
 
 This release contains **BREAKING CHANGES**. See the [v3.0 Upgrade Guide][breaking3] for required

@@ -88,7 +88,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (_persistenceProcessor.InvalidProfileNames.Count > 0)
         {
             _log.Warning("The following quality profile names are not valid and should either be " +
-                         "removed or renamed in your YAML config");
+                "removed or renamed in your YAML config");
             _log.Warning("{QualityProfileNames}", _persistenceProcessor.InvalidProfileNames);
         }
     }
@@ -136,13 +136,12 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private bool ValidateGuideDataAndCheckShouldProceed()
     {
-        _console.Output.WriteLine("");
-
         if (_guideProcessor.CustomFormatsNotInGuide.Count > 0)
         {
-            _log.Warning("The Custom Formats below do not exist in the guide and will " +
-                         "be skipped. Trash IDs must match what is listed in the output when using the " +
-                         "`--list-custom-formats` option");
+            _log.Warning(
+                "The Custom Formats below do not exist in the guide and will " +
+                "be skipped. Trash IDs must match what is listed in the output when using the " +
+                "`--list-custom-formats` option");
             _log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
 
             _console.Output.WriteLine("");
@@ -155,8 +154,9 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
         if (cfsWithoutQualityProfiles.Count > 0)
         {
-            _log.Debug("These custom formats will be uploaded but are not associated to a quality profile in the " +
-                       "config file: {UnassociatedCfs}", cfsWithoutQualityProfiles);
+            _log.Debug(
+                "These custom formats will be uploaded but are not associated to a quality profile in the " +
+                "config file: {UnassociatedCfs}", cfsWithoutQualityProfiles);
 
             _console.Output.WriteLine("");
         }
@@ -171,8 +171,9 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
         if (_guideProcessor.CustomFormatsWithoutScore.Count > 0)
         {
-            _log.Information("The below custom formats have no score in the guide or in your YAML config. They will " +
-                             "still be synced, but no score will be set in your chosen quality profiles");
+            _log.Information(
+                "The below custom formats have no score in the guide or in your YAML config. They will " +
+                "still be synced, but no score will be set in your chosen quality profiles");
             foreach (var tuple in _guideProcessor.CustomFormatsWithoutScore)
             {
                 _log.Information("{CfList}", tuple);

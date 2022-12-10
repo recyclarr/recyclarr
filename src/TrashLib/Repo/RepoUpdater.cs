@@ -35,21 +35,19 @@ public class RepoUpdater : IRepoUpdater
     {
         // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
         // fresh.
-        var exception = await CheckoutAndUpdateRepo();
-        if (exception is not null)
+        try
         {
-            _log.Information("Deleting local git repo and retrying git operation...");
+            await CheckoutAndUpdateRepo();
+        }
+        catch (GitCmdException)
+        {
+            _log.Warning("Deleting local git repo and retrying git operation due to error...");
             _fileUtils.DeleteReadOnlyDirectory(RepoPath.FullName);
-
-            exception = await CheckoutAndUpdateRepo();
-            if (exception is not null)
-            {
-                throw exception;
-            }
+            await CheckoutAndUpdateRepo();
         }
     }
 
-    private async Task<Exception?> CheckoutAndUpdateRepo()
+    private async Task CheckoutAndUpdateRepo()
     {
         var repoSettings = _settingsProvider.Settings.Repository;
         var cloneUrl = repoSettings.CloneUrl;
@@ -61,19 +59,9 @@ public class RepoUpdater : IRepoUpdater
             _log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
         }
 
-        try
-        {
-            using var repo = await _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
-            await repo.ForceCheckout(branch);
-            await repo.Fetch();
-            await repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
-        }
-        catch (GitCmdException e)
-        {
-            _log.Error(e, "An exception occurred during git operations on path: {RepoPath}", RepoPath);
-            return e;
-        }
-
-        return null;
+        using var repo = await _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, RepoPath.FullName, branch);
+        await repo.ForceCheckout(branch);
+        await repo.Fetch();
+        await repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
     }
 }

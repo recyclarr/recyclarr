@@ -26,7 +26,7 @@ public sealed class GitRepository : IGitRepository
 
     private async Task RunGitCmd(ICollection<string> args)
     {
-        _log.Debug("Executing command: git {Args}", args);
+        _log.Debug("Executing git command with args: {Args}", args);
 
         var output = new StringBuilder();
         var error = new StringBuilder();
@@ -69,6 +69,11 @@ public sealed class GitRepository : IGitRepository
     public async Task Fetch(string remote = "origin")
     {
         await RunGitCmd("fetch", remote);
+    }
+
+    public async Task Status()
+    {
+        await RunGitCmd("status");
     }
 
     public async Task ResetHard(string toBranchOrSha1)

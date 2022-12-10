@@ -10,6 +10,7 @@
     <PackageReference Include="Autofac.Extras.Ordering" />
     <PackageReference Include="CliFx" />
     <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Expressions" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />

@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
+using Serilog;
 using TestLibrary.AutoFixture;
 using TrashLib.Config.Services;
 using TrashLib.ExceptionTypes;
@@ -57,7 +58,7 @@ public class SonarrCompatibilityTest
 
         var compat = Substitute.For<ISonarrCompatibility>();
         var dataV1 = new SonarrReleaseProfileV1 {Ignored = "one,two,three"};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
+        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), compat, ctx.Mapper);
 
         var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV1)));
 
@@ -74,7 +75,7 @@ public class SonarrCompatibilityTest
 
         var compat = Substitute.For<ISonarrCompatibility>();
         var dataV2 = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
+        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), compat, ctx.Mapper);
 
         var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV2)));
 
@@ -93,7 +94,7 @@ public class SonarrCompatibilityTest
         }.ToObservable());
 
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
+        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), compat, ctx.Mapper);
 
         var result = await sut.CompatibleReleaseProfileForSendingAsync(data);
 
@@ -112,7 +113,7 @@ public class SonarrCompatibilityTest
         }.ToObservable());
 
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(compat, ctx.Mapper);
+        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), compat, ctx.Mapper);
 
         var result = await sut.CompatibleReleaseProfileForSendingAsync(data);
 

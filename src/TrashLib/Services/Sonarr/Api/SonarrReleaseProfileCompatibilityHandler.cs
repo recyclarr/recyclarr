@@ -10,13 +10,16 @@ namespace TrashLib.Services.Sonarr.Api;
 
 public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCompatibilityHandler
 {
+    private readonly ILogger _log;
     private readonly ISonarrCompatibility _compatibility;
     private readonly IMapper _mapper;
 
     public SonarrReleaseProfileCompatibilityHandler(
+        ILogger log,
         ISonarrCompatibility compatibility,
         IMapper mapper)
     {
+        _log = log;
         _compatibility = compatibility;
         _mapper = mapper;
     }
@@ -38,10 +41,10 @@ public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCom
         if (profile.IsValid(schema, out errorMessages))
         {
             return profile.ToObject<SonarrReleaseProfile>()
-                   ?? throw new InvalidDataException("SonarrReleaseProfile V2 parsing failed");
+                ?? throw new InvalidDataException("SonarrReleaseProfile V2 parsing failed");
         }
 
-        Log.Debug("SonarrReleaseProfile is not a match for V2, proceeding to V1: {Reasons}", errorMessages);
+        _log.Debug("SonarrReleaseProfile is not a match for V2, proceeding to V1: {Reasons}", errorMessages);
 
         schema = JSchema.Parse(SonarrReleaseProfileSchema.V1);
         if (profile.IsValid(schema, out errorMessages))

@@ -4,7 +4,6 @@ public class GitCmdException : Exception
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
     public string Error { get; }
-
     public int ExitCode { get; }
     // ReSharper restore UnusedAutoPropertyAccessor.Global
 
