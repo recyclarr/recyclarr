@@ -87,10 +87,8 @@ what commands you need to run manually.
 
 ## Conventional Commits
 
-This project uses and enforces a variation of [Conventional Commits][commits]. The below official
-commit types are used:
-
-Official:
+This project uses and enforces [Conventional Commits][commits]. The below official commit types are
+used:
 
 - `build`: Update project files, settings, etc.
 - `chore`: Anything not code related or that falls into other categories.
@@ -103,12 +101,6 @@ Official:
 - `revert`: Prefix to be used for commits made by the `git revert` command.
 - `style`: A whitespace or code cleanup change in code.
 - `test`: Updates to unit test code only.
-
-Specialized:
-
-- `change`: Change to existing functionality.
-- `deprecate`: Deprecation of existing functionality.
-- `remove`: Removal of existing feature.
 
 ## Release Process
 
