@@ -17,6 +17,7 @@ public class JsonUtilsTest
     [Test]
     public void Log_files_that_do_not_exist()
     {
+        using var logContext = TestCorrelator.CreateContext();
         var fs = new MockFileSystem();
         var log = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Debug)
@@ -30,7 +31,7 @@ public class JsonUtilsTest
         var result = JsonUtils.GetJsonFilesInDirectories(new[] {path}, log);
 
         result.Should().BeEmpty();
-        TestCorrelator.GetLogEventsFromCurrentContext()
+        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
             .Should().ContainSingle()
             .Which.RenderMessage()
             .Should().Match("*doesnt_exist*");
@@ -45,7 +46,7 @@ public class JsonUtilsTest
             .WriteTo.TestCorrelator()
             .CreateLogger();
 
-        using var context = TestCorrelator.CreateContext();
+        using var logContext = TestCorrelator.CreateContext();
 
         var path = fs.CurrentDirectory().SubDirectory("exists").File("test.json");
         fs.AddFile(path.FullName, new MockFileData(""));
@@ -56,7 +57,8 @@ public class JsonUtilsTest
             .Which.FullName
             .Should().Be(path.FullName);
 
-        TestCorrelator.GetLogEventsFromCurrentContext().Should().BeEmpty();
+        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
+            .Should().BeEmpty();
     }
 
     [Test]
@@ -68,7 +70,7 @@ public class JsonUtilsTest
             .WriteTo.TestCorrelator()
             .CreateLogger();
 
-        using var context = TestCorrelator.CreateContext();
+        using var logContext = TestCorrelator.CreateContext();
 
         var paths = new[]
         {
@@ -87,7 +89,7 @@ public class JsonUtilsTest
             .Which.FullName
             .Should().Be(existingFile);
 
-        TestCorrelator.GetLogEventsFromCurrentContext()
+        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
             .Should().ContainSingle()
             .Which.RenderMessage()
             .Should().Match("*does_not_exist*");
