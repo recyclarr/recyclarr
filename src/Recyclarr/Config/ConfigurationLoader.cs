@@ -1,8 +1,11 @@
 ﻿using System.IO.Abstractions;
 using FluentValidation;
+using Recyclarr.Logging;
 using Serilog;
+using Serilog.Context;
 using TrashLib.Config;
 using TrashLib.Config.Services;
+using TrashLib.Http;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -14,95 +17,159 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
 {
     private readonly ILogger _log;
     private readonly IDeserializer _deserializer;
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fs;
     private readonly IValidator<T> _validator;
 
     public ConfigurationLoader(
         ILogger log,
-        IFileSystem fileSystem,
+        IFileSystem fs,
         IYamlSerializerFactory yamlFactory,
         IValidator<T> validator)
     {
         _log = log;
-        _fileSystem = fileSystem;
+        _fs = fs;
         _validator = validator;
         _deserializer = yamlFactory.CreateDeserializer();
     }
 
-    public IEnumerable<T> Load(string file, string configSection)
+    public ICollection<T> LoadMany(IEnumerable<string> configFiles, string configSection)
     {
-        using var stream = _fileSystem.File.OpenText(file);
-        return LoadFromStream(stream, configSection);
+        return configFiles.SelectMany(file => Load(file, configSection)).ToList();
     }
 
-    public IEnumerable<T> LoadFromStream(TextReader stream, string configSection)
+    public ICollection<T> Load(string file, string configSection)
     {
-        var parser = new Parser(stream);
-        parser.Consume<StreamStart>();
-        parser.Consume<DocumentStart>();
-        parser.Consume<MappingStart>();
+        _log.Debug("Loading config file: {File}", file);
+        using var logScope = LogContext.PushProperty(LogProperty.Scope, _fs.Path.GetFileName(file));
 
-        var validConfigs = new List<T>();
-        while (parser.TryConsume<Scalar>(out var key))
+        try
         {
-            if (key.Value != configSection)
+            using var stream = _fs.File.OpenText(file);
+            var configs = LoadFromStream(stream, configSection);
+            if (!configs.Any())
             {
-                parser.SkipThisAndNestedEvents();
-                continue;
+                _log.Warning("Configuration file yielded no usable configuration (is it empty?)");
             }
 
-            List<T>? configs;
-            switch (parser.Current)
+            return configs;
+        }
+        catch (YamlException e)
+        {
+            var line = e.Start.Line;
+            switch (e.InnerException)
             {
-                case MappingStart:
-                    configs = _deserializer.Deserialize<Dictionary<string, T>>(parser)
-                        .Select(kvp =>
-                        {
-                            kvp.Value.Name = kvp.Key;
-                            return kvp.Value;
-                        })
-                        .ToList();
-                    break;
-
-                case SequenceStart:
-                    _log.Warning(
-                        "Found array-style list of instances instead of named-style. Array-style lists of Sonarr/Radarr " +
-                        "instances are deprecated");
-                    configs = _deserializer.Deserialize<List<T>>(parser);
+                case InvalidCastException:
+                    _log.Error("Incompatible value assigned/used at line {Line}", line);
                     break;
 
                 default:
-                    configs = null;
+                    _log.Error("Exception at line {Line}: {Msg}", line, e.InnerException?.Message ?? e.Message);
                     break;
             }
-
-            if (configs is not null)
-            {
-                ValidateConfigs(configSection, configs, validConfigs);
-            }
-
-            parser.SkipThisAndNestedEvents();
         }
 
-        return validConfigs;
+        _log.Error("Due to previous exception, this file will be skipped: {File}", file);
+        return Array.Empty<T>();
     }
 
-    private void ValidateConfigs(string configSection, IEnumerable<T> configs, ICollection<T> validConfigs)
+    public ICollection<T> LoadFromStream(TextReader stream, string requestedSection)
     {
-        foreach (var config in configs)
+        _log.Debug("Loading config section: {Section}", requestedSection);
+        var parser = new Parser(stream);
+
+        parser.Consume<StreamStart>();
+        if (parser.Current is StreamEnd)
         {
-            var result = _validator.Validate(config);
+            _log.Debug("Skipping this config due to StreamEnd");
+            return Array.Empty<T>();
+        }
+
+        parser.Consume<DocumentStart>();
+        if (parser.Current is DocumentEnd)
+        {
+            _log.Debug("Skipping this config due to DocumentEnd");
+            return Array.Empty<T>();
+        }
+
+        return ParseAllSections(parser, requestedSection);
+    }
+
+    private ICollection<T> ParseAllSections(Parser parser, string requestedSection)
+    {
+        var configs = new List<T>();
+
+        parser.Consume<MappingStart>();
+        while (parser.TryConsume<Scalar>(out var section))
+        {
+            if (section.Value == requestedSection)
+            {
+                configs.AddRange(ParseSingleSection(parser));
+            }
+            else
+            {
+                _log.Debug("Skipping non-matching config section {Section} at line {Line}",
+                    section.Value, section.Start.Line);
+                parser.SkipThisAndNestedEvents();
+            }
+        }
+
+        // If any config names are null, that means user specified array-style (deprecated) instances.
+        if (configs.Any(x => x.Name is null))
+        {
+            _log.Warning(
+                "Found array-style list of instances instead of named-style. " +
+                "Array-style lists of Sonarr/Radarr instances are deprecated");
+        }
+
+        return configs;
+    }
+
+    private ICollection<T> ParseSingleSection(Parser parser)
+    {
+        var configs = new List<T>();
+
+        switch (parser.Current)
+        {
+            case MappingStart:
+                ParseAndAdd<MappingStart, MappingEnd>(parser, configs);
+                break;
+
+            case SequenceStart:
+                ParseAndAdd<SequenceStart, SequenceEnd>(parser, configs);
+                break;
+        }
+
+        return configs;
+    }
+
+    private void ParseAndAdd<TStart, TEnd>(Parser parser, ICollection<T> configs)
+        where TStart : ParsingEvent
+        where TEnd : ParsingEvent
+    {
+        parser.Consume<TStart>();
+        while (!parser.TryConsume<TEnd>(out _))
+        {
+            var lineNumber = parser.Current?.Start.Line;
+
+            string? instanceName = null;
+            if (parser.TryConsume<Scalar>(out var key))
+            {
+                instanceName = key.Value;
+            }
+
+            var newConfig = _deserializer.Deserialize<T>(parser);
+            newConfig.Name = instanceName;
+
+            var result = _validator.Validate(newConfig);
             if (result is {IsValid: false})
             {
-                throw new ConfigurationException(configSection, typeof(T), result.Errors);
+                var printableName = instanceName ?? FlurlLogging.SanitizeUrl(newConfig.BaseUrl);
+                _log.Error("Validation failed for instance config {Instance} at line {Line} with errors {Errors}",
+                    printableName, lineNumber, result.Errors);
+                continue;
             }
 
-            validConfigs.Add(config);
+            configs.Add(newConfig);
         }
-    }
-
-    public IEnumerable<T> LoadMany(IEnumerable<string> configFiles, string configSection)
-    {
-        return configFiles.SelectMany(file => Load(file, configSection));
     }
 }

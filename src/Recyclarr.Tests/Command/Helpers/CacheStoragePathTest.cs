@@ -13,11 +13,11 @@ namespace Recyclarr.Tests.Command.Helpers;
 public class CacheStoragePathTest : IntegrationFixture
 {
     [Test]
-    public void Use_guid_when_empty_name()
+    public void Use_guid_when_no_name()
     {
         var config = Substitute.ForPartsOf<ServiceConfiguration>();
         config.BaseUrl = "something";
-        config.Name = "";
+        config.Name = null;
 
         using var scope = Container.BeginLifetimeScope(builder =>
         {
@@ -31,7 +31,7 @@ public class CacheStoragePathTest : IntegrationFixture
     }
 
     [Test]
-    public void Use_name_when_not_empty()
+    public void Use_name_when_not_null()
     {
         var config = Substitute.ForPartsOf<ServiceConfiguration>();
         config.BaseUrl = "something";

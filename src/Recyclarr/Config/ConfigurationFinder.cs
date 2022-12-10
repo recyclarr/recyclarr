@@ -57,7 +57,6 @@ public class ConfigurationFinder : IConfigurationFinder
             throw new CommandException("No configuration YAML files found");
         }
 
-        _log.Debug("Using config files: {ConfigFiles}", configs);
         return configs;
     }
 }

@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Improved logging: theme changes, better exception handling, more detail written to log files.
+- Print instance name instead of URL in more places.
+- Configuration parsing is more forgiving about errors:
+  - If there's a YAML syntax error, skip the file but continue.
+  - If there's a validation error, skip only that instance (not the whole file).
+
+### Fixed
+
+- Empty configuration files are skipped if they are empty (warning is printed).
 
 ## [3.0.0] - 2022-12-03
 

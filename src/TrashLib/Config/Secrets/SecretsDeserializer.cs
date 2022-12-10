@@ -25,10 +25,10 @@ public class SecretsDeserializer : INodeDeserializer
             return false;
         }
 
-        var scalar = reader.Consume<Scalar>();
-        if (!_secrets.Secrets.TryGetValue(scalar.Value, out var secretsValue))
+        var secretKey = reader.Consume<Scalar>();
+        if (!_secrets.Secrets.TryGetValue(secretKey.Value, out var secretsValue))
         {
-            throw new YamlException(scalar.Start, scalar.End, $"{scalar.Value} is not defined in secrets.yml.");
+            throw new SecretNotFoundException(secretKey.Start.Line, secretKey.Value);
         }
 
         value = secretsValue;

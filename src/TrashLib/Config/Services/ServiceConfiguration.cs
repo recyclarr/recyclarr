@@ -1,11 +1,14 @@
 using JetBrains.Annotations;
+using YamlDotNet.Serialization;
 
 namespace TrashLib.Config.Services;
 
 public abstract class ServiceConfiguration : IServiceConfiguration
 {
-    // Name is set dynamically by
-    public string Name { get; set; } = "";
+    // Name is set dynamically by ConfigurationLoader
+    [YamlIgnore]
+    public string? Name { get; set; }
+
     public string BaseUrl { get; set; } = "";
     public string ApiKey { get; set; } = "";
 

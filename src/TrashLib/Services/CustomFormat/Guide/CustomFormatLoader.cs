@@ -40,7 +40,6 @@ public class CustomFormatLoader : ICustomFormatLoader
         IReadOnlyCollection<CustomFormatCategoryItem> categories)
     {
         return Observable.Using(file.OpenText, x => x.ReadToEndAsync().ToObservable())
-            .Do(_ => _log.Debug("Parsing CF Json: {Name}", file.Name))
             .Select(x =>
             {
                 var cf = _parser.ParseCustomFormatData(x, file.Name);

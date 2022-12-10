@@ -16,7 +16,7 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         _secretsProvider = secretsProvider;
     }
 
-    public IDeserializer CreateDeserializer()
+    public IDeserializer CreateDeserializer(Action<DeserializerBuilder>? extraBuilder = null)
     {
         var builder = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
@@ -26,6 +26,8 @@ public class YamlSerializerFactory : IYamlSerializerFactory
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
             .WithObjectFactory(_objectFactory);
+
+        extraBuilder?.Invoke(builder);
 
         return builder.Build();
     }

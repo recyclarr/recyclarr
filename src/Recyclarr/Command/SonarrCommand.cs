@@ -94,7 +94,8 @@ public class SonarrCommand : ServiceCommand
                 builder.RegisterInstance(config).As<IServiceConfiguration>();
             });
 
-            log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
+            log.Information("Processing {Server} server {Name}",
+                Name, config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl));
 
             var versionEnforcement = scope.Resolve<ISonarrVersionEnforcement>();
             await versionEnforcement.DoVersionEnforcement(config);

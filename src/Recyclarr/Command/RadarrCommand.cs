@@ -60,7 +60,8 @@ internal class RadarrCommand : ServiceCommand
                 builder.RegisterInstance(config).As<IServiceConfiguration>();
             });
 
-            log.Information("Processing server {Url}", FlurlLogging.SanitizeUrl(config.BaseUrl));
+            log.Information("Processing {Server} server {Name}",
+                Name, config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl));
 
             // There's no actual compatibility checks to perform yet. We directly access the RadarrCompatibility class,
             // as opposed to a IRadarrVersionEnforcement object (like Sonarr does), simply to force the API invocation

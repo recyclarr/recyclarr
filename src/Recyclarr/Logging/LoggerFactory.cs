@@ -11,31 +11,31 @@ public class LoggerFactory
 {
     private readonly IAppPaths _paths;
 
-    private const string BaseTemplate =
-        "{@m}" +
-        "{@x}" +
-        "\n";
-
     public LoggerFactory(IAppPaths paths)
     {
         _paths = paths;
     }
 
+    private static string GetBaseTemplateString()
+    {
+        var scope = LogProperty.Scope;
+
+        return
+            $"{{#if {scope} is not null}}{{{scope}}}: {{#end}}" +
+            "{@m}" +
+            "{@x}" +
+            "\n";
+    }
+
     private static ExpressionTemplate GetConsoleTemplate()
     {
-        const string template =
-            "[{@l:u3}] " +
-            BaseTemplate;
-
+        var template = "[{@l:u3}] " + GetBaseTemplateString();
         return new ExpressionTemplate(template, theme: TemplateTheme.Code);
     }
 
     private static ExpressionTemplate GetFileTemplate()
     {
-        const string template =
-            "[{@t:HH:mm:ss} {@l:u3}] " +
-            BaseTemplate;
-
+        var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString();
         return new ExpressionTemplate(template);
     }
 
@@ -47,6 +47,7 @@ public class LoggerFactory
             .MinimumLevel.Is(LogEventLevel.Debug)
             .WriteTo.Console(GetConsoleTemplate(), level)
             .WriteTo.File(GetFileTemplate(), logPath.FullName)
+            .Enrich.FromLogContext()
             .CreateLogger();
     }
 }
