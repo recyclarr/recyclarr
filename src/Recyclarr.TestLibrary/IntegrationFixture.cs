@@ -5,11 +5,11 @@ using Autofac;
 using Autofac.Features.ResolveAnything;
 using CliFx.Infrastructure;
 using Common.TestLibrary;
-using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Command;
 using Serilog;
 using Serilog.Events;
+using TestLibrary;
 using TrashLib;
 using TrashLib.Repo.VersionControl;
 using TrashLib.Startup;
@@ -31,9 +31,9 @@ public abstract class IntegrationFixture : IDisposable
             builder.RegisterInstance(Console).As<IConsole>();
             builder.RegisterInstance(Logger).As<ILogger>().SingleInstance();
 
-            RegisterMockFor<IServiceCommand>(builder);
-            RegisterMockFor<IGitRepository>(builder);
-            RegisterMockFor<IGitRepositoryFactory>(builder);
+            builder.RegisterMockFor<IServiceCommand>();
+            builder.RegisterMockFor<IGitRepository>();
+            builder.RegisterMockFor<IGitRepositoryFactory>();
 
             RegisterExtraTypes(builder);
 
@@ -72,11 +72,6 @@ public abstract class IntegrationFixture : IDisposable
     protected ILogger Logger { get; }
 
     // ReSharper restore MemberCanBePrivate.Global
-
-    private static void RegisterMockFor<T>(ContainerBuilder builder) where T : class
-    {
-        builder.RegisterInstance(Substitute.For<T>()).As<T>();
-    }
 
     protected T Resolve<T>() where T : notnull
     {

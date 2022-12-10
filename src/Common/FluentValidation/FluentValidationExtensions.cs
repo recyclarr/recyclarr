@@ -21,12 +21,12 @@ public static class FluentValidationExtensions
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(
         this IEnumerable<TSource> source, TValidator validator,
         Action<List<ValidationFailure>, TSource>? handleInvalid = null)
-        where TValidator : IValidator<TSource>, new()
+        where TValidator : IValidator<TSource>
     {
         foreach (var s in source)
         {
             var result = validator.Validate(s);
-            if (result.IsValid)
+            if (result is {IsValid: true})
             {
                 yield return s;
             }
