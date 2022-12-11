@@ -275,12 +275,37 @@ sonarr:
     }
 
     [Test, AutoMockData]
-    public void Yaml_file_with_only_comment_should_be_skipped(ConfigurationLoader<TestConfig> sut)
+    public void Throw_when_yaml_file_only_has_comment(ConfigurationLoader<TestConfig> sut)
     {
         const string testYml = "# YAML with nothing but this comment";
 
-        var result = sut.LoadFromStream(new StringReader(testYml), "fubar");
+        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
 
-        result.Should().BeEmpty();
+        act.Should().Throw<EmptyYamlException>();
+    }
+
+    [Test, AutoMockData]
+    public void Throw_when_yaml_file_is_empty(ConfigurationLoader<TestConfig> sut)
+    {
+        const string testYml = "";
+
+        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
+
+        act.Should().Throw<EmptyYamlException>();
+    }
+
+    [Test, AutoMockData]
+    public void Do_not_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader<TestConfig> sut)
+    {
+        const string testYml = @"
+not_wanted:
+  instance:
+    base_url: abc
+    api_key: xyz
+";
+
+        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
+
+        act.Should().NotThrow();
     }
 }

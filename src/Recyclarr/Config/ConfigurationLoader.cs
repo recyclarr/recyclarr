@@ -45,13 +45,12 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
         try
         {
             using var stream = _fs.File.OpenText(file);
-            var configs = LoadFromStream(stream, configSection);
-            if (!configs.Any())
-            {
-                _log.Warning("Configuration file yielded no usable configuration (is it empty?)");
-            }
-
-            return configs;
+            return LoadFromStream(stream, configSection);
+        }
+        catch (EmptyYamlException)
+        {
+            _log.Warning("Configuration file yielded no usable configuration (is it empty?)");
+            return Array.Empty<T>();
         }
         catch (YamlException e)
         {
@@ -81,14 +80,14 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
         if (parser.Current is StreamEnd)
         {
             _log.Debug("Skipping this config due to StreamEnd");
-            return Array.Empty<T>();
+            throw new EmptyYamlException();
         }
 
         parser.Consume<DocumentStart>();
         if (parser.Current is DocumentEnd)
         {
             _log.Debug("Skipping this config due to DocumentEnd");
-            return Array.Empty<T>();
+            throw new EmptyYamlException();
         }
 
         return ParseAllSections(parser, requestedSection);
