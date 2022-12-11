@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2022-12-11
+
 This release contains **BREAKING CHANGES**. See the [v4.0 Upgrade Guide][breaking4] for required
 changes you need to make.
 
@@ -533,7 +535,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/recyclarr/recyclarr/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/recyclarr/recyclarr/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/recyclarr/recyclarr/compare/v2.6.1...v3.0.0
 [2.6.1]: https://github.com/recyclarr/recyclarr/compare/v2.6.0...v2.6.1
