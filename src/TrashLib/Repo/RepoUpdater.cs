@@ -39,8 +39,9 @@ public class RepoUpdater : IRepoUpdater
         {
             await CheckoutAndUpdateRepo();
         }
-        catch (GitCmdException)
+        catch (GitCmdException e)
         {
+            _log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}", e.ExitCode, e.Error);
             _log.Warning("Deleting local git repo and retrying git operation due to error...");
             _fileUtils.DeleteReadOnlyDirectory(RepoPath.FullName);
             await CheckoutAndUpdateRepo();
