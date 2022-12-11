@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace TrashLib.Services.Common.QualityDefinition;
+namespace TrashLib.Services.QualitySize.Guide;
 
 public class QualityItem
 {

@@ -5,13 +5,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 
-namespace TrashLib.Services.Common.QualityDefinition;
+namespace TrashLib.Services.QualitySize.Guide;
 
-internal class QualityGuideParser<T> where T : class
+internal class QualitySizeGuideParser<T> where T : class
 {
     private readonly ILogger _log;
 
-    public QualityGuideParser(ILogger log)
+    public QualitySizeGuideParser(ILogger log)
     {
         _log = log;
     }

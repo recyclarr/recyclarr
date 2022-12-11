@@ -16,6 +16,8 @@ public abstract class ServiceConfiguration : IServiceConfiguration
         new List<CustomFormatConfig>();
 
     public bool DeleteOldCustomFormats { get; init; }
+
+    public QualityDefinitionConfig? QualityDefinition { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -33,4 +35,11 @@ public class QualityProfileScoreConfig
     public string Name { get; init; } = "";
     public int? Score { get; init; }
     public bool ResetUnmatchedScores { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public class QualityDefinitionConfig
+{
+    public string Type { get; init; } = "";
+    public decimal? PreferredRatio { get; set; }
 }

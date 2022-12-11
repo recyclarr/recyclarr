@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v4.0 Upgrade Guide][breaking4] for required
+changes you need to make.
+
+[breaking4]: https://recyclarr.dev/wiki/upgrade-guide/v4.0
+
+### Changed
+
+- **BREAKING**: Sonarr `quality_definition` configuration updated to address unexpected changes in
+  Sonarr v4 that caused it to stop working. See upgrade guide for details.
+- Default for `preferred_ratio` changed from `1.0` to using the values from the guide.
+
+### Removed
+
+- **BREAKING**: Sonarr's `hybrid` quality definition removed.
+
 ### Fixed
 
 - Do not warn about empty configuration YAML files when they aren't really empty.

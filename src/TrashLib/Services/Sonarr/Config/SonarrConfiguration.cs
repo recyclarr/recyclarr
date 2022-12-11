@@ -7,8 +7,6 @@ public class SonarrConfiguration : ServiceConfiguration
 {
     public IList<ReleaseProfileConfig> ReleaseProfiles { get; [UsedImplicitly] init; } =
         Array.Empty<ReleaseProfileConfig>();
-
-    public string QualityDefinition { get; [UsedImplicitly] init; } = "";
 }
 
 public class ReleaseProfileConfig

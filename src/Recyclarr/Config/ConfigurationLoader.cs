@@ -58,7 +58,8 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
             switch (e.InnerException)
             {
                 case InvalidCastException:
-                    _log.Error("Incompatible value assigned/used at line {Line}", line);
+                    _log.Error("Incompatible value assigned/used at line {Line}: {Msg}", line,
+                        e.InnerException.Message);
                     break;
 
                 default:

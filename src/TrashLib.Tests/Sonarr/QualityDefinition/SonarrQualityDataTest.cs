@@ -1,12 +1,12 @@
 using FluentAssertions;
 using NUnit.Framework;
-using TrashLib.Services.Common.QualityDefinition;
+using TrashLib.Services.QualitySize.Guide;
 
 namespace TrashLib.Tests.Sonarr.QualityDefinition;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class SonarrQualityDataTest
+public class QualitySizeDataTest
 {
     private static readonly object[] MaxTestValues =
     {

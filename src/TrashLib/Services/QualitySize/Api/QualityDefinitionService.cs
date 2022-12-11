@@ -1,8 +1,7 @@
 using Flurl.Http;
 using TrashLib.Config.Services;
-using TrashLib.Services.Radarr.QualityDefinition.Api.Objects;
 
-namespace TrashLib.Services.Radarr.QualityDefinition.Api;
+namespace TrashLib.Services.QualitySize.Api;
 
 internal class QualityDefinitionService : IQualityDefinitionService
 {
@@ -13,17 +12,17 @@ internal class QualityDefinitionService : IQualityDefinitionService
         _service = service;
     }
 
-    public async Task<List<RadarrQualityDefinitionItem>> GetQualityDefinition()
+    public async Task<List<ServiceQualityDefinitionItem>> GetQualityDefinition()
     {
         return await _service.Request("qualitydefinition")
-            .GetJsonAsync<List<RadarrQualityDefinitionItem>>();
+            .GetJsonAsync<List<ServiceQualityDefinitionItem>>();
     }
 
-    public async Task<IList<RadarrQualityDefinitionItem>> UpdateQualityDefinition(
-        IList<RadarrQualityDefinitionItem> newQuality)
+    public async Task<IList<ServiceQualityDefinitionItem>> UpdateQualityDefinition(
+        IList<ServiceQualityDefinitionItem> newQuality)
     {
         return await _service.Request("qualityDefinition", "update")
             .PutJsonAsync(newQuality)
-            .ReceiveJson<List<RadarrQualityDefinitionItem>>();
+            .ReceiveJson<List<ServiceQualityDefinitionItem>>();
     }
 }

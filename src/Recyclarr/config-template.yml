@@ -16,15 +16,18 @@
 
 # Configuration specific to Sonarr
 sonarr:
-  # Set the URL/API Key to your actual instance
-  - base_url: http://localhost:8989
-    api_key: f7e74ba6c80046e39e076a27af5a8444
+  series:
+    # Set the URL/API Key to your actual instance
+    base_url: http://localhost:8989
+    api_key: YOUR_KEY_HERE
 
-    # Quality definitions from the guide to sync to Sonarr. Choice: anime, series, hybrid
-    quality_definition: hybrid
+    # Quality definitions from the guide to sync to Sonarr. Choices: series, anime
+    quality_definition:
+      type: series
 
-    # Release profiles from the guide to sync to Sonarr.
-    # You can optionally add tags and make negative scores strictly ignored
+    # Release profiles from the guide to sync to Sonarr v3 (Sonarr v4 does not use this!)
+    # Use `recyclarr sonarr --list-release-profiles` for values you can put here.
+    # https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
     release_profiles:
       # Series
       - trash_ids:
@@ -38,9 +41,10 @@ sonarr:
 
 # Configuration specific to Radarr.
 radarr:
-  # Set the URL/API Key to your actual instance
-  - base_url: http://localhost:7878
-    api_key: bf99da49d0b0488ea34e4464aa63a0e5
+  movies:
+    # Set the URL/API Key to your actual instance
+    base_url: http://localhost:7878
+    api_key: YOUR_KEY_HERE
 
     # Which quality definition in the guide to sync to Radarr. Only choice right now is 'movie'
     quality_definition:
@@ -51,7 +55,9 @@ radarr:
     delete_old_custom_formats: false
 
     custom_formats:
-      # A list of custom formats to sync to Radarr. Must match the "trash_id" in the guide JSON.
+      # A list of custom formats to sync to Radarr.
+      # Use `recyclarr radarr --list-custom-formats` for values you can put here.
+      # https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/
       - trash_ids:
           - ed38b889b31be83fda192888e2286d83 # BR-DISK
           - 90cedc1fea7ea5d11298bebd3d1d3223 # EVO (no WEBDL)

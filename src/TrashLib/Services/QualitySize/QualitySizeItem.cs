@@ -1,10 +1,10 @@
-using TrashLib.Services.Common.QualityDefinition;
+using TrashLib.Services.QualitySize.Guide;
 
-namespace TrashLib.Services.Radarr.QualityDefinition;
+namespace TrashLib.Services.QualitySize;
 
-public class RadarrQualityItem : QualityItem
+public class QualitySizeItem : QualityItem
 {
-    public RadarrQualityItem(string quality, decimal min, decimal max, decimal preferred)
+    public QualitySizeItem(string quality, decimal min, decimal max, decimal preferred)
         : base(quality, min, max)
     {
         Preferred = preferred;

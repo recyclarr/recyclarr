@@ -7,9 +7,9 @@ using Serilog;
 using TrashLib.Config.Services;
 using TrashLib.Http;
 using TrashLib.Services.CustomFormat;
+using TrashLib.Services.QualitySize;
 using TrashLib.Services.Radarr;
 using TrashLib.Services.Radarr.Config;
-using TrashLib.Services.Radarr.QualityDefinition;
 
 namespace Recyclarr.Command;
 
@@ -73,8 +73,8 @@ internal class RadarrCommand : ServiceCommand
 
             if (config.QualityDefinition != null)
             {
-                var updater = scope.Resolve<IRadarrQualityDefinitionUpdater>();
-                await updater.Process(Preview, config);
+                var updater = scope.Resolve<IQualitySizeUpdater>();
+                await updater.Process(Preview, config.QualityDefinition, guideService);
             }
 
             if (config.CustomFormats.Count > 0)

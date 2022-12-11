@@ -2,7 +2,6 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using TrashLib.Services.Sonarr.Api;
 using TrashLib.Services.Sonarr.Config;
-using TrashLib.Services.Sonarr.QualityDefinition;
 using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
@@ -33,8 +32,5 @@ public class SonarrAutofacModule : Module
                 typeof(StrictNegativeScoresFilter))
             .As<IReleaseProfileFilter>()
             .OrderByRegistration();
-
-        // Quality Definition Support
-        builder.RegisterType<SonarrQualityDefinitionUpdater>().As<ISonarrQualityDefinitionUpdater>();
     }
 }

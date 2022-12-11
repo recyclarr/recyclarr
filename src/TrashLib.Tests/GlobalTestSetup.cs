@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using NUnit.Framework;
 
+namespace TrashLib.Tests;
+
 [SetUpFixture]
 [SuppressMessage("ReSharper", "CheckNamespace")]
 public class GlobalTestSetup

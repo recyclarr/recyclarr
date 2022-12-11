@@ -1,9 +1,9 @@
 using JetBrains.Annotations;
 
-namespace TrashLib.Services.Radarr.QualityDefinition.Api.Objects;
+namespace TrashLib.Services.QualitySize.Api;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class RadarrQualityItem
+public class ServiceQualityItem
 {
     public int Id { get; set; }
     public string Modifier { get; set; } = "";
@@ -13,10 +13,10 @@ public class RadarrQualityItem
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class RadarrQualityDefinitionItem
+public class ServiceQualityDefinitionItem
 {
     public int Id { get; set; }
-    public RadarrQualityItem? Quality { get; set; }
+    public ServiceQualityItem? Quality { get; set; }
     public string Title { get; set; } = "";
     public int Weight { get; set; }
     public decimal MinSize { get; set; }

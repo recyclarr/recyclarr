@@ -7,9 +7,9 @@ using Serilog;
 using TrashLib.Config.Services;
 using TrashLib.Http;
 using TrashLib.Services.CustomFormat;
+using TrashLib.Services.QualitySize;
 using TrashLib.Services.Sonarr;
 using TrashLib.Services.Sonarr.Config;
-using TrashLib.Services.Sonarr.QualityDefinition;
 using TrashLib.Services.Sonarr.ReleaseProfile;
 using TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
@@ -108,10 +108,10 @@ public class SonarrCommand : ServiceCommand
                 await updater.Process(Preview, config);
             }
 
-            if (!string.IsNullOrEmpty(config.QualityDefinition))
+            if (config.QualityDefinition != null)
             {
-                var updater = scope.Resolve<ISonarrQualityDefinitionUpdater>();
-                await updater.Process(Preview, config);
+                var updater = scope.Resolve<IQualitySizeUpdater>();
+                await updater.Process(Preview, config.QualityDefinition, guideService);
             }
 
             if (config.CustomFormats.Count > 0)

@@ -5,10 +5,10 @@ using MoreLinq;
 using Newtonsoft.Json;
 using Serilog;
 using TrashLib.Repo;
-using TrashLib.Services.Common.QualityDefinition;
 using TrashLib.Services.CustomFormat.Guide;
 using TrashLib.Services.CustomFormat.Models;
-using TrashLib.Services.Sonarr.QualityDefinition;
+using TrashLib.Services.QualitySize;
+using TrashLib.Services.QualitySize.Guide;
 using TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 
 namespace TrashLib.Services.Sonarr.ReleaseProfile.Guide;
@@ -19,7 +19,7 @@ public class LocalRepoSonarrGuideService : ISonarrGuideService
     private readonly ILogger _log;
     private readonly ICustomFormatLoader _cfLoader;
     private readonly Lazy<IEnumerable<ReleaseProfileData>> _data;
-    private readonly QualityGuideParser<SonarrQualityData> _parser;
+    private readonly QualitySizeGuideParser<QualitySizeData> _parser;
 
     public LocalRepoSonarrGuideService(
         IRepoPathsFactory pathsFactory,
@@ -30,10 +30,10 @@ public class LocalRepoSonarrGuideService : ISonarrGuideService
         _log = log;
         _cfLoader = cfLoader;
         _data = new Lazy<IEnumerable<ReleaseProfileData>>(GetReleaseProfileDataImpl);
-        _parser = new QualityGuideParser<SonarrQualityData>(log);
+        _parser = new QualitySizeGuideParser<QualitySizeData>(log);
     }
 
-    public ICollection<SonarrQualityData> GetQualities()
+    public ICollection<QualitySizeData> GetQualities()
         => _parser.GetQualities(_pathsFactory.Create().SonarrQualityPaths);
 
     public ICollection<CustomFormatData> GetCustomFormatData()

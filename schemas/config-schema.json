@@ -104,6 +104,22 @@
         }
       }
     },
+    "quality_definition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "preferred_ratio": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    },
     "radarr_instance": {
       "type": "object",
       "additionalProperties": false,
@@ -123,20 +139,7 @@
           "description": "The API key from Radarr."
         },
         "quality_definition": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["type"],
-          "properties": {
-            "type": {
-              "type": "string"
-            },
-            "preferred_ratio": {
-              "type": "number",
-              "default": 1.0,
-              "minimum": 0.0,
-              "maximum": 1.0
-            }
-          }
+          "$ref": "#/$defs/quality_definition"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
@@ -165,7 +168,7 @@
           "description": "The API key from Sonarr."
         },
         "quality_definition": {
-          "type": "string"
+          "$ref": "#/$defs/quality_definition"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
