@@ -36,7 +36,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
@@ -99,7 +99,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download Artifacts
         uses: actions/download-artifact@v3
@@ -126,7 +126,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
@@ -152,7 +152,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
           # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
