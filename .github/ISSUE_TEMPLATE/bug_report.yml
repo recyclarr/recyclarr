@@ -35,20 +35,19 @@ body:
       label: Environment & Versions
       render: bash
       description: |
-        Please provide information about your environment below. If certain information is not
-        relevant to your issue, you may omit it. Feel free to add more information than what is
-        shown here as well, especially if it's directly related to the issue and will help debug the
-        problem and/or find a solution.
+        Please provide information about your environment below (only relevant details):
 
-        Examples:
-
-        - Operating System: `Windows 10 / Ubuntu 22.04 / Docker`
-        - Recyclarr Version: `v3.0.0`
-        - Sonarr Version: `3.0.9.1549`
-        - Radarr Version: `4.3.0.6671`
+        - OS are you running on (e.g. Windows 10, Ubuntu 22.04)
+        - Your CPU architecture (e.g. arm, arm64, x86, x64)
+        - Recyclarr version (e.g. `v3.0.0`)
+        - Build of Recyclarr in use (e.g. Docker, `recyclarr-linux-arm64`, `recyclarr-osx-x64`)
+        - Sonarr version (e.g. `3.0.9.1549`)
+        - Radarr Version: (e.g. `4.3.0.6671`)
       value: |
         - Operating System:
+        - Architecture:
         - Recyclarr Version:
+        - Recyclarr Build:
         - Sonarr Version:
         - Radarr Version:
   - type: textarea
