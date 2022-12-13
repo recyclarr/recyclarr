@@ -29,4 +29,4 @@ COPY --chmod=555 ./scripts/prod/*.sh /
 USER 1000:1000
 VOLUME /config
 
-ENTRYPOINT ["/sbin/tini", "-s", "/entrypoint.sh", "--"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
