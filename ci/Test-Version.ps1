@@ -5,8 +5,8 @@ param (
 )
 
 if ($Version -match 'v\d+\.\d+\.\d+') {
-    '::set-output name=match::true'
+    "match=true" >> $env:GITHUB_OUTPUT
 }
 else {
-    '::set-output name=match::false'
+    "match=false" >> $env:GITHUB_OUTPUT
 }
