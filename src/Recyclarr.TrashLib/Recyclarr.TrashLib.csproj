@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="Autofac.Extras.AggregateService" />
+    <PackageReference Include="Autofac.Extras.Ordering" />
+    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="CliFx" />
+    <PackageReference Include="CliWrap" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Flurl" />
+    <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="morelinq" />
+    <PackageReference Include="Newtonsoft.Json.Schema" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Data.HashFunction.FNV" />
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
+</Project>

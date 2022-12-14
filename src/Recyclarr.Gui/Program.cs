@@ -7,8 +7,8 @@ using System.IO.Abstractions;
 using Autofac.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using Recyclarr.Gui;
+using Recyclarr.TrashLib.Startup;
 using Serilog;
-using TrashLib.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 

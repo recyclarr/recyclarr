@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
 using Autofac;
 using AutofacSerilogIntegration;
-using Common;
-using TrashLib.Startup;
+using Recyclarr.Common;
+using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Gui;
 
