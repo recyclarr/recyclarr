@@ -6,6 +6,7 @@ using Autofac;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.Common;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib;
@@ -43,6 +44,7 @@ public abstract class IntegrationFixture : IDisposable
             builder.RegisterMockFor<IGitRepository>();
             builder.RegisterMockFor<IGitRepositoryFactory>();
             builder.RegisterMockFor<IServiceConfiguration>();
+            builder.RegisterMockFor<IEnvironment>();
             builder.RegisterMockFor<IServiceInformation>(m =>
             {
                 // By default, choose some extremely high number so that all the newest features are enabled.
