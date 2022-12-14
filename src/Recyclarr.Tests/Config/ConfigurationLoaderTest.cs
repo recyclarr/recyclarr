@@ -17,6 +17,7 @@ using TestLibrary;
 using TestLibrary.AutoFixture;
 using TrashLib.Config.Secrets;
 using TrashLib.Services.Sonarr.Config;
+using TrashLib.Config.EnvironmentVariables;
 using TrashLib.TestLibrary;
 using YamlDotNet.Core;
 
@@ -307,5 +308,21 @@ not_wanted:
         var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
 
         act.Should().NotThrow();
+    }
+
+    [Test]
+    public void Test_Reference_EnvironmentVariable()
+    {
+        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+
+        const string testYml = @"
+sonarr:
+  instance5:
+    api_key: !env_var SONARR_API_KEY
+    base_url: !env_var SONARR_URL http://sonarr:1233
+";
+
+        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
+        act.Should().Throw<YamlException>().WithMessage("Exception during deserialization");
     }
 }

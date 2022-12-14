@@ -1,5 +1,7 @@
+using Common;
 using Common.YamlDotNet;
 using TrashLib.Config.Secrets;
+using TrashLib.Config.EnvironmentVariables;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -9,11 +11,13 @@ public class YamlSerializerFactory : IYamlSerializerFactory
 {
     private readonly IObjectFactory _objectFactory;
     private readonly ISecretsProvider _secretsProvider;
+    private readonly IEnvironment _environment;
 
-    public YamlSerializerFactory(IObjectFactory objectFactory, ISecretsProvider secretsProvider)
+    public YamlSerializerFactory(IObjectFactory objectFactory, ISecretsProvider secretsProvider, IEnvironment environment)
     {
         _objectFactory = objectFactory;
         _secretsProvider = secretsProvider;
+        _environment = environment;
     }
 
     public IDeserializer CreateDeserializer(Action<DeserializerBuilder>? extraBuilder = null)
@@ -22,7 +26,9 @@ public class YamlSerializerFactory : IYamlSerializerFactory
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeConverter(new YamlNullableEnumTypeConverter())
             .WithNodeDeserializer(new SecretsDeserializer(_secretsProvider))
+            .WithNodeDeserializer(new EnvironmentVariablesDeserializer(_environment))
             .WithTagMapping("!secret", typeof(SecretTag))
+            .WithTagMapping("!env_var", typeof(EnvironmentVariableTag))
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
             .WithObjectFactory(_objectFactory);
