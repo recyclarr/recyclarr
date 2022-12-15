@@ -8,7 +8,7 @@ namespace Recyclarr.Common.Tests.Extensions;
 [Parallelizable(ParallelScope.All)]
 public class DictionaryExtensionsTest
 {
-    private class MySampleValue
+    private sealed class MySampleValue
     {
     }
 

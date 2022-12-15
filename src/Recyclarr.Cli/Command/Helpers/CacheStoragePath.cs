@@ -1,4 +1,5 @@
 using System.Data.HashFunction.FNV;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
 using Recyclarr.TrashLib.Cache;
@@ -33,7 +34,7 @@ public class CacheStoragePath : ICacheStoragePath
     public IFileInfo CalculatePath(string cacheObjectName)
     {
         return _paths.CacheDirectory
-            .SubDirectory(_serviceCommand.Name.ToLower())
+            .SubDirectory(_serviceCommand.Name.ToLower(CultureInfo.CurrentCulture))
             .SubDirectory(_config.Name ?? BuildServiceGuid())
             .File(cacheObjectName + ".json");
     }

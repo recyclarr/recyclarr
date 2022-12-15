@@ -19,14 +19,14 @@ namespace Recyclarr.TrashLib.Tests.CustomFormat.Processors;
 [Parallelizable(ParallelScope.All)]
 public class GuideProcessorTest
 {
-    private class TestGuideProcessorSteps : IGuideProcessorSteps
+    private sealed class TestGuideProcessorSteps : IGuideProcessorSteps
     {
         public ICustomFormatStep CustomFormat { get; } = new CustomFormatStep();
         public IConfigStep Config { get; } = new ConfigStep();
         public IQualityProfileStep QualityProfile { get; } = new QualityProfileStep();
     }
 
-    private class Context
+    private sealed class Context
     {
         public Context()
         {

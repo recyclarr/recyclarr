@@ -25,7 +25,7 @@ namespace Recyclarr.TrashLib.Tests.Sonarr;
 [Parallelizable(ParallelScope.All)]
 public class SonarrCompatibilityTest
 {
-    private class TestContext : IDisposable
+    private sealed class TestContext : IDisposable
     {
         private readonly JsonSerializerSettings _jsonSettings;
 

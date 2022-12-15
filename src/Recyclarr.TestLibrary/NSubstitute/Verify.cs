@@ -15,7 +15,7 @@ public static class Verify
         return ArgumentMatcher.Enqueue(new AssertionMatcher<T>(action));
     }
 
-    private class AssertionMatcher<T> : IArgumentMatcher<T>
+    private sealed class AssertionMatcher<T> : IArgumentMatcher<T>
     {
         private readonly Action<T> _assertion;
 

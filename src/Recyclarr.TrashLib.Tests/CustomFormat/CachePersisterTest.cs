@@ -16,7 +16,7 @@ namespace Recyclarr.TrashLib.Tests.CustomFormat;
 [Parallelizable(ParallelScope.All)]
 public class CachePersisterTest
 {
-    private class Context
+    private sealed class Context
     {
         public Context()
         {

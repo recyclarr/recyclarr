@@ -14,20 +14,20 @@ namespace Recyclarr.TrashLib.Tests.Cache;
 [Parallelizable(ParallelScope.All)]
 public class ServiceCacheTest
 {
-    private class ObjectWithoutAttribute
+    private sealed class ObjectWithoutAttribute
     {
     }
 
     private const string ValidObjectName = "azAZ_09";
 
     [CacheObjectName(ValidObjectName)]
-    private class ObjectWithAttribute
+    private sealed class ObjectWithAttribute
     {
         public string TestValue { get; init; } = "";
     }
 
     [CacheObjectName("invalid+name")]
-    private class ObjectWithAttributeInvalidChars
+    private sealed class ObjectWithAttributeInvalidChars
     {
     }
 

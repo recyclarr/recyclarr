@@ -15,7 +15,7 @@ namespace Recyclarr.TrashLib.Tests.CustomFormat.Processors.GuideSteps;
 [Parallelizable(ParallelScope.All)]
 public class CustomFormatStepTest
 {
-    private class Context
+    private sealed class Context
     {
         public List<CustomFormatData> TestGuideData { get; } = new()
         {
