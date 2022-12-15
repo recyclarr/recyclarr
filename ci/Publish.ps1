@@ -7,7 +7,7 @@ param (
 
     [string] $Configuration = "Release",
 
-    [string] $BuildPath = "src\Recyclarr",
+    [string] $BuildPath = "src\Recyclarr.Cli",
 
     [switch] $NoSingleFile
 )

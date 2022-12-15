@@ -7,7 +7,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/src/Recyclarr/Recyclarr.csproj",
+        "${workspaceFolder}/src/Recyclarr.Cli/Recyclarr.Cli.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -19,7 +19,7 @@
       "type": "process",
       "args": [
         "publish",
-        "${workspaceFolder}/src/Recyclarr/Recyclarr.csproj",
+        "${workspaceFolder}/src/Recyclarr.Cli/Recyclarr.Cli.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
         "-o",
