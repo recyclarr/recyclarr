@@ -10,6 +10,7 @@ using Recyclarr.Cli.Config;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Common;
+using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
@@ -36,6 +37,10 @@ public static class CompositionRoot
 
     private static ILifetimeScope Setup(ContainerBuilder builder, Action<ContainerBuilder>? extraRegistrations = null)
     {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(x => x.FullName?.StartsWithIgnoreCase("Recyclarr") ?? false)
+            .ToArray();
+
         RegisterAppPaths(builder);
         RegisterLogger(builder);
 
@@ -56,7 +61,7 @@ public static class CompositionRoot
         builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
         builder.RegisterType<ProgressBar>();
 
-        ConfigurationRegistrations(builder);
+        ConfigurationRegistrations(builder, assemblies);
         CommandRegistrations(builder);
 
         builder.Register(_ => AutoMapperConfig.Setup()).SingleInstance();
@@ -81,9 +86,9 @@ public static class CompositionRoot
         builder.RegisterType<DefaultAppDataSetup>();
     }
 
-    private static void ConfigurationRegistrations(ContainerBuilder builder)
+    private static void ConfigurationRegistrations(ContainerBuilder builder, Assembly[] assemblies)
     {
-        builder.RegisterModule<ConfigAutofacModule>();
+        builder.RegisterModule(new ConfigAutofacModule(assemblies));
 
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();

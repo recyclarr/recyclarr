@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions;
 using FluentValidation;
 using Recyclarr.Cli.Logging;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Http;
 using Serilog;
 using Serilog.Context;

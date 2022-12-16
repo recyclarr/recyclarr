@@ -1,4 +1,5 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Config.Settings;
