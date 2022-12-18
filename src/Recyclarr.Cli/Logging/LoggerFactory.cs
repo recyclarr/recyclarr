@@ -22,9 +22,8 @@ public class LoggerFactory
 
         return
             $"{{#if {scope} is not null}}{{{scope}}}: {{#end}}" +
-            "{@m}" +
-            "{@x}" +
-            "\n";
+            "{@m}\n" +
+            "{@x}";
     }
 
     private static ExpressionTemplate GetConsoleTemplate()
