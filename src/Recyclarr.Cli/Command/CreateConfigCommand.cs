@@ -34,8 +34,9 @@ public class CreateConfigCommand : BaseCommand
 
         if (configFile.Exists)
         {
-            throw new CommandException($"The file {configFile} already exists. Please choose another path or " +
-                                       "delete/move the existing file and run this command again.");
+            throw new CommandException(
+                $"The file {configFile} already exists. Please choose another path or delete/move the existing " +
+                "file and run this command again.");
         }
 
         configFile.CreateParentDirectory();

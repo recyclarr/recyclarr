@@ -75,10 +75,11 @@ public abstract class BaseCommand : ICommand
                     break;
 
                 default:
-                    Logger.Error(e, "Non-recoverable exception");
+                    Logger.Error("{Message}", e.Message);
                     break;
             }
 
+            Logger.Debug(e, "Exception");
             throw new CommandException("Exiting due to exception");
         }
         finally
