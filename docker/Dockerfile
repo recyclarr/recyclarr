@@ -20,7 +20,7 @@ ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_CREATE_CONFIG=false
 
 RUN set -ex; \
-    apk add --no-cache bash tzdata supercronic git; \
+    apk add --no-cache bash tzdata supercronic git tini; \
     mkdir -p /config && chown 1000:1000 /config;
 
 COPY --from=build /build/publish /app/recyclarr/
@@ -29,4 +29,4 @@ COPY --chmod=555 ./scripts/prod/*.sh /
 USER 1000:1000
 VOLUME /config
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
