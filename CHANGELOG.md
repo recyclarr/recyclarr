@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Docker: Explicit `init` is no longer required in Docker Compose. It is now built into the image.
+
 ## [4.0.0] - 2022-12-11
 
 This release contains **BREAKING CHANGES**. See the [v4.0 Upgrade Guide][breaking4] for required
