@@ -11,7 +11,6 @@ services:
       context: .
       args:
         - TARGETPLATFORM=linux/amd64
-    init: true
     networks: [recyclarr]
     volumes:
       - ./config:/config
