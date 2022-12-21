@@ -23,7 +23,7 @@
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
         "-o",
-        "${workspaceFolder}/docker/artifacts/recyclarr-${config:recyclarr.runtime}"
+        "${workspaceFolder}/docker/artifacts/${config:recyclarr.runtime}"
       ],
       "problemMatcher": "$msCompile"
     },

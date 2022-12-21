@@ -15,7 +15,7 @@ Remove-Item $artifactsDir -Recurse -Force -ErrorAction SilentlyContinue
 Push-Location $PSScriptRoot\..
 try {
     & .\ci\Publish.ps1 -NoSingleFile `
-        -OutputDir "$artifactsDir\recyclarr-$Runtime" `
+        -OutputDir "$artifactsDir\$Runtime" `
         -Runtime $Runtime
 }
 finally {
