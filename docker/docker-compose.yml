@@ -10,7 +10,7 @@ services:
     build:
       context: .
       args:
-        - TARGETPLATFORM=linux/amd64
+        - TARGETARCH=amd64
     networks: [recyclarr]
     volumes:
       - ./config:/config

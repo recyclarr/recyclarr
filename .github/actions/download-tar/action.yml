@@ -1,0 +1,25 @@
+# This custom action exists because of this issue:
+# https://github.com/actions/upload-artifact/issues/38
+name: Download Tar Artifact
+description: >
+  Download and extract a tar artifact that was previously uploaded in the workflow by the upload-tar
+  action
+
+inputs:
+  name:
+    description: Artifact name
+  path:
+    description: Destination path
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+
+    - run: ${{ github.action_path }}/untar.sh "${{ inputs.name }}"
+      working-directory: ${{ inputs.path }}
+      shell: bash

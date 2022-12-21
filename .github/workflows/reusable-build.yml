@@ -39,16 +39,15 @@ jobs:
 
       - name: Publish
         shell: pwsh
-        run: |
-          ci/Publish.ps1 -Runtime ${{ inputs.runtime }} ${{ inputs.publish-args }}
+        run: ci/Publish.ps1 -Runtime ${{ inputs.runtime }} ${{ inputs.publish-args }}
 
       - name: Smoke
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
         shell: pwsh
         run: ci/SmokeTest.ps1 publish/${{ inputs.runtime }}/recyclarr
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Artifact
+        uses: ./.github/actions/upload-tar
         with:
           name: ${{ inputs.runtime }}
-          path: publish/${{ inputs.runtime }}/*
+          path: publish/${{ inputs.runtime }}

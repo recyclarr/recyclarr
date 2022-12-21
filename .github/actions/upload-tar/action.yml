@@ -1,0 +1,28 @@
+# This custom action exists because of this issue:
+# https://github.com/actions/upload-artifact/issues/38
+name: Upload Tar Artifact
+description: Compress files with tar prior to artifacting to keep file privileges.
+
+inputs:
+  name:
+    description: Artifact name
+  path:
+    description: A directory path. The contents of that directory will be tarballed and uploaded.
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+    - run: tar cvf artifact.tar *
+      shell: bash
+      working-directory: ${{ inputs.path }}
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}/artifact.tar
+
+    - run: rm artifact.tar
+      shell: bash
+      working-directory: ${{ inputs.path }}

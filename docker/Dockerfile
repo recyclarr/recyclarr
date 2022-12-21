@@ -1,17 +1,15 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/runtime:7.0-alpine as base
 
-WORKDIR /build
+FROM base AS base-arm
+ENV RUNTIME=linux-musl-arm
 
-ARG TARGETPLATFORM
+FROM base AS base-arm64
+ENV RUNTIME=linux-musl-arm64
 
-RUN apk add unzip bash
+FROM base AS base-amd64
+ENV RUNTIME=linux-musl-x64
 
-COPY --chmod=544 ./scripts/build/*.sh .
-COPY ./artifacts ./artifacts
-RUN ./build.sh
-
-#############################################################################
-FROM mcr.microsoft.com/dotnet/runtime:7.0-alpine AS final
+FROM base-$TARGETARCH AS final
 
 # Required by environment and/or dotnet
 ENV PATH="${PATH}:/app/recyclarr" \
@@ -23,7 +21,7 @@ RUN set -ex; \
     apk add --no-cache bash tzdata supercronic git tini; \
     mkdir -p /config && chown 1000:1000 /config;
 
-COPY --from=build /build/publish /app/recyclarr/
+COPY ./artifacts/$RUNTIME /app/recyclarr/
 COPY --chmod=555 ./scripts/prod/*.sh /
 
 USER 1000:1000

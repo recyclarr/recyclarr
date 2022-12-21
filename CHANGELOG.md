@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Releases now retain executable permissions on Linux and macOS.
+
 ## [4.0.1] - 2022-12-21
 
 ### Changed

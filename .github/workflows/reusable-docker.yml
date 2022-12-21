@@ -45,7 +45,7 @@ jobs:
             ${{ env.SEMVER }},pattern={{major}}
 
       - name: Grab Artifacts
-        uses: actions/download-artifact@v3
+        uses: ./.github/actions/download-tar
         with:
           path: docker/artifacts
 
