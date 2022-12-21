@@ -9,7 +9,7 @@ case "$TARGETPLATFORM" in
     *) echo >&2 "ERROR: Unsupported target platform: $TARGETPLATFORM"; exit 1 ;;
 esac
 
-path="artifacts/recyclarr-$runtime/"
+path="artifacts/$runtime/"
 
 mv "$path" publish
 

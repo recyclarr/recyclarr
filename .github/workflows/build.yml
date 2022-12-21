@@ -20,83 +20,66 @@ on:
       - "docker/**"
       - "ci/**"
 
-env:
-  dotnetVersion: "7.0.x"
-
 jobs:
-  test:
-    name: Test
+  build-win:
+    name: Build Windows
+    secrets: inherit
+    uses: ./.github/workflows/reusable-build.yml
     strategy:
-      fail-fast: true
       matrix:
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
+        runtime: [win-x64, win-arm64]
+    with:
+      platform: windows-latest
+      runtime: ${{ matrix.runtime }}
 
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
-
-      - name: Test
-        run: dotnet test src --configuration Release --logger GitHubActions
-
-  build:
-    name: Build Non-MUSL
-    needs: test
+  build-linux:
+    name: Build Linux
+    secrets: inherit
+    uses: ./.github/workflows/reusable-build.yml
     strategy:
-      fail-fast: true
+      matrix:
+        runtime: [linux-x64, linux-arm64, linux-arm]
+    with:
+      platform: ubuntu-latest
+      runtime: ${{ matrix.runtime }}
+
+  build-osx:
+    name: Build Mac OS
+    secrets: inherit
+    uses: ./.github/workflows/reusable-build.yml
+    strategy:
+      matrix:
+        runtime: [osx-x64, osx-arm64]
+    with:
+      platform: macos-latest
+      runtime: ${{ matrix.runtime }}
+      # Compression cannot be used on MacOS due to this issue:
+      # https://github.com/dotnet/runtime/issues/79267
+      publish-args: -NoCompress
+
+  build-musl:
+    name: Build MUSL
+    secrets: inherit
+    uses: ./.github/workflows/reusable-build.yml
+    strategy:
+      matrix:
+        runtime: [linux-musl-x64, linux-musl-arm, linux-musl-arm64]
+    with:
+      platform: ubuntu-latest
+      runtime: ${{ matrix.runtime }}
+      publish-args: -NoSingleFile
+      skip-test: true
+
+  codesign:
+    name: Apple Signing
+    runs-on: macos-latest
+    if: github.event_name != 'pull_request'
+    needs: [build-osx]
+    strategy:
       matrix:
         runtime:
-          - win-x64
-          - win-arm64
-          - linux-x64
-          - linux-arm
-          - linux-arm64
           - osx-x64
           - osx-arm64
-    # Must run on Windows so that version info gets properly set in host EXE. See:
-    # https://github.com/dotnet/runtime/issues/3828
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
-
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
-
-      - name: Publish
-        shell: pwsh
-        run: ci/Publish.ps1 -Runtime ${{ matrix.runtime }}
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: recyclarr-${{ matrix.runtime }}
-          path: publish/${{ matrix.runtime }}/*
-
-  smoke:
-    name: Smoke
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { os: windows-latest, runtime: win-x64 }
-          - { os: ubuntu-latest, runtime: linux-x64 }
-          - { os: macos-latest, runtime: osx-x64 }
-    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -104,58 +87,66 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: recyclarr-${{ matrix.runtime }}
+          name: ${{ matrix.runtime }}
+          path: publish
 
-      - name: Run Smoke Test
-        shell: pwsh
-        run: ci/SmokeTest.ps1 ./recyclarr
-
-  # NOTE: This is duplicated from the 'build' job. Sadly, reusable workflows cannot be invoked from
-  # matrix jobs. See here:
-  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#limitations
-  musl:
-    name: Build MUSL
-    needs: test
-    strategy:
-      fail-fast: true
-      matrix:
-        runtime:
-          - linux-musl-x64
-          - linux-musl-arm
-          - linux-musl-arm64
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v1
         with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
 
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v3
+      - name: Code Sign
+        env:
+          CODESIGN_IDENTITY: ${{ secrets.MAC_CODESIGN_IDENTITY }}
+        run: >
+          codesign --timestamp --no-strict --force
+          --options=runtime
+          --entitlements ci/codesign/entitlements.plist
+          --sign "$CODESIGN_IDENTITY"
+          "publish/recyclarr"
+
+      - name: Notarize
+        uses: recyclarr/xcode-notarize@main
         with:
-          dotnet-version: ${{ env.dotnetVersion }}
+          product-path: publish/recyclarr
+          appstore-connect-username: ${{ secrets.MAC_DEV_USERNAME }}
+          appstore-connect-password: ${{ secrets.MAC_DEV_PASSWORD }}
+          primary-bundle-id: dev.recyclarr.cli
 
-      - name: Publish
-        shell: pwsh
-        run: ci/Publish.ps1 -Runtime ${{ matrix.runtime }} -NoSingleFile
+      # Cannot staple directly to a binary:
+      # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow?language=objc#3087720
+      # - name: Staple
+      #   run: xcrun stapler staple -v publish/recyclarr
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: recyclarr-${{ matrix.runtime }}
-          path: publish/${{ matrix.runtime }}/*
+          name: ${{ matrix.runtime }}
+          path: publish/*
+
+  docker:
+    name: Docker
+    needs: [build-musl]
+    uses: ./.github/workflows/reusable-docker.yml
+    secrets: inherit
 
   release:
     name: Release
-    needs: [smoke, musl]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build-win
+      - build-linux
+      - codesign # Depends on build-osx
+      - docker # Only for preventing a release if docker build & publish fails
+    env:
+      XZ_OPT: "-T0 -9"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
-          # token: ${{ secrets.GITHUB_TOKEN }} # Allows git push
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
@@ -171,9 +162,12 @@ jobs:
         with:
           path: publish
 
-      - name: Create Zip Files
+      - name: Create Archive
         shell: pwsh
-        run: ci/CreateZip.ps1 publish
+        run: >
+          ci/CreateArchive.ps1
+          -PublishDir publish
+          -OutputDir archive
 
       - name: Extract Changelog
         id: changelog
@@ -184,17 +178,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_PAT }}
         with:
-          files: publish-zip/recyclarr-*.zip
+          files: archive/*
           body: ${{ steps.changelog.outputs.release_notes }}
           tag_name: ${{ github.event.create.ref }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
-
-  docker:
-    name: Docker
-    needs: musl
-    uses: ./.github/workflows/docker.yml
-    secrets: inherit
 
   # The main purpose of this job is to group all the other jobs together into one single job status
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
@@ -202,10 +190,18 @@ jobs:
   check:
     if: always()
     name: Report Build Status
-    needs: [build, smoke]
+    needs:
+      - build-win
+      - build-linux
+      - build-osx
+      - build-musl
+      - codesign
+      - docker
+      - release
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded
         uses: re-actors/alls-green@release/v1
         with:
+          allowed-skips: codesign, release
           jobs: ${{ toJSON(needs) }}

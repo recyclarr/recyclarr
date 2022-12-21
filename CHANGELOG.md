@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Docker: Explicit `init` is no longer required in Docker Compose. It is now built into the image.
+- Reduced size of the `recyclarr` executable
+- macOS & linux are now released as `tar.xz` archives instead of `zip`.
+
+### Fixed
+
+- Fix CoreCLR / "killed" crash on Apple macOS platforms (#39). This was accomplished by properly
+  signing and notarizing Recyclarr.
 
 ## [4.0.0] - 2022-12-11
 
