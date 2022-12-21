@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix CoreCLR / "killed" crash on Apple macOS platforms (#39). This was accomplished by properly
-  signing and notarizing Recyclarr.
+  signing and notarizing Recyclarr and disabling compression.
 
 ## [4.0.0] - 2022-12-11
 
