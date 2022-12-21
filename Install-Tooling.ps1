@@ -1,2 +1,2 @@
 dotnet tool update --global GitVersion.Tool
-Install-Module -Name ChangelogManagement
+Install-Module -Force -Name ChangelogManagement
