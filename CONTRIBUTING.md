@@ -42,7 +42,7 @@ The project's `Dockerfile` build requires the Recyclarr build output to be place
 location in order to succeed. The location is below, relative to the repository root:
 
 ```txt
-docker/artifacts/recyclarr-${{runtime}}
+docker/artifacts/${{runtime}}
 ```
 
 Where `${{runtime}}` is one of the runtimes compatible with `dotnet publish`, such as
