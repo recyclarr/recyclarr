@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.1] - 2022-12-21
+
 ### Changed
 
 - Docker: Explicit `init` is no longer required in Docker Compose. It is now built into the image.
@@ -546,7 +548,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/recyclarr/recyclarr/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/recyclarr/recyclarr/compare/v3.1.0...v4.0.0
 [3.1.0]: https://github.com/recyclarr/recyclarr/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/recyclarr/recyclarr/compare/v2.6.1...v3.0.0
