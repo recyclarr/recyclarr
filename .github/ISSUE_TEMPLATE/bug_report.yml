@@ -40,7 +40,7 @@ body:
         - OS are you running on (e.g. Windows 10, Ubuntu 22.04)
         - Your CPU architecture (e.g. arm, arm64, x86, x64)
         - Recyclarr version (e.g. `v3.0.0`)
-        - Build of Recyclarr in use (e.g. Docker, `recyclarr-linux-arm64`, `recyclarr-osx-x64`)
+        - Build of Recyclarr in use (e.g. Docker, `linux-arm64`, `osx-x64`)
         - Sonarr version (e.g. `3.0.9.1549`)
         - Radarr Version: (e.g. `4.3.0.6671`)
       value: |
