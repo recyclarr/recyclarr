@@ -47,19 +47,18 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (isPreview)
         {
             PreviewCustomFormats();
+            return;
         }
-        else
-        {
-            await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
-                _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
 
-            PrintApiStatistics(_persistenceProcessor.Transactions);
-            PrintQualityProfileUpdates();
+        await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
+            _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
 
-            // Cache all the custom formats (using ID from API response).
-            _cache.Update(_guideProcessor.ProcessedCustomFormats);
-            _cache.Save();
-        }
+        PrintApiStatistics(_persistenceProcessor.Transactions);
+        PrintQualityProfileUpdates();
+
+        // Cache all the custom formats (using ID from API response).
+        _cache.Update(_guideProcessor.ProcessedCustomFormats);
+        _cache.Save();
     }
 
     private void PrintQualityProfileUpdates()

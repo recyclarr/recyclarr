@@ -55,14 +55,17 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
                 selectedProfile.TrashId);
 
             selectedProfile = _pipeline.Process(selectedProfile, configProfile);
+            filteredProfiles.Add((selectedProfile, configProfile.Tags));
+        }
 
-            if (isPreview)
+        if (isPreview)
+        {
+            foreach (var profile in filteredProfiles.Select(x => x.Profile))
             {
-                PrintTermsAndScores(selectedProfile);
-                continue;
+                PrintTermsAndScores(profile);
             }
 
-            filteredProfiles.Add((selectedProfile, configProfile.Tags));
+            return;
         }
 
         await ProcessReleaseProfiles(filteredProfiles);
@@ -111,7 +114,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
 
         _console.Output.WriteLine("  Include Preferred when Renaming?");
         _console.Output.WriteLine("    " +
-                                  (profile.IncludePreferredWhenRenaming ? "YES" : "NO"));
+            (profile.IncludePreferredWhenRenaming ? "YES" : "NO"));
         _console.Output.WriteLine("");
 
         PrintTerms("Must Contain", profile.Required);
@@ -164,7 +167,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
             .Where(sonarrProfile =>
             {
                 return sonarrProfile.Name.StartsWithIgnoreCase("[Trash]") &&
-                       !profiles.Any(profile => sonarrProfile.Name.EndsWithIgnoreCase(profile.Name));
+                    !profiles.Any(profile => sonarrProfile.Name.EndsWithIgnoreCase(profile.Name));
             });
 
         foreach (var profile in sonarrProfilesToDelete)

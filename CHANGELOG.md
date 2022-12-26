@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Releases now retain executable permissions on Linux and macOS.
+- Sonarr: Do not modify or delete release profiles when using `--preview`
 
 ## [4.0.1] - 2022-12-21
 
