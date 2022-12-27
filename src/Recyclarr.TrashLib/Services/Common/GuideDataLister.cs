@@ -17,6 +17,7 @@ public class GuideDataLister : IGuideDataLister
         _console.Output.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
 
         var categories = customFormats
+            .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key);
 

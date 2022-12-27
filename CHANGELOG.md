@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Sort CFs alphabetically in `--list-custom-formats`
+
 ### Fixed
 
 - Releases now retain executable permissions on Linux and macOS.
