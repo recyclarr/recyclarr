@@ -24,7 +24,7 @@ public class GuideDataLister : IGuideDataLister
         foreach (var cat in categories)
         {
             var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
-            _console.Output.WriteLine($"\n{title}\n");
+            _console.Output.WriteLine($"\n          # {title}");
 
             foreach (var cf in cat)
             {
