@@ -19,31 +19,44 @@ jobs:
     name: Discord Notification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
 
-      - uses: octokit/request-action@v2.x
+      - name: Setup Inputs
+        run: |
+          cat >> $GITHUB_ENV <<"EOL"
+          INPUT_TAG="${{ env.TAG }}"
+          INPUT_ORG_REPO="${{ github.repository }}"
+          EOL
+
+      - name: Get Release Info
+        uses: octokit/request-action@v2.x
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           route: GET /repos/{org_repo}/releases/tags/{tag}
-          org_repo: ${{ github.repository }}
-          tag: ${{ env.TAG }}
 
-      - uses: actions/setup-python@v2
+      # Write changelog to a file to avoid certain characters from being processed by the shell
+      - name: Get Information from Release
+        run: |
+          echo '${{ steps.release.outputs.data }}' > release.json
+          jq -r '.assets[].browser_download_url' release.json > assets.txt
+          jq -r '.body' release.json > changelog.txt
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - run: pip install discord-webhook
+      - name: Install Discord Webhook Python Module
+        run: pip install "discord-webhook==1.0.0"
 
-      # Write changelog to a file to avoid certain characters from being processed by the shell
-      - run: |
-          cat >changelog.txt <<"EOL"
-          ${{ fromJSON(steps.release.outputs.data).body }}
-          EOL
-
-      - run: |
-          python ci/notify/discord_notify.py \
-            '${{ env.TAG }}' \
-            '${{ secrets.DISCORD_WEBHOOK }}' \
-            changelog.txt
+      - name: Send Discord Notification
+        run: >
+          python ci/notify/discord_notify.py
+          --version ${{ env.TAG }}
+          --repo ${{ github.repository }}
+          --webhook-url ${{ secrets.DISCORD_WEBHOOK }}
+          --changelog changelog.txt
+          --assets assets.txt

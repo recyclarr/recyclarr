@@ -144,3 +144,32 @@ The Github Workflows manage the release process after the push by doing the foll
 Execute the `Update-Gitignore.ps1` script using Powershell. The working directory *must* be the root
 of the repo. This will pull the latest relevant `.gitignore` patterns from
 [gitignore.io](https://gitignore.io) and commit them automatically to your current branch.
+
+## Testing Discord Notifier
+
+Use Postman to make an HTTP `GET` request to the following URL. Note that `v4.0.0` can be any
+release.
+
+```txt
+https://api.github.com/recyclarr/recyclarr/releases/tags/v4.0.0
+```
+
+Copy the resulting response JSON to a file named `ci/notify/release.json`. In the `ci/notify`
+directory, run these commands to generate the other files needed:
+
+```bash
+jq -r '.assets[].browser_download_url' release.json > assets.txt
+jq -r '.body' release.json > changelog.txt
+```
+
+Also be sure to grab a discord webhook URL to a personal test server of yours. Then run the command
+below (using a Bash terminal)
+
+```bash
+python ./discord_notify.py \
+  --version v4.0.0 \
+  --repo recyclarr/recyclarr \
+  --webhook-url https://discord.com/api/webhooks/your_webhook_url \
+  --changelog ./changelog.txt \
+  --assets ./assets.txt
+```

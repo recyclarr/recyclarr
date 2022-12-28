@@ -1,22 +1,17 @@
+from collections import defaultdict
+import re
 from discord_webhook import DiscordWebhook, DiscordEmbed
-import sys
+import argparse
 
-version = sys.argv[1]
-if not version:
-    print('Pass version as first argument')
-    exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('--repo', required=True)
+parser.add_argument('--version', required=True)
+parser.add_argument('--webhook-url', required=True)
+parser.add_argument('--changelog', required=True)
+parser.add_argument('--assets', required=True)
+args = parser.parse_args()
 
-webhook_url = sys.argv[2]
-if not webhook_url:
-    print('Pass webhook URL as second argument')
-    exit(1)
-
-changelog = sys.argv[3]
-if not changelog:
-    print('Pass path to changelog file as third argument')
-    exit(1)
-
-with open(changelog, 'r') as f:
+with open(args.changelog, 'r') as f:
     changelog_text = f.read()
 
 mkdown_desc = f'''
@@ -27,25 +22,45 @@ mkdown_desc = f'''
 '''
 
 embed = DiscordEmbed(
-    title=f'New Release {version}',
+    title=f'New Release {args.version}',
     description=mkdown_desc,
-    url=f'https://github.com/recyclarr/recyclarr/releases/tag/{version}'
-    )
+    url=f'https://github.com/recyclarr/recyclarr/releases/tag/{args.version}'
+)
 
 embed.set_author(
     name='Recyclarr',
     url='https://github.com/recyclarr/recyclarr',
     icon_url='https://github.com/recyclarr/recyclarr/blob/master/ci/notify/trash-icon.png?raw=true')
 
-def add_links(os_name, archs, os):
-    url_base = f'https://github.com/recyclarr/recyclarr/releases/download/{version}'
-    download_links = ', '.join(f'[{arch}]({url_base}/recyclarr-{os}-{arch}.zip)' for arch in archs)
-    embed.add_embed_field(name=os_name, value=f'[{download_links}]')
+def parse_assets():
+    link_groups = defaultdict(list)
+    with open(args.assets) as file:
+        for line in file.read().splitlines():
+            print(f"Processing {line}")
+            match = re.search(r"/recyclarr-([\w-]+?)-(\w+)\.", line)
+            if match:
+                platform = match.group(1)
+                arch = match.group(2)
+                link_groups[platform].append((arch, line))
 
-add_links('Linux', ('x64', 'arm', 'arm64'), 'linux')
-add_links('Windows', ('x64', 'arm64'), 'win')
-add_links('MacOS', ('x64', 'arm64'), 'osx')
+    return link_groups
 
-webhook = DiscordWebhook(webhook_url)
+def add_links():
+    platform_display_name = {
+        'win': 'Windows',
+        'osx': 'macOS',
+        'linux': 'Linux'
+    }
+
+    assets = parse_assets()
+    for platform in assets.keys():
+        links = ', '.join(f'[{arch}]({link})' for (arch, link) in assets[platform])
+        if platform in platform_display_name:
+          os_name = platform_display_name[platform]
+          embed.add_embed_field(name=os_name, value=f'[{links}]')
+
+add_links()
+
+webhook = DiscordWebhook(args.webhook_url)
 webhook.add_embed(embed)
 print(webhook.execute())
