@@ -64,8 +64,7 @@ internal class JsonTransactionStep : IJsonTransactionStep
 
         // The 'Where' excludes cached CFs that were deleted manually by the user in Radarr
         // FindRadarrCf() specifies 'null' for name because we should never delete unless an ID is found
-        foreach (var del in deletedCfsInCache.Where(
-                     del => FindServiceCf(cfs, del.CustomFormatId) != null))
+        foreach (var del in deletedCfsInCache.Where(del => FindServiceCf(cfs, del.CustomFormatId) != null))
         {
             Transactions.DeletedCustomFormatIds.Add(del);
         }

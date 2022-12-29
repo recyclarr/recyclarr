@@ -38,7 +38,7 @@ public class CachePersisterTest
         var testCfObj = new CustomFormatCache
         {
             Version = versionToTest,
-            TrashIdMappings = new Collection<TrashIdMapping> {new("", 5)}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
         ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
         ctx.Persister.Load();
@@ -53,7 +53,7 @@ public class CachePersisterTest
         var testCfObj = new CustomFormatCache
         {
             Version = CustomFormatCache.LatestVersion,
-            TrashIdMappings = new Collection<TrashIdMapping> {new("", 5)}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
         ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
         ctx.Persister.Load();
@@ -108,7 +108,7 @@ public class CachePersisterTest
         // Load initial CfCache just to test that it gets replaced
         var testCfObj = new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {new("") {CustomFormatId = 5}}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("", "") {CustomFormatId = 5}}
         };
         ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
         ctx.Persister.Load();
@@ -119,7 +119,7 @@ public class CachePersisterTest
 
         var customFormatData = new List<ProcessedCustomFormatData>
         {
-            new(NewCf.Data("", "trashid")) {CacheEntry = new TrashIdMapping("trashid", 10)}
+            new(NewCf.Data("", "trashid")) {CacheEntry = new TrashIdMapping("trashid", "", 10)}
         };
 
         ctx.Persister.Update(customFormatData);
@@ -130,7 +130,7 @@ public class CachePersisterTest
 
         customFormatData.Should().ContainSingle()
             .Which.CacheEntry.Should().BeEquivalentTo(
-                new TrashIdMapping("trashid") {CustomFormatId = 10});
+                new TrashIdMapping("trashid", "") {CustomFormatId = 10});
     }
 
     [Test]

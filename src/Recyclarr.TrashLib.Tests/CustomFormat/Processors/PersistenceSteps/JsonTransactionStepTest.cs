@@ -120,8 +120,8 @@ public class JsonTransactionStepTest
         var guideCfs = new List<ProcessedCustomFormatData>
         {
             NewCf.Processed("created", "id1", guideCfData[0]),
-            NewCf.Processed("updated_different_name", "id2", guideCfData[1], new TrashIdMapping("id2", 2)),
-            NewCf.Processed("no_change", "id3", guideCfData[2], new TrashIdMapping("id3", 3))
+            NewCf.Processed("updated_different_name", "id2", guideCfData[1], new TrashIdMapping("id2", "", 2)),
+            NewCf.Processed("no_change", "id3", guideCfData[2], new TrashIdMapping("id3", "", 3))
         };
 
         var processor = new JsonTransactionStep();
@@ -227,12 +227,12 @@ public class JsonTransactionStepTest
 }");
         var deletedCfsInCache = new List<TrashIdMapping>
         {
-            new("") {CustomFormatId = 2}
+            new("", "") {CustomFormatId = 2}
         };
 
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("updated", "", guideCfData, new TrashIdMapping("") {CustomFormatId = 1})
+            NewCf.Processed("updated", "", guideCfData, new TrashIdMapping("", "") {CustomFormatId = 1})
         };
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
@@ -253,7 +253,7 @@ public class JsonTransactionStepTest
   }]
 }";
         var expectedTransactions = new CustomFormatTransactionData();
-        expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("", 2));
+        expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("", "", 2));
         expectedTransactions.UpdatedCustomFormats.Add(guideCfs[0]);
         processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
 
@@ -290,8 +290,8 @@ public class JsonTransactionStepTest
 }]";
         var deletedCfsInCache = new List<TrashIdMapping>
         {
-            new("testtrashid", 2),
-            new("", 3)
+            new("testtrashid", "", 2),
+            new("", "", 3)
         };
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
@@ -300,7 +300,7 @@ public class JsonTransactionStepTest
         processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
         var expectedTransactions = new CustomFormatTransactionData();
-        expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", 2));
+        expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", "", 2));
         processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
     }
 }

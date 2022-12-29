@@ -168,7 +168,7 @@ public class ServiceCacheTest
     }
 
     [Test, AutoMockData]
-    public void Name_properties_get_truncated_on_load(
+    public void Name_properties_are_set_on_load(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
         ServiceCache sut)
@@ -195,7 +195,7 @@ public class ServiceCacheTest
         {
             TrashIdMappings = new Collection<TrashIdMapping>
             {
-                new("eca37840c13c6ef2dd0262b141a5482f", 4)
+                new("eca37840c13c6ef2dd0262b141a5482f", "4K Remaster", 4)
             }
         });
     }

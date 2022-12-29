@@ -22,7 +22,8 @@ public class ProcessedCustomFormatData
 
     public void SetCache(int customFormatId)
     {
-        CacheEntry ??= new TrashIdMapping(TrashId);
+        // Do not pass the customFormatId to constructor since an instance may already exist.
+        CacheEntry ??= new TrashIdMapping(TrashId, Name);
         CacheEntry.CustomFormatId = customFormatId;
     }
 

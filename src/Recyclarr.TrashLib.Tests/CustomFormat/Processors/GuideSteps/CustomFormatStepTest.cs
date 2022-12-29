@@ -82,13 +82,13 @@ public class CustomFormatStepTest
 
         var testCache = new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {new("id1000")}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("id1000", "")}
         };
 
         processor.Process(guideData, testConfig, testCache);
 
         processor.DeletedCustomFormatsInCache.Should()
-            .BeEquivalentTo(new[] {new TrashIdMapping("id1000")});
+            .BeEquivalentTo(new[] {new TrashIdMapping("id1000", "")});
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
         {
             NewCf.Processed("name1", "id1")
@@ -100,7 +100,7 @@ public class CustomFormatStepTest
     {
         var cache = new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {new("id1", 9)}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("id1", "", 9)}
         };
 
         var guideCfs = new List<CustomFormatData>
