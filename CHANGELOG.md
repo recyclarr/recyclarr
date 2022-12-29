@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Better visual separation between processed instances in console output.
+- More information about deleted, skipped, updated, and created CFs in console output.
+
 ### Changed
 
 - Category headers in `--list-custom-formats` output is now formatted as a YAML comment that can be
