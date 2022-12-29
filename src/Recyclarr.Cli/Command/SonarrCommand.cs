@@ -1,6 +1,7 @@
 using Autofac;
 using CliFx.Attributes;
 using CliFx.Exceptions;
+using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Config;
 using Recyclarr.TrashLib.Config.Services;
@@ -51,6 +52,7 @@ public class SonarrCommand : ServiceCommand
         var lister = container.Resolve<ISonarrGuideDataLister>();
         var log = container.Resolve<ILogger>();
         var guideService = container.Resolve<ISonarrGuideService>();
+        var console = container.Resolve<IConsole>();
 
         if (ListReleaseProfiles)
         {
@@ -94,8 +96,16 @@ public class SonarrCommand : ServiceCommand
                 builder.RegisterInstance(config).As<IServiceConfiguration>();
             });
 
-            log.Information("Processing {Server} server {Name}",
-                Name, config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl));
+            var serverName = Name;
+            var instanceName = config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl);
+
+            await console.Output.WriteLineAsync($@"
+===========================================
+Processing {serverName} Server: [{instanceName}]
+===========================================
+");
+
+            log.Debug("Processing {Server} server {Name}", serverName, instanceName);
 
             var versionEnforcement = scope.Resolve<ISonarrVersionEnforcement>();
             await versionEnforcement.DoVersionEnforcement(config);

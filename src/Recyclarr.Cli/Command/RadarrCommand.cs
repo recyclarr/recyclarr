@@ -1,6 +1,7 @@
 using System.Reactive.Linq;
 using Autofac;
 using CliFx.Attributes;
+using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Config;
 using Recyclarr.TrashLib.Config.Services;
@@ -38,6 +39,7 @@ internal class RadarrCommand : ServiceCommand
         var lister = container.Resolve<IRadarrGuideDataLister>();
         var log = container.Resolve<ILogger>();
         var guideService = container.Resolve<IRadarrGuideService>();
+        var console = container.Resolve<IConsole>();
 
         if (ListCustomFormats)
         {
@@ -60,8 +62,16 @@ internal class RadarrCommand : ServiceCommand
                 builder.RegisterInstance(config).As<IServiceConfiguration>();
             });
 
-            log.Information("Processing {Server} server {Name}",
-                Name, config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl));
+            var serverName = Name;
+            var instanceName = config.Name ?? FlurlLogging.SanitizeUrl(config.BaseUrl);
+
+            await console.Output.WriteLineAsync($@"
+===========================================
+Processing {serverName} Server: [{instanceName}]
+===========================================
+");
+
+            log.Debug("Processing {Server} server {Name}", serverName, instanceName);
 
             // There's no actual compatibility checks to perform yet. We directly access the RadarrCompatibility class,
             // as opposed to a IRadarrVersionEnforcement object (like Sonarr does), simply to force the API invocation
