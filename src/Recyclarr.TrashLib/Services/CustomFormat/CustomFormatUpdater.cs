@@ -97,29 +97,53 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         var created = transactions.NewCustomFormats;
         if (created.Count > 0)
         {
-            _log.Information("Created {Count} New Custom Formats: {CustomFormats}", created.Count,
-                created.Select(r => r.Name));
+            _log.Information("Created {Count} New Custom Formats", created.Count);
+            _log.Debug("Custom formats Created: {CustomFormats}",
+                created.ToDictionary(k => k.TrashId, v => v.Name));
+
+            foreach (var mapping in created)
+            {
+                _console.Output.WriteLine($"> Created: {mapping.TrashId} ({mapping.Name})");
+            }
         }
 
         var updated = transactions.UpdatedCustomFormats;
         if (updated.Count > 0)
         {
-            _log.Information("Updated {Count} Existing Custom Formats: {CustomFormats}", updated.Count,
-                updated.Select(r => r.Name));
+            _log.Information("Updated {Count} Existing Custom Formats", updated.Count);
+            _log.Debug("Custom formats Updated: {CustomFormats}",
+                updated.ToDictionary(k => k.TrashId, v => v.Name));
+
+            foreach (var mapping in updated)
+            {
+                _console.Output.WriteLine($"> Updated: {mapping.TrashId} ({mapping.Name})");
+            }
         }
 
         var skipped = transactions.UnchangedCustomFormats;
         if (skipped.Count > 0)
         {
-            _log.Debug("Skipped {Count} Custom Formats that did not change: {CustomFormats}", skipped.Count,
-                skipped.Select(r => r.Name));
+            _log.Information("Skipped {Count} Custom Formats that did not change", skipped.Count);
+            _log.Debug("Custom Formats Skipped: {CustomFormats}",
+                skipped.ToDictionary(k => k.TrashId, v => v.Name));
+
+            foreach (var mapping in skipped)
+            {
+                _console.Output.WriteLine($"> Skipped: {mapping.TrashId} ({mapping.Name})");
+            }
         }
 
         var deleted = transactions.DeletedCustomFormatIds;
         if (deleted.Count > 0)
         {
-            _log.Information("Deleted {Count} Custom Formats: {CustomFormats}", deleted.Count,
-                deleted.Select(r => r.TrashId));
+            _log.Information("Deleted {Count} Custom Formats", deleted.Count);
+            _log.Debug("Custom formats Deleted: {CustomFormats}",
+                deleted.ToDictionary(k => k.TrashId, v => v.CustomFormatName));
+
+            foreach (var mapping in deleted)
+            {
+                _console.Output.WriteLine($"> Deleted: {mapping.TrashId} ({mapping.CustomFormatName})");
+            }
         }
 
         var totalCount = created.Count + updated.Count;
