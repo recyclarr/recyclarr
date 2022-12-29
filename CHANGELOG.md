@@ -10,8 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Better visual separation between processed instances in console output.
-- More information about deleted, skipped, updated, and created CFs in console output.
+- Better visual separation between processed instances in console output. (#146)
+- More information about deleted, skipped, updated, and created CFs in console output. (#159)
 
 ### Changed
 
