@@ -17,4 +17,4 @@ $content = Get-Content -Path .\CHANGELOG.md
 Set-Content -Path .\CHANGELOG.md -Value $content
 
 git commit -m "release: v$version" -- CHANGELOG.md
-git tag -m "release v$version" "v$version"
+git tag -fm "release v$version" "v$version"
