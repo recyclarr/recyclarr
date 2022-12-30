@@ -12,9 +12,9 @@ public static class AutoMapperConfig
             cfg.AddMaps(typeof(AutoMapperConfig));
         });
 
-#if DEBUG
+    #if DEBUG
         mapperConfig.AssertConfigurationIsValid();
-#endif
+    #endif
 
         return mapperConfig.CreateMapper();
     }

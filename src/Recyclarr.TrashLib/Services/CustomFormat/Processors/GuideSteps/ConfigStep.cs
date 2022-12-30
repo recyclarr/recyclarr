@@ -5,10 +5,9 @@ using Recyclarr.TrashLib.Services.CustomFormat.Models;
 namespace Recyclarr.TrashLib.Services.CustomFormat.Processors.GuideSteps;
 
 /// <remarks>
-/// The purpose of this step is to validate the custom format data in the configs:
-///
-/// - Validate that custom formats specified in the config exist in the guide.
-/// - Removal of duplicates.
+///     The purpose of this step is to validate the custom format data in the configs:
+///     - Validate that custom formats specified in the config exist in the guide.
+///     - Removal of duplicates.
 /// </remarks>
 public class ConfigStep : IConfigStep
 {

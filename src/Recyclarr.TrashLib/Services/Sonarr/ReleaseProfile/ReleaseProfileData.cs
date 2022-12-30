@@ -51,10 +51,10 @@ public record ReleaseProfileData
     public override string ToString()
     {
         return $"[TrashId: {TrashId}] " +
-               $"[Name: {Name}] " +
-               $"[IncludePreferred: {IncludePreferredWhenRenaming}] " +
-               $"[Required: {Required.Count}] " +
-               $"[Ignored: {Ignored.Count}] " +
-               $"[Preferred: {Preferred.Count}]";
+            $"[Name: {Name}] " +
+            $"[IncludePreferred: {IncludePreferredWhenRenaming}] " +
+            $"[Required: {Required.Count}] " +
+            $"[Ignored: {Ignored.Count}] " +
+            $"[Preferred: {Preferred.Count}]";
     }
 }

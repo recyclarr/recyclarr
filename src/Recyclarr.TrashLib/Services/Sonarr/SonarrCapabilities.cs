@@ -2,7 +2,8 @@ namespace Recyclarr.TrashLib.Services.Sonarr;
 
 public record SonarrCapabilities(Version Version)
 {
-    public SonarrCapabilities() : this(new Version())
+    public SonarrCapabilities()
+        : this(new Version())
     {
     }
 

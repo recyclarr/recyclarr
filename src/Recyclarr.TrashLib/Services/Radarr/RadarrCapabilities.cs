@@ -6,7 +6,8 @@ namespace Recyclarr.TrashLib.Services.Radarr;
 // code does not need to be changed later.
 public record RadarrCapabilities(Version Version)
 {
-    public RadarrCapabilities() : this(new Version())
+    public RadarrCapabilities()
+        : this(new Version())
     {
     }
 }

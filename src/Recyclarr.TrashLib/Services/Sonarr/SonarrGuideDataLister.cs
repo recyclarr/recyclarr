@@ -60,7 +60,7 @@ public class SonarrGuideDataLister : ISonarrGuideDataLister
         if (!validator.Validate(profile).IsValid)
         {
             _console.Output.WriteLine("This release profile has no terms that can be filtered. " +
-                                      "Terms must have Trash IDs assigned in order to be filtered.");
+                "Terms must have Trash IDs assigned in order to be filtered.");
             return;
         }
 

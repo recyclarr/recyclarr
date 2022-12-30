@@ -30,5 +30,5 @@ public class ProcessedCustomFormatData
     [SuppressMessage("Microsoft.Design", "CA1024", Justification = "Method throws an exception")]
     public int GetCustomFormatId()
         => CacheEntry?.CustomFormatId ??
-           throw new InvalidOperationException("CacheEntry must exist to obtain custom format ID");
+            throw new InvalidOperationException("CacheEntry must exist to obtain custom format ID");
 }
