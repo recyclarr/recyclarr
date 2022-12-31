@@ -1,12 +1,12 @@
+using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.System;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Radarr;
 
 public class RadarrCompatibility : ServiceCompatibility<RadarrCapabilities>
 {
-    public RadarrCompatibility(ISystemApiService api, ILogger log)
-        : base(api, log)
+    public RadarrCompatibility(IServiceInformation compatibility)
+        : base(compatibility)
     {
     }
 

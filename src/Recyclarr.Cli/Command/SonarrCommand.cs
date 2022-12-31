@@ -107,8 +107,12 @@ Processing {serverName} Server: [{instanceName}]
 
             log.Debug("Processing {Server} server {Name}", serverName, instanceName);
 
-            var versionEnforcement = scope.Resolve<ISonarrVersionEnforcement>();
-            await versionEnforcement.DoVersionEnforcement(config);
+            var validator = scope.Resolve<ConfigValidationExecutor>();
+            if (!validator.Validate(config))
+            {
+                log.Error("Due to validation failure, this instance will be skipped");
+                continue;
+            }
 
             // ReSharper disable InvertIf
 

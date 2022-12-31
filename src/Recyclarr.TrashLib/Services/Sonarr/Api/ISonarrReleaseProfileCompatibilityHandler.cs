@@ -5,6 +5,6 @@ namespace Recyclarr.TrashLib.Services.Sonarr.Api;
 
 public interface ISonarrReleaseProfileCompatibilityHandler
 {
-    Task<object> CompatibleReleaseProfileForSendingAsync(SonarrReleaseProfile profile);
+    object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile);
     SonarrReleaseProfile CompatibleReleaseProfileForReceiving(JObject profile);
 }

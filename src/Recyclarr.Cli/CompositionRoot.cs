@@ -92,6 +92,7 @@ public static class CompositionRoot
 
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
+        builder.RegisterType<ConfigValidationExecutor>();
 
         builder.RegisterGeneric(typeof(ConfigurationLoader<>))
             .WithProperty(new AutowiringParameter())

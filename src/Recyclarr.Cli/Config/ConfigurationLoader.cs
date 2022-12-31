@@ -1,9 +1,7 @@
 ﻿using System.IO.Abstractions;
-using FluentValidation;
 using Recyclarr.Cli.Logging;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Config.Yaml;
-using Recyclarr.TrashLib.Http;
 using Serilog;
 using Serilog.Context;
 using YamlDotNet.Core;
@@ -18,17 +16,14 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
     private readonly ILogger _log;
     private readonly IDeserializer _deserializer;
     private readonly IFileSystem _fs;
-    private readonly IValidator<T> _validator;
 
     public ConfigurationLoader(
         ILogger log,
         IFileSystem fs,
-        IYamlSerializerFactory yamlFactory,
-        IValidator<T> validator)
+        IYamlSerializerFactory yamlFactory)
     {
         _log = log;
         _fs = fs;
-        _validator = validator;
         _deserializer = yamlFactory.CreateDeserializer();
     }
 
@@ -159,16 +154,7 @@ public class ConfigurationLoader<T> : IConfigurationLoader<T>
 
             var newConfig = _deserializer.Deserialize<T>(parser);
             newConfig.Name = instanceName;
-
-            var result = _validator.Validate(newConfig);
-            if (result is {IsValid: false})
-            {
-                var printableName = instanceName ?? FlurlLogging.SanitizeUrl(newConfig.BaseUrl);
-                _log.Error("Validation failed for instance config {Instance} at line {Line} with errors {Errors}",
-                    printableName, lineNumber, result.Errors);
-                continue;
-            }
-
+            newConfig.LineNumber = lineNumber ?? 0;
             configs.Add(newConfig);
         }
     }

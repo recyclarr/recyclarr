@@ -7,6 +7,8 @@ public record SonarrCapabilities(Version Version)
     {
     }
 
+    public static Version MinimumVersion => new("3.0.4.1098");
+
     public bool SupportsNamedReleaseProfiles { get; init; }
 
     // Background: Issue #16 filed which points to a backward-breaking API

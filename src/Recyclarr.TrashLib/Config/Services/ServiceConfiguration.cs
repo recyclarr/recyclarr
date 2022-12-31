@@ -9,6 +9,9 @@ public abstract class ServiceConfiguration : IServiceConfiguration
     [YamlIgnore]
     public string? Name { get; set; }
 
+    [YamlIgnore]
+    public int LineNumber { get; set; }
+
     public string BaseUrl { get; set; } = "";
     public string ApiKey { get; set; } = "";
 

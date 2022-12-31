@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
+using FluentValidation.Validators;
 
 namespace Recyclarr.Common.FluentValidation;
 
@@ -16,6 +17,26 @@ public static class FluentValidationExtensions
         };
 
         return ruleBuilder.SetAsyncValidator(adapter);
+    }
+
+    private sealed class NullableChildValidatorAdaptor<T, TProperty> : ChildValidatorAdaptor<T, TProperty>,
+        IPropertyValidator<T, TProperty?>, IAsyncPropertyValidator<T, TProperty?>
+    {
+        public NullableChildValidatorAdaptor(IValidator<TProperty> validator, Type validatorType)
+            : base(validator, validatorType)
+        {
+        }
+
+        public override bool IsValid(ValidationContext<T> context, TProperty? value)
+        {
+            return base.IsValid(context, value!);
+        }
+
+        public override Task<bool> IsValidAsync(ValidationContext<T> context, TProperty? value,
+            CancellationToken cancellation)
+        {
+            return base.IsValidAsync(context, value!, cancellation);
+        }
     }
 
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(

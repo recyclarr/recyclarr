@@ -2,7 +2,6 @@ using System.Reflection;
 using Autofac;
 using FluentValidation;
 using Recyclarr.TrashLib.Config.Secrets;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
 using Module = Autofac.Module;
@@ -31,6 +30,5 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
-        builder.RegisterType<ServiceValidationMessages>().As<IServiceValidationMessages>();
     }
 }

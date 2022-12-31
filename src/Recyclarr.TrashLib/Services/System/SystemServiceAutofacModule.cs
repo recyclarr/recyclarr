@@ -8,5 +8,7 @@ public class SystemServiceAutofacModule : Module
     {
         base.Load(builder);
         builder.RegisterType<SystemApiService>().As<ISystemApiService>();
+        builder.RegisterType<ServiceInformation>().As<IServiceInformation>()
+            .InstancePerLifetimeScope();
     }
 }

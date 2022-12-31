@@ -1,4 +1,3 @@
-using System.Reactive.Linq;
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -11,22 +10,22 @@ namespace Recyclarr.TrashLib.Services.Sonarr.Api;
 public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCompatibilityHandler
 {
     private readonly ILogger _log;
-    private readonly ISonarrCompatibility _compatibility;
+    private readonly Func<SonarrCapabilities> _capabilitiesFactory;
     private readonly IMapper _mapper;
 
     public SonarrReleaseProfileCompatibilityHandler(
         ILogger log,
-        ISonarrCompatibility compatibility,
+        Func<SonarrCapabilities> capabilitiesFactory,
         IMapper mapper)
     {
         _log = log;
-        _compatibility = compatibility;
+        _capabilitiesFactory = capabilitiesFactory;
         _mapper = mapper;
     }
 
-    public async Task<object> CompatibleReleaseProfileForSendingAsync(SonarrReleaseProfile profile)
+    public object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile)
     {
-        var capabilities = await _compatibility.Capabilities.LastAsync();
+        var capabilities = _capabilitiesFactory();
         return capabilities.ArraysNeededForReleaseProfileRequiredAndIgnored
             ? profile
             : _mapper.Map<SonarrReleaseProfileV1>(profile);

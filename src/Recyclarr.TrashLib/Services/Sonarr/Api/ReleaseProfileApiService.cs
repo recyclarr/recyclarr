@@ -20,14 +20,14 @@ public class ReleaseProfileApiService : IReleaseProfileApiService
 
     public async Task UpdateReleaseProfile(SonarrReleaseProfile profile)
     {
-        var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(profile);
+        var profileToSend = _profileHandler.CompatibleReleaseProfileForSending(profile);
         await _service.Request("releaseprofile", profile.Id)
             .PutJsonAsync(profileToSend);
     }
 
     public async Task<SonarrReleaseProfile> CreateReleaseProfile(SonarrReleaseProfile profile)
     {
-        var profileToSend = await _profileHandler.CompatibleReleaseProfileForSendingAsync(profile);
+        var profileToSend = _profileHandler.CompatibleReleaseProfileForSending(profile);
 
         var response = await _service.Request("releaseprofile")
             .PostJsonAsync(profileToSend)

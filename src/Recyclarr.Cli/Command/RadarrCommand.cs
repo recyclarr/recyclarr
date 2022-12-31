@@ -1,4 +1,3 @@
-using System.Reactive.Linq;
 using Autofac;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
@@ -73,11 +72,12 @@ Processing {serverName} Server: [{instanceName}]
 
             log.Debug("Processing {Server} server {Name}", serverName, instanceName);
 
-            // There's no actual compatibility checks to perform yet. We directly access the RadarrCompatibility class,
-            // as opposed to a IRadarrVersionEnforcement object (like Sonarr does), simply to force the API invocation
-            // in Radarr to acquire and log version information.
-            var compatibility = scope.Resolve<RadarrCompatibility>();
-            await compatibility.Capabilities.LastAsync();
+            var validator = scope.Resolve<ConfigValidationExecutor>();
+            if (!validator.Validate(config))
+            {
+                log.Error("Due to validation failure, this instance will be skipped");
+                continue;
+            }
 
             // ReSharper disable InvertIf
 

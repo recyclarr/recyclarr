@@ -5,8 +5,6 @@ using System.Text;
 using Autofac;
 using FluentAssertions;
 using FluentValidation;
-using FluentValidation.Results;
-using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Cli.Config;
 using Recyclarr.Cli.TestLibrary;
@@ -72,7 +70,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var loader = Resolve<IConfigurationLoader<SonarrConfiguration>>();
         var actual = loader.LoadMany(fileData.Select(x => x.Item1), "sonarr").ToList();
 
-        actual.Should().BeEquivalentTo(expected);
+        actual.Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
     }
 
     [Test]
@@ -108,49 +106,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
                     }
                 }
             }
-        });
-    }
-
-    [Test]
-    public void Skip_when_validation_fails()
-        // [Frozen] IValidator<TestConfig> validator,
-        // ConfigurationLoader<TestConfig> configLoader)
-    {
-        var validator = Resolve<IValidator<TestConfig>>();
-        var sut = Resolve<ConfigurationLoader<TestConfig>>();
-
-        // force the validator to return a validation error
-        validator.Validate(Arg.Any<TestConfig>()).Returns(new ValidationResult
-        {
-            Errors =
-            {
-                new ValidationFailure("PropertyName", "Test Validation Failure"),
-                new ValidationFailure("Another", "This is yet another failure")
-            }
-        });
-
-        const string testYml = @"
-fubar:
-  instance1:
-    api_key: abc
-";
-        var result = sut.LoadFromStream(new StringReader(testYml), "fubar");
-
-        result.Should().BeEmpty();
-    }
-
-    [Test]
-    public void Validation_success_does_not_throw()
-    {
-        var configLoader = Resolve<ConfigurationLoader<TestConfig>>();
-
-        const string testYml = @"
-fubar:
-  instanceA:
-    api_key: abc
-";
-        Action act = () => configLoader.LoadFromStream(new StringReader(testYml), "fubar");
-        act.Should().NotThrow();
+        }, o => o.Excluding(x => x.LineNumber));
     }
 
     [Test]
@@ -193,7 +149,7 @@ secret_rp: 1234567
         };
 
         var parsedSecret = configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
-        parsedSecret.Should().BeEquivalentTo(expected);
+        parsedSecret.Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
     }
 
     [Test]
