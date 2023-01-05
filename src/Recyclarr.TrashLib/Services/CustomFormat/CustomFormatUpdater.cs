@@ -50,8 +50,10 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
             return;
         }
 
-        await _persistenceProcessor.PersistCustomFormats(_guideProcessor.ProcessedCustomFormats,
-            _guideProcessor.DeletedCustomFormatsInCache, _guideProcessor.ProfileScores);
+        await _persistenceProcessor.PersistCustomFormats(
+            _guideProcessor.ProcessedCustomFormats,
+            _guideProcessor.DeletedCustomFormatsInCache,
+            _guideProcessor.ProfileScores);
 
         PrintApiStatistics(_persistenceProcessor.Transactions);
         PrintQualityProfileUpdates();
@@ -94,6 +96,15 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private void PrintApiStatistics(CustomFormatTransactionData transactions)
     {
+        foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
+        {
+            _log.Warning(
+                "Custom Format with name {Name} (Trash ID: {TrashId}) will be skipped because another " +
+                "CF already exists with that name (ID: {ConflictId}). To fix the conflict, delete or " +
+                "rename the CF with the mentioned name",
+                guideCf.Name, guideCf.TrashId, conflictingId);
+        }
+
         var created = transactions.NewCustomFormats;
         if (created.Count > 0)
         {

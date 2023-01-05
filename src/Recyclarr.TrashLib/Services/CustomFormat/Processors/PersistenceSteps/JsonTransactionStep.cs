@@ -12,17 +12,18 @@ public class CustomFormatTransactionData
     public Collection<ProcessedCustomFormatData> UpdatedCustomFormats { get; } = new();
     public Collection<TrashIdMapping> DeletedCustomFormatIds { get; } = new();
     public Collection<ProcessedCustomFormatData> UnchangedCustomFormats { get; } = new();
+    public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = new();
 }
 
-internal class JsonTransactionStep : IJsonTransactionStep
+public class JsonTransactionStep : IJsonTransactionStep
 {
     public CustomFormatTransactionData Transactions { get; } = new();
 
-    public void Process(IEnumerable<ProcessedCustomFormatData> guideCfs,
+    public void Process(
+        IEnumerable<ProcessedCustomFormatData> guideCfs,
         IReadOnlyCollection<JObject> serviceCfs)
     {
-        foreach (var (guideCf, serviceCf) in guideCfs
-                     .Select(gcf => (GuideCf: gcf, ServiceCf: FindServiceCf(serviceCfs, gcf))))
+        foreach (var (guideCf, serviceCf) in guideCfs.Select(gcf => (gcf, FindServiceCf(serviceCfs, gcf))))
         {
             var guideCfJson = BuildNewServiceCf(guideCf.Json);
 
@@ -31,31 +32,61 @@ internal class JsonTransactionStep : IJsonTransactionStep
             {
                 guideCf.Json = guideCfJson;
                 Transactions.NewCustomFormats.Add(guideCf);
+                continue;
             }
-            // found match in radarr CFs; update the existing CF
+
+            // If cache entry is NOT null, that means we found the service by its ID
+            if (guideCf.CacheEntry is not null)
+            {
+                // Check for conflicts with upstream CFs with the same name but different ID.
+                // If found, it is recorded and we skip this CF.
+                if (DetectConflictingCustomFormats(serviceCfs, guideCf, serviceCf))
+                {
+                    continue;
+                }
+            }
+            // Null cache entry use case
             else
             {
-                guideCf.Json = (JObject) serviceCf.DeepClone();
-                UpdateServiceCf(guideCf.Json, guideCfJson);
-
                 // Set the cache for use later (like updating scores) if it hasn't been updated already.
-                // This handles CFs that already exist in Radarr but aren't cached (they will be added to cache
+                // This handles CFs that already exist in the service but aren't cached (they will be added to cache
                 // later).
-                if (guideCf.CacheEntry == null)
-                {
-                    guideCf.SetCache(guideCf.Json.Value<int>("id"));
-                }
+                guideCf.SetCache(guideCf.Json.Value<int>("id"));
+            }
 
-                if (!JToken.DeepEquals(serviceCf, guideCf.Json))
-                {
-                    Transactions.UpdatedCustomFormats.Add(guideCf);
-                }
-                else
-                {
-                    Transactions.UnchangedCustomFormats.Add(guideCf);
-                }
+            guideCf.Json = (JObject) serviceCf.DeepClone();
+            UpdateServiceCf(guideCf.Json, guideCfJson);
+
+            if (!JToken.DeepEquals(serviceCf, guideCf.Json))
+            {
+                Transactions.UpdatedCustomFormats.Add(guideCf);
+            }
+            else
+            {
+                Transactions.UnchangedCustomFormats.Add(guideCf);
             }
         }
+    }
+
+    private bool DetectConflictingCustomFormats(
+        IReadOnlyCollection<JObject> serviceCfs,
+        ProcessedCustomFormatData guideCf,
+        JObject serviceCf)
+    {
+        var conflictingServiceCf = FindServiceCf(serviceCfs, null, guideCf.Name);
+        if (conflictingServiceCf is null)
+        {
+            return false;
+        }
+
+        var conflictingId = conflictingServiceCf.Value<int>("id");
+        if (conflictingId == serviceCf.Value<int>("id"))
+        {
+            return false;
+        }
+
+        Transactions.ConflictingCustomFormats.Add(new ConflictingCustomFormat(guideCf, conflictingId));
+        return true;
     }
 
     public void RecordDeletions(IEnumerable<TrashIdMapping> deletedCfsInCache, IEnumerable<JObject> serviceCfs)

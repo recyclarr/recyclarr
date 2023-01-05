@@ -2,6 +2,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TestLibrary.FluentAssertions;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
@@ -42,8 +43,9 @@ namespace Recyclarr.TrashLib.Tests.CustomFormat.Processors.PersistenceSteps;
 [Parallelizable(ParallelScope.All)]
 public class JsonTransactionStepTest
 {
-    [Test]
-    public void Combination_of_create_update_and_unchanged_and_verify_proper_json_merging()
+    [Test, AutoMockData]
+    public void Combination_of_create_update_and_unchanged_and_verify_proper_json_merging(
+        JsonTransactionStep processor)
     {
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(@"
 [{
@@ -124,7 +126,6 @@ public class JsonTransactionStepTest
             NewCf.Processed("no_change", "id3", guideCfData[2], new TrashIdMapping("id3", "", 3))
         };
 
-        var processor = new JsonTransactionStep();
         processor.Process(guideCfs, radarrCfs);
 
         var expectedJson = new[]
@@ -188,10 +189,13 @@ public class JsonTransactionStepTest
 
         processor.Transactions.UnchangedCustomFormats.First().Json.Should()
             .BeEquivalentTo(JObject.Parse(expectedJson[2]), op => op.Using(new JsonEquivalencyStep()));
+
+        processor.Transactions.ConflictingCustomFormats.Should().BeEmpty();
     }
 
-    [Test]
-    public void Deletes_happen_before_updates()
+    [Test, AutoMockData]
+    public void Deletes_happen_before_updates(
+        JsonTransactionStep processor)
     {
         const string radarrCfData = @"[{
   'id': 1,
@@ -237,7 +241,6 @@ public class JsonTransactionStepTest
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
 
-        var processor = new JsonTransactionStep();
         processor.Process(guideCfs, radarrCfs!);
         processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
@@ -261,8 +264,9 @@ public class JsonTransactionStepTest
             .BeEquivalentTo(JObject.Parse(expectedJson), op => op.Using(new JsonEquivalencyStep()));
     }
 
-    [Test]
-    public void Only_delete_correct_cfs()
+    [Test, AutoMockData]
+    public void Only_delete_correct_cfs(
+        JsonTransactionStep processor)
     {
         const string radarrCfData = @"[{
   'id': 1,
@@ -296,11 +300,37 @@ public class JsonTransactionStepTest
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
 
-        var processor = new JsonTransactionStep();
         processor.RecordDeletions(deletedCfsInCache, radarrCfs!);
 
         var expectedTransactions = new CustomFormatTransactionData();
         expectedTransactions.DeletedCustomFormatIds.Add(new TrashIdMapping("testtrashid", "", 2));
+        processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
+    }
+
+    [Test, AutoMockData]
+    public void Conflicting_ids_detected(
+        JsonTransactionStep processor)
+    {
+        const string serviceCfData = @"
+[{
+  'id': 1,
+  'name': 'first'
+}, {
+  'id': 2,
+  'name': 'second'
+}]";
+
+        var serviceCfs = JsonConvert.DeserializeObject<List<JObject>>(serviceCfData)!;
+
+        var guideCfs = new List<ProcessedCustomFormatData>
+        {
+            NewCf.Processed("first", "", new TrashIdMapping("", "first", 2))
+        };
+
+        processor.Process(guideCfs, serviceCfs);
+
+        var expectedTransactions = new CustomFormatTransactionData();
+        expectedTransactions.ConflictingCustomFormats.Add(new ConflictingCustomFormat(guideCfs[0], 1));
         processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
     }
 }

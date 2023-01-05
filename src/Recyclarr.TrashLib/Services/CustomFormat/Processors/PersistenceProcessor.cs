@@ -41,7 +41,8 @@ internal class PersistenceProcessor : IPersistenceProcessor
     public IReadOnlyCollection<string> InvalidProfileNames
         => _steps.ProfileQualityProfileApiPersister.InvalidProfileNames;
 
-    public async Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
+    public async Task PersistCustomFormats(
+        IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
         IEnumerable<TrashIdMapping> deletedCfsInCache,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores)
     {
