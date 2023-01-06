@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- More robust configuration validation logic. You may notice new configuration errors that were not
+  there before.
+
 ### Fixed
 
 - Custom Formats: Updates that conflict with existing CFs in Sonarr/Radarr are now skipped and a
