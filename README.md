@@ -1,7 +1,7 @@
 # Recyclarr
 
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/recyclarr/recyclarr/blob/master/LICENSE)
-![build status](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml/badge.svg?branch=master)
+[![Build & Test](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml/badge.svg)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=recyclarr_recyclarr&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=recyclarr_recyclarr)
 [![GitHub release](https://img.shields.io/github/release/recyclarr/recyclarr.svg)](https://github.com/recyclarr/recyclarr/releases/)
 [![Support Server](https://img.shields.io/discord/492590071455940612.svg?color=7289da&label=TRaSH-Guides&logo=discord&style=flat-square)](https://discord.com/invite/Vau8dZ3)
