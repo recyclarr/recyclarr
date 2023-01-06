@@ -26,16 +26,26 @@ public class CacheStoragePath : ICacheStoragePath
         _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
     }
 
-    private string BuildServiceGuid()
+    private string BuildUniqueServiceDir(string? serviceName)
     {
-        return _hash.ComputeHash(Encoding.ASCII.GetBytes(_config.BaseUrl)).AsHexString();
+        // In the future, once array-style configurations are removed, the service name will no longer be optional
+        // and the below condition can be removed and the logic simplified.
+        var dirName = new StringBuilder();
+        if (serviceName is not null)
+        {
+            dirName.Append($"{serviceName}_");
+        }
+
+        var guid = _hash.ComputeHash(Encoding.ASCII.GetBytes(_config.BaseUrl)).AsHexString();
+        dirName.Append(guid);
+        return dirName.ToString();
     }
 
     public IFileInfo CalculatePath(string cacheObjectName)
     {
         return _paths.CacheDirectory
             .SubDirectory(_serviceCommand.Name.ToLower(CultureInfo.CurrentCulture))
-            .SubDirectory(_config.Name ?? BuildServiceGuid())
+            .SubDirectory(BuildUniqueServiceDir(_config.Name))
             .File(cacheObjectName + ".json");
     }
 }

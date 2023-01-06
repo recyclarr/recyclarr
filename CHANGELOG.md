@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Custom Formats: Updates that conflict with existing CFs in Sonarr/Radarr are now skipped and a
   warning is printed.
+- When changing instance URLs, use new cache data to avoid mismatched custom formats on next sync.
 
 ## [4.1.0] - 2022-12-30
 

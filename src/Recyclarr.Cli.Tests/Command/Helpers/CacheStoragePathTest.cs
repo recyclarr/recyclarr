@@ -45,6 +45,6 @@ public class CacheStoragePathTest : IntegrationFixture
         var sut = scope.Resolve<CacheStoragePath>();
         var result = sut.CalculatePath("obj");
 
-        result.FullName.Should().MatchRegex(@".*[/\\]thename[/\\]obj\.json$");
+        result.FullName.Should().MatchRegex(@".*[/\\]thename_[a-f0-9]+[/\\]obj\.json$");
     }
 }
