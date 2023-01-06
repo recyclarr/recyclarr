@@ -79,7 +79,7 @@ public abstract class BaseCommand : ICommand
                     break;
             }
 
-            Logger.Debug(e, "Exception");
+            Logger.Debug("Exception Stacktrace: {Stacktrace}", e.StackTrace);
             throw new CommandException("Exiting due to exception");
         }
         finally

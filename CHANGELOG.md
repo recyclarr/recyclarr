@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove unredacted request URI from log files on exception
+
 ## [4.1.1] - 2023-01-06
 
 ### Changed
