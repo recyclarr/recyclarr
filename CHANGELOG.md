@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Remove unredacted request URI from log files on exception
+- Remove unredacted request URI from log files on exception.
+- Scores/Custom Formats would not sync under certain conditions (#160).
 
 ## [4.1.1] - 2023-01-06
 

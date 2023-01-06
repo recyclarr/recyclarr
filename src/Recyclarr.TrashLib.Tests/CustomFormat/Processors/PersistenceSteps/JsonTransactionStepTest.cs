@@ -333,4 +333,27 @@ public class JsonTransactionStepTest
         expectedTransactions.ConflictingCustomFormats.Add(new ConflictingCustomFormat(guideCfs[0], 1));
         processor.Transactions.Should().BeEquivalentTo(expectedTransactions);
     }
+
+    [Test, AutoMockData]
+    public void Service_cf_id_set_when_no_cache_entry(JsonTransactionStep processor)
+    {
+        const string serviceCfData = @"
+[{
+  'id': 1,
+  'name': 'first'
+}]";
+
+        var serviceCfs = JsonConvert.DeserializeObject<List<JObject>>(serviceCfData)!;
+
+        var guideCfs = new List<ProcessedCustomFormatData>
+        {
+            NewCf.Processed("first", "")
+        };
+
+        processor.Process(guideCfs, serviceCfs);
+
+        processor.Transactions.UpdatedCustomFormats.Should().BeEquivalentTo(
+            new[] {NewCf.Processed("first", "", new TrashIdMapping("", "first", 1))},
+            o => o.Including(x => x.CacheEntry!.CustomFormatId));
+    }
 }

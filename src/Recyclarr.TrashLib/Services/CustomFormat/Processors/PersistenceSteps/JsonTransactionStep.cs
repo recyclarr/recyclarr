@@ -51,7 +51,7 @@ public class JsonTransactionStep : IJsonTransactionStep
                 // Set the cache for use later (like updating scores) if it hasn't been updated already.
                 // This handles CFs that already exist in the service but aren't cached (they will be added to cache
                 // later).
-                guideCf.SetCache(guideCf.Json.Value<int>("id"));
+                guideCf.SetCache(serviceCf.Value<int>("id"));
             }
 
             guideCf.Json = (JObject) serviceCf.DeepClone();
