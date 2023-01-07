@@ -6,7 +6,6 @@ using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Services.CustomFormat;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
-using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 using Recyclarr.TrashLib.TestLibrary;
 using Serilog;
 
@@ -106,31 +105,48 @@ public class CachePersisterTest
         var ctx = new Context();
 
         // Load initial CfCache just to test that it gets replaced
-        var testCfObj = new CustomFormatCache
+        ctx.ServiceCache.Load<CustomFormatCache>().Returns(new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {new("", "") {CustomFormatId = 5}}
-        };
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+            TrashIdMappings = new Collection<TrashIdMapping> {new("trashid", "", 1)}
+        });
         ctx.Persister.Load();
 
         // Update with new cached items
-        var results = new CustomFormatTransactionData();
-        results.NewCustomFormats.Add(NewCf.Processed("cfname", "trashid", 10));
-
         var customFormatData = new List<ProcessedCustomFormatData>
         {
-            new(NewCf.Data("", "trashid")) {CacheEntry = new TrashIdMapping("trashid", "", 10)}
+            NewCf.Processed("trashid", "name", 5)
         };
-
         ctx.Persister.Update(customFormatData);
+
         ctx.Persister.CfCache.Should().BeEquivalentTo(new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {customFormatData[0].CacheEntry!}
+            TrashIdMappings = new Collection<TrashIdMapping>
+            {
+                new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].FormatId)
+            }
         });
+    }
 
-        customFormatData.Should().ContainSingle()
-            .Which.CacheEntry.Should().BeEquivalentTo(
-                new TrashIdMapping("trashid", "") {CustomFormatId = 10});
+    [Test]
+    public void Saving_skips_custom_formats_with_zero_id()
+    {
+        var ctx = new Context();
+
+        // Update with new cached items
+        var customFormatData = new List<ProcessedCustomFormatData>
+        {
+            NewCf.Processed("trashid1", "name", 5),
+            NewCf.Processed("trashid2", "invalid")
+        };
+        ctx.Persister.Update(customFormatData);
+
+        ctx.Persister.CfCache.Should().BeEquivalentTo(new CustomFormatCache
+        {
+            TrashIdMappings = new Collection<TrashIdMapping>
+            {
+                new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].FormatId)
+            }
+        });
     }
 
     [Test]

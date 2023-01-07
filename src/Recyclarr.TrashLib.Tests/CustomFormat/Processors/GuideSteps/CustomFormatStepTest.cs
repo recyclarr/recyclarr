@@ -82,13 +82,13 @@ public class CustomFormatStepTest
 
         var testCache = new CustomFormatCache
         {
-            TrashIdMappings = new Collection<TrashIdMapping> {new("id1000", "")}
+            TrashIdMappings = new Collection<TrashIdMapping> {new("id1000", "", 1)}
         };
 
         processor.Process(guideData, testConfig, testCache);
 
         processor.DeletedCustomFormatsInCache.Should()
-            .BeEquivalentTo(new[] {new TrashIdMapping("id1000", "")});
+            .BeEquivalentTo(new[] {new TrashIdMapping("id1000", "", 1)});
         processor.ProcessedCustomFormats.Should().BeEquivalentTo(new List<ProcessedCustomFormatData>
         {
             NewCf.Processed("name1", "id1")
@@ -151,36 +151,5 @@ public class CustomFormatStepTest
 
         processor.DeletedCustomFormatsInCache.Should().BeEmpty();
         processor.ProcessedCustomFormats.Should().BeEmpty();
-    }
-
-    [Test, AutoMockData]
-    public void Score_from_json_takes_precedence_over_score_from_guide(CustomFormatStep processor)
-    {
-        var guideData = new List<CustomFormatData>
-        {
-            NewCf.Data("name1", "id1", 100)
-        };
-
-        var testConfig = new List<CustomFormatConfig>
-        {
-            new()
-            {
-                TrashIds = new List<string> {"id1"},
-                QualityProfiles = new List<QualityProfileScoreConfig>
-                {
-                    new() {Name = "profile", Score = 200}
-                }
-            }
-        };
-
-        processor.Process(guideData, testConfig, null);
-
-        processor.DeletedCustomFormatsInCache.Should().BeEmpty();
-        processor.ProcessedCustomFormats.Should()
-            .BeEquivalentTo(new List<ProcessedCustomFormatData>
-                {
-                    NewCf.Processed("name1", "id1", 100)
-                },
-                op => op.Using(new JsonEquivalencyStep()));
     }
 }

@@ -79,7 +79,6 @@ internal class QualityProfileApiPersistenceStep : IQualityProfileApiPersistenceS
         QualityProfileCustomFormatScoreMapping scoreMap)
     {
         return scoreMap.Mapping.FirstOrDefault(
-            m => m.CustomFormat.CacheEntry != null &&
-                formatItem.Value<int>("format") == m.CustomFormat.CacheEntry.CustomFormatId);
+            m => formatItem.Value<int>("format") == m.CustomFormat.FormatId);
     }
 }

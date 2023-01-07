@@ -7,7 +7,6 @@ using NUnit.Framework;
 using Recyclarr.TestLibrary.NSubstitute;
 using Recyclarr.TrashLib.Services.CustomFormat.Api;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
-using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 using Recyclarr.TrashLib.TestLibrary;
 
@@ -47,8 +46,7 @@ public class QualityProfileApiPersistenceStepTest
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
             {
-                "profile1", CfTestUtils.NewMapping(new FormatMappingEntry(
-                    NewCf.Processed("", "", new TrashIdMapping("", "") {CustomFormatId = 4}), 100))
+                "profile1", CfTestUtils.NewMapping(new FormatMappingEntry(NewCf.Processed("", "", 4), 100))
             }
         };
 
@@ -109,7 +107,7 @@ public class QualityProfileApiPersistenceStepTest
         {
             {
                 "profile1", CfTestUtils.NewMappingWithReset(
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 2)), 100))
+                    new FormatMappingEntry(NewCf.Processed("", "", 2), 100))
             }
         };
 
@@ -183,11 +181,11 @@ public class QualityProfileApiPersistenceStepTest
             {
                 "profile1", CfTestUtils.NewMapping(
                     // First match by ID
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 4)), 100),
+                    new FormatMappingEntry(NewCf.Processed("", "", 4), 100),
                     // Should NOT match because we do not use names to assign scores
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "")), 101),
+                    new FormatMappingEntry(NewCf.Processed("", ""), 101),
                     // Second match by ID
-                    new FormatMappingEntry(NewCf.Processed("", "", new TrashIdMapping("", "", 1)), 102))
+                    new FormatMappingEntry(NewCf.Processed("", "", 1), 102))
             }
         };
 

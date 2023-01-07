@@ -35,8 +35,8 @@ public class JsonTransactionStep : IJsonTransactionStep
                 continue;
             }
 
-            // If cache entry is NOT null, that means we found the service by its ID
-            if (guideCf.CacheEntry is not null)
+            // If custom format ID is NOT zero, that means we found the serviceCf by its ID
+            if (guideCf.FormatId != 0)
             {
                 // Check for conflicts with upstream CFs with the same name but different ID.
                 // If found, it is recorded and we skip this CF.
@@ -45,15 +45,8 @@ public class JsonTransactionStep : IJsonTransactionStep
                     continue;
                 }
             }
-            // Null cache entry use case
-            else
-            {
-                // Set the cache for use later (like updating scores) if it hasn't been updated already.
-                // This handles CFs that already exist in the service but aren't cached (they will be added to cache
-                // later).
-                guideCf.SetCache(serviceCf.Value<int>("id"));
-            }
 
+            guideCf.FormatId = serviceCf.Value<int>("id");
             guideCf.Json = (JObject) serviceCf.DeepClone();
             UpdateServiceCf(guideCf.Json, guideCfJson);
 
@@ -73,7 +66,7 @@ public class JsonTransactionStep : IJsonTransactionStep
         ProcessedCustomFormatData guideCf,
         JObject serviceCf)
     {
-        var conflictingServiceCf = FindServiceCf(serviceCfs, null, guideCf.Name);
+        var conflictingServiceCf = FindServiceCf(serviceCfs, 0, guideCf.Name);
         if (conflictingServiceCf is null)
         {
             return false;
@@ -103,15 +96,15 @@ public class JsonTransactionStep : IJsonTransactionStep
 
     private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, ProcessedCustomFormatData guideCf)
     {
-        return FindServiceCf(serviceCfs, guideCf.CacheEntry?.CustomFormatId, guideCf.Name);
+        return FindServiceCf(serviceCfs, guideCf.FormatId, guideCf.Name);
     }
 
-    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int? cfId, string? cfName = null)
+    private static JObject? FindServiceCf(IReadOnlyCollection<JObject> serviceCfs, int cfId, string? cfName = null)
     {
         JObject? match = null;
 
         // Try to find match in cache first
-        if (cfId is not null)
+        if (cfId is not 0)
         {
             match = serviceCfs.FirstOrDefault(rcf => cfId == rcf.Value<int>("id"));
         }

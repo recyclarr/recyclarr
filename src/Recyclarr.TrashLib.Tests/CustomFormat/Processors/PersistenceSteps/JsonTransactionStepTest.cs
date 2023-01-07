@@ -122,8 +122,8 @@ public class JsonTransactionStepTest
         var guideCfs = new List<ProcessedCustomFormatData>
         {
             NewCf.Processed("created", "id1", guideCfData[0]),
-            NewCf.Processed("updated_different_name", "id2", guideCfData[1], new TrashIdMapping("id2", "", 2)),
-            NewCf.Processed("no_change", "id3", guideCfData[2], new TrashIdMapping("id3", "", 3))
+            NewCf.Processed("updated_different_name", "id2", 2, guideCfData[1]),
+            NewCf.Processed("no_change", "id3", 3, guideCfData[2])
         };
 
         processor.Process(guideCfs, radarrCfs);
@@ -231,12 +231,12 @@ public class JsonTransactionStepTest
 }");
         var deletedCfsInCache = new List<TrashIdMapping>
         {
-            new("", "") {CustomFormatId = 2}
+            new("", "", 1) {CustomFormatId = 2}
         };
 
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("updated", "", guideCfData, new TrashIdMapping("", "") {CustomFormatId = 1})
+            NewCf.Processed("updated", "", 1, guideCfData)
         };
 
         var radarrCfs = JsonConvert.DeserializeObject<List<JObject>>(radarrCfData);
@@ -324,7 +324,7 @@ public class JsonTransactionStepTest
 
         var guideCfs = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("first", "", new TrashIdMapping("", "first", 2))
+            NewCf.Processed("first", "", 2)
         };
 
         processor.Process(guideCfs, serviceCfs);
@@ -353,7 +353,7 @@ public class JsonTransactionStepTest
         processor.Process(guideCfs, serviceCfs);
 
         processor.Transactions.UpdatedCustomFormats.Should().BeEquivalentTo(
-            new[] {NewCf.Processed("first", "", new TrashIdMapping("", "first", 1))},
-            o => o.Including(x => x.CacheEntry!.CustomFormatId));
+            new[] {NewCf.Processed("first", "", 1)},
+            o => o.Including(x => x.FormatId));
     }
 }

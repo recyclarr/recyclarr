@@ -1,6 +1,5 @@
 using Newtonsoft.Json.Linq;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
-using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 
 namespace Recyclarr.TrashLib.TestLibrary;
 
@@ -8,39 +7,45 @@ public static class NewCf
 {
     public static CustomFormatData Data(string name, string trashId, int? score = null)
     {
-        var json = JObject.Parse($"{{'name':'{name}'}}");
-        return new CustomFormatData("", name, trashId, score, new JObject(json));
+        return Data(name, trashId, score, JObject.Parse($"{{'name':'{name}'}}"));
     }
 
-    public static ProcessedCustomFormatData Processed(string name, string trashId, int? score = null)
+    public static CustomFormatData Data(string name, string trashId, int? score, JObject json)
     {
-        return new ProcessedCustomFormatData(Data(name, trashId, score));
+        return new CustomFormatData("", name, trashId, score, json);
     }
 
-    public static ProcessedCustomFormatData Processed(string name, string trashId, int? score, JObject json)
+    public static ProcessedCustomFormatData ProcessedWithScore(string name, string trashId, int score, JObject json)
     {
-        return new ProcessedCustomFormatData(new CustomFormatData("", name, trashId, score, json));
+        return new ProcessedCustomFormatData(Data(name, trashId, score, json));
+    }
+
+    public static ProcessedCustomFormatData ProcessedWithScore(string name, string trashId, int score, int formatId = 0)
+    {
+        return new ProcessedCustomFormatData(Data(name, trashId, score))
+        {
+            FormatId = formatId
+        };
     }
 
     public static ProcessedCustomFormatData Processed(string name, string trashId, JObject json)
     {
-        return Processed(name, trashId, null, json);
+        return Processed(name, trashId, 0, json);
     }
 
-    public static ProcessedCustomFormatData Processed(string name, string trashId, TrashIdMapping cacheEntry)
+    public static ProcessedCustomFormatData Processed(string name, string trashId, int formatId = 0)
     {
         return new ProcessedCustomFormatData(Data(name, trashId))
         {
-            CacheEntry = cacheEntry
+            FormatId = formatId
         };
     }
 
-    public static ProcessedCustomFormatData Processed(string name, string trashId, JObject json,
-        TrashIdMapping? cacheEntry)
+    public static ProcessedCustomFormatData Processed(string name, string trashId, int formatId, JObject json)
     {
-        return new ProcessedCustomFormatData(new CustomFormatData("", name, trashId, null, json))
+        return new ProcessedCustomFormatData(Data(name, trashId, null, json))
         {
-            CacheEntry = cacheEntry
+            FormatId = formatId
         };
     }
 }

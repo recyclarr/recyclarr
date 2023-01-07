@@ -74,7 +74,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("", "id1", 100)
+                    NewCf.ProcessedWithScore("", "id1", 100)
                 },
                 QualityProfiles = new List<QualityProfileScoreConfig>
                 {
@@ -109,7 +109,7 @@ public class QualityProfileStepTest
             {
                 CustomFormats = new List<ProcessedCustomFormatData>
                 {
-                    NewCf.Processed("name1", "id1", 0)
+                    NewCf.ProcessedWithScore("name1", "id1", 0)
                 },
                 QualityProfiles = new List<QualityProfileScoreConfig>
                 {

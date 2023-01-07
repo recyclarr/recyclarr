@@ -56,10 +56,12 @@ public class CachePersister : ICachePersister
 
     public void Update(IEnumerable<ProcessedCustomFormatData> customFormats)
     {
-        Log.Debug("Updating cache");
         CfCache = new CustomFormatCache();
         CfCache!.TrashIdMappings.AddRange(customFormats
-            .Where(cf => cf.CacheEntry != null)
-            .Select(cf => cf.CacheEntry!));
+            .Where(cf => cf.FormatId is not 0)
+            .Select(cf => new TrashIdMapping(cf.TrashId, cf.Name, cf.FormatId)));
+
+        Log.Debug("Updated Cache with {Mappings}", CfCache.TrashIdMappings.Select(
+            x => $"TrashID: {x.TrashId}, Name: {x.CustomFormatName}, FormatID: {x.CustomFormatId}"));
     }
 }

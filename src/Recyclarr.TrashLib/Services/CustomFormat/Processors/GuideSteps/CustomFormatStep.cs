@@ -24,7 +24,7 @@ public class CustomFormatStep : ICustomFormatStep
         // For each ID listed under the `trash_ids` YML property, match it to an existing CF
         _processedCustomFormats.AddRange(config
             .SelectMany(c => c.TrashIds)
-            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Join(processedCfs,
                 id => id,
                 cf => cf.TrashId,
@@ -38,9 +38,10 @@ public class CustomFormatStep : ICustomFormatStep
     private static ProcessedCustomFormatData ProcessCustomFormatData(CustomFormatData cf,
         CustomFormatCache? cache)
     {
+        var map = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == cf.TrashId);
         return new ProcessedCustomFormatData(cf)
         {
-            CacheEntry = cache?.TrashIdMappings.FirstOrDefault(c => c.TrashId == cf.TrashId)
+            FormatId = map?.CustomFormatId ?? 0
         };
     }
 
@@ -51,11 +52,8 @@ public class CustomFormatStep : ICustomFormatStep
             return;
         }
 
-        static bool MatchCfInCache(ProcessedCustomFormatData cf, TrashIdMapping c)
-            => cf.CacheEntry != null && cf.CacheEntry.TrashId == c.TrashId;
-
         // Delete if CF is in cache and not in the guide or config
-        _deletedCustomFormatsInCache.AddRange(cache.TrashIdMappings
-            .Where(c => !ProcessedCustomFormats.Any(cf => MatchCfInCache(cf, c))));
+        _deletedCustomFormatsInCache.AddRange(
+            cache.TrashIdMappings.Where(map => ProcessedCustomFormats.All(cf => cf.TrashId != map.TrashId)));
     }
 }

@@ -28,13 +28,13 @@ internal class CustomFormatService : ICustomFormatService
 
         if (response != null)
         {
-            cf.SetCache(response.Value<int>("id"));
+            cf.FormatId = response.Value<int>("id");
         }
     }
 
     public async Task UpdateCustomFormat(ProcessedCustomFormatData cf)
     {
-        await _service.Request("customformat", cf.GetCustomFormatId())
+        await _service.Request("customformat", cf.FormatId)
             .PutJsonAsync(cf.Json)
             .ReceiveJson<JObject>();
     }

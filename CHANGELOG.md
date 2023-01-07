@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- More scenarios were causing custom formats to sometimes not be synced (#160).
+
 ## [4.1.2] - 2023-01-06
 
 ### Fixed

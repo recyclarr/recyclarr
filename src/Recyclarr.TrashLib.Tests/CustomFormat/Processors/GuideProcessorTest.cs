@@ -99,9 +99,9 @@ public class GuideProcessorTest
 
         var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
         {
-            NewCf.Processed("Surround Sound", "43bb5f09c79641e7a22e48d440bd8868", 500,
+            NewCf.ProcessedWithScore("Surround Sound", "43bb5f09c79641e7a22e48d440bd8868", 500,
                 ctx.ReadJson("ImportableCustomFormat1_Processed.json")),
-            NewCf.Processed("DTS-HD/DTS:X", "4eb3c272d48db8ab43c2c85283b69744", 480,
+            NewCf.ProcessedWithScore("DTS-HD/DTS:X", "4eb3c272d48db8ab43c2c85283b69744", 480,
                 ctx.ReadJson("ImportableCustomFormat2_Processed.json")),
             NewCf.Processed("No Score", "abc")
         };
