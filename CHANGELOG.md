@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Do not print skipped custom formats to console (they are too verbose). If you still want to see
+  what was skipped, check the log file for additional debug logs.
+
 ### Fixed
 
 - More scenarios were causing custom formats to sometimes not be synced (#160).

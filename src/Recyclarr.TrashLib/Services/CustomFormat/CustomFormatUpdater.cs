@@ -138,10 +138,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
             _log.Debug("Custom Formats Skipped: {CustomFormats}",
                 skipped.ToDictionary(k => k.TrashId, v => v.Name));
 
-            foreach (var mapping in skipped)
-            {
-                _console.Output.WriteLine($"> Skipped: {mapping.TrashId} ({mapping.Name})");
-            }
+            // Do not print skipped CFs to console; they are too verbose
         }
 
         var deleted = transactions.DeletedCustomFormatIds;
