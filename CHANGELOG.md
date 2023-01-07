@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.3] - 2023-01-07
+
 ### Changed
 
 - Do not print skipped custom formats to console (they are too verbose). If you still want to see
@@ -600,7 +602,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.1.2...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.1.3...HEAD
+[4.1.3]: https://github.com/recyclarr/recyclarr/compare/v4.1.2...v4.1.3
 [4.1.2]: https://github.com/recyclarr/recyclarr/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/recyclarr/recyclarr/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/recyclarr/recyclarr/compare/v4.0.2...v4.1.0
