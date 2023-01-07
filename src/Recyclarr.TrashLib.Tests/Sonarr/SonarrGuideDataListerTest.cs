@@ -58,7 +58,7 @@ public class SonarrGuideDataListerTest
             new TermData {Name = "Sixth", TrashId = "666", Term = "term6"}
         };
 
-        guide.GetUnfilteredProfileById(Arg.Any<string>()).Returns(new ReleaseProfileData
+        guide.GetUnfilteredProfileById(default!).ReturnsForAnyArgs(new ReleaseProfileData
         {
             Name = "Release Profile",
             TrashId = "098",
