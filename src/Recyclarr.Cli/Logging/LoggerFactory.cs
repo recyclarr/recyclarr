@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common.Serilog;
 using Recyclarr.TrashLib.Startup;
 using Serilog;
 using Serilog.Events;
@@ -22,19 +23,20 @@ public class LoggerFactory
 
         return
             $"{{#if {scope} is not null}}{{{scope}}}: {{#end}}" +
-            "{@m}\n" +
-            "{@x}";
+            "{@m}";
     }
 
     private static ExpressionTemplate GetConsoleTemplate()
     {
-        var template = "[{@l:u3}] " + GetBaseTemplateString();
+        var template = "[{@l:u3}] " + GetBaseTemplateString() + ": {ExceptionMessage}\n";
+
         return new ExpressionTemplate(template, theme: TemplateTheme.Code);
     }
 
     private static ExpressionTemplate GetFileTemplate()
     {
-        var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString();
+        var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString() + "\n{@x}";
+
         return new ExpressionTemplate(template);
     }
 
@@ -44,6 +46,7 @@ public class LoggerFactory
 
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Debug)
+            .Enrich.With<ExceptionMessageEnricher>()
             .WriteTo.Console(GetConsoleTemplate(), level)
             .WriteTo.File(GetFileTemplate(), logPath.FullName)
             .Enrich.FromLogContext()
