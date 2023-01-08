@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="create-config (default)" type="DotNetProject" factoryName=".NET Project">
-    <option name="EXE_PATH" value="$PROJECT_DIR$/Recyclarr/bin/Debug/net7.0/recyclarr.exe" />
-    <option name="PROGRAM_PARAMETERS" value="create-config" />
-    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Recyclarr/bin/Debug/net7.0" />
+  <configuration default="false" name="list release-profiles --terms" type="DotNetProject" factoryName=".NET Project">
+    <option name="EXE_PATH" value="$PROJECT_DIR$/Recyclarr.Cli/bin/Debug/net7.0/recyclarr.exe" />
+    <option name="PROGRAM_PARAMETERS" value="list release-profiles --terms EBC725268D687D588A20CBC5F97E538B" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Recyclarr.Cli/bin/Debug/net7.0" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <option name="USE_EXTERNAL_CONSOLE" value="0" />
     <option name="USE_MONO" value="0" />
