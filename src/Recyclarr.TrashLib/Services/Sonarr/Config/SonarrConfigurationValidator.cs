@@ -1,5 +1,6 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.Config;
@@ -7,28 +8,14 @@ namespace Recyclarr.TrashLib.Services.Sonarr.Config;
 [UsedImplicitly]
 public class SonarrConfigurationValidator : AbstractValidator<SonarrConfiguration>
 {
-    public SonarrConfigurationValidator(SonarrCapabilities capabilities)
+    public SonarrConfigurationValidator()
     {
+        RuleForEach(x => x.ReleaseProfiles)
+            .Empty()
+            .When(x => x.CustomFormats.NotEmpty())
+            .WithMessage("`custom_formats` and `release_profiles` may not be used together");
+
         RuleForEach(x => x.ReleaseProfiles).SetValidator(new ReleaseProfileConfigValidator());
-
-        // Release profiles may not be used with Sonarr v4
-        RuleFor(x => x)
-            .Must(_ => capabilities.SupportsNamedReleaseProfiles)
-            .WithMessage(
-                $"Your Sonarr version {capabilities.Version} does not meet the minimum " +
-                $"required version of {SonarrCapabilities.MinimumVersion}.");
-
-        // Release profiles may not be used with Sonarr v4
-        RuleFor(x => x.ReleaseProfiles).Empty()
-            .When(_ => capabilities.SupportsCustomFormats)
-            .WithMessage("Release profiles require Sonarr v3. " +
-                "Please use `custom_formats` instead or use the right version of Sonarr.");
-
-        // Custom formats may not be used with Sonarr v3
-        RuleFor(x => x.CustomFormats).Empty()
-            .When(_ => !capabilities.SupportsCustomFormats)
-            .WithMessage("Custom formats require Sonarr v4 or greater. " +
-                "Please use `release_profiles` instead or use the right version of Sonarr.");
     }
 }
 

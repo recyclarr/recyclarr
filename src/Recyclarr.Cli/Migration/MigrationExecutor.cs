@@ -1,14 +1,13 @@
-using CliFx.Exceptions;
-using CliFx.Infrastructure;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
 
 public class MigrationExecutor : IMigrationExecutor
 {
-    private readonly IConsole _console;
+    private readonly IAnsiConsole _console;
     private readonly List<IMigrationStep> _migrationSteps;
 
-    public MigrationExecutor(IEnumerable<IMigrationStep> migrationSteps, IConsole console)
+    public MigrationExecutor(IEnumerable<IMigrationStep> migrationSteps, IAnsiConsole console)
     {
         _console = console;
         _migrationSteps = migrationSteps.OrderBy(x => x.Order).ToList();
@@ -16,7 +15,7 @@ public class MigrationExecutor : IMigrationExecutor
 
     public void PerformAllMigrationSteps(bool withDiagnostics)
     {
-        _console.Output.WriteLine("Performing migration steps...");
+        _console.WriteLine("Performing migration steps...");
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach (var step in _migrationSteps)
@@ -38,7 +37,7 @@ public class MigrationExecutor : IMigrationExecutor
                 throw new MigrationException(e, step.Description, step.Remediation);
             }
 
-            _console.Output.WriteLine($"Migrate: {step.Description}");
+            _console.WriteLine($"Migrate: {step.Description}");
         }
     }
 
@@ -55,16 +54,16 @@ public class MigrationExecutor : IMigrationExecutor
         foreach (var step in neededMigrationSteps)
         {
             var requiredText = step.Required ? "Required" : "Not Required";
-            _console.Output.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
+            _console.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
             wereAnyRequired |= step.Required;
         }
 
-        _console.Output.WriteLine(
+        _console.WriteLine(
             "\nRun the `migrate` subcommand to perform the above migration steps automatically\n");
 
         if (wereAnyRequired)
         {
-            throw new CommandException("Some migrations above are REQUIRED. Application will now exit.");
+            throw new RequiredMigrationException();
         }
     }
 }

@@ -7,12 +7,12 @@ public class ExceptionMessageEnricher : ILogEventEnricher
 {
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        if (logEvent.Exception is null)
+        var msg = logEvent.Exception?.Message;
+        if (string.IsNullOrEmpty(msg))
         {
             return;
         }
 
-        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-            "ExceptionMessage", logEvent.Exception.Message));
+        logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("ExceptionMessage", msg));
     }
 }

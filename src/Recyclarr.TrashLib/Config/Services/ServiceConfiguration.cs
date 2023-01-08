@@ -5,9 +5,12 @@ namespace Recyclarr.TrashLib.Config.Services;
 
 public abstract class ServiceConfiguration : IServiceConfiguration
 {
+    [YamlIgnore]
+    public abstract string ServiceName { get; }
+
     // Name is set dynamically by ConfigurationLoader
     [YamlIgnore]
-    public string? Name { get; set; }
+    public string? InstanceName { get; set; }
 
     [YamlIgnore]
     public int LineNumber { get; set; }

@@ -7,6 +7,8 @@ namespace Recyclarr.TestLibrary.AutoFixture;
 
 public class MockFileSystemSpecimenBuilder : ICustomization
 {
+    private static int _mockPathCounter;
+
     public void Customize(IFixture fixture)
     {
         var fs = new MockFileSystem();
@@ -14,13 +16,15 @@ public class MockFileSystemSpecimenBuilder : ICustomization
 
         fixture.Customize<IFileInfo>(x => x.FromFactory(() =>
         {
-            var name = $"MockFile-{fixture.Create<string>()}";
+            var name = $"MockFile-{_mockPathCounter}";
+            Interlocked.Increment(ref _mockPathCounter);
             return fs.CurrentDirectory().File(name);
         }));
 
         fixture.Customize<IDirectoryInfo>(x => x.FromFactory(() =>
         {
-            var name = $"MockDirectory-{fixture.Create<string>()}";
+            var name = $"MockDirectory-{_mockPathCounter}";
+            Interlocked.Increment(ref _mockPathCounter);
             return fs.CurrentDirectory().SubDirectory(name);
         }));
     }

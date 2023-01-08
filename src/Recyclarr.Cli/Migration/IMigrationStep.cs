@@ -1,4 +1,4 @@
-using CliFx.Infrastructure;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
 
@@ -9,5 +9,5 @@ public interface IMigrationStep
     IReadOnlyCollection<string> Remediation { get; }
     bool Required { get; }
     bool CheckIfNeeded();
-    void Execute(IConsole? console);
+    void Execute(IAnsiConsole? console);
 }

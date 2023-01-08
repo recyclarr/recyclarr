@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Autofac" />
-    <PackageReference Include="CliFx" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
+    <PackageReference Include="Spectre.Console" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />

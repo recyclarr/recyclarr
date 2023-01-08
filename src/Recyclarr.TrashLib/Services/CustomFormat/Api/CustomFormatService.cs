@@ -1,6 +1,6 @@
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat.Api;

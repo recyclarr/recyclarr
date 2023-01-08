@@ -36,7 +36,10 @@ public static class FlurlLogging
             log.Warning("HTTP Redirect received; this indicates a problem with your URL and/or reverse proxy: {Url}",
                 urlInterceptor(call.Redirect.Url));
 
-            call.Redirect.Follow = false;
+            // Must follow redirect because we want an exception to be thrown eventually. If it is set to false, HTTP
+            // communication stops and existing methods will return nothing / null. This messes with Observable
+            // pipelines (which normally either expect a response object or an exception)
+            call.Redirect.Follow = true;
         };
     }
 

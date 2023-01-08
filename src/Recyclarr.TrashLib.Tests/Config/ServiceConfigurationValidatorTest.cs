@@ -17,6 +17,8 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         {
             ApiKey = "valid",
             BaseUrl = "valid",
+            InstanceName = "valid",
+            LineNumber = 1,
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -209,5 +211,33 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
 
         result.ShouldHaveValidationErrorFor(FirstCf +
             $"{nameof(CustomFormatConfig.QualityProfiles)}[0].{nameof(QualityProfileScoreConfig.Name)}");
+    }
+
+    [Test]
+    public void Validation_failure_when_instance_name_empty()
+    {
+        var config = new TestConfig
+        {
+            InstanceName = ""
+        };
+
+        var validator = Resolve<ServiceConfigurationValidator>();
+        var result = validator.TestValidate(config);
+
+        result.ShouldHaveValidationErrorFor(x => x.InstanceName);
+    }
+
+    [Test]
+    public void Validation_failure_when_line_number_equals_zero()
+    {
+        var config = new TestConfig
+        {
+            LineNumber = 0
+        };
+
+        var validator = Resolve<ServiceConfigurationValidator>();
+        var result = validator.TestValidate(config);
+
+        result.ShouldHaveValidationErrorFor(x => x.LineNumber);
     }
 }

@@ -7,7 +7,7 @@ using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Radarr;
 
-public class LocalRepoRadarrGuideService : IRadarrGuideService
+public class LocalRepoRadarrGuideService : RadarrGuideService
 {
     private readonly IRepoPathsFactory _pathsFactory;
     private readonly ICustomFormatLoader _cfLoader;
@@ -20,10 +20,10 @@ public class LocalRepoRadarrGuideService : IRadarrGuideService
         _parser = new QualitySizeGuideParser<QualitySizeData>(log);
     }
 
-    public ICollection<QualitySizeData> GetQualities()
+    public override ICollection<QualitySizeData> GetQualities()
         => _parser.GetQualities(_pathsFactory.Create().RadarrQualityPaths);
 
-    public ICollection<CustomFormatData> GetCustomFormatData()
+    public override ICollection<CustomFormatData> GetCustomFormatData()
     {
         var paths = _pathsFactory.Create();
         return _cfLoader.LoadAllCustomFormatsAtPaths(

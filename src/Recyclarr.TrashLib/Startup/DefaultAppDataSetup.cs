@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using CliFx.Exceptions;
 using Recyclarr.Common;
 
 namespace Recyclarr.TrashLib.Startup;
@@ -37,9 +36,9 @@ public class DefaultAppDataSetup
         var home = _env.GetFolderPath(Environment.SpecialFolder.UserProfile);
         if (string.IsNullOrEmpty(home))
         {
-            throw new CommandException(
+            throw new NoHomeDirectoryException(
                 "The system does not have a HOME directory, so the application cannot determine where to place " +
-                "data files. Please use the --app-data option to explicitly set a location for these files.");
+                "data files. Please use the --app-data option to explicitly set a location for these files");
         }
 
         // Set app data path to application directory value (e.g. `$HOME/.config` on Linux) and ensure it is

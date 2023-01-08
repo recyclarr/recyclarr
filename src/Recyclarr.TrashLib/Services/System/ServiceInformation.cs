@@ -26,13 +26,13 @@ public class ServiceInformation : IServiceInformation
                     _ => ex.Message
                 });
 
-                return Observable.Return(new Version());
+                return Observable.Return((Version?) null);
             })
             .Replay(1)
             .AutoConnect();
     }
 
-    public IObservable<Version> Version { get; }
+    public IObservable<Version?> Version { get; }
 
     private void LogServiceInfo(SystemStatus status)
     {

@@ -1,58 +1,44 @@
-using AutoMapper;
+using Autofac;
 using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.TrashLib.Services.Sonarr;
+using Recyclarr.Cli.TestLibrary;
+using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib.Services.Sonarr.Api;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
-using Recyclarr.TrashLib.Startup;
-using Serilog;
+using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class SonarrCompatibilityTest
+public class SonarrCompatibilityTest : IntegrationFixture
 {
-    private sealed class TestContext : IDisposable
+    private static JObject SerializeJson<T>(T obj)
     {
-        private readonly JsonSerializerSettings _jsonSettings;
-
-        public TestContext()
+        JsonSerializerSettings jsonSettings = new()
         {
-            _jsonSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        };
 
-            Mapper = AutoMapperConfig.Setup();
-        }
+        return JObject.Parse(JsonConvert.SerializeObject(obj, jsonSettings));
+    }
 
-        public IMapper Mapper { get; }
-
-        public void Dispose()
-        {
-        }
-
-        public string SerializeJson<T>(T obj)
-        {
-            return JsonConvert.SerializeObject(obj, _jsonSettings);
-        }
+    protected override void RegisterExtraTypes(ContainerBuilder builder)
+    {
+        builder.RegisterMockFor<ISonarrCapabilityChecker>();
     }
 
     [Test]
     public void Receive_v1_to_v2()
     {
-        using var ctx = new TestContext();
-
-        static SonarrCapabilities Compat() => new();
+        var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var dataV1 = new SonarrReleaseProfileV1 {Ignored = "one,two,three"};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), Compat, ctx.Mapper);
 
-        var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV1)));
+        var result = sut.CompatibleReleaseProfileForReceiving(SerializeJson(dataV1));
 
         result.Should().BeEquivalentTo(new SonarrReleaseProfile
         {
@@ -63,13 +49,10 @@ public class SonarrCompatibilityTest
     [Test]
     public void Receive_v2_to_v2()
     {
-        using var ctx = new TestContext();
-
-        static SonarrCapabilities Compat() => new();
+        var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var dataV2 = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), Compat, ctx.Mapper);
 
-        var result = sut.CompatibleReleaseProfileForReceiving(JObject.Parse(ctx.SerializeJson(dataV2)));
+        var result = sut.CompatibleReleaseProfileForReceiving(SerializeJson(dataV2));
 
         result.Should().BeEquivalentTo(dataV2);
     }
@@ -77,12 +60,14 @@ public class SonarrCompatibilityTest
     [Test]
     public void Send_v2_to_v1()
     {
-        using var ctx = new TestContext();
+        var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
+        capabilityChecker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        {
+            ArraysNeededForReleaseProfileRequiredAndIgnored = false
+        });
 
-        static SonarrCapabilities Compat() => new() {ArraysNeededForReleaseProfileRequiredAndIgnored = false};
-
+        var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), Compat, ctx.Mapper);
 
         var result = sut.CompatibleReleaseProfileForSending(data);
 
@@ -92,12 +77,14 @@ public class SonarrCompatibilityTest
     [Test]
     public void Send_v2_to_v2()
     {
-        using var ctx = new TestContext();
+        var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
+        capabilityChecker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        {
+            ArraysNeededForReleaseProfileRequiredAndIgnored = true
+        });
 
-        static SonarrCapabilities Compat() => new() {ArraysNeededForReleaseProfileRequiredAndIgnored = true};
-
+        var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
-        var sut = new SonarrReleaseProfileCompatibilityHandler(Substitute.For<ILogger>(), Compat, ctx.Mapper);
 
         var result = sut.CompatibleReleaseProfileForSending(data);
 

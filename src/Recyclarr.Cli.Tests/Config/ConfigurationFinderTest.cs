@@ -2,12 +2,12 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
 using AutoFixture.NUnit3;
-using CliFx.Exceptions;
 using FluentAssertions;
 using NUnit.Framework;
-using Recyclarr.Cli.Config;
+using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib;
+using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Tests.Config;
@@ -16,13 +16,13 @@ namespace Recyclarr.Cli.Tests.Config;
 [Parallelizable(ParallelScope.All)]
 public class ConfigurationFinderTest
 {
-    private static string[] GetYamlPaths(IAppPaths paths)
+    private static IFileInfo[] GetYamlPaths(IAppPaths paths)
     {
         return new[]
         {
-            paths.ConfigPath.FullName,
-            paths.ConfigsDirectory.File("b.yml").FullName,
-            paths.ConfigsDirectory.File("c.yml").FullName
+            paths.ConfigPath,
+            paths.ConfigsDirectory.File("b.yml"),
+            paths.ConfigsDirectory.File("c.yml")
         };
     }
 
@@ -36,12 +36,12 @@ public class ConfigurationFinderTest
 
         foreach (var path in yamlPaths)
         {
-            fs.AddFile(path, new MockFileData(""));
+            fs.AddFile(path.FullName, new MockFileData(""));
         }
 
         var result = sut.GetConfigFiles(null);
 
-        result.Should().BeEquivalentTo(yamlPaths);
+        result.Should().BeEquivalentTo(yamlPaths, o => o.Including(x => x.FullName));
     }
 
     [Test, AutoMockData]
@@ -54,12 +54,12 @@ public class ConfigurationFinderTest
 
         foreach (var path in yamlPaths)
         {
-            fs.AddFile(path, new MockFileData(""));
+            fs.AddEmptyFile(path);
         }
 
-        var result = sut.GetConfigFiles(new List<string>());
+        var result = sut.GetConfigFiles(new List<IFileInfo>());
 
-        result.Should().BeEquivalentTo(yamlPaths);
+        result.Should().BeEquivalentTo(yamlPaths, o => o.Including(x => x.FullName));
     }
 
     [Test, AutoMockData]
@@ -72,31 +72,15 @@ public class ConfigurationFinderTest
 
         foreach (var path in yamlPaths)
         {
-            fs.AddFile(path, new MockFileData(""));
+            fs.AddFile(path.FullName, new MockFileData(""));
         }
 
         var manualConfig = fs.CurrentDirectory().File("manual-config.yml");
-        fs.AddFile(manualConfig.FullName, new MockFileData(""));
+        fs.AddEmptyFile(manualConfig);
 
-        var result = sut.GetConfigFiles(new[] {manualConfig.FullName});
+        var result = sut.GetConfigFiles(new[] {manualConfig});
 
-        result.Should().BeEquivalentTo(manualConfig.FullName);
-    }
-
-    [Test, AutoMockData]
-    public void Non_existent_files_are_skipped(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
-    {
-        var yamlPaths = GetYamlPaths(paths);
-
-        fs.AddFile(yamlPaths[0], new MockFileData(""));
-        fs.AddFile(yamlPaths[1], new MockFileData(""));
-
-        var result = sut.GetConfigFiles(yamlPaths);
-
-        result.Should().BeEquivalentTo(yamlPaths.Take(2));
+        result.Should().ContainSingle(x => x.FullName == manualConfig.FullName);
     }
 
     [Test, AutoMockData]
@@ -105,12 +89,12 @@ public class ConfigurationFinderTest
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
         ConfigurationFinder sut)
     {
-        var testFile = paths.ConfigsDirectory.File("test.yml").FullName;
-        fs.AddFile(testFile, new MockFileData(""));
+        var testFile = paths.ConfigsDirectory.File("test.yml");
+        fs.AddEmptyFile(testFile);
 
-        var result = sut.GetConfigFiles(Array.Empty<string>());
+        var result = sut.GetConfigFiles(Array.Empty<IFileInfo>());
 
-        result.Should().BeEquivalentTo(testFile);
+        result.Should().ContainSingle(x => x.FullName == testFile.FullName);
     }
 
     [Test, AutoMockData]
@@ -119,11 +103,11 @@ public class ConfigurationFinderTest
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
         ConfigurationFinder sut)
     {
-        fs.AddFile(paths.ConfigPath.FullName, new MockFileData(""));
+        fs.AddEmptyFile(paths.ConfigPath);
 
-        var result = sut.GetConfigFiles(Array.Empty<string>());
+        var result = sut.GetConfigFiles(Array.Empty<IFileInfo>());
 
-        result.Should().BeEquivalentTo(paths.ConfigPath.FullName);
+        result.Should().ContainSingle(x => x.FullName == paths.ConfigPath.FullName);
     }
 
     [Test, AutoMockData]
@@ -132,8 +116,8 @@ public class ConfigurationFinderTest
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
         ConfigurationFinder sut)
     {
-        var act = () => sut.GetConfigFiles(Array.Empty<string>());
+        var act = () => sut.GetConfigFiles(Array.Empty<IFileInfo>());
 
-        act.Should().Throw<CommandException>();
+        act.Should().Throw<NoConfigurationFilesException>();
     }
 }

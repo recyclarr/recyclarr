@@ -50,7 +50,7 @@ public class GuideProcessorTest
     public async Task Guide_processor_behaves_as_expected_with_normal_guide_data()
     {
         var ctx = new Context();
-        var guideService = Substitute.For<IRadarrGuideService>();
+        var guideService = Substitute.For<RadarrGuideService>();
         var guideProcessor = new GuideProcessor(new TestGuideProcessorSteps());
 
         // simulate guide data

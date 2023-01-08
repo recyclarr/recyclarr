@@ -4,10 +4,8 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Reactive.Linq;
 using Autofac;
 using Autofac.Features.ResolveAnything;
-using CliFx.Infrastructure;
 using NSubstitute;
 using NUnit.Framework;
-using Recyclarr.Cli.Command;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib;
@@ -17,6 +15,8 @@ using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
 using Serilog;
 using Serilog.Events;
+using Spectre.Console;
+using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.TestLibrary;
 
@@ -28,14 +28,18 @@ public abstract class IntegrationFixture : IDisposable
         Paths = new AppPaths(Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr"));
         Logger = CreateLogger();
 
-        Container = CompositionRoot.Setup(builder =>
+        SetupMetadataJson();
+
+        _container = new Lazy<IContainer>(() =>
         {
+            var builder = new ContainerBuilder();
+            CompositionRoot.Setup(builder);
+
             builder.RegisterInstance(Fs).As<IFileSystem>();
             builder.RegisterInstance(Paths).As<IAppPaths>();
-            builder.RegisterInstance(Console).As<IConsole>();
-            builder.RegisterInstance(Logger).As<ILogger>().SingleInstance();
+            builder.RegisterInstance(Console).As<IAnsiConsole>();
+            builder.RegisterInstance(Logger).As<ILogger>();
 
-            builder.RegisterMockFor<IServiceCommand>();
             builder.RegisterMockFor<IGitRepository>();
             builder.RegisterMockFor<IGitRepositoryFactory>();
             builder.RegisterMockFor<IServiceConfiguration>();
@@ -48,9 +52,9 @@ public abstract class IntegrationFixture : IDisposable
             RegisterExtraTypes(builder);
 
             builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
-        });
 
-        SetupMetadataJson();
+            return builder.Build();
+        });
     }
 
     // ReSharper disable once VirtualMemberNeverOverridden.Global
@@ -64,6 +68,7 @@ public abstract class IntegrationFixture : IDisposable
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Debug)
             .WriteTo.TestCorrelator()
+            .WriteTo.Console()
             .CreateLogger();
     }
 
@@ -75,9 +80,11 @@ public abstract class IntegrationFixture : IDisposable
 
     // ReSharper disable MemberCanBePrivate.Global
 
+    private readonly Lazy<IContainer> _container;
+    protected ILifetimeScope Container => _container.Value;
+
     protected MockFileSystem Fs { get; } = new();
-    protected FakeInMemoryConsole Console { get; } = new();
-    protected ILifetimeScope Container { get; }
+    protected TestConsole Console { get; } = new();
     protected IAppPaths Paths { get; }
     protected ILogger Logger { get; }
 
@@ -96,8 +103,10 @@ public abstract class IntegrationFixture : IDisposable
             return;
         }
 
-        Container.Dispose();
-        Console.Dispose();
+        if (_container.IsValueCreated)
+        {
+            _container.Value.Dispose();
+        }
     }
 
     public void Dispose()

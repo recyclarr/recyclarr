@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
-using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Startup;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;
 
@@ -52,7 +52,7 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
         return OldPath.Exists;
     }
 
-    public void Execute(IConsole? console)
+    public void Execute(IAnsiConsole? console)
     {
         MoveDirectory("cache", console);
         MoveFile("recyclarr.yml");
@@ -64,7 +64,7 @@ public class MigrateTrashUpdaterAppDataDir : IMigrationStep
         }
     }
 
-    private void MoveDirectory(string directory, IConsole? console)
+    private void MoveDirectory(string directory, IAnsiConsole? console)
     {
         var oldPath = OldPath.SubDirectory(directory);
         if (oldPath.Exists)

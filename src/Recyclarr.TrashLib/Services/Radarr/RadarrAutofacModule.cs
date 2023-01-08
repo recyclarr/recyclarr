@@ -1,4 +1,6 @@
 using Autofac;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.QualitySize.Api;
 
@@ -11,10 +13,12 @@ public class RadarrAutofacModule : Module
         builder.RegisterType<QualityDefinitionService>().As<IQualityDefinitionService>();
         builder.RegisterType<RadarrGuideDataLister>().As<IRadarrGuideDataLister>();
         builder.RegisterType<QualitySizeUpdater>().As<IQualitySizeUpdater>();
-        builder.RegisterType<LocalRepoRadarrGuideService>().As<IRadarrGuideService>();
-        builder.RegisterType<RadarrGuideDataLister>().As<IRadarrGuideDataLister>();
 
-        builder.RegisterType<RadarrCompatibility>().InstancePerLifetimeScope();
-        builder.Register(c => c.Resolve<RadarrCompatibility>().Capabilities);
+        builder.RegisterType<LocalRepoRadarrGuideService>()
+            .As<RadarrGuideService>()
+            .Keyed<IGuideService>(SupportedServices.Radarr);
+
+        builder.RegisterType<RadarrCapabilityChecker>().As<IRadarrCapabilityChecker>()
+            .InstancePerLifetimeScope();
     }
 }

@@ -6,13 +6,16 @@ using Autofac;
 using FluentAssertions;
 using FluentValidation;
 using NUnit.Framework;
-using Recyclarr.Cli.Config;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Secrets;
+using Recyclarr.TrashLib.Config.Yaml;
+using Recyclarr.TrashLib.Services.Radarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.TestLibrary;
 using Serilog.Sinks.TestCorrelator;
@@ -39,80 +42,96 @@ public class ConfigurationLoaderTest : IntegrationFixture
     [Test]
     public void Load_many_iterations_of_config()
     {
-        static string MockYaml(params object[] args)
+        static string MockYaml(string sectionName, params object[] args)
         {
-            var str = new StringBuilder("sonarr:");
-            const string templateYaml = "\n  - base_url: {0}\n    api_key: abc";
-            str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p)));
+            var str = new StringBuilder($"{sectionName}:");
+            const string templateYaml = @"
+  instance{1}:
+    base_url: {0}
+    api_key: abc";
+
+            var counter = 0;
+            str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p, counter++)));
             return str.ToString();
         }
 
         var baseDir = Fs.CurrentDirectory();
-        var fileData = new (string, string)[]
+        var fileData = new[]
         {
-            (baseDir.File("config1.yml").FullName, MockYaml(1, 2)),
-            (baseDir.File("config2.yml").FullName, MockYaml(3)),
-            (baseDir.File("config3.yml").FullName, "bad yaml")
+            (baseDir.File("config1.yml"), MockYaml("sonarr", 1, 2)),
+            (baseDir.File("config2.yml"), MockYaml("sonarr", 3)),
+            (baseDir.File("config3.yml"), "bad yaml"),
+            (baseDir.File("config4.yml"), MockYaml("radarr", 4))
         };
 
         foreach (var (file, data) in fileData)
         {
-            Fs.AddFile(file, new MockFileData(data));
+            Fs.AddFile(file.FullName, new MockFileData(data));
         }
 
-        var expected = new List<SonarrConfiguration>
+        var expectedSonarr = new[]
         {
-            new() {ApiKey = "abc", BaseUrl = "1"},
-            new() {ApiKey = "abc", BaseUrl = "2"},
-            new() {ApiKey = "abc", BaseUrl = "3"}
+            new {ApiKey = "abc", BaseUrl = "1"},
+            new {ApiKey = "abc", BaseUrl = "2"},
+            new {ApiKey = "abc", BaseUrl = "3"}
         };
 
-        var loader = Resolve<IConfigurationLoader<SonarrConfiguration>>();
-        var actual = loader.LoadMany(fileData.Select(x => x.Item1), "sonarr").ToList();
+        var expectedRadarr = new[]
+        {
+            new {ApiKey = "abc", BaseUrl = "4"}
+        };
 
-        actual.Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
+        var loader = Resolve<IConfigurationLoader>();
+        var actual = loader.LoadMany(fileData.Select(x => x.Item1));
+
+        actual.Get<SonarrConfiguration>(SupportedServices.Sonarr)
+            .Should().BeEquivalentTo(expectedSonarr);
+
+        actual.Get<RadarrConfiguration>(SupportedServices.Radarr)
+            .Should().BeEquivalentTo(expectedRadarr);
     }
 
     [Test]
     public void Parse_using_stream()
     {
-        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+        var configLoader = Resolve<ConfigurationLoader>();
         var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
-        configs.Should().BeEquivalentTo(new List<SonarrConfiguration>
-        {
-            new()
+        configs.Get<SonarrConfiguration>(SupportedServices.Sonarr)
+            .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
-                ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                BaseUrl = "http://localhost:8989",
-                Name = "name",
-                ReleaseProfiles = new List<ReleaseProfileConfig>
+                new()
                 {
-                    new()
+                    ApiKey = "95283e6b156c42f3af8a9b16173f876b",
+                    BaseUrl = "http://localhost:8989",
+                    InstanceName = "name",
+                    ReleaseProfiles = new List<ReleaseProfileConfig>
                     {
-                        TrashIds = new[] {"123"},
-                        StrictNegativeScores = true,
-                        Tags = new List<string> {"anime"}
-                    },
-                    new()
-                    {
-                        TrashIds = new[] {"456"},
-                        StrictNegativeScores = false,
-                        Tags = new List<string>
+                        new()
                         {
-                            "tv",
-                            "series"
+                            TrashIds = new[] {"123"},
+                            StrictNegativeScores = true,
+                            Tags = new List<string> {"anime"}
+                        },
+                        new()
+                        {
+                            TrashIds = new[] {"456"},
+                            StrictNegativeScores = false,
+                            Tags = new List<string>
+                            {
+                                "tv",
+                                "series"
+                            }
                         }
                     }
                 }
-            }
-        }, o => o.Excluding(x => x.LineNumber));
+            }, o => o.Excluding(x => x.LineNumber));
     }
 
     [Test]
     public void Test_secret_loading()
     {
-        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+        var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml = @"
 sonarr:
@@ -135,7 +154,7 @@ secret_rp: 1234567
         {
             new()
             {
-                Name = "instance1",
+                InstanceName = "instance1",
                 ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                 BaseUrl = "https://radarr:7878",
                 ReleaseProfiles = new List<ReleaseProfileConfig>
@@ -149,14 +168,15 @@ secret_rp: 1234567
         };
 
         var parsedSecret = configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
-        parsedSecret.Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
+        parsedSecret.Get<SonarrConfiguration>(SupportedServices.Sonarr)
+            .Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
     }
 
     [Test]
     public void Throw_when_referencing_invalid_secret()
     {
         using var logContext = TestCorrelator.CreateContext();
-        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+        var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml = @"
 sonarr:
@@ -179,7 +199,7 @@ sonarr:
     [Test]
     public void Throw_when_referencing_secret_without_secrets_file()
     {
-        var configLoader = Resolve<ConfigurationLoader<TestConfig>>();
+        var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml = @"
 sonarr:
@@ -197,7 +217,7 @@ sonarr:
     [Test]
     public void Throw_when_secret_value_is_not_scalar()
     {
-        var configLoader = Resolve<ConfigurationLoader<TestConfig>>();
+        var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml = @"
 sonarr:
@@ -213,7 +233,7 @@ sonarr:
     [Test]
     public void Throw_when_expected_value_is_not_scalar()
     {
-        var configLoader = Resolve<ConfigurationLoader<SonarrConfiguration>>();
+        var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml = @"
 sonarr:
@@ -231,7 +251,7 @@ sonarr:
     }
 
     [Test, AutoMockData]
-    public void Throw_when_yaml_file_only_has_comment(ConfigurationLoader<TestConfig> sut)
+    public void Throw_when_yaml_file_only_has_comment(ConfigurationLoader sut)
     {
         const string testYml = "# YAML with nothing but this comment";
 
@@ -241,7 +261,7 @@ sonarr:
     }
 
     [Test, AutoMockData]
-    public void Throw_when_yaml_file_is_empty(ConfigurationLoader<TestConfig> sut)
+    public void Throw_when_yaml_file_is_empty(ConfigurationLoader sut)
     {
         const string testYml = "";
 
@@ -251,7 +271,7 @@ sonarr:
     }
 
     [Test, AutoMockData]
-    public void Do_not_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader<TestConfig> sut)
+    public void Do_not_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
     {
         const string testYml = @"
 not_wanted:

@@ -2,9 +2,9 @@ namespace Recyclarr.TrashLib.Config.Services;
 
 public interface IServiceConfiguration
 {
-    string? Name { get; }
+    string ServiceName { get; }
+    string? InstanceName { get; }
     string BaseUrl { get; }
     string ApiKey { get; }
-    ICollection<CustomFormatConfig> CustomFormats { get; }
     bool DeleteOldCustomFormats { get; }
 }

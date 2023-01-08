@@ -7,7 +7,7 @@
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
     <PackageVersion Include="AutoMapper" Version="12.0.0" />
-    <PackageVersion Include="CliFx" Version="2.3.1" />
+    <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="7.1.0" />
     <PackageVersion Include="CliWrap" Version="3.6.0" />
     <PackageVersion Include="FluentValidation" Version="11.4.0" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
@@ -24,6 +24,9 @@
     <PackageVersion Include="Serilog.Expressions" Version="3.4.1" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.45.1-preview.0.49" />
+    <PackageVersion Include="Spectre.Console.Analyzer" Version="0.45.1-preview.0.49" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.45.1-preview.0.49" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.1.5" />
@@ -49,6 +52,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="4.3.1" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.45.1-preview.0.49" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.1.5" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->

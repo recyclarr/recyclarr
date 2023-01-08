@@ -1,5 +1,5 @@
 using Flurl.Http;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.System.Dto;
 
 namespace Recyclarr.TrashLib.Services.System;
