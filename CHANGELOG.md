@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `list` subcommand for listing information from the guide.
+- New `sync` command for syncing all services, specific service types, and/or specific instances.
+- New `config` subcommand for performing configuration-specific operations.
+
+### Changed
+
+- The CLI has been completely redesigned to be more consistent and structured (#142).
+
+### Deprecated
+
+- The `create-config` subcommand is deprecated and replaced by `config create`.
+- The `sonarr` subcommand is deprecated and replaced by `sync sonarr`.
+- The `radarr` subcommand is deprecated and replaced by `sync radarr`.
+
 ## [4.1.3] - 2023-01-07
 
 ### Changed
