@@ -7,6 +7,7 @@ services:
   recyclarr:
     image: ghcr.io/recyclarr/recyclarr:edge
     user: $DOCKER_UID:$DOCKER_GID
+    container_name: recyclarr
     build:
       context: .
       args:
