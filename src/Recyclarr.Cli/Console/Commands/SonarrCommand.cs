@@ -10,7 +10,6 @@ using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Processors;
 using Recyclarr.TrashLib.Services.Sonarr;
 using Serilog;
-using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -98,37 +97,38 @@ internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `sync` instead!");
-
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
         await _repoUpdater.UpdateRepo();
 
         if (settings.ListCustomFormats)
         {
+            _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list custom-formats sonarr` instead!");
             _lister.ListCustomFormats();
             return 0;
         }
 
         if (settings.ListQualities)
         {
+            _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list qualities sonarr` instead!");
             _lister.ListQualities();
             return 0;
         }
 
         if (settings.ListReleaseProfiles)
         {
+            _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list release-profiles` instead!");
             _lister.ListReleaseProfiles();
             return 0;
         }
 
         if (settings.ListTerms != "empty")
         {
-            // Ignore nullability of ListTerms since the Settings.Validate() method will check for null/empty.
             _lister.ListTerms(settings.ListTerms!);
             return 0;
         }
 
+        _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `sync` instead!");
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }
 }

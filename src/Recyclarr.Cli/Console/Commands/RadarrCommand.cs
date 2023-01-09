@@ -72,24 +72,25 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `sync` instead!");
-
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
         await _repoUpdater.UpdateRepo();
 
         if (settings.ListCustomFormats)
         {
+            _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `list custom-formats radarr` instead!");
             _lister.ListCustomFormats();
             return 0;
         }
 
         if (settings.ListQualities)
         {
+            _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `list qualities radarr` instead!");
             _lister.ListQualities();
             return 0;
         }
 
+        _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `sync` instead!");
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }
 }
