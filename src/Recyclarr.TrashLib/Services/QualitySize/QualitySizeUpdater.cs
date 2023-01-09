@@ -1,9 +1,9 @@
-using CliFx.Infrastructure;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.QualitySize.Api;
 using Serilog;
+using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.QualitySize;
 
@@ -11,12 +11,12 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
 {
     private readonly ILogger _log;
     private readonly IQualityDefinitionService _api;
-    private readonly IConsole _console;
+    private readonly IAnsiConsole _console;
 
     public QualitySizeUpdater(
         ILogger logger,
         IQualityDefinitionService api,
-        IConsole console)
+        IAnsiConsole console)
     {
         _log = logger;
         _api = api;
@@ -71,17 +71,18 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
 
     private void PrintQualityPreview(IReadOnlyCollection<QualitySizeItem> quality)
     {
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
         const string format = "{0,-20} {1,-10} {2,-15} {3,-15}";
-        _console.Output.WriteLine(format, "Quality", "Min", "Max", "Preferred");
-        _console.Output.WriteLine(format, "-------", "---", "---", "---------");
+        _console.WriteLine(format.FormatWith(format, "Quality", "Min", "Max", "Preferred"));
+        _console.WriteLine(format.FormatWith(format, "-------", "---", "---", "---------"));
 
         foreach (var q in quality)
         {
-            _console.Output.WriteLine(format, q.Quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
+            _console.WriteLine(format.FormatWith(format, q.Quality, q.AnnotatedMin, q.AnnotatedMax,
+                q.AnnotatedPreferred));
         }
 
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
     }
 
     private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualitySizeItem b)

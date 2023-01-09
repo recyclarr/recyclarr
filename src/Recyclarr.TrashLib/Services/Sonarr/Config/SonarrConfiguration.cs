@@ -1,10 +1,13 @@
 using JetBrains.Annotations;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.Config;
 
 public class SonarrConfiguration : ServiceConfiguration
 {
+    public override string ServiceName { get; } = SupportedServices.Sonarr.ToString();
+
     public IList<ReleaseProfileConfig> ReleaseProfiles { get; [UsedImplicitly] init; } =
         Array.Empty<ReleaseProfileConfig>();
 }

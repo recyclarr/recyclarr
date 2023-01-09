@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using CliFx.Infrastructure;
 using JetBrains.Annotations;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;
 
@@ -36,7 +36,7 @@ public class MigrateTrashYml : IMigrationStep
 
     public bool CheckIfNeeded() => _fileSystem.File.Exists(_oldConfigPath);
 
-    public void Execute(IConsole? console)
+    public void Execute(IAnsiConsole? console)
     {
         _fileSystem.File.Move(_oldConfigPath, _newConfigPath);
     }

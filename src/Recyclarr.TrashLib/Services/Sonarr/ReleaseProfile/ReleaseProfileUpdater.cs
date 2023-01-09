@@ -1,11 +1,10 @@
-using CliFx.Infrastructure;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Services.Sonarr.Api;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Filters;
-using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 using Serilog;
+using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
 
@@ -13,18 +12,18 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
 {
     private readonly IReleaseProfileApiService _releaseProfileApi;
     private readonly IReleaseProfileFilterPipeline _pipeline;
-    private readonly IConsole _console;
-    private readonly ISonarrGuideService _guide;
+    private readonly IAnsiConsole _console;
+    private readonly SonarrGuideService _guide;
     private readonly ISonarrApi _api;
     private readonly ILogger _log;
 
     public ReleaseProfileUpdater(
         ILogger logger,
-        ISonarrGuideService guide,
+        SonarrGuideService guide,
         ISonarrApi api,
         IReleaseProfileApiService releaseProfileApi,
         IReleaseProfileFilterPipeline pipeline,
-        IConsole console)
+        IAnsiConsole console)
     {
         _log = logger;
         _guide = guide;
@@ -80,16 +79,16 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
                 return;
             }
 
-            _console.Output.WriteLine($"  {title}:");
+            _console.WriteLine($"  {title}:");
             foreach (var (score, terms) in preferredTerms)
             {
                 foreach (var term in terms)
                 {
-                    _console.Output.WriteLine($"    {score,-10} {term}");
+                    _console.WriteLine($"    {score,-10} {term}");
                 }
             }
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
         void PrintTerms(string title, IReadOnlyCollection<TermData> terms)
@@ -99,29 +98,29 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
                 return;
             }
 
-            _console.Output.WriteLine($"  {title}:");
+            _console.WriteLine($"  {title}:");
             foreach (var term in terms)
             {
-                _console.Output.WriteLine($"    {term}");
+                _console.WriteLine($"    {term}");
             }
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
 
-        _console.Output.WriteLine(profile.Name);
+        _console.WriteLine(profile.Name);
 
-        _console.Output.WriteLine("  Include Preferred when Renaming?");
-        _console.Output.WriteLine("    " +
+        _console.WriteLine("  Include Preferred when Renaming?");
+        _console.WriteLine("    " +
             (profile.IncludePreferredWhenRenaming ? "YES" : "NO"));
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
 
         PrintTerms("Must Contain", profile.Required);
         PrintTerms("Must Not Contain", profile.Ignored);
         PrintPreferredTerms("Preferred", profile.Preferred);
 
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
     }
 
     private async Task ProcessReleaseProfiles(

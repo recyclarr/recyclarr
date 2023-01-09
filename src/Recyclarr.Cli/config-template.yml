@@ -26,7 +26,7 @@ sonarr:
       type: series
 
     # Release profiles from the guide to sync to Sonarr v3 (Sonarr v4 does not use this!)
-    # Use `recyclarr sonarr --list-release-profiles` for values you can put here.
+    # Use `recyclarr list release-profiles` for values you can put here.
     # https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
     release_profiles:
       # Series
@@ -56,7 +56,7 @@ radarr:
 
     custom_formats:
       # A list of custom formats to sync to Radarr.
-      # Use `recyclarr radarr --list-custom-formats` for values you can put here.
+      # Use `recyclarr list custom-formats radarr` for values you can put here.
       # https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/
       - trash_ids:
           - ed38b889b31be83fda192888e2286d83 # BR-DISK

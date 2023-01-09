@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using FluentAssertions;
 using NUnit.Framework;
-using Recyclarr.Cli.Command.Setup;
+using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config.Settings;
 

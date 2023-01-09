@@ -1,12 +1,11 @@
 using AutoFixture.NUnit3;
-using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Services.Sonarr;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
-using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Guide;
+using Spectre.Console.Testing;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 
@@ -16,8 +15,8 @@ public class SonarrGuideDataListerTest
 {
     [Test, AutoMockData]
     public void Release_profiles_appear_in_console_output(
-        [Frozen] ISonarrGuideService guide,
-        [Frozen(Matching.ImplementedInterfaces)] FakeInMemoryConsole console,
+        [Frozen] SonarrGuideService guide,
+        [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         SonarrGuideDataLister sut)
     {
         var testData = new[]
@@ -30,14 +29,14 @@ public class SonarrGuideDataListerTest
 
         sut.ListReleaseProfiles();
 
-        console.ReadOutputString().Should().ContainAll(
+        console.Output.Should().ContainAll(
             testData.SelectMany(x => new[] {x.Name, x.TrashId}));
     }
 
     [Test, AutoMockData]
     public void Terms_appear_in_console_output(
-        [Frozen] ISonarrGuideService guide,
-        [Frozen(Matching.ImplementedInterfaces)] FakeInMemoryConsole console,
+        [Frozen] SonarrGuideService guide,
+        [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         SonarrGuideDataLister sut)
     {
         var requiredData = new[]
@@ -79,15 +78,7 @@ public class SonarrGuideDataListerTest
             preferredData.SelectMany(x => new[] {x.Name, x.TrashId})
         };
 
-        console.ReadOutputString().Should().ContainAll(expectedOutput.SelectMany(x => x));
-    }
-
-    [Test, AutoMockData]
-    public void Release_profile_trash_id_is_used_to_look_up_data(
-        [Frozen] ISonarrGuideService guide,
-        SonarrGuideDataLister sut)
-    {
-        sut.ListTerms("098");
         guide.Received().GetUnfilteredProfileById("098");
+        console.Output.Should().ContainAll(expectedOutput.SelectMany(x => x));
     }
 }

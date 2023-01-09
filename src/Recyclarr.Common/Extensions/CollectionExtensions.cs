@@ -38,4 +38,24 @@ public static class CollectionExtensions
     {
         return observable.Where(x => x is not null).Select(x => x!);
     }
+
+    public static bool Empty<T>(this ICollection<T>? collection)
+    {
+        return collection is null or {Count: 0};
+    }
+
+    public static bool Empty<T>(this IReadOnlyCollection<T>? collection)
+    {
+        return collection is null or {Count: 0};
+    }
+
+    public static bool NotEmpty<T>(this ICollection<T>? collection)
+    {
+        return collection is {Count: > 0};
+    }
+
+    public static bool NotEmpty<T>(this IReadOnlyCollection<T>? collection)
+    {
+        return collection is {Count: > 0};
+    }
 }

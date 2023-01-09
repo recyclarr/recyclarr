@@ -1,8 +1,10 @@
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Schemas;
+using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
 using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.Api;
@@ -10,22 +12,27 @@ namespace Recyclarr.TrashLib.Services.Sonarr.Api;
 public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCompatibilityHandler
 {
     private readonly ILogger _log;
-    private readonly Func<SonarrCapabilities> _capabilitiesFactory;
+    private readonly ISonarrCapabilityChecker _capabilityChecker;
     private readonly IMapper _mapper;
 
     public SonarrReleaseProfileCompatibilityHandler(
         ILogger log,
-        Func<SonarrCapabilities> capabilitiesFactory,
+        ISonarrCapabilityChecker capabilityChecker,
         IMapper mapper)
     {
         _log = log;
-        _capabilitiesFactory = capabilitiesFactory;
+        _capabilityChecker = capabilityChecker;
         _mapper = mapper;
     }
 
     public object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile)
     {
-        var capabilities = _capabilitiesFactory();
+        var capabilities = _capabilityChecker.GetCapabilities();
+        if (capabilities is null)
+        {
+            throw new ServiceIncompatibilityException("Capabilities could not be obtained");
+        }
+
         return capabilities.ArraysNeededForReleaseProfileRequiredAndIgnored
             ? profile
             : _mapper.Map<SonarrReleaseProfileV1>(profile);

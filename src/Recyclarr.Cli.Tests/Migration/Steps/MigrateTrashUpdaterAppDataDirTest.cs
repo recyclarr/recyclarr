@@ -36,8 +36,8 @@ public class MigrateTrashUpdaterAppDataDirTest
         [Frozen(Matching.ImplementedInterfaces)] TestAppPaths paths,
         MigrateTrashUpdaterAppDataDir sut)
     {
-        fs.AddFileNoData(sut.OldPath.File("recyclarr.yml"));
-        fs.AddFileNoData(sut.NewPath.File("recyclarr.yml"));
+        fs.AddEmptyFile(sut.OldPath.File("recyclarr.yml"));
+        fs.AddEmptyFile(sut.NewPath.File("recyclarr.yml"));
 
         var act = () => sut.Execute(null);
 
@@ -52,12 +52,12 @@ public class MigrateTrashUpdaterAppDataDirTest
     {
         // Add file instead of directory since the migration step only operates on files
         var baseDir = sut.OldPath;
-        fs.AddFileNoData(baseDir.File("settings.yml"));
-        fs.AddFileNoData(baseDir.File("recyclarr.yml"));
-        fs.AddFileNoData(baseDir.File("this-gets-ignored.yml"));
+        fs.AddEmptyFile(baseDir.File("settings.yml"));
+        fs.AddEmptyFile(baseDir.File("recyclarr.yml"));
+        fs.AddEmptyFile(baseDir.File("this-gets-ignored.yml"));
         fs.AddDirectory(baseDir.SubDirectory("repo"));
         fs.AddDirectory(baseDir.SubDirectory("cache"));
-        fs.AddFileNoData(baseDir.File("cache/sonarr/test.txt"));
+        fs.AddEmptyFile(baseDir.File("cache/sonarr/test.txt"));
 
         sut.Execute(null);
 

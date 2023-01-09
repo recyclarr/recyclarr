@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Reflection;
 using Autofac;
 using AutofacSerilogIntegration;
 using Recyclarr.Common;
@@ -12,7 +13,7 @@ public static class CompositionRoot
     {
         builder.RegisterLogger();
 
-        builder.RegisterModule<CommonAutofacModule>();
+        builder.RegisterModule(new CommonAutofacModule(Assembly.GetExecutingAssembly()));
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.RegisterType<DefaultAppDataSetup>();

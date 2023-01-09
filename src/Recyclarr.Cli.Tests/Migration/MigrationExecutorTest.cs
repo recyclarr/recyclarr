@@ -1,27 +1,21 @@
-using Autofac;
-using CliFx.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Cli.TestLibrary;
+using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Migration;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class MigrationExecutorTest
+public class MigrationExecutorTest : IntegrationFixture
 {
     [Test]
     public void Migration_steps_are_in_expected_order()
     {
-        var container = CompositionRoot.Setup(builder =>
-        {
-            builder.RegisterInstance(Substitute.For<IAppPaths>());
-        });
-
-        var steps = container.Resolve<IEnumerable<IMigrationStep>>();
+        var steps = Resolve<IEnumerable<IMigrationStep>>();
         var orderedSteps = steps.OrderBy(x => x.Order).Select(x => x.GetType()).ToList();
         orderedSteps.Should().BeEquivalentTo(
             new[]
@@ -35,7 +29,7 @@ public class MigrationExecutorTest
     [Test]
     public void Step_not_executed_if_check_returns_false()
     {
-        using var console = new FakeInMemoryConsole();
+        using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, console);
 
@@ -50,7 +44,7 @@ public class MigrationExecutorTest
     [Test]
     public void Step_executed_if_check_returns_true()
     {
-        using var console = new FakeInMemoryConsole();
+        using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, console);
 
@@ -65,7 +59,7 @@ public class MigrationExecutorTest
     [Test]
     public void Steps_executed_in_ascending_order()
     {
-        using var console = new FakeInMemoryConsole();
+        using var console = new TestConsole();
 
         var steps = new[]
         {
@@ -93,7 +87,7 @@ public class MigrationExecutorTest
     [Test]
     public void Exception_converted_to_migration_exception()
     {
-        using var console = new FakeInMemoryConsole();
+        using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, console);
 
@@ -108,7 +102,7 @@ public class MigrationExecutorTest
     [Test]
     public void Migration_exceptions_are_not_converted()
     {
-        using var console = new FakeInMemoryConsole();
+        using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, console);
         var exception = new MigrationException(new Exception(), "a", new[] {"b"});

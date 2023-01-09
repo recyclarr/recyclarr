@@ -9,6 +9,7 @@
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <NoWarn>CA1308</NoWarn>
   </PropertyGroup>
 
   <!--
@@ -35,6 +36,7 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
+    <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- TEST ONLY PROPERTIES -->
@@ -60,6 +62,7 @@
     <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
+    <PackageReference Include="Spectre.Console.Testing" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />
   </ItemGroup>

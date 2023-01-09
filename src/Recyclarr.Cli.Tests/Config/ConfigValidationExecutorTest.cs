@@ -1,7 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+using Autofac;
 using FluentAssertions;
+using FluentValidation;
 using NUnit.Framework;
-using Recyclarr.Cli.Config;
 using Recyclarr.Cli.TestLibrary;
+using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Config;
@@ -10,13 +14,34 @@ namespace Recyclarr.Cli.Tests.Config;
 [Parallelizable(ParallelScope.All)]
 public class ConfigValidationExecutorTest : IntegrationFixture
 {
-    [Test]
-    public void Invalid_returns_false()
+    [SuppressMessage("Design", "CA1812", Justification = "Instantiated via reflection in unit test")]
+    private sealed class TestValidator : AbstractValidator<ServiceConfiguration>
     {
-        var sut = Resolve<ConfigValidationExecutor>();
-        var config = new TestConfig {ApiKey = ""}; // Use bad data
+        public bool ShouldSucceed { get; set; }
 
-        var result = sut.Validate(config);
+        public TestValidator()
+        {
+            RuleFor(x => x).Must(_ => ShouldSucceed);
+        }
+    }
+
+    protected override void RegisterExtraTypes(ContainerBuilder builder)
+    {
+        builder.RegisterType<TestValidator>()
+            .AsSelf()
+            .As<IValidator<ServiceConfiguration>>()
+            .SingleInstance();
+    }
+
+    [Test]
+    public void Return_false_on_validation_failure()
+    {
+        var validator = Resolve<TestValidator>();
+        validator.ShouldSucceed = false;
+
+        var sut = Resolve<ConfigValidationExecutor>();
+
+        var result = sut.Validate(new TestConfig());
 
         result.Should().BeFalse();
     }
@@ -24,10 +49,12 @@ public class ConfigValidationExecutorTest : IntegrationFixture
     [Test]
     public void Valid_returns_true()
     {
-        var sut = Resolve<ConfigValidationExecutor>();
-        var config = new TestConfig {ApiKey = "good", BaseUrl = "good"}; // Use good data
+        var validator = Resolve<TestValidator>();
+        validator.ShouldSucceed = true;
 
-        var result = sut.Validate(config);
+        var sut = Resolve<ConfigValidationExecutor>();
+
+        var result = sut.Validate(new TestConfig());
 
         result.Should().BeTrue();
     }

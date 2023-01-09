@@ -1,10 +1,11 @@
-using CliFx.Infrastructure;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 using Serilog;
+using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat;
 
@@ -13,7 +14,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
     private readonly ICachePersister _cache;
     private readonly IGuideProcessor _guideProcessor;
     private readonly IPersistenceProcessor _persistenceProcessor;
-    private readonly IConsole _console;
+    private readonly IAnsiConsole _console;
     private readonly IServiceRequestBuilder _service;
     private readonly ILogger _log;
 
@@ -22,7 +23,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         ICachePersister cache,
         IGuideProcessor guideProcessor,
         IPersistenceProcessor persistenceProcessor,
-        IConsole console,
+        IAnsiConsole console,
         IServiceRequestBuilder service)
     {
         _log = log;
@@ -114,7 +115,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
             foreach (var mapping in created)
             {
-                _console.Output.WriteLine($"> Created: {mapping.TrashId} ({mapping.Name})");
+                _console.WriteLine($"> Created: {mapping.TrashId} ({mapping.Name})");
             }
         }
 
@@ -127,7 +128,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
             foreach (var mapping in updated)
             {
-                _console.Output.WriteLine($"> Updated: {mapping.TrashId} ({mapping.Name})");
+                _console.WriteLine($"> Updated: {mapping.TrashId} ({mapping.Name})");
             }
         }
 
@@ -150,7 +151,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
             foreach (var mapping in deleted)
             {
-                _console.Output.WriteLine($"> Deleted: {mapping.TrashId} ({mapping.CustomFormatName})");
+                _console.WriteLine($"> Deleted: {mapping.TrashId} ({mapping.CustomFormatName})");
             }
         }
 
@@ -175,7 +176,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 "`--list-custom-formats` option");
             _log.Warning("{CfList}", _guideProcessor.CustomFormatsNotInGuide);
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
         var cfsWithoutQualityProfiles = _guideProcessor.ConfigData
@@ -189,7 +190,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 "These custom formats will be uploaded but are not associated to a quality profile in the " +
                 "config file: {UnassociatedCfs}", cfsWithoutQualityProfiles);
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
         // No CFs are defined in this item, or they are all invalid. Skip this whole instance.
@@ -210,7 +211,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 _log.Information("{CfList}", tuple);
             }
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
         if (_guideProcessor.DuplicateScores.Any())
@@ -229,7 +230,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                 "only the score from the first occurrence is used. To resolve the duplication warnings above, " +
                 "remove the duplicate trash IDs from your YAML config");
 
-            _console.Output.WriteLine("");
+            _console.WriteLine("");
         }
 
         return true;
@@ -237,34 +238,34 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private void PreviewCustomFormats()
     {
-        _console.Output.WriteLine("");
-        _console.Output.WriteLine("=========================================================");
-        _console.Output.WriteLine("            >>> Custom Formats From Guide <<<            ");
-        _console.Output.WriteLine("=========================================================");
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
+        _console.WriteLine("=========================================================");
+        _console.WriteLine("            >>> Custom Formats From Guide <<<            ");
+        _console.WriteLine("=========================================================");
+        _console.WriteLine("");
 
         const string format = "{0,-30} {1,-35}";
-        _console.Output.WriteLine(format, "Custom Format", "Trash ID");
-        _console.Output.WriteLine(string.Concat(Enumerable.Repeat('-', 1 + 30 + 35)));
+        _console.WriteLine(format.FormatWith("Custom Format", "Trash ID"));
+        _console.WriteLine(string.Concat(Enumerable.Repeat('-', 1 + 30 + 35)));
 
         foreach (var cf in _guideProcessor.ProcessedCustomFormats)
         {
-            _console.Output.WriteLine(format, cf.Name, cf.TrashId);
+            _console.WriteLine(format.FormatWith(cf.Name, cf.TrashId));
         }
 
-        _console.Output.WriteLine("");
-        _console.Output.WriteLine("=========================================================");
-        _console.Output.WriteLine("      >>> Quality Profile Assignments & Scores <<<       ");
-        _console.Output.WriteLine("=========================================================");
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
+        _console.WriteLine("=========================================================");
+        _console.WriteLine("      >>> Quality Profile Assignments & Scores <<<       ");
+        _console.WriteLine("=========================================================");
+        _console.WriteLine("");
 
         const string profileFormat = "{0,-18} {1,-20} {2,-8}";
-        _console.Output.WriteLine(profileFormat, "Profile", "Custom Format", "Score");
-        _console.Output.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
+        _console.WriteLine(format.FormatWith(profileFormat, "Profile", "Custom Format", "Score"));
+        _console.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
 
         foreach (var (profileName, scoreMap) in _guideProcessor.ProfileScores)
         {
-            _console.Output.WriteLine(profileFormat, profileName, "", "");
+            _console.WriteLine(format.FormatWith(profileFormat, profileName, "", ""));
 
             foreach (var (customFormat, score) in scoreMap.Mapping)
             {
@@ -278,10 +279,10 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
                     continue;
                 }
 
-                _console.Output.WriteLine(profileFormat, "", matchingCf.Name, score);
+                _console.WriteLine(format.FormatWith(profileFormat, "", matchingCf.Name, score));
             }
         }
 
-        _console.Output.WriteLine("");
+        _console.WriteLine("");
     }
 }

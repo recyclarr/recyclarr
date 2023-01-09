@@ -5,23 +5,28 @@ namespace Recyclarr.TestLibrary;
 
 public static class MockFileSystemExtensions
 {
-    public static void AddFileNoData(this MockFileSystem fs, string path)
+    public static void AddEmptyFile(this MockFileSystem fs, string path)
     {
-        fs.AddFile(FileUtils.NormalizePath(path), new MockFileData(""));
+        fs.AddFile(path, new MockFileData(""));
     }
 
-    public static void AddFileNoData(this MockFileSystem fs, IFileInfo path)
+    public static void AddEmptyFile(this MockFileSystem fs, IFileInfo path)
     {
-        fs.AddFile(path.FullName, new MockFileData(""));
-    }
-
-    public static void AddDirectory2(this MockFileSystem fs, string path)
-    {
-        fs.AddDirectory(FileUtils.NormalizePath(path));
+        fs.AddEmptyFile(path.FullName);
     }
 
     public static void AddDirectory(this MockFileSystem fs, IDirectoryInfo path)
     {
         fs.AddDirectory(path.FullName);
+    }
+
+    public static void AddFile(this MockFileSystem fs, IFileInfo path, MockFileData data)
+    {
+        fs.AddFile(path.FullName, data);
+    }
+
+    public static MockFileData GetFile(this MockFileSystem fs, IFileInfo path)
+    {
+        return fs.GetFile(path.FullName);
     }
 }

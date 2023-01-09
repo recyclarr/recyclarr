@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Recyclarr.Common;
 
-public class ResourceDataReader
+public class ResourceDataReader : IResourceDataReader
 {
     private readonly Assembly? _assembly;
     private readonly string? _namespace;

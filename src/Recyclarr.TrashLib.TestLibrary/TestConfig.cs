@@ -6,8 +6,5 @@ namespace Recyclarr.TrashLib.TestLibrary;
 [UsedImplicitly]
 public class TestConfig : ServiceConfiguration
 {
-    public TestConfig()
-    {
-        Name = "Test";
-    }
+    public override string ServiceName => "Test";
 }

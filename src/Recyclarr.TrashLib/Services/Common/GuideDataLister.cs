@@ -1,20 +1,22 @@
-using CliFx.Infrastructure;
+using MoreLinq;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
+using Recyclarr.TrashLib.Services.QualitySize;
+using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Common;
 
 public class GuideDataLister : IGuideDataLister
 {
-    private readonly IConsole _console;
+    private readonly IAnsiConsole _console;
 
-    public GuideDataLister(IConsole console)
+    public GuideDataLister(IAnsiConsole console)
     {
         _console = console;
     }
 
     public void ListCustomFormats(IEnumerable<CustomFormatData> customFormats)
     {
-        _console.Output.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
+        _console.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
 
         var categories = customFormats
             .OrderBy(x => x.Name)
@@ -24,16 +26,29 @@ public class GuideDataLister : IGuideDataLister
         foreach (var cat in categories)
         {
             var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
-            _console.Output.WriteLine($"\n          # {title}");
+            _console.WriteLine($"\n          # {title}");
 
             foreach (var cf in cat)
             {
-                _console.Output.WriteLine($"          - {cf.TrashId} # {cf.Name}");
+                _console.WriteLine($"          - {cf.TrashId} # {cf.Name}");
             }
         }
 
-        _console.Output.WriteLine(
+        _console.WriteLine(
             "\nThe above Custom Formats are in YAML format and ready to be copied & pasted " +
             "under the `trash_ids:` property.");
+    }
+
+    public void ListQualities(IEnumerable<QualitySizeData> qualityData)
+    {
+        _console.WriteLine("\nList of Quality Definition types in the TRaSH Guides:\n");
+
+        qualityData
+            .Select(x => x.Type)
+            .ForEach(x => _console.WriteLine($"  - {x}"));
+
+        _console.WriteLine(
+            "\nThe above quality definition types can be used with the `quality_definition:` property in your " +
+            "recyclarr.yml file.");
     }
 }

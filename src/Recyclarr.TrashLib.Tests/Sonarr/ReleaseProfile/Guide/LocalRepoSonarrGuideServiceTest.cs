@@ -9,8 +9,8 @@ using NUnit.Framework;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Services.Sonarr;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
-using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Guide;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr.ReleaseProfile.Guide;
 
