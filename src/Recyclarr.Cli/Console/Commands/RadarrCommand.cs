@@ -6,6 +6,7 @@ using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Processors;
 using Recyclarr.TrashLib.Services.Radarr;
 using Serilog;
@@ -20,6 +21,7 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
     private readonly ILogger _log;
     private readonly IRadarrGuideDataLister _lister;
     private readonly IMigrationExecutor _migration;
+    private readonly IRepoUpdater _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
 
     [UsedImplicitly]
@@ -58,17 +60,23 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
         ILogger log,
         IRadarrGuideDataLister lister,
         IMigrationExecutor migration,
+        IRepoUpdater repoUpdater,
         ISyncProcessor syncProcessor)
     {
         _log = log;
         _lister = lister;
         _migration = migration;
+        _repoUpdater = repoUpdater;
         _syncProcessor = syncProcessor;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `sync` instead!");
+
+        // Will throw if migration is required, otherwise just a warning is issued.
+        _migration.CheckNeededMigrations();
+        await _repoUpdater.UpdateRepo();
 
         if (settings.ListCustomFormats)
         {
@@ -81,9 +89,6 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
             _lister.ListQualities();
             return 0;
         }
-
-        // Will throw if migration is required, otherwise just a warning is issued.
-        _migration.CheckNeededMigrations();
 
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }

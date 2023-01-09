@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Common;
 using Spectre.Console.Cli;
 
@@ -13,10 +14,11 @@ namespace Recyclarr.Cli.Console.Commands;
 #pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
-internal class ListQualitiesCommand : Command<ListQualitiesCommand.CliSettings>
+internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
     private readonly IGuideDataLister _lister;
     private readonly IIndex<SupportedServices, IGuideService> _guideService;
+    private readonly IRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -30,14 +32,17 @@ internal class ListQualitiesCommand : Command<ListQualitiesCommand.CliSettings>
 
     public ListQualitiesCommand(
         IGuideDataLister lister,
-        IIndex<SupportedServices, IGuideService> guideService)
+        IIndex<SupportedServices, IGuideService> guideService,
+        IRepoUpdater repoUpdater)
     {
         _lister = lister;
         _guideService = guideService;
+        _repoUpdater = repoUpdater;
     }
 
-    public override int Execute(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
+        await _repoUpdater.UpdateRepo();
         var guideService = _guideService[settings.Service];
         _lister.ListQualities(guideService.GetQualities());
         return 0;

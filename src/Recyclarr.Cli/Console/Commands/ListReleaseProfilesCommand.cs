@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Commands.Shared;
+using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Sonarr;
 using Serilog;
 using Spectre.Console.Cli;
@@ -12,10 +13,11 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List Sonarr release profiles in the guide for a particular service.")]
-internal class ListReleaseProfilesCommand : Command<ListReleaseProfilesCommand.CliSettings>
+internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesCommand.CliSettings>
 {
     private readonly ILogger _log;
     private readonly ISonarrGuideDataLister _lister;
+    private readonly IRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -31,16 +33,20 @@ internal class ListReleaseProfilesCommand : Command<ListReleaseProfilesCommand.C
 
     public ListReleaseProfilesCommand(
         ILogger log,
-        ISonarrGuideDataLister lister)
+        ISonarrGuideDataLister lister,
+        IRepoUpdater repoUpdater)
     {
         _log = log;
         _lister = lister;
+        _repoUpdater = repoUpdater;
     }
 
-    public override int Execute(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         try
         {
+            await _repoUpdater.UpdateRepo();
+
             if (settings.ListTerms is not null)
             {
                 // Ignore nullability of ListTerms since the Settings.Validate() method will check for null/empty.

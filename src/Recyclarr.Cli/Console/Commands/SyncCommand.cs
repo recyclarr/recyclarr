@@ -6,6 +6,7 @@ using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Processors;
 using Spectre.Console.Cli;
 
@@ -16,6 +17,7 @@ namespace Recyclarr.Cli.Console.Commands;
 public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
 {
     private readonly IMigrationExecutor _migration;
+    private readonly IRepoUpdater _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
 
     [UsedImplicitly]
@@ -50,9 +52,11 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
 
     public SyncCommand(
         IMigrationExecutor migration,
+        IRepoUpdater repoUpdater,
         ISyncProcessor syncProcessor)
     {
         _migration = migration;
+        _repoUpdater = repoUpdater;
         _syncProcessor = syncProcessor;
     }
 
@@ -61,6 +65,7 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
     {
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
+        await _repoUpdater.UpdateRepo();
 
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }
