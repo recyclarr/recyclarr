@@ -67,18 +67,7 @@ internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
         [Description(
             "For the given Release Profile Trash ID, list terms in it that can be filtered in YAML format. " +
             "Note that not every release profile has terms that may be filtered.")]
-        public string? ListTerms { get; init; } = "empty";
-
-        public override ValidationResult Validate()
-        {
-            if (string.IsNullOrEmpty(ListTerms))
-            {
-                return ValidationResult.Error(
-                    "The --list-terms option was specified without a Release Profile Trash ID specified");
-            }
-
-            return base.Validate();
-        }
+        public string? ListTerms { get; init; }
     }
 
     public SonarrCommand(
@@ -122,9 +111,9 @@ internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
             return 0;
         }
 
-        if (settings.ListTerms != "empty")
+        if (settings.ListTerms is not null)
         {
-            _lister.ListTerms(settings.ListTerms!);
+            _lister.ListTerms(settings.ListTerms);
             return 0;
         }
 
