@@ -48,6 +48,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         if (isPreview)
         {
             PreviewCustomFormats();
+            PreviewQualityProfiles();
             return;
         }
 
@@ -238,34 +239,33 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
     private void PreviewCustomFormats()
     {
-        _console.WriteLine("");
-        _console.WriteLine("=========================================================");
-        _console.WriteLine("            >>> Custom Formats From Guide <<<            ");
-        _console.WriteLine("=========================================================");
-        _console.WriteLine("");
-
-        const string format = "{0,-30} {1,-35}";
-        _console.WriteLine(format.FormatWith("Custom Format", "Trash ID"));
-        _console.WriteLine(string.Concat(Enumerable.Repeat('-', 1 + 30 + 35)));
+        var table = new Table()
+            .Title("Custom Formats [red](Preview)[/]")
+            .AddColumn("[bold]Custom Format[/]")
+            .AddColumn("[bold]Trash ID[/]")
+            .AddColumn("[bold]Guide Score[/]");
 
         foreach (var cf in _guideProcessor.ProcessedCustomFormats)
         {
-            _console.WriteLine(format.FormatWith(cf.Name, cf.TrashId));
+            var score = cf.Score?.ToString() ?? "-";
+            table.AddRow(cf.Name, cf.TrashId, score);
         }
 
-        _console.WriteLine("");
-        _console.WriteLine("=========================================================");
-        _console.WriteLine("      >>> Quality Profile Assignments & Scores <<<       ");
-        _console.WriteLine("=========================================================");
-        _console.WriteLine("");
+        _console.WriteLine();
+        _console.Write(table);
+    }
 
-        const string profileFormat = "{0,-18} {1,-20} {2,-8}";
-        _console.WriteLine(format.FormatWith(profileFormat, "Profile", "Custom Format", "Score"));
-        _console.WriteLine(string.Concat(Enumerable.Repeat('-', 2 + 18 + 20 + 8)));
+    private void PreviewQualityProfiles()
+    {
+        var cfsNotFound = new HashSet<string>();
+
+        var tree = new Tree("Quality Profiles Scores [red](Preview)[/]");
 
         foreach (var (profileName, scoreMap) in _guideProcessor.ProfileScores)
         {
-            _console.WriteLine(format.FormatWith(profileFormat, profileName, "", ""));
+            var table = new Table()
+                .AddColumn("[bold]Custom Format[/]")
+                .AddColumn("[bold]Score[/]");
 
             foreach (var (customFormat, score) in scoreMap.Mapping)
             {
@@ -274,15 +274,30 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
                 if (matchingCf == null)
                 {
-                    _log.Warning("Quality Profile refers to CF not found in guide: {TrashId}",
-                        customFormat.TrashId);
+                    cfsNotFound.Add(customFormat.TrashId);
                     continue;
                 }
 
-                _console.WriteLine(format.FormatWith(profileFormat, "", matchingCf.Name, score));
+                table.AddRow(matchingCf.Name, score.ToString());
             }
+
+            tree.AddNode($"[yellow]{profileName}[/]")
+                .AddNode(table);
         }
 
-        _console.WriteLine("");
+        _console.WriteLine();
+        _console.Write(tree);
+
+        if (!cfsNotFound.IsNotEmpty())
+        {
+            return;
+        }
+
+        _console.WriteLine();
+        _console.MarkupLine("The following CFs were [red]not found[/]:");
+        foreach (var id in cfsNotFound)
+        {
+            _console.MarkupLine($"[red]x[/] {id}");
+        }
     }
 }
