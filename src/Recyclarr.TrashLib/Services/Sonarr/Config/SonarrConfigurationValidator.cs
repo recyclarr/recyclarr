@@ -12,7 +12,7 @@ public class SonarrConfigurationValidator : AbstractValidator<SonarrConfiguratio
     {
         RuleForEach(x => x.ReleaseProfiles)
             .Empty()
-            .When(x => x.CustomFormats.NotEmpty())
+            .When(x => x.CustomFormats.IsNotEmpty())
             .WithMessage("`custom_formats` and `release_profiles` may not be used together");
 
         RuleForEach(x => x.ReleaseProfiles).SetValidator(new ReleaseProfileConfigValidator());

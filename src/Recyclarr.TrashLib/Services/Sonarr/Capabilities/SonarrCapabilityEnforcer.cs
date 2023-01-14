@@ -30,12 +30,12 @@ public class SonarrCapabilityEnforcer
 
         switch (capabilities.SupportsCustomFormats)
         {
-            case true when config.ReleaseProfiles.NotEmpty():
+            case true when config.ReleaseProfiles.IsNotEmpty():
                 throw new ServiceIncompatibilityException(
                     "Release profiles require Sonarr v3. " +
                     "Please use `custom_formats` instead or use the right version of Sonarr.");
 
-            case false when config.CustomFormats.NotEmpty():
+            case false when config.CustomFormats.IsNotEmpty():
                 throw new ServiceIncompatibilityException(
                     "Custom formats require Sonarr v4 or greater. " +
                     "Please use `release_profiles` instead or use the right version of Sonarr.");
