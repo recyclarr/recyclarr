@@ -69,20 +69,24 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
         await ProcessQualityDefinition(selectedQuality.Qualities);
     }
 
-    private void PrintQualityPreview(IReadOnlyCollection<QualitySizeItem> quality)
+    private void PrintQualityPreview(IReadOnlyCollection<QualitySizeItem> qualitySizeItems)
     {
-        _console.WriteLine("");
-        const string format = "{0,-20} {1,-10} {2,-15} {3,-15}";
-        _console.WriteLine(format.FormatWith(format, "Quality", "Min", "Max", "Preferred"));
-        _console.WriteLine(format.FormatWith(format, "-------", "---", "---", "---------"));
+        var table = new Table();
 
-        foreach (var q in quality)
+        table.Title("Quality Sizes [red](Preview)[/]");
+        table.AddColumn("[bold]Quality[/]");
+        table.AddColumn("[bold]Min[/]");
+        table.AddColumn("[bold]Max[/]");
+        table.AddColumn("[bold]Preferred[/]");
+
+        foreach (var q in qualitySizeItems)
         {
-            _console.WriteLine(format.FormatWith(format, q.Quality, q.AnnotatedMin, q.AnnotatedMax,
-                q.AnnotatedPreferred));
+            var quality = $"[dodgerblue1]{q.Quality}[/]";
+            table.AddRow(quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
         }
 
-        _console.WriteLine("");
+        _console.WriteLine();
+        _console.Write(table);
     }
 
     private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualitySizeItem b)
