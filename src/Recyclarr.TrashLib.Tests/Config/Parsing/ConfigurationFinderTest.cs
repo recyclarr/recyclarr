@@ -6,11 +6,10 @@ using FluentAssertions;
 using NUnit.Framework;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Startup;
 
-namespace Recyclarr.Cli.Tests.Config;
+namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

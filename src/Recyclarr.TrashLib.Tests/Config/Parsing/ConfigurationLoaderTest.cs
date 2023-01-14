@@ -21,7 +21,7 @@ using Recyclarr.TrashLib.TestLibrary;
 using Serilog.Sinks.TestCorrelator;
 using YamlDotNet.Core;
 
-namespace Recyclarr.Cli.Tests.Config;
+namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

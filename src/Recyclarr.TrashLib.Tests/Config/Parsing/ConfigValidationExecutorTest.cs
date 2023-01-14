@@ -8,7 +8,7 @@ using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
 
-namespace Recyclarr.Cli.Tests.Config;
+namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
