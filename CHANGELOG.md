@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The CLI has been completely redesigned to be more consistent and structured (#142).
-- Improved preview output for quality sizes
+- Improved preview output for quality sizes, custom formats, and release profiles.
 
 ### Deprecated
 

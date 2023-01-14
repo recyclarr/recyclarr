@@ -59,68 +59,81 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
 
         if (isPreview)
         {
-            foreach (var profile in filteredProfiles.Select(x => x.Profile))
-            {
-                PrintTermsAndScores(profile);
-            }
-
+            PreviewReleaseProfiles(filteredProfiles.Select(x => x.Profile));
             return;
         }
 
         await ProcessReleaseProfiles(filteredProfiles);
     }
 
-    private void PrintTermsAndScores(ReleaseProfileData profile)
+    private void PreviewReleaseProfiles(IEnumerable<ReleaseProfileData> profiles)
     {
-        void PrintPreferredTerms(string title, IReadOnlyCollection<PreferredTermData> preferredTerms)
+        var tree = new Tree("Release Profiles [red](Preview)[/]");
+
+        foreach (var profile in profiles)
         {
-            if (preferredTerms.Count <= 0)
-            {
-                return;
-            }
-
-            _console.WriteLine($"  {title}:");
-            foreach (var (score, terms) in preferredTerms)
-            {
-                foreach (var term in terms)
-                {
-                    _console.WriteLine($"    {score,-10} {term}");
-                }
-            }
-
-            _console.WriteLine("");
+            PrintTermsAndScores(tree, profile);
         }
 
-        void PrintTerms(string title, IReadOnlyCollection<TermData> terms)
-        {
-            if (terms.Count == 0)
-            {
-                return;
-            }
+        _console.WriteLine();
+        _console.Write(tree);
+    }
 
-            _console.WriteLine($"  {title}:");
+    private void PrintTermsAndScores(Tree tree, ReleaseProfileData profile)
+    {
+        var rpNode = tree.AddNode($"[yellow]{profile.Name}[/]");
+
+        var incPreferred = profile.IncludePreferredWhenRenaming ? "[green]YES[/]" : "[red]NO[/]";
+        rpNode.AddNode($"Include Preferred when Renaming? {incPreferred}");
+
+        PrintTerms(rpNode, "Must Contain", profile.Required);
+        PrintTerms(rpNode, "Must Not Contain", profile.Ignored);
+        PrintPreferredTerms(rpNode, "Preferred", profile.Preferred);
+
+        _console.WriteLine("");
+    }
+
+    private static void PrintTerms(TreeNode tree, string title, IReadOnlyCollection<TermData> terms)
+    {
+        if (terms.Count == 0)
+        {
+            return;
+        }
+
+        var table = new Table()
+            .AddColumn("[bold]Term[/]");
+
+        foreach (var term in terms)
+        {
+            table.AddRow(Markup.Escape(term.Term));
+        }
+
+        tree.AddNode(title)
+            .AddNode(table);
+    }
+
+    private static void PrintPreferredTerms(TreeNode tree, string title,
+        IReadOnlyCollection<PreferredTermData> preferredTerms)
+    {
+        if (preferredTerms.Count <= 0)
+        {
+            return;
+        }
+
+        var table = new Table()
+            .AddColumn("[bold]Score[/]")
+            .AddColumn("[bold]Term[/]");
+
+        foreach (var (score, terms) in preferredTerms)
+        {
             foreach (var term in terms)
             {
-                _console.WriteLine($"    {term}");
+                table.AddRow(score.ToString(), Markup.Escape(term.Term));
             }
-
-            _console.WriteLine("");
         }
 
-        _console.WriteLine("");
-
-        _console.WriteLine(profile.Name);
-
-        _console.WriteLine("  Include Preferred when Renaming?");
-        _console.WriteLine("    " +
-            (profile.IncludePreferredWhenRenaming ? "YES" : "NO"));
-        _console.WriteLine("");
-
-        PrintTerms("Must Contain", profile.Required);
-        PrintTerms("Must Not Contain", profile.Ignored);
-        PrintPreferredTerms("Preferred", profile.Preferred);
-
-        _console.WriteLine("");
+        tree.AddNode(title)
+            .AddNode(table);
     }
 
     private async Task ProcessReleaseProfiles(
