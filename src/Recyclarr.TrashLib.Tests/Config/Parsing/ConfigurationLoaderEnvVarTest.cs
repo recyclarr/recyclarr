@@ -4,8 +4,10 @@ using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Config.EnvironmentVariables;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
+using YamlDotNet.Core;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -167,5 +169,23 @@ sonarr:
                 BaseUrl = "some value"
             }
         });
+    }
+
+    [Test]
+    public void Throw_when_no_env_var_and_no_default()
+    {
+        var sut = Resolve<ConfigurationLoader>();
+
+        const string testYml = @"
+sonarr:
+  instance:
+    base_url: !env_var SONARR_URL
+    api_key: value
+";
+
+        var act = () => sut.LoadFromStream(new StringReader(testYml));
+
+        act.Should().Throw<YamlException>()
+            .WithInnerException<EnvironmentVariableNotDefinedException>();
     }
 }
