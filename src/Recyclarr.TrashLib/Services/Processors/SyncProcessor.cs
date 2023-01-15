@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Flurl.Http;
-using JetBrains.Annotations;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
@@ -14,13 +13,11 @@ using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 
-[UsedImplicitly]
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor : ISyncProcessor
 {
     private readonly IAnsiConsole _console;
     private readonly ILogger _log;
-    private readonly ConfigValidationExecutor _validator;
     private readonly IConfigurationFinder _configFinder;
     private readonly IConfigurationLoader _configLoader;
     private readonly ServiceProcessorFactory _factory;
@@ -28,14 +25,12 @@ public class SyncProcessor : ISyncProcessor
     public SyncProcessor(
         IAnsiConsole console,
         ILogger log,
-        ConfigValidationExecutor validator,
         IConfigurationFinder configFinder,
         IConfigurationLoader configLoader,
         ServiceProcessorFactory factory)
     {
         _console = console;
         _log = log;
-        _validator = validator;
         _configFinder = configFinder;
         _configLoader = configLoader;
         _factory = factory;
@@ -105,13 +100,6 @@ public class SyncProcessor : ISyncProcessor
                 }
 
                 PrintProcessingHeader(service.ToString(), config);
-
-                if (!_validator.Validate(config))
-                {
-                    // Useful logs are printed in the Validate method
-                    continue;
-                }
-
                 using var processor = _factory.CreateProcessor<TConfig>(config);
                 await processor.Value.Process(config, settings);
             }
