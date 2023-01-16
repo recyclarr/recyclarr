@@ -6,7 +6,6 @@ using Recyclarr.Common;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.EnvironmentVariables;
 using Recyclarr.TrashLib.Config.Parsing;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
 using YamlDotNet.Core;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
@@ -33,7 +32,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -58,7 +57,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -85,7 +84,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -112,7 +111,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -137,7 +136,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -161,7 +160,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new

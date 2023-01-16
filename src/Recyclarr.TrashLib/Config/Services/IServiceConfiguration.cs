@@ -2,7 +2,7 @@ namespace Recyclarr.TrashLib.Config.Services;
 
 public interface IServiceConfiguration
 {
-    string ServiceName { get; }
+    SupportedServices ServiceType { get; }
     string? InstanceName { get; }
     Uri BaseUrl { get; }
     string ApiKey { get; }

@@ -1,6 +1,5 @@
 using Autofac;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 
@@ -10,8 +9,8 @@ public class ServiceProcessorsAutofacModule : Module
     {
         base.Load(builder);
         builder.RegisterType<ServiceProcessorFactory>();
-        builder.RegisterType<RadarrProcessor>().As<IServiceProcessor<RadarrConfiguration>>();
-        builder.RegisterType<SonarrProcessor>().As<IServiceProcessor<SonarrConfiguration>>();
+        builder.RegisterType<RadarrProcessor>().Keyed<IServiceProcessor>(SupportedServices.Radarr);
+        builder.RegisterType<SonarrProcessor>().Keyed<IServiceProcessor>(SupportedServices.Sonarr);
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
     }
 }

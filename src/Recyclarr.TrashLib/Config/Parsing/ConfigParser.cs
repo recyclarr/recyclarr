@@ -75,6 +75,6 @@ public class ConfigParser
             throw new YamlException("Validation failed");
         }
 
-        _configs.Add(_currentSection.Value, newConfig);
+        _configs.Add(newConfig);
     }
 }

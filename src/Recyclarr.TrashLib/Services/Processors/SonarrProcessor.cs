@@ -7,7 +7,7 @@ using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 
-public class SonarrProcessor : IServiceProcessor<SonarrConfiguration>
+public class SonarrProcessor : IServiceProcessor
 {
     private readonly ILogger _log;
     private readonly ICustomFormatUpdater _cfUpdater;
@@ -15,6 +15,7 @@ public class SonarrProcessor : IServiceProcessor<SonarrConfiguration>
     private readonly SonarrGuideService _guideService;
     private readonly IReleaseProfileUpdater _profileUpdater;
     private readonly SonarrCapabilityEnforcer _compatibilityEnforcer;
+    private readonly SonarrConfiguration _config;
 
     public SonarrProcessor(
         ILogger log,
@@ -22,7 +23,8 @@ public class SonarrProcessor : IServiceProcessor<SonarrConfiguration>
         IQualitySizeUpdater qualityUpdater,
         SonarrGuideService guideService,
         IReleaseProfileUpdater profileUpdater,
-        SonarrCapabilityEnforcer compatibilityEnforcer)
+        SonarrCapabilityEnforcer compatibilityEnforcer,
+        SonarrConfiguration config)
     {
         _log = log;
         _cfUpdater = cfUpdater;
@@ -30,30 +32,31 @@ public class SonarrProcessor : IServiceProcessor<SonarrConfiguration>
         _guideService = guideService;
         _profileUpdater = profileUpdater;
         _compatibilityEnforcer = compatibilityEnforcer;
+        _config = config;
     }
 
-    public async Task Process(SonarrConfiguration config, ISyncSettings settings)
+    public async Task Process(ISyncSettings settings)
     {
         // Any compatibility failures will be thrown as exceptions
-        _compatibilityEnforcer.Check(config);
+        _compatibilityEnforcer.Check(_config);
 
         var didWork = false;
 
-        if (config.ReleaseProfiles.Count > 0)
+        if (_config.ReleaseProfiles.Count > 0)
         {
-            await _profileUpdater.Process(settings.Preview, config);
+            await _profileUpdater.Process(settings.Preview, _config);
             didWork = true;
         }
 
-        if (config.QualityDefinition != null)
+        if (_config.QualityDefinition != null)
         {
-            await _qualityUpdater.Process(settings.Preview, config.QualityDefinition, _guideService);
+            await _qualityUpdater.Process(settings.Preview, _config.QualityDefinition, _guideService);
             didWork = true;
         }
 
-        if (config.CustomFormats.Count > 0)
+        if (_config.CustomFormats.Count > 0)
         {
-            await _cfUpdater.Process(settings.Preview, config.CustomFormats, _guideService);
+            await _cfUpdater.Process(settings.Preview, _config.CustomFormats, _guideService);
             didWork = true;
         }
 

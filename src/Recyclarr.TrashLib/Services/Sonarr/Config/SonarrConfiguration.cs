@@ -6,7 +6,7 @@ namespace Recyclarr.TrashLib.Services.Sonarr.Config;
 
 public class SonarrConfiguration : ServiceConfiguration
 {
-    public override string ServiceName { get; } = SupportedServices.Sonarr.ToString();
+    public override SupportedServices ServiceType => SupportedServices.Sonarr;
 
     public IList<ReleaseProfileConfig> ReleaseProfiles { get; [UsedImplicitly] init; } =
         Array.Empty<ReleaseProfileConfig>();

@@ -14,7 +14,6 @@ internal class ServiceConfigurationValidator : AbstractValidator<ServiceConfigur
         IValidator<RadarrConfiguration> radarrValidator)
     {
         RuleFor(x => x.InstanceName).NotEmpty();
-        RuleFor(x => x.ServiceName).NotEmpty();
         RuleFor(x => x.LineNumber).NotEqual(0);
         RuleFor(x => x.BaseUrl).Must(x => x.Scheme is "http" or "https")
             .WithMessage("Property 'base_url' is required and must be a valid URL");

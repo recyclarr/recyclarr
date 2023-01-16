@@ -6,7 +6,7 @@ namespace Recyclarr.TrashLib.Config.Services;
 public abstract class ServiceConfiguration : IServiceConfiguration
 {
     [YamlIgnore]
-    public abstract string ServiceName { get; }
+    public abstract SupportedServices ServiceType { get; }
 
     // Name is set dynamically by ConfigurationLoader
     [YamlIgnore]

@@ -6,8 +6,6 @@ using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Processors;
@@ -37,7 +35,7 @@ public class SyncProcessor : ISyncProcessor
 
     public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
     {
-        var failureDetected = false;
+        bool failureDetected;
         try
         {
             var configs = _configLoader.LoadMany(_configFinder.GetConfigFiles(settings.Configs));
@@ -48,17 +46,7 @@ public class SyncProcessor : ISyncProcessor
                 _log.Warning("These instances do not exist: {Instances}", invalidInstances);
             }
 
-            if (settings.Service is null or SupportedServices.Radarr)
-            {
-                failureDetected |=
-                    await ProcessService<RadarrConfiguration>(SupportedServices.Radarr, settings, configs);
-            }
-
-            if (settings.Service is null or SupportedServices.Sonarr)
-            {
-                failureDetected |=
-                    await ProcessService<SonarrConfiguration>(SupportedServices.Sonarr, settings, configs);
-            }
+            failureDetected = await ProcessService(settings.Service, settings, configs);
         }
         catch (Exception e)
         {
@@ -69,11 +57,10 @@ public class SyncProcessor : ISyncProcessor
         return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 
-    private async Task<bool> ProcessService<TConfig>(
-        SupportedServices service, ISyncSettings settings, IConfigRegistry configs)
-        where TConfig : ServiceConfiguration
+    private async Task<bool> ProcessService(
+        SupportedServices? serviceType, ISyncSettings settings, IConfigRegistry configs)
     {
-        var serviceConfigs = configs.GetConfigsOfType<TConfig>(service);
+        var serviceConfigs = configs.GetConfigsOfType(serviceType);
 
         // If any config names are null, that means user specified array-style (deprecated) instances.
         if (serviceConfigs.Any(x => x.InstanceName is null))
@@ -98,9 +85,9 @@ public class SyncProcessor : ISyncProcessor
                     continue;
                 }
 
-                PrintProcessingHeader(service.ToString(), config);
-                using var processor = _factory.CreateProcessor<TConfig>(config);
-                await processor.Value.Process(config, settings);
+                PrintProcessingHeader(config.ServiceType, config);
+                using var processor = _factory.CreateProcessor(config.ServiceType, config);
+                await processor.Value.Process(settings);
             }
             catch (Exception e)
             {
@@ -131,16 +118,16 @@ public class SyncProcessor : ISyncProcessor
         }
     }
 
-    private void PrintProcessingHeader(string serverName, ServiceConfiguration config)
+    private void PrintProcessingHeader(SupportedServices serviceType, IServiceConfiguration config)
     {
         var instanceName = config.InstanceName ?? FlurlLogging.SanitizeUrl(config.BaseUrl);
 
         _console.WriteLine($@"
 ===========================================
-Processing {serverName} Server: [{instanceName}]
+Processing {serviceType} Server: [{instanceName}]
 ===========================================
 ");
 
-        _log.Debug("Processing {Server} server {Name}", serverName, instanceName);
+        _log.Debug("Processing {Server} server {Name}", serviceType, instanceName);
     }
 }

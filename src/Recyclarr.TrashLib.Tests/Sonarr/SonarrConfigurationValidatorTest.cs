@@ -18,7 +18,7 @@ public class SonarrConfigurationValidatorTest : IntegrationFixture
         var validator = Resolve<SonarrConfigurationValidator>();
         var result = validator.TestValidate(config);
 
-        result.ShouldNotHaveValidationErrorFor(x => x.ServiceName);
+        result.ShouldNotHaveValidationErrorFor(x => x.ServiceType);
     }
 
     [Test]

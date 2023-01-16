@@ -14,7 +14,6 @@ using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Yaml;
-using Recyclarr.TrashLib.Services.Radarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.TestLibrary;
 
@@ -81,10 +80,10 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var loader = Resolve<IConfigurationLoader>();
         var actual = loader.LoadMany(fileData.Select(x => x.Item1));
 
-        actual.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
+        actual.GetConfigsOfType(SupportedServices.Sonarr)
             .Should().BeEquivalentTo(expectedSonarr);
 
-        actual.GetConfigsOfType<RadarrConfiguration>(SupportedServices.Radarr)
+        actual.GetConfigsOfType(SupportedServices.Radarr)
             .Should().BeEquivalentTo(expectedRadarr);
     }
 
@@ -94,7 +93,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var configLoader = Resolve<ConfigurationLoader>();
         var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
-        configs.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
+        configs.GetConfigsOfType(SupportedServices.Sonarr)
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
                 new()

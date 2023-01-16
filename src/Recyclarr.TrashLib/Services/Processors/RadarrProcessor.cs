@@ -5,38 +5,41 @@ using Recyclarr.TrashLib.Services.Radarr.Config;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 
-public class RadarrProcessor : IServiceProcessor<RadarrConfiguration>
+public class RadarrProcessor : IServiceProcessor
 {
     private readonly ILogger _log;
     private readonly ICustomFormatUpdater _cfUpdater;
     private readonly IQualitySizeUpdater _qualityUpdater;
     private readonly RadarrGuideService _guideService;
+    private readonly RadarrConfiguration _config;
 
     public RadarrProcessor(
         ILogger log,
         ICustomFormatUpdater cfUpdater,
         IQualitySizeUpdater qualityUpdater,
-        RadarrGuideService guideService)
+        RadarrGuideService guideService,
+        RadarrConfiguration config)
     {
         _log = log;
         _cfUpdater = cfUpdater;
         _qualityUpdater = qualityUpdater;
         _guideService = guideService;
+        _config = config;
     }
 
-    public async Task Process(RadarrConfiguration config, ISyncSettings settings)
+    public async Task Process(ISyncSettings settings)
     {
         var didWork = false;
 
-        if (config.QualityDefinition != null)
+        if (_config.QualityDefinition != null)
         {
-            await _qualityUpdater.Process(settings.Preview, config.QualityDefinition, _guideService);
+            await _qualityUpdater.Process(settings.Preview, _config.QualityDefinition, _guideService);
             didWork = true;
         }
 
-        if (config.CustomFormats.Count > 0)
+        if (_config.CustomFormats.Count > 0)
         {
-            await _cfUpdater.Process(settings.Preview, config.CustomFormats, _guideService);
+            await _cfUpdater.Process(settings.Preview, _config.CustomFormats, _guideService);
             didWork = true;
         }
 
