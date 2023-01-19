@@ -1,8 +1,9 @@
 using AutoFixture.NUnit3;
 using FluentAssertions;
+using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib.Services.Common;
+using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 
@@ -15,7 +16,8 @@ public class GuideDataListerTest
     [Test, AutoMockData]
     public void Custom_formats_appear_in_console_output(
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
-        GuideDataLister sut)
+        [Frozen] ICustomFormatGuideService guide,
+        CustomFormatDataLister sut)
     {
         var testData = new[]
         {
@@ -23,7 +25,9 @@ public class GuideDataListerTest
             NewCf.Data("Second", "456")
         };
 
-        sut.ListCustomFormats(testData);
+        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
+
+        sut.ListCustomFormats(default!);
 
         console.Output.Should().ContainAll(
             testData.SelectMany(x => new[] {x.Name, x.TrashId}));

@@ -1,11 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using Autofac.Features.Indexed;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.Common;
+using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765
@@ -16,8 +15,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List custom formats in the guide for a particular service.")]
 internal class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
-    private readonly IGuideDataLister _lister;
-    private readonly IIndex<SupportedServices, IGuideService> _guideService;
+    private readonly CustomFormatDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
@@ -31,20 +29,17 @@ internal class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.
     }
 
     public ListCustomFormatsCommand(
-        IGuideDataLister lister,
-        IIndex<SupportedServices, IGuideService> guideService,
+        CustomFormatDataLister lister,
         IRepoUpdater repoUpdater)
     {
         _lister = lister;
-        _guideService = guideService;
         _repoUpdater = repoUpdater;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         await _repoUpdater.UpdateRepo();
-        var guideService = _guideService[settings.Service];
-        _lister.ListCustomFormats(guideService.GetCustomFormatData());
+        _lister.ListCustomFormats(settings.Service);
         return 0;
     }
 }

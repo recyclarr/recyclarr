@@ -1,5 +1,5 @@
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 
@@ -15,6 +15,8 @@ internal interface IGuideProcessor
     IReadOnlyCollection<TrashIdMapping> DeletedCustomFormatsInCache { get; }
     IReadOnlyDictionary<string, Dictionary<string, HashSet<int>>> DuplicateScores { get; }
 
-    Task BuildGuideDataAsync(IEnumerable<CustomFormatConfig> config, CustomFormatCache? cache,
-        IGuideService guideService);
+    Task BuildGuideDataAsync(
+        IEnumerable<CustomFormatConfig> config,
+        CustomFormatCache? cache,
+        SupportedServices serviceType);
 }

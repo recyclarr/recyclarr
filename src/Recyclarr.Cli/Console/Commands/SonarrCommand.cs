@@ -6,8 +6,10 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Recyclarr.TrashLib.Services.Processors;
-using Recyclarr.TrashLib.Services.Sonarr;
+using Recyclarr.TrashLib.Services.QualitySize.Guide;
+using Recyclarr.TrashLib.Services.ReleaseProfile.Guide;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -17,7 +19,9 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
 {
     private readonly ILogger _log;
-    private readonly ISonarrGuideDataLister _lister;
+    private readonly CustomFormatDataLister _cfLister;
+    private readonly QualitySizeDataLister _qualityLister;
+    private readonly ReleaseProfileDataLister _rpLister;
     private readonly IMigrationExecutor _migration;
     private readonly IRepoUpdater _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
@@ -70,13 +74,17 @@ internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
 
     public SonarrCommand(
         ILogger log,
-        ISonarrGuideDataLister lister,
+        CustomFormatDataLister cfLister,
+        QualitySizeDataLister qualityLister,
+        ReleaseProfileDataLister rpLister,
         IMigrationExecutor migration,
         IRepoUpdater repoUpdater,
         ISyncProcessor syncProcessor)
     {
         _log = log;
-        _lister = lister;
+        _cfLister = cfLister;
+        _qualityLister = qualityLister;
+        _rpLister = rpLister;
         _migration = migration;
         _repoUpdater = repoUpdater;
         _syncProcessor = syncProcessor;
@@ -91,27 +99,27 @@ internal class SonarrCommand : AsyncCommand<SonarrCommand.CliSettings>
         if (settings.ListCustomFormats)
         {
             _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list custom-formats sonarr` instead!");
-            _lister.ListCustomFormats();
+            _cfLister.ListCustomFormats(SupportedServices.Sonarr);
             return 0;
         }
 
         if (settings.ListQualities)
         {
             _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list qualities sonarr` instead!");
-            _lister.ListQualities();
+            _qualityLister.ListQualities(SupportedServices.Sonarr);
             return 0;
         }
 
         if (settings.ListReleaseProfiles)
         {
             _log.Warning("The `sonarr` subcommand is DEPRECATED -- Use `list release-profiles` instead!");
-            _lister.ListReleaseProfiles();
+            _rpLister.ListReleaseProfiles();
             return 0;
         }
 
         if (settings.ListTerms is not null)
         {
-            _lister.ListTerms(settings.ListTerms);
+            _rpLister.ListTerms(settings.ListTerms);
             return 0;
         }
 

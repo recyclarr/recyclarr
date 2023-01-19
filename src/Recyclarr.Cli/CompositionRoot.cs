@@ -14,10 +14,11 @@ using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat;
 using Recyclarr.TrashLib.Services.Processors;
+using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.Radarr;
+using Recyclarr.TrashLib.Services.ReleaseProfile;
 using Recyclarr.TrashLib.Services.Sonarr;
 using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
@@ -38,11 +39,12 @@ public static class CompositionRoot
 
         builder.RegisterModule<SonarrAutofacModule>();
         builder.RegisterModule<RadarrAutofacModule>();
+        builder.RegisterModule<QualitySizeAutofacModule>();
+        builder.RegisterModule<CustomFormatAutofacModule>();
+        builder.RegisterModule<ReleaseProfileAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
-        builder.RegisterModule<CustomFormatAutofacModule>();
-        builder.RegisterModule<GuideServicesAutofacModule>();
         builder.RegisterModule<SystemServiceAutofacModule>();
         builder.RegisterModule(new ConfigAutofacModule(assemblies));
         builder.RegisterModule<ServiceProcessorsAutofacModule>();

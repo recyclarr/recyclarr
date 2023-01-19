@@ -10,7 +10,6 @@ using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.GuideSteps;
-using Recyclarr.TrashLib.Services.Radarr;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.CustomFormat.Processors;
@@ -57,11 +56,11 @@ public class GuideProcessorTest
     public async Task Guide_processor_behaves_as_expected_with_normal_guide_data()
     {
         var ctx = new Context();
-        var guideService = Substitute.For<RadarrGuideService>();
-        var guideProcessor = new GuideProcessor(new TestGuideProcessorSteps());
+        var guideService = Substitute.For<ICustomFormatGuideService>();
+        var guideProcessor = new GuideProcessor(new TestGuideProcessorSteps(), guideService);
 
         // simulate guide data
-        guideService.GetCustomFormatData().Returns(new[]
+        guideService.GetCustomFormatData(default!).ReturnsForAnyArgs(new[]
         {
             ctx.ReadCustomFormat("ImportableCustomFormat1.json"),
             ctx.ReadCustomFormat("ImportableCustomFormat2.json"),
@@ -102,7 +101,7 @@ public class GuideProcessorTest
             }
         };
 
-        await guideProcessor.BuildGuideDataAsync(config, null, guideService);
+        await guideProcessor.BuildGuideDataAsync(config, null, default!);
 
         var expectedProcessedCustomFormatData = new List<ProcessedCustomFormatData>
         {

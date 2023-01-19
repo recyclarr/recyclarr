@@ -1,21 +1,25 @@
 namespace Recyclarr.TrashLib.Repo;
 
-public record RadarrMetadata(
-    IReadOnlyCollection<string> CustomFormats,
-    IReadOnlyCollection<string> Qualities
-);
+public record RadarrMetadata
+{
+    public IReadOnlyCollection<string> CustomFormats { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> Qualities { get; init; } = Array.Empty<string>();
+}
 
-public record SonarrMetadata(
-    IReadOnlyCollection<string> ReleaseProfiles,
-    IReadOnlyCollection<string> Qualities,
-    IReadOnlyCollection<string> CustomFormats
-);
+public record SonarrMetadata
+{
+    public IReadOnlyCollection<string> ReleaseProfiles { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> Qualities { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> CustomFormats { get; init; } = Array.Empty<string>();
+}
 
-public record JsonPaths(
-    RadarrMetadata Radarr,
-    SonarrMetadata Sonarr
-);
+public record JsonPaths
+{
+    public RadarrMetadata Radarr { get; init; } = new();
+    public SonarrMetadata Sonarr { get; init; } = new();
+}
 
-public record RepoMetadata(
-    JsonPaths JsonPaths
-);
+public record RepoMetadata
+{
+    public JsonPaths JsonPaths { get; init; } = new();
+}

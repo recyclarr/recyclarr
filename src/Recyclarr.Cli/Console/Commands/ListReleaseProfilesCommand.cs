@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.Sonarr;
+using Recyclarr.TrashLib.Services.ReleaseProfile.Guide;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765
@@ -14,7 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesCommand.CliSettings>
 {
     private readonly ILogger _log;
-    private readonly ISonarrGuideDataLister _lister;
+    private readonly ReleaseProfileDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
@@ -31,7 +31,7 @@ internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesComm
 
     public ListReleaseProfilesCommand(
         ILogger log,
-        ISonarrGuideDataLister lister,
+        ReleaseProfileDataLister lister,
         IRepoUpdater repoUpdater)
     {
         _log = log;

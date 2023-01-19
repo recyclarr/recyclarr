@@ -1,7 +1,8 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.QualitySize.Api;
+using Recyclarr.TrashLib.Services.QualitySize.Guide;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.QualitySize;
@@ -11,21 +12,24 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
     private readonly ILogger _log;
     private readonly IQualityDefinitionService _api;
     private readonly IAnsiConsole _console;
+    private readonly IQualityGuideService _guide;
 
     public QualitySizeUpdater(
         ILogger logger,
         IQualityDefinitionService api,
-        IAnsiConsole console)
+        IAnsiConsole console,
+        IQualityGuideService guide)
     {
         _log = logger;
         _api = api;
         _console = console;
+        _guide = guide;
     }
 
-    public async Task Process(bool isPreview, QualityDefinitionConfig config, IGuideService guideService)
+    public async Task Process(bool isPreview, QualityDefinitionConfig config, SupportedServices serviceType)
     {
         _log.Information("Processing Quality Definition: {QualityDefinition}", config.Type);
-        var qualityDefinitions = guideService.GetQualities();
+        var qualityDefinitions = _guide.GetQualitySizeData(serviceType);
         var qualityTypeInConfig = config.Type;
 
         var selectedQuality = qualityDefinitions

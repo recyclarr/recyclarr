@@ -1,6 +1,6 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 using Spectre.Console;
@@ -29,11 +29,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         _console = console;
     }
 
-    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, IGuideService guideService)
+    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, SupportedServices serviceType)
     {
         _cache.Load();
 
-        await _guideProcessor.BuildGuideDataAsync(configs, _cache.CfCache, guideService);
+        await _guideProcessor.BuildGuideDataAsync(configs, _cache.CfCache, serviceType);
 
         if (!ValidateGuideDataAndCheckShouldProceed())
         {

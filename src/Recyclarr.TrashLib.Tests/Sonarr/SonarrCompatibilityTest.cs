@@ -7,8 +7,8 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TestLibrary;
-using Recyclarr.TrashLib.Services.Sonarr.Api;
-using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
+using Recyclarr.TrashLib.Services.ReleaseProfile.Api;
+using Recyclarr.TrashLib.Services.ReleaseProfile.Api.Objects;
 using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
