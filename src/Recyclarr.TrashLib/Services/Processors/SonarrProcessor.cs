@@ -1,4 +1,3 @@
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Services.CustomFormat;
 using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.ReleaseProfile;
@@ -35,7 +34,7 @@ public class SonarrProcessor : IServiceProcessor
     public async Task Process(ISyncSettings settings)
     {
         // Any compatibility failures will be thrown as exceptions
-        _compatibilityEnforcer.Check(_config);
+        await _compatibilityEnforcer.Check(_config);
 
         var didWork = false;
 
@@ -47,13 +46,13 @@ public class SonarrProcessor : IServiceProcessor
 
         if (_config.QualityDefinition != null)
         {
-            await _qualityUpdater.Process(settings.Preview, _config.QualityDefinition, SupportedServices.Sonarr);
+            await _qualityUpdater.Process(settings.Preview, _config);
             didWork = true;
         }
 
         if (_config.CustomFormats.Count > 0)
         {
-            await _cfUpdater.Process(settings.Preview, _config.CustomFormats, SupportedServices.Sonarr);
+            await _cfUpdater.Process(settings.Preview, _config);
             didWork = true;
         }
 

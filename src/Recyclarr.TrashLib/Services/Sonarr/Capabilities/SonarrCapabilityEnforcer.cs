@@ -13,9 +13,9 @@ public class SonarrCapabilityEnforcer
         _capabilityChecker = capabilityChecker;
     }
 
-    public void Check(SonarrConfiguration config)
+    public async Task Check(SonarrConfiguration config)
     {
-        var capabilities = _capabilityChecker.GetCapabilities();
+        var capabilities = await _capabilityChecker.GetCapabilities(config);
         if (capabilities is null)
         {
             throw new ServiceIncompatibilityException("Capabilities could not be obtained");

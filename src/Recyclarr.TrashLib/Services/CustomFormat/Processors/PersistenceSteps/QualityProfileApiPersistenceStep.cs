@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Api;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 
@@ -7,16 +8,23 @@ namespace Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 
 internal class QualityProfileApiPersistenceStep : IQualityProfileApiPersistenceStep
 {
+    private readonly IQualityProfileService _api;
     private readonly List<string> _invalidProfileNames = new();
     private readonly Dictionary<string, List<UpdatedFormatScore>> _updatedScores = new();
 
     public IDictionary<string, List<UpdatedFormatScore>> UpdatedScores => _updatedScores;
     public IReadOnlyCollection<string> InvalidProfileNames => _invalidProfileNames;
 
-    public async Task Process(IQualityProfileService api,
+    public QualityProfileApiPersistenceStep(IQualityProfileService api)
+    {
+        _api = api;
+    }
+
+    public async Task Process(
+        IServiceConfiguration config,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> cfScores)
     {
-        var serviceProfiles = await api.GetQualityProfiles();
+        var serviceProfiles = await _api.GetQualityProfiles(config);
 
         // Match quality profiles in Radarr to ones the user put in their config.
         // For each match, we return a tuple including the list of custom format scores ("formatItems").
@@ -71,7 +79,7 @@ internal class QualityProfileApiPersistenceStep : IQualityProfileApiPersistenceS
             }
 
             var jsonRoot = (JObject) formatItems.First().Root;
-            await api.UpdateQualityProfile(jsonRoot, jsonRoot.Value<int>("id"));
+            await _api.UpdateQualityProfile(config, jsonRoot, jsonRoot.Value<int>("id"));
         }
     }
 

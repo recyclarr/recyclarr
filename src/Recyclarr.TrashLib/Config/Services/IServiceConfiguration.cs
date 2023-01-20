@@ -7,4 +7,6 @@ public interface IServiceConfiguration
     Uri BaseUrl { get; }
     string ApiKey { get; }
     bool DeleteOldCustomFormats { get; }
+    ICollection<CustomFormatConfig> CustomFormats { get; init; }
+    QualityDefinitionConfig? QualityDefinition { get; init; }
 }

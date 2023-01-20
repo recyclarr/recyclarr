@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.TestLibrary.NSubstitute;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Api;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
@@ -41,7 +42,8 @@ public class QualityProfileApiPersistenceStepTest
 }]";
 
         var api = Substitute.For<IQualityProfileService>();
-        api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+        api.GetQualityProfiles(default!)!.ReturnsForAnyArgs(
+            JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
@@ -50,10 +52,10 @@ public class QualityProfileApiPersistenceStepTest
             }
         };
 
-        var processor = new QualityProfileApiPersistenceStep();
-        await processor.Process(api, cfScores);
+        var processor = new QualityProfileApiPersistenceStep(api);
+        await processor.Process(Substitute.For<IServiceConfiguration>(), cfScores);
 
-        await api.DidNotReceive().UpdateQualityProfile(Arg.Any<JObject>(), Arg.Any<int>());
+        await api.DidNotReceiveWithAnyArgs().UpdateQualityProfile(default!, default!, default!);
     }
 
     [Test]
@@ -62,15 +64,16 @@ public class QualityProfileApiPersistenceStepTest
         const string radarrQualityProfileData = @"[{'name': 'profile1'}]";
 
         var api = Substitute.For<IQualityProfileService>();
-        api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+        api.GetQualityProfiles(default!)!.ReturnsForAnyArgs(
+            JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
             {"wrong_profile_name", CfTestUtils.NewMapping()}
         };
 
-        var processor = new QualityProfileApiPersistenceStep();
-        await processor.Process(api, cfScores);
+        var processor = new QualityProfileApiPersistenceStep(api);
+        await processor.Process(Substitute.For<IServiceConfiguration>(), cfScores);
 
         processor.InvalidProfileNames.Should().Equal("wrong_profile_name");
         processor.UpdatedScores.Should().BeEmpty();
@@ -101,7 +104,8 @@ public class QualityProfileApiPersistenceStepTest
 }]";
 
         var api = Substitute.For<IQualityProfileService>();
-        api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+        api.GetQualityProfiles(default!)!.ReturnsForAnyArgs(
+            JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
@@ -111,8 +115,8 @@ public class QualityProfileApiPersistenceStepTest
             }
         };
 
-        var processor = new QualityProfileApiPersistenceStep();
-        await processor.Process(api, cfScores);
+        var processor = new QualityProfileApiPersistenceStep(api);
+        await processor.Process(Substitute.For<IServiceConfiguration>(), cfScores);
 
         processor.InvalidProfileNames.Should().BeEmpty();
         processor.UpdatedScores.Should()
@@ -125,6 +129,7 @@ public class QualityProfileApiPersistenceStepTest
             });
 
         await api.Received().UpdateQualityProfile(
+            Arg.Any<IServiceConfiguration>(),
             Verify.That<JObject>(j => j["formatItems"]!.Children().Should().HaveCount(3)),
             Arg.Any<int>());
     }
@@ -174,7 +179,8 @@ public class QualityProfileApiPersistenceStepTest
 }]";
 
         var api = Substitute.For<IQualityProfileService>();
-        api.GetQualityProfiles()!.Returns(JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
+        api.GetQualityProfiles(default!)!.ReturnsForAnyArgs(
+            JsonConvert.DeserializeObject<List<JObject>>(radarrQualityProfileData));
 
         var cfScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>
         {
@@ -189,8 +195,9 @@ public class QualityProfileApiPersistenceStepTest
             }
         };
 
-        var processor = new QualityProfileApiPersistenceStep();
-        await processor.Process(api, cfScores);
+        var processor = new QualityProfileApiPersistenceStep(api);
+        var config = Substitute.For<IServiceConfiguration>();
+        await processor.Process(config, cfScores);
 
         var expectedProfileJson = JObject.Parse(@"{
   'name': 'profile1',
@@ -234,7 +241,10 @@ public class QualityProfileApiPersistenceStepTest
 }");
 
         await api.Received()
-            .UpdateQualityProfile(Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)), 1);
+            .UpdateQualityProfile(
+                config,
+                Verify.That<JObject>(a => a.Should().BeEquivalentTo(expectedProfileJson)),
+                1);
         processor.InvalidProfileNames.Should().BeEmpty();
         processor.UpdatedScores.Should()
             .ContainKey("profile1").WhoseValue.Should()

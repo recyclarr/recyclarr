@@ -6,6 +6,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Cache;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 
 namespace Recyclarr.TrashLib.Tests.Cache;
@@ -34,9 +35,10 @@ public class ServiceCacheTest
     [Test, AutoMockData]
     public void Load_returns_null_when_file_does_not_exist(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
-        var result = sut.Load<ObjectWithAttribute>();
+        var result = sut.Load<ObjectWithAttribute>(config);
         result.Should().BeNull();
     }
 
@@ -44,6 +46,7 @@ public class ServiceCacheTest
     public void Loading_with_attribute_parses_correctly(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
         const string testJson = @"{'test_value': 'Foo'}";
@@ -51,18 +54,20 @@ public class ServiceCacheTest
         const string testJsonPath = "cacheFile.json";
         fs.AddFile(testJsonPath, new MockFileData(testJson));
 
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
 
-        var obj = sut.Load<ObjectWithAttribute>();
+        var obj = sut.Load<ObjectWithAttribute>(config);
 
         obj.Should().NotBeNull();
         obj!.TestValue.Should().Be("Foo");
     }
 
     [Test, AutoMockData]
-    public void Loading_with_invalid_object_name_throws(ServiceCache sut)
+    public void Loading_with_invalid_object_name_throws(
+        IServiceConfiguration config,
+        ServiceCache sut)
     {
-        Action act = () => sut.Load<ObjectWithAttributeInvalidChars>();
+        Action act = () => sut.Load<ObjectWithAttributeInvalidChars>(config);
 
         act.Should()
             .Throw<ArgumentException>()
@@ -70,9 +75,11 @@ public class ServiceCacheTest
     }
 
     [Test, AutoMockData]
-    public void Loading_without_attribute_throws(ServiceCache sut)
+    public void Loading_without_attribute_throws(
+        IServiceConfiguration config,
+        ServiceCache sut)
     {
-        Action act = () => sut.Load<ObjectWithoutAttribute>();
+        Action act = () => sut.Load<ObjectWithoutAttribute>(config);
 
         act.Should()
             .Throw<ArgumentException>()
@@ -83,15 +90,17 @@ public class ServiceCacheTest
     public void Properties_are_saved_using_snake_case(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(_ => fs.FileInfo.New($"{ValidObjectName}.json"));
+        storage.CalculatePath(default!, default!)
+            .ReturnsForAnyArgs(_ => fs.FileInfo.New($"{ValidObjectName}.json"));
 
-        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"}, config);
 
         fs.AllFiles.Should().ContainMatch($"*{ValidObjectName}.json");
 
-        var file = fs.GetFile(storage.CalculatePath("").FullName);
+        var file = fs.GetFile(storage.CalculatePath(config, "").FullName);
         file.Should().NotBeNull();
         file.TextContents.Should().Contain("\"test_value\"");
     }
@@ -100,12 +109,13 @@ public class ServiceCacheTest
     public void Saving_with_attribute_parses_correctly(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
         const string testJsonPath = "cacheFile.json";
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New(testJsonPath));
 
-        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"}, config);
 
         var expectedFile = fs.GetFile(testJsonPath);
         expectedFile.Should().NotBeNull();
@@ -115,9 +125,11 @@ public class ServiceCacheTest
     }
 
     [Test, AutoMockData]
-    public void Saving_with_invalid_object_name_throws(ServiceCache sut)
+    public void Saving_with_invalid_object_name_throws(
+        IServiceConfiguration config,
+        ServiceCache sut)
     {
-        var act = () => sut.Save(new ObjectWithAttributeInvalidChars());
+        var act = () => sut.Save(new ObjectWithAttributeInvalidChars(), config);
 
         act.Should()
             .Throw<ArgumentException>()
@@ -125,9 +137,11 @@ public class ServiceCacheTest
     }
 
     [Test, AutoMockData]
-    public void Saving_without_attribute_throws(ServiceCache sut)
+    public void Saving_without_attribute_throws(
+        IServiceConfiguration config,
+        ServiceCache sut)
     {
-        var act = () => sut.Save(new ObjectWithoutAttribute());
+        var act = () => sut.Save(new ObjectWithoutAttribute(), config);
 
         act.Should()
             .Throw<ArgumentException>()
@@ -138,13 +152,14 @@ public class ServiceCacheTest
     public void Switching_config_and_base_url_should_yield_different_cache_paths(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("Foo.json"));
-        sut.Save(new ObjectWithAttribute {TestValue = "Foo"});
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("Foo.json"));
+        sut.Save(new ObjectWithAttribute {TestValue = "Foo"}, config);
 
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("Bar.json"));
-        sut.Save(new ObjectWithAttribute {TestValue = "Bar"});
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("Bar.json"));
+        sut.Save(new ObjectWithAttribute {TestValue = "Bar"}, config);
 
         var expectedFiles = new[] {"*Foo.json", "*Bar.json"};
         foreach (var expectedFile in expectedFiles)
@@ -157,12 +172,13 @@ public class ServiceCacheTest
     public void When_cache_file_is_empty_do_not_throw(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
         fs.AddFile("cacheFile.json", new MockFileData(""));
 
-        Action act = () => sut.Load<ObjectWithAttribute>();
+        Action act = () => sut.Load<ObjectWithAttribute>(config);
 
         act.Should().NotThrow();
     }
@@ -171,6 +187,7 @@ public class ServiceCacheTest
     public void Name_properties_are_set_on_load(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
+        IServiceConfiguration config,
         ServiceCache sut)
     {
         const string cacheJson = @"
@@ -187,9 +204,9 @@ public class ServiceCacheTest
 ";
 
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
-        storage.CalculatePath(default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
+        storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
 
-        var result = sut.Load<CustomFormatCache>();
+        var result = sut.Load<CustomFormatCache>(config);
 
         result.Should().BeEquivalentTo(new CustomFormatCache
         {

@@ -6,7 +6,6 @@ public class RadarrAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<RadarrCapabilityChecker>().As<IRadarrCapabilityChecker>()
-            .InstancePerLifetimeScope();
+        builder.RegisterType<RadarrCapabilityChecker>().InstancePerLifetimeScope();
     }
 }

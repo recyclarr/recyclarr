@@ -1,4 +1,5 @@
 using Flurl.Http;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.System.Dto;
 
@@ -13,9 +14,9 @@ public class SystemApiService : ISystemApiService
         _service = service;
     }
 
-    public async Task<SystemStatus> GetStatus()
+    public async Task<SystemStatus> GetStatus(IServiceConfiguration config)
     {
-        return await _service.Request("system", "status")
+        return await _service.Request(config, "system", "status")
             .GetJsonAsync<SystemStatus>();
     }
 }

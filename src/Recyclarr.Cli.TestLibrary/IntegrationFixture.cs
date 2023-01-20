@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using System.IO.Abstractions.TestingHelpers;
-using System.Reactive.Linq;
 using Autofac;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
@@ -10,7 +9,6 @@ using Recyclarr.Common;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
@@ -43,12 +41,11 @@ public abstract class IntegrationFixture : IDisposable
 
             builder.RegisterMockFor<IGitRepository>();
             builder.RegisterMockFor<IGitRepositoryFactory>();
-            builder.RegisterMockFor<IServiceConfiguration>();
             builder.RegisterMockFor<IEnvironment>();
             builder.RegisterMockFor<IServiceInformation>(m =>
             {
                 // By default, choose some extremely high number so that all the newest features are enabled.
-                m.Version.Returns(_ => Observable.Return(new Version("99.0.0.0")));
+                m.GetVersion(default!).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
             });
 
             RegisterExtraTypes(builder);

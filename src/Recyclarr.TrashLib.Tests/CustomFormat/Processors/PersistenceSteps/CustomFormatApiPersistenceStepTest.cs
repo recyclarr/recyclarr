@@ -1,5 +1,6 @@
 using NSubstitute;
 using NUnit.Framework;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Api;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
@@ -28,14 +29,15 @@ public class CustomFormatApiPersistenceStepTest
 
         var api = Substitute.For<ICustomFormatService>();
 
-        var processor = new CustomFormatApiPersistenceStep();
-        await processor.Process(api, transactions);
+        var processor = new CustomFormatApiPersistenceStep(api);
+        var config = Substitute.For<IServiceConfiguration>();
+        await processor.Process(config, transactions);
 
         Received.InOrder(() =>
         {
-            api.CreateCustomFormat(transactions.NewCustomFormats.First());
-            api.UpdateCustomFormat(transactions.UpdatedCustomFormats.First());
-            api.DeleteCustomFormat(4);
+            api.CreateCustomFormat(config, transactions.NewCustomFormats.First());
+            api.UpdateCustomFormat(config, transactions.UpdatedCustomFormats.First());
+            api.DeleteCustomFormat(config, 4);
         });
     }
 }

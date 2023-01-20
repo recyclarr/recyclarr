@@ -1,6 +1,8 @@
+using Recyclarr.TrashLib.Config.Services;
+
 namespace Recyclarr.TrashLib.Services.System;
 
 public interface IServiceInformation
 {
-    IObservable<Version?> Version { get; }
+    public Task<Version?> GetVersion(IServiceConfiguration config);
 }

@@ -1,3 +1,4 @@
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
@@ -10,7 +11,9 @@ public interface IPersistenceProcessor
     IReadOnlyCollection<string> InvalidProfileNames { get; }
     CustomFormatTransactionData Transactions { get; }
 
-    Task PersistCustomFormats(IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
+    Task PersistCustomFormats(
+        IServiceConfiguration config,
+        IReadOnlyCollection<ProcessedCustomFormatData> guideCfs,
         IEnumerable<TrashIdMapping> deletedCfsInCache,
         IDictionary<string, QualityProfileCustomFormatScoreMapping> profileScores);
 }

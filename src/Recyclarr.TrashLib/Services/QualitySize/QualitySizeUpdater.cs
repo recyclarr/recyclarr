@@ -1,5 +1,4 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.QualitySize.Api;
 using Recyclarr.TrashLib.Services.QualitySize.Guide;
@@ -26,40 +25,45 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
         _guide = guide;
     }
 
-    public async Task Process(bool isPreview, QualityDefinitionConfig config, SupportedServices serviceType)
+    public async Task Process(bool isPreview, IServiceConfiguration config)
     {
-        _log.Information("Processing Quality Definition: {QualityDefinition}", config.Type);
-        var qualityDefinitions = _guide.GetQualitySizeData(serviceType);
-        var qualityTypeInConfig = config.Type;
-
-        var selectedQuality = qualityDefinitions
-            .FirstOrDefault(x => x.Type.EqualsIgnoreCase(qualityTypeInConfig));
-
-        if (selectedQuality == null)
+        var qualityDef = config.QualityDefinition;
+        if (qualityDef is null)
         {
-            _log.Error("The specified quality definition type does not exist: {Type}", qualityTypeInConfig);
             return;
         }
 
-        if (config.PreferredRatio is not null)
+        var qualityDefinitions = _guide.GetQualitySizeData(config.ServiceType);
+        var selectedQuality = qualityDefinitions
+            .FirstOrDefault(x => x.Type.EqualsIgnoreCase(qualityDef.Type));
+
+        if (selectedQuality == null)
+        {
+            _log.Error("The specified quality definition type does not exist: {Type}", qualityDef.Type);
+            return;
+        }
+
+        _log.Information("Processing Quality Definition: {QualityDefinition}", qualityDef.Type);
+
+        if (qualityDef.PreferredRatio is not null)
         {
             _log.Information("Using an explicit preferred ratio which will override values from the guide");
 
             // Fix an out of range ratio and warn the user
-            if (config.PreferredRatio is < 0 or > 1)
+            if (qualityDef.PreferredRatio is < 0 or > 1)
             {
-                var clampedRatio = Math.Clamp(config.PreferredRatio.Value, 0, 1);
+                var clampedRatio = Math.Clamp(qualityDef.PreferredRatio.Value, 0, 1);
                 _log.Warning("Your `preferred_ratio` of {CurrentRatio} is out of range. " +
                     "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
-                    config.PreferredRatio, clampedRatio);
+                    qualityDef.PreferredRatio, clampedRatio);
 
-                config.PreferredRatio = clampedRatio;
+                qualityDef.PreferredRatio = clampedRatio;
             }
 
             // Apply a calculated preferred size
             foreach (var quality in selectedQuality.Qualities)
             {
-                quality.Preferred = quality.InterpolatedPreferred(config.PreferredRatio.Value);
+                quality.Preferred = quality.InterpolatedPreferred(qualityDef.PreferredRatio.Value);
             }
         }
 
@@ -69,7 +73,7 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
             return;
         }
 
-        await ProcessQualityDefinition(selectedQuality.Qualities);
+        await ProcessQualityDefinition(config, selectedQuality.Qualities);
     }
 
     private void PrintQualityPreview(IReadOnlyCollection<QualitySizeItem> qualitySizeItems)
@@ -98,9 +102,11 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
             a.PreferredSize is not null && b.IsPreferredDifferent(a.PreferredSize);
     }
 
-    private async Task ProcessQualityDefinition(IReadOnlyCollection<QualitySizeItem> guideQuality)
+    private async Task ProcessQualityDefinition(
+        IServiceConfiguration config,
+        IReadOnlyCollection<QualitySizeItem> guideQuality)
     {
-        var serverQuality = await _api.GetQualityDefinition();
+        var serverQuality = await _api.GetQualityDefinition(config);
 
         var newQuality = new List<ServiceQualityDefinitionItem>();
         foreach (var qualityData in guideQuality)
@@ -129,7 +135,7 @@ internal class QualitySizeUpdater : IQualitySizeUpdater
                 serverEntry.PreferredSize);
         }
 
-        await _api.UpdateQualityDefinition(newQuality);
+        await _api.UpdateQualityDefinition(config, newQuality);
         _log.Information("Number of updated qualities: {Count}", newQuality.Count);
     }
 }

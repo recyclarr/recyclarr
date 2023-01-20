@@ -3,6 +3,7 @@ using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.TrashLib.Cache;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
@@ -33,14 +34,15 @@ public class CachePersisterTest
     public void Set_loaded_cache_to_null_if_versions_mismatch(int versionToTest)
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         var testCfObj = new CustomFormatCache
         {
             Version = versionToTest,
             TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
-        ctx.Persister.Load();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+        ctx.Persister.Load(config);
         ctx.Persister.CfCache.Should().BeNull();
     }
 
@@ -48,14 +50,15 @@ public class CachePersisterTest
     public void Accept_loaded_cache_when_versions_match()
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         var testCfObj = new CustomFormatCache
         {
             Version = CustomFormatCache.LatestVersion,
             TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
-        ctx.Persister.Load();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+        ctx.Persister.Load(config);
         ctx.Persister.CfCache.Should().NotBeNull();
     }
 
@@ -64,9 +67,10 @@ public class CachePersisterTest
     {
         var ctx = new Context();
         var testCfObj = new CustomFormatCache();
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+        var config = Substitute.For<IServiceConfiguration>();
 
-        ctx.Persister.Load();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+        ctx.Persister.Load(config);
         ctx.Persister.CfCache.Should().BeSameAs(testCfObj);
     }
 
@@ -74,7 +78,9 @@ public class CachePersisterTest
     public void Cf_cache_returns_null_if_not_loaded()
     {
         var ctx = new Context();
-        ctx.Persister.Load();
+        var config = Substitute.For<IServiceConfiguration>();
+
+        ctx.Persister.Load(config);
         ctx.Persister.CfCache.Should().BeNull();
     }
 
@@ -83,33 +89,39 @@ public class CachePersisterTest
     {
         var ctx = new Context();
         var testCfObj = new CustomFormatCache();
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+        var config = Substitute.For<IServiceConfiguration>();
 
-        ctx.Persister.Load();
-        ctx.Persister.Save();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
 
-        ctx.ServiceCache.Received().Save(Arg.Is(testCfObj));
+        ctx.Persister.Load(config);
+        ctx.Persister.Save(config);
+
+        ctx.ServiceCache.Received().Save(testCfObj, config);
     }
 
     [Test]
     public void Saving_without_loading_does_nothing()
     {
         var ctx = new Context();
-        ctx.Persister.Save();
-        ctx.ServiceCache.DidNotReceive().Save(Arg.Any<object>());
+        var config = Substitute.For<IServiceConfiguration>();
+
+        ctx.Persister.Save(config);
+        ctx.ServiceCache.DidNotReceiveWithAnyArgs().Save(Arg.Any<object>(), default!);
     }
 
     [Test]
     public void Updating_overwrites_previous_cf_cache_and_updates_cf_data()
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         // Load initial CfCache just to test that it gets replaced
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(new CustomFormatCache
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(new CustomFormatCache
         {
             TrashIdMappings = new Collection<TrashIdMapping> {new("trashid", "", 1)}
         });
-        ctx.Persister.Load();
+
+        ctx.Persister.Load(config);
 
         // Update with new cached items
         var customFormatData = new List<ProcessedCustomFormatData>

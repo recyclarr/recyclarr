@@ -3,7 +3,7 @@ using Recyclarr.TrashLib.Services.System;
 
 namespace Recyclarr.TrashLib.Services.Radarr;
 
-public class RadarrCapabilityChecker : ServiceCapabilityChecker<RadarrCapabilities>, IRadarrCapabilityChecker
+public class RadarrCapabilityChecker : ServiceCapabilityChecker<RadarrCapabilities>
 {
     public RadarrCapabilityChecker(IServiceInformation info)
         : base(info)

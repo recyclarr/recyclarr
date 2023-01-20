@@ -1,5 +1,4 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
@@ -29,11 +28,11 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         _console = console;
     }
 
-    public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, SupportedServices serviceType)
+    public async Task Process(bool isPreview, IServiceConfiguration config)
     {
-        _cache.Load();
+        _cache.Load(config);
 
-        await _guideProcessor.BuildGuideDataAsync(configs, _cache.CfCache, serviceType);
+        await _guideProcessor.BuildGuideDataAsync(config.CustomFormats, _cache.CfCache, config.ServiceType);
 
         if (!ValidateGuideDataAndCheckShouldProceed())
         {
@@ -48,6 +47,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         }
 
         await _persistenceProcessor.PersistCustomFormats(
+            config,
             _guideProcessor.ProcessedCustomFormats,
             _guideProcessor.DeletedCustomFormatsInCache,
             _guideProcessor.ProfileScores);
@@ -57,7 +57,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
 
         // Cache all the custom formats (using ID from API response).
         _cache.Update(_guideProcessor.ProcessedCustomFormats);
-        _cache.Save();
+        _cache.Save(config);
     }
 
     private void PrintQualityProfileUpdates()

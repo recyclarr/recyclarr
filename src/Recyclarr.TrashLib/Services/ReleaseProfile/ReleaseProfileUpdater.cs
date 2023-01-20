@@ -1,4 +1,5 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.ReleaseProfile.Api;
 using Recyclarr.TrashLib.Services.ReleaseProfile.Api.Objects;
 using Recyclarr.TrashLib.Services.ReleaseProfile.Filters;
@@ -65,7 +66,7 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
             return;
         }
 
-        await ProcessReleaseProfiles(filteredProfiles);
+        await ProcessReleaseProfiles(config, filteredProfiles);
     }
 
     private void PreviewReleaseProfiles(IEnumerable<ReleaseProfileData> profiles)
@@ -139,40 +140,42 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
     }
 
     private async Task ProcessReleaseProfiles(
+        IServiceConfiguration config,
         List<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)> profilesAndTags)
     {
         // Obtain all of the existing release profiles first. If any were previously created by our program
         // here, we favor replacing those instead of creating new ones, which would just be mostly duplicates
         // (but with some differences, since there have likely been updates since the last run).
-        var existingProfiles = await _releaseProfileApi.GetReleaseProfiles();
+        var existingProfiles = await _releaseProfileApi.GetReleaseProfiles(config);
 
         foreach (var (profile, tags) in profilesAndTags)
         {
             // If tags were provided, ensure they exist. Tags that do not exist are added first, so that we
             // may specify them with the release profile request payload.
-            var tagIds = await CreateTagsInSonarr(tags);
+            var tagIds = await CreateTagsInSonarr(config, tags);
 
             var title = BuildProfileTitle(profile.Name);
             var profileToUpdate = GetProfileToUpdate(existingProfiles, title);
             if (profileToUpdate != null)
             {
                 _log.Information("Update existing profile: {ProfileName}", title);
-                await UpdateExistingProfile(profileToUpdate, profile, tagIds);
+                await UpdateExistingProfile(config, profileToUpdate, profile, tagIds);
             }
             else
             {
                 _log.Information("Create new profile: {ProfileName}", title);
-                await CreateNewProfile(title, profile, tagIds);
+                await CreateNewProfile(config, title, profile, tagIds);
             }
         }
 
         // Any profiles with `[Trash]` in front of their name are managed exclusively by Recyclarr. As such, if
         // there are any still in Sonarr that we didn't update, those are most certainly old and shouldn't be kept
         // around anymore.
-        await DeleteOldManagedProfiles(profilesAndTags, existingProfiles);
+        await DeleteOldManagedProfiles(config, profilesAndTags, existingProfiles);
     }
 
     private async Task DeleteOldManagedProfiles(
+        IServiceConfiguration config,
         IEnumerable<(ReleaseProfileData Profile, IReadOnlyCollection<string> Tags)> profilesAndTags,
         IEnumerable<SonarrReleaseProfile> sonarrProfiles)
     {
@@ -187,32 +190,37 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         foreach (var profile in sonarrProfilesToDelete)
         {
             _log.Information("Deleting old Trash release profile: {ProfileName}", profile.Name);
-            await _releaseProfileApi.DeleteReleaseProfile(profile.Id);
+            await _releaseProfileApi.DeleteReleaseProfile(config, profile.Id);
         }
     }
 
-    private async Task<IReadOnlyCollection<int>> CreateTagsInSonarr(IReadOnlyCollection<string> tags)
+    private async Task<IReadOnlyCollection<int>> CreateTagsInSonarr(
+        IServiceConfiguration config,
+        IReadOnlyCollection<string> tags)
     {
         if (!tags.Any())
         {
             return Array.Empty<int>();
         }
 
-        var sonarrTags = await _tagApiService.GetTags();
-        await CreateMissingTags(sonarrTags, tags);
+        var sonarrTags = await _tagApiService.GetTags(config);
+        await CreateMissingTags(config, sonarrTags, tags);
         return sonarrTags
             .Where(t => tags.Any(ct => ct.EqualsIgnoreCase(t.Label)))
             .Select(t => t.Id)
             .ToList();
     }
 
-    private async Task CreateMissingTags(ICollection<SonarrTag> sonarrTags, IEnumerable<string> configTags)
+    private async Task CreateMissingTags(
+        IServiceConfiguration config,
+        ICollection<SonarrTag> sonarrTags,
+        IEnumerable<string> configTags)
     {
         var missingTags = configTags.Where(t => !sonarrTags.Any(t2 => t2.Label.EqualsIgnoreCase(t)));
         foreach (var tag in missingTags)
         {
             _log.Debug("Creating Tag: {Tag}", tag);
-            var newTag = await _tagApiService.CreateTag(tag);
+            var newTag = await _tagApiService.CreateTag(config, tag);
             sonarrTags.Add(newTag);
         }
     }
@@ -243,18 +251,25 @@ public class ReleaseProfileUpdater : IReleaseProfileUpdater
         profileToUpdate.Tags = tagIds;
     }
 
-    private async Task UpdateExistingProfile(SonarrReleaseProfile profileToUpdate, ReleaseProfileData profile,
+    private async Task UpdateExistingProfile(
+        IServiceConfiguration config,
+        SonarrReleaseProfile profileToUpdate,
+        ReleaseProfileData profile,
         IReadOnlyCollection<int> tagIds)
     {
         _log.Debug("Update existing profile with id {ProfileId}", profileToUpdate.Id);
         SetupProfileRequestObject(profileToUpdate, profile, tagIds);
-        await _releaseProfileApi.UpdateReleaseProfile(profileToUpdate);
+        await _releaseProfileApi.UpdateReleaseProfile(config, profileToUpdate);
     }
 
-    private async Task CreateNewProfile(string title, ReleaseProfileData profile, IReadOnlyCollection<int> tagIds)
+    private async Task CreateNewProfile(
+        IServiceConfiguration config,
+        string title,
+        ReleaseProfileData profile,
+        IReadOnlyCollection<int> tagIds)
     {
         var newProfile = new SonarrReleaseProfile {Name = title, Enabled = true};
         SetupProfileRequestObject(newProfile, profile, tagIds);
-        await _releaseProfileApi.CreateReleaseProfile(newProfile);
+        await _releaseProfileApi.CreateReleaseProfile(config, newProfile);
     }
 }

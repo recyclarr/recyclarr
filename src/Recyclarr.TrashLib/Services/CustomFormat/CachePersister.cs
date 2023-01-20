@@ -1,5 +1,6 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Cache;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
 
@@ -18,9 +19,9 @@ public class CachePersister : ICachePersister
     private ILogger Log { get; }
     public CustomFormatCache? CfCache { get; private set; }
 
-    public void Load()
+    public void Load(IServiceConfiguration config)
     {
-        CfCache = _cache.Load<CustomFormatCache>();
+        CfCache = _cache.Load<CustomFormatCache>(config);
         // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
         if (CfCache != null)
         {
@@ -41,7 +42,7 @@ public class CachePersister : ICachePersister
         }
     }
 
-    public void Save()
+    public void Save(IServiceConfiguration config)
     {
         if (CfCache == null)
         {
@@ -50,7 +51,7 @@ public class CachePersister : ICachePersister
         }
 
         Log.Debug("Saving Cache");
-        _cache.Save(CfCache);
+        _cache.Save(CfCache, config);
     }
 
     public void Update(IEnumerable<ProcessedCustomFormatData> customFormats)

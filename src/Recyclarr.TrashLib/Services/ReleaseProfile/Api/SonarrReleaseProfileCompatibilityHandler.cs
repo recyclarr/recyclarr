@@ -1,6 +1,7 @@
 using AutoMapper;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Services.ReleaseProfile.Api.Objects;
 using Recyclarr.TrashLib.Services.ReleaseProfile.Api.Schemas;
@@ -24,9 +25,11 @@ public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCom
         _mapper = mapper;
     }
 
-    public object CompatibleReleaseProfileForSending(SonarrReleaseProfile profile)
+    public async Task<object> CompatibleReleaseProfileForSending(
+        IServiceConfiguration config,
+        SonarrReleaseProfile profile)
     {
-        var capabilities = _capabilityChecker.GetCapabilities();
+        var capabilities = await _capabilityChecker.GetCapabilities(config);
         if (capabilities is null)
         {
             throw new ServiceIncompatibilityException("Capabilities could not be obtained");

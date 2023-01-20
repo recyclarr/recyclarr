@@ -1,24 +1,32 @@
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.CustomFormat.Api;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
 
 internal class CustomFormatApiPersistenceStep : ICustomFormatApiPersistenceStep
 {
-    public async Task Process(ICustomFormatService api, CustomFormatTransactionData transactions)
+    private readonly ICustomFormatService _api;
+
+    public CustomFormatApiPersistenceStep(ICustomFormatService api)
+    {
+        _api = api;
+    }
+
+    public async Task Process(IServiceConfiguration config, CustomFormatTransactionData transactions)
     {
         foreach (var cf in transactions.NewCustomFormats)
         {
-            await api.CreateCustomFormat(cf);
+            await _api.CreateCustomFormat(config, cf);
         }
 
         foreach (var cf in transactions.UpdatedCustomFormats)
         {
-            await api.UpdateCustomFormat(cf);
+            await _api.UpdateCustomFormat(config, cf);
         }
 
         foreach (var cfId in transactions.DeletedCustomFormatIds)
         {
-            await api.DeleteCustomFormat(cfId.CustomFormatId);
+            await _api.DeleteCustomFormat(config, cfId.CustomFormatId);
         }
     }
 }

@@ -19,7 +19,6 @@ public class PersistenceProcessorTest
     {
         var steps = Substitute.For<IPersistenceProcessorSteps>();
         var cfApi = Substitute.For<ICustomFormatService>();
-        var qpApi = Substitute.For<IQualityProfileService>();
 
         var config = new RadarrConfiguration {DeleteOldCustomFormats = true};
 
@@ -27,8 +26,8 @@ public class PersistenceProcessorTest
         var deletedCfsInCache = new Collection<TrashIdMapping>();
         var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-        var processor = new PersistenceProcessor(cfApi, qpApi, config, steps);
-        await processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
+        var processor = new PersistenceProcessor(cfApi, steps);
+        await processor.PersistCustomFormats(config, guideCfs, deletedCfsInCache, profileScores);
 
         steps.JsonTransactionStep.Received().RecordDeletions(Arg.Is(deletedCfsInCache), Arg.Any<List<JObject>>());
     }
@@ -38,7 +37,6 @@ public class PersistenceProcessorTest
     {
         var steps = Substitute.For<IPersistenceProcessorSteps>();
         var cfApi = Substitute.For<ICustomFormatService>();
-        var qpApi = Substitute.For<IQualityProfileService>();
 
         var config = new RadarrConfiguration {DeleteOldCustomFormats = false};
 
@@ -46,8 +44,8 @@ public class PersistenceProcessorTest
         var deletedCfsInCache = Array.Empty<TrashIdMapping>();
         var profileScores = new Dictionary<string, QualityProfileCustomFormatScoreMapping>();
 
-        var processor = new PersistenceProcessor(cfApi, qpApi, config, steps);
-        await processor.PersistCustomFormats(guideCfs, deletedCfsInCache, profileScores);
+        var processor = new PersistenceProcessor(cfApi, steps);
+        await processor.PersistCustomFormats(config, guideCfs, deletedCfsInCache, profileScores);
 
         steps.JsonTransactionStep.DidNotReceive()
             .RecordDeletions(Arg.Any<IEnumerable<TrashIdMapping>>(), Arg.Any<List<JObject>>());

@@ -21,11 +21,11 @@ public class SonarrCapabilityEnforcerTest
     {
         var config = new SonarrConfiguration();
 
-        checker.GetCapabilities().Returns((SonarrCapabilities?) null);
+        checker.GetCapabilities(default!).ReturnsForAnyArgs((SonarrCapabilities?) null);
 
         var act = () => sut.Check(config);
 
-        act.Should().Throw<ServiceIncompatibilityException>().WithMessage("*obtained*");
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*obtained*");
     }
 
     [Test, AutoMockData]
@@ -35,14 +35,14 @@ public class SonarrCapabilityEnforcerTest
     {
         var config = new SonarrConfiguration();
 
-        checker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
             SupportsNamedReleaseProfiles = false
         });
 
         var act = () => sut.Check(config);
 
-        act.Should().Throw<ServiceIncompatibilityException>().WithMessage("*minimum*");
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*minimum*");
     }
 
     [Test, AutoMockData]
@@ -58,7 +58,7 @@ public class SonarrCapabilityEnforcerTest
             }
         };
 
-        checker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
             SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = true
@@ -66,7 +66,7 @@ public class SonarrCapabilityEnforcerTest
 
         var act = () => sut.Check(config);
 
-        act.Should().Throw<ServiceIncompatibilityException>().WithMessage("*v3*");
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*v3*");
     }
 
     [Test, AutoMockData]
@@ -82,7 +82,7 @@ public class SonarrCapabilityEnforcerTest
             }
         };
 
-        checker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
             SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = false
@@ -90,6 +90,6 @@ public class SonarrCapabilityEnforcerTest
 
         var act = () => sut.Check(config);
 
-        act.Should().Throw<ServiceIncompatibilityException>().WithMessage("*v4*");
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*v4*");
     }
 }

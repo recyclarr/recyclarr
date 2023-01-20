@@ -1,24 +1,21 @@
-using System.Reactive.Linq;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.System;
 
 namespace Recyclarr.TrashLib.Services.Common;
 
 public abstract class ServiceCapabilityChecker<T> where T : class
 {
-    private readonly IObservable<T?> _capabilities;
-
-    public T? GetCapabilities()
-    {
-        return _capabilities.Wait();
-    }
+    private readonly IServiceInformation _info;
 
     protected ServiceCapabilityChecker(IServiceInformation info)
     {
-        _capabilities = info.Version
-            .Select(x => x is null ? null : BuildCapabilitiesObject(x))
-            .Replay(1)
-            .AutoConnect()
-            .LastAsync();
+        _info = info;
+    }
+
+    public async Task<T?> GetCapabilities(IServiceConfiguration config)
+    {
+        var version = await _info.GetVersion(config);
+        return version is not null ? BuildCapabilitiesObject(version) : null;
     }
 
     protected abstract T BuildCapabilitiesObject(Version version);

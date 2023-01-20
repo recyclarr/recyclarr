@@ -11,39 +11,36 @@ namespace Recyclarr.Cli.Console.Helpers;
 public class CacheStoragePath : ICacheStoragePath
 {
     private readonly IAppPaths _paths;
-    private readonly IServiceConfiguration _config;
     private readonly IFNV1a _hash;
 
     public CacheStoragePath(
-        IAppPaths paths,
-        IServiceConfiguration config)
+        IAppPaths paths)
     {
         _paths = paths;
-        _config = config;
         _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(32));
     }
 
-    private string BuildUniqueServiceDir()
+    private string BuildUniqueServiceDir(IServiceConfiguration config)
     {
         // In the future, once array-style configurations are removed, the service name will no longer be optional
         // and the below condition can be removed and the logic simplified.
         var dirName = new StringBuilder();
-        if (_config.InstanceName is not null)
+        if (config.InstanceName is not null)
         {
-            dirName.Append($"{_config.InstanceName}_");
+            dirName.Append($"{config.InstanceName}_");
         }
 
-        var url = _config.BaseUrl.OriginalString;
+        var url = config.BaseUrl.OriginalString;
         var guid = _hash.ComputeHash(Encoding.ASCII.GetBytes(url)).AsHexString();
         dirName.Append(guid);
         return dirName.ToString();
     }
 
-    public IFileInfo CalculatePath(string cacheObjectName)
+    public IFileInfo CalculatePath(IServiceConfiguration config, string cacheObjectName)
     {
         return _paths.CacheDirectory
-            .SubDirectory(_config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture))
-            .SubDirectory(BuildUniqueServiceDir())
+            .SubDirectory(config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture))
+            .SubDirectory(BuildUniqueServiceDir(config))
             .File(cacheObjectName + ".json");
     }
 }
