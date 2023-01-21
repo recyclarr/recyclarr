@@ -7,9 +7,9 @@ internal class DefaultEnvironment : IEnvironment
         return Environment.GetFolderPath(folder);
     }
 
-    public string GetFolderPath(Environment.SpecialFolder folder, Environment.SpecialFolderOption option)
+    public string GetFolderPath(Environment.SpecialFolder folder, Environment.SpecialFolderOption folderOption)
     {
-        return Environment.GetFolderPath(folder, option);
+        return Environment.GetFolderPath(folder, folderOption);
     }
 
     public string? GetEnvironmentVariable(string variable)

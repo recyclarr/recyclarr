@@ -71,10 +71,10 @@ public class SyncProcessor : ISyncProcessor
     }
 
     private async Task<bool> ProcessService<TConfig>(
-        SupportedServices service, ISyncSettings settings, IConfigCollection configs)
+        SupportedServices service, ISyncSettings settings, IConfigRegistry configs)
         where TConfig : ServiceConfiguration
     {
-        var serviceConfigs = configs.Get<TConfig>(service);
+        var serviceConfigs = configs.GetConfigsOfType<TConfig>(service);
 
         // If any config names are null, that means user specified array-style (deprecated) instances.
         if (serviceConfigs.Any(x => x.InstanceName is null))

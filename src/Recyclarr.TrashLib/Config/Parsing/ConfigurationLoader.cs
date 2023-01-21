@@ -18,7 +18,7 @@ public class ConfigurationLoader : IConfigurationLoader
         _parser = parser;
     }
 
-    public IConfigCollection LoadMany(IEnumerable<IFileInfo> configFiles, string? desiredSection = null)
+    public IConfigRegistry LoadMany(IEnumerable<IFileInfo> configFiles, string? desiredSection = null)
     {
         foreach (var file in configFiles)
         {
@@ -28,7 +28,7 @@ public class ConfigurationLoader : IConfigurationLoader
         return _parser.Configs;
     }
 
-    public IConfigCollection Load(IFileInfo file, string? desiredSection = null)
+    public IConfigRegistry Load(IFileInfo file, string? desiredSection = null)
     {
         _log.Debug("Loading config file: {File}", file);
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
@@ -63,7 +63,7 @@ public class ConfigurationLoader : IConfigurationLoader
         return _parser.Configs;
     }
 
-    public IConfigCollection LoadFromStream(TextReader stream, string? desiredSection = null)
+    public IConfigRegistry LoadFromStream(TextReader stream, string? desiredSection = null)
     {
         var parser = new Parser(stream);
 

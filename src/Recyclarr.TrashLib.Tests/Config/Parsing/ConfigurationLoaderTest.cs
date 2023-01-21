@@ -81,10 +81,10 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var loader = Resolve<IConfigurationLoader>();
         var actual = loader.LoadMany(fileData.Select(x => x.Item1));
 
-        actual.Get<SonarrConfiguration>(SupportedServices.Sonarr)
+        actual.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
             .Should().BeEquivalentTo(expectedSonarr);
 
-        actual.Get<RadarrConfiguration>(SupportedServices.Radarr)
+        actual.GetConfigsOfType<RadarrConfiguration>(SupportedServices.Radarr)
             .Should().BeEquivalentTo(expectedRadarr);
     }
 
@@ -94,7 +94,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var configLoader = Resolve<ConfigurationLoader>();
         var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
-        configs.Get<SonarrConfiguration>(SupportedServices.Sonarr)
+        configs.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
                 new()

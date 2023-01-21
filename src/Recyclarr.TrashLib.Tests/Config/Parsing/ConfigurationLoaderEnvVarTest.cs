@@ -33,7 +33,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -58,7 +58,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -85,7 +85,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -112,7 +112,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -137,7 +137,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -161,7 +161,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.Get<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
         config.Should().BeEquivalentTo(new[]
         {
             new

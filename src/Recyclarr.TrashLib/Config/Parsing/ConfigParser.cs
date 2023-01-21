@@ -14,7 +14,7 @@ public class ConfigParser
 {
     private readonly ConfigValidationExecutor _validator;
     private readonly IDeserializer _deserializer;
-    private readonly ConfigCollection _configs = new();
+    private readonly ConfigRegistry _configs = new();
     private SupportedServices? _currentSection;
 
     private readonly Dictionary<SupportedServices, Type> _configTypes = new()
@@ -23,7 +23,7 @@ public class ConfigParser
         {SupportedServices.Radarr, typeof(RadarrConfiguration)}
     };
 
-    public IConfigCollection Configs => _configs;
+    public IConfigRegistry Configs => _configs;
 
     public ConfigParser(
         IYamlSerializerFactory yamlFactory,

@@ -3,7 +3,7 @@ using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
-public class ConfigCollection : IConfigCollection
+public class ConfigRegistry : IConfigRegistry
 {
     private readonly Dictionary<SupportedServices, List<ServiceConfiguration>> _configs = new();
 
@@ -12,7 +12,7 @@ public class ConfigCollection : IConfigCollection
         _configs.GetOrCreate(configType).Add(config);
     }
 
-    public IReadOnlyCollection<T> Get<T>(SupportedServices serviceType) where T : ServiceConfiguration
+    public IReadOnlyCollection<T> GetConfigsOfType<T>(SupportedServices serviceType) where T : ServiceConfiguration
     {
         return _configs[serviceType].Cast<T>().ToList();
     }
