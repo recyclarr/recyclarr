@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using JetBrains.Annotations;
-using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.Cli.Migration;
 using Spectre.Console;
 using Spectre.Console.Cli;

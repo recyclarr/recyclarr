@@ -2,7 +2,7 @@ using System.ComponentModel;
 using JetBrains.Annotations;
 using Spectre.Console.Cli;
 
-namespace Recyclarr.Cli.Console.Commands.Shared;
+namespace Recyclarr.Cli.Console.Commands;
 
 public class BaseCommandSettings : CommandSettings
 {

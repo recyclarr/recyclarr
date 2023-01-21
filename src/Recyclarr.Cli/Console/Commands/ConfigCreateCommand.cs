@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Services.Processors;
 using Serilog;

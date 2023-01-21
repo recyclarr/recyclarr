@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Autofac.Features.Indexed;
 using JetBrains.Annotations;
-using Recyclarr.Cli.Console.Commands.Shared;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
