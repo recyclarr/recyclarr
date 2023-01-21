@@ -9,7 +9,6 @@
     <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <NoWarn>CA1308</NoWarn>
   </PropertyGroup>
 
   <!--
