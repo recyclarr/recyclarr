@@ -26,7 +26,7 @@ public class LocalRepoSonarrGuideServiceTest
     {
         static ReleaseProfileData MakeMockObject(string term)
         {
-            return new()
+            return new ReleaseProfileData
             {
                 Name = "name",
                 TrashId = "123",
