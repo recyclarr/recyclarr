@@ -44,7 +44,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
             var str = new StringBuilder($"{sectionName}:");
             const string templateYaml = @"
   instance{1}:
-    base_url: {0}
+    base_url: http://{0}
     api_key: abc";
 
             var counter = 0;
@@ -55,10 +55,10 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var baseDir = Fs.CurrentDirectory();
         var fileData = new[]
         {
-            (baseDir.File("config1.yml"), MockYaml("sonarr", 1, 2)),
-            (baseDir.File("config2.yml"), MockYaml("sonarr", 3)),
+            (baseDir.File("config1.yml"), MockYaml("sonarr", "one", "two")),
+            (baseDir.File("config2.yml"), MockYaml("sonarr", "three")),
             (baseDir.File("config3.yml"), "bad yaml"),
-            (baseDir.File("config4.yml"), MockYaml("radarr", 4))
+            (baseDir.File("config4.yml"), MockYaml("radarr", "four"))
         };
 
         foreach (var (file, data) in fileData)
@@ -68,14 +68,14 @@ public class ConfigurationLoaderTest : IntegrationFixture
 
         var expectedSonarr = new[]
         {
-            new {ApiKey = "abc", BaseUrl = "1"},
-            new {ApiKey = "abc", BaseUrl = "2"},
-            new {ApiKey = "abc", BaseUrl = "3"}
+            new {ApiKey = "abc", BaseUrl = new Uri("http://one")},
+            new {ApiKey = "abc", BaseUrl = new Uri("http://two")},
+            new {ApiKey = "abc", BaseUrl = new Uri("http://three")}
         };
 
         var expectedRadarr = new[]
         {
-            new {ApiKey = "abc", BaseUrl = "4"}
+            new {ApiKey = "abc", BaseUrl = new Uri("http://four")}
         };
 
         var loader = Resolve<IConfigurationLoader>();
@@ -100,7 +100,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
                 new()
                 {
                     ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                    BaseUrl = "http://localhost:8989",
+                    BaseUrl = new Uri("http://localhost:8989"),
                     InstanceName = "name",
                     ReleaseProfiles = new List<ReleaseProfileConfig>
                     {

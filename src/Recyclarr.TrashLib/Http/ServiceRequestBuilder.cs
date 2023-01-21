@@ -16,7 +16,7 @@ public class ServiceRequestBuilder : IServiceRequestBuilder
 
     public IFlurlRequest Request(params object[] path)
     {
-        var client = _clientFactory.Get(_config.BaseUrl);
+        var client = _clientFactory.BuildClient(_config.BaseUrl);
         return client.Request(new[] {"api", "v3"}.Concat(path).ToArray())
             .SetQueryParams(new {apikey = _config.ApiKey});
     }

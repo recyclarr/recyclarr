@@ -20,7 +20,7 @@ public class FlurlClientFactory : IFlurlClientFactory
         _factory = new PerBaseUrlFlurlClientFactory();
     }
 
-    public IFlurlClient Get(string baseUrl)
+    public IFlurlClient BuildClient(Uri baseUrl)
     {
         var client = _factory.Get(baseUrl);
         client.Settings = GetClientSettings();

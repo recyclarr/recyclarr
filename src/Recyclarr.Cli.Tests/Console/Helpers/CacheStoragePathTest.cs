@@ -16,7 +16,7 @@ public class CacheStoragePathTest : IntegrationFixture
     public void Use_guid_when_no_name()
     {
         var config = Substitute.ForPartsOf<ServiceConfiguration>();
-        config.BaseUrl = "something";
+        config.BaseUrl = new Uri("http://something");
         config.InstanceName = null;
 
         using var scope = Container.BeginLifetimeScope(builder =>
@@ -34,7 +34,7 @@ public class CacheStoragePathTest : IntegrationFixture
     public void Use_name_when_not_null()
     {
         var config = Substitute.ForPartsOf<ServiceConfiguration>();
-        config.BaseUrl = "something";
+        config.BaseUrl = new Uri("http://something");
         config.InstanceName = "thename";
 
         using var scope = Container.BeginLifetimeScope(builder =>

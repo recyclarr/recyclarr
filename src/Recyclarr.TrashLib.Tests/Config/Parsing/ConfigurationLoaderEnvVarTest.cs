@@ -20,7 +20,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationFixture
     {
         var env = Resolve<IEnvironment>();
         env.GetEnvironmentVariable("SONARR_API_KEY").Returns("the_api_key");
-        env.GetEnvironmentVariable("SONARR_URL").Returns("the_url");
+        env.GetEnvironmentVariable("SONARR_URL").Returns("http://the_url");
 
         var sut = Resolve<ConfigurationLoader>();
 
@@ -38,7 +38,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "the_url",
+                BaseUrl = new Uri("http://the_url"),
                 ApiKey = "the_api_key"
             }
         });
@@ -63,7 +63,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "http://sonarr:1233"
+                BaseUrl = new Uri("http://sonarr:1233")
             }
         });
     }
@@ -79,7 +79,7 @@ sonarr:
         const string testYml = @"
 sonarr:
   instance:
-    base_url: !env_var SONARR_URL some value
+    base_url: !env_var SONARR_URL http://somevalue
     api_key: value
 ";
 
@@ -90,7 +90,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "some value"
+                BaseUrl = new Uri("http://somevalue")
             }
         });
     }
@@ -106,7 +106,7 @@ sonarr:
         const string testYml = @"
 sonarr:
   instance:
-    base_url: !env_var SONARR_URL ""the url""
+    base_url: !env_var SONARR_URL ""http://theurl""
     api_key: !env_var SONARR_API 'the key'
 ";
 
@@ -117,7 +117,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "the url",
+                BaseUrl = new Uri("http://theurl"),
                 ApiKey = "the key"
             }
         });
@@ -131,7 +131,7 @@ sonarr:
         const string testYml = @"
 sonarr:
   instance:
-    base_url: !env_var SONARR_URL    some value
+    base_url: !env_var SONARR_URL    http://somevalue
     api_key: value
 ";
 
@@ -142,7 +142,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "some value"
+                BaseUrl = new Uri("http://somevalue")
             }
         });
     }
@@ -155,7 +155,7 @@ sonarr:
         const string testYml = $@"
 sonarr:
   instance:
-    base_url: !env_var SONARR_URL {"\t"}some value
+    base_url: !env_var SONARR_URL {"\t"}http://somevalue
     api_key: value
 ";
 
@@ -166,7 +166,7 @@ sonarr:
         {
             new
             {
-                BaseUrl = "some value"
+                BaseUrl = new Uri("http://somevalue")
             }
         });
     }

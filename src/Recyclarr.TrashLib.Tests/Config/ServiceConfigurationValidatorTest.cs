@@ -16,7 +16,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "valid",
-            BaseUrl = "valid",
+            BaseUrl = new Uri("http://valid"),
             InstanceName = "valid",
             LineNumber = 1,
             CustomFormats = new List<CustomFormatConfig>
@@ -51,7 +51,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "", // Must not be empty
-            BaseUrl = "valid",
+            BaseUrl = new Uri("http://valid"),
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -84,7 +84,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "valid",
-            BaseUrl = "",
+            BaseUrl = new Uri("about:empty"),
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -119,7 +119,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "valid",
-            BaseUrl = "valid",
+            BaseUrl = new Uri("http://valid"),
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -152,7 +152,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "valid",
-            BaseUrl = "valid",
+            BaseUrl = new Uri("http://valid"),
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -185,7 +185,7 @@ public class ServiceConfigurationValidatorTest : IntegrationFixture
         var config = new TestConfig
         {
             ApiKey = "valid",
-            BaseUrl = "valid",
+            BaseUrl = new Uri("http://valid"),
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()

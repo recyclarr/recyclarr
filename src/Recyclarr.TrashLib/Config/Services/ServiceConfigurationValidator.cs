@@ -16,7 +16,8 @@ internal class ServiceConfigurationValidator : AbstractValidator<ServiceConfigur
         RuleFor(x => x.InstanceName).NotEmpty();
         RuleFor(x => x.ServiceName).NotEmpty();
         RuleFor(x => x.LineNumber).NotEqual(0);
-        RuleFor(x => x.BaseUrl).NotEmpty().WithMessage("Property 'base_url' is required");
+        RuleFor(x => x.BaseUrl).Must(x => x.Scheme is "http" or "https")
+            .WithMessage("Property 'base_url' is required and must be a valid URL");
         RuleFor(x => x.ApiKey).NotEmpty().WithMessage("Property 'api_key' is required");
         RuleForEach(x => x.CustomFormats).SetValidator(new CustomFormatConfigValidator());
         RuleFor(x => x.QualityDefinition).SetNonNullableValidator(new QualityDefinitionConfigValidator());

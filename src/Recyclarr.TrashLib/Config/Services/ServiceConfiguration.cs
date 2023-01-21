@@ -15,7 +15,7 @@ public abstract class ServiceConfiguration : IServiceConfiguration
     [YamlIgnore]
     public int LineNumber { get; set; }
 
-    public string BaseUrl { get; set; } = "";
+    public Uri BaseUrl { get; set; } = new("about:empty");
     public string ApiKey { get; set; } = "";
 
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } =

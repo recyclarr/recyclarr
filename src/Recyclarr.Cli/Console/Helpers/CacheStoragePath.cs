@@ -33,7 +33,8 @@ public class CacheStoragePath : ICacheStoragePath
             dirName.Append($"{_config.InstanceName}_");
         }
 
-        var guid = _hash.ComputeHash(Encoding.ASCII.GetBytes(_config.BaseUrl)).AsHexString();
+        var url = _config.BaseUrl.OriginalString;
+        var guid = _hash.ComputeHash(Encoding.ASCII.GetBytes(url)).AsHexString();
         dirName.Append(guid);
         return dirName.ToString();
     }

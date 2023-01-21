@@ -43,7 +43,7 @@ secret_rp: 1234567
             {
                 InstanceName = "instance1",
                 ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                BaseUrl = "https://radarr:7878",
+                BaseUrl = new Uri("https://radarr:7878"),
                 ReleaseProfiles = new List<ReleaseProfileConfig>
                 {
                     new()

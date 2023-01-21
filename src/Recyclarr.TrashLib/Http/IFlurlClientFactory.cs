@@ -4,5 +4,5 @@ namespace Recyclarr.TrashLib.Http;
 
 public interface IFlurlClientFactory
 {
-    IFlurlClient Get(string baseUrl);
+    IFlurlClient BuildClient(Uri baseUrl);
 }
