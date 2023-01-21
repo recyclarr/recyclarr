@@ -1,6 +1,5 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
@@ -15,7 +14,6 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
     private readonly IGuideProcessor _guideProcessor;
     private readonly IPersistenceProcessor _persistenceProcessor;
     private readonly IAnsiConsole _console;
-    private readonly IServiceRequestBuilder _service;
     private readonly ILogger _log;
 
     public CustomFormatUpdater(
@@ -23,15 +21,13 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         ICachePersister cache,
         IGuideProcessor guideProcessor,
         IPersistenceProcessor persistenceProcessor,
-        IAnsiConsole console,
-        IServiceRequestBuilder service)
+        IAnsiConsole console)
     {
         _log = log;
         _cache = cache;
         _guideProcessor = guideProcessor;
         _persistenceProcessor = persistenceProcessor;
         _console = console;
-        _service = service;
     }
 
     public async Task Process(bool isPreview, IEnumerable<CustomFormatConfig> configs, IGuideService guideService)
@@ -197,8 +193,7 @@ internal class CustomFormatUpdater : ICustomFormatUpdater
         // No CFs are defined in this item, or they are all invalid. Skip this whole instance.
         if (_guideProcessor.ConfigData.Count == 0)
         {
-            _log.Error("Guide processing yielded no custom formats for configured instance host {BaseUrl}",
-                _service.SanitizedBaseUrl);
+            _log.Error("Guide processing yielded no custom formats");
             return false;
         }
 

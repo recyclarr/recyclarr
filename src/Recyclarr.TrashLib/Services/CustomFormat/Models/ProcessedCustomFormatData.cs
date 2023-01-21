@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json.Linq;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat.Models;
@@ -15,6 +16,7 @@ public class ProcessedCustomFormatData
     public string Name => _data.Name;
     public string TrashId => _data.TrashId;
     public int? Score => _data.Score;
+    [SuppressMessage("Usage", "CA2227:Collection properties should be read only")]
     public JObject Json { get; set; }
     public int FormatId { get; set; }
 }

@@ -20,6 +20,4 @@ public class ServiceRequestBuilder : IServiceRequestBuilder
         return client.Request(new[] {"api", "v3"}.Concat(path).ToArray())
             .SetQueryParams(new {apikey = _config.ApiKey});
     }
-
-    public string SanitizedBaseUrl => FlurlLogging.SanitizeUrl(_config.BaseUrl);
 }

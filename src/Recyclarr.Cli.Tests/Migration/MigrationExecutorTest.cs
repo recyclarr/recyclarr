@@ -105,7 +105,7 @@ public class MigrationExecutorTest : IntegrationFixture
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
         var executor = new MigrationExecutor(new[] {step}, console);
-        var exception = new MigrationException(new Exception(), "a", new[] {"b"});
+        var exception = new MigrationException(new ArgumentException(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute(null)).Throw(exception);
