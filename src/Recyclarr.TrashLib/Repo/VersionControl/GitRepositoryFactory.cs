@@ -15,7 +15,7 @@ public class GitRepositoryFactory : IGitRepositoryFactory
         _log = log;
     }
 
-    public async Task<IGitRepository> CreateAndCloneIfNeeded(string repoUrl, string repoPath, string branch)
+    public async Task<IGitRepository> CreateAndCloneIfNeeded(Uri repoUrl, string repoPath, string branch)
     {
         var repo = _repoFactory(repoPath);
 

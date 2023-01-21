@@ -81,12 +81,12 @@ public sealed class GitRepository : IGitRepository
         await RunGitCmd("reset", "--hard", toBranchOrSha1);
     }
 
-    public async Task SetRemote(string name, string newUrl)
+    public async Task SetRemote(string name, Uri newUrl)
     {
-        await RunGitCmd("remote", "set-url", name, newUrl);
+        await RunGitCmd("remote", "set-url", name, newUrl.ToString());
     }
 
-    public async Task Clone(string cloneUrl, string? branch = null)
+    public async Task Clone(Uri cloneUrl, string? branch = null)
     {
         var args = new List<string> {"clone"};
         if (branch is not null)
@@ -94,7 +94,7 @@ public sealed class GitRepository : IGitRepository
             args.AddRange(new[] {"-b", branch});
         }
 
-        args.AddRange(new[] {cloneUrl, _paths.RepoDirectory.FullName});
+        args.AddRange(new[] {cloneUrl.ToString(), _paths.RepoDirectory.FullName});
         await RunGitCmd(args);
     }
 }
