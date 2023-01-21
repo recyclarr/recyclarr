@@ -34,7 +34,10 @@ public class MigrateTrashYml : IMigrationStep
         Description = $"Rename default YAML config from `{_oldConfigPath}` to `{_newConfigPath}`";
     }
 
-    public bool CheckIfNeeded() => _fileSystem.File.Exists(_oldConfigPath);
+    public bool CheckIfNeeded()
+    {
+        return _fileSystem.File.Exists(_oldConfigPath);
+    }
 
     public void Execute(IAnsiConsole? console)
     {

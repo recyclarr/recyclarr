@@ -19,10 +19,23 @@ public static class CollectionExtensions
     private sealed class ReadOnlyCollectionAdapter<T> : IReadOnlyCollection<T>
     {
         private readonly ICollection<T> _source;
-        public ReadOnlyCollectionAdapter(ICollection<T> source) => _source = source;
+
+        public ReadOnlyCollectionAdapter(ICollection<T> source)
+        {
+            _source = source;
+        }
+
         public int Count => _source.Count;
-        public IEnumerator<T> GetEnumerator() => _source.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _source.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
     public static void AddRange<T>(this ICollection<T> destination, IEnumerable<T> source)

@@ -41,8 +41,15 @@ public class GuideProcessorTest
             return parser.ParseCustomFormatData(ReadText(textFile), "");
         }
 
-        public string ReadText(string textFile) => Data.ReadData(textFile);
-        public JObject ReadJson(string jsonFile) => JObject.Parse(ReadText(jsonFile));
+        public string ReadText(string textFile)
+        {
+            return Data.ReadData(textFile);
+        }
+
+        public JObject ReadJson(string jsonFile)
+        {
+            return JObject.Parse(ReadText(jsonFile));
+        }
     }
 
     [Test]

@@ -6,7 +6,9 @@ namespace Recyclarr.TestLibrary;
 public static partial class FileUtils
 {
     public static ICollection<string> NormalizePaths(IEnumerable<string> paths)
-        => paths.Select(NormalizePath).ToList();
+    {
+        return paths.Select(NormalizePath).ToList();
+    }
 
     public static string NormalizePath(string path)
     {

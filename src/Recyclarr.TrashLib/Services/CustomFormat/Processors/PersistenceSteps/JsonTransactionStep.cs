@@ -148,7 +148,9 @@ public class JsonTransactionStep : IJsonTransactionStep
     }
 
     private static bool KeyMatch(JObject left, JObject right, string keyName)
-        => left.Value<string>(keyName) == right.Value<string>(keyName);
+    {
+        return left.Value<string>(keyName) == right.Value<string>(keyName);
+    }
 
     private static void MergeProperties(JObject serviceCf, JObject guideCfJson,
         JTokenType exceptType = JTokenType.None)

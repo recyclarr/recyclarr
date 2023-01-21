@@ -17,6 +17,13 @@ public class RadarrGuideDataLister : IRadarrGuideDataLister
         _guideLister = guideLister;
     }
 
-    public void ListCustomFormats() => _guideLister.ListCustomFormats(_guide.GetCustomFormatData());
-    public void ListQualities() => _guideLister.ListQualities(_guide.GetQualities());
+    public void ListCustomFormats()
+    {
+        _guideLister.ListCustomFormats(_guide.GetCustomFormatData());
+    }
+
+    public void ListQualities()
+    {
+        _guideLister.ListQualities(_guide.GetQualities());
+    }
 }

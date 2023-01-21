@@ -7,7 +7,10 @@ public abstract class ServiceCapabilityChecker<T> where T : class
 {
     private readonly IObservable<T?> _capabilities;
 
-    public T? GetCapabilities() => _capabilities.Wait();
+    public T? GetCapabilities()
+    {
+        return _capabilities.Wait();
+    }
 
     protected ServiceCapabilityChecker(IServiceInformation info)
     {

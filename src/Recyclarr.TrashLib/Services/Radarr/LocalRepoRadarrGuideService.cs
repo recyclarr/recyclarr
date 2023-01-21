@@ -21,7 +21,9 @@ public class LocalRepoRadarrGuideService : RadarrGuideService
     }
 
     public override ICollection<QualitySizeData> GetQualities()
-        => _parser.GetQualities(_pathsFactory.Create().RadarrQualityPaths);
+    {
+        return _parser.GetQualities(_pathsFactory.Create().RadarrQualityPaths);
+    }
 
     public override ICollection<CustomFormatData> GetCustomFormatData()
     {

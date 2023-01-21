@@ -23,8 +23,15 @@ public class SonarrGuideDataLister : ISonarrGuideDataLister
         _guideLister = guideLister;
     }
 
-    public void ListCustomFormats() => _guideLister.ListCustomFormats(_guide.GetCustomFormatData());
-    public void ListQualities() => _guideLister.ListQualities(_guide.GetQualities());
+    public void ListCustomFormats()
+    {
+        _guideLister.ListCustomFormats(_guide.GetCustomFormatData());
+    }
+
+    public void ListQualities()
+    {
+        _guideLister.ListQualities(_guide.GetQualities());
+    }
 
     public void ListReleaseProfiles()
     {
@@ -42,8 +49,10 @@ public class SonarrGuideDataLister : ISonarrGuideDataLister
 
     private static bool HasIdentifiableTerms(ReleaseProfileData profile)
     {
-        static bool HasTrashIds(IEnumerable<TermData> terms) =>
-            terms.Any(x => !string.IsNullOrEmpty(x.TrashId));
+        static bool HasTrashIds(IEnumerable<TermData> terms)
+        {
+            return terms.Any(x => !string.IsNullOrEmpty(x.TrashId));
+        }
 
         return
             HasTrashIds(profile.Ignored) ||

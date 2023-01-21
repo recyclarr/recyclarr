@@ -24,18 +24,23 @@ public class LocalRepoSonarrGuideServiceTest
         [Frozen] IRepoPaths repoPaths,
         LocalRepoSonarrGuideService sut)
     {
-        static ReleaseProfileData MakeMockObject(string term) => new()
+        static ReleaseProfileData MakeMockObject(string term)
         {
-            Name = "name",
-            TrashId = "123",
-            Required = new TermData[]
+            return new()
             {
-                new() {Term = term}
-            }
-        };
+                Name = "name",
+                TrashId = "123",
+                Required = new TermData[]
+                {
+                    new() {Term = term}
+                }
+            };
+        }
 
-        static MockFileData MockFileData(dynamic obj) =>
-            new MockFileData(JsonConvert.SerializeObject(obj));
+        static MockFileData MockFileData(dynamic obj)
+        {
+            return new MockFileData(JsonConvert.SerializeObject(obj));
+        }
 
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");

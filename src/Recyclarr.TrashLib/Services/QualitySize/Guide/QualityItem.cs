@@ -35,7 +35,10 @@ public class QualityItem
         return builder.ToString();
     }
 
-    public bool IsMinDifferent(decimal serviceValue) => serviceValue != Min;
+    public bool IsMinDifferent(decimal serviceValue)
+    {
+        return serviceValue != Min;
+    }
 
     public bool IsMaxDifferent(decimal? serviceValue)
     {

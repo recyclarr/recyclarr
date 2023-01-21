@@ -35,7 +35,9 @@ public class LocalRepoSonarrGuideService : SonarrGuideService
     }
 
     public override ICollection<QualitySizeData> GetQualities()
-        => _parser.GetQualities(_pathsFactory.Create().SonarrQualityPaths);
+    {
+        return _parser.GetQualities(_pathsFactory.Create().SonarrQualityPaths);
+    }
 
     public override ICollection<CustomFormatData> GetCustomFormatData()
     {
