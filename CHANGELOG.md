@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.0] - 2023-01-22
+
 ### Added
 
 - Environment variables may now be used in YAML configuration (#145).
@@ -629,7 +631,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.3.0...HEAD
+[4.3.0]: https://github.com/recyclarr/recyclarr/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/recyclarr/recyclarr/compare/v4.1.3...v4.2.0
 [4.1.3]: https://github.com/recyclarr/recyclarr/compare/v4.1.2...v4.1.3
 [4.1.2]: https://github.com/recyclarr/recyclarr/compare/v4.1.1...v4.1.2
