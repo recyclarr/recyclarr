@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Environment variables may now be used in YAML configuration (#145).
 
+### Fixed
+
+- Exception when there's not configuration for both Sonarr and Radarr together.
+
 ## [4.2.0] - 2023-01-13
 
 ### Added

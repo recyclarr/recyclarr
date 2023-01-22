@@ -14,7 +14,12 @@ public class ConfigRegistry : IConfigRegistry
 
     public IReadOnlyCollection<T> GetConfigsOfType<T>(SupportedServices serviceType) where T : ServiceConfiguration
     {
-        return _configs[serviceType].Cast<T>().ToList();
+        if (_configs.TryGetValue(serviceType, out var configs))
+        {
+            return configs.Cast<T>().ToList();
+        }
+
+        return Array.Empty<T>();
     }
 
     public bool DoesConfigExist(string name)
