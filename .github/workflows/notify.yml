@@ -37,10 +37,15 @@ jobs:
         with:
           route: GET /repos/{org_repo}/releases/tags/{tag}
 
+      - name: Write JSON to File
+        uses: devops-actions/json-to-file@v1.0.1
+        with:
+          json: ${{ steps.release.outputs.data }}
+          filename: release.json
+
       # Write changelog to a file to avoid certain characters from being processed by the shell
       - name: Get Information from Release
         run: |
-          echo '${{ steps.release.outputs.data }}' > release.json
           jq -r '.assets[].browser_download_url' release.json > assets.txt
           jq -r '.body' release.json > changelog.txt
 
