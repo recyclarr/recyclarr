@@ -1,16 +1,10 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
 using Newtonsoft.Json;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Guide;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.ReleaseProfile;
-using Recyclarr.TrashLib.Services.ReleaseProfile.Guide;
 
 namespace Recyclarr.TrashLib.Tests.Services;
 

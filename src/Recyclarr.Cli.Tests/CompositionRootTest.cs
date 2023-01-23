@@ -2,8 +2,6 @@ using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Core;
-using FluentAssertions;
-using NUnit.Framework;
 using NUnit.Framework.Internal;
 using Recyclarr.Cli.TestLibrary;
 

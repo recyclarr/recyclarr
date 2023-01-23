@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
-using FluentAssertions;
 using FluentValidation;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;

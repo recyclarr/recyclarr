@@ -5,10 +5,10 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
+using Recyclarr.TrashLib.Pipelines.QualitySize.Guide;
+using Recyclarr.TrashLib.Processors;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.CustomFormat.Guide;
-using Recyclarr.TrashLib.Services.Processors;
-using Recyclarr.TrashLib.Services.QualitySize.Guide;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

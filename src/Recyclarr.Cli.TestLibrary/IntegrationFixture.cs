@@ -1,18 +1,14 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Features.ResolveAnything;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Common;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib;
+using Recyclarr.TrashLib.ApiServices.System;
 using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 using Serilog.Events;
 using Spectre.Console;
 using Spectre.Console.Testing;
@@ -74,7 +70,7 @@ public abstract class IntegrationFixture : IDisposable
     private void SetupMetadataJson()
     {
         var metadataFile = Paths.RepoDirectory.File("metadata.json");
-        Fs.AddFileFromResource(metadataFile, "metadata.json");
+        Fs.AddFileFromEmbeddedResource(metadataFile, typeof(IntegrationFixture), "Data.metadata.json");
     }
 
     // ReSharper disable MemberCanBePrivate.Global

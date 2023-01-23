@@ -1,7 +1,5 @@
-using FluentAssertions;
 using FluentValidation.TestHelper;
-using NUnit.Framework;
-using Recyclarr.TrashLib.Services.ReleaseProfile;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr.ReleaseProfile;
 

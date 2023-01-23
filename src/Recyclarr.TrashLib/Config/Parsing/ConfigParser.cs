@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config.Services.Radarr;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 using Recyclarr.TrashLib.Config.Yaml;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

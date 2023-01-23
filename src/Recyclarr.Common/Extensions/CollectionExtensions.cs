@@ -46,10 +46,16 @@ public static class CollectionExtensions
         }
     }
 
-    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> observable)
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source)
         where T : class
     {
-        return observable.Where(x => x is not null).Select(x => x!);
+        return source.Where(x => x is not null).Select(x => x!);
+    }
+
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source)
+        where T : struct
+    {
+        return source.Where(x => x is not null).Select(x => x!.Value);
     }
 
     public static bool IsEmpty<T>(this ICollection<T>? collection)
@@ -65,5 +71,11 @@ public static class CollectionExtensions
     public static bool IsNotEmpty<T>(this ICollection<T>? collection)
     {
         return collection is {Count: > 0};
+    }
+
+    public static IList<T>? ToListOrNull<T>(this IEnumerable<T> source)
+    {
+        var list = source.ToList();
+        return list.Any() ? list : null;
     }
 }

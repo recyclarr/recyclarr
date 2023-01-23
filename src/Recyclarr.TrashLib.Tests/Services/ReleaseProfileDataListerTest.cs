@@ -1,10 +1,5 @@
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib.Services.ReleaseProfile;
-using Recyclarr.TrashLib.Services.ReleaseProfile.Guide;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Guide;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.TrashLib.Tests.Services;

@@ -81,6 +81,13 @@ public class ConfigurationLoader : IConfigurationLoader
         }
 
         ParseAllSections(parser, desiredSection);
+
+        if (_parser.Configs.Count == 0)
+        {
+            _log.Debug("Document isn't empty, but still yielded no configs");
+            throw new EmptyYamlException();
+        }
+
         return _parser.Configs;
     }
 
@@ -99,17 +106,20 @@ public class ConfigurationLoader : IConfigurationLoader
 
             if (!_parser.SetCurrentSection(section.Value))
             {
-                _log.Warning("Unknown instance type {Type} at line {Line}; skipping",
+                _log.Warning("Unknown service type {Type} at line {Line}; skipping",
                     section.Value, section.Start.Line);
                 parser.SkipThisAndNestedEvents();
                 continue;
             }
 
-            ParseSingleSection(parser);
+            if (!ParseSingleSection(parser))
+            {
+                break;
+            }
         }
     }
 
-    private void ParseSingleSection(Parser parser)
+    private bool ParseSingleSection(Parser parser)
     {
         switch (parser.Current)
         {
@@ -120,7 +130,17 @@ public class ConfigurationLoader : IConfigurationLoader
             case SequenceStart:
                 ParseAndAdd<SequenceStart, SequenceEnd>(parser);
                 break;
+
+            case Scalar:
+                _log.Debug("End of section");
+                return false;
+
+            default:
+                _log.Warning("Unexpected YAML type at line {Line}; skipping this section", parser.Current?.Start.Line);
+                return false;
         }
+
+        return true;
     }
 
     private void ParseAndAdd<TStart, TEnd>(Parser parser)

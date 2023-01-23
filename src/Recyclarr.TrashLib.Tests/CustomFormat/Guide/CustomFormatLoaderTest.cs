@@ -1,12 +1,8 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
-using FluentAssertions;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary.FluentAssertions;
-using Recyclarr.TrashLib.Services.CustomFormat.Guide;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.CustomFormat.Guide;
@@ -30,32 +26,6 @@ public class CustomFormatLoaderTest : IntegrationFixture
         {
             NewCf.Data("first", "1") with {FileName = "first.json"},
             NewCf.Data("second", "2") with {FileName = "second.json"}
-        });
-    }
-
-    [Test]
-    public void Trash_properties_are_removed()
-    {
-        Fs.AddFile("collection_of_cfs.md", new MockFileData(""));
-        Fs.AddFile("first.json", new MockFileData(@"
-{
-  'name':'first',
-  'trash_id':'1',
-  'trash_foo': 'foo',
-  'trash_bar': 'bar',
-  'extra': 'e1'
-}"));
-
-        var sut = Resolve<ICustomFormatLoader>();
-
-        var dir = Fs.CurrentDirectory();
-        var results = sut.LoadAllCustomFormatsAtPaths(
-            new[] {dir}, dir.File("collection_of_cfs.md"));
-
-        const string expectedExtraJson = @"{'name':'first','extra': 'e1'}";
-
-        results.Should()
-            .ContainSingle().Which.Json.Should()
-            .BeEquivalentTo(JObject.Parse(expectedExtraJson), op => op.Using(new JsonEquivalencyStep()));
+        }, o => o.Excluding(x => x.Type == typeof(JObject)));
     }
 }

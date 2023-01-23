@@ -1,10 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.TestCorrelator;
 

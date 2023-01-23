@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Autofac;
 using AutoFixture;
-using AutoFixture.NUnit3;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 

@@ -1,9 +1,4 @@
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib.Services.CustomFormat.Guide;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 

@@ -1,5 +1,4 @@
 using Autofac;
-using NSubstitute;
 
 namespace Recyclarr.TestLibrary;
 

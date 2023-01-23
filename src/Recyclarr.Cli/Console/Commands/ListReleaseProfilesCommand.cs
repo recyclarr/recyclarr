@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Guide;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.ReleaseProfile.Guide;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765

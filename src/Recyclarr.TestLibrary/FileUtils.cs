@@ -1,4 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
 using System.Text.RegularExpressions;
 
 namespace Recyclarr.TestLibrary;

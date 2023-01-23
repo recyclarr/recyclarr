@@ -1,8 +1,8 @@
 using FluentValidation;
 using JetBrains.Annotations;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config.Services.Radarr;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 
 namespace Recyclarr.TrashLib.Config.Services;
 

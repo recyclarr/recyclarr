@@ -6,7 +6,9 @@ namespace Recyclarr.TestLibrary.FluentAssertions;
 
 public class JsonEquivalencyStep : IEquivalencyStep
 {
-    public EquivalencyResult Handle(Comparands comparands, IEquivalencyValidationContext context,
+    public EquivalencyResult Handle(
+        Comparands comparands,
+        IEquivalencyValidationContext context,
         IEquivalencyValidator nestedValidator)
     {
         var canHandle = comparands.Subject?.GetType().IsAssignableTo(typeof(JToken)) ?? false;

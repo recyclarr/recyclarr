@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765

@@ -1,10 +1,10 @@
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config.Services.Radarr;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
+using Recyclarr.TrashLib.Processors;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -28,7 +28,7 @@ public class ConfigRegistryTest
             sut.Add(c);
         }
 
-        var result = sut.GetConfigsOfType(SupportedServices.Sonarr);
+        var result = sut.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
 
         result.Should().Equal(configs.Take(2));
     }
@@ -49,7 +49,7 @@ public class ConfigRegistryTest
             sut.Add(c);
         }
 
-        var result = sut.GetConfigsOfType(null);
+        var result = sut.GetConfigsBasedOnSettings(MockSyncSettings.AnyService());
 
         result.Should().Equal(configs);
     }
@@ -60,8 +60,51 @@ public class ConfigRegistryTest
         var sut = new ConfigRegistry();
         sut.Add(new SonarrConfiguration());
 
-        var result = sut.GetConfigsOfType(SupportedServices.Radarr);
+        var settings = Substitute.For<ISyncSettings>();
+        settings.Service.Returns(SupportedServices.Radarr);
+
+        var result = sut.GetConfigsBasedOnSettings(settings);
 
         result.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Get_configs_by_type_and_instance_name()
+    {
+        var configs = new IServiceConfiguration[]
+        {
+            new SonarrConfiguration {InstanceName = "one"},
+            new SonarrConfiguration {InstanceName = "two"},
+            new RadarrConfiguration {InstanceName = "three"}
+        };
+
+        var sut = new ConfigRegistry();
+        foreach (var c in configs)
+        {
+            sut.Add(c);
+        }
+
+        var result = sut.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr("one"));
+
+        result.Should().Equal(configs.Take(1));
+    }
+
+    [Test]
+    public void Instance_matching_should_be_case_insensitive()
+    {
+        var configs = new IServiceConfiguration[]
+        {
+            new SonarrConfiguration {InstanceName = "one"}
+        };
+
+        var sut = new ConfigRegistry();
+        foreach (var c in configs)
+        {
+            sut.Add(c);
+        }
+
+        var result = sut.GetConfigsBasedOnSettings(MockSyncSettings.AnyService("ONE"));
+
+        result.Should().Equal(configs);
     }
 }

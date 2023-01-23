@@ -9,7 +9,9 @@ public static class FluentValidationExtensions
     // From: https://github.com/FluentValidation/FluentValidation/issues/1648
     // ReSharper disable once UnusedMethodReturnValue.Global
     public static IRuleBuilderOptions<T, TProperty?> SetNonNullableValidator<T, TProperty>(
-        this IRuleBuilder<T, TProperty?> ruleBuilder, IValidator<TProperty> validator, params string[] ruleSets)
+        this IRuleBuilder<T, TProperty?> ruleBuilder,
+        IValidator<TProperty> validator,
+        params string[] ruleSets)
     {
         var adapter = new NullableChildValidatorAdaptor<T, TProperty>(validator, validator.GetType())
         {
@@ -32,7 +34,9 @@ public static class FluentValidationExtensions
             return base.IsValid(context, value!);
         }
 
-        public override Task<bool> IsValidAsync(ValidationContext<T> context, TProperty? value,
+        public override Task<bool> IsValidAsync(
+            ValidationContext<T> context,
+            TProperty? value,
             CancellationToken cancellation)
         {
             return base.IsValidAsync(context, value!, cancellation);
@@ -40,7 +44,8 @@ public static class FluentValidationExtensions
     }
 
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(
-        this IEnumerable<TSource> source, TValidator validator,
+        this IEnumerable<TSource> source,
+        TValidator validator,
         Action<List<ValidationFailure>, TSource>? handleInvalid = null)
         where TValidator : IValidator<TSource>
     {

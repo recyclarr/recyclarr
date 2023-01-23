@@ -1,13 +1,7 @@
 using System.Collections.ObjectModel;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Models;
 
 namespace Recyclarr.TrashLib.Tests.Cache;
 
@@ -208,7 +202,7 @@ public class ServiceCacheTest
 
         var result = sut.Load<CustomFormatCache>(config);
 
-        result.Should().BeEquivalentTo(new CustomFormatCache
+        result.Should().BeEquivalentTo(new
         {
             TrashIdMappings = new Collection<TrashIdMapping>
             {

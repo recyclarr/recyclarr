@@ -1,12 +1,7 @@
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
+using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 

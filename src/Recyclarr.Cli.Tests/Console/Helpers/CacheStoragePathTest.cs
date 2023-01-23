@@ -1,6 +1,3 @@
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;

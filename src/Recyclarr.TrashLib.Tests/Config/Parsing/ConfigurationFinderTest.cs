@@ -1,11 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Startup;
 

@@ -1,16 +1,13 @@
 using Autofac;
-using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TestLibrary;
+using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.ReleaseProfile.Api;
-using Recyclarr.TrashLib.Services.ReleaseProfile.Api.Objects;
-using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Api;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Api.Objects;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 

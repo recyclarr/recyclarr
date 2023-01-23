@@ -3,24 +3,27 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
+using AutoMapper.EquivalencyExpression;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.ApiServices;
 using Recyclarr.TrashLib.Cache;
+using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
+using Recyclarr.TrashLib.Pipelines;
+using Recyclarr.TrashLib.Pipelines.CustomFormat;
+using Recyclarr.TrashLib.Pipelines.QualityProfile;
+using Recyclarr.TrashLib.Pipelines.QualitySize;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
+using Recyclarr.TrashLib.Pipelines.Tags;
+using Recyclarr.TrashLib.Processors;
 using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Services.CustomFormat;
-using Recyclarr.TrashLib.Services.Processors;
-using Recyclarr.TrashLib.Services.QualitySize;
-using Recyclarr.TrashLib.Services.Radarr;
-using Recyclarr.TrashLib.Services.ReleaseProfile;
-using Recyclarr.TrashLib.Services.Sonarr;
-using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
 using Spectre.Console.Cli;
 
@@ -37,15 +40,11 @@ public static class CompositionRoot
         RegisterAppPaths(builder);
         RegisterLogger(builder);
 
-        builder.RegisterModule<SonarrAutofacModule>();
-        builder.RegisterModule<RadarrAutofacModule>();
-        builder.RegisterModule<QualitySizeAutofacModule>();
-        builder.RegisterModule<CustomFormatAutofacModule>();
-        builder.RegisterModule<ReleaseProfileAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
-        builder.RegisterModule<SystemServiceAutofacModule>();
+        builder.RegisterModule<CompatibilityAutofacModule>();
+        builder.RegisterModule<ApiServicesAutofacModule>();
         builder.RegisterModule(new ConfigAutofacModule(assemblies));
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
         builder.RegisterModule(new CommonAutofacModule(Assembly.GetExecutingAssembly()));
@@ -58,10 +57,33 @@ public static class CompositionRoot
         builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
 
         CommandRegistrations(builder);
+        PipelineRegistrations(builder);
 
-        builder.RegisterAutoMapper(false, assemblies);
+        builder.RegisterAutoMapper(c =>
+            {
+                c.AddCollectionMappers();
+            },
+            false, assemblies);
 
         builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
+    }
+
+    private static void PipelineRegistrations(ContainerBuilder builder)
+    {
+        builder.RegisterModule<TagsAutofacModule>();
+        builder.RegisterModule<CustomFormatAutofacModule>();
+        builder.RegisterModule<QualityProfileAutofacModule>();
+        builder.RegisterModule<QualitySizeAutofacModule>();
+        builder.RegisterModule<ReleaseProfileAutofacModule>();
+
+        builder.RegisterTypes(
+                typeof(TagSyncPipeline),
+                typeof(CustomFormatSyncPipeline),
+                typeof(QualityProfileSyncPipeline),
+                typeof(QualitySizeSyncPipeline),
+                typeof(ReleaseProfileSyncPipeline))
+            .As<ISyncPipeline>()
+            .OrderByRegistration();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)
