@@ -8,7 +8,6 @@ using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Recyclarr.TrashLib.Services.Radarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
-using Serilog;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Processors;

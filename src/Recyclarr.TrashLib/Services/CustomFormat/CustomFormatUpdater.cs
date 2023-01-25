@@ -3,7 +3,6 @@ using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors;
 using Recyclarr.TrashLib.Services.CustomFormat.Processors.PersistenceSteps;
-using Serilog;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat;

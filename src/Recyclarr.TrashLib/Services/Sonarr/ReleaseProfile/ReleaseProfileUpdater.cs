@@ -3,7 +3,6 @@ using Recyclarr.TrashLib.Services.Sonarr.Api;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Filters;
-using Serilog;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;

@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Sonarr;
-using Serilog;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765

@@ -1,6 +1,5 @@
 using FluentValidation.Results;
 using Recyclarr.Common.FluentValidation;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 

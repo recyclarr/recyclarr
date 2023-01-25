@@ -21,7 +21,6 @@ using Recyclarr.TrashLib.Services.Radarr;
 using Recyclarr.TrashLib.Services.Sonarr;
 using Recyclarr.TrashLib.Services.System;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;

@@ -3,7 +3,6 @@ using Recyclarr.TrashLib.Services.CustomFormat.Guide;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.QualitySize.Guide;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Radarr;
 

@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat.Guide;
 

@@ -2,7 +2,6 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Http;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 

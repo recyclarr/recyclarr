@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.Text;
 using CliWrap;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Repo.VersionControl;
 

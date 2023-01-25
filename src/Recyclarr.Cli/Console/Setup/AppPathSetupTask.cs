@@ -1,5 +1,4 @@
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 
 namespace Recyclarr.Cli.Console.Setup;
 

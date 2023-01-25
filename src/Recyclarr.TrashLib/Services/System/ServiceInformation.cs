@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using Flurl.Http;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Services.System.Dto;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.System;
 

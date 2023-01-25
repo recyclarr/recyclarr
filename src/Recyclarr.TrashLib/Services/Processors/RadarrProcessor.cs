@@ -2,7 +2,6 @@ using Recyclarr.TrashLib.Services.CustomFormat;
 using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.Radarr;
 using Recyclarr.TrashLib.Services.Radarr.Config;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 

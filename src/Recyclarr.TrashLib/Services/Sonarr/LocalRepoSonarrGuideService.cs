@@ -10,7 +10,6 @@ using Recyclarr.TrashLib.Services.QualitySize;
 using Recyclarr.TrashLib.Services.QualitySize.Guide;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Filters;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Sonarr;
 

@@ -4,7 +4,6 @@ using Recyclarr.TrashLib.Services.Sonarr;
 using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
 using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 

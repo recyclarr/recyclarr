@@ -3,7 +3,6 @@ using Flurl.Http.Configuration;
 using Newtonsoft.Json;
 using Recyclarr.Common.Networking;
 using Recyclarr.TrashLib.Config.Settings;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Http;
 

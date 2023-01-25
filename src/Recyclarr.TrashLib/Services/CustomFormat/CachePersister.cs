@@ -2,7 +2,6 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Services.CustomFormat.Models;
 using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.CustomFormat;
 

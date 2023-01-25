@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using Recyclarr.Common;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Processors;
 

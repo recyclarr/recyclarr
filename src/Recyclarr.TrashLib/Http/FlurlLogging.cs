@@ -1,7 +1,6 @@
 using Flurl;
 using Flurl.Http.Configuration;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Http;
 

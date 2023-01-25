@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.QualitySize.Guide;
 

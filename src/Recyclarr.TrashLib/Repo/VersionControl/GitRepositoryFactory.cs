@@ -1,5 +1,3 @@
-using Serilog;
-
 namespace Recyclarr.TrashLib.Repo.VersionControl;
 
 public class GitRepositoryFactory : IGitRepositoryFactory

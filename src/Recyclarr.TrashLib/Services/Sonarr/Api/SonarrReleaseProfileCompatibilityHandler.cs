@@ -5,7 +5,6 @@ using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
 using Recyclarr.TrashLib.Services.Sonarr.Api.Schemas;
 using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.Api;
 

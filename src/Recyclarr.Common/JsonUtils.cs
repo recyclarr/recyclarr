@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
-using Serilog;
 
 namespace Recyclarr.Common;
 

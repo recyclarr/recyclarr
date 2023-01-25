@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Serilog;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Templates;

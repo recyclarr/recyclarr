@@ -1,5 +1,4 @@
 using Recyclarr.TrashLib.Services.Sonarr.Config;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Services.Sonarr.ReleaseProfile.Filters;
 

@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using Recyclarr.TrashLib.Config.Yaml;
-using Serilog;
 using Serilog.Context;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;

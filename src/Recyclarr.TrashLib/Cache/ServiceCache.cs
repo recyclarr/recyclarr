@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Recyclarr.Common.Extensions;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Cache;
 

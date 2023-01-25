@@ -1,6 +1,5 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Serilog;
 
 namespace Recyclarr.Common.Extensions;
 

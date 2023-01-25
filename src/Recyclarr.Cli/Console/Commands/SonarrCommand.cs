@@ -8,7 +8,6 @@ using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Services.Processors;
 using Recyclarr.TrashLib.Services.Sonarr;
-using Serilog;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

@@ -3,7 +3,6 @@ using Recyclarr.Common;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Recyclarr.TrashLib.Startup;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Repo;
 

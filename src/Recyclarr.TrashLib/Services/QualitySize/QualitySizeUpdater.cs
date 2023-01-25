@@ -2,7 +2,6 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Services.Common;
 using Recyclarr.TrashLib.Services.QualitySize.Api;
-using Serilog;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Services.QualitySize;

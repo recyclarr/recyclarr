@@ -5,7 +5,6 @@ using MoreLinq;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
-using Serilog;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;

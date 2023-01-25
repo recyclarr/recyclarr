@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Logging;
 using Recyclarr.TrashLib.Config.Settings;
-using Serilog;
 
 namespace Recyclarr.Cli.Console.Setup;
 
