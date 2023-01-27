@@ -14,7 +14,7 @@ public static class FlurlLogging
         {
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Request: {Method} {Url}", call.HttpRequestMessage.Method, url);
-            LogBody(log, call.RequestBody);
+            LogBody(log, url, call.RequestBody);
         };
 
         settings.AfterCallAsync = async call =>
@@ -26,7 +26,7 @@ public static class FlurlLogging
             var content = call.Response?.ResponseMessage.Content;
             if (content is not null)
             {
-                LogBody(log, await content.ReadAsStringAsync());
+                LogBody(log, url, await content.ReadAsStringAsync());
             }
         };
 
@@ -42,7 +42,7 @@ public static class FlurlLogging
         };
     }
 
-    private static void LogBody(ILogger log, string? body)
+    private static void LogBody(ILogger log, Url url, string? body)
     {
         if (body is null)
         {
@@ -50,7 +50,7 @@ public static class FlurlLogging
         }
 
         body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body));
-        log.Debug("HTTP Body: {Body}", body);
+        log.Verbose("HTTP Body: {Url} {Body}", url, body);
     }
 
     public static Url SanitizeUrl(Url url)

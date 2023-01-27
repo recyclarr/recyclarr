@@ -62,4 +62,10 @@ public static class FileSystemExtensions
     {
         return Regex.Replace(path, $"^{Regex.Escape(oldDir)}", newDir);
     }
+
+    public static IDirectoryInfo SubDir(this IDirectoryInfo dir, params string[] subdirectories)
+    {
+        return subdirectories.Aggregate(dir,
+            (d, s) => d.FileSystem.DirectoryInfo.New(d.FileSystem.Path.Combine(d.FullName, s)));
+    }
 }

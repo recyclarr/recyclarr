@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Common.Serilog;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Startup;
@@ -47,13 +48,24 @@ public class LoggerFactory
 
     public ILogger Create()
     {
-        var logPath = _paths.LogDirectory.File($"trash_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
+        var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
+        var logDir = _paths.LogDirectory.SubDir("cli");
+
+        string LogFilePath(string type)
+        {
+            return logDir.File($"{logFilePrefix}.{type}.log").FullName;
+        }
 
         return new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Debug)
+            .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.With<ExceptionMessageEnricher>()
             .WriteTo.Console(GetConsoleTemplate(), levelSwitch: _levelSwitch)
-            .WriteTo.File(GetFileTemplate(), logPath.FullName)
+            .WriteTo.Logger(c => c
+                .MinimumLevel.Debug()
+                .WriteTo.File(GetFileTemplate(), LogFilePath("debug")))
+            .WriteTo.Logger(c => c
+                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
+                .WriteTo.File(GetFileTemplate(), LogFilePath("verbose")))
             .Enrich.FromLogContext()
             .CreateLogger();
     }

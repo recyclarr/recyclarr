@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Log files are restructured. They are now under `logs/cli`.
+- Log files are split. There is now a `verbose.log` and `debug.log` for every run. The time stamps
+  between the two will be identical.
+
 ## [4.3.0] - 2023-01-22
 
 ### Added
