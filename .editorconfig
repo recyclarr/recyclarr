@@ -331,6 +331,7 @@ resharper_csharp_naming_rule.other = AaBb
 resharper_csharp_prefer_qualified_reference = false
 resharper_csharp_space_after_unary_operator = false
 resharper_csharp_stick_comment = false
+resharper_csharp_wrap_after_declaration_lpar = true
 resharper_csharp_wrap_lines = true
 resharper_cxxcli_property_declaration_braces = next_line
 resharper_default_exception_variable_name = e
