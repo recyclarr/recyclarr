@@ -38,7 +38,7 @@ Main documentation is located in [the wiki](https://recyclarr.dev/wiki). Links p
 some main topics.
 
 - [Installation](https://recyclarr.dev/wiki/installation/)
-- [Command Line Reference](https://recyclarr.dev/wiki/reference/cli-reference)
-- [Configuration Reference](https://recyclarr.dev/wiki/reference/config-reference)
-- [Settings Reference](https://recyclarr.dev/wiki/reference/settings-reference)
-- [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting)
+- [Command Line Reference](https://recyclarr.dev/wiki/cli/)
+- [Configuration Reference](https://recyclarr.dev/wiki/yaml/config-reference)
+- [Settings Reference](https://recyclarr.dev/wiki/yaml/settings-reference)
+- [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help)
