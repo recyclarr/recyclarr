@@ -8,11 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `replace_existing_custom_formats` property that can be set to `false` to disallow updates to
+  existing CFs that Recyclarr never created in the first place. The default is `true`.
+- New `quality_profiles` section supported for specifying information about quality profiles. For
+  now, this section doesn't do much, but paves the way for quality profile syncing.
+
 ### Changed
 
 - Log files are restructured. They are now under `logs/cli`.
 - Log files are split. There is now a `verbose.log` and `debug.log` for every run. The time stamps
-  between the two will be identical.
+  (in the file name) between the two will be identical.
+
+### Deprecated
+
+- `replace_existing_custom_formats` must be explicitly specified, otherwise you will get a
+  deprecation warning. In a future release, the default will change from `true` to `false`. To
+  prepare for that, users must explicitly state what behavior they want to avoid unwanted behavior
+  in the future.
+- `reset_unmatched_scores` is being moved to the `quality_profiles` section; a deprecation message
+  will be logged until it is moved.
+
+### Fixed
+
+- Deleted custom formats are now included in the log message showing the count of CFs synced.
 
 ## [4.3.0] - 2023-01-22
 
