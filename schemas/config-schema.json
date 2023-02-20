@@ -97,11 +97,6 @@
                 "score": {
                   "type": "integer",
                   "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."
-                },
-                "reset_unmatched_scores": {
-                  "type": "boolean",
-                  "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
-                  "default": false
                 }
               }
             }
@@ -125,6 +120,25 @@
         }
       }
     },
+    "quality_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reset_unmatched_scores": {
+            "type": "boolean",
+            "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
+            "default": false
+          }
+        }
+      }
+    },
     "radarr_instance": {
       "type": "object",
       "additionalProperties": false,
@@ -145,6 +159,9 @@
         },
         "quality_definition": {
           "$ref": "#/$defs/quality_definition"
+        },
+        "quality_profiles": {
+          "$ref": "#/$defs/quality_profiles"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
@@ -177,6 +194,9 @@
         },
         "quality_definition": {
           "$ref": "#/$defs/quality_definition"
+        },
+        "quality_profiles": {
+          "$ref": "#/$defs/quality_profiles"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
