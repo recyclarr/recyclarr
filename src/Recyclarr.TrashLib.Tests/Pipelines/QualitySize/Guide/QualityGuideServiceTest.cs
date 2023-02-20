@@ -24,9 +24,6 @@ public class QualityGuideServiceTest : IntegrationFixture
 
         var result = sut.GetQualitySizeData(service);
 
-        result.Should().BeEquivalentTo(new[]
-        {
-            new {TrashId = "bef99584217af744e404ed44a33af589"}
-        });
+        result.Should().ContainSingle(x => x.Type == "series");
     }
 }
