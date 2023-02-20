@@ -16,7 +16,10 @@ public class EnvironmentVariablesDeserializer : INodeDeserializer
         _environment = environment;
     }
 
-    public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object?> nestedObjectDeserializer,
+    public bool Deserialize(
+        IParser reader,
+        Type expectedType,
+        Func<IParser, Type, object?> nestedObjectDeserializer,
         out object? value)
     {
         // Only process items flagged as Environment Variables

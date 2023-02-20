@@ -1,35 +1,35 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
-
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedMember.Global
 
 namespace Recyclarr.Common.TestLibrary;
 
 public static class CommonMockFileSystemExtensions
 {
-    public static void AddFileFromResource(this MockFileSystem fs, string resourceFilename)
+    public static void AddFileFromEmbeddedResource(
+        this MockFileSystem fs,
+        IFileInfo path,
+        Assembly resourceAssembly,
+        string embeddedResourcePath)
     {
-        fs.AddFileFromResource(resourceFilename, resourceFilename, Assembly.GetCallingAssembly());
+        fs.AddFileFromEmbeddedResource(path.FullName, resourceAssembly, embeddedResourcePath);
     }
 
-    public static void AddFileFromResource(this MockFileSystem fs, IFileInfo file, string resourceFilename,
-        string resourceDir = "Data")
+    public static void AddSameFileFromEmbeddedResource(
+        this MockFileSystem fs,
+        IFileInfo path,
+        Type typeInAssembly,
+        string resourceSubPath = "Data")
     {
-        fs.AddFileFromResource(file.FullName, resourceFilename, Assembly.GetCallingAssembly(), resourceDir);
+        fs.AddFileFromEmbeddedResource(path, typeInAssembly, $"{resourceSubPath}.{path.Name}");
     }
 
-    public static void AddFileFromResource(this MockFileSystem fs, string file, string resourceFilename,
-        string resourceDir = "Data")
+    public static void AddFileFromEmbeddedResource(
+        this MockFileSystem fs,
+        IFileInfo path,
+        Type typeInAssembly,
+        string embeddedResourcePath)
     {
-        fs.AddFileFromResource(file, resourceFilename, Assembly.GetCallingAssembly(), resourceDir);
-    }
-
-    public static void AddFileFromResource(this MockFileSystem fs, string file, string resourceFilename,
-        Assembly assembly, string resourceDir = "Data")
-    {
-        var resourceReader = new ResourceDataReader(assembly, resourceDir);
-        fs.AddFile(file, new MockFileData(resourceReader.ReadData(resourceFilename)));
+        var resourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath}";
+        fs.AddFileFromEmbeddedResource(path, typeInAssembly.Assembly, resourcePath);
     }
 }

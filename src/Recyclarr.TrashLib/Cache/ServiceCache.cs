@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Cache;
 
@@ -29,9 +30,9 @@ public class ServiceCache : IServiceCache
 
     private ILogger Log { get; }
 
-    public T? Load<T>() where T : class
+    public T? Load<T>(IServiceConfiguration config) where T : class
     {
-        var path = PathFromAttribute<T>();
+        var path = PathFromAttribute<T>(config);
         if (!path.Exists)
         {
             return null;
@@ -52,9 +53,9 @@ public class ServiceCache : IServiceCache
         return null;
     }
 
-    public void Save<T>(T obj) where T : class
+    public void Save<T>(T obj, IServiceConfiguration config) where T : class
     {
-        var path = PathFromAttribute<T>();
+        var path = PathFromAttribute<T>(config);
         path.CreateParentDirectory();
 
         var serializer = JsonSerializer.Create(_jsonSettings);
@@ -74,7 +75,7 @@ public class ServiceCache : IServiceCache
         return attribute.Name;
     }
 
-    private IFileInfo PathFromAttribute<T>()
+    private IFileInfo PathFromAttribute<T>(IServiceConfiguration config)
     {
         var objectName = GetCacheObjectNameAttribute<T>();
         if (!AllowedObjectNameCharacters.IsMatch(objectName))
@@ -82,6 +83,6 @@ public class ServiceCache : IServiceCache
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
 
-        return _storagePath.CalculatePath(objectName);
+        return _storagePath.CalculatePath(config, objectName);
     }
 }

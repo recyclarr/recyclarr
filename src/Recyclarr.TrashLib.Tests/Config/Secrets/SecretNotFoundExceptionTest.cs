@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.TrashLib.Config.Secrets;
 
 namespace Recyclarr.TrashLib.Tests.Config.Secrets;

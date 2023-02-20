@@ -49,6 +49,7 @@
 
   <!-- TEST ONLY PACKAGES -->
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('TestLibrary'))">
+    <PackageReference Include="AgileObjects.ReadableExpressions" PrivateAssets="All" />
     <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
     <PackageReference Include="AutoFixture" PrivateAssets="All" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="All" />
@@ -68,6 +69,14 @@
     <PackageReference Include="Spectre.Console.Testing" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('TestLibrary'))">
+    <Using Include="NUnit.Framework" />
+    <Using Include="NSubstitute" />
+    <Using Include="FluentAssertions" />
+    <Using Include="AutoFixture.NUnit3" />
+    <Using Include="System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('TestLibrary'))">

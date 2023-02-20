@@ -1,8 +1,8 @@
 using Flurl.Http;
 using Flurl.Http.Configuration;
-using Newtonsoft.Json;
 using Recyclarr.Common.Networking;
 using Recyclarr.TrashLib.Config.Settings;
+using Recyclarr.TrashLib.Json;
 
 namespace Recyclarr.TrashLib.Http;
 
@@ -30,12 +30,7 @@ public class FlurlClientFactory : IFlurlClientFactory
     {
         var settings = new ClientFlurlHttpSettings
         {
-            JsonSerializer = new NewtonsoftJsonSerializer(new JsonSerializerSettings
-            {
-                // This makes sure that null properties, such as maxSize and preferredSize in Radarr
-                // Quality Definitions, do not get written out to JSON request bodies.
-                NullValueHandling = NullValueHandling.Ignore
-            })
+            JsonSerializer = new NewtonsoftJsonSerializer(ServiceJsonSerializerFactory.Settings)
         };
 
         FlurlLogging.SetupLogging(settings, _log);

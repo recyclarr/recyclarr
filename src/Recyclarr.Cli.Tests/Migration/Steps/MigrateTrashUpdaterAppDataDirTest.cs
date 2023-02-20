@@ -1,8 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;

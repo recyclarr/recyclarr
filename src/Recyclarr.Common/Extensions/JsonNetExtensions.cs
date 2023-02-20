@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Recyclarr.Common.Extensions;
@@ -20,5 +21,11 @@ public static class JsonNetExtensions
         }
 
         return value;
+    }
+
+    public static T Clone<T>(this T source) where T : notnull
+    {
+        return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source))
+            ?? throw new ArgumentException("Could not deep clone", nameof(source));
     }
 }

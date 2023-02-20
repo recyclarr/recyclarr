@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using AutoFixture.NUnit3;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 

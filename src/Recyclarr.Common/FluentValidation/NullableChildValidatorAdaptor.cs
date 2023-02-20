@@ -11,7 +11,9 @@ internal sealed class NullableChildValidatorAdaptor<T, TProperty> : ChildValidat
     {
     }
 
-    public override Task<bool> IsValidAsync(ValidationContext<T> context, TProperty? value,
+    public override Task<bool> IsValidAsync(
+        ValidationContext<T> context,
+        TProperty? value,
         CancellationToken cancellation)
     {
         return base.IsValidAsync(context, value!, cancellation);

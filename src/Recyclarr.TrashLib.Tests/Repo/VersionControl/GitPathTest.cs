@@ -1,8 +1,3 @@
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Repo.VersionControl;
 

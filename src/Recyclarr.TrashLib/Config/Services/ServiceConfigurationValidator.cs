@@ -1,8 +1,8 @@
 using FluentValidation;
 using JetBrains.Annotations;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config.Services.Radarr;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 
 namespace Recyclarr.TrashLib.Config.Services;
 
@@ -14,7 +14,6 @@ internal class ServiceConfigurationValidator : AbstractValidator<ServiceConfigur
         IValidator<RadarrConfiguration> radarrValidator)
     {
         RuleFor(x => x.InstanceName).NotEmpty();
-        RuleFor(x => x.ServiceName).NotEmpty();
         RuleFor(x => x.LineNumber).NotEqual(0);
         RuleFor(x => x.BaseUrl).Must(x => x.Scheme is "http" or "https")
             .WithMessage("Property 'base_url' is required and must be a valid URL");

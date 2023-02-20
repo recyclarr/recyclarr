@@ -1,11 +1,9 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Services.Processors;
+using Recyclarr.TrashLib.Processors;
 
 namespace Recyclarr.TrashLib.Tests.Services.Processors;
 

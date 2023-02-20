@@ -1,13 +1,9 @@
 using System.Collections.ObjectModel;
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.TrashLib.Cache;
-using Recyclarr.TrashLib.Services.CustomFormat;
-using Recyclarr.TrashLib.Services.CustomFormat.Models;
-using Recyclarr.TrashLib.Services.CustomFormat.Models.Cache;
+using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Cache;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Models;
 using Recyclarr.TrashLib.TestLibrary;
-using Serilog;
 
 namespace Recyclarr.TrashLib.Tests.CustomFormat;
 
@@ -30,52 +26,50 @@ public class CachePersisterTest
 
     [TestCase(CustomFormatCache.LatestVersion - 1)]
     [TestCase(CustomFormatCache.LatestVersion + 1)]
-    public void Set_loaded_cache_to_null_if_versions_mismatch(int versionToTest)
+    public void Throw_when_versions_mismatch(int versionToTest)
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         var testCfObj = new CustomFormatCache
         {
             Version = versionToTest,
             TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
-        ctx.Persister.Load();
-        ctx.Persister.CfCache.Should().BeNull();
+
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+
+        var act = () => ctx.Persister.Load(config);
+
+        act.Should().Throw<CacheException>();
     }
 
     [Test]
     public void Accept_loaded_cache_when_versions_match()
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         var testCfObj = new CustomFormatCache
         {
             Version = CustomFormatCache.LatestVersion,
             TrashIdMappings = new Collection<TrashIdMapping> {new("", "", 5)}
         };
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
-        ctx.Persister.Load();
-        ctx.Persister.CfCache.Should().NotBeNull();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+        var result = ctx.Persister.Load(config);
+        result.Should().NotBeNull();
     }
 
     [Test]
-    public void Cf_cache_is_valid_after_successful_load()
+    public void Cache_is_valid_after_successful_load()
     {
         var ctx = new Context();
         var testCfObj = new CustomFormatCache();
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+        var config = Substitute.For<IServiceConfiguration>();
 
-        ctx.Persister.Load();
-        ctx.Persister.CfCache.Should().BeSameAs(testCfObj);
-    }
-
-    [Test]
-    public void Cf_cache_returns_null_if_not_loaded()
-    {
-        var ctx = new Context();
-        ctx.Persister.Load();
-        ctx.Persister.CfCache.Should().BeNull();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
+        var result = ctx.Persister.Load(config);
+        result.Should().BeSameAs(testCfObj);
     }
 
     [Test]
@@ -83,77 +77,62 @@ public class CachePersisterTest
     {
         var ctx = new Context();
         var testCfObj = new CustomFormatCache();
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(testCfObj);
+        var config = Substitute.For<IServiceConfiguration>();
 
-        ctx.Persister.Load();
-        ctx.Persister.Save();
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(testCfObj);
 
-        ctx.ServiceCache.Received().Save(Arg.Is(testCfObj));
-    }
+        var result = ctx.Persister.Load(config);
+        ctx.Persister.Save(config, result);
 
-    [Test]
-    public void Saving_without_loading_does_nothing()
-    {
-        var ctx = new Context();
-        ctx.Persister.Save();
-        ctx.ServiceCache.DidNotReceive().Save(Arg.Any<object>());
+        ctx.ServiceCache.Received().Save(testCfObj, config);
     }
 
     [Test]
     public void Updating_overwrites_previous_cf_cache_and_updates_cf_data()
     {
         var ctx = new Context();
+        var config = Substitute.For<IServiceConfiguration>();
 
         // Load initial CfCache just to test that it gets replaced
-        ctx.ServiceCache.Load<CustomFormatCache>().Returns(new CustomFormatCache
+        ctx.ServiceCache.Load<CustomFormatCache>(config).Returns(new CustomFormatCache
         {
             TrashIdMappings = new Collection<TrashIdMapping> {new("trashid", "", 1)}
         });
-        ctx.Persister.Load();
+
+        var result = ctx.Persister.Load(config);
 
         // Update with new cached items
-        var customFormatData = new List<ProcessedCustomFormatData>
+        var customFormatData = new List<CustomFormatData>
         {
-            NewCf.Processed("trashid", "name", 5)
+            NewCf.Data("trashid", "name", 5)
         };
-        ctx.Persister.Update(customFormatData);
 
-        ctx.Persister.CfCache.Should().BeEquivalentTo(new CustomFormatCache
+        result = result.Update(customFormatData);
+
+        result.Should().BeEquivalentTo(new CustomFormatCache
         {
             TrashIdMappings = new Collection<TrashIdMapping>
             {
-                new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].FormatId)
+                new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].Id)
             }
         });
     }
 
     [Test]
-    public void Saving_skips_custom_formats_with_zero_id()
+    public void Cache_update_skips_custom_formats_with_zero_id()
     {
-        var ctx = new Context();
-
         // Update with new cached items
-        var customFormatData = new List<ProcessedCustomFormatData>
+        var customFormatData = new List<CustomFormatData>
         {
-            NewCf.Processed("trashid1", "name", 5),
-            NewCf.Processed("trashid2", "invalid")
+            NewCf.Data("trashid1", "name", 5),
+            NewCf.Data("trashid2", "invalid")
         };
-        ctx.Persister.Update(customFormatData);
 
-        ctx.Persister.CfCache.Should().BeEquivalentTo(new CustomFormatCache
+        var cache = new CustomFormatCache().Update(customFormatData);
+
+        cache.TrashIdMappings.Should().BeEquivalentTo(new Collection<TrashIdMapping>
         {
-            TrashIdMappings = new Collection<TrashIdMapping>
-            {
-                new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].FormatId)
-            }
+            new(customFormatData[0].TrashId, customFormatData[0].Name, customFormatData[0].Id)
         });
-    }
-
-    [Test]
-    public void Updating_sets_cf_cache_without_loading()
-    {
-        var ctx = new Context();
-        ctx.Persister.Update(new List<ProcessedCustomFormatData>());
-        ctx.Persister.CfCache.Should().NotBeNull();
     }
 }

@@ -1,10 +1,5 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib.Services.CustomFormat.Guide;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Tests.CustomFormat.Guide;

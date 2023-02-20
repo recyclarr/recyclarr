@@ -1,11 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using Autofac.Features.Indexed;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Pipelines.QualitySize.Guide;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.Common;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -15,8 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List quality definitions in the guide for a particular service.")]
 internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
-    private readonly IGuideDataLister _lister;
-    private readonly IIndex<SupportedServices, IGuideService> _guideService;
+    private readonly QualitySizeDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
@@ -29,21 +27,16 @@ internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSetti
         public required SupportedServices Service { get; init; }
     }
 
-    public ListQualitiesCommand(
-        IGuideDataLister lister,
-        IIndex<SupportedServices, IGuideService> guideService,
-        IRepoUpdater repoUpdater)
+    public ListQualitiesCommand(QualitySizeDataLister lister, IRepoUpdater repoUpdater)
     {
         _lister = lister;
-        _guideService = guideService;
         _repoUpdater = repoUpdater;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         await _repoUpdater.UpdateRepo();
-        var guideService = _guideService[settings.Service];
-        _lister.ListQualities(guideService.GetQualities());
+        _lister.ListQualities(settings.Service);
         return 0;
     }
 }

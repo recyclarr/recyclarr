@@ -1,8 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
-using AutoFixture.NUnit3;
-using FluentAssertions;
-using NUnit.Framework;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Startup;

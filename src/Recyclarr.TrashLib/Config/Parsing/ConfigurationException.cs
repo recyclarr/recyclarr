@@ -24,7 +24,9 @@ public class ConfigurationException : Exception
     {
     }
 
-    public ConfigurationException(string propertyName, Type deserializableType,
+    public ConfigurationException(
+        string propertyName,
+        Type deserializableType,
         IEnumerable<ValidationFailure> validationFailures)
         : this(propertyName, deserializableType, validationFailures.Select(e => e.ToString()))
     {

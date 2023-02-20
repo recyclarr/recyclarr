@@ -5,7 +5,6 @@ using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Secrets;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
-using Recyclarr.TrashLib.Services.Processors;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 using Module = Autofac.Module;
@@ -40,7 +39,5 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-
-        builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
     }
 }

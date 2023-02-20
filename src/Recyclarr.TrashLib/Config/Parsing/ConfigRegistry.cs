@@ -1,26 +1,35 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Processors;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
 public class ConfigRegistry : IConfigRegistry
 {
-    private readonly Dictionary<SupportedServices, List<ServiceConfiguration>> _configs = new();
+    private readonly Dictionary<SupportedServices, List<IServiceConfiguration>> _configs = new();
 
-    public void Add(SupportedServices configType, ServiceConfiguration config)
+    public void Add(IServiceConfiguration config)
     {
-        _configs.GetOrCreate(configType).Add(config);
+        _configs.GetOrCreate(config.ServiceType).Add(config);
     }
 
-    public IReadOnlyCollection<T> GetConfigsOfType<T>(SupportedServices serviceType) where T : ServiceConfiguration
+    private IEnumerable<IServiceConfiguration> GetConfigsOfType(SupportedServices? serviceType)
     {
-        if (_configs.TryGetValue(serviceType, out var configs))
-        {
-            return configs.Cast<T>().ToList();
-        }
-
-        return Array.Empty<T>();
+        return _configs
+            .Where(x => serviceType is null || serviceType.Value == x.Key)
+            .SelectMany(x => x.Value);
     }
+
+    public IEnumerable<IServiceConfiguration> GetConfigsBasedOnSettings(ISyncSettings settings)
+    {
+        // later, if we filter by "operation type" (e.g. release profiles, CFs, quality sizes) it's just another
+        // ".Where()" in the LINQ expression below.
+        return GetConfigsOfType(settings.Service)
+            .Where(x => settings.Instances.IsEmpty() ||
+                settings.Instances!.Any(y => y.EqualsIgnoreCase(x.InstanceName)));
+    }
+
+    public int Count => _configs.Count;
 
     public bool DoesConfigExist(string name)
     {

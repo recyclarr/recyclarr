@@ -1,12 +1,8 @@
-using FluentAssertions;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.EnvironmentVariables;
 using Recyclarr.TrashLib.Config.Parsing;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.TestLibrary;
 using YamlDotNet.Core;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
@@ -33,7 +29,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -58,7 +54,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -85,7 +81,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -112,7 +108,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -137,7 +133,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new
@@ -161,7 +157,7 @@ sonarr:
 
         var configCollection = sut.LoadFromStream(new StringReader(testYml));
 
-        var config = configCollection.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr);
+        var config = configCollection.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr());
         config.Should().BeEquivalentTo(new[]
         {
             new

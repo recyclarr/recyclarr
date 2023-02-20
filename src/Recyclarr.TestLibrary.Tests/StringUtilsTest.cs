@@ -1,6 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
-
 namespace Recyclarr.TestLibrary.Tests;
 
 [TestFixture]

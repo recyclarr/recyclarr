@@ -1,5 +1,4 @@
 using AutoMapper;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 
 namespace Recyclarr.Cli.Tests;

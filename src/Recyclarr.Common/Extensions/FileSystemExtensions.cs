@@ -21,7 +21,10 @@ public static class FileSystemExtensions
         }
     }
 
-    public static void MergeDirectory(this IFileSystem fs, IDirectoryInfo targetDir, IDirectoryInfo destDir,
+    public static void MergeDirectory(
+        this IFileSystem fs,
+        IDirectoryInfo targetDir,
+        IDirectoryInfo destDir,
         IAnsiConsole? console = null)
     {
         var directories = targetDir

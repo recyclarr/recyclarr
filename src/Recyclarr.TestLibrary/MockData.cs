@@ -1,4 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
 using Newtonsoft.Json;
 
 namespace Recyclarr.TestLibrary;

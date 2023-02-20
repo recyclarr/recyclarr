@@ -1,8 +1,9 @@
 using Flurl.Http;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Http;
 
 public interface IServiceRequestBuilder
 {
-    IFlurlRequest Request(params object[] path);
+    IFlurlRequest Request(IServiceConfiguration config, params object[] path);
 }

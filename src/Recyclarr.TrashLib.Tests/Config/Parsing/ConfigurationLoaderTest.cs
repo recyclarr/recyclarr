@@ -1,21 +1,15 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using Autofac;
-using FluentAssertions;
 using FluentValidation;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 using Recyclarr.TrashLib.Config.Yaml;
-using Recyclarr.TrashLib.Services.Radarr.Config;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
@@ -81,10 +75,10 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var loader = Resolve<IConfigurationLoader>();
         var actual = loader.LoadMany(fileData.Select(x => x.Item1));
 
-        actual.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
+        actual.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
             .Should().BeEquivalentTo(expectedSonarr);
 
-        actual.GetConfigsOfType<RadarrConfiguration>(SupportedServices.Radarr)
+        actual.GetConfigsBasedOnSettings(MockSyncSettings.Radarr())
             .Should().BeEquivalentTo(expectedRadarr);
     }
 
@@ -94,7 +88,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
         var configLoader = Resolve<ConfigurationLoader>();
         var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
 
-        configs.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
+        configs.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
                 new()
@@ -146,7 +140,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
     }
 
     [Test, AutoMockData]
-    public void Do_not_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
+    public void Throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
     {
         const string testYml = @"
 not_wanted:
@@ -157,6 +151,6 @@ not_wanted:
 
         var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
 
-        act.Should().NotThrow();
+        act.Should().Throw<EmptyYamlException>();
     }
 }

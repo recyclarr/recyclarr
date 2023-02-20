@@ -67,6 +67,11 @@
       "description": "If enabled, custom formats that you remove from your YAML configuration OR that are removed from the guide will be deleted from your Radarr instance.",
       "default": false
     },
+    "replace_existing_custom_formats": {
+      "type": "boolean",
+      "description": "If disabled, custom formats that Recyclarr didn't explicitly create or know about will not be replaced.",
+      "default": true
+    },
     "custom_formats": {
       "type": "array",
       "minItems": 1,
@@ -92,11 +97,6 @@
                 "score": {
                   "type": "integer",
                   "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."
-                },
-                "reset_unmatched_scores": {
-                  "type": "boolean",
-                  "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
-                  "default": false
                 }
               }
             }
@@ -120,6 +120,25 @@
         }
       }
     },
+    "quality_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reset_unmatched_scores": {
+            "type": "boolean",
+            "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
+            "default": false
+          }
+        }
+      }
+    },
     "radarr_instance": {
       "type": "object",
       "additionalProperties": false,
@@ -136,13 +155,19 @@
         "api_key": {
           "type": "string",
           "minLength": 1,
-          "description": "The API key from Radarr."
+          "description": "The API key from Radarr"
         },
         "quality_definition": {
           "$ref": "#/$defs/quality_definition"
         },
+        "quality_profiles": {
+          "$ref": "#/$defs/quality_profiles"
+        },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
+        },
+        "replace_existing_custom_formats": {
+          "$ref": "#/$defs/replace_existing_custom_formats"
         },
         "custom_formats": {
           "$ref": "#/$defs/custom_formats"
@@ -170,8 +195,14 @@
         "quality_definition": {
           "$ref": "#/$defs/quality_definition"
         },
+        "quality_profiles": {
+          "$ref": "#/$defs/quality_profiles"
+        },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
+        },
+        "replace_existing_custom_formats": {
+          "$ref": "#/$defs/replace_existing_custom_formats"
         },
         "custom_formats": {
           "$ref": "#/$defs/custom_formats"

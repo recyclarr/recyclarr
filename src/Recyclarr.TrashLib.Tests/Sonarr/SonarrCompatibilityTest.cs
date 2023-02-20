@@ -1,15 +1,13 @@
 using Autofac;
-using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TestLibrary;
-using Recyclarr.TrashLib.Services.Sonarr.Api;
-using Recyclarr.TrashLib.Services.Sonarr.Api.Objects;
-using Recyclarr.TrashLib.Services.Sonarr.Capabilities;
+using Recyclarr.TrashLib.Compatibility.Sonarr;
+using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Api;
+using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Api.Objects;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 
@@ -58,10 +56,10 @@ public class SonarrCompatibilityTest : IntegrationFixture
     }
 
     [Test]
-    public void Send_v2_to_v1()
+    public async Task Send_v2_to_v1()
     {
         var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
-        capabilityChecker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
             ArraysNeededForReleaseProfileRequiredAndIgnored = false
         });
@@ -69,16 +67,16 @@ public class SonarrCompatibilityTest : IntegrationFixture
         var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
 
-        var result = sut.CompatibleReleaseProfileForSending(data);
+        var result = await sut.CompatibleReleaseProfileForSending(Substitute.For<IServiceConfiguration>(), data);
 
         result.Should().BeEquivalentTo(new SonarrReleaseProfileV1 {Ignored = "one,two,three"});
     }
 
     [Test]
-    public void Send_v2_to_v2()
+    public async Task Send_v2_to_v2()
     {
         var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
-        capabilityChecker.GetCapabilities().Returns(new SonarrCapabilities(new Version())
+        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
             ArraysNeededForReleaseProfileRequiredAndIgnored = true
         });
@@ -86,7 +84,7 @@ public class SonarrCompatibilityTest : IntegrationFixture
         var sut = Resolve<SonarrReleaseProfileCompatibilityHandler>();
         var data = new SonarrReleaseProfile {Ignored = new List<string> {"one", "two", "three"}};
 
-        var result = sut.CompatibleReleaseProfileForSending(data);
+        var result = await sut.CompatibleReleaseProfileForSending(Substitute.For<IServiceConfiguration>(), data);
 
         result.Should().BeEquivalentTo(data);
     }

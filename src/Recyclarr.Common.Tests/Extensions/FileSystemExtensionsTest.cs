@@ -1,8 +1,5 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.TestingHelpers;
 using System.Text.RegularExpressions;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary;
 
@@ -12,8 +9,11 @@ namespace Recyclarr.Common.Tests.Extensions;
 [Parallelizable(ParallelScope.All)]
 public class FileSystemExtensionsTest
 {
-    private static IEnumerable<string> ReRootFiles(IFileSystem fs, IEnumerable<string> files,
-        string oldRoot, string newRoot)
+    private static IEnumerable<string> ReRootFiles(
+        IFileSystem fs,
+        IEnumerable<string> files,
+        string oldRoot,
+        string newRoot)
     {
         return files.Select(x =>
         {

@@ -5,9 +5,10 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
+using Recyclarr.TrashLib.Pipelines.QualitySize.Guide;
+using Recyclarr.TrashLib.Processors;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Services.Processors;
-using Recyclarr.TrashLib.Services.Radarr;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -17,7 +18,8 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
 {
     private readonly ILogger _log;
-    private readonly IRadarrGuideDataLister _lister;
+    private readonly CustomFormatDataLister _cfLister;
+    private readonly QualitySizeDataLister _qualityLister;
     private readonly IMigrationExecutor _migration;
     private readonly IRepoUpdater _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
@@ -56,13 +58,15 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
 
     public RadarrCommand(
         ILogger log,
-        IRadarrGuideDataLister lister,
+        CustomFormatDataLister cfLister,
+        QualitySizeDataLister qualityLister,
         IMigrationExecutor migration,
         IRepoUpdater repoUpdater,
         ISyncProcessor syncProcessor)
     {
         _log = log;
-        _lister = lister;
+        _cfLister = cfLister;
+        _qualityLister = qualityLister;
         _migration = migration;
         _repoUpdater = repoUpdater;
         _syncProcessor = syncProcessor;
@@ -77,14 +81,14 @@ internal class RadarrCommand : AsyncCommand<RadarrCommand.CliSettings>
         if (settings.ListCustomFormats)
         {
             _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `list custom-formats radarr` instead!");
-            _lister.ListCustomFormats();
+            _cfLister.ListCustomFormats(SupportedServices.Radarr);
             return 0;
         }
 
         if (settings.ListQualities)
         {
             _log.Warning("The `radarr` subcommand is DEPRECATED -- Use `list qualities radarr` instead!");
-            _lister.ListQualities();
+            _qualityLister.ListQualities(SupportedServices.Radarr);
             return 0;
         }
 

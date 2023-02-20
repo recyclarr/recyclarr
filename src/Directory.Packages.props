@@ -7,6 +7,7 @@
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
     <PackageVersion Include="AutoMapper" Version="12.0.1" />
+    <PackageVersion Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="7.1.0" />
     <PackageVersion Include="CliWrap" Version="3.6.0" />
     <PackageVersion Include="FluentValidation" Version="11.4.0" />
@@ -36,6 +37,7 @@
   </ItemGroup>
   <!-- Unit Test Packages -->
   <ItemGroup>
+    <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
     <PackageVersion Include="AutoFixture" Version="4.17.0" />
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.17.0" />

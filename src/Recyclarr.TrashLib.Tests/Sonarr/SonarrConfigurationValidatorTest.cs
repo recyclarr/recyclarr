@@ -1,8 +1,7 @@
 using FluentValidation.TestHelper;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr;
 
@@ -18,7 +17,7 @@ public class SonarrConfigurationValidatorTest : IntegrationFixture
         var validator = Resolve<SonarrConfigurationValidator>();
         var result = validator.TestValidate(config);
 
-        result.ShouldNotHaveValidationErrorFor(x => x.ServiceName);
+        result.ShouldNotHaveValidationErrorFor(x => x.ServiceType);
     }
 
     [Test]

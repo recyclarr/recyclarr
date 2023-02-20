@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.TrashLib.Config.EnvironmentVariables;
 
 namespace Recyclarr.TrashLib.Tests.Config.EnvironmentVariables;

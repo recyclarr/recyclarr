@@ -1,5 +1,3 @@
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Common.Tests.Extensions;

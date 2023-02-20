@@ -1,11 +1,8 @@
-using System.IO.Abstractions.TestingHelpers;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Secrets;
-using Recyclarr.TrashLib.Services.Sonarr.Config;
+using Recyclarr.TrashLib.Config.Services.Sonarr;
+using Recyclarr.TrashLib.TestLibrary;
 using Serilog.Sinks.TestCorrelator;
 using YamlDotNet.Core;
 
@@ -55,7 +52,7 @@ secret_rp: 1234567
         };
 
         var parsedSecret = configLoader.LoadFromStream(new StringReader(testYml), "sonarr");
-        parsedSecret.GetConfigsOfType<SonarrConfiguration>(SupportedServices.Sonarr)
+        parsedSecret.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
             .Should().BeEquivalentTo(expected, o => o.Excluding(x => x.LineNumber));
     }
 

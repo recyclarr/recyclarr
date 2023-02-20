@@ -1,6 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
-using FluentAssertions;
-using NUnit.Framework;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config.Settings;
 

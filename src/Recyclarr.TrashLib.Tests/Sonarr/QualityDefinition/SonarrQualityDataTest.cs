@@ -1,6 +1,4 @@
-using FluentAssertions;
-using NUnit.Framework;
-using Recyclarr.TrashLib.Services.QualitySize.Guide;
+using Recyclarr.TrashLib.Pipelines.QualitySize.Guide;
 
 namespace Recyclarr.TrashLib.Tests.Sonarr.QualityDefinition;
 
@@ -27,7 +25,9 @@ public class QualitySizeDataTest
     };
 
     [TestCaseSource(nameof(MaxTestValues))]
-    public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal? radarrValue,
+    public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(
+        decimal guideValue,
+        decimal? radarrValue,
         bool isDifferent)
     {
         var data = new QualityItem("", 0, guideValue);
@@ -36,7 +36,9 @@ public class QualitySizeDataTest
     }
 
     [TestCaseSource(nameof(MinTestValues))]
-    public void MinDifferent_WithVariousValues_ReturnsExpectedResult(decimal guideValue, decimal radarrValue,
+    public void MinDifferent_WithVariousValues_ReturnsExpectedResult(
+        decimal guideValue,
+        decimal radarrValue,
         bool isDifferent)
     {
         var data = new QualityItem("", guideValue, 0);
