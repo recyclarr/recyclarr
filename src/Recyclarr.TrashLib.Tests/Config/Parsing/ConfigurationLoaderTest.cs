@@ -140,7 +140,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
     }
 
     [Test, AutoMockData]
-    public void Throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
+    public void No_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
     {
         const string testYml = @"
 not_wanted:
@@ -151,6 +151,6 @@ not_wanted:
 
         var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
 
-        act.Should().Throw<EmptyYamlException>();
+        act.Should().NotThrow();
     }
 }
