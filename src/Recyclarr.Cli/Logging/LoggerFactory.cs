@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Common.Serilog;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Startup;
@@ -49,7 +48,7 @@ public class LoggerFactory
     public ILogger Create()
     {
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
-        var logDir = _paths.LogDirectory.SubDir("cli");
+        var logDir = _paths.LogDirectory;
 
         string LogFilePath(string type)
         {

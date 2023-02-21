@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using MoreLinq.Extensions;
 using Recyclarr.Cli.Logging;
+using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.TestLibrary;
 
@@ -17,14 +17,19 @@ public class LogJanitorTest
         LogJanitor janitor)
     {
         var testFiles = new[]
-        {
-            paths.LogDirectory.File("trash_2021-05-15_19-00-00.log"),
-            paths.LogDirectory.File("trash_2021-05-15_20-00-00.log"),
-            paths.LogDirectory.File("trash_2021-05-15_21-00-00.log"),
-            paths.LogDirectory.File("trash_2021-05-15_22-00-00.log")
-        };
+            {
+                "trash_2021-05-15_19-00-00.log",
+                "trash_2021-05-15_20-00-00.log",
+                "trash_2021-05-15_21-00-00.log",
+                "trash_2021-05-15_22-00-00.log"
+            }
+            .Select(x => paths.LogDirectory.File(x))
+            .ToList();
 
-        testFiles.ForEach(x => fs.AddFile(x.FullName, new MockFileData("")));
+        foreach (var file in testFiles)
+        {
+            fs.AddEmptyFile(file);
+        }
 
         janitor.DeleteOldestLogFiles(2);
 

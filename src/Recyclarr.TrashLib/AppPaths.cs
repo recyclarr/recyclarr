@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib;
@@ -18,8 +19,8 @@ public class AppPaths : IAppPaths
     public IFileInfo ConfigPath => AppDataDirectory.File(DefaultConfigFilename);
     public IFileInfo SettingsPath => AppDataDirectory.File("settings.yml");
     public IFileInfo SecretsPath => AppDataDirectory.File("secrets.yml");
-    public IDirectoryInfo LogDirectory => AppDataDirectory.SubDirectory("logs");
-    public IDirectoryInfo RepoDirectory => AppDataDirectory.SubDirectory("repo");
-    public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDirectory("cache");
-    public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDirectory("configs");
+    public IDirectoryInfo LogDirectory => AppDataDirectory.SubDir("logs", "cli");
+    public IDirectoryInfo RepoDirectory => AppDataDirectory.SubDir("repo");
+    public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDir("cache");
+    public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDir("configs");
 }
