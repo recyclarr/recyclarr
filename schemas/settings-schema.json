@@ -26,6 +26,11 @@
           "type": "string",
           "title": "A SHA1 (commit hash) in Git to use",
           "description": "If specified, it overrides the `branch` setting. This SHA1 is passed to `git reset --hard` to force your local clone to this specific revision in the repository. If not specified, only the `branch` controls what revision is used in the repo."
+        },
+        "git_path": {
+          "type": "string",
+          "title": "Provide an explicit path to your git executable",
+          "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
         }
       }
     },
@@ -34,6 +39,20 @@
       "title": "Allow SSL certificate validation for Sonarr & Radarr",
       "description": "If set to `false`, SSL certificates are not validated. This is useful if you are connecting to a Sonarr or Radarr instance using `https` and it is set up with self-signed certificates. Note that disabling this setting is a **security risk** and should be avoided unless you are absolutely sure what you are doing.",
       "default": false
+    },
+    "log_janitor": {
+      "type": "object",
+      "additionalProperties": false,
+      "title": "Settings for the log janitor",
+      "properties": {
+        "max_files": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 20,
+          "title": "The maximum number of log files to keep",
+          "description": "If there are more log files than the max allowed here, Log Janitor will remove the oldest log files."
+        }
+      }
     }
   }
 }
