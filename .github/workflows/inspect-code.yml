@@ -36,7 +36,7 @@ jobs:
         run: dotnet restore src
 
       - name: Inspect Code
-        uses: muno92/resharper_inspectcode@1.6.7
+        uses: muno92/resharper_inspectcode@1.6.8
         with:
           workingDirectory: src
           solutionPath: Recyclarr.sln
