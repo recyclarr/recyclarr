@@ -85,7 +85,6 @@ public class ConfigurationLoader : IConfigurationLoader
         if (_parser.Configs.Count == 0)
         {
             _log.Debug("Document isn't empty, but still yielded no configs");
-            throw new EmptyYamlException();
         }
 
         return _parser.Configs;
@@ -114,7 +113,8 @@ public class ConfigurationLoader : IConfigurationLoader
 
             if (!ParseSingleSection(parser))
             {
-                break;
+                parser.SkipThisAndNestedEvents();
+                continue;
             }
         }
     }
