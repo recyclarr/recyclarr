@@ -27,6 +27,8 @@ public class CustomFormatTransactionPhase
         {
             _log.Debug("Process transaction for guide CF {TrashId} ({Name})", guideCf.TrashId, guideCf.Name);
 
+            guideCf.Id = cache.FindId(guideCf) ?? 0;
+
             var serviceCf = FindServiceCfByName(serviceData, guideCf.Name);
             if (serviceCf is not null)
             {
@@ -37,8 +39,9 @@ public class CustomFormatTransactionPhase
                     if (guideCf.Id != serviceCf.Id)
                     {
                         _log.Debug(
-                            "Format IDs for CF {Name} did not match which indicates a manually-created CF is replaced",
-                            serviceCf.Name);
+                            "Format IDs for CF {Name} did not match which indicates a manually-created CF is " +
+                            "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
+                            serviceCf.Name, guideCf.Id, serviceCf.Id);
 
                         guideCf.Id = serviceCf.Id;
                     }
@@ -49,7 +52,6 @@ public class CustomFormatTransactionPhase
                 {
                     // NO replace:
                     // - ids must match (can't rename another cf to the same name), otherwise error
-                    guideCf.Id = cache.FindId(guideCf) ?? 0;
                     if (guideCf.Id != serviceCf.Id)
                     {
                         transactions.ConflictingCustomFormats.Add(
@@ -63,8 +65,6 @@ public class CustomFormatTransactionPhase
 
                 continue;
             }
-
-            guideCf.Id = cache.FindId(guideCf) ?? 0;
 
             serviceCf = FindServiceCfById(serviceData, guideCf.Id);
             if (serviceCf is not null)
