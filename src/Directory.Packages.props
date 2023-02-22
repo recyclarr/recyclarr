@@ -10,16 +10,16 @@
     <PackageVersion Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="7.1.0" />
     <PackageVersion Include="CliWrap" Version="3.6.0" />
-    <PackageVersion Include="FluentValidation" Version="11.4.0" />
+    <PackageVersion Include="FluentValidation" Version="11.5.1" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
     <PackageVersion Include="Flurl.Http" Version="3.2.4" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageVersion Include="morelinq" Version="3.3.2" />
-    <PackageVersion Include="MudBlazor" Version="6.1.7" />
+    <PackageVersion Include="MudBlazor" Version="6.1.9" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.1" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.22" />
     <PackageVersion Include="Serilog" Version="2.12.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageVersion Include="Serilog.Expressions" Version="3.4.1" />
@@ -30,32 +30,32 @@
     <PackageVersion Include="Spectre.Console.Cli" Version="0.46.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.1.5" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.1.18" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.39" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.1.5" />
-    <PackageVersion Include="YamlDotNet" Version="12.3.1" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.1.18" />
+    <PackageVersion Include="YamlDotNet" Version="13.0.1" />
   </ItemGroup>
   <!-- Unit Test Packages -->
   <ItemGroup>
     <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.0.0" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
-    <PackageVersion Include="AutoFixture" Version="4.17.0" />
-    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.17.0" />
-    <PackageVersion Include="AutoFixture.NUnit3" Version="4.17.0" />
+    <PackageVersion Include="AutoFixture" Version="4.18.0" />
+    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.18.0" />
+    <PackageVersion Include="AutoFixture.NUnit3" Version="4.18.0" />
     <PackageVersion Include="coverlet.collector" Version="3.2.0" />
-    <PackageVersion Include="FluentAssertions" Version="6.9.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.10.0" />
     <PackageVersion Include="FluentAssertions.Json" Version="6.1.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.0.1" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
-    <PackageVersion Include="NSubstitute" Version="4.4.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageVersion Include="NSubstitute" Version="5.0.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.16" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
-    <PackageVersion Include="NUnit.Analyzers" Version="3.5.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="3.6.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.3.1" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.46.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.1.5" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.1.18" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
