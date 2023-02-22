@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Deleted custom formats are now included in the log message showing the count of CFs synced.
+- An error will now be presented if an invalid option is specified on the CLI.
 
 ## [4.3.0] - 2023-01-22
 

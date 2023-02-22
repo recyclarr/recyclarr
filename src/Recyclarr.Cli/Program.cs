@@ -38,6 +38,8 @@ internal static partial class Program
         #endif
 
             config.Settings.PropagateExceptions = true;
+            config.Settings.StrictParsing = true;
+
             config.SetApplicationName("recyclarr");
             // config.SetApplicationVersion("v1.2.3");
 
