@@ -43,7 +43,7 @@ public class QualityProfileApiPersistencePhase
                 }
             }
 
-            _log.Debug("Updated {ProfileCount} profiles and a total of {ScoreCount} scores",
+            _log.Information("Updated {ProfileCount} profiles and a total of {ScoreCount} scores",
                 transactions.UpdatedProfiles.Count,
                 updatedScores.Sum(s => s.UpdatedScores.Count));
         }
