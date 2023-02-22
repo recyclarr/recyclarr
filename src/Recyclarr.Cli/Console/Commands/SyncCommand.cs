@@ -27,25 +27,21 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
     {
         [CommandArgument(0, "[service]")]
         [EnumDescription<SupportedServices>("The service to sync. If not specified, all services are synced.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public SupportedServices? Service { get; init; }
+        public SupportedServices? Service { get; [UsedImplicitly] init; }
 
         [CommandOption("-c|--config")]
         [Description("One or more YAML configuration files to load & use.")]
         [TypeConverter(typeof(FileInfoConverter))]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public IFileInfo[] ConfigsOption { get; init; } = Array.Empty<IFileInfo>();
+        public IFileInfo[] ConfigsOption { get; [UsedImplicitly] init; } = Array.Empty<IFileInfo>();
         public IReadOnlyCollection<IFileInfo> Configs => ConfigsOption;
 
         [CommandOption("-p|--preview")]
         [Description("Perform a dry run: preview the results without syncing.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public bool Preview { get; init; }
+        public bool Preview { get; [UsedImplicitly] init; }
 
         [CommandOption("-i|--instance")]
         [Description("One or more instance names to sync. If not specified, all instances will be synced.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] InstancesOption { get; init; } = Array.Empty<string>();
+        public string[] InstancesOption { get; [UsedImplicitly] init; } = Array.Empty<string>();
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 
