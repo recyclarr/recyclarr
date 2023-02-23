@@ -11,5 +11,5 @@ Function gig {
     Out-File -FilePath $(Join-Path -path $pwd -ChildPath ".gitignore") -Encoding ascii
 }
 
-gig windows,rider,csharp
+gig windows,rider,csharp,macos
 git commit -m 'chore(git): Latest .gitignore from gitignore.io' -- .gitignore
