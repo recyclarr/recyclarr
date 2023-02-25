@@ -26,6 +26,7 @@ public static class CliSetup
         {
             config.SetDescription("Operations for configuration files");
             config.AddCommand<ConfigCreateCommand>("create");
+            config.AddCommand<ConfigListCommand>("list");
         });
 
         // LEGACY / DEPRECATED SUBCOMMANDS

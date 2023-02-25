@@ -23,9 +23,27 @@ public static class CommonMockFileSystemExtensions
         fs.AddFileFromEmbeddedResource(path, typeInAssembly, $"{resourceSubPath}.{path.Name}");
     }
 
+    public static void AddSameFileFromEmbeddedResource(
+        this MockFileSystem fs,
+        string path,
+        Type typeInAssembly,
+        string resourceSubPath = "Data")
+    {
+        fs.AddFileFromEmbeddedResource(fs.FileInfo.New(path), typeInAssembly, resourceSubPath);
+    }
+
     public static void AddFileFromEmbeddedResource(
         this MockFileSystem fs,
         IFileInfo path,
+        Type typeInAssembly,
+        string embeddedResourcePath)
+    {
+        fs.AddFileFromEmbeddedResource(path.FullName, typeInAssembly, embeddedResourcePath);
+    }
+
+    public static void AddFileFromEmbeddedResource(
+        this MockFileSystem fs,
+        string path,
         Type typeInAssembly,
         string embeddedResourcePath)
     {

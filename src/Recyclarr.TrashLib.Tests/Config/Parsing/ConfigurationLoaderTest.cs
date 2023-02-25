@@ -6,7 +6,7 @@ using FluentValidation;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TestLibrary;
+using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services.Sonarr;
 using Recyclarr.TrashLib.Config.Yaml;

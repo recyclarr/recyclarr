@@ -1,0 +1,18 @@
+{
+  "radarr": [
+    {
+      "template": "radarr/hd-bluray-web.yml",
+      "id": "hd-bluray-web"
+    },
+    {
+      "template": "radarr/uhd-bluray-web.yml",
+      "id": "uhd-bluray-web"
+    }
+  ],
+  "sonarr": [
+    {
+      "template": "sonarr/web-1080p-v4.yml",
+      "id": "web-1080p-v4"
+    }
+  ]
+}

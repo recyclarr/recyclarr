@@ -1,8 +1,10 @@
 using System.Reflection;
 using Autofac;
 using FluentValidation;
+using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Secrets;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
 using YamlDotNet.Serialization;
@@ -15,7 +17,7 @@ public class ConfigAutofacModule : Module
 {
     private readonly Assembly[] _assemblies;
 
-    public ConfigAutofacModule(Assembly[] assemblies)
+    public ConfigAutofacModule(params Assembly[] assemblies)
     {
         _assemblies = assemblies;
     }
@@ -39,5 +41,10 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
+        builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>();
+
+        // Config Listers
+        builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigListCategory.Templates);
+        builder.RegisterType<ConfigLocalLister>().Keyed<IConfigLister>(ConfigListCategory.Local);
     }
 }

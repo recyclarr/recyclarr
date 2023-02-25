@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary;
+using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Api;

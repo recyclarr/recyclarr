@@ -1,6 +1,6 @@
 using Autofac;
 
-namespace Recyclarr.TestLibrary;
+namespace Recyclarr.TestLibrary.Autofac;
 
 public static class AutofacTestExtensions
 {

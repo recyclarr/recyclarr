@@ -10,5 +10,6 @@ public class ServiceProcessorsAutofacModule : Module
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
         builder.RegisterType<SyncPipelineExecutor>();
+        builder.RegisterType<ConfigListProcessor>();
     }
 }

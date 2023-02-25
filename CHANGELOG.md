@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   existing CFs that Recyclarr never created in the first place. The default is `true`.
 - New `quality_profiles` section supported for specifying information about quality profiles. For
   now, this section doesn't do much, but paves the way for quality profile syncing.
+- New CLI command: `config list` which lists information about current or available configuration
+  files.
+- New `--templates` argument added to `config list` which will list available configuration YAML
+  templates that can be used in the Trash repo.
 
 ### Changed
 

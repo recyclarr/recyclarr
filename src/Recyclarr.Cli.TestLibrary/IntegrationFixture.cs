@@ -4,7 +4,7 @@ using Autofac;
 using Autofac.Features.ResolveAnything;
 using Recyclarr.Common;
 using Recyclarr.Common.TestLibrary;
-using Recyclarr.TestLibrary;
+using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.ApiServices.System;
 using Recyclarr.TrashLib.Repo.VersionControl;

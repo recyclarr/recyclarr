@@ -19,7 +19,13 @@ public record JsonPaths
     public SonarrMetadata Sonarr { get; init; } = new();
 }
 
+public record RecyclarrMetadata
+{
+    public string Templates { get; init; } = "";
+}
+
 public record RepoMetadata
 {
     public JsonPaths JsonPaths { get; init; } = new();
+    public RecyclarrMetadata Recyclarr { get; init; } = new();
 }

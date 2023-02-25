@@ -8,12 +8,11 @@ public class RepoMetadataBuilder : IRepoMetadataBuilder
     private readonly IAppPaths _paths;
     private readonly Lazy<RepoMetadata> _metadata;
 
-    public RepoMetadataBuilder(
-        IRepoMetadataParser parser,
-        IAppPaths paths)
+    public RepoMetadataBuilder(IAppPaths paths)
     {
         _paths = paths;
-        _metadata = new Lazy<RepoMetadata>(parser.Deserialize);
+        _metadata = new Lazy<RepoMetadata>(()
+            => TrashRepoJsonParser.Deserialize<RepoMetadata>(_paths.RepoDirectory.File("metadata.json")));
     }
 
     public IReadOnlyList<IDirectoryInfo> ToDirectoryInfoList(IEnumerable<string> listOfDirectories)

@@ -114,7 +114,6 @@ public class ConfigurationLoader : IConfigurationLoader
             if (!ParseSingleSection(parser))
             {
                 parser.SkipThisAndNestedEvents();
-                continue;
             }
         }
     }
