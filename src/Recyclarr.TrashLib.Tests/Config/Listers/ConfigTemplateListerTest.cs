@@ -23,7 +23,7 @@ public class ConfigTemplateListerTest : IntegrationFixture
             new TemplatePath(SupportedServices.Radarr, "r1", stubFile, false),
             new TemplatePath(SupportedServices.Radarr, "r2", stubFile, false),
             new TemplatePath(SupportedServices.Sonarr, "s1", stubFile, false),
-            new TemplatePath(SupportedServices.Sonarr, "s2", stubFile, true),
+            new TemplatePath(SupportedServices.Sonarr, "s2", stubFile, true)
         });
 
         sut.List();
