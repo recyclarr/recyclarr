@@ -24,12 +24,12 @@ public class ConfigTemplateLister : IConfigLister
 
         var sonarrRowItems = RenderTemplates(table, data, SupportedServices.Sonarr);
         var radarrRowItems = RenderTemplates(table, data, SupportedServices.Radarr);
-        var items = radarrRowItems
-            .ZipLongest(sonarrRowItems, (l, r) => (l ?? empty, r ?? empty));
+        var items = sonarrRowItems
+            .ZipLongest(radarrRowItems, (s, r) => (s ?? empty, r ?? empty));
 
-        foreach (var (r, s) in items)
+        foreach (var (s, r) in items)
         {
-            table.AddRow(r, s);
+            table.AddRow(s, r);
         }
 
         _console.Write(table);
