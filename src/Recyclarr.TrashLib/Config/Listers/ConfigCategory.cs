@@ -1,6 +1,6 @@
 namespace Recyclarr.TrashLib.Config.Listers;
 
-public enum ConfigListCategory
+public enum ConfigCategory
 {
     Local,
     Templates

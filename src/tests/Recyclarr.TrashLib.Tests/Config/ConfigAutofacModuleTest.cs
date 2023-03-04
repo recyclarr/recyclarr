@@ -8,15 +8,15 @@ namespace Recyclarr.TrashLib.Tests.Config;
 [Parallelizable(ParallelScope.All)]
 public class ConfigAutofacModuleTest : TrashLibIntegrationFixture
 {
-    private static IEnumerable<ConfigListCategory> AllConfigListCategories()
+    private static IEnumerable<ConfigCategory> AllConfigListCategories()
     {
-        return Enum.GetValues<ConfigListCategory>();
+        return Enum.GetValues<ConfigCategory>();
     }
 
     [TestCaseSource(nameof(AllConfigListCategories))]
-    public void All_list_category_types_registered(ConfigListCategory category)
+    public void All_list_category_types_registered(ConfigCategory category)
     {
-        var sut = Resolve<IIndex<ConfigListCategory, IConfigLister>>();
+        var sut = Resolve<IIndex<ConfigCategory, IConfigLister>>();
         var result = sut.TryGetValue(category, out _);
         result.Should().BeTrue();
     }

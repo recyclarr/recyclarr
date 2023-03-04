@@ -37,7 +37,7 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigParser>();
 
         // Config Listers
-        builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigListCategory.Templates);
-        builder.RegisterType<ConfigLocalLister>().Keyed<IConfigLister>(ConfigListCategory.Local);
+        builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigCategory.Templates);
+        builder.RegisterType<ConfigLocalLister>().Keyed<IConfigLister>(ConfigCategory.Local);
     }
 }

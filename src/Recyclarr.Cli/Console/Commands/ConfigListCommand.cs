@@ -20,9 +20,9 @@ public class ConfigListCommand : AsyncCommand<ConfigListCommand.CliSettings>
     public class CliSettings : BaseCommandSettings
     {
         [CommandArgument(0, "[ListCategory]")]
-        [EnumDescription<ConfigListCategory>(
+        [EnumDescription<ConfigCategory>(
             "The type of configuration information to list. If not specified, defaults to 'local'.")]
-        public ConfigListCategory ListCategory { get; [UsedImplicitly] init; } = ConfigListCategory.Local;
+        public ConfigCategory ListCategory { get; [UsedImplicitly] init; } = ConfigCategory.Local;
     }
 
     public ConfigListCommand(ILogger log, ConfigListProcessor processor)

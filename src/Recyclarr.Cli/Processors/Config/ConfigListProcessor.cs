@@ -7,12 +7,12 @@ namespace Recyclarr.Cli.Processors.Config;
 public class ConfigListProcessor
 {
     private readonly ILogger _log;
-    private readonly IIndex<ConfigListCategory, IConfigLister> _configListers;
+    private readonly IIndex<ConfigCategory, IConfigLister> _configListers;
     private readonly IConfigTemplatesRepo _repo;
 
     public ConfigListProcessor(
         ILogger log,
-        IIndex<ConfigListCategory, IConfigLister> configListers,
+        IIndex<ConfigCategory, IConfigLister> configListers,
         IConfigTemplatesRepo repo)
     {
         _log = log;
@@ -20,9 +20,9 @@ public class ConfigListProcessor
         _repo = repo;
     }
 
-    public async Task Process(ConfigListCategory listCategory)
+    public async Task Process(ConfigCategory listCategory)
     {
-        if (listCategory == ConfigListCategory.Templates)
+        if (listCategory == ConfigCategory.Templates)
         {
             await _repo.Update();
         }

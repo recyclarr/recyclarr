@@ -10,10 +10,10 @@ namespace Recyclarr.Cli.Tests.Processors;
 public class ConfigListProcessorTest
 {
     [Test]
-    [InlineAutoMockData(ConfigListCategory.Templates)]
+    [InlineAutoMockData(ConfigCategory.Templates)]
     public async Task List_templates_invokes_correct_lister(
-        ConfigListCategory category,
-        [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<ConfigListCategory, IConfigLister> configListers,
+        ConfigCategory category,
+        [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<ConfigCategory, IConfigLister> configListers,
         IConfigLister lister,
         ConfigListProcessor sut)
     {
