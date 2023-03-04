@@ -10,7 +10,7 @@ public class ConfigListProcessorTest
 {
     [Test]
     [InlineAutoMockData(ConfigListCategory.Templates)]
-    public void List_templates_invokes_correct_lister(
+    public async Task List_templates_invokes_correct_lister(
         ConfigListCategory category,
         [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<ConfigListCategory, IConfigLister> configListers,
         IConfigLister lister,
@@ -18,8 +18,8 @@ public class ConfigListProcessorTest
     {
         configListers.Add(category, lister);
 
-        sut.Process(category);
+        await sut.Process(category);
 
-        lister.Received().List();
+        await lister.Received().List();
     }
 }

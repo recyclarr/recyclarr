@@ -33,7 +33,7 @@ public class ConfigurationFinderTest
             fs.AddFile(path.FullName, new MockFileData(""));
         }
 
-        var result = sut.GetConfigFiles(null);
+        var result = sut.GetConfigFiles();
 
         result.Should().BeEquivalentTo(yamlPaths, o => o.Including(x => x.FullName));
     }
