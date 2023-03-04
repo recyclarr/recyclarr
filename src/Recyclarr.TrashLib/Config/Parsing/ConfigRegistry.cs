@@ -13,7 +13,12 @@ public class ConfigRegistry : IConfigRegistry
         _configs.GetOrCreate(config.ServiceType).Add(config);
     }
 
-    private IEnumerable<IServiceConfiguration> GetConfigsOfType(SupportedServices? serviceType)
+    public IEnumerable<IServiceConfiguration> GetAllConfigs()
+    {
+        return GetConfigsOfType(null);
+    }
+
+    public IEnumerable<IServiceConfiguration> GetConfigsOfType(SupportedServices? serviceType)
     {
         return _configs
             .Where(x => serviceType is null || serviceType.Value == x.Key)

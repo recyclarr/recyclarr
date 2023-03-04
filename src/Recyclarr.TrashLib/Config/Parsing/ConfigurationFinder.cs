@@ -29,7 +29,7 @@ public class ConfigurationFinder : IConfigurationFinder
         return configs;
     }
 
-    public IReadOnlyCollection<IFileInfo> GetConfigFiles(IReadOnlyCollection<IFileInfo>? configs)
+    public IReadOnlyCollection<IFileInfo> GetConfigFiles(IReadOnlyCollection<IFileInfo>? configs = null)
     {
         if (configs is not null && configs.Any())
         {

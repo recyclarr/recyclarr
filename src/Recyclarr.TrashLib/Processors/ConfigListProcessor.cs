@@ -14,7 +14,7 @@ public class ConfigListProcessor
         _configListers = configListers;
     }
 
-    public void Process(ConfigListCategory listCategory)
+    public async Task Process(ConfigListCategory listCategory)
     {
         _log.Debug("Listing configuration for category {Category}", listCategory);
         if (!_configListers.TryGetValue(listCategory, out var lister))
@@ -22,6 +22,6 @@ public class ConfigListProcessor
             throw new ArgumentOutOfRangeException(nameof(listCategory), listCategory, "Unknown list category");
         }
 
-        lister.List();
+        await lister.List();
     }
 }

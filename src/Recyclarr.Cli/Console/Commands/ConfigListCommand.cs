@@ -5,7 +5,6 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Processors;
-using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -16,7 +15,6 @@ public class ConfigListCommand : AsyncCommand<ConfigListCommand.CliSettings>
 {
     private readonly ILogger _log;
     private readonly ConfigListProcessor _processor;
-    private readonly IRepoUpdater _repoUpdater;
 
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings
@@ -26,20 +24,17 @@ public class ConfigListCommand : AsyncCommand<ConfigListCommand.CliSettings>
         public ConfigListCategory ListCategory { get; [UsedImplicitly] init; } = ConfigListCategory.Local;
     }
 
-    public ConfigListCommand(ILogger log, ConfigListProcessor processor, IRepoUpdater repoUpdater)
+    public ConfigListCommand(ILogger log, ConfigListProcessor processor)
     {
         _log = log;
         _processor = processor;
-        _repoUpdater = repoUpdater;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateRepo();
-
         try
         {
-            _processor.Process(settings.ListCategory);
+            await _processor.Process(settings.ListCategory);
         }
         catch (FileExistsException e)
         {

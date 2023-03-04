@@ -1,5 +1,6 @@
 using MoreLinq;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Repo;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Config.Listers;
@@ -8,15 +9,22 @@ public class ConfigTemplateLister : IConfigLister
 {
     private readonly IAnsiConsole _console;
     private readonly IConfigTemplateGuideService _guideService;
+    private readonly IRepoUpdater _repoUpdater;
 
-    public ConfigTemplateLister(IAnsiConsole console, IConfigTemplateGuideService guideService)
+    public ConfigTemplateLister(
+        IAnsiConsole console,
+        IConfigTemplateGuideService guideService,
+        IRepoUpdater repoUpdater)
     {
         _console = console;
         _guideService = guideService;
+        _repoUpdater = repoUpdater;
     }
 
-    public void List()
+    public async Task List()
     {
+        await _repoUpdater.UpdateRepo();
+
         var data = _guideService.TemplateData;
 
         var table = new Table();
