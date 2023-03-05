@@ -35,6 +35,7 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
+        builder.RegisterType<ConfigSaver>();
 
         // Config Listers
         builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigCategory.Templates);

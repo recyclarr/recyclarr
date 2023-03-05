@@ -14,7 +14,13 @@ public record TemplatesData
     public ReadOnlyCollection<TemplateEntry> Sonarr { get; [UsedImplicitly] init; } = new(Array.Empty<TemplateEntry>());
 }
 
-public record TemplatePath(SupportedServices Service, string Id, IFileInfo TemplateFile, bool Hidden);
+public record TemplatePath
+{
+    public required string Id { get; init; }
+    public required IFileInfo TemplateFile { get; init; }
+    public required SupportedServices Service { get; init; }
+    public bool Hidden { get; init; }
+}
 
 public class ConfigTemplateGuideService : IConfigTemplateGuideService
 {
@@ -38,7 +44,13 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
 
         TemplatePath NewTemplatePath(TemplateEntry entry, SupportedServices service)
         {
-            return new TemplatePath(service, entry.Id, _repo.Path.File(entry.Template), entry.Hidden);
+            return new TemplatePath
+            {
+                Id = entry.Id,
+                TemplateFile = _repo.Path.File(entry.Template),
+                Service = service,
+                Hidden = entry.Hidden
+            };
         }
 
         return templates.Radarr

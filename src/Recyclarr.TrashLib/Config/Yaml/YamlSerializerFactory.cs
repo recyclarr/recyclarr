@@ -25,10 +25,9 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         // resolvers.
         builder.WithNodeTypeResolver(new SyntaxErrorHelper());
 
+        CommonSetup(builder);
+
         builder
-            .IgnoreFields()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .WithTypeConverter(new YamlNullableEnumTypeConverter())
             .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithObjectFactory(_objectFactory);
@@ -39,5 +38,29 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         }
 
         return builder.Build();
+    }
+
+    public ISerializer CreateSerializer()
+    {
+        var builder = new SerializerBuilder();
+        CommonSetup(builder);
+
+        builder
+            .DisableAliases()
+            .ConfigureDefaultValuesHandling(
+                DefaultValuesHandling.OmitEmptyCollections |
+                DefaultValuesHandling.OmitNull |
+                DefaultValuesHandling.OmitDefaults);
+
+        return builder.Build();
+    }
+
+    private static void CommonSetup<T>(BuilderSkeleton<T> builder)
+        where T : BuilderSkeleton<T>
+    {
+        builder
+            .IgnoreFields()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithTypeConverter(new YamlNullableEnumTypeConverter());
     }
 }

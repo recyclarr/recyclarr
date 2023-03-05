@@ -31,7 +31,7 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
         {
             var fsPath = templateDir.File(path);
             Fs.AddEmptyFile(fsPath);
-            return new TemplatePath(service, id, fsPath, false);
+            return new TemplatePath {Service = service, Id = id, TemplateFile = fsPath, Hidden = false};
         }
 
         var expectedPaths = new[]

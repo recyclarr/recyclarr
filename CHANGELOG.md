@@ -17,6 +17,10 @@ changes you may need to make.
 
 - The `*.yaml` extension is now accepted for all YAML files (e.g. `settings.yaml`, `recyclarr.yaml`)
   in addition to `*.yml` (which was already supported).
+- New `--template` option added to `config create` which facilitates creating new configuration
+  files from the configuration template repository.
+- New `--force` option added to the `config create` command. This will overwrite existing
+  configuration files, if they exist.
 
 ### Changed
 

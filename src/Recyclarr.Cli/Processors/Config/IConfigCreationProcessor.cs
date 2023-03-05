@@ -1,6 +1,8 @@
+using Recyclarr.Cli.Console.Settings;
+
 namespace Recyclarr.Cli.Processors.Config;
 
 public interface IConfigCreationProcessor
 {
-    Task Process(string? configFilePath);
+    Task Process(ICreateConfigSettings settings);
 }

@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using FluentValidation;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Yaml;
@@ -13,16 +12,11 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 public class ConfigParser
 {
     private readonly ILogger _log;
-    private readonly ConfigValidationExecutor _validator;
     private readonly IDeserializer _deserializer;
 
-    public ConfigParser(
-        ILogger log,
-        ConfigValidationExecutor validator,
-        IYamlSerializerFactory yamlFactory)
+    public ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
     {
         _log = log;
-        _validator = validator;
         _deserializer = yamlFactory.CreateDeserializer();
     }
 
@@ -48,11 +42,6 @@ public class ConfigParser
             if (config.IsConfigEmpty())
             {
                 _log.Warning("Configuration is empty");
-            }
-
-            if (!_validator.Validate(config))
-            {
-                throw new ValidationException("Validation Failed");
             }
 
             return config;

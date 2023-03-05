@@ -30,9 +30,11 @@ public record QualityProfileConfigYaml
 
 public record ServiceConfigYaml
 {
+    public string? ApiKey { get; [UsedImplicitly] init; }
+
     [SuppressMessage("Design", "CA1056:URI-like properties should not be strings")]
     public string? BaseUrl { get; [UsedImplicitly] init; }
-    public string? ApiKey { get; [UsedImplicitly] init; }
+
     public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
     public bool ReplaceExistingCustomFormats { get; [UsedImplicitly] init; }
 

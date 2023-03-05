@@ -23,6 +23,12 @@ public static class FileSystemExtensions
         }
     }
 
+    public static void CreateFullPath(this IFileInfo file)
+    {
+        file.CreateParentDirectory();
+        file.Create();
+    }
+
     public static void MergeDirectory(
         this IFileSystem fs,
         IDirectoryInfo targetDir,

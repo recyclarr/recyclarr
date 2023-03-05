@@ -8,11 +8,13 @@ public class ConfigurationLoader : IConfigurationLoader
 {
     private readonly ConfigParser _parser;
     private readonly IMapper _mapper;
+    private readonly ConfigValidationExecutor _validator;
 
-    public ConfigurationLoader(ConfigParser parser, IMapper mapper)
+    public ConfigurationLoader(ConfigParser parser, IMapper mapper, ConfigValidationExecutor validator)
     {
         _parser = parser;
         _mapper = mapper;
+        _validator = validator;
     }
 
     public ICollection<IServiceConfiguration> LoadMany(
@@ -42,10 +44,15 @@ public class ConfigurationLoader : IConfigurationLoader
     }
 
     private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(
-        RootConfigYaml? configs,
+        RootConfigYaml? config,
         SupportedServices? desiredServiceType)
     {
-        if (configs is null)
+        if (config is null)
+        {
+            return Array.Empty<IServiceConfiguration>();
+        }
+
+        if (!_validator.Validate(config))
         {
             return Array.Empty<IServiceConfiguration>();
         }
@@ -55,13 +62,13 @@ public class ConfigurationLoader : IConfigurationLoader
         if (desiredServiceType is null or SupportedServices.Radarr)
         {
             convertedConfigs.AddRange(
-                ValidateAndMap<RadarrConfigYaml, RadarrConfiguration>(configs.Radarr));
+                ValidateAndMap<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
         }
 
         if (desiredServiceType is null or SupportedServices.Sonarr)
         {
             convertedConfigs.AddRange(
-                ValidateAndMap<SonarrConfigYaml, SonarrConfiguration>(configs.Sonarr));
+                ValidateAndMap<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
         }
 
         return convertedConfigs;

@@ -7,6 +7,5 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper.Collection" />
     <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
-    <PackageReference Include="Serilog.Sinks.Console" />
   </ItemGroup>
 </Project>

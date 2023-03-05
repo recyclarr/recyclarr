@@ -5,4 +5,7 @@
     <ProjectReference Include="..\..\Recyclarr.Cli\Recyclarr.Cli.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib.TestLibrary\Recyclarr.TrashLib.TestLibrary.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" />
+  </ItemGroup>
 </Project>

@@ -20,10 +20,10 @@ public class ConfigTemplateListerTest : TrashLibIntegrationFixture
     {
         guideService.LoadTemplateData().Returns(new[]
         {
-            new TemplatePath(SupportedServices.Radarr, "r1", stubFile, false),
-            new TemplatePath(SupportedServices.Radarr, "r2", stubFile, false),
-            new TemplatePath(SupportedServices.Sonarr, "s1", stubFile, false),
-            new TemplatePath(SupportedServices.Sonarr, "s2", stubFile, true)
+            new TemplatePath {Id = "r1", TemplateFile = stubFile, Service = SupportedServices.Radarr, Hidden = false},
+            new TemplatePath {Id = "r2", TemplateFile = stubFile, Service = SupportedServices.Radarr, Hidden = false},
+            new TemplatePath {Id = "s1", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = false},
+            new TemplatePath {Id = "s2", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = true}
         });
 
         await sut.List();

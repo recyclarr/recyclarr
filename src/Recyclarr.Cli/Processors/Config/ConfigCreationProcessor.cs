@@ -1,46 +1,25 @@
-using System.IO.Abstractions;
-using Recyclarr.Common;
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Processors.Config;
 
 public class ConfigCreationProcessor : IConfigCreationProcessor
 {
-    private readonly ILogger _log;
-    private readonly IAppPaths _paths;
-    private readonly IFileSystem _fs;
-    private readonly IResourceDataReader _resources;
+    private readonly IOrderedEnumerable<IConfigCreator> _creators;
 
-    public ConfigCreationProcessor(
-        ILogger log,
-        IAppPaths paths,
-        IFileSystem fs,
-        IResourceDataReader resources)
+    public ConfigCreationProcessor(IOrderedEnumerable<IConfigCreator> creators)
     {
-        _log = log;
-        _paths = paths;
-        _fs = fs;
-        _resources = resources;
+        _creators = creators;
     }
 
-    public async Task Process(string? configFilePath)
+    public async Task Process(ICreateConfigSettings settings)
     {
-        var configFile = configFilePath is null
-            ? _paths.AppDataDirectory.File("recyclarr.yml")
-            : _fs.FileInfo.New(configFilePath);
-
-        if (configFile.Exists)
+        var creator = _creators.FirstOrDefault(x => x.CanHandle(settings));
+        if (creator is null)
         {
-            throw new FileExistsException(configFile.FullName);
+            throw new FatalException("Unable to determine which config creation logic to use");
         }
 
-        configFile.Directory?.Create();
-        await using var stream = configFile.CreateText();
-
-        var ymlData = _resources.ReadData("config-template.yml");
-        await stream.WriteAsync(ymlData);
-
-        _log.Information("Created configuration at: {Path}", configFile.FullName);
+        await creator.Create(settings);
     }
 }
