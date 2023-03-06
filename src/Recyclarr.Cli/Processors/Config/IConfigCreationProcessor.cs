@@ -1,4 +1,4 @@
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Config;
 
 public interface IConfigCreationProcessor
 {

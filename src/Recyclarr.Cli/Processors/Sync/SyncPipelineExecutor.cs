@@ -2,7 +2,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.TrashLib.Config.Services;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Sync;
 
 public class SyncPipelineExecutor
 {

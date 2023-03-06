@@ -1,4 +1,6 @@
 using Autofac;
+using Recyclarr.Cli.Processors.Config;
+using Recyclarr.Cli.Processors.Sync;
 
 namespace Recyclarr.Cli.Processors;
 

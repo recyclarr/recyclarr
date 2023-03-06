@@ -3,7 +3,7 @@ using Recyclarr.Common;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Startup;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Config;
 
 public class ConfigCreationProcessor : IConfigCreationProcessor
 {

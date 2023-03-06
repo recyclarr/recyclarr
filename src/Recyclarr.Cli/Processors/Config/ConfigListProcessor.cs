@@ -2,7 +2,7 @@ using Autofac.Features.Indexed;
 using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Repo;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Config;
 
 public class ConfigListProcessor
 {

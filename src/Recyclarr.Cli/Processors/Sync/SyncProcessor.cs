@@ -8,7 +8,7 @@ using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Sync;
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor : ISyncProcessor

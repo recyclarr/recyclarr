@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
+using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Spectre.Console.Cli;

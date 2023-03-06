@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Processors;
+using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Listers;

@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.Sync;
 
 public interface ISyncProcessor
 {
