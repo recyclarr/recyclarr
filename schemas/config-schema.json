@@ -5,42 +5,20 @@
   "additionalProperties": false,
   "properties": {
     "sonarr": {
-      "oneOf": [
-        {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/$defs/sonarr_instance"
-          }
-        },
-        {
-          "type": "object",
-          "patternProperties": {
-            "^.*$": {
-              "$ref": "#/$defs/sonarr_instance"
-            }
-          }
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/$defs/sonarr_instance"
         }
-      ]
+      }
     },
     "radarr": {
-      "oneOf": [
-        {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/$defs/radarr_instance"
-          }
-        },
-        {
-          "type": "object",
-          "patternProperties": {
-            "^.*$": {
-              "$ref": "#/$defs/radarr_instance"
-            }
-          }
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "#/$defs/radarr_instance"
         }
-      ]
+      }
     }
   },
   "$defs": {
