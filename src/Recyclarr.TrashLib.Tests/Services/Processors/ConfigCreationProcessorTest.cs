@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Processors;
 

@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.TestLibrary;
-using Recyclarr.TestLibrary;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 

@@ -25,7 +25,7 @@ internal class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.
         [CommandArgument(0, "<service>")]
         [EnumDescription<SupportedServices>("The service to obtain information about.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public required SupportedServices Service { get; init; }
+        public SupportedServices Service { get; init; }
     }
 
     public ListCustomFormatsCommand(
