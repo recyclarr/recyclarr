@@ -56,9 +56,6 @@ jobs:
     with:
       platform: macos-latest
       runtime: ${{ matrix.runtime }}
-      # Compression cannot be used on MacOS due to this issue:
-      # https://github.com/dotnet/runtime/issues/79267
-      publish-args: -NoCompress
 
   #############################################
   build-musl:
