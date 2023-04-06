@@ -30,9 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `replace_existing_custom_formats` must be explicitly specified, otherwise you will get a
   deprecation warning. In a future release, the default will change from `true` to `false`. To
   prepare for that, users must explicitly state what behavior they want to avoid unwanted behavior
-  in the future.
+  in the future. Read more
+  [here](https://recyclarr.dev/wiki/upgrade-guide/v5.0#replace-existing-custom-formats).
 - `reset_unmatched_scores` is being moved to the `quality_profiles` section; a deprecation message
-  will be logged until it is moved.
+  will be logged until it is moved. Read more
+  [here](https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores).
 
 ### Fixed
 
