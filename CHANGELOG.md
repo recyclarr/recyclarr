@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Deleted custom formats are now included in the log message showing the count of CFs synced.
 - An error will now be presented if an invalid option is specified on the CLI.
+- Compressed builds are now enabled on MacOS. This means the executable size will be smaller.
 
 ## [4.3.0] - 2023-01-22
 
