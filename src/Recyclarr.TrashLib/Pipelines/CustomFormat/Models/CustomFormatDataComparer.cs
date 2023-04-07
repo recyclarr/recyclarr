@@ -1,5 +1,3 @@
-using MoreLinq;
-
 namespace Recyclarr.TrashLib.Pipelines.CustomFormat.Models;
 
 public sealed class CustomFormatDataEqualityComparer : IEqualityComparer<CustomFormatData>

@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
 
-namespace Recyclarr.TrashLib.Config.Services.Sonarr;
+namespace Recyclarr.TrashLib.Config.Services;
 
-public class SonarrConfiguration : ServiceConfiguration
+public record SonarrConfiguration : ServiceConfiguration
 {
     public override SupportedServices ServiceType => SupportedServices.Sonarr;
 

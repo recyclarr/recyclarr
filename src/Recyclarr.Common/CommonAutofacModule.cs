@@ -1,5 +1,6 @@
 using System.Reflection;
 using Autofac;
+using Recyclarr.Common.FluentValidation;
 using Module = Autofac.Module;
 
 namespace Recyclarr.Common;
@@ -17,6 +18,7 @@ public class CommonAutofacModule : Module
     {
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<FileUtilities>().As<IFileUtilities>();
+        builder.RegisterType<RuntimeValidationService>();
 
         builder.Register(_ => new ResourceDataReader(_rootAssembly))
             .As<IResourceDataReader>();

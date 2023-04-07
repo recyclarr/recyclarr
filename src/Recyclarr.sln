@@ -37,6 +37,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Common.TestLibrar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{18E17C53-F600-40AE-82C1-3CD1E547C307}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Config.Data", "Recyclarr.Config.Data\Recyclarr.Config.Data.csproj", "{32A46317-4D87-40BF-A83E-7F2CFFCDF70A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Config.Data.Tests", "Recyclarr.Config.Data.Tests\Recyclarr.Config.Data.Tests.csproj", "{D12D7A10-183F-4215-A3FE-207DC8CE30F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +95,14 @@ Global
 		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A92321B5-2796-467B-B5A5-2BFC41167A25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A46317-4D87-40BF-A83E-7F2CFFCDF70A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A46317-4D87-40BF-A83E-7F2CFFCDF70A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A46317-4D87-40BF-A83E-7F2CFFCDF70A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A46317-4D87-40BF-A83E-7F2CFFCDF70A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D12D7A10-183F-4215-A3FE-207DC8CE30F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D12D7A10-183F-4215-A3FE-207DC8CE30F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D12D7A10-183F-4215-A3FE-207DC8CE30F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D12D7A10-183F-4215-A3FE-207DC8CE30F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,5 +119,6 @@ Global
 		{BF105B2F-8E13-48AD-BF72-DF7EFEB018B6} = {18E17C53-F600-40AE-82C1-3CD1E547C307}
 		{33226068-65E3-4890-8671-59A56BA3F6F0} = {18E17C53-F600-40AE-82C1-3CD1E547C307}
 		{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83} = {18E17C53-F600-40AE-82C1-3CD1E547C307}
+		{D12D7A10-183F-4215-A3FE-207DC8CE30F5} = {18E17C53-F600-40AE-82C1-3CD1E547C307}
 	EndGlobalSection
 EndGlobal

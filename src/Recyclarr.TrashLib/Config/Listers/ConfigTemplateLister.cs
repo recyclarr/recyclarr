@@ -1,4 +1,3 @@
-using MoreLinq;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Repo;
 using Spectre.Console;

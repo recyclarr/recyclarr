@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Config.Data\Recyclarr.Config.Data.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Recyclarr.TrashLib\Config\Parsing\ConfigYamlDataObjectsLatest.cs">
+      <Link>ConfigYamlDataObjectsLatest.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -13,7 +13,7 @@ public class QualityProfileConfigPhaseTest
     public void Reset_unmatched_scores_promoted_to_quality_profiles_property_when_no_quality_profiles_in_config(
         QualityProfileConfigPhase sut)
     {
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
             CustomFormats = new List<CustomFormatConfig>
             {
@@ -35,7 +35,7 @@ public class QualityProfileConfigPhaseTest
 
         config.QualityProfiles.Should().BeEquivalentTo(new QualityProfileConfig[]
         {
-            new("test_profile", true)
+            new() {Name = "test_profile", ResetUnmatchedScores = true}
         });
     }
 
@@ -43,9 +43,16 @@ public class QualityProfileConfigPhaseTest
     public void Reset_unmatched_scores_promoted_to_quality_profiles_property_when_quality_profile_in_config(
         QualityProfileConfigPhase sut)
     {
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
-            QualityProfiles = new[] {new QualityProfileConfig("test_profile", null)},
+            QualityProfiles = new[]
+            {
+                new QualityProfileConfig
+                {
+                    Name = "test_profile",
+                    ResetUnmatchedScores = null
+                }
+            },
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -66,7 +73,7 @@ public class QualityProfileConfigPhaseTest
 
         config.QualityProfiles.Should().BeEquivalentTo(new QualityProfileConfig[]
         {
-            new("test_profile", true)
+            new() {Name = "test_profile", ResetUnmatchedScores = true}
         });
     }
 
@@ -74,7 +81,7 @@ public class QualityProfileConfigPhaseTest
     public void Reset_unmatched_scores_not_promoted_to_quality_profiles_property_when_false(
         QualityProfileConfigPhase sut)
     {
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
             CustomFormats = new List<CustomFormatConfig>
             {
@@ -97,9 +104,9 @@ public class QualityProfileConfigPhaseTest
         config.QualityProfiles.Should().BeEmpty();
     }
 
-    private static TestConfig SetupCfs(params CustomFormatConfig[] cfConfigs)
+    private static RadarrConfiguration SetupCfs(params CustomFormatConfig[] cfConfigs)
     {
-        return new TestConfig
+        return new RadarrConfiguration
         {
             CustomFormats = cfConfigs
         };
@@ -264,9 +271,16 @@ public class QualityProfileConfigPhaseTest
             NewCf.DataWithScore("", "id1", 100, 1)
         });
 
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
-            QualityProfiles = new[] {new QualityProfileConfig("test_profile", true)},
+            QualityProfiles = new[]
+            {
+                new QualityProfileConfig
+                {
+                    Name = "test_profile",
+                    ResetUnmatchedScores = true
+                }
+            },
             CustomFormats = new List<CustomFormatConfig>
             {
                 new()
@@ -288,7 +302,7 @@ public class QualityProfileConfigPhaseTest
 
         config.QualityProfiles.Should().BeEquivalentTo(new QualityProfileConfig[]
         {
-            new("test_profile", true)
+            new() {Name = "test_profile", ResetUnmatchedScores = true}
         });
     }
 }

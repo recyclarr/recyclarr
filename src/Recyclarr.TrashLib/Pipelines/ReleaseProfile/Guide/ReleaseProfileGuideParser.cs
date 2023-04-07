@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using MoreLinq;
 using Newtonsoft.Json;
 using Recyclarr.Common;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Filters;

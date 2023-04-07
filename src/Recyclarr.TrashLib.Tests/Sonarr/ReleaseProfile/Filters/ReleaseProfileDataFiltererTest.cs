@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Config.Services.Sonarr;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Filters;
 

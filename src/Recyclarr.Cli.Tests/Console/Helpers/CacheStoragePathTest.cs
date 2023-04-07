@@ -11,9 +11,11 @@ public class CacheStoragePathTest
     [Test, AutoMockData]
     public void Use_guid_when_no_name(CacheStoragePath sut)
     {
-        var config = Substitute.ForPartsOf<ServiceConfiguration>();
-        config.BaseUrl = new Uri("http://something");
-        config.InstanceName = null;
+        var config = new SonarrConfiguration
+        {
+            BaseUrl = new Uri("http://something"),
+            InstanceName = null
+        };
 
         var result = sut.CalculatePath(config, "obj");
 
@@ -23,9 +25,11 @@ public class CacheStoragePathTest
     [Test, AutoMockData]
     public void Use_name_when_not_null(CacheStoragePath sut)
     {
-        var config = Substitute.ForPartsOf<ServiceConfiguration>();
-        config.BaseUrl = new Uri("http://something");
-        config.InstanceName = "thename";
+        var config = new SonarrConfiguration
+        {
+            BaseUrl = new Uri("http://something"),
+            InstanceName = "thename"
+        };
 
         var result = sut.CalculatePath(config, "obj");
 

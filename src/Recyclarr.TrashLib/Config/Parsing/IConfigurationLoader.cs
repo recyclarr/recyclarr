@@ -1,10 +1,14 @@
 using System.IO.Abstractions;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
 public interface IConfigurationLoader
 {
-    IConfigRegistry LoadMany(IEnumerable<IFileInfo> configFiles, string? desiredSection = null);
-    IConfigRegistry Load(IFileInfo file, string? desiredSection = null);
-    IConfigRegistry LoadFromStream(TextReader stream, string? desiredSection = null);
+    ICollection<IServiceConfiguration> LoadMany(
+        IEnumerable<IFileInfo> configFiles,
+        SupportedServices? desiredServiceType = null);
+
+    IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file, SupportedServices? desiredServiceType = null);
+    IReadOnlyCollection<IServiceConfiguration> Load(string yaml, SupportedServices? desiredServiceType = null);
 }

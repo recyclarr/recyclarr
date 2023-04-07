@@ -1,5 +1,5 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services.Sonarr;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Filters;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Guide;
 

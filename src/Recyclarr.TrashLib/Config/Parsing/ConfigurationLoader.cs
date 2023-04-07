@@ -1,39 +1,82 @@
 ﻿using System.IO.Abstractions;
+using AutoMapper;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
 public class ConfigurationLoader : IConfigurationLoader
 {
-    private readonly Func<ConfigParser> _parserFactory;
+    private readonly ConfigParser _parser;
+    private readonly IMapper _mapper;
 
-    public ConfigurationLoader(Func<ConfigParser> parserFactory)
+    public ConfigurationLoader(ConfigParser parser, IMapper mapper)
     {
-        _parserFactory = parserFactory;
+        _parser = parser;
+        _mapper = mapper;
     }
 
-    public IConfigRegistry LoadMany(IEnumerable<IFileInfo> configFiles, string? desiredSection = null)
+    public ICollection<IServiceConfiguration> LoadMany(
+        IEnumerable<IFileInfo> configFiles,
+        SupportedServices? desiredServiceType = null)
     {
-        var parser = _parserFactory();
+        return configFiles
+            .SelectMany(x => Load(x, desiredServiceType))
+            .ToList();
+    }
 
-        foreach (var file in configFiles)
+    public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file, SupportedServices? desiredServiceType = null)
+    {
+        return ProcessLoadedConfigs(_parser.Load(file), desiredServiceType);
+    }
+
+    public IReadOnlyCollection<IServiceConfiguration> Load(string yaml, SupportedServices? desiredServiceType = null)
+    {
+        return ProcessLoadedConfigs(_parser.Load(yaml), desiredServiceType);
+    }
+
+    public IReadOnlyCollection<IServiceConfiguration> Load(
+        Func<TextReader> streamFactory,
+        SupportedServices? desiredServiceType = null)
+    {
+        return ProcessLoadedConfigs(_parser.Load(streamFactory), desiredServiceType);
+    }
+
+    private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(
+        RootConfigYamlLatest? configs,
+        SupportedServices? desiredServiceType)
+    {
+        if (configs is null)
         {
-            parser.Load(file, desiredSection);
+            return Array.Empty<IServiceConfiguration>();
         }
 
-        return parser.Configs;
+        var convertedConfigs = new List<IServiceConfiguration>();
+
+        if (desiredServiceType is null or SupportedServices.Radarr)
+        {
+            convertedConfigs.AddRange(
+                ValidateAndMap<RadarrConfigYamlLatest, RadarrConfiguration>(configs.Radarr));
+        }
+
+        if (desiredServiceType is null or SupportedServices.Sonarr)
+        {
+            convertedConfigs.AddRange(
+                ValidateAndMap<SonarrConfigYamlLatest, SonarrConfiguration>(configs.Sonarr));
+        }
+
+        return convertedConfigs;
     }
 
-    public IConfigRegistry Load(IFileInfo file, string? desiredSection = null)
+    private IEnumerable<IServiceConfiguration> ValidateAndMap<TConfigYaml, TServiceConfig>(
+        IReadOnlyDictionary<string, TConfigYaml>? configs)
+        where TServiceConfig : ServiceConfiguration
+        where TConfigYaml : ServiceConfigYamlLatest
     {
-        var parser = _parserFactory();
-        parser.Load(file, desiredSection);
-        return parser.Configs;
-    }
+        if (configs is null)
+        {
+            return Array.Empty<IServiceConfiguration>();
+        }
 
-    public IConfigRegistry LoadFromStream(TextReader stream, string? desiredSection = null)
-    {
-        var parser = _parserFactory();
-        parser.LoadFromStream(stream, desiredSection);
-        return parser.Configs;
+        return configs.Select(x => _mapper.Map<TServiceConfig>(x.Value) with {InstanceName = x.Key});
     }
 }

@@ -52,7 +52,7 @@ public class SyncProcessor : ISyncProcessor
         return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 
-    private void LogInvalidInstances(IEnumerable<string>? instanceNames, IConfigRegistry configs)
+    private void LogInvalidInstances(IEnumerable<string>? instanceNames, ICollection<IServiceConfiguration> configs)
     {
         var invalidInstances = instanceNames?
             .Where(x => !configs.DoesConfigExist(x))
@@ -64,18 +64,8 @@ public class SyncProcessor : ISyncProcessor
         }
     }
 
-    private async Task<bool> ProcessService(ISyncSettings settings, IConfigRegistry configs)
+    private async Task<bool> ProcessService(ISyncSettings settings, ICollection<IServiceConfiguration> configs)
     {
-        var serviceConfigs = configs.GetConfigsBasedOnSettings(settings).ToList();
-
-        // If any config names are null, that means user specified array-style (deprecated) instances.
-        if (serviceConfigs.Any(x => x.InstanceName is null))
-        {
-            _log.Warning(
-                "Found array-style list of instances instead of named-style. " +
-                "Array-style lists of Sonarr/Radarr instances are deprecated");
-        }
-
         foreach (var config in configs.GetConfigsBasedOnSettings(settings))
         {
             try

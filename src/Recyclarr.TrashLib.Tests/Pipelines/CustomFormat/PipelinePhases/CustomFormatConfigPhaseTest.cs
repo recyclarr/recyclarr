@@ -20,7 +20,7 @@ public class CustomFormatConfigPhaseTest
             NewCf.Data("two", "cf2")
         });
 
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
             CustomFormats = new List<CustomFormatConfig>
             {
@@ -54,7 +54,7 @@ public class CustomFormatConfigPhaseTest
             NewCf.Data("", "cf4")
         });
 
-        var config = new TestConfig
+        var config = new RadarrConfiguration
         {
             CustomFormats = new List<CustomFormatConfig>
             {

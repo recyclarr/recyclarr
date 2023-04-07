@@ -7,10 +7,11 @@ using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary.Autofac;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
-using Recyclarr.TrashLib.Config.Services.Sonarr;
-using Recyclarr.TrashLib.Config.Yaml;
+using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
+using Serilog.Sinks.TestCorrelator;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -18,16 +19,17 @@ namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 [Parallelizable(ParallelScope.All)]
 public class ConfigurationLoaderTest : IntegrationFixture
 {
-    private static TextReader GetResourceData(string file)
+    private static Func<TextReader> GetResourceData(string file)
     {
         var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
-        return new StringReader(testData.ReadData(file));
+        return () => new StringReader(testData.ReadData(file));
     }
 
     protected override void RegisterExtraTypes(ContainerBuilder builder)
     {
         base.RegisterExtraTypes(builder);
-        builder.RegisterMockFor<IValidator<TestConfig>>();
+        builder.RegisterMockFor<IValidator<RadarrConfigYamlLatest>>();
+        builder.RegisterMockFor<IValidator<SonarrConfigYamlLatest>>();
     }
 
     [Test]
@@ -86,7 +88,8 @@ public class ConfigurationLoaderTest : IntegrationFixture
     public void Parse_using_stream()
     {
         var configLoader = Resolve<ConfigurationLoader>();
-        var configs = configLoader.LoadFromStream(GetResourceData("Load_UsingStream_CorrectParsing.yml"), "sonarr");
+        var configs = configLoader.Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"),
+            SupportedServices.Sonarr);
 
         configs.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
@@ -96,6 +99,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
                     ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                     BaseUrl = new Uri("http://localhost:8989"),
                     InstanceName = "name",
+                    ReplaceExistingCustomFormats = true,
                     ReleaseProfiles = new List<ReleaseProfileConfig>
                     {
                         new()
@@ -116,32 +120,15 @@ public class ConfigurationLoaderTest : IntegrationFixture
                         }
                     }
                 }
-            }, o => o.Excluding(x => x.LineNumber));
+            });
     }
 
-    [Test, AutoMockData]
-    public void Throw_when_yaml_file_only_has_comment(ConfigurationLoader sut)
+    [Test]
+    public void No_log_when_file_not_empty_but_has_no_desired_sections()
     {
-        const string testYml = "# YAML with nothing but this comment";
+        using var logContext = TestCorrelator.CreateContext();
 
-        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
-
-        act.Should().Throw<EmptyYamlException>();
-    }
-
-    [Test, AutoMockData]
-    public void Throw_when_yaml_file_is_empty(ConfigurationLoader sut)
-    {
-        const string testYml = "";
-
-        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
-
-        act.Should().Throw<EmptyYamlException>();
-    }
-
-    [Test, AutoMockData]
-    public void No_throw_when_file_not_empty_but_has_no_desired_sections(ConfigurationLoader sut)
-    {
+        var sut = Resolve<ConfigurationLoader>();
         const string testYml = @"
 not_wanted:
   instance:
@@ -149,8 +136,10 @@ not_wanted:
     api_key: xyz
 ";
 
-        var act = () => sut.LoadFromStream(new StringReader(testYml), "fubar");
+        sut.Load(testYml, SupportedServices.Sonarr);
 
-        act.Should().NotThrow();
+        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
+            .Select(x => x.RenderMessage())
+            .Should().NotContain("Configuration is empty");
     }
 }

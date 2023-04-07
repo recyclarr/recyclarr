@@ -5,4 +5,9 @@
     <ProjectReference Include="..\Recyclarr.TrashLib.TestLibrary\Recyclarr.TrashLib.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Recyclarr.TrashLib\Config\Parsing\ConfigYamlDataObjectsLatest.cs">
+      <Link>Config\Parsing\ConfigYamlDataObjectsLatest.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>

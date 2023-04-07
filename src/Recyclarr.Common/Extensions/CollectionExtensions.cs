@@ -68,9 +68,9 @@ public static class CollectionExtensions
         return collection is null or {Count: 0};
     }
 
-    public static bool IsNotEmpty<T>(this ICollection<T>? collection)
+    public static bool IsNotEmpty<T>(this IEnumerable<T>? collection)
     {
-        return collection is {Count: > 0};
+        return collection is not null && collection.Any();
     }
 
     public static IList<T>? ToListOrNull<T>(this IEnumerable<T> source)

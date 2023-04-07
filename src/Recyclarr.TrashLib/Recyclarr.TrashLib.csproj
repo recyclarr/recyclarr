@@ -22,5 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Config.Data\Recyclarr.Config.Data.csproj" />
   </ItemGroup>
 </Project>

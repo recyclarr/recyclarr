@@ -1,7 +1,7 @@
 using FluentValidation;
 using JetBrains.Annotations;
-using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Http;
+using Recyclarr.Common.FluentValidation;
+using Serilog.Events;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
@@ -9,33 +9,43 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 public class ConfigValidationExecutor
 {
     private readonly ILogger _log;
-    private readonly IValidator<ServiceConfiguration> _validator;
+    private readonly RuntimeValidationService _validationService;
 
-    public ConfigValidationExecutor(
-        ILogger log,
-        IValidator<ServiceConfiguration> validator)
+    public ConfigValidationExecutor(ILogger log, RuntimeValidationService validationService)
     {
         _log = log;
-        _validator = validator;
+        _validationService = validationService;
     }
 
-    public bool Validate(ServiceConfiguration config)
+    public bool Validate(object config)
     {
-        var result = _validator.Validate(config);
-        if (result is not {IsValid: false})
+        var result = _validationService.Validate(config);
+        if (result.IsValid)
         {
             return true;
         }
 
-        var printableName = config.InstanceName ?? FlurlLogging.SanitizeUrl(config.BaseUrl);
-        _log.Error("Validation failed for instance config {Instance} at line {Line} with {Count} errors",
-            printableName, config.LineNumber, result.Errors.Count);
+        var anyErrorsDetected = false;
 
         foreach (var error in result.Errors)
         {
-            _log.Error("Validation error: {Msg}", error.ErrorMessage);
+            var level = error.Severity switch
+            {
+                Severity.Error => LogEventLevel.Error,
+                Severity.Warning => LogEventLevel.Warning,
+                Severity.Info => LogEventLevel.Information,
+                _ => LogEventLevel.Debug
+            };
+
+            anyErrorsDetected |= level == LogEventLevel.Error;
+            _log.Write(level, "Config Validation: {Msg}", error.ErrorMessage);
         }
 
-        return false;
+        if (anyErrorsDetected)
+        {
+            _log.Error("Config validation failed with {Count} errors", result.Errors.Count);
+        }
+
+        return !anyErrorsDetected;
     }
 }

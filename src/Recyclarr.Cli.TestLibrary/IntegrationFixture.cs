@@ -61,7 +61,7 @@ public abstract class IntegrationFixture : IDisposable
     private static ILogger CreateLogger()
     {
         return new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Debug)
+            .MinimumLevel.Is(LogEventLevel.Verbose)
             .WriteTo.TestCorrelator()
             .WriteTo.Console()
             .CreateLogger();

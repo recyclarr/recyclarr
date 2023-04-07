@@ -1,5 +1,4 @@
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Config.Services.Sonarr;
 using Recyclarr.TrashLib.Pipelines.ReleaseProfile.PipelinePhases;
 using Recyclarr.TrashLib.Processors;
 

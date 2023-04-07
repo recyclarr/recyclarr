@@ -9,15 +9,18 @@ public static class NewQp
         string profileName,
         params (int FormatId, int Score)[] scores)
     {
-        return Processed(profileName, false, scores);
+        return Processed(profileName, null, scores);
     }
 
     public static ProcessedQualityProfileData Processed(
         string profileName,
-        bool resetUnmatchedScores,
+        bool? resetUnmatchedScores,
         params (int FormatId, int Score)[] scores)
     {
-        return new ProcessedQualityProfileData(new QualityProfileConfig(profileName, resetUnmatchedScores))
+        return new ProcessedQualityProfileData(new QualityProfileConfig
+        {
+            Name = profileName, ResetUnmatchedScores = resetUnmatchedScores
+        })
         {
             CfScores = scores.ToDictionary(x => x.FormatId, x => x.Score)
         };

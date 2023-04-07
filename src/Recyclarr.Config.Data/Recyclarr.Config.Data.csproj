@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="JetBrains.Annotations" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
+</Project>

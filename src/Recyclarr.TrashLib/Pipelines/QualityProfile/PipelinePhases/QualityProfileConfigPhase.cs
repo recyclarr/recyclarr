@@ -51,7 +51,7 @@ public class QualityProfileConfigPhase
                         x => x.Name.EqualsIgnoreCase(profile.Name),
                         // If the user did not specify a quality profile in their config, we still create the QP object
                         // for consistency (at the very least for the name).
-                        new QualityProfileConfig(profile.Name, false)));
+                        new QualityProfileConfig {Name = profile.Name}));
                 allProfiles[profile.Name] = profileCfs;
             }
 
@@ -65,38 +65,44 @@ public class QualityProfileConfigPhase
 
     private void ProcessLegacyResetUnmatchedScores(IServiceConfiguration config)
     {
-        // todo: Remove this later; it is for backward compatibility
-        // Propagate the quality_profile version of ResetUnmatchedScores to the top-level quality_profile config.
-        var profilesThatNeedResetUnmatchedScores = config.CustomFormats
+        // todo: Remove this method later; it is for backward compatibility
+        var legacyResetUnmatchedScores = config.CustomFormats
             .SelectMany(x => x.QualityProfiles)
-            .Where(x => x.ResetUnmatchedScores)
+            .Where(x => x.ResetUnmatchedScores is not null)
+            .ToList();
+
+        if (legacyResetUnmatchedScores.Count > 0)
+        {
+            _log.Warning(
+                "DEPRECATION: Support for using `reset_unmatched_scores` under `custom_formats.quality_profiles` " +
+                "will be removed in a future release. Move it to the top level `quality_profiles` instead");
+        }
+
+        // Propagate the quality_profile version of ResetUnmatchedScores to the top-level quality_profile config.
+        var profilesThatNeedResetUnmatchedScores = legacyResetUnmatchedScores
+            .Where(x => x.ResetUnmatchedScores is true)
             .Select(x => x.Name)
             .Distinct(StringComparer.InvariantCultureIgnoreCase);
 
         var newQualityProfiles = config.QualityProfiles.ToList();
-
-        var logDeprecationMessage = false;
 
         foreach (var profileName in profilesThatNeedResetUnmatchedScores)
         {
             var match = config.QualityProfiles.FirstOrDefault(x => x.Name.EqualsIgnoreCase(profileName));
             if (match is null)
             {
-                logDeprecationMessage = true;
-                newQualityProfiles.Add(new QualityProfileConfig(profileName, true));
+                _log.Debug(
+                    "Root-level quality profile created to promote reset_unmatched_scores from CF score config: {Name}",
+                    profileName);
+                newQualityProfiles.Add(new QualityProfileConfig {Name = profileName, ResetUnmatchedScores = true});
             }
             else if (match.ResetUnmatchedScores is null)
             {
-                logDeprecationMessage = true;
+                _log.Debug(
+                    "Score-based reset_unmatched_scores propagated to existing root-level " +
+                    "quality profile config: {Name}", profileName);
                 match.ResetUnmatchedScores = true;
             }
-        }
-
-        if (logDeprecationMessage)
-        {
-            _log.Warning(
-                "DEPRECATION: Support for using `reset_unmatched_scores` under `custom_formats.quality_profiles` " +
-                "will be removed in a future release. Move it to the top level `quality_profiles` instead");
         }
 
         // Down-cast to avoid having to make the property mutable in the interface

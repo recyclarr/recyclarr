@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services.Sonarr;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Pipelines.Tags.PipelinePhases;
 

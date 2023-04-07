@@ -26,7 +26,7 @@ public class ConfigAutofacModule : Module
     {
         builder.RegisterAssemblyTypes(_assemblies)
             .AsClosedTypesOf(typeof(IValidator<>))
-            .AsImplementedInterfaces();
+            .As<IValidator>();
 
         builder.RegisterAssemblyTypes(_assemblies)
             .AssignableTo<IYamlBehavior>()
@@ -39,9 +39,10 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
         builder.RegisterType<ConfigurationLoader>().As<IConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
+        builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>();
+        builder.RegisterType<BackwardCompatibleConfigParser>();
 
         // Config Listers
         builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigListCategory.Templates);

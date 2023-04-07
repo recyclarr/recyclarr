@@ -9,7 +9,6 @@ using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Common;
-using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.ApiServices;
 using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Compatibility;
@@ -33,9 +32,13 @@ public static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-            .Where(x => x.FullName?.StartsWithIgnoreCase("Recyclarr") ?? false)
-            .ToArray();
+        var assemblies = new[]
+        {
+            Assembly.GetExecutingAssembly(),
+            Assembly.Load("Recyclarr.Common"),
+            Assembly.Load("Recyclarr.Config.Data"),
+            Assembly.Load("Recyclarr.TrashLib")
+        };
 
         RegisterAppPaths(builder);
         RegisterLogger(builder);
@@ -59,11 +62,7 @@ public static class CompositionRoot
         CommandRegistrations(builder);
         PipelineRegistrations(builder);
 
-        builder.RegisterAutoMapper(c =>
-            {
-                c.AddCollectionMappers();
-            },
-            false, assemblies);
+        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), false, assemblies);
 
         builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
     }

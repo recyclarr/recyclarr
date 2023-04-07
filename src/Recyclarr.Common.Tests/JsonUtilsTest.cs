@@ -19,8 +19,6 @@ public class JsonUtilsTest
             .WriteTo.TestCorrelator()
             .CreateLogger();
 
-        using var context = TestCorrelator.CreateContext();
-
         var path = fs.CurrentDirectory().SubDirectory("doesnt_exist");
 
         var result = JsonUtils.GetJsonFilesInDirectories(new[] {path}, log);
