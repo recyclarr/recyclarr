@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.4.1] - 2023-04-08
+
 ### Fixed
 
 - Fixed JSON parsing issue that sometimes occurs when pulling custom formats from Radarr (#178)
@@ -671,7 +673,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.4.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v4.4.1...HEAD
+[4.4.1]: https://github.com/recyclarr/recyclarr/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/recyclarr/recyclarr/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/recyclarr/recyclarr/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/recyclarr/recyclarr/compare/v4.1.3...v4.2.0
