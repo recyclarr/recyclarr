@@ -19,7 +19,7 @@ public record CustomFormatSpecificationData
     public bool Required { get; init; }
 
     [JsonConverter(typeof(FieldsArrayJsonConverter))]
-    public CustomFormatFieldData Fields { get; init; } = new();
+    public IReadOnlyCollection<CustomFormatFieldData> Fields { get; init; } = Array.Empty<CustomFormatFieldData>();
 }
 
 public record CustomFormatData

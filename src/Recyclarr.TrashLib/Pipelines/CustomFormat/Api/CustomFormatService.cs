@@ -5,7 +5,7 @@ using Recyclarr.TrashLib.Pipelines.CustomFormat.Models;
 
 namespace Recyclarr.TrashLib.Pipelines.CustomFormat.Api;
 
-internal class CustomFormatService : ICustomFormatService
+public class CustomFormatService : ICustomFormatService
 {
     private readonly IServiceRequestBuilder _service;
 

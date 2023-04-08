@@ -21,9 +21,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -32,9 +35,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 7
+                        new CustomFormatFieldData
+                        {
+                            Value = 7
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -43,9 +49,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }
@@ -63,9 +72,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -74,9 +86,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 7
+                        new CustomFormatFieldData
+                        {
+                            Value = 7
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -85,17 +100,18 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }
         };
 
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeTrue();
+        a.Should().BeEquivalentTo(b, o => o.Using(CustomFormatData.Comparer));
     }
 
     [Test]
@@ -113,9 +129,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -124,9 +143,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 7
+                        new CustomFormatFieldData
+                        {
+                            Value = 7
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -135,9 +157,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }
@@ -155,9 +180,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -166,9 +194,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 10 // this is different
+                        new CustomFormatFieldData
+                        {
+                            Value = 10 // this is different
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -177,9 +208,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }
@@ -292,9 +326,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -303,9 +340,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 7
+                        new CustomFormatFieldData
+                        {
+                            Value = 7
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -314,9 +354,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }
@@ -334,9 +377,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = "\\bEVO(TGX)?\\b"
+                        new CustomFormatFieldData
+                        {
+                            Value = "\\bEVO(TGX)?\\b"
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -345,9 +391,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 7
+                        new CustomFormatFieldData
+                        {
+                            Value = 7
+                        }
                     }
                 },
                 new CustomFormatSpecificationData
@@ -356,9 +405,12 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new CustomFormatFieldData
+                    Fields = new[]
                     {
-                        Value = 8
+                        new CustomFormatFieldData
+                        {
+                            Value = 8
+                        }
                     }
                 }
             }

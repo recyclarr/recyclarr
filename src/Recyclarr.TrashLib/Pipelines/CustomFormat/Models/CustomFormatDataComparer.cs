@@ -39,10 +39,29 @@ public sealed class CustomFormatDataEqualityComparer : IEqualityComparer<CustomF
     private static bool SpecificationEqual(CustomFormatSpecificationData a, CustomFormatSpecificationData b)
     {
         return a.Name.Equals(b.Name, StringComparison.Ordinal) &&
-            Equals(a.Fields.Value, b.Fields.Value) &&
             a.Implementation.Equals(b.Implementation, StringComparison.Ordinal) &&
             a.Negate.Equals(b.Negate) &&
-            a.Required.Equals(b.Required);
+            a.Required.Equals(b.Required) &&
+            AllFieldsEqual(a.Fields, b.Fields);
+    }
+
+    private static bool AllFieldsEqual(
+        IReadOnlyCollection<CustomFormatFieldData> first,
+        IReadOnlyCollection<CustomFormatFieldData> second)
+    {
+        if (first.Count != second.Count)
+        {
+            return false;
+        }
+
+        return first
+            .FullJoin(second, x => x.Name, _ => false, _ => false, FieldEqual)
+            .All(x => x);
+    }
+
+    private static bool FieldEqual(CustomFormatFieldData a, CustomFormatFieldData b)
+    {
+        return a.Value?.Equals(b.Value) ?? false;
     }
 
     public int GetHashCode(CustomFormatData obj)

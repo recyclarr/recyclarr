@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed JSON parsing issue that sometimes occurs when pulling custom formats from Radarr (#178)
+
 ## [4.4.0] - 2023-04-06
 
 ### Added

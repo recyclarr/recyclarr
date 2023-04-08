@@ -7,22 +7,7 @@ public class FieldsArrayJsonConverter : JsonConverter
 {
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
-        if (value is not CustomFormatFieldData)
-        {
-            serializer.Serialize(writer, value);
-            return;
-        }
-
-        var token = JToken.FromObject(value);
-        if (token.Type == JTokenType.Object)
-        {
-            var array = new JArray(token);
-            serializer.Serialize(writer, array);
-        }
-        else
-        {
-            serializer.Serialize(writer, token);
-        }
+        serializer.Serialize(writer, value);
     }
 
     public override object? ReadJson(
@@ -31,17 +16,14 @@ public class FieldsArrayJsonConverter : JsonConverter
         object? existingValue,
         JsonSerializer serializer)
     {
-        if (existingValue is not CustomFormatFieldData)
-        {
-            return new CustomFormatFieldData();
-        }
-
         var token = JToken.Load(reader);
+
+        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
         return token.Type switch
         {
-            JTokenType.Object => token.ToObject<CustomFormatFieldData>(),
-            JTokenType.Array => token.ToObject<CustomFormatFieldData[]>()?.SingleOrDefault(),
-            _ => null
+            JTokenType.Object => new[] {token.ToObject<CustomFormatFieldData>()},
+            JTokenType.Array => token.ToObject<CustomFormatFieldData[]>(),
+            _ => throw new InvalidOperationException("Unsupported token type for CustomFormatFieldData")
         };
     }
 
