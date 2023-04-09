@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Recyclarr.Common;
 
+[SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
 public sealed class GenericEqualityComparer<T> : IEqualityComparer<T>
 {
     private readonly Func<T, T, bool> _equalsPredicate;

@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Tests.Migration.Steps;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class MigrateTrashYmlTest
+public partial class MigrateTrashYmlTest
 {
     private static readonly string BasePath = AppContext.BaseDirectory;
 
@@ -49,6 +49,9 @@ public class MigrateTrashYmlTest
 
         sut.Execute(null);
 
-        fs.AllFiles.Should().ContainSingle(x => Regex.IsMatch(x, @"[/\\]recyclarr\.yml$"));
+        fs.AllFiles.Should().ContainSingle(x => RecyclarrYmlRegex().IsMatch(x));
     }
+
+    [GeneratedRegex("[/\\\\]recyclarr\\.yml$")]
+    private static partial Regex RecyclarrYmlRegex();
 }
