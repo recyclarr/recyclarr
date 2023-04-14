@@ -16,7 +16,7 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageVersion Include="morelinq" Version="3.4.2" />
-    <PackageVersion Include="MudBlazor" Version="6.2.0" />
+    <PackageVersion Include="MudBlazor" Version="6.2.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.26" />
@@ -30,9 +30,9 @@
     <PackageVersion Include="Spectre.Console.Cli" Version="0.46.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.4" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.11" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.42" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.4" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.11" />
     <PackageVersion Include="YamlDotNet" Version="13.0.2" />
   </ItemGroup>
   <!-- Unit Test Packages -->
@@ -55,7 +55,7 @@
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.46.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.4" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.11" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
