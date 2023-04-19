@@ -55,13 +55,8 @@ public static class FlurlLogging
 
     public static Url SanitizeUrl(Url url)
     {
-        // Replace hostname and API key for user privacy
+        // Replace hostname for user privacy
         url.Host = "REDACTED";
-        if (url.QueryParams.Contains("apikey"))
-        {
-            url.QueryParams.AddOrReplace("apikey", "REDACTED");
-        }
-
         return url;
     }
 }

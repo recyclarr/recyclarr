@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- API Key is now sent via the `X-Api-Key` header instead of the `apikey` query parameter. This
+  lessens the need to redact information in the console.
+
 ## [4.4.1] - 2023-04-08
 
 ### Fixed

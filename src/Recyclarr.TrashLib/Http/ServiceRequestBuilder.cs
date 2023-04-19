@@ -16,6 +16,6 @@ public class ServiceRequestBuilder : IServiceRequestBuilder
     {
         var client = _clientFactory.BuildClient(config.BaseUrl);
         return client.Request(new[] {"api", "v3"}.Concat(path).ToArray())
-            .SetQueryParams(new {apikey = config.ApiKey});
+            .WithHeader("X-Api-Key", config.ApiKey);
     }
 }
