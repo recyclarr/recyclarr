@@ -38,7 +38,6 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
-    <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- TEST ONLY PROPERTIES -->
