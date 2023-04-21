@@ -19,7 +19,7 @@
     <PackageVersion Include="MudBlazor" Version="6.2.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.14" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.26" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="18.4.34" />
     <PackageVersion Include="Serilog" Version="2.12.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageVersion Include="Serilog.Expressions" Version="3.4.1" />
@@ -30,9 +30,9 @@
     <PackageVersion Include="Spectre.Console.Cli" Version="0.46.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.15" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.16" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.42" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.15" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.16" />
     <PackageVersion Include="YamlDotNet" Version="13.1.0" />
   </ItemGroup>
   <!-- Unit Test Packages -->
@@ -43,7 +43,7 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.18.0" />
     <PackageVersion Include="AutoFixture.NUnit3" Version="4.18.0" />
     <PackageVersion Include="coverlet.collector" Version="3.2.0" />
-    <PackageVersion Include="FluentAssertions" Version="6.10.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.11.0" />
     <PackageVersion Include="FluentAssertions.Json" Version="6.1.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
@@ -55,7 +55,7 @@
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.46.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.15" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.16" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
