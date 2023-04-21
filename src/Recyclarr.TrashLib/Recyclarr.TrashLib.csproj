@@ -9,6 +9,7 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="morelinq" />
     <PackageReference Include="Newtonsoft.Json.Schema" />
     <PackageReference Include="Serilog" />

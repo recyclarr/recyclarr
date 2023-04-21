@@ -36,10 +36,6 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
-  </ItemGroup>
-
   <!-- TEST ONLY PROPERTIES -->
   <PropertyGroup Condition="$(ProjectName.EndsWith('.Tests')) Or $(ProjectName.EndsWith('TestLibrary'))">
     <IsPackable>false</IsPackable>

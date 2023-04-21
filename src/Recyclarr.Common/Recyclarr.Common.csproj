@@ -3,6 +3,7 @@
     <PackageReference Include="Autofac" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Spectre.Console" />
