@@ -18,7 +18,7 @@ public class CommonAutofacModule : Module
     {
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<FileUtilities>().As<IFileUtilities>();
-        builder.RegisterType<RuntimeValidationService>();
+        builder.RegisterType<RuntimeValidationService>().As<IRuntimeValidationService>();
 
         builder.Register(_ => new ResourceDataReader(_rootAssembly))
             .As<IResourceDataReader>();

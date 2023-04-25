@@ -3,7 +3,7 @@ using FluentValidation.Results;
 
 namespace Recyclarr.Common.FluentValidation;
 
-public class RuntimeValidationService
+public class RuntimeValidationService : IRuntimeValidationService
 {
     private readonly Dictionary<Type, IValidator> _validators;
 

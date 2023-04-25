@@ -9,9 +9,9 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 public class ConfigValidationExecutor
 {
     private readonly ILogger _log;
-    private readonly RuntimeValidationService _validationService;
+    private readonly IRuntimeValidationService _validationService;
 
-    public ConfigValidationExecutor(ILogger log, RuntimeValidationService validationService)
+    public ConfigValidationExecutor(ILogger log, IRuntimeValidationService validationService)
     {
         _log = log;
         _validationService = validationService;
