@@ -1,60 +1,54 @@
-// using System.Diagnostics.CodeAnalysis;
-// using Autofac;
-// using FluentValidation;
-// using Recyclarr.Cli.TestLibrary;
-// using Recyclarr.TrashLib.Config.Parsing;
-// using Recyclarr.TrashLib.Config.Services;
-//
-// namespace Recyclarr.TrashLib.Tests.Config.Parsing;
-//
-// [TestFixture]
-// [Parallelizable(ParallelScope.All)]
-// public class ConfigValidationExecutorTest : IntegrationFixture
-// {
-//     [SuppressMessage("Design", "CA1812", Justification = "Instantiated via reflection in unit test")]
-//     private sealed class TestValidator : AbstractValidator<ServiceConfiguration>
-//     {
-//         public bool ShouldSucceed { get; set; }
-//
-//         public TestValidator()
-//         {
-//             RuleFor(x => x).Must(_ => ShouldSucceed);
-//         }
-//     }
-//
-//     protected override void RegisterExtraTypes(ContainerBuilder builder)
-//     {
-//         builder.RegisterType<TestValidator>()
-//             .AsSelf()
-//             .As<IValidator<ServiceConfiguration>>()
-//             .SingleInstance();
-//     }
-//
-//     [Test]
-//     public void Return_false_on_validation_failure()
-//     {
-//         var validator = Resolve<TestValidator>();
-//         validator.ShouldSucceed = false;
-//
-//         var sut = Resolve<ConfigValidationExecutor>();
-//
-//         var result = sut.Validate(new RadarrConfiguration());
-//
-//         result.Should().BeFalse();
-//     }
-//
-//     [Test]
-//     public void Valid_returns_true()
-//     {
-//         var validator = Resolve<TestValidator>();
-//         validator.ShouldSucceed = true;
-//
-//         var sut = Resolve<ConfigValidationExecutor>();
-//
-//         var result = sut.Validate(new RadarrConfiguration());
-//
-//         result.Should().BeTrue();
-//     }
-// }
+using FluentValidation;
+using FluentValidation.Results;
+using Recyclarr.Common.FluentValidation;
+using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.TrashLib.Config.Services;
 
+namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
+[TestFixture]
+[Parallelizable(ParallelScope.All)]
+public class ConfigValidationExecutorTest
+{
+    [Test, AutoMockData]
+    public void Return_false_on_validation_failure(
+        [Frozen] IRuntimeValidationService validationService,
+        ConfigValidationExecutor sut)
+    {
+        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult(new[]
+        {
+            new ValidationFailure("property", "message")
+        }));
+
+        var result = sut.Validate(new RadarrConfiguration());
+
+        result.Should().BeFalse();
+    }
+
+    [Test, AutoMockData]
+    public void Return_true_when_severity_is_warning(
+        [Frozen] IRuntimeValidationService validationService,
+        ConfigValidationExecutor sut)
+    {
+        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult(new[]
+        {
+            new ValidationFailure("property", "message") {Severity = Severity.Warning}
+        }));
+
+        var result = sut.Validate(new RadarrConfiguration());
+
+        result.Should().BeTrue();
+    }
+
+    [Test, AutoMockData]
+    public void Valid_returns_true(
+        [Frozen] IRuntimeValidationService validationService,
+        ConfigValidationExecutor sut)
+    {
+        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult());
+
+        var result = sut.Validate(new RadarrConfiguration());
+
+        result.Should().BeTrue();
+    }
+}
