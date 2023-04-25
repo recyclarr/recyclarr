@@ -4,7 +4,14 @@
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="JetBrains.Annotations" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>$(MSBuildProjectFullPath)</Value>
+    </SonarQubeSetting>
   </ItemGroup>
 </Project>
