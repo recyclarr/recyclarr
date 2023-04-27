@@ -5,7 +5,7 @@ namespace Recyclarr.Cli.Tests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class AutoMapperConfigurationTest : IntegrationFixture
+public class AutoMapperConfigurationTest : CliIntegrationFixture
 {
     [Test]
     public void Automapper_config_is_valid()

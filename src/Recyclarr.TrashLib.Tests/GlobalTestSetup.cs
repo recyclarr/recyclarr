@@ -1,14 +1,16 @@
-using System.Diagnostics.CodeAnalysis;
+// using System.Diagnostics.CodeAnalysis;
+//
+// namespace Recyclarr.TrashLib.Tests;
+//
+// [SetUpFixture]
+// [SuppressMessage("ReSharper", "CheckNamespace")]
+// public class GlobalTestSetup
+// {
+//     [OneTimeSetUp]
+//     public void Setup()
+//     {
+//         AssertionOptions.FormattingOptions.MaxDepth = 100;
+//     }
+// }
 
-namespace Recyclarr.TrashLib.Tests;
 
-[SetUpFixture]
-[SuppressMessage("ReSharper", "CheckNamespace")]
-public class GlobalTestSetup
-{
-    [OneTimeSetUp]
-    public void Setup()
-    {
-        AssertionOptions.FormattingOptions.MaxDepth = 100;
-    }
-}

@@ -4,26 +4,21 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.EquivalencyExpression;
+using FluentValidation;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
+using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Pipelines.QualitySize;
+using Recyclarr.Cli.Pipelines.ReleaseProfile;
+using Recyclarr.Cli.Pipelines.Tags;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
-using Recyclarr.TrashLib.ApiServices;
-using Recyclarr.TrashLib.Cache;
-using Recyclarr.TrashLib.Compatibility;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Http;
-using Recyclarr.TrashLib.Pipelines;
-using Recyclarr.TrashLib.Pipelines.CustomFormat;
-using Recyclarr.TrashLib.Pipelines.QualityProfile;
-using Recyclarr.TrashLib.Pipelines.QualitySize;
-using Recyclarr.TrashLib.Pipelines.ReleaseProfile;
-using Recyclarr.TrashLib.Pipelines.Tags;
-using Recyclarr.TrashLib.Processors;
-using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.TrashLib;
+using Recyclarr.TrashLib.Interfaces;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
@@ -32,39 +27,28 @@ public static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {
-        var assemblies = new[]
-        {
-            Assembly.GetExecutingAssembly(),
-            Assembly.Load("Recyclarr.Common"),
-            Assembly.Load("Recyclarr.Config.Data"),
-            Assembly.Load("Recyclarr.TrashLib")
-        };
+        var thisAssembly = typeof(CompositionRoot).Assembly;
 
-        RegisterAppPaths(builder);
         RegisterLogger(builder);
 
-        builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<MigrationAutofacModule>();
-        builder.RegisterModule<RepoAutofacModule>();
-        builder.RegisterModule<CompatibilityAutofacModule>();
-        builder.RegisterModule<ApiServicesAutofacModule>();
-        builder.RegisterModule(new ConfigAutofacModule(assemblies));
+        builder.RegisterModule<TrashLibAutofacModule>();
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
-        builder.RegisterModule(new CommonAutofacModule(Assembly.GetExecutingAssembly()));
 
-        // Needed for Autofac.Extras.Ordering
-        builder.RegisterSource<OrderedRegistrationSource>();
-
-        builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
-        builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
+        builder.RegisterType<FileSystem>().As<IFileSystem>();
+        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         CommandRegistrations(builder);
         PipelineRegistrations(builder);
 
-        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), false, assemblies);
+        builder.RegisterAssemblyTypes(thisAssembly)
+            .AsClosedTypesOf(typeof(IValidator<>))
+            .As<IValidator>();
 
-        builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
+        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), false,
+            thisAssembly,
+            typeof(TrashLibAutofacModule).Assembly);
     }
 
     private static void PipelineRegistrations(ContainerBuilder builder)
@@ -90,21 +74,6 @@ public static class CompositionRoot
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
         builder.RegisterType<LoggerFactory>();
         builder.Register(c => c.Resolve<LoggerFactory>().Create()).As<ILogger>().SingleInstance();
-    }
-
-    private static void RegisterAppPaths(ContainerBuilder builder)
-    {
-        builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.RegisterType<DefaultAppDataSetup>();
-
-        builder.Register(c =>
-            {
-                var appData = c.Resolve<AppDataPathProvider>();
-                var dataSetup = c.Resolve<DefaultAppDataSetup>();
-                return dataSetup.CreateAppPaths(appData.AppDataPath);
-            })
-            .As<IAppPaths>()
-            .SingleInstance();
     }
 
     private static void CommandRegistrations(ContainerBuilder builder)

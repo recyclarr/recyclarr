@@ -1,7 +1,10 @@
 using System.IO.Abstractions;
+using FluentValidation;
 using JetBrains.Annotations;
+using Recyclarr.TrashLib.Config.Yaml;
 using Serilog.Context;
 using YamlDotNet.Core;
+using YamlDotNet.Serialization;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
@@ -9,35 +12,46 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 public class ConfigParser
 {
     private readonly ILogger _log;
-    private readonly BackwardCompatibleConfigParser _parser;
+    private readonly ConfigValidationExecutor _validator;
+    private readonly IDeserializer _deserializer;
 
-    public ConfigParser(ILogger log, BackwardCompatibleConfigParser parser)
+    public ConfigParser(
+        ILogger log,
+        ConfigValidationExecutor validator,
+        IYamlSerializerFactory yamlFactory)
     {
         _log = log;
-        _parser = parser;
+        _validator = validator;
+        _deserializer = yamlFactory.CreateDeserializer();
     }
 
-    public RootConfigYamlLatest? Load(IFileInfo file)
+    public RootConfigYaml? Load(IFileInfo file)
     {
         _log.Debug("Loading config file: {File}", file);
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
         return Load(file.OpenText);
     }
 
-    public RootConfigYamlLatest? Load(string yaml)
+    public RootConfigYaml? Load(string yaml)
     {
         _log.Debug("Loading config from string data");
         return Load(() => new StringReader(yaml));
     }
 
-    public RootConfigYamlLatest? Load(Func<TextReader> streamFactory)
+    public RootConfigYaml? Load(Func<TextReader> streamFactory)
     {
         try
         {
-            var config = _parser.ParseYamlConfig(streamFactory);
-            if (config != null && config.IsConfigEmpty())
+            using var stream = streamFactory();
+            var config = _deserializer.Deserialize<RootConfigYaml>(stream);
+            if (config.IsConfigEmpty())
             {
                 _log.Warning("Configuration is empty");
+            }
+
+            if (!_validator.Validate(config))
+            {
+                throw new ValidationException("Validation Failed");
             }
 
             return config;

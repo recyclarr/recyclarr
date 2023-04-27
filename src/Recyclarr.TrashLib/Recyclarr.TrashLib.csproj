@@ -4,7 +4,6 @@
     <PackageReference Include="Autofac.Extras.AggregateService" />
     <PackageReference Include="Autofac.Extras.Ordering" />
     <PackageReference Include="AutoMapper" />
-    <PackageReference Include="AutoMapper.Collection" />
     <PackageReference Include="CliWrap" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="Flurl" />
@@ -22,6 +21,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
-    <ProjectReference Include="..\Recyclarr.Config.Data\Recyclarr.Config.Data.csproj" />
   </ItemGroup>
 </Project>

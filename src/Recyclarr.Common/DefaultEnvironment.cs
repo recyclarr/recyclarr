@@ -1,6 +1,6 @@
 ﻿namespace Recyclarr.Common;
 
-internal class DefaultEnvironment : IEnvironment
+public class DefaultEnvironment : IEnvironment
 {
     public string GetFolderPath(Environment.SpecialFolder folder)
     {

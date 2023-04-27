@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Config.Settings;
+using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.TrashLib.Repo.VersionControl;
 

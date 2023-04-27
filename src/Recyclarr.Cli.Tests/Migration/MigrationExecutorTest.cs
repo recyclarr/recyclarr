@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Tests.Migration;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class MigrationExecutorTest : IntegrationFixture
+public class MigrationExecutorTest : CliIntegrationFixture
 {
     [Test]
     public void Migration_steps_are_in_expected_order()

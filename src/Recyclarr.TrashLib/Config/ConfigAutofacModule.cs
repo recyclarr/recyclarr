@@ -1,34 +1,27 @@
-using System.Reflection;
 using Autofac;
 using FluentValidation;
 using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Secrets;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
+using Recyclarr.TrashLib.Settings;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
-using Module = Autofac.Module;
 
 namespace Recyclarr.TrashLib.Config;
 
 public class ConfigAutofacModule : Module
 {
-    private readonly Assembly[] _assemblies;
-
-    public ConfigAutofacModule(params Assembly[] assemblies)
-    {
-        _assemblies = assemblies;
-    }
-
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterAssemblyTypes(_assemblies)
+        var thisAssembly = typeof(ConfigAutofacModule).Assembly;
+
+        builder.RegisterAssemblyTypes(thisAssembly)
             .AsClosedTypesOf(typeof(IValidator<>))
             .As<IValidator>();
 
-        builder.RegisterAssemblyTypes(_assemblies)
+        builder.RegisterAssemblyTypes(thisAssembly)
             .AssignableTo<IYamlBehavior>()
             .As<IYamlBehavior>();
 
@@ -42,7 +35,6 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<BackwardCompatibleConfigParser>();
 
         // Config Listers
         builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigListCategory.Templates);

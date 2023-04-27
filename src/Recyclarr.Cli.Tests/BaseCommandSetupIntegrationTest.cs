@@ -1,13 +1,13 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Config.Settings;
+using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.Cli.Tests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class BaseCommandSetupIntegrationTest : IntegrationFixture
+public class BaseCommandSetupIntegrationTest : CliIntegrationFixture
 {
     [Test]
     public void Base_command_startup_tasks_are_registered()

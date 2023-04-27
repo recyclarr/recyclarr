@@ -14,7 +14,7 @@ public class CompositionRootTest
     // Warning CA1812 : CompositionRootTest.ConcreteTypeEnumerator is an internal class that is apparently never
     // instantiated.
     [SuppressMessage("Performance", "CA1812", Justification = "Created via reflection by TestCaseSource attribute")]
-    private sealed class ConcreteTypeEnumerator : IntegrationFixture, IEnumerable
+    private sealed class ConcreteTypeEnumerator : CliIntegrationFixture, IEnumerable
     {
         public IEnumerator GetEnumerator()
         {

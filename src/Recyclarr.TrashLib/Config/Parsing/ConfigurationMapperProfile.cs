@@ -9,20 +9,20 @@ public class ConfigurationMapperProfile : Profile
 {
     public ConfigurationMapperProfile()
     {
-        CreateMap<QualityScoreConfigYamlLatest, QualityProfileScoreConfig>();
-        CreateMap<CustomFormatConfigYamlLatest, CustomFormatConfig>();
-        CreateMap<QualitySizeConfigYamlLatest, QualityDefinitionConfig>();
-        CreateMap<QualityProfileConfigYamlLatest, QualityProfileConfig>();
-        CreateMap<ReleaseProfileConfigYamlLatest, ReleaseProfileConfig>();
-        CreateMap<ReleaseProfileFilterConfigYamlLatest, SonarrProfileFilterConfig>();
+        CreateMap<QualityScoreConfigYaml, QualityProfileScoreConfig>();
+        CreateMap<CustomFormatConfigYaml, CustomFormatConfig>();
+        CreateMap<QualitySizeConfigYaml, QualityDefinitionConfig>();
+        CreateMap<QualityProfileConfigYaml, QualityProfileConfig>();
+        CreateMap<ReleaseProfileConfigYaml, ReleaseProfileConfig>();
+        CreateMap<ReleaseProfileFilterConfigYaml, SonarrProfileFilterConfig>();
 
-        CreateMap<ServiceConfigYamlLatest, ServiceConfiguration>()
+        CreateMap<ServiceConfigYaml, ServiceConfiguration>()
             .ForMember(x => x.InstanceName, o => o.Ignore());
 
-        CreateMap<RadarrConfigYamlLatest, RadarrConfiguration>()
-            .IncludeBase<ServiceConfigYamlLatest, ServiceConfiguration>();
+        CreateMap<RadarrConfigYaml, RadarrConfiguration>()
+            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>();
 
-        CreateMap<SonarrConfigYamlLatest, SonarrConfiguration>()
-            .IncludeBase<ServiceConfigYamlLatest, ServiceConfiguration>();
+        CreateMap<SonarrConfigYaml, SonarrConfiguration>()
+            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>();
     }
 }

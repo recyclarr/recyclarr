@@ -1,12 +1,12 @@
 using Autofac.Features.Indexed;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config.Listers;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigAutofacModuleTest : IntegrationFixture
+public class ConfigAutofacModuleTest : TrashLibIntegrationFixture
 {
     private static IEnumerable<ConfigListCategory> AllConfigListCategories()
     {

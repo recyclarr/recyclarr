@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Pipelines.CustomFormat.Models;
+using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.TrashLib.Tests.Cache;
 

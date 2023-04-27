@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Autofac;
-using MoreLinq;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
+using Recyclarr.TrashLib.Startup;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;

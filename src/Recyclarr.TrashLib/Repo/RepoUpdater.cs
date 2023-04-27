@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Common;
-using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Repo.VersionControl;
+using Recyclarr.TrashLib.Settings;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Repo;

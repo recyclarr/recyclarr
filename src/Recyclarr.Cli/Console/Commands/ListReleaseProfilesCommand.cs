@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using Recyclarr.TrashLib.Pipelines.ReleaseProfile.Guide;
+using Recyclarr.Cli.Pipelines.ReleaseProfile.Guide;
 using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;
 

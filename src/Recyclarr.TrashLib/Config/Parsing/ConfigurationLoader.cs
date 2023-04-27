@@ -42,7 +42,7 @@ public class ConfigurationLoader : IConfigurationLoader
     }
 
     private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(
-        RootConfigYamlLatest? configs,
+        RootConfigYaml? configs,
         SupportedServices? desiredServiceType)
     {
         if (configs is null)
@@ -55,13 +55,13 @@ public class ConfigurationLoader : IConfigurationLoader
         if (desiredServiceType is null or SupportedServices.Radarr)
         {
             convertedConfigs.AddRange(
-                ValidateAndMap<RadarrConfigYamlLatest, RadarrConfiguration>(configs.Radarr));
+                ValidateAndMap<RadarrConfigYaml, RadarrConfiguration>(configs.Radarr));
         }
 
         if (desiredServiceType is null or SupportedServices.Sonarr)
         {
             convertedConfigs.AddRange(
-                ValidateAndMap<SonarrConfigYamlLatest, SonarrConfiguration>(configs.Sonarr));
+                ValidateAndMap<SonarrConfigYaml, SonarrConfiguration>(configs.Sonarr));
         }
 
         return convertedConfigs;
@@ -70,7 +70,7 @@ public class ConfigurationLoader : IConfigurationLoader
     private IEnumerable<IServiceConfiguration> ValidateAndMap<TConfigYaml, TServiceConfig>(
         IReadOnlyDictionary<string, TConfigYaml>? configs)
         where TServiceConfig : ServiceConfiguration
-        where TConfigYaml : ServiceConfigYamlLatest
+        where TConfigYaml : ServiceConfigYaml
     {
         if (configs is null)
         {

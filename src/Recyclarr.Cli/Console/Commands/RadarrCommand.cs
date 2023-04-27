@@ -3,11 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Migration;
+using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
+using Recyclarr.Cli.Pipelines.QualitySize.Guide;
+using Recyclarr.Cli.Processors;
 using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Pipelines.CustomFormat.Guide;
-using Recyclarr.TrashLib.Pipelines.QualitySize.Guide;
-using Recyclarr.TrashLib.Processors;
 using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;
 

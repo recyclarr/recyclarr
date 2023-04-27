@@ -1,15 +1,15 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config.Services;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigTemplateGuideServiceTest : IntegrationFixture
+public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
 {
     [Test, AutoMockData]
     public void Throw_when_templates_dir_does_not_exist(

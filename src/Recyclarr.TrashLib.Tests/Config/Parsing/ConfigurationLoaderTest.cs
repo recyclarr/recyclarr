@@ -3,7 +3,6 @@ using System.IO.Abstractions.Extensions;
 using System.Text;
 using Autofac;
 using FluentValidation;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary.Autofac;
@@ -17,7 +16,7 @@ namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigurationLoaderTest : IntegrationFixture
+public class ConfigurationLoaderTest : TrashLibIntegrationFixture
 {
     private static Func<TextReader> GetResourceData(string file)
     {
@@ -25,11 +24,11 @@ public class ConfigurationLoaderTest : IntegrationFixture
         return () => new StringReader(testData.ReadData(file));
     }
 
-    protected override void RegisterExtraTypes(ContainerBuilder builder)
+    protected override void RegisterTypes(ContainerBuilder builder)
     {
-        base.RegisterExtraTypes(builder);
-        builder.RegisterMockFor<IValidator<RadarrConfigYamlLatest>>();
-        builder.RegisterMockFor<IValidator<SonarrConfigYamlLatest>>();
+        base.RegisterTypes(builder);
+        builder.RegisterMockFor<IValidator<RadarrConfigYaml>>();
+        builder.RegisterMockFor<IValidator<SonarrConfigYaml>>();
     }
 
     [Test]
@@ -75,12 +74,11 @@ public class ConfigurationLoaderTest : IntegrationFixture
         };
 
         var loader = Resolve<IConfigurationLoader>();
-        var actual = loader.LoadMany(fileData.Select(x => x.Item1));
 
-        actual.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
+        loader.LoadMany(fileData.Select(x => x.Item1), SupportedServices.Sonarr)
             .Should().BeEquivalentTo(expectedSonarr);
 
-        actual.GetConfigsBasedOnSettings(MockSyncSettings.Radarr())
+        loader.LoadMany(fileData.Select(x => x.Item1), SupportedServices.Radarr)
             .Should().BeEquivalentTo(expectedRadarr);
     }
 
@@ -88,10 +86,7 @@ public class ConfigurationLoaderTest : IntegrationFixture
     public void Parse_using_stream()
     {
         var configLoader = Resolve<ConfigurationLoader>();
-        var configs = configLoader.Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"),
-            SupportedServices.Sonarr);
-
-        configs.GetConfigsBasedOnSettings(MockSyncSettings.Sonarr())
+        configLoader.Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"), SupportedServices.Sonarr)
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
                 new()

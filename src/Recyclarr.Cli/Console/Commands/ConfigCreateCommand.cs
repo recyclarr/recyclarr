@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using Recyclarr.Cli.Processors;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Processors;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

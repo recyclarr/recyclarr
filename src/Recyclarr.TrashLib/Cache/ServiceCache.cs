@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.TrashLib.Cache;
 

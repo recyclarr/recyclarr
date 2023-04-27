@@ -1,8 +1,8 @@
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Common.Networking;
-using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Json;
+using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.TrashLib.Http;
 

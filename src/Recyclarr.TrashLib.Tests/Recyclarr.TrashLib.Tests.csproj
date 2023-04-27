@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Cli.TestLibrary\Recyclarr.Cli.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib.TestLibrary\Recyclarr.TrashLib.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Recyclarr.TrashLib\Config\Parsing\ConfigYamlDataObjectsLatest.cs">
-      <Link>Config\Parsing\ConfigYamlDataObjectsLatest.cs</Link>
-    </Compile>
+    <Folder Include="Services\" />
   </ItemGroup>
 </Project>

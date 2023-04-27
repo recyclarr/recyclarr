@@ -1,11 +1,11 @@
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Config.Settings;
+using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.Cli.Tests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ServiceCompatibilityIntegrationTest : IntegrationFixture
+public class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
 {
     [Test]
     public void Load_settings_yml_correctly_when_file_exists()

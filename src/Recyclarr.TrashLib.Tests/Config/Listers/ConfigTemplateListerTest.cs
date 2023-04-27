@@ -1,15 +1,15 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.TrashLib.Tests.Config.Listers;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigTemplateListerTest : IntegrationFixture
+public class ConfigTemplateListerTest : TrashLibIntegrationFixture
 {
     [Test, AutoMockData]
     public async Task Hidden_templates_are_not_rendered(

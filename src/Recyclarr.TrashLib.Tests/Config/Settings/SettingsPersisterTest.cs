@@ -1,5 +1,5 @@
-using Recyclarr.TrashLib.Config.Settings;
 using Recyclarr.TrashLib.Config.Yaml;
+using Recyclarr.TrashLib.Settings;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Tests.Config.Settings;
