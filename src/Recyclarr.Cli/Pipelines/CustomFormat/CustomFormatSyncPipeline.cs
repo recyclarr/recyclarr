@@ -67,7 +67,6 @@ public class CustomFormatSyncPipeline : ISyncPipeline
             return;
         }
 
-        // todo: Update the ProcessedCustomFormat objects' FormatId after API calls
         await _phases.ApiPersistencePhase.Execute(config, transactions);
 
         _cachePersister.Save(config, cache.Update(guideCfs));

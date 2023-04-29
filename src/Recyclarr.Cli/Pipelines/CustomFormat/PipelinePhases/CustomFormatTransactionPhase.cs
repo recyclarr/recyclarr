@@ -34,37 +34,7 @@ public class CustomFormatTransactionPhase
             var serviceCf = FindServiceCfByName(serviceData, guideCf.Name);
             if (serviceCf is not null)
             {
-                if (config.ReplaceExistingCustomFormats)
-                {
-                    // replace:
-                    // - Use the ID from the service, not the cache, and do an update
-                    if (guideCf.Id != serviceCf.Id)
-                    {
-                        _log.Debug(
-                            "Format IDs for CF {Name} did not match which indicates a manually-created CF is " +
-                            "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
-                            serviceCf.Name, guideCf.Id, serviceCf.Id);
-
-                        guideCf.Id = serviceCf.Id;
-                    }
-
-                    AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
-                }
-                else
-                {
-                    // NO replace:
-                    // - ids must match (can't rename another cf to the same name), otherwise error
-                    if (guideCf.Id != serviceCf.Id)
-                    {
-                        transactions.ConflictingCustomFormats.Add(
-                            new ConflictingCustomFormat(guideCf, serviceCf.Id));
-                    }
-                    else
-                    {
-                        AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
-                    }
-                }
-
+                ProcessExistingCf(config, guideCf, serviceCf, transactions);
                 continue;
             }
 
@@ -89,6 +59,44 @@ public class CustomFormatTransactionPhase
             .Where(map => serviceData.Any(cf => cf.Id == map.CustomFormatId)));
 
         return transactions;
+    }
+
+    private void ProcessExistingCf(
+        IServiceConfiguration config,
+        CustomFormatData guideCf,
+        CustomFormatData serviceCf,
+        CustomFormatTransactionData transactions)
+    {
+        if (config.ReplaceExistingCustomFormats)
+        {
+            // replace:
+            // - Use the ID from the service, not the cache, and do an update
+            if (guideCf.Id != serviceCf.Id)
+            {
+                _log.Debug(
+                    "Format IDs for CF {Name} did not match which indicates a manually-created CF is " +
+                    "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
+                    serviceCf.Name, guideCf.Id, serviceCf.Id);
+
+                guideCf.Id = serviceCf.Id;
+            }
+
+            AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
+        }
+        else
+        {
+            // NO replace:
+            // - ids must match (can't rename another cf to the same name), otherwise error
+            if (guideCf.Id != serviceCf.Id)
+            {
+                transactions.ConflictingCustomFormats.Add(
+                    new ConflictingCustomFormat(guideCf, serviceCf.Id));
+            }
+            else
+            {
+                AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
+            }
+        }
     }
 
     private static void AddUpdatedCustomFormat(
