@@ -58,6 +58,8 @@ public class ConfigParser
         }
         catch (YamlException e)
         {
+            _log.Debug(e, "Exception while parsing config file");
+
             var line = e.Start.Line;
             switch (e.InnerException)
             {
@@ -67,7 +69,11 @@ public class ConfigParser
                     break;
 
                 default:
-                    _log.Error("Exception at line {Line}: {Msg}", line, e.InnerException?.Message ?? e.Message);
+                    // Check for Configuration-specific deprecation messages
+                    var msg = ConfigDeprecations.GetContextualErrorFromException(e) ??
+                        e.InnerException?.Message ?? e.Message;
+
+                    _log.Error("Exception at line {Line}: {Msg}", line, msg);
                     break;
             }
 
