@@ -52,6 +52,6 @@ public partial class MigrateTrashYmlTest
         fs.AllFiles.Should().ContainSingle(x => RecyclarrYmlRegex().IsMatch(x));
     }
 
-    [GeneratedRegex("[/\\\\]recyclarr\\.yml$")]
+    [GeneratedRegex("[/\\\\]recyclarr\\.yml$", RegexOptions.None, 1000)]
     private static partial Regex RecyclarrYmlRegex();
 }

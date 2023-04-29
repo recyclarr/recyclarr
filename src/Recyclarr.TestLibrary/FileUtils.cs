@@ -16,9 +16,9 @@ public static partial class FileUtils
             : LinuxRootRegex().Replace(path, @"C:\").Replace("/", "\\");
     }
 
-    [GeneratedRegex(@"^C:\\")]
+    [GeneratedRegex(@"^C:\\", RegexOptions.None, 1000)]
     private static partial Regex WindowsRootRegex();
 
-    [GeneratedRegex("^/")]
+    [GeneratedRegex("^/", RegexOptions.None, 1000)]
     private static partial Regex LinuxRootRegex();
 }

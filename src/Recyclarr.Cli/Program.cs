@@ -93,6 +93,6 @@ internal static partial class Program
         _tasks.Reverse().ForEach(x => x.OnFinish());
     }
 
-    [GeneratedRegex("'.*?'")]
+    [GeneratedRegex("'.*?'", RegexOptions.None, 1000)]
     private static partial Regex CommandMessageRegex();
 }

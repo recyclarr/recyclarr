@@ -9,9 +9,8 @@ using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.TrashLib.Cache;
 
-public class ServiceCache : IServiceCache
+public partial class ServiceCache : IServiceCache
 {
-    private static readonly Regex AllowedObjectNameCharacters = new(@"^[\w-]+$", RegexOptions.Compiled);
     private readonly ICacheStoragePath _storagePath;
     private readonly JsonSerializerSettings _jsonSettings;
 
@@ -79,11 +78,14 @@ public class ServiceCache : IServiceCache
     private IFileInfo PathFromAttribute<T>(IServiceConfiguration config)
     {
         var objectName = GetCacheObjectNameAttribute<T>();
-        if (!AllowedObjectNameCharacters.IsMatch(objectName))
+        if (!AllowedObjectNameCharactersRegex().IsMatch(objectName))
         {
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
 
         return _storagePath.CalculatePath(config, objectName);
     }
+
+    [GeneratedRegex("^[\\w-]+$", RegexOptions.None, 1000)]
+    private static partial Regex AllowedObjectNameCharactersRegex();
 }

@@ -4,11 +4,8 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 
-public class CustomFormatCategoryParser : ICustomFormatCategoryParser
+public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
 {
-    private static readonly Regex TableRegex = new(@"^\s*\|(.*)\|\s*$");
-    private static readonly Regex LinkRegex = new(@"^\[(.+?)\]\(#(.+?)\)$");
-
     public ICollection<CustomFormatCategoryItem> Parse(IFileInfo collectionOfCustomFormatsMdFile)
     {
         var columns = new List<List<string>>();
@@ -35,7 +32,7 @@ public class CustomFormatCategoryParser : ICustomFormatCategoryParser
 
     private static CustomFormatCategoryItem? ParseLink(string categoryName, string markdownLink)
     {
-        var match = LinkRegex.Match(markdownLink);
+        var match = LinkRegex().Match(markdownLink);
         return match.Success
             ? new CustomFormatCategoryItem(categoryName, match.Groups[1].Value, match.Groups[2].Value)
             : null;
@@ -71,14 +68,14 @@ public class CustomFormatCategoryParser : ICustomFormatCategoryParser
 
         return tableRows
             // Filter out the `|---|---|---|` part of the table between the heading & data rows.
-            .Where(x => !Regex.IsMatch(x[0], @"^-+$"));
+            .Where(x => !Regex.IsMatch(x[0], @"^-+$", RegexOptions.None, TimeSpan.FromMilliseconds(1000)));
     }
 
     private static List<string> GetTableRow(string line)
     {
         var fields = new List<string>();
 
-        var match = TableRegex.Match(line);
+        var match = TableRegex().Match(line);
         if (match.Success)
         {
             var tableRow = match.Groups[1].Value;
@@ -87,4 +84,10 @@ public class CustomFormatCategoryParser : ICustomFormatCategoryParser
 
         return fields;
     }
+
+    [GeneratedRegex("^\\s*\\|(.*)\\|\\s*$", RegexOptions.None, 1000)]
+    private static partial Regex TableRegex();
+
+    [GeneratedRegex("^\\[(.+?)\\]\\(#(.+?)\\)$", RegexOptions.None, 1000)]
+    private static partial Regex LinkRegex();
 }
