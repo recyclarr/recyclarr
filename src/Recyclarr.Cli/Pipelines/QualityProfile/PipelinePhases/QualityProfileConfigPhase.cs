@@ -23,8 +23,6 @@ public class QualityProfileConfigPhase
 
     public IReadOnlyCollection<ProcessedQualityProfileData> Execute(IServiceConfiguration config)
     {
-        // todo: error & throw when there are duplicate profiles in config
-
         ProcessLegacyResetUnmatchedScores(config);
 
         // 1. For each group of CFs that has a quality profile specified
