@@ -22,6 +22,7 @@ changes you may need to make.
 
 - **BREAKING**: Array-style instances are no longer supported.
 - **BREAKING**: Remove deprecated CLI commands: `radarr`, `sonarr`, and `create-config`.
+- **BREAKING**: Removed `reset_unmatched_scores` support under quality profile score section.
 
 ## [4.4.1] - 2023-04-08
 

@@ -18,8 +18,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 
     public QualityDefinitionConfig? QualityDefinition { get; init; }
 
-    // todo: Remove the setter later once ResetUnmatchedScores is removed from custom format quality profiles property
-    public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; set; } =
+    public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; init; } =
         Array.Empty<QualityProfileConfig>();
 }
 
@@ -37,7 +36,6 @@ public record QualityProfileScoreConfig
 {
     public string Name { get; init; } = "";
     public int? Score { get; init; }
-    public bool? ResetUnmatchedScores { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -49,7 +47,6 @@ public record QualityDefinitionConfig
 
 public record QualityProfileConfig
 {
-    // todo: Remove the setter later once reset_unmatched_scores is not in the cf.quality_profiles property anymore
-    public bool? ResetUnmatchedScores { get; set; }
+    public bool? ResetUnmatchedScores { get; init; }
     public string Name { get; init; } = "";
 }

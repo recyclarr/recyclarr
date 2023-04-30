@@ -13,6 +13,9 @@ public static class ConfigDeprecations
                 "See: https://recyclarr.dev/wiki/upgrade-guide/v5.0/#instances-must-now-be-named";
         }
 
+        // "DEPRECATION: Support for using `reset_unmatched_scores` under `custom_formats.quality_profiles` " +
+        //     "will be removed in a future release. Move it to the top level `quality_profiles` instead"
+
         return null;
     }
 }

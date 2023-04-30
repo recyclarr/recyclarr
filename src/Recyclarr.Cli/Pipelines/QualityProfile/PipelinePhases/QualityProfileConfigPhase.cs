@@ -23,8 +23,6 @@ public class QualityProfileConfigPhase
 
     public IReadOnlyCollection<ProcessedQualityProfileData> Execute(IServiceConfiguration config)
     {
-        ProcessLegacyResetUnmatchedScores(config);
-
         // 1. For each group of CFs that has a quality profile specified
         // 2. For each quality profile score config in that CF group
         // 3. For each CF in the group above, match it to a Guide CF object and pair it with the quality profile config
@@ -59,52 +57,6 @@ public class QualityProfileConfigPhase
         return allProfiles.Values
             .Where(x => x.CfScores.IsNotEmpty())
             .ToList();
-    }
-
-    private void ProcessLegacyResetUnmatchedScores(IServiceConfiguration config)
-    {
-        // todo: Remove this method later; it is for backward compatibility
-        var legacyResetUnmatchedScores = config.CustomFormats
-            .SelectMany(x => x.QualityProfiles)
-            .Where(x => x.ResetUnmatchedScores is not null)
-            .ToList();
-
-        if (legacyResetUnmatchedScores.Count > 0)
-        {
-            _log.Warning(
-                "DEPRECATION: Support for using `reset_unmatched_scores` under `custom_formats.quality_profiles` " +
-                "will be removed in a future release. Move it to the top level `quality_profiles` instead");
-        }
-
-        // Propagate the quality_profile version of ResetUnmatchedScores to the top-level quality_profile config.
-        var profilesThatNeedResetUnmatchedScores = legacyResetUnmatchedScores
-            .Where(x => x.ResetUnmatchedScores is true)
-            .Select(x => x.Name)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase);
-
-        var newQualityProfiles = config.QualityProfiles.ToList();
-
-        foreach (var profileName in profilesThatNeedResetUnmatchedScores)
-        {
-            var match = config.QualityProfiles.FirstOrDefault(x => x.Name.EqualsIgnoreCase(profileName));
-            if (match is null)
-            {
-                _log.Debug(
-                    "Root-level quality profile created to promote reset_unmatched_scores from CF score config: {Name}",
-                    profileName);
-                newQualityProfiles.Add(new QualityProfileConfig {Name = profileName, ResetUnmatchedScores = true});
-            }
-            else if (match.ResetUnmatchedScores is null)
-            {
-                _log.Debug(
-                    "Score-based reset_unmatched_scores propagated to existing root-level " +
-                    "quality profile config: {Name}", profileName);
-                match.ResetUnmatchedScores = true;
-            }
-        }
-
-        // Down-cast to avoid having to make the property mutable in the interface
-        ((ServiceConfiguration) config).QualityProfiles = newQualityProfiles;
     }
 
     private void AddCustomFormatScoreData(
