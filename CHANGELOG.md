@@ -8,10 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v5.0 Upgrade Guide][breaking5] for required
+changes you may need to make.
+
+[breaking5]: https://recyclarr.dev/wiki/upgrade-guide/v5.0
+
 ### Changed
 
 - API Key is now sent via the `X-Api-Key` header instead of the `apikey` query parameter. This
   lessens the need to redact information in the console.
+
+### Removed
+
+- **BREAKING**: Array-style instances are no longer supported.
 
 ## [4.4.1] - 2023-04-08
 
