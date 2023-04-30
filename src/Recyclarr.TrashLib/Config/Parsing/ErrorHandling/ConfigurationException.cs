@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using FluentValidation.Results;
 
-namespace Recyclarr.TrashLib.Config.Parsing;
+namespace Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 
 [Serializable]
 public class ConfigurationException : Exception

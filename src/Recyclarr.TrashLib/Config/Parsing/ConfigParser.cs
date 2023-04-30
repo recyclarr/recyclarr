@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using FluentValidation;
 using JetBrains.Annotations;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Yaml;
 using Serilog.Context;
 using YamlDotNet.Core;
@@ -56,6 +57,10 @@ public class ConfigParser
 
             return config;
         }
+        catch (FeatureRemovalException e)
+        {
+            _log.Error(e, "Unsupported feature");
+        }
         catch (YamlException e)
         {
             _log.Debug(e, "Exception while parsing config file");
@@ -69,17 +74,14 @@ public class ConfigParser
                     break;
 
                 default:
-                    // Check for Configuration-specific deprecation messages
-                    var msg = ConfigDeprecations.GetContextualErrorFromException(e) ??
+                    var msg = ContextualMessages.GetContextualErrorFromException(e) ??
                         e.InnerException?.Message ?? e.Message;
-
                     _log.Error("Exception at line {Line}: {Msg}", line, msg);
                     break;
             }
-
-            _log.Error("Due to previous exception, this config will be skipped");
         }
 
+        _log.Error("Due to previous exception, this config will be skipped");
         return null;
     }
 }

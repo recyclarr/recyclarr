@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Config.Parsing;

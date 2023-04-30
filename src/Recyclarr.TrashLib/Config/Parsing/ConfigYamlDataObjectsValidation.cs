@@ -57,13 +57,6 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
     {
         RuleFor(x => x.Name).NotEmpty()
             .WithMessage("'name' is required for elements under 'quality_profiles'");
-
-        RuleFor(x => x.ResetUnmatchedScores).Null()
-            .WithSeverity(Severity.Warning)
-            .WithMessage(
-                "Usage of 'reset_unmatched_scores' inside 'quality_profiles' under 'custom_formats' is deprecated. " +
-                "Use the root-level 'quality_profiles' instead. " +
-                "See: https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores");
     }
 }
 

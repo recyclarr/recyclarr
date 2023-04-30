@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;

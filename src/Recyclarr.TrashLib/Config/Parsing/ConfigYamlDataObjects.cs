@@ -8,7 +8,6 @@ public record QualityScoreConfigYaml
 {
     public string? Name { get; [UsedImplicitly] init; }
     public int? Score { get; [UsedImplicitly] init; }
-    public bool? ResetUnmatchedScores { get; [UsedImplicitly] init; }
 }
 
 public record CustomFormatConfigYaml

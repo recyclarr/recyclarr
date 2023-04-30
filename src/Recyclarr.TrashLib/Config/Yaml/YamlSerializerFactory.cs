@@ -1,4 +1,5 @@
 using Recyclarr.Common.YamlDotNet;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -17,11 +18,19 @@ public class YamlSerializerFactory : IYamlSerializerFactory
 
     public IDeserializer CreateDeserializer()
     {
-        var builder = new DeserializerBuilder()
+        var builder = new DeserializerBuilder();
+
+        // This MUST be first (amongst the other node type resolvers) because that means it will be processed LAST. This
+        // is a last resort utility resolver to make error messages more clear. We do not want it interfering with other
+        // resolvers.
+        builder.WithNodeTypeResolver(new SyntaxErrorHelper());
+
+        builder
+            .IgnoreFields()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeConverter(new YamlNullableEnumTypeConverter())
-            .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
+            .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithObjectFactory(_objectFactory);
 
         foreach (var behavior in _behaviors)
