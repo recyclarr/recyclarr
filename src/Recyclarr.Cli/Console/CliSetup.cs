@@ -28,11 +28,5 @@ public static class CliSetup
             config.AddCommand<ConfigCreateCommand>("create");
             config.AddCommand<ConfigListCommand>("list");
         });
-
-        // LEGACY / DEPRECATED SUBCOMMANDS
-        cli.AddCommand<RadarrCommand>("radarr");
-        cli.AddCommand<SonarrCommand>("sonarr");
-        cli.AddCommand<ConfigCreateCommand>("create-config")
-            .WithDescription("OBSOLETE: Use `config create` instead");
     }
 }

@@ -32,11 +32,6 @@ public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        if (context.Name == "create-config")
-        {
-            _log.Warning("The `create-config` subcommand is DEPRECATED -- Use `config create` instead!");
-        }
-
         try
         {
             await _processor.Process(settings.Path);

@@ -21,6 +21,7 @@ changes you may need to make.
 ### Removed
 
 - **BREAKING**: Array-style instances are no longer supported.
+- **BREAKING**: Remove deprecated CLI commands: `radarr`, `sonarr`, and `create-config`.
 
 ## [4.4.1] - 2023-04-08
 
