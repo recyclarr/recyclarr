@@ -22,18 +22,9 @@ public class CacheStoragePath : ICacheStoragePath
 
     private string BuildUniqueServiceDir(IServiceConfiguration config)
     {
-        // In the future, once array-style configurations are removed, the service name will no longer be optional
-        // and the below condition can be removed and the logic simplified.
-        var dirName = new StringBuilder();
-        if (config.InstanceName is not null)
-        {
-            dirName.Append($"{config.InstanceName}_");
-        }
-
         var url = config.BaseUrl.OriginalString;
         var guid = _hash.ComputeHash(Encoding.ASCII.GetBytes(url)).AsHexString();
-        dirName.Append(guid);
-        return dirName.ToString();
+        return $"{config.InstanceName}_{guid}";
     }
 
     public IFileInfo CalculatePath(IServiceConfiguration config, string cacheObjectName)

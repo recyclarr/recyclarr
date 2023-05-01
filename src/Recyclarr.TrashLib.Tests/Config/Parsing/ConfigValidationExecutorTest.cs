@@ -2,7 +2,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.TrashLib.Config.Parsing;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -20,7 +20,7 @@ public class ConfigValidationExecutorTest
             new ValidationFailure("property", "message")
         }));
 
-        var result = sut.Validate(new RadarrConfiguration());
+        var result = sut.Validate(NewConfig.Radarr());
 
         result.Should().BeFalse();
     }
@@ -35,7 +35,7 @@ public class ConfigValidationExecutorTest
             new ValidationFailure("property", "message") {Severity = Severity.Warning}
         }));
 
-        var result = sut.Validate(new RadarrConfiguration());
+        var result = sut.Validate(NewConfig.Radarr());
 
         result.Should().BeTrue();
     }
@@ -47,7 +47,7 @@ public class ConfigValidationExecutorTest
     {
         validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult());
 
-        var result = sut.Validate(new RadarrConfiguration());
+        var result = sut.Validate(NewConfig.Radarr());
 
         result.Should().BeTrue();
     }

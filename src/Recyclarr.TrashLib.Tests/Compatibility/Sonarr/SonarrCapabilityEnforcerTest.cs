@@ -1,6 +1,7 @@
 using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Compatibility.Sonarr;
 
@@ -13,7 +14,7 @@ public class SonarrCapabilityEnforcerTest
         [Frozen] ISonarrCapabilityChecker checker,
         SonarrCapabilityEnforcer sut)
     {
-        var config = new SonarrConfiguration();
+        var config = NewConfig.Sonarr();
 
         checker.GetCapabilities(default!).ReturnsForAnyArgs((SonarrCapabilities?) null);
 
@@ -27,7 +28,7 @@ public class SonarrCapabilityEnforcerTest
         [Frozen] ISonarrCapabilityChecker checker,
         SonarrCapabilityEnforcer sut)
     {
-        var config = new SonarrConfiguration();
+        var config = NewConfig.Sonarr();
 
         checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
         {
@@ -44,7 +45,7 @@ public class SonarrCapabilityEnforcerTest
         [Frozen] ISonarrCapabilityChecker checker,
         SonarrCapabilityEnforcer sut)
     {
-        var config = new SonarrConfiguration
+        var config = NewConfig.Sonarr() with
         {
             ReleaseProfiles = new List<ReleaseProfileConfig>
             {
@@ -68,7 +69,7 @@ public class SonarrCapabilityEnforcerTest
         [Frozen] ISonarrCapabilityChecker checker,
         SonarrCapabilityEnforcer sut)
     {
-        var config = new SonarrConfiguration
+        var config = NewConfig.Sonarr() with
         {
             CustomFormats = new List<CustomFormatConfig>
             {

@@ -5,7 +5,7 @@ namespace Recyclarr.TrashLib.Config.Services;
 public abstract record ServiceConfiguration : IServiceConfiguration
 {
     public abstract SupportedServices ServiceType { get; }
-    public string? InstanceName { get; set; }
+    public required string InstanceName { get; init; }
 
     public Uri BaseUrl { get; set; } = new("about:empty");
     public string ApiKey { get; init; } = "";

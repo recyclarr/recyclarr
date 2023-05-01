@@ -9,21 +9,7 @@ namespace Recyclarr.Cli.Tests.Console.Helpers;
 public class CacheStoragePathTest
 {
     [Test, AutoMockData]
-    public void Use_guid_when_no_name(CacheStoragePath sut)
-    {
-        var config = new SonarrConfiguration
-        {
-            BaseUrl = new Uri("http://something"),
-            InstanceName = null
-        };
-
-        var result = sut.CalculatePath(config, "obj");
-
-        result.FullName.Should().MatchRegex(@".*[/\\][a-f0-9]+[/\\]obj\.json$");
-    }
-
-    [Test, AutoMockData]
-    public void Use_name_when_not_null(CacheStoragePath sut)
+    public void Use_instance_name_in_path(CacheStoragePath sut)
     {
         var config = new SonarrConfiguration
         {

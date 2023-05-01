@@ -105,7 +105,7 @@ public class SyncProcessor : ISyncProcessor
 
     private void PrintProcessingHeader(SupportedServices serviceType, IServiceConfiguration config)
     {
-        var instanceName = config.InstanceName ?? FlurlLogging.SanitizeUrl(config.BaseUrl);
+        var instanceName = config.InstanceName;
 
         _console.WriteLine($@"
 ===========================================

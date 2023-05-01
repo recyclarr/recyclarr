@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 
@@ -11,7 +12,7 @@ public class TagConfigPhaseTest
     [Test, AutoMockData]
     public void Return_null_when_list_empty(TagConfigPhase sut)
     {
-        var config = new SonarrConfiguration
+        var config = NewConfig.Sonarr() with
         {
             ReleaseProfiles = Array.Empty<ReleaseProfileConfig>()
         };
@@ -23,7 +24,7 @@ public class TagConfigPhaseTest
     [Test, AutoMockData]
     public void Return_tags(TagConfigPhase sut)
     {
-        var config = new SonarrConfiguration
+        var config = NewConfig.Sonarr() with
         {
             ReleaseProfiles = new[]
             {

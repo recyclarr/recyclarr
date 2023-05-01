@@ -77,7 +77,7 @@ public class ConfigLocalLister : IConfigLister
 
         var tree = new Tree(Markup.FromInterpolated($"[red]{service}[/]"));
         tree.AddNodes(configs.Select(c =>
-            Markup.FromInterpolated($"[blue]{c.InstanceName ?? c.BaseUrl.ToString()}[/]")));
+            Markup.FromInterpolated($"[blue]{c.InstanceName}[/]")));
 
         rows.Add(tree);
     }

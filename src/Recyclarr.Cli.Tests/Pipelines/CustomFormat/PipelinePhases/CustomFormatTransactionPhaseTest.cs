@@ -3,7 +3,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Cache;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Models;
 using Recyclarr.TrashLib.TestLibrary;
 
@@ -27,7 +26,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var cache = new CustomFormatCache();
 
-        var config = new RadarrConfiguration();
+        var config = NewConfig.Radarr();
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 
@@ -63,7 +62,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var cache = new CustomFormatCache();
 
-        var config = new RadarrConfiguration();
+        var config = NewConfig.Radarr();
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 
@@ -108,7 +107,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration();
+        var config = NewConfig.Radarr();
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 
@@ -147,7 +146,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var cache = new CustomFormatCache();
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = true
         };
@@ -184,7 +183,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var cache = new CustomFormatCache();
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = false
         };
@@ -224,7 +223,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = false
         };
@@ -270,7 +269,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = false
         };
@@ -303,7 +302,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var cache = new CustomFormatCache();
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = true
         };
@@ -339,7 +338,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration
+        var config = NewConfig.Radarr() with
         {
             ReplaceExistingCustomFormats = false
         };
@@ -372,7 +371,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration();
+        var config = NewConfig.Radarr();
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 
@@ -408,7 +407,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = new RadarrConfiguration();
+        var config = NewConfig.Radarr();
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 

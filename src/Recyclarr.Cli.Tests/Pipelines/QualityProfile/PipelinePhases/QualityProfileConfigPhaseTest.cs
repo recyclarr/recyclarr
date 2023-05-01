@@ -13,7 +13,7 @@ public class QualityProfileConfigPhaseTest
 {
     private static RadarrConfiguration SetupCfs(params CustomFormatConfig[] cfConfigs)
     {
-        return new RadarrConfiguration
+        return NewConfig.Radarr() with
         {
             CustomFormats = cfConfigs
         };
