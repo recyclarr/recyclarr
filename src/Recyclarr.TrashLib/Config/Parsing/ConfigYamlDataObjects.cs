@@ -34,9 +34,7 @@ public record ServiceConfigYaml
     public string? BaseUrl { get; [UsedImplicitly] init; }
     public string? ApiKey { get; [UsedImplicitly] init; }
     public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
-
-    // todo: In v5.0, this will change to false.
-    public bool ReplaceExistingCustomFormats { get; [UsedImplicitly] init; } = true;
+    public bool ReplaceExistingCustomFormats { get; [UsedImplicitly] init; }
 
     public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; [UsedImplicitly] init; }
     public QualitySizeConfigYaml? QualityDefinition { get; [UsedImplicitly] init; }

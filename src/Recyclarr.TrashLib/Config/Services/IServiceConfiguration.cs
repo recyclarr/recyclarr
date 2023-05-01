@@ -11,5 +11,5 @@ public interface IServiceConfiguration
     QualityDefinitionConfig? QualityDefinition { get; }
 
     IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; }
-    bool ReplaceExistingCustomFormats { get; init; }
+    bool ReplaceExistingCustomFormats { get; }
 }

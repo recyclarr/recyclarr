@@ -17,6 +17,7 @@ changes you may need to make.
 
 - API Key is now sent via the `X-Api-Key` header instead of the `apikey` query parameter. This
   lessens the need to redact information in the console.
+- **BREAKING**: `replace_existing_custom_formats` now defaults to `true`
 
 ### Removed
 
