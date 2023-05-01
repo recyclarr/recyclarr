@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Migration;
-using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.TestLibrary;
 using Spectre.Console.Testing;
 
@@ -9,20 +8,6 @@ namespace Recyclarr.Cli.Tests.Migration;
 [Parallelizable(ParallelScope.All)]
 public class MigrationExecutorTest : CliIntegrationFixture
 {
-    [Test]
-    public void Migration_steps_are_in_expected_order()
-    {
-        var steps = Resolve<IEnumerable<IMigrationStep>>();
-        var orderedSteps = steps.OrderBy(x => x.Order).Select(x => x.GetType()).ToList();
-        orderedSteps.Should().BeEquivalentTo(
-            new[]
-            {
-                typeof(MigrateTrashYml),
-                typeof(MigrateTrashUpdaterAppDataDir)
-            },
-            config => config.WithStrictOrdering());
-    }
-
     [Test]
     public void Step_not_executed_if_check_returns_false()
     {

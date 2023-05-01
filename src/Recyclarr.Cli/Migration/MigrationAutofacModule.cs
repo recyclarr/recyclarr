@@ -1,5 +1,4 @@
 using Autofac;
-using Recyclarr.Cli.Migration.Steps;
 
 namespace Recyclarr.Cli.Migration;
 
@@ -13,8 +12,7 @@ public class MigrationAutofacModule : Module
         // Migration Steps
         builder.RegisterTypes
             (
-                typeof(MigrateTrashYml),
-                typeof(MigrateTrashUpdaterAppDataDir)
+                // Add migration steps here in order of execution
             )
             .As<IMigrationStep>();
     }

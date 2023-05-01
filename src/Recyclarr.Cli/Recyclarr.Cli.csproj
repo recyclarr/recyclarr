@@ -37,4 +37,8 @@
   <ItemGroup>
     <EmbeddedResource Include="config-template.yml" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migration\Steps\" />
+  </ItemGroup>
 </Project>
