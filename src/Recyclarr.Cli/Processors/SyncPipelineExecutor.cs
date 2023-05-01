@@ -6,11 +6,16 @@ namespace Recyclarr.Cli.Processors;
 
 public class SyncPipelineExecutor
 {
+    private readonly ILogger _log;
     private readonly IOrderedEnumerable<ISyncPipeline> _pipelines;
     private readonly IEnumerable<IPipelineCache> _caches;
 
-    public SyncPipelineExecutor(IOrderedEnumerable<ISyncPipeline> pipelines, IEnumerable<IPipelineCache> caches)
+    public SyncPipelineExecutor(
+        ILogger log,
+        IOrderedEnumerable<ISyncPipeline> pipelines,
+        IEnumerable<IPipelineCache> caches)
     {
+        _log = log;
         _pipelines = pipelines;
         _caches = caches;
     }
@@ -24,6 +29,7 @@ public class SyncPipelineExecutor
 
         foreach (var pipeline in _pipelines)
         {
+            _log.Debug("Executing Pipeline: {Pipeline}", pipeline.GetType().Name);
             await pipeline.Execute(settings, config);
         }
     }
