@@ -13,7 +13,7 @@ public static class ContextualMessages
             return
                 "Usage of 'reset_unmatched_scores' inside 'quality_profiles' under 'custom_formats' is no " +
                 "longer supported. Use the root-level 'quality_profiles' instead. " +
-                "See: https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores";
+                "See: https://recyclarr.dev/wiki/upgrade-guide/v5.0/#reset-unmatched-scores";
         }
 
         return null;

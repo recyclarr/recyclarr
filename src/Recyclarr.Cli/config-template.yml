@@ -12,7 +12,7 @@
 # The YAML comments will already be at the appropriate indentation.
 #
 # For more details on the configuration, see the Configuration Reference on the wiki here:
-# https://recyclarr.dev/wiki/reference/config-reference
+# https://recyclarr.dev/wiki/yaml/config-reference/
 
 # Configuration specific to Sonarr
 sonarr:
