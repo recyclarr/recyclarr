@@ -7,7 +7,13 @@ public record TrashRepository : IRepositorySettings
     public Uri CloneUrl { get; [UsedImplicitly] init; } = new("https://github.com/TRaSH-/Guides.git");
     public string Branch { get; [UsedImplicitly] init; } = "master";
     public string? Sha1 { get; [UsedImplicitly] init; }
-    public string? GitPath { get; [UsedImplicitly] init; }
+}
+
+public record ConfigTemplateRepository : IRepositorySettings
+{
+    public Uri CloneUrl { get; [UsedImplicitly] init; } = new("https://github.com/recyclarr/config-templates.git");
+    public string Branch { get; [UsedImplicitly] init; } = "master";
+    public string? Sha1 { get; [UsedImplicitly] init; }
 }
 
 public record LogJanitorSettings
@@ -18,6 +24,7 @@ public record LogJanitorSettings
 public record Repositories
 {
     public TrashRepository TrashGuide { get; [UsedImplicitly] init; } = new();
+    public ConfigTemplateRepository ConfigTemplates { get; [UsedImplicitly] init; } = new();
 }
 
 public record SettingsValues

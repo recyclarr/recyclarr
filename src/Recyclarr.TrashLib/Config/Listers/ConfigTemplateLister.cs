@@ -26,7 +26,7 @@ public class ConfigTemplateLister : IConfigLister
 
     public async Task List()
     {
-        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.TrashGuide);
+        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.ConfigTemplates);
 
         var data = _guideService.TemplateData;
 
