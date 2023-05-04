@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Guide;
 using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Settings;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765
@@ -16,6 +17,7 @@ internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesComm
     private readonly ILogger _log;
     private readonly ReleaseProfileDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
+    private readonly ISettingsProvider _settings;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -32,18 +34,20 @@ internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesComm
     public ListReleaseProfilesCommand(
         ILogger log,
         ReleaseProfileDataLister lister,
-        IRepoUpdater repoUpdater)
+        IRepoUpdater repoUpdater,
+        ISettingsProvider settings)
     {
         _log = log;
         _lister = lister;
         _repoUpdater = repoUpdater;
+        _settings = settings;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         try
         {
-            await _repoUpdater.UpdateRepo();
+            await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.TrashGuide);
 
             if (settings.ListTerms is not null)
             {

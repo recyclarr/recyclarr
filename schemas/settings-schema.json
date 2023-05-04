@@ -6,31 +6,18 @@
   "description": "Optional settings to control the behavior of Recyclarr",
   "additionalProperties": false,
   "properties": {
-    "repository": {
+    "repositories": {
       "type": "object",
       "additionalProperties": false,
-      "title": "Settings for the git repo",
-      "description": "",
+      "title": "Settings for any local git clones that Recyclarr manages",
       "properties": {
-        "clone_url": {
-          "type": "string",
-          "format": "uri",
-          "title": "Clone URL to the trash guides git repository",
-          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Recyclarr pull data from a fork instead of the official repository."
+        "trash_guide": {
+          "$ref": "#/$defs/repository",
+          "title": "Settings for the Trash Guides GitHub repository"
         },
-        "branch": {
-          "type": "string",
-          "title": "The name of a branch to check out in the repository"
-        },
-        "sha1": {
-          "type": "string",
-          "title": "A SHA1 (commit hash) in Git to use",
-          "description": "If specified, it overrides the `branch` setting. This SHA1 is passed to `git reset --hard` to force your local clone to this specific revision in the repository. If not specified, only the `branch` controls what revision is used in the repo."
-        },
-        "git_path": {
-          "type": "string",
-          "title": "Provide an explicit path to your git executable",
-          "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
+        "config_templates": {
+          "$ref": "#/$defs/repository",
+          "title": "Settings for the Recyclarr Config Templates GitHub repository"
         }
       }
     },
@@ -51,6 +38,34 @@
           "default": 20,
           "title": "The maximum number of log files to keep",
           "description": "If there are more log files than the max allowed here, Log Janitor will remove the oldest log files."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "clone_url": {
+          "type": "string",
+          "format": "uri",
+          "title": "Clone URL to the trash guides git repository",
+          "description": "A URL compatible with `git clone` that is used to clone the Trash Guides repository. This setting exists for enthusiasts that may want to instead have Recyclarr pull data from a fork instead of the official repository."
+        },
+        "branch": {
+          "type": "string",
+          "title": "The name of a branch to check out in the repository"
+        },
+        "sha1": {
+          "type": "string",
+          "title": "A SHA1 (commit hash) in Git to use",
+          "description": "If specified, it overrides the `branch` setting. This SHA1 is passed to `git reset --hard` to force your local clone to this specific revision in the repository. If not specified, only the `branch` controls what revision is used in the repo."
+        },
+        "git_path": {
+          "type": "string",
+          "title": "Provide an explicit path to your git executable",
+          "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
         }
       }
     }

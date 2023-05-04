@@ -12,44 +12,40 @@ public class RepoUpdater : IRepoUpdater
     private readonly IAppPaths _paths;
     private readonly IGitRepositoryFactory _repositoryFactory;
     private readonly IFileUtilities _fileUtils;
-    private readonly ISettingsProvider _settingsProvider;
 
     public RepoUpdater(
         ILogger log,
         IAppPaths paths,
         IGitRepositoryFactory repositoryFactory,
-        IFileUtilities fileUtils,
-        ISettingsProvider settingsProvider)
+        IFileUtilities fileUtils)
     {
         _log = log;
         _paths = paths;
         _repositoryFactory = repositoryFactory;
         _fileUtils = fileUtils;
-        _settingsProvider = settingsProvider;
     }
 
     public IDirectoryInfo RepoPath => _paths.RepoDirectory;
 
-    public async Task UpdateRepo()
+    public async Task UpdateRepo(IRepositorySettings repoSettings)
     {
         // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
         // fresh.
         try
         {
-            await CheckoutAndUpdateRepo();
+            await CheckoutAndUpdateRepo(repoSettings);
         }
         catch (GitCmdException e)
         {
             _log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}", e.ExitCode, e.Error);
             _log.Warning("Deleting local git repo and retrying git operation due to error...");
             _fileUtils.DeleteReadOnlyDirectory(RepoPath.FullName);
-            await CheckoutAndUpdateRepo();
+            await CheckoutAndUpdateRepo(repoSettings);
         }
     }
 
-    private async Task CheckoutAndUpdateRepo()
+    private async Task CheckoutAndUpdateRepo(IRepositorySettings repoSettings)
     {
-        var repoSettings = _settingsProvider.Settings.Repository;
         var cloneUrl = repoSettings.CloneUrl;
         var branch = repoSettings.Branch;
 

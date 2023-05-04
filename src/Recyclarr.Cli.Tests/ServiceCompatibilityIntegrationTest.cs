@@ -15,14 +15,15 @@ public class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
         // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects.
         // This test only ensures that the data deserialized is from the actual correct file.
         const string yamlData = @"
-repository:
-  clone_url: http://the_url.com
+repositories:
+  trash_guide:
+    clone_url: http://the_url.com
 ";
 
         Fs.AddFile(Paths.SettingsPath.FullName, new MockFileData(yamlData));
 
         var settings = sut.Settings;
 
-        settings.Repository.CloneUrl.Should().Be("http://the_url.com");
+        settings.Repositories.TrashGuide.CloneUrl.Should().Be("http://the_url.com");
     }
 }

@@ -5,6 +5,7 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Settings;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765
@@ -17,6 +18,7 @@ internal class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.
 {
     private readonly CustomFormatDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
+    private readonly ISettingsProvider _settings;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -30,15 +32,17 @@ internal class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.
 
     public ListCustomFormatsCommand(
         CustomFormatDataLister lister,
-        IRepoUpdater repoUpdater)
+        IRepoUpdater repoUpdater,
+        ISettingsProvider settings)
     {
         _lister = lister;
         _repoUpdater = repoUpdater;
+        _settings = settings;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateRepo();
+        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.TrashGuide);
         _lister.ListCustomFormats(settings.Service);
         return 0;
     }

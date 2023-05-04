@@ -12,5 +12,5 @@ public class GitPath : IGitPath
     }
 
     public static string Default => "git";
-    public string Path => _settings.Settings.Repository.GitPath ?? Default;
+    public string Path => _settings.Settings.GitPath ?? Default;
 }

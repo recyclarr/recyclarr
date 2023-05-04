@@ -5,6 +5,7 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualitySize.Guide;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Settings;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -16,6 +17,7 @@ internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSetti
 {
     private readonly QualitySizeDataLister _lister;
     private readonly IRepoUpdater _repoUpdater;
+    private readonly ISettingsProvider _settings;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -27,15 +29,16 @@ internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSetti
         public SupportedServices Service { get; init; }
     }
 
-    public ListQualitiesCommand(QualitySizeDataLister lister, IRepoUpdater repoUpdater)
+    public ListQualitiesCommand(QualitySizeDataLister lister, IRepoUpdater repoUpdater, ISettingsProvider settings)
     {
         _lister = lister;
         _repoUpdater = repoUpdater;
+        _settings = settings;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateRepo();
+        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.TrashGuide);
         _lister.ListQualities(settings.Service);
         return 0;
     }

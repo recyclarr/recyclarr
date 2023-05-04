@@ -12,7 +12,10 @@ public class GitPathTest
         [Frozen] ISettingsProvider settings,
         GitPath sut)
     {
-        settings.Settings.Returns(new SettingsValues {Repository = new TrashRepository {GitPath = null}});
+        settings.Settings.Returns(new SettingsValues
+        {
+            GitPath = null
+        });
 
         var result = sut.Path;
 
@@ -25,7 +28,10 @@ public class GitPathTest
         GitPath sut)
     {
         var expectedPath = "/usr/local/bin/git";
-        settings.Settings.Returns(new SettingsValues {Repository = new TrashRepository {GitPath = expectedPath}});
+        settings.Settings.Returns(new SettingsValues
+        {
+            GitPath = expectedPath
+        });
 
         var result = sut.Path;
 
