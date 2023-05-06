@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Common.TestLibrary;
 using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.Cli.Tests;
@@ -74,11 +75,11 @@ log_janitor:
 
         var expectedDirs = new[]
         {
+            Paths.CacheDirectory.FullName,
             Paths.LogDirectory.FullName,
-            Paths.RepoDirectory.FullName,
-            Paths.CacheDirectory.FullName
+            Paths.ConfigsDirectory.FullName
         };
 
-        expectedDirs.Should().IntersectWith(Fs.AllDirectories);
+        Fs.LeafDirectories().Should().BeEquivalentTo(expectedDirs);
     }
 }

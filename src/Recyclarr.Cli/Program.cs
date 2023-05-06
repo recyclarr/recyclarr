@@ -24,10 +24,8 @@ internal static partial class Program
         CompositionRoot.Setup(builder);
 
         var logLevelSwitch = new LoggingLevelSwitch();
-        builder.RegisterInstance(logLevelSwitch);
-
         var appDataPathProvider = new AppDataPathProvider();
-        builder.RegisterInstance(appDataPathProvider);
+        CompositionRoot.RegisterExternal(builder, logLevelSwitch, appDataPathProvider);
 
         var app = new CommandApp(new AutofacTypeRegistrar(builder, s => _scope = s));
         app.Configure(config =>

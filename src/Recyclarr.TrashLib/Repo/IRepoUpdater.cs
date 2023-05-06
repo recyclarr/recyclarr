@@ -5,6 +5,5 @@ namespace Recyclarr.TrashLib.Repo;
 
 public interface IRepoUpdater
 {
-    IDirectoryInfo RepoPath { get; }
-    Task UpdateRepo(IRepositorySettings repoSettings);
+    Task UpdateRepo(IDirectoryInfo repoPath, IRepositorySettings repoSettings);
 }

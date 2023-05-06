@@ -8,7 +8,6 @@ using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Settings;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -18,9 +17,8 @@ namespace Recyclarr.Cli.Console.Commands;
 public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
 {
     private readonly IMigrationExecutor _migration;
-    private readonly IRepoUpdater _repoUpdater;
+    private readonly ITrashGuidesRepo _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
-    private readonly ISettingsProvider _settings;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -52,16 +50,11 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 
-    public SyncCommand(
-        IMigrationExecutor migration,
-        IRepoUpdater repoUpdater,
-        ISyncProcessor syncProcessor,
-        ISettingsProvider settings)
+    public SyncCommand(IMigrationExecutor migration, ITrashGuidesRepo repo, ISyncProcessor syncProcessor)
     {
         _migration = migration;
-        _repoUpdater = repoUpdater;
+        _repoUpdater = repo;
         _syncProcessor = syncProcessor;
-        _settings = settings;
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
@@ -69,7 +62,7 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
     {
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
-        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.TrashGuide);
+        await _repoUpdater.Update();
 
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }

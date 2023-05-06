@@ -1,25 +1,25 @@
+using System.IO.Abstractions;
+
 namespace Recyclarr.TrashLib.Repo.VersionControl;
 
 public class GitRepositoryFactory : IGitRepositoryFactory
 {
-    private readonly Func<string, IGitRepository> _repoFactory;
     private readonly ILogger _log;
+    private readonly IGitPath _gitPath;
 
-    public GitRepositoryFactory(
-        Func<string, IGitRepository> repoFactory,
-        ILogger log)
+    public GitRepositoryFactory(ILogger log, IGitPath gitPath)
     {
-        _repoFactory = repoFactory;
         _log = log;
+        _gitPath = gitPath;
     }
 
-    public async Task<IGitRepository> CreateAndCloneIfNeeded(Uri repoUrl, string repoPath, string branch)
+    public async Task<IGitRepository> CreateAndCloneIfNeeded(Uri repoUrl, IDirectoryInfo repoPath, string branch)
     {
-        var repo = _repoFactory(repoPath);
+        var repo = new GitRepository(_log, _gitPath, repoPath);
 
-        if (!repo.Path.Exists)
+        if (!repoPath.Exists)
         {
-            _log.Information("Cloning trash repository...");
+            _log.Information("Cloning '{RepoName}' repository...", repoPath.Name);
             await repo.Clone(repoUrl, branch);
         }
         else

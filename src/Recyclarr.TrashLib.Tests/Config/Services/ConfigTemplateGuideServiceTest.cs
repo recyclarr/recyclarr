@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Common.TestLibrary;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.TrashLib.Tests.Config.Services;
@@ -15,15 +15,16 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
     public void Throw_when_templates_dir_does_not_exist(
         ConfigTemplateGuideService sut)
     {
-        var act = () => _ = sut.TemplateData;
+        var act = () => _ = sut.LoadTemplateData();
 
-        act.Should().Throw<InvalidDataException>().WithMessage("Path*templates*");
+        act.Should().Throw<InvalidDataException>().WithMessage("Recyclarr*templates*");
     }
 
     [Test]
     public void Normal_behavior()
     {
-        var templateDir = Paths.RepoDirectory.SubDir("docs/recyclarr-configs");
+        var repo = Resolve<IConfigTemplatesRepo>();
+        var templateDir = repo.Path;
         Fs.AddSameFileFromEmbeddedResource(templateDir.File("templates.json"), typeof(ConfigTemplateGuideServiceTest));
 
         TemplatePath MakeTemplatePath(SupportedServices service, string id, string path)
@@ -43,7 +44,7 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
 
         var sut = Resolve<ConfigTemplateGuideService>();
 
-        var data = sut.TemplateData;
+        var data = sut.LoadTemplateData();
         data.Should().BeEquivalentTo(expectedPaths, o => o.Excluding(x => x.TemplateFile));
         data.Select(x => x.TemplateFile.FullName)
             .Should().BeEquivalentTo(expectedPaths.Select(x => x.TemplateFile.FullName));

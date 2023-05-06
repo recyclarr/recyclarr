@@ -1,6 +1,4 @@
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Settings;
 using Spectre.Console;
 
 namespace Recyclarr.TrashLib.Config.Listers;
@@ -9,26 +7,18 @@ public class ConfigTemplateLister : IConfigLister
 {
     private readonly IAnsiConsole _console;
     private readonly IConfigTemplateGuideService _guideService;
-    private readonly IRepoUpdater _repoUpdater;
-    private readonly ISettingsProvider _settings;
 
     public ConfigTemplateLister(
         IAnsiConsole console,
-        IConfigTemplateGuideService guideService,
-        IRepoUpdater repoUpdater,
-        ISettingsProvider settings)
+        IConfigTemplateGuideService guideService)
     {
         _console = console;
         _guideService = guideService;
-        _repoUpdater = repoUpdater;
-        _settings = settings;
     }
 
-    public async Task List()
+    public Task List()
     {
-        await _repoUpdater.UpdateRepo(_settings.Settings.Repositories.ConfigTemplates);
-
-        var data = _guideService.TemplateData;
+        var data = _guideService.LoadTemplateData();
 
         var table = new Table();
         var empty = new Markup("");
@@ -44,6 +34,7 @@ public class ConfigTemplateLister : IConfigLister
         }
 
         _console.Write(table);
+        return Task.CompletedTask;
     }
 
     private static IEnumerable<Markup> RenderTemplates(

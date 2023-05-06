@@ -5,7 +5,6 @@ using Autofac.Features.ResolveAnything;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.EquivalencyExpression;
 using Recyclarr.Common;
-using Recyclarr.Common.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.ApiServices.System;
 using Recyclarr.TrashLib.Repo.VersionControl;
@@ -27,8 +26,6 @@ public abstract class TrashLibIntegrationFixture : IDisposable
 
         Paths = new AppPaths(Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr"));
         Logger = CreateLogger();
-
-        SetupMetadataJson();
 
         _container = new Lazy<IContainer>(() =>
         {
@@ -75,12 +72,6 @@ public abstract class TrashLibIntegrationFixture : IDisposable
             .WriteTo.TestCorrelator()
             .WriteTo.Console()
             .CreateLogger();
-    }
-
-    private void SetupMetadataJson()
-    {
-        var metadataFile = Paths.RepoDirectory.File("metadata.json");
-        Fs.AddFileFromEmbeddedResource(metadataFile, typeof(TrashLibIntegrationFixture), "Data.metadata.json");
     }
 
     // ReSharper disable MemberCanBePrivate.Global

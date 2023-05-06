@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Startup;
@@ -50,7 +51,7 @@ public class CustomFormatCategoryParserTest
 ------
 ";
 
-        var file = paths.RepoDirectory
+        var file = fs.CurrentDirectory()
             .SubDirectory("docs")
             .SubDirectory("Radarr")
             .File("Radarr-collection-of-custom-formats.md");

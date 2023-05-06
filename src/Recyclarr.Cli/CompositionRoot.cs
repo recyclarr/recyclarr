@@ -19,6 +19,8 @@ using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Interfaces;
+using Recyclarr.TrashLib.Startup;
+using Serilog.Core;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
@@ -86,5 +88,14 @@ public static class CompositionRoot
 
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<CommandSettings>();
+    }
+
+    public static void RegisterExternal(
+        ContainerBuilder builder,
+        LoggingLevelSwitch logLevelSwitch,
+        AppDataPathProvider appDataPathProvider)
+    {
+        builder.RegisterInstance(logLevelSwitch);
+        builder.RegisterInstance(appDataPathProvider);
     }
 }

@@ -23,7 +23,7 @@ public record LogJanitorSettings
 
 public record Repositories
 {
-    public TrashRepository TrashGuide { get; [UsedImplicitly] init; } = new();
+    public TrashRepository TrashGuides { get; [UsedImplicitly] init; } = new();
     public ConfigTemplateRepository ConfigTemplates { get; [UsedImplicitly] init; } = new();
 }
 

@@ -1,21 +1,20 @@
 using System.IO.Abstractions;
 using System.Text;
 using CliWrap;
-using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Repo.VersionControl;
 
 public sealed class GitRepository : IGitRepository
 {
     private readonly ILogger _log;
-    private readonly IAppPaths _paths;
     private readonly IGitPath _gitPath;
+    private readonly IDirectoryInfo _workDir;
 
-    public GitRepository(ILogger log, IAppPaths paths, IGitPath gitPath)
+    public GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir)
     {
         _log = log;
-        _paths = paths;
         _gitPath = gitPath;
+        _workDir = workDir;
     }
 
     private Task RunGitCmd(params string[] args)
@@ -30,18 +29,15 @@ public sealed class GitRepository : IGitRepository
         var output = new StringBuilder();
         var error = new StringBuilder();
 
+        _log.Debug("Using working directory: {Dir}", _workDir.FullName);
+        _workDir.Create();
+
         var cli = Cli.Wrap(_gitPath.Path)
             .WithArguments(args)
             .WithValidation(CommandResultValidation.None)
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(output))
-            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error));
-
-        if (_paths.RepoDirectory.Exists)
-        {
-            var workDir = _paths.RepoDirectory.FullName;
-            _log.Debug("Using working directory: {Dir}", workDir);
-            cli = cli.WithWorkingDirectory(workDir);
-        }
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error))
+            .WithWorkingDirectory(_workDir.FullName);
 
         var result = await cli.ExecuteAsync();
 
@@ -52,8 +48,6 @@ public sealed class GitRepository : IGitRepository
             throw new GitCmdException(result.ExitCode, error.ToString());
         }
     }
-
-    public IDirectoryInfo Path => _paths.RepoDirectory;
 
     public void Dispose()
     {
@@ -93,7 +87,7 @@ public sealed class GitRepository : IGitRepository
             args.AddRange(new[] {"-b", branch});
         }
 
-        args.AddRange(new[] {cloneUrl.ToString(), _paths.RepoDirectory.FullName});
+        args.AddRange(new[] {cloneUrl.ToString(), "."});
         await RunGitCmd(args);
     }
 }

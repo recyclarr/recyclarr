@@ -20,7 +20,7 @@ public class AppPaths : IAppPaths
     public IFileInfo SettingsPath => AppDataDirectory.File("settings.yml");
     public IFileInfo SecretsPath => AppDataDirectory.File("secrets.yml");
     public IDirectoryInfo LogDirectory => AppDataDirectory.SubDir("logs", "cli");
-    public IDirectoryInfo RepoDirectory => AppDataDirectory.SubDir("repo");
+    public IDirectoryInfo ReposDirectory => AppDataDirectory.SubDir("repositories");
     public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDir("cache");
     public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDir("configs");
 }

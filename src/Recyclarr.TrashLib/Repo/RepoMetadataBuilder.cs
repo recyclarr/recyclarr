@@ -1,26 +1,25 @@
 using System.IO.Abstractions;
-using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.TrashLib.Repo;
 
 public class RepoMetadataBuilder : IRepoMetadataBuilder
 {
-    private readonly IAppPaths _paths;
     private readonly Lazy<RepoMetadata> _metadata;
+    private readonly IDirectoryInfo _repoPath;
 
-    public RepoMetadataBuilder(IAppPaths paths)
+    public RepoMetadataBuilder(ITrashGuidesRepo repo)
     {
-        _paths = paths;
-        _metadata = new Lazy<RepoMetadata>(()
-            => TrashRepoJsonParser.Deserialize<RepoMetadata>(_paths.RepoDirectory.File("metadata.json")));
+        _repoPath = repo.Path;
+        _metadata = new Lazy<RepoMetadata>(
+            () => TrashRepoJsonParser.Deserialize<RepoMetadata>(_repoPath.File("metadata.json")));
     }
 
     public IReadOnlyList<IDirectoryInfo> ToDirectoryInfoList(IEnumerable<string> listOfDirectories)
     {
-        return listOfDirectories.Select(x => _paths.RepoDirectory.SubDirectory(x)).ToList();
+        return listOfDirectories.Select(x => _repoPath.SubDirectory(x)).ToList();
     }
 
-    public IDirectoryInfo DocsDirectory => _paths.RepoDirectory.SubDirectory("docs");
+    public IDirectoryInfo DocsDirectory => _repoPath.SubDirectory("docs");
 
     public RepoMetadata GetMetadata()
     {

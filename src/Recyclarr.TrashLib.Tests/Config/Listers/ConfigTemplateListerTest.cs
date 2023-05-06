@@ -18,7 +18,7 @@ public class ConfigTemplateListerTest : TrashLibIntegrationFixture
         [Frozen] IConfigTemplateGuideService guideService,
         ConfigTemplateLister sut)
     {
-        guideService.TemplateData.Returns(new[]
+        guideService.LoadTemplateData().Returns(new[]
         {
             new TemplatePath(SupportedServices.Radarr, "r1", stubFile, false),
             new TemplatePath(SupportedServices.Radarr, "r2", stubFile, false),

@@ -1,6 +1,8 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Startup;
+using YamlDotNet.Core;
 
 namespace Recyclarr.TrashLib.Settings;
 
@@ -8,11 +10,13 @@ public class SettingsProvider : ISettingsProvider
 {
     public SettingsValues Settings => _settings.Value;
 
+    private readonly ILogger _log;
     private readonly IAppPaths _paths;
     private readonly Lazy<SettingsValues> _settings;
 
-    public SettingsProvider(IAppPaths paths, IYamlSerializerFactory serializerFactory)
+    public SettingsProvider(ILogger log, IAppPaths paths, IYamlSerializerFactory serializerFactory)
     {
+        _log = log;
         _paths = paths;
         _settings = new Lazy<SettingsValues>(() => LoadOrCreateSettingsFile(serializerFactory));
     }
@@ -24,9 +28,22 @@ public class SettingsProvider : ISettingsProvider
             CreateDefaultSettingsFile();
         }
 
-        using var stream = _paths.SettingsPath.OpenText();
-        var deserializer = serializerFactory.CreateDeserializer();
-        return deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
+        try
+        {
+            using var stream = _paths.SettingsPath.OpenText();
+            var deserializer = serializerFactory.CreateDeserializer();
+            return deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
+        }
+        catch (YamlException e)
+        {
+            _log.Debug(e, "Exception while parsing settings file");
+
+            var line = e.Start.Line;
+            var msg = ContextualMessages.GetContextualErrorFromException(e);
+            _log.Error("Exception while parsing settings.yml at line {Line}: {Msg}", line, msg);
+
+            throw;
+        }
     }
 
     private void CreateDefaultSettingsFile()

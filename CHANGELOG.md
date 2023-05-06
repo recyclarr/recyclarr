@@ -19,6 +19,8 @@ changes you may need to make.
   lessens the need to redact information in the console.
 - **BREAKING**: `replace_existing_custom_formats` now defaults to `true`.
 - **BREAKING**: Restructured repository settings.
+- Configuration templates repository moved to `recyclarr/config-templates` on GitHub. Corresponding
+  settings for this repo as well (see the Settings YAML Reference on the wiki for more details).
 
 ### Removed
 

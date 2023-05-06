@@ -9,7 +9,7 @@ public interface IAppPaths
     IFileInfo SettingsPath { get; }
     IFileInfo SecretsPath { get; }
     IDirectoryInfo LogDirectory { get; }
-    IDirectoryInfo RepoDirectory { get; }
+    IDirectoryInfo ReposDirectory { get; }
     IDirectoryInfo CacheDirectory { get; }
     IDirectoryInfo ConfigsDirectory { get; }
 }
