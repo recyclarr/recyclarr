@@ -50,4 +50,9 @@ public static class CommonMockFileSystemExtensions
         var resourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath}";
         fs.AddFileFromEmbeddedResource(path, typeInAssembly.Assembly, resourcePath);
     }
+
+    public static IEnumerable<string> LeafDirectories(this MockFileSystem fs)
+    {
+        return fs.AllDirectories.Where(x => !fs.AllDirectories.Any(y => y.StartsWith(x) && y != x));
+    }
 }
