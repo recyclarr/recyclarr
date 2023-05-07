@@ -21,6 +21,10 @@ public abstract class TrashLibIntegrationFixture : IDisposable
 {
     protected TrashLibIntegrationFixture()
     {
+        // todo: Remove later. Needed because of this issue:
+        // https://github.com/TestableIO/System.IO.Abstractions/issues/983
+        Fs.Directory.Delete("temp", true);
+
         Paths = new AppPaths(Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr"));
         Logger = CreateLogger();
 
