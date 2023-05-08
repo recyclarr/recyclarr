@@ -36,7 +36,7 @@ public class SettingsProvider : ISettingsProvider
             "\n" +
             "# Edit this file to customize the behavior of Recyclarr beyond its defaults\n" +
             "# For the settings file reference guide, visit the link to the wiki below:\n" +
-            "# https://github.com/recyclarr/recyclarr/wiki/Settings-Reference\n";
+            "# https://recyclarr.dev/wiki/yaml/settings-reference/\n";
 
         _paths.SettingsPath.CreateParentDirectory();
         using var stream = _paths.SettingsPath.CreateText();

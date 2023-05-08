@@ -31,7 +31,8 @@ changes you may need to make.
 
 ### Fixed
 
-- Fixed JSON parsing issue that sometimes occurs when pulling custom formats from Radarr (#178)
+- Fixed JSON parsing issue that sometimes occurs when pulling custom formats from Radarr (#178).
+- Use correct wiki link in settings.yml template.
 
 ## [4.4.0] - 2023-04-06
 
