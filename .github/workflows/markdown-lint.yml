@@ -6,10 +6,12 @@ on:
     paths:
       - "**.md"
       - .github/workflows/markdown-lint.yml
+      - "!src/**"
   pull_request:
     paths:
       - "**.md"
       - .github/workflows/markdown-lint.yml
+      - "!src/**"
 
 jobs:
   markdownlint:
@@ -19,7 +21,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Lint Markdown Files
-        uses: DavidAnson/markdownlint-cli2-action@v5
+        uses: DavidAnson/markdownlint-cli2-action@v10
         with:
           globs: |
             **.md
