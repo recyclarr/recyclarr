@@ -138,6 +138,7 @@ The Github Workflows manage the release process after the push by doing the foll
 [release]: https://github.com/recyclarr/recyclarr/releases
 [ghcr]: https://github.com/recyclarr/recyclarr/pkgs/container/recyclarr
 [discord]: https://discord.com/invite/Vau8dZ3
+[dockerhub]: https://hub.docker.com/r/recyclarr/recyclarr
 
 ## Update `.gitignore`
 
