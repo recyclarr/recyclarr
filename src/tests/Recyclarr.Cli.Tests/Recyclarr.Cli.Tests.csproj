@@ -2,7 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Cli.TestLibrary\Recyclarr.Cli.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
-    <ProjectReference Include="..\Recyclarr.Cli\Recyclarr.Cli.csproj" />
+    <ProjectReference Include="..\..\Recyclarr.Cli\Recyclarr.Cli.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib.TestLibrary\Recyclarr.TrashLib.TestLibrary.csproj" />
   </ItemGroup>
 </Project>

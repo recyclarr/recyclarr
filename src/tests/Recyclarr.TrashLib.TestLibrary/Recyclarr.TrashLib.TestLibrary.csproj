@@ -2,7 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common.TestLibrary\Recyclarr.Common.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
+    <ProjectReference Include="..\..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper.Collection" />
