@@ -29,6 +29,7 @@
     <PackageVersion Include="Spectre.Console.Analyzer" Version="0.46.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.46.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
+    <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
     <PackageVersion Include="System.Reactive" Version="5.0.0" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.18" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.42" />
