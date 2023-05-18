@@ -46,7 +46,6 @@ public class ConfigCreationProcessorTest : CliIntegrationFixture
 
         var yml = Fs.CurrentDirectory().File("file.yml");
         Fs.AddEmptyFile(yml);
-        yml.Refresh(); // Required since file was created after IFileInfo was constructed
 
         var act = () => sut.Process(yml.FullName);
 

@@ -20,7 +20,6 @@ repositories:
 ";
 
         Fs.AddFile(Paths.SettingsPath, new MockFileData(yamlData));
-        Paths.SettingsPath.Refresh();
 
         var settings = sut.Settings;
 
