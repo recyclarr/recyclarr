@@ -26,7 +26,7 @@ public class BaseCommandSetupIntegrationTest : CliIntegrationFixture
     {
         const int maxFiles = 25;
 
-        Fs.AddFile(Paths.SettingsPath.FullName, new MockFileData($@"
+        Fs.AddFile(Paths.AppDataDirectory.File("settings.yml").FullName, new MockFileData($@"
 log_janitor:
   max_files: {maxFiles}
 "));

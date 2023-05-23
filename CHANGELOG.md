@@ -13,6 +13,11 @@ changes you may need to make.
 
 [breaking5]: https://recyclarr.dev/wiki/upgrade-guide/v5.0
 
+### Added
+
+- The `*.yaml` extension is now accepted for all YAML files (e.g. `settings.yaml`, `recyclarr.yaml`)
+  in addition to `*.yml` (which was already supported).
+
 ### Changed
 
 - API Key is now sent via the `X-Api-Key` header instead of the `apikey` query parameter. This

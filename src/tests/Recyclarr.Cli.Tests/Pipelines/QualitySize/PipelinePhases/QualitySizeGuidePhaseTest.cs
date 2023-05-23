@@ -63,7 +63,8 @@ public class QualitySizeGuidePhaseTest
 
         _ = sut.Execute(config);
 
-        config.QualityDefinition?.PreferredRatio.Should().Be(decimal.Parse(expectedPreferred));
+        config.QualityDefinition.Should().NotBeNull();
+        config.QualityDefinition!.PreferredRatio.Should().Be(decimal.Parse(expectedPreferred));
     }
 
     [Test, AutoMockData]
@@ -91,8 +92,8 @@ public class QualitySizeGuidePhaseTest
         });
 
         var result = sut.Execute(config);
-
-        result?.Qualities.Should().BeEquivalentTo(new[]
+        result.Should().NotBeNull();
+        result!.Qualities.Should().BeEquivalentTo(new[]
             {
                 new QualitySizeItem("quality1", 0, 100, 50)
             },
@@ -127,8 +128,8 @@ public class QualitySizeGuidePhaseTest
         });
 
         var result = sut.Execute(config);
-
-        result?.Qualities.Should().BeEquivalentTo(new[]
+        result.Should().NotBeNull();
+        result!.Qualities.Should().BeEquivalentTo(new[]
             {
                 new QualitySizeItem("quality1", 0, 100, 90)
             },

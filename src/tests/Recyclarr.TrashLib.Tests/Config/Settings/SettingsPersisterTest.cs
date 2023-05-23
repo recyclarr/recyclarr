@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Settings;
 using Recyclarr.TrashLib.Startup;
@@ -16,7 +17,7 @@ public class SettingsPersisterTest
     {
         _ = sut.Settings;
 
-        fileSystem.AllFiles.Should().ContainSingle(paths.SettingsPath.FullName);
+        fileSystem.AllFiles.Should().ContainSingle(paths.AppDataDirectory.File("settings.yml").FullName);
     }
 
     [Test, AutoMockData]

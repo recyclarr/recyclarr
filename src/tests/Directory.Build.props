@@ -13,6 +13,7 @@
     <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="All" />
     <PackageReference Include="coverlet.collector" PrivateAssets="All" />
     <PackageReference Include="FluentAssertions" PrivateAssets="All" />
+    <PackageReference Include="FluentAssertions.Analyzers" PrivateAssets="All" />
     <PackageReference Include="FluentAssertions.Json" PrivateAssets="All" />
     <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" PrivateAssets="All" />

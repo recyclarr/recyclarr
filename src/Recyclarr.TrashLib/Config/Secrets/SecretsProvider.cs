@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Startup;
 using YamlDotNet.Serialization;
 
@@ -21,9 +22,10 @@ public class SecretsProvider : ISecretsProvider
     {
         var result = new Dictionary<string, string>();
 
-        if (_paths.SecretsPath.Exists)
+        var yamlPath = _paths.AppDataDirectory.YamlFile("secrets");
+        if (yamlPath is not null)
         {
-            using var stream = _paths.SecretsPath.OpenText();
+            using var stream = yamlPath.OpenText();
             var deserializer = new DeserializerBuilder().Build();
             var dict = deserializer.Deserialize<Dictionary<string, string>?>(stream);
             if (dict is not null)

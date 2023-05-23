@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TrashLib.Settings;
 
@@ -19,7 +20,7 @@ repositories:
     clone_url: http://the_url.com
 ";
 
-        Fs.AddFile(Paths.SettingsPath, new MockFileData(yamlData));
+        Fs.AddFile(Paths.AppDataDirectory.File("settings.yml"), new MockFileData(yamlData));
 
         var settings = sut.Settings;
 

@@ -17,7 +17,7 @@ public class ConfigCreationProcessorTest : CliIntegrationFixture
 
         await sut.Process(null);
 
-        var file = Fs.GetFile(Paths.ConfigPath);
+        var file = Fs.GetFile(Paths.AppDataDirectory.File("recyclarr.yml"));
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }

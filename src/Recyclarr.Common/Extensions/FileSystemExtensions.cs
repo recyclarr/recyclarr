@@ -73,4 +73,20 @@ public static class FileSystemExtensions
         return subdirectories.Aggregate(dir,
             (d, s) => d.FileSystem.DirectoryInfo.New(d.FileSystem.Path.Combine(d.FullName, s)));
     }
+
+    public static IFileInfo? YamlFile(this IDirectoryInfo dir, string yamlFilenameNoExtension)
+    {
+        var supportedFiles = new[] {$"{yamlFilenameNoExtension}.yml", $"{yamlFilenameNoExtension}.yaml"};
+        var configs = supportedFiles
+            .Select(dir.File)
+            .Where(x => x.Exists)
+            .ToList();
+
+        if (configs.Count > 1)
+        {
+            throw new ConflictingYamlFilesException(supportedFiles);
+        }
+
+        return configs.FirstOrDefault();
+    }
 }

@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Yaml;
@@ -23,14 +24,15 @@ public class SettingsProvider : ISettingsProvider
 
     private SettingsValues LoadOrCreateSettingsFile(IYamlSerializerFactory serializerFactory)
     {
-        if (!_paths.SettingsPath.Exists)
+        var yamlPath = _paths.AppDataDirectory.YamlFile("settings");
+        if (yamlPath is null)
         {
-            CreateDefaultSettingsFile();
+            yamlPath = CreateDefaultSettingsFile();
         }
 
         try
         {
-            using var stream = _paths.SettingsPath.OpenText();
+            using var stream = yamlPath.OpenText();
             var deserializer = serializerFactory.CreateDeserializer();
             return deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
         }
@@ -46,7 +48,7 @@ public class SettingsProvider : ISettingsProvider
         }
     }
 
-    private void CreateDefaultSettingsFile()
+    private IFileInfo CreateDefaultSettingsFile()
     {
         const string fileData =
             "# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json\n" +
@@ -55,8 +57,10 @@ public class SettingsProvider : ISettingsProvider
             "# For the settings file reference guide, visit the link to the wiki below:\n" +
             "# https://recyclarr.dev/wiki/yaml/settings-reference/\n";
 
-        _paths.SettingsPath.CreateParentDirectory();
-        using var stream = _paths.SettingsPath.CreateText();
+        var settingsFile = _paths.AppDataDirectory.File("settings.yml");
+        settingsFile.CreateParentDirectory();
+        using var stream = settingsFile.CreateText();
         stream.Write(fileData);
+        return settingsFile;
     }
 }

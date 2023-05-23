@@ -26,7 +26,10 @@ public class ConfigCreationProcessor : IConfigCreationProcessor
 
     public async Task Process(string? configFilePath)
     {
-        var configFile = configFilePath is null ? _paths.ConfigPath : _fs.FileInfo.New(configFilePath);
+        var configFile = configFilePath is null
+            ? _paths.AppDataDirectory.File("recyclarr.yml")
+            : _fs.FileInfo.New(configFilePath);
+
         if (configFile.Exists)
         {
             throw new FileExistsException(configFile.FullName);

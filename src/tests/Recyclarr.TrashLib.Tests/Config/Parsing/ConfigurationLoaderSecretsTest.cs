@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.TestLibrary;
@@ -30,7 +31,7 @@ api_key: 95283e6b156c42f3af8a9b16173f876b
 secret_rp: 1234567
 ";
 
-        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+        Fs.AddFile(Paths.AppDataDirectory.File("secrets.yml").FullName, new MockFileData(secretsYml));
         var expected = new[]
         {
             new
@@ -67,7 +68,7 @@ sonarr:
 
         const string secretsYml = "no_api_key: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+        Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
 
         var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
         result.Should().BeEmpty();
@@ -120,7 +121,7 @@ sonarr:
 
         const string secretsYml = @"bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(Paths.SecretsPath.FullName, new MockFileData(secretsYml));
+        Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
         var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
         result.Should().BeEmpty();
     }

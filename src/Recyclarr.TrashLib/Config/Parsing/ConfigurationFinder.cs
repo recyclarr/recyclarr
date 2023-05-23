@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Startup;
 
@@ -19,12 +20,15 @@ public class ConfigurationFinder : IConfigurationFinder
 
         if (_paths.ConfigsDirectory.Exists)
         {
-            configs.AddRange(_paths.ConfigsDirectory.EnumerateFiles("*.yml"));
+            var extensions = new[] {"*.yml", "*.yaml"};
+            var files = extensions.SelectMany(x => _paths.ConfigsDirectory.EnumerateFiles(x));
+            configs.AddRange(files);
         }
 
-        if (_paths.ConfigPath.Exists)
+        var configPath = _paths.AppDataDirectory.YamlFile("recyclarr");
+        if (configPath is not null)
         {
-            configs.Add(_paths.ConfigPath);
+            configs.Add(configPath);
         }
 
         return configs;

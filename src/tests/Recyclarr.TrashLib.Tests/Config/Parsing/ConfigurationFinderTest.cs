@@ -14,9 +14,9 @@ public class ConfigurationFinderTest
     {
         return new[]
         {
-            paths.ConfigPath,
+            paths.AppDataDirectory.File("recyclarr.yml"),
             paths.ConfigsDirectory.File("b.yml"),
-            paths.ConfigsDirectory.File("c.yml")
+            paths.ConfigsDirectory.File("c.yaml")
         };
     }
 
@@ -97,11 +97,12 @@ public class ConfigurationFinderTest
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
         ConfigurationFinder sut)
     {
-        fs.AddEmptyFile(paths.ConfigPath);
+        var configFile = paths.AppDataDirectory.File("recyclarr.yml");
+        fs.AddEmptyFile(configFile);
 
         var result = sut.GetConfigFiles(Array.Empty<IFileInfo>());
 
-        result.Should().ContainSingle(x => x.FullName == paths.ConfigPath.FullName);
+        result.Should().ContainSingle(x => x.FullName == configFile.FullName);
     }
 
     [Test, AutoMockData]
