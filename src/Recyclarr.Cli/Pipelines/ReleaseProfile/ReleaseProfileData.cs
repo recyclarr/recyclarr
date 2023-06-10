@@ -11,6 +11,11 @@ public record TermData
 
     public string Name { get; init; } = string.Empty;
     public string Term { get; init; } = string.Empty;
+
+    public sealed override string ToString()
+    {
+        return $"[TrashId: {TrashId}] [Name: {Name}] [Term: {Term}]";
+    }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -23,6 +28,11 @@ public record PreferredTermData
     {
         score = Score;
         terms = Terms;
+    }
+
+    public sealed override string ToString()
+    {
+        return $"[Score: {Score}] [Terms: {Terms.Count}]";
     }
 }
 
@@ -37,4 +47,14 @@ public record ReleaseProfileData
     public IReadOnlyCollection<TermData> Required { get; init; } = Array.Empty<TermData>();
     public IReadOnlyCollection<TermData> Ignored { get; init; } = Array.Empty<TermData>();
     public IReadOnlyCollection<PreferredTermData> Preferred { get; init; } = Array.Empty<PreferredTermData>();
+
+    public sealed override string ToString()
+    {
+        return $"[TrashId: {TrashId}] " +
+            $"[Name: {Name}] " +
+            $"[IncludePreferred: {IncludePreferredWhenRenaming}] " +
+            $"[Required: {Required.Count}] " +
+            $"[Ignored: {Ignored.Count}] " +
+            $"[Preferred: {Preferred.Count}]";
+    }
 }
