@@ -21,4 +21,9 @@ public class ProcessedCustomFormatCache : IPipelineCache
     {
         return _customFormats.FirstOrDefault(x => x.TrashId.EqualsIgnoreCase(trashId));
     }
+
+    public CustomFormatData? LookupByServiceId(int id)
+    {
+        return _customFormats.FirstOrDefault(x => x.Id == id);
+    }
 }

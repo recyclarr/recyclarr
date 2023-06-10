@@ -34,6 +34,11 @@ changes you may need to make.
 - **BREAKING**: Removed `reset_unmatched_scores` support under quality profile score section.
 - **BREAKING**: Migration steps that dealt with the old `trash.yml` have been removed.
 
+### Fixed
+
+- False-positive duplicate score warnings no longer occur when doing `sync --preview` for the first
+  time.
+
 ## [4.4.1] - 2023-04-08
 
 ### Fixed

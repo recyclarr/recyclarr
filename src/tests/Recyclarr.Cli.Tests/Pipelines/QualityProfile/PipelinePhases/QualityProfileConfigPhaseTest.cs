@@ -47,7 +47,7 @@ public class QualityProfileConfigPhaseTest
 
         result.Should().BeEquivalentTo(new[]
         {
-            NewQp.Processed("test_profile", (1, 100), (2, 100))
+            NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
         });
     }
 
@@ -78,7 +78,7 @@ public class QualityProfileConfigPhaseTest
 
         result.Should().BeEquivalentTo(new[]
         {
-            NewQp.Processed("test_profile", (1, 100), (2, 200))
+            NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
         });
     }
 
@@ -163,8 +163,8 @@ public class QualityProfileConfigPhaseTest
 
         result.Should().BeEquivalentTo(new[]
         {
-            NewQp.Processed("test_profile1", (1, 100)),
-            NewQp.Processed("test_profile2", (1, 200))
+            NewQp.Processed("test_profile1", ("id1", 1, 100)),
+            NewQp.Processed("test_profile2", ("id1", 1, 200))
         });
     }
 }

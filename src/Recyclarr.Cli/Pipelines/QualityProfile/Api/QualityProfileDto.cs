@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -14,7 +13,7 @@ public record QualityProfileDto
     public int MinFormatScore { get; init; }
     public int Cutoff { get; init; }
     public int CutoffFormatScore { get; init; }
-    public Collection<ProfileFormatItemDto> FormatItems { get; } = new();
+    public IReadOnlyCollection<ProfileFormatItemDto> FormatItems { get; init; } = Array.Empty<ProfileFormatItemDto>();
 
     [JsonExtensionData]
     public JObject? ExtraJson { get; init; }
@@ -25,7 +24,7 @@ public record ProfileFormatItemDto
 {
     public int Format { get; init; }
     public string Name { get; init; } = "";
-    public int Score { get; set; }
+    public int Score { get; init; }
 
     [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();

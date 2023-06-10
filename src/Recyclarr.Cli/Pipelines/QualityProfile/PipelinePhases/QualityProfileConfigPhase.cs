@@ -5,9 +5,11 @@ using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
+public record ProcessedQualityProfileScore(string TrashId, string CfName, int FormatId, int Score);
+
 public record ProcessedQualityProfileData(QualityProfileConfig Profile)
 {
-    public Dictionary<int, int> CfScores { get; init; } = new();
+    public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
 }
 
 public class QualityProfileConfigPhase
@@ -60,7 +62,7 @@ public class QualityProfileConfigPhase
     }
 
     private void AddCustomFormatScoreData(
-        IDictionary<int, int> existingScoreData,
+        ICollection<ProcessedQualityProfileScore> existingScoreData,
         QualityProfileScoreConfig profile,
         CustomFormatData cf)
     {
@@ -71,9 +73,10 @@ public class QualityProfileConfigPhase
             return;
         }
 
-        if (existingScoreData.TryGetValue(cf.Id, out var existingScore))
+        var existingScore = existingScoreData.FirstOrDefault(x => x.TrashId.EqualsIgnoreCase(cf.TrashId));
+        if (existingScore is not null)
         {
-            if (existingScore != scoreToUse)
+            if (existingScore.Score != scoreToUse)
             {
                 _log.Warning(
                     "Custom format {Name} ({TrashId}) is duplicated in quality profile {ProfileName} with a score " +
@@ -88,6 +91,6 @@ public class QualityProfileConfigPhase
             return;
         }
 
-        existingScoreData.Add(cf.Id, scoreToUse.Value);
+        existingScoreData.Add(new ProcessedQualityProfileScore(cf.TrashId, cf.Name, cf.Id, scoreToUse.Value));
     }
 }

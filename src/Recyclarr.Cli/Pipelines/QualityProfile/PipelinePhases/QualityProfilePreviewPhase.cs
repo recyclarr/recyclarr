@@ -26,11 +26,11 @@ public class QualityProfilePreviewPhase
                 .AddColumn("[bold]New[/]")
                 .AddColumn("[bold]Reason[/]");
 
-            foreach (var updatedScore in updatedScores)
+            foreach (var updatedScore in updatedScores.Where(x => x.Reason != FormatScoreUpdateReason.NoChange))
             {
                 table.AddRow(
-                    updatedScore.CustomFormatName,
-                    updatedScore.OldScore.ToString(),
+                    updatedScore.Dto.Name,
+                    updatedScore.Dto.Score.ToString(),
                     updatedScore.NewScore.ToString(),
                     updatedScore.Reason.ToString());
             }

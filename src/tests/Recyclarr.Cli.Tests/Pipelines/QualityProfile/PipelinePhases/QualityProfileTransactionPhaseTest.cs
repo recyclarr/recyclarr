@@ -16,7 +16,7 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = new[]
         {
-            NewQp.Processed("invalid_profile_name", (1, 100))
+            NewQp.Processed("invalid_profile_name", ("id1", 1, 100))
         };
 
         var serviceData = new[]
@@ -41,7 +41,7 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = new[]
         {
-            NewQp.Processed("profile1", (1, 100), (2, 500))
+            NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
         };
 
         var serviceData = new[]
@@ -49,7 +49,7 @@ public class QualityProfileTransactionPhaseTest
             new QualityProfileDto
             {
                 Name = "profile1",
-                FormatItems =
+                FormatItems = new[]
                 {
                     new ProfileFormatItemDto
                     {
@@ -69,38 +69,13 @@ public class QualityProfileTransactionPhaseTest
 
         var result = sut.Execute(guideData, serviceData);
 
-        result.Should().BeEquivalentTo(new QualityProfileTransactionData
-        {
-            UpdatedProfiles =
+        result.UpdatedProfiles.Should()
+            .ContainSingle().Which.UpdatedScores.Should()
+            .BeEquivalentTo(new[]
             {
-                new UpdatedQualityProfile(new QualityProfileDto
-                {
-                    Name = "profile1",
-                    FormatItems =
-                    {
-                        new ProfileFormatItemDto
-                        {
-                            Name = "quality1",
-                            Format = 1,
-                            Score = 100
-                        },
-                        new ProfileFormatItemDto
-                        {
-                            Name = "quality2",
-                            Format = 2,
-                            Score = 500
-                        }
-                    }
-                })
-                {
-                    UpdatedScores =
-                    {
-                        new UpdatedFormatScore("quality1", 200, 100, FormatScoreUpdateReason.Updated),
-                        new UpdatedFormatScore("quality2", 300, 500, FormatScoreUpdateReason.Updated)
-                    }
-                }
-            }
-        });
+                NewQp.UpdatedScore("quality1", 200, 100, FormatScoreUpdateReason.Updated),
+                NewQp.UpdatedScore("quality2", 300, 500, FormatScoreUpdateReason.Updated)
+            }, o => o.Excluding(x => x.Dto.Format));
     }
 
     [Test, AutoMockData]
@@ -114,7 +89,7 @@ public class QualityProfileTransactionPhaseTest
             new QualityProfileDto
             {
                 Name = "profile1",
-                FormatItems =
+                FormatItems = new[]
                 {
                     new ProfileFormatItemDto
                     {
@@ -145,7 +120,7 @@ public class QualityProfileTransactionPhaseTest
         // Profile name must match but the format IDs for each quality should not
         var guideData = new[]
         {
-            NewQp.Processed("profile1", (1, 200), (2, 300))
+            NewQp.Processed("profile1", ("id1", 1, 200), ("id2", 2, 300))
         };
 
         var serviceData = new[]
@@ -153,7 +128,7 @@ public class QualityProfileTransactionPhaseTest
             new QualityProfileDto
             {
                 Name = "profile1",
-                FormatItems =
+                FormatItems = new[]
                 {
                     new ProfileFormatItemDto
                     {
@@ -182,7 +157,7 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = new[]
         {
-            NewQp.Processed("profile1", true, (3, 100), (4, 500))
+            NewQp.Processed("profile1", true, ("quality3", "id3", 3, 100), ("quality4", "id4", 4, 500))
         };
 
         var serviceData = new[]
@@ -190,7 +165,7 @@ public class QualityProfileTransactionPhaseTest
             new QualityProfileDto
             {
                 Name = "profile1",
-                FormatItems =
+                FormatItems = new[]
                 {
                     new ProfileFormatItemDto
                     {
@@ -210,37 +185,14 @@ public class QualityProfileTransactionPhaseTest
 
         var result = sut.Execute(guideData, serviceData);
 
-        result.Should().BeEquivalentTo(new QualityProfileTransactionData
-        {
-            UpdatedProfiles =
+        result.UpdatedProfiles.Should()
+            .ContainSingle().Which.UpdatedScores.Should()
+            .BeEquivalentTo(new[]
             {
-                new UpdatedQualityProfile(new QualityProfileDto
-                {
-                    Name = "profile1",
-                    FormatItems =
-                    {
-                        new ProfileFormatItemDto
-                        {
-                            Name = "quality1",
-                            Format = 1,
-                            Score = 0
-                        },
-                        new ProfileFormatItemDto
-                        {
-                            Name = "quality2",
-                            Format = 2,
-                            Score = 0
-                        }
-                    }
-                })
-                {
-                    UpdatedScores =
-                    {
-                        new UpdatedFormatScore("quality1", 200, 0, FormatScoreUpdateReason.Reset),
-                        new UpdatedFormatScore("quality2", 300, 0, FormatScoreUpdateReason.Reset)
-                    }
-                }
-            }
-        });
+                NewQp.UpdatedScore("quality1", 200, 0, FormatScoreUpdateReason.Reset),
+                NewQp.UpdatedScore("quality2", 300, 0, FormatScoreUpdateReason.Reset),
+                NewQp.UpdatedScore("quality3", 0, 100, FormatScoreUpdateReason.New),
+                NewQp.UpdatedScore("quality4", 0, 500, FormatScoreUpdateReason.New)
+            }, o => o.Excluding(x => x.Dto.Format));
     }
 }

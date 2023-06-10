@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 public record UpdatedQualityProfile(QualityProfileDto UpdatedProfile)
 {
-    public Collection<UpdatedFormatScore> UpdatedScores { get; } = new();
+    public required IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; init; }
 }
 
 public record QualityProfileTransactionData
@@ -67,33 +67,33 @@ public class QualityProfileTransactionPhase
         ProcessedQualityProfileData profileData,
         QualityProfileDto profileDto)
     {
-        var updatedProfile = new UpdatedQualityProfile(profileDto);
+        var scoreMap = profileData.CfScores
+            .FullJoin(profileDto.FormatItems,
+                x => x.FormatId,
+                x => x.Format,
+                l => new UpdatedFormatScore
+                {
+                    Dto = new ProfileFormatItemDto {Format = l.FormatId, Name = l.CfName},
+                    NewScore = l.Score,
+                    Reason = FormatScoreUpdateReason.New
+                },
+                r => new UpdatedFormatScore
+                {
+                    Dto = r,
+                    NewScore = 0,
+                    Reason = FormatScoreUpdateReason.Reset
+                },
+                (l, r) => new UpdatedFormatScore
+                {
+                    Dto = r,
+                    NewScore = l.Score,
+                    Reason = FormatScoreUpdateReason.Updated
+                })
+            .Select(x => x.Dto.Score == x.NewScore ? x with {Reason = FormatScoreUpdateReason.NoChange} : x)
+            .ToList();
 
-        void UpdateScore(ProfileFormatItemDto item, int newScore, FormatScoreUpdateReason reason)
-        {
-            if (item.Score == newScore)
-            {
-                return;
-            }
-
-            updatedProfile.UpdatedScores.Add(new UpdatedFormatScore(item.Name, item.Score, newScore, reason));
-            item.Score = newScore;
-        }
-
-        var scoreMap = profileData.CfScores;
-
-        foreach (var formatItem in profileDto.FormatItems)
-        {
-            if (scoreMap.TryGetValue(formatItem.Format, out var existingScore))
-            {
-                UpdateScore(formatItem, existingScore, FormatScoreUpdateReason.Updated);
-            }
-            else if (profileData.Profile is {ResetUnmatchedScores: true})
-            {
-                UpdateScore(formatItem, 0, FormatScoreUpdateReason.Reset);
-            }
-        }
-
-        return updatedProfile.UpdatedScores.Any() ? updatedProfile : null;
+        return scoreMap.Any(x => x.Reason != FormatScoreUpdateReason.NoChange)
+            ? new UpdatedQualityProfile(profileDto) {UpdatedScores = scoreMap}
+            : null;
     }
 }

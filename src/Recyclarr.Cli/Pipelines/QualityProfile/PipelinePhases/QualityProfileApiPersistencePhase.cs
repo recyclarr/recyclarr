@@ -16,7 +16,12 @@ public class QualityProfileApiPersistencePhase
 
     public async Task Execute(IServiceConfiguration config, QualityProfileTransactionData transactions)
     {
-        foreach (var profile in transactions.UpdatedProfiles.Select(x => x.UpdatedProfile))
+        var profilesToUpdate = transactions.UpdatedProfiles.Select(x => x.UpdatedProfile with
+        {
+            FormatItems = x.UpdatedScores.Select(y => y.Dto with {Score = y.NewScore}).ToList()
+        });
+
+        foreach (var profile in profilesToUpdate)
         {
             await _api.UpdateQualityProfile(config, profile);
         }
@@ -36,10 +41,10 @@ public class QualityProfileApiPersistencePhase
             {
                 _log.Debug("> Scores updated for quality profile: {ProfileName}", profileName);
 
-                foreach (var (customFormatName, oldScore, newScore, reason) in scores)
+                foreach (var (dto, newScore, reason) in scores)
                 {
                     _log.Debug("  - {Format}: {OldScore} -> {NewScore} ({Reason})",
-                        customFormatName, oldScore, newScore, reason);
+                        dto.Name, dto.Score, newScore, reason);
                 }
             }
 
