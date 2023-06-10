@@ -1,42 +1,55 @@
-version: '3'
-
 networks:
   recyclarr:
     name: recyclarr_dev
 
 volumes:
-  radarr_nightly:
-  sonarr_nightly:
-  sonarr_v4:
+  radarr_stable:
+  radarr_develop:
+  sonarr_stable:
+  sonarr_develop:
 
 services:
-  radarr_nightly:
-    image: ghcr.io/hotio/radarr:nightly
-    container_name: radarr_nightly
+  radarr_stable:
+    image: ghcr.io/onedr0p/radarr:rolling
+    container_name: radarr_stable
     networks: [recyclarr]
     ports: [7878:7878]
     volumes:
-      - radarr_nightly:/config
+      - radarr_stable:/config
       - ./certs:/certs:ro
     environment:
       - TZ=America/Chicago
+      - RADARR__API_KEY=testkey
 
-  sonarr_nightly:
-    image: ghcr.io/hotio/sonarr:nightly
-    container_name: sonarr_nightly
+  radarr_develop:
+    image: ghcr.io/onedr0p/radarr-develop:rolling
+    container_name: radarr_develop
+    networks: [recyclarr]
+    ports: [7890:7878]
+    volumes:
+      - radarr_develop:/config
+      - ./certs:/certs:ro
+    environment:
+      - TZ=America/Chicago
+      - RADARR__API_KEY=testkey
+
+  sonarr_stable:
+    image: ghcr.io/onedr0p/sonarr:rolling
+    container_name: sonarr_stable
     networks: [recyclarr]
     ports: [8989:8989]
     volumes:
-      - sonarr_nightly:/config
+      - sonarr_stable:/config
     environment:
       - TZ=America/Chicago
+      - SONARR__API_KEY=testkey
 
-  sonarr_v4:
-    image: ghcr.io/hotio/sonarr:v4
-    container_name: sonarr_v4
+  sonarr_develop:
+    image: ghcr.io/onedr0p/sonarr-develop:rolling
+    container_name: sonarr_develop
     networks: [recyclarr]
     ports: [8990:8989]
     volumes:
-      - sonarr_v4:/config
+      - sonarr_develop:/config
     environment:
       - TZ=America/Chicago
