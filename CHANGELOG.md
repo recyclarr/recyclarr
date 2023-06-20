@@ -26,7 +26,7 @@ changes you may need to make.
 
 - API Key is now sent via the `X-Api-Key` header instead of the `apikey` query parameter. This
   lessens the need to redact information in the console.
-- **BREAKING**: `replace_existing_custom_formats` now defaults to `true`.
+- **BREAKING**: `replace_existing_custom_formats` now defaults to `false`.
 - **BREAKING**: Restructured repository settings.
 - Configuration templates repository moved to `recyclarr/config-templates` on GitHub. Corresponding
   settings for this repo as well (see the Settings YAML Reference on the wiki for more details).
