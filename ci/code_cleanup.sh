@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ref="$1"
-changed_files="$(git diff --relative --name-only $ref... | egrep '\.cs$')"
+changed_files="$(git diff --relative --name-only --diff-filter=d $ref... | egrep '\.cs$')"
 
 if [[ -z "$changed_files" ]]; then
   echo "No changed files detected; skipping code cleanup"
