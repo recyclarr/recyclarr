@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 

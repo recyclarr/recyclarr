@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Guide;

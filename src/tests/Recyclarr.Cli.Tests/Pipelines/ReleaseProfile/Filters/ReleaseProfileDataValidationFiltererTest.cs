@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
-using Recyclarr.TestLibrary.AutoFixture;
 
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile.Filters;
 

@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Guide;
 using Recyclarr.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Repo;
 
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile.Guide;

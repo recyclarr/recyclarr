@@ -1,7 +1,6 @@
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.Api;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.TestLibrary.AutoFixture;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 

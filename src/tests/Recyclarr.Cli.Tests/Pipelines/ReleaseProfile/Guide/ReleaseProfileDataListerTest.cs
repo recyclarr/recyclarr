@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Guide;
-using Recyclarr.TestLibrary.AutoFixture;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile.Guide;

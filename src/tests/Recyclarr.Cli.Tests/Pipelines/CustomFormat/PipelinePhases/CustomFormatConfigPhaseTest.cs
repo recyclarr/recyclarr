@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
 

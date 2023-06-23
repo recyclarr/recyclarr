@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Logging;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.Cli.Tests;

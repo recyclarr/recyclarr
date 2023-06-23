@@ -2,7 +2,6 @@ using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.Guide;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;

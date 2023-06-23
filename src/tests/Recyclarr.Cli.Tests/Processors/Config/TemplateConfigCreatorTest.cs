@@ -3,7 +3,6 @@ using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;

@@ -2,7 +2,6 @@ using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 

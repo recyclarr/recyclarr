@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Tests.Console.Helpers;

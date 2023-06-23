@@ -6,7 +6,6 @@ using AutoFixture;
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.Cli.Tests.Processors;

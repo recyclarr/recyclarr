@@ -1,7 +1,6 @@
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Pipelines.Tags.Api;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.TestLibrary.AutoFixture;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 

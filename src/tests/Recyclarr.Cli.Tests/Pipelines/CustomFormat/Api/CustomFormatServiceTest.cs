@@ -2,7 +2,6 @@ using Flurl.Http.Testing;
 using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Api;

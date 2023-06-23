@@ -1,7 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Json;
 using Recyclarr.TrashLib.Models;
 
