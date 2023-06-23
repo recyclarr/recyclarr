@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Commenting/uncommenting CFs in configuration YAML no longer causes duplicate CF warnings when
+  `replace_existing_custom_formats` is omitted or set to `false` (better caching logic).
+
 ## [5.0.1] - 2023-06-23
 
 ### Changed

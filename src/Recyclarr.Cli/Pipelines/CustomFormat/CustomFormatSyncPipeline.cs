@@ -69,6 +69,6 @@ public class CustomFormatSyncPipeline : ISyncPipeline
 
         await _phases.ApiPersistencePhase.Execute(config, transactions);
 
-        _cachePersister.Save(config, cache.Update(guideCfs));
+        _cachePersister.Save(config, cache.Update(transactions));
     }
 }
