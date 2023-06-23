@@ -3,7 +3,6 @@ using Autofac.Extras.Ordering;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.TrashLib.ApiServices;
-using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
@@ -31,7 +30,6 @@ public class TrashLibAutofacModule : Module
         builder.RegisterModule<ApiServicesAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
         builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
-        builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
     }
 

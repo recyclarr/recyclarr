@@ -1,10 +1,10 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
+using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
-using Recyclarr.TrashLib.Cache;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 

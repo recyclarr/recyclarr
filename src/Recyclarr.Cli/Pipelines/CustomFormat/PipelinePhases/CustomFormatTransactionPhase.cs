@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Models;
 

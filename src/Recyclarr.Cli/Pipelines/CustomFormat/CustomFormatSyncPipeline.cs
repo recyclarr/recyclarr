@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
+using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Cache;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Models;
 

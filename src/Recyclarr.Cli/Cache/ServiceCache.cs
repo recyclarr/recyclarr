@@ -7,7 +7,7 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Interfaces;
 
-namespace Recyclarr.TrashLib.Cache;
+namespace Recyclarr.Cli.Cache;
 
 public partial class ServiceCache : IServiceCache
 {

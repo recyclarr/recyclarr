@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Recyclarr.TrashLib.Cache;
+namespace Recyclarr.Cli.Cache;
 
 [Serializable]
 public class CacheException : Exception

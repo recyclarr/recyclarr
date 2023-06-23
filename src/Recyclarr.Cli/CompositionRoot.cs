@@ -5,6 +5,7 @@ using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using AutoMapper.EquivalencyExpression;
 using FluentValidation;
+using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
@@ -36,6 +37,7 @@ public static class CompositionRoot
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<TrashLibAutofacModule>();
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
+        builder.RegisterModule<CacheAutofacModule>();
 
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();

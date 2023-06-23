@@ -1,6 +1,6 @@
 using Recyclarr.TrashLib.Config.Services;
 
-namespace Recyclarr.TrashLib.Cache;
+namespace Recyclarr.Cli.Cache;
 
 public interface IServiceCache
 {

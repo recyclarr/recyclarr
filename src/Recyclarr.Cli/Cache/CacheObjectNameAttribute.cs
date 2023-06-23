@@ -1,4 +1,4 @@
-namespace Recyclarr.TrashLib.Cache;
+namespace Recyclarr.Cli.Cache;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class CacheObjectNameAttribute : Attribute
