@@ -1,9 +1,11 @@
 [CmdletBinding()]
-param ()
+param (
+    [string] $Version
+)
 
 $ErrorActionPreference = "Stop"
 
-$version = dotnet-gitversion /showvariable SemVer
+$version = if ($Version) { $Version } else { dotnet-gitversion /showvariable SemVer }
 
 Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
     FirstRelease = "https://github.com/recyclarr/recyclarr/releases/tag/v{CUR}"
