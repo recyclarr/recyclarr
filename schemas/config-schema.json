@@ -48,7 +48,7 @@
     "replace_existing_custom_formats": {
       "type": "boolean",
       "description": "If disabled, custom formats that Recyclarr didn't explicitly create or know about will not be replaced.",
-      "default": true
+      "default": false
     },
     "custom_formats": {
       "type": "array",
