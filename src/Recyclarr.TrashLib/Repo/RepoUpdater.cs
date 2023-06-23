@@ -51,7 +51,20 @@ public class RepoUpdater : IRepoUpdater
 
         using var repo = await _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, repoPath, branch);
         await repo.ForceCheckout(branch);
-        await repo.Fetch();
+
+        try
+        {
+            await repo.Fetch();
+        }
+        catch (GitCmdException e)
+        {
+            _log.Debug(e, "Non-zero exit code {ExitCode} while running git fetch: {Error}", e.ExitCode, e.Error);
+            _log.Error(
+                "Updating the repo '{RepoDir}' (git fetch) failed. Proceeding with existing files. " +
+                "Check clone URL is correct and that github is not down",
+                repoPath.Name);
+        }
+
         await repo.ResetHard(repoSettings.Sha1 ?? $"origin/{branch}");
     }
 }
