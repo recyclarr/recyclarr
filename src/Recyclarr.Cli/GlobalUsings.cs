@@ -1,1 +1,1 @@
-global using MoreLinq;
+global using SuperLinq;
