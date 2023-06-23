@@ -53,3 +53,4 @@ services:
       - sonarr_develop:/config
     environment:
       - TZ=America/Chicago
+      - SONARR__API_KEY=testkey
