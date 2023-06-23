@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Address regression causing `reset_unmatched_scores: false` to not be respected.
+- Do not show deleted custom formats in console output when `delete_old_custom_formats` is set to
+  `false`.
 
 ## [5.0.0] - 2023-06-22
 

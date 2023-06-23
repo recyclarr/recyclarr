@@ -28,12 +28,9 @@ public class CustomFormatApiPersistencePhase
             await _api.UpdateCustomFormat(config, dto);
         }
 
-        if (config.DeleteOldCustomFormats)
+        foreach (var map in transactions.DeletedCustomFormats)
         {
-            foreach (var map in transactions.DeletedCustomFormats)
-            {
-                await _api.DeleteCustomFormat(config, map.CustomFormatId);
-            }
+            await _api.DeleteCustomFormat(config, map.CustomFormatId);
         }
     }
 }

@@ -352,7 +352,7 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Deleted_cfs()
+    public void Deleted_cfs_when_enabled()
     {
         var sut = Resolve<CustomFormatTransactionPhase>();
 
@@ -371,7 +371,10 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             }
         };
 
-        var config = NewConfig.Radarr();
+        var config = NewConfig.Radarr() with
+        {
+            DeleteOldCustomFormats = true
+        };
 
         var result = sut.Execute(config, guideCfs, serviceData, cache);
 
@@ -382,6 +385,36 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 new TrashIdMapping("cf2", "two", 2)
             }
         });
+    }
+
+    [Test]
+    public void No_deleted_cfs_when_disabled()
+    {
+        var sut = Resolve<CustomFormatTransactionPhase>();
+
+        var guideCfs = Array.Empty<CustomFormatData>();
+
+        var serviceData = new[]
+        {
+            new CustomFormatData {Name = "two", Id = 2}
+        };
+
+        var cache = new CustomFormatCache
+        {
+            TrashIdMappings = new[]
+            {
+                new TrashIdMapping("cf2", "two", 2)
+            }
+        };
+
+        var config = NewConfig.Radarr() with
+        {
+            DeleteOldCustomFormats = false
+        };
+
+        var result = sut.Execute(config, guideCfs, serviceData, cache);
+
+        result.Should().BeEquivalentTo(new CustomFormatTransactionData());
     }
 
     [Test]

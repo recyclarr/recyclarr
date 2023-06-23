@@ -52,11 +52,14 @@ public class CustomFormatTransactionPhase
             }
         }
 
-        transactions.DeletedCustomFormats.AddRange(cache.TrashIdMappings
-            // Custom format must be in the cache but NOT in the user's config
-            .Where(map => guideCfs.All(cf => cf.TrashId != map.TrashId))
-            // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
-            .Where(map => serviceData.Any(cf => cf.Id == map.CustomFormatId)));
+        if (config.DeleteOldCustomFormats)
+        {
+            transactions.DeletedCustomFormats.AddRange(cache.TrashIdMappings
+                // Custom format must be in the cache but NOT in the user's config
+                .Where(map => guideCfs.All(cf => cf.TrashId != map.TrashId))
+                // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
+                .Where(map => serviceData.Any(cf => cf.Id == map.CustomFormatId)));
+        }
 
         return transactions;
     }
