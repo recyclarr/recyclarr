@@ -1,4 +1,5 @@
 using Autofac;
+using Recyclarr.Cli.Migration.Steps;
 
 namespace Recyclarr.Cli.Migration;
 
@@ -10,10 +11,8 @@ public class MigrationAutofacModule : Module
         builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
 
         // Migration Steps
-        builder.RegisterTypes
-            (
-                // Add migration steps here in order of execution
-            )
+        builder.RegisterAssemblyTypes(ThisAssembly)
+            .AssignableTo<IMigrationStep>()
             .As<IMigrationStep>();
     }
 }

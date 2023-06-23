@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Migration.Steps;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
@@ -13,12 +14,10 @@ public class MigrationExecutor : IMigrationExecutor
         _migrationSteps = migrationSteps.OrderBy(x => x.Order).ToList();
     }
 
-    public void PerformAllMigrationSteps(bool withDiagnostics)
+    private void PerformMigrationStepsImpl(bool withDiagnostics, IEnumerable<IMigrationStep> migrationSteps)
     {
-        _console.WriteLine("Performing migration steps...");
-
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach (var step in _migrationSteps)
+        foreach (var step in migrationSteps)
         {
             // Do not use LINQ to filter using CheckIfNeeded(). If it returns true, then 'Execute()' must be invoked to
             // cause the necessary changes to happen. Those changes may be required in order for the *next* step's
@@ -39,6 +38,11 @@ public class MigrationExecutor : IMigrationExecutor
 
             _console.WriteLine($"Migrate: {step.Description}");
         }
+    }
+
+    public void PerformAllMigrationSteps(bool withDiagnostics)
+    {
+        PerformMigrationStepsImpl(withDiagnostics, _migrationSteps);
     }
 
     public void CheckNeededMigrations()

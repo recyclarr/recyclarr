@@ -62,6 +62,7 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
     {
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
+
         await _repoUpdater.Update();
 
         return (int) await _syncProcessor.ProcessConfigs(settings);

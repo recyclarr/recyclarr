@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Migration;
+using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.TestLibrary;
 using Spectre.Console.Testing;
 

@@ -36,6 +36,7 @@ public class MigrateCommand : Command<MigrateCommand.CliSettings>
         try
         {
             _migration.PerformAllMigrationSteps(settings.Debug);
+            _console.WriteLine("All migration steps completed");
         }
         catch (MigrationException e)
         {

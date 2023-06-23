@@ -95,4 +95,14 @@ public static class FileSystemExtensions
 
         return configs.FirstOrDefault();
     }
+
+    public static void RecursivelyDeleteReadOnly(this IDirectoryInfo dir)
+    {
+        foreach (var info in dir.GetFileSystemInfos("*", SearchOption.AllDirectories))
+        {
+            info.Attributes = FileAttributes.Normal;
+        }
+
+        dir.Delete(true);
+    }
 }
