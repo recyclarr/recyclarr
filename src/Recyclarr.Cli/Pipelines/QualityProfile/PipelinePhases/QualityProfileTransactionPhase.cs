@@ -71,28 +71,31 @@ public class QualityProfileTransactionPhase
             .FullJoin(profileDto.FormatItems,
                 x => x.FormatId,
                 x => x.Format,
+                // Exists in config, but not in service (these are unusual and should be errors)
+                // See `FormatScoreUpdateReason` for reason why we need this (it's preview mode)
                 l => new UpdatedFormatScore
                 {
                     Dto = new ProfileFormatItemDto {Format = l.FormatId, Name = l.CfName},
                     NewScore = l.Score,
                     Reason = FormatScoreUpdateReason.New
                 },
+                // Exists in service, but not in config
                 r => new UpdatedFormatScore
                 {
                     Dto = r,
-                    NewScore = 0,
+                    NewScore = profileData.Profile.ResetUnmatchedScores ? 0 : r.Score,
                     Reason = FormatScoreUpdateReason.Reset
                 },
+                // Exists in both service and config
                 (l, r) => new UpdatedFormatScore
                 {
                     Dto = r,
                     NewScore = l.Score,
                     Reason = FormatScoreUpdateReason.Updated
                 })
-            .Select(x => x.Dto.Score == x.NewScore ? x with {Reason = FormatScoreUpdateReason.NoChange} : x)
             .ToList();
 
-        return scoreMap.Any(x => x.Reason != FormatScoreUpdateReason.NoChange)
+        return scoreMap.Any(x => x.Dto.Score != x.NewScore)
             ? new UpdatedQualityProfile(profileDto) {UpdatedScores = scoreMap}
             : null;
     }

@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recyclarr will now continue if `git fetch` fails for any repos, so long as there is an existing,
   valid clone to use.
 
+### Fixed
+
+- Address regression causing `reset_unmatched_scores: false` to not be respected.
+
 ## [5.0.0] - 2023-06-22
 
 This release contains **BREAKING CHANGES**. See the [v5.0 Upgrade Guide][breaking5] for required

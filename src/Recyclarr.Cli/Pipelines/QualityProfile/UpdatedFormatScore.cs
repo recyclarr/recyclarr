@@ -5,11 +5,6 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 public enum FormatScoreUpdateReason
 {
     /// <summary>
-    ///     A score who's value did not change.
-    /// </summary>
-    NoChange,
-
-    /// <summary>
     ///     A score that is changed.
     /// </summary>
     Updated,

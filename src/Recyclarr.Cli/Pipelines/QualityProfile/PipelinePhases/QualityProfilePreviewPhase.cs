@@ -26,7 +26,7 @@ public class QualityProfilePreviewPhase
                 .AddColumn("[bold]New[/]")
                 .AddColumn("[bold]Reason[/]");
 
-            foreach (var updatedScore in updatedScores.Where(x => x.Reason != FormatScoreUpdateReason.NoChange))
+            foreach (var updatedScore in updatedScores.Where(x => x.Dto.Score != x.NewScore))
             {
                 table.AddRow(
                     updatedScore.Dto.Name,

@@ -32,7 +32,12 @@ public class QualityProfileApiPersistencePhase
     private void LogQualityProfileUpdates(QualityProfileTransactionData transactions)
     {
         var updatedScores = transactions.UpdatedProfiles
-            .Select(x => (x.UpdatedProfile.Name, x.UpdatedScores))
+            .Select(x => (
+                ProfileName: x.UpdatedProfile.Name,
+                Scores: x.UpdatedScores
+                    .Where(y => y.Reason != FormatScoreUpdateReason.New && y.Dto.Score != y.NewScore)
+                    .ToList()))
+            .Where(x => x.Scores.Any())
             .ToList();
 
         if (updatedScores.Count > 0)
@@ -50,7 +55,7 @@ public class QualityProfileApiPersistencePhase
 
             _log.Information("Updated {ProfileCount} profiles and a total of {ScoreCount} scores",
                 transactions.UpdatedProfiles.Count,
-                updatedScores.Sum(s => s.UpdatedScores.Count));
+                updatedScores.Sum(s => s.Scores.Count));
         }
         else
         {

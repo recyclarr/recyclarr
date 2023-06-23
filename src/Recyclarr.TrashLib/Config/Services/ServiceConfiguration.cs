@@ -47,6 +47,6 @@ public record QualityDefinitionConfig
 
 public record QualityProfileConfig
 {
-    public bool? ResetUnmatchedScores { get; init; }
+    public bool ResetUnmatchedScores { get; init; }
     public string Name { get; init; } = "";
 }

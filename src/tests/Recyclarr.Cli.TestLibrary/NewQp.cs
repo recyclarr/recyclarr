@@ -11,12 +11,12 @@ public static class NewQp
         string profileName,
         params (string TrashId, int FormatId, int Score)[] scores)
     {
-        return Processed(profileName, null, scores);
+        return Processed(profileName, false, scores);
     }
 
     public static ProcessedQualityProfileData Processed(
         string profileName,
-        bool? resetUnmatchedScores,
+        bool resetUnmatchedScores,
         params (string TrashId, int FormatId, int Score)[] scores)
     {
         return Processed(profileName, resetUnmatchedScores,
@@ -25,7 +25,7 @@ public static class NewQp
 
     public static ProcessedQualityProfileData Processed(
         string profileName,
-        bool? resetUnmatchedScores,
+        bool resetUnmatchedScores,
         params (string CfName, string TrashId, int FormatId, int Score)[] scores)
     {
         return new ProcessedQualityProfileData(new QualityProfileConfig
