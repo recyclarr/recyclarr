@@ -11,7 +11,7 @@
       "additionalProperties": false,
       "title": "Settings for any local git clones that Recyclarr manages",
       "properties": {
-        "trash_guide": {
+        "trash_guides": {
           "$ref": "#/$defs/repository",
           "title": "Settings for the Trash Guides GitHub repository"
         },
