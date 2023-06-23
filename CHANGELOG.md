@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1] - 2023-06-23
+
 ### Changed
 
 - Recyclarr will now continue if `git fetch` fails for any repos, so long as there is an existing,
@@ -719,7 +721,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/recyclarr/recyclarr/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/recyclarr/recyclarr/compare/v4.4.1...v5.0.0
 [4.4.1]: https://github.com/recyclarr/recyclarr/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/recyclarr/recyclarr/compare/v4.3.0...v4.4.0
