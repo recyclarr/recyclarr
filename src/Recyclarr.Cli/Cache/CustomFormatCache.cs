@@ -33,7 +33,7 @@ public record CustomFormatCache
                     // Add a new mapping for CFs in user's config
                     r => new TrashIdMapping(r.TrashId, r.Name, r.Id),
                     // Update existing mappings for CFs in user's config
-                    (l, r) => l with { TrashId = r.TrashId, CustomFormatName = r.Name })
+                    (l, r) => l with {TrashId = r.TrashId, CustomFormatName = r.Name})
                 .Where(x => x.CustomFormatId != 0)
                 .OrderBy(x => x.CustomFormatId)
                 .ToList()

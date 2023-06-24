@@ -213,7 +213,7 @@ public class CustomFormatCacheTest
                 new TrashIdMapping("1", "one", 1),
                 new TrashIdMapping("3", "three", 3),
                 new TrashIdMapping("4", "four", 4),
-                new TrashIdMapping("2", "two", 2),
+                new TrashIdMapping("2", "two", 2)
             }
         };
 
