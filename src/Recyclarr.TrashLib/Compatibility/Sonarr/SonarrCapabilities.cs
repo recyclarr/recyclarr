@@ -1,8 +1,10 @@
 namespace Recyclarr.TrashLib.Compatibility.Sonarr;
 
-public record SonarrCapabilities(Version Version)
+public record SonarrCapabilities
 {
-    public static Version MinimumVersion => new("3.0.4.1098");
+    public static Version MinimumVersion { get; } = new("3.0.4.1098");
+
+    public Version Version { get; init; } = new();
 
     public bool SupportsNamedReleaseProfiles { get; init; }
 

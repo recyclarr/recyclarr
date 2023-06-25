@@ -3,11 +3,11 @@ using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Compatibility;
 
-public abstract class ServiceCapabilityChecker<T> where T : class
+public abstract class ServiceCapabilityFetcher<T> where T : class
 {
     private readonly IServiceInformation _info;
 
-    protected ServiceCapabilityChecker(IServiceInformation info)
+    protected ServiceCapabilityFetcher(IServiceInformation info)
     {
         _info = info;
     }

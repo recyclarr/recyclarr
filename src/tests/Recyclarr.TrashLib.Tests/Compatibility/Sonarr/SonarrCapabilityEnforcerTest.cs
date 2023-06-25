@@ -11,12 +11,12 @@ public class SonarrCapabilityEnforcerTest
 {
     [Test, AutoMockData]
     public void Fail_when_capabilities_not_obtained(
-        [Frozen] ISonarrCapabilityChecker checker,
+        [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)
     {
         var config = NewConfig.Sonarr();
 
-        checker.GetCapabilities(default!).ReturnsForAnyArgs((SonarrCapabilities?) null);
+        fetcher.GetCapabilities(default!).ReturnsForAnyArgs((SonarrCapabilities?) null);
 
         var act = () => sut.Check(config);
 
@@ -25,12 +25,12 @@ public class SonarrCapabilityEnforcerTest
 
     [Test, AutoMockData]
     public void Minimum_version_not_met(
-        [Frozen] ISonarrCapabilityChecker checker,
+        [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)
     {
         var config = NewConfig.Sonarr();
 
-        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
+        fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
             SupportsNamedReleaseProfiles = false
         });
@@ -42,7 +42,7 @@ public class SonarrCapabilityEnforcerTest
 
     [Test, AutoMockData]
     public void Release_profiles_not_allowed_in_v4(
-        [Frozen] ISonarrCapabilityChecker checker,
+        [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)
     {
         var config = NewConfig.Sonarr() with
@@ -53,7 +53,7 @@ public class SonarrCapabilityEnforcerTest
             }
         };
 
-        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
+        fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
             SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = true
@@ -66,7 +66,7 @@ public class SonarrCapabilityEnforcerTest
 
     [Test, AutoMockData]
     public void Custom_formats_not_allowed_in_v3(
-        [Frozen] ISonarrCapabilityChecker checker,
+        [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)
     {
         var config = NewConfig.Sonarr() with
@@ -77,7 +77,7 @@ public class SonarrCapabilityEnforcerTest
             }
         };
 
-        checker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
+        fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
             SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = false

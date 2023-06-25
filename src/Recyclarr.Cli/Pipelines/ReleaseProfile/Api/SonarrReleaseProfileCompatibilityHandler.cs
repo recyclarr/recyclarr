@@ -12,16 +12,16 @@ namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCompatibilityHandler
 {
     private readonly ILogger _log;
-    private readonly ISonarrCapabilityChecker _capabilityChecker;
+    private readonly ISonarrCapabilityFetcher _capabilityFetcher;
     private readonly IMapper _mapper;
 
     public SonarrReleaseProfileCompatibilityHandler(
         ILogger log,
-        ISonarrCapabilityChecker capabilityChecker,
+        ISonarrCapabilityFetcher capabilityFetcher,
         IMapper mapper)
     {
         _log = log;
-        _capabilityChecker = capabilityChecker;
+        _capabilityFetcher = capabilityFetcher;
         _mapper = mapper;
     }
 
@@ -29,7 +29,7 @@ public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCom
         IServiceConfiguration config,
         SonarrReleaseProfile profile)
     {
-        var capabilities = await _capabilityChecker.GetCapabilities(config);
+        var capabilities = await _capabilityFetcher.GetCapabilities(config);
         if (capabilities is null)
         {
             throw new ServiceIncompatibilityException("Capabilities could not be obtained");

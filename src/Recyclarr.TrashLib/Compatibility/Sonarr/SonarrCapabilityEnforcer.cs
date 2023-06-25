@@ -6,16 +6,16 @@ namespace Recyclarr.TrashLib.Compatibility.Sonarr;
 
 public class SonarrCapabilityEnforcer
 {
-    private readonly ISonarrCapabilityChecker _capabilityChecker;
+    private readonly ISonarrCapabilityFetcher _capabilityFetcher;
 
-    public SonarrCapabilityEnforcer(ISonarrCapabilityChecker capabilityChecker)
+    public SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
     {
-        _capabilityChecker = capabilityChecker;
+        _capabilityFetcher = capabilityFetcher;
     }
 
     public async Task Check(SonarrConfiguration config)
     {
-        var capabilities = await _capabilityChecker.GetCapabilities(config);
+        var capabilities = await _capabilityFetcher.GetCapabilities(config);
         if (capabilities is null)
         {
             throw new ServiceIncompatibilityException("Capabilities could not be obtained");

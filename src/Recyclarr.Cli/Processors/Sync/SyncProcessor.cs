@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Flurl.Http;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
@@ -18,19 +19,22 @@ public class SyncProcessor : ISyncProcessor
     private readonly IConfigurationFinder _configFinder;
     private readonly IConfigurationLoader _configLoader;
     private readonly SyncPipelineExecutor _pipelines;
+    private readonly ServiceAgnosticCapabilityEnforcer _capabilityEnforcer;
 
     public SyncProcessor(
         IAnsiConsole console,
         ILogger log,
         IConfigurationFinder configFinder,
         IConfigurationLoader configLoader,
-        SyncPipelineExecutor pipelines)
+        SyncPipelineExecutor pipelines,
+        ServiceAgnosticCapabilityEnforcer capabilityEnforcer)
     {
         _console = console;
         _log = log;
         _configFinder = configFinder;
         _configLoader = configLoader;
         _pipelines = pipelines;
+        _capabilityEnforcer = capabilityEnforcer;
     }
 
     public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
@@ -74,6 +78,7 @@ public class SyncProcessor : ISyncProcessor
             try
             {
                 PrintProcessingHeader(config.ServiceType, config);
+                await _capabilityEnforcer.Check(config);
                 await _pipelines.Process(settings, config);
             }
             catch (Exception e)

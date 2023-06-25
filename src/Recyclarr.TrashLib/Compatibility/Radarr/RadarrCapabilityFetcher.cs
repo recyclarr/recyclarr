@@ -2,9 +2,9 @@ using Recyclarr.TrashLib.ApiServices.System;
 
 namespace Recyclarr.TrashLib.Compatibility.Radarr;
 
-public class RadarrCapabilityChecker : ServiceCapabilityChecker<RadarrCapabilities>
+public class RadarrCapabilityFetcher : ServiceCapabilityFetcher<RadarrCapabilities>, IRadarrCapabilityFetcher
 {
-    public RadarrCapabilityChecker(IServiceInformation info)
+    public RadarrCapabilityFetcher(IServiceInformation info)
         : base(info)
     {
     }

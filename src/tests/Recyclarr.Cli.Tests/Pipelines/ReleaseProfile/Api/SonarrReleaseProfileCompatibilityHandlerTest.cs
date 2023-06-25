@@ -28,7 +28,7 @@ public class SonarrReleaseProfileCompatibilityHandlerTest : CliIntegrationFixtur
     protected override void RegisterTypes(ContainerBuilder builder)
     {
         base.RegisterTypes(builder);
-        builder.RegisterMockFor<ISonarrCapabilityChecker>();
+        builder.RegisterMockFor<ISonarrCapabilityFetcher>();
     }
 
     [Test]
@@ -59,8 +59,8 @@ public class SonarrReleaseProfileCompatibilityHandlerTest : CliIntegrationFixtur
     [Test]
     public async Task Send_v2_to_v1()
     {
-        var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
-        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
+        var capabilityChecker = Resolve<ISonarrCapabilityFetcher>();
+        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
             ArraysNeededForReleaseProfileRequiredAndIgnored = false
         });
@@ -76,8 +76,8 @@ public class SonarrReleaseProfileCompatibilityHandlerTest : CliIntegrationFixtur
     [Test]
     public async Task Send_v2_to_v2()
     {
-        var capabilityChecker = Resolve<ISonarrCapabilityChecker>();
-        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities(new Version())
+        var capabilityChecker = Resolve<ISonarrCapabilityFetcher>();
+        capabilityChecker.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
             ArraysNeededForReleaseProfileRequiredAndIgnored = true
         });
