@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.3] - 2023-06-25
+
 ### Fixed
 
 - When using `sync`, continue processing other instances when there's a failure.
@@ -733,7 +735,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.0.2...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.0.3...HEAD
+[5.0.3]: https://github.com/recyclarr/recyclarr/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/recyclarr/recyclarr/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/recyclarr/recyclarr/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/recyclarr/recyclarr/compare/v4.4.1...v5.0.0
