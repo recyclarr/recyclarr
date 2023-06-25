@@ -67,6 +67,8 @@ public class SyncProcessor : ISyncProcessor
 
     private async Task<bool> ProcessService(ISyncSettings settings, ICollection<IServiceConfiguration> configs)
     {
+        var failureDetected = false;
+
         foreach (var config in configs.GetConfigsBasedOnSettings(settings))
         {
             try
@@ -77,11 +79,11 @@ public class SyncProcessor : ISyncProcessor
             catch (Exception e)
             {
                 HandleException(e);
-                return true;
+                failureDetected = true;
             }
         }
 
-        return false;
+        return failureDetected;
     }
 
     private void HandleException(Exception e)
