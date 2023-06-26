@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Migration step added to delete old `repo` directory. Run `recyclarr migrate` to use.
 
+### Fixed
+
+- Update default clone URL for trash guides repo to new URL:
+  `https://github.com/TRaSH-Guides/Guides.git`.
+
 ## [5.0.3] - 2023-06-25
 
 ### Fixed

@@ -29,8 +29,9 @@ public class GitRepositoryFactory : IGitRepositoryFactory
             await repo.Status();
         }
 
-        _log.Debug("Remote 'origin' set to {Url}", repoUrl);
         await repo.SetRemote("origin", repoUrl);
+        _log.Debug("Remote 'origin' set to {Url}", repoUrl);
+
         return repo;
     }
 }

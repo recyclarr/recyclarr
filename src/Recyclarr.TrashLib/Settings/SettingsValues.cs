@@ -4,7 +4,7 @@ namespace Recyclarr.TrashLib.Settings;
 
 public record TrashRepository : IRepositorySettings
 {
-    public Uri CloneUrl { get; [UsedImplicitly] init; } = new("https://github.com/TRaSH-/Guides.git");
+    public Uri CloneUrl { get; [UsedImplicitly] init; } = new("https://github.com/TRaSH-Guides/Guides.git");
     public string Branch { get; [UsedImplicitly] init; } = "master";
     public string? Sha1 { get; [UsedImplicitly] init; }
 }
