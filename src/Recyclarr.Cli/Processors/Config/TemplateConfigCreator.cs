@@ -35,11 +35,11 @@ public class TemplateConfigCreator : IConfigCreator
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public Task Create(ICreateConfigSettings settings)
+    public async Task Create(ICreateConfigSettings settings)
     {
         _log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
-        var matchingTemplateData = _templates.LoadTemplateData()
+        var matchingTemplateData = (await _templates.LoadTemplateData())
             .IntersectBy(settings.Templates, path => path.Id, StringComparer.CurrentCultureIgnoreCase)
             .Select(x => x.TemplateFile);
 
@@ -94,7 +94,5 @@ public class TemplateConfigCreator : IConfigCreator
                 _log.Error(e, "Unable to save configuration template file");
             }
         }
-
-        return Task.CompletedTask;
     }
 }

@@ -91,7 +91,7 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Template_id_matching_works()
+    public async Task Template_id_matching_works()
     {
         const string templatesJson = @"
 {
@@ -131,7 +131,7 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
         });
 
         var sut = Resolve<TemplateConfigCreator>();
-        sut.Create(settings);
+        await sut.Create(settings);
 
         Fs.AllFiles.Should().Contain(new[]
         {

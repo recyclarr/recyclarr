@@ -2,8 +2,6 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
-using AutoMapper.Contrib.Autofac.DependencyInjection;
-using AutoMapper.EquivalencyExpression;
 using FluentValidation;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Helpers;
@@ -35,7 +33,7 @@ public static class CompositionRoot
         RegisterLogger(builder);
 
         builder.RegisterModule<MigrationAutofacModule>();
-        builder.RegisterModule<TrashLibAutofacModule>();
+        builder.RegisterModule(new TrashLibAutofacModule {AdditionalMapperProfileAssembly = thisAssembly});
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
         builder.RegisterModule<CacheAutofacModule>();
 
@@ -49,10 +47,6 @@ public static class CompositionRoot
         builder.RegisterAssemblyTypes(thisAssembly)
             .AsClosedTypesOf(typeof(IValidator<>))
             .As<IValidator>();
-
-        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), false,
-            thisAssembly,
-            typeof(TrashLibAutofacModule).Assembly);
     }
 
     private static void PipelineRegistrations(ContainerBuilder builder)

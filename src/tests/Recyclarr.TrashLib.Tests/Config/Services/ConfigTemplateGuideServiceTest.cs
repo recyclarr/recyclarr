@@ -17,11 +17,11 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
     {
         var act = () => _ = sut.LoadTemplateData();
 
-        act.Should().Throw<InvalidDataException>().WithMessage("Recyclarr*templates*");
+        act.Should().ThrowAsync<InvalidDataException>().WithMessage("Recyclarr*templates*");
     }
 
     [Test]
-    public void Normal_behavior()
+    public async Task Normal_behavior()
     {
         var repo = Resolve<IConfigTemplatesRepo>();
         var templateDir = repo.Path;
@@ -43,7 +43,7 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
 
         var sut = Resolve<ConfigTemplateGuideService>();
 
-        var data = sut.LoadTemplateData();
+        var data = await sut.LoadTemplateData();
         data.Should().BeEquivalentTo(expectedPaths, o => o.Excluding(x => x.TemplateFile));
         data.Select(x => x.TemplateFile.FullName)
             .Should().BeEquivalentTo(expectedPaths.Select(x => x.TemplateFile.FullName));

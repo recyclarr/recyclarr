@@ -16,9 +16,9 @@ public class ConfigTemplateLister : IConfigLister
         _guideService = guideService;
     }
 
-    public Task List()
+    public async Task List()
     {
-        var data = _guideService.LoadTemplateData();
+        var data = await _guideService.LoadTemplateData();
 
         var table = new Table();
         var empty = new Markup("");
@@ -34,7 +34,6 @@ public class ConfigTemplateLister : IConfigLister
         }
 
         _console.Write(table);
-        return Task.CompletedTask;
     }
 
     private static IEnumerable<Markup> RenderTemplates(

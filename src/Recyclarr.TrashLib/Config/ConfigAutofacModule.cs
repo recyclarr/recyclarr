@@ -15,13 +15,11 @@ public class ConfigAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        var thisAssembly = typeof(ConfigAutofacModule).Assembly;
-
-        builder.RegisterAssemblyTypes(thisAssembly)
+        builder.RegisterAssemblyTypes(ThisAssembly)
             .AsClosedTypesOf(typeof(IValidator<>))
             .As<IValidator>();
 
-        builder.RegisterAssemblyTypes(thisAssembly)
+        builder.RegisterAssemblyTypes(ThisAssembly)
             .AssignableTo<IYamlBehavior>()
             .As<IYamlBehavior>();
 

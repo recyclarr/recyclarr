@@ -8,8 +8,6 @@
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extras.AggregateService" />
     <PackageReference Include="Autofac.Extras.Ordering" />
-    <PackageReference Include="AutoMapper.Collection" />
-    <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Expressions" />

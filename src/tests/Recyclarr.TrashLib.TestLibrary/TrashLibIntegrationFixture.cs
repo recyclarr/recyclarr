@@ -2,8 +2,6 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
 using Autofac;
 using Autofac.Features.ResolveAnything;
-using AutoMapper.Contrib.Autofac.DependencyInjection;
-using AutoMapper.EquivalencyExpression;
 using Recyclarr.Common;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.ApiServices.System;
@@ -62,7 +60,6 @@ public abstract class TrashLibIntegrationFixture : IDisposable
         // Normally, the CLI's composition root registers this (because we can only do it once, and it must include
         // dependent assemblies). The TrashLib assembly does have its own mapping profiles. We register those here, but
         // not in the TrashLibAutofacModule.
-        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), false, typeof(TrashLibAutofacModule).Assembly);
     }
 
     private static ILogger CreateLogger()

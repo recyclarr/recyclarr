@@ -4,8 +4,4 @@
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoMapper.Collection" />
-    <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
-  </ItemGroup>
 </Project>
