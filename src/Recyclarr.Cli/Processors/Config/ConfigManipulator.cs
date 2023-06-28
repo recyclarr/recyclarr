@@ -5,11 +5,11 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Config;
 
 /// <remarks>
-///     This was originally intended to be used by `config create`, but YamlDotNet cannot serialize
-///     comments so this
-///     class was not used. I kept it around in case I want to revisit later. There might be an
-///     opportunity to use this
-///     with the GUI.
+/// This was originally intended to be used by `config create`, but YamlDotNet cannot serialize
+/// comments so this
+/// class was not used. I kept it around in case I want to revisit later. There might be an
+/// opportunity to use this
+/// with the GUI.
 /// </remarks>
 public class ConfigManipulator : IConfigManipulator
 {

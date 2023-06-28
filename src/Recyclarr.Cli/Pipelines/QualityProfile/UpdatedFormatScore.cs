@@ -5,19 +5,19 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 public enum FormatScoreUpdateReason
 {
     /// <summary>
-    ///     A score that is changed.
+    /// A score that is changed.
     /// </summary>
     Updated,
 
     /// <summary>
-    ///     Scores were reset to a 0 value because `reset_unmatched_scores` was set to `true`.
+    /// Scores were reset to a 0 value because `reset_unmatched_scores` was set to `true`.
     /// </summary>
     Reset,
 
     /// <summary>
-    ///     New custom format scores (format items) shouldn't exist normally. They do exist during
-    ///     `--preview` runs since new custom formats that aren't synced yet won't be available when
-    ///     processing quality profiles.
+    /// New custom format scores (format items) shouldn't exist normally. They do exist during
+    /// `--preview` runs since new custom formats that aren't synced yet won't be available when
+    /// processing quality profiles.
     /// </summary>
     New
 }
