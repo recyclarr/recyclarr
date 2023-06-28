@@ -5,7 +5,8 @@ on:
   push:
     paths:
       - ".github/workflows/build.yml"
-      - ".github/workflows/docker.yml"
+      - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-build.yml"
       - "src/**"
       - "schemas/**"
       - "docker/**"
@@ -14,7 +15,8 @@ on:
   pull_request:
     paths:
       - ".github/workflows/build.yml"
-      - ".github/workflows/docker.yml"
+      - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-build.yml"
       - "src/**"
       - "schemas/**"
       - "docker/**"
