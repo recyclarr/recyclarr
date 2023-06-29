@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Clone config template repo when `config create -t` is used.
+- Fix error when completely commenting out a YAML configuration file (#190).
 
 ## [5.1.0] - 2023-06-26
 

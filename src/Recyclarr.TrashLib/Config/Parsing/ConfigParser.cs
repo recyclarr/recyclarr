@@ -38,7 +38,7 @@ public class ConfigParser
         try
         {
             using var stream = streamFactory();
-            var config = _deserializer.Deserialize<RootConfigYaml>(stream);
+            var config = _deserializer.Deserialize<RootConfigYaml?>(stream);
             if (config.IsConfigEmpty())
             {
                 _log.Warning("Configuration is empty");

@@ -18,10 +18,10 @@ public static class ConfigExtensions
         return configs.Any(x => x.InstanceName.EqualsIgnoreCase(name));
     }
 
-    public static bool IsConfigEmpty(this RootConfigYaml config)
+    public static bool IsConfigEmpty(this RootConfigYaml? config)
     {
-        var sonarr = config.Sonarr?.Count ?? 0;
-        var radarr = config.Radarr?.Count ?? 0;
+        var sonarr = config?.Sonarr?.Count ?? 0;
+        var radarr = config?.Radarr?.Count ?? 0;
         return sonarr + radarr == 0;
     }
 }
