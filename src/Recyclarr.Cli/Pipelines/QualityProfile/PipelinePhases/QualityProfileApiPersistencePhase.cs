@@ -48,8 +48,8 @@ public class QualityProfileApiPersistencePhase
 
                 foreach (var (dto, newScore, reason) in scores)
                 {
-                    _log.Debug("  - {Format}: {OldScore} -> {NewScore} ({Reason})",
-                        dto.Name, dto.Score, newScore, reason);
+                    _log.Debug("  - {Format} ({Id}): {OldScore} -> {NewScore} ({Reason})",
+                        dto.Name, dto.Format, dto.Score, newScore, reason);
                 }
             }
 
