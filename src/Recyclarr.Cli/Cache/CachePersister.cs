@@ -38,6 +38,7 @@ public class CachePersister : ICachePersister
     public void Save(IServiceConfiguration config, CustomFormatCache cache)
     {
         _log.Debug("Saving Cache with {Mappings}", JsonConvert.SerializeObject(cache.TrashIdMappings));
+
         _cache.Save(cache, config);
     }
 }

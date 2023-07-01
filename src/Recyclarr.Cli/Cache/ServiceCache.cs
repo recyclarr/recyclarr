@@ -31,7 +31,7 @@ public partial class ServiceCache : IServiceCache
 
     public T? Load<T>(IServiceConfiguration config) where T : class
     {
-        var path = PathFromAttribute<T>(config);
+        var path = PathFromAttribute<T>(config, true);
         _log.Debug("Loading cache from path: {Path}", path.FullName);
         if (!path.Exists)
         {
@@ -77,12 +77,18 @@ public partial class ServiceCache : IServiceCache
         return attribute.Name;
     }
 
-    private IFileInfo PathFromAttribute<T>(IServiceConfiguration config)
+    private IFileInfo PathFromAttribute<T>(IServiceConfiguration config, bool migratePath = false)
     {
         var objectName = GetCacheObjectNameAttribute<T>();
         if (!AllowedObjectNameCharactersRegex().IsMatch(objectName))
         {
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
+        }
+
+        if (migratePath)
+        {
+            // Only do this while loading the cache. Saving should always use the direct (latest) path.
+            _storagePath.MigrateOldPath(config, objectName);
         }
 
         return _storagePath.CalculatePath(config, objectName);

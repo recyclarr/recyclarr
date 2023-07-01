@@ -9,6 +9,7 @@ public record CustomFormatCache
     public const int LatestVersion = 1;
 
     public int Version { get; init; } = LatestVersion;
+    public string? InstanceName { get; init; }
     public IReadOnlyList<TrashIdMapping> TrashIdMappings { get; init; } = new List<TrashIdMapping>();
 
     public CustomFormatCache Update(CustomFormatTransactionData transactions)
