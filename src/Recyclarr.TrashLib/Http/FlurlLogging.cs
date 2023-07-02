@@ -14,7 +14,7 @@ public static class FlurlLogging
         {
             var url = urlInterceptor(call.Request.Url.Clone());
             log.Debug("HTTP Request: {Method} {Url}", call.HttpRequestMessage.Method, url);
-            LogBody(log, url, call.RequestBody);
+            LogBody(log, url, "Request", call.HttpRequestMessage.Method, call.RequestBody);
         };
 
         settings.AfterCallAsync = async call =>
@@ -26,7 +26,7 @@ public static class FlurlLogging
             var content = call.Response?.ResponseMessage.Content;
             if (content is not null)
             {
-                LogBody(log, url, await content.ReadAsStringAsync());
+                LogBody(log, url, "Response", call.HttpRequestMessage.Method, await content.ReadAsStringAsync());
             }
         };
 
@@ -42,15 +42,23 @@ public static class FlurlLogging
         };
     }
 
-    private static void LogBody(ILogger log, Url url, string? body)
+    private static void LogBody(ILogger log, Url url, string direction, HttpMethod method, string? body)
     {
         if (body is null)
         {
             return;
         }
 
-        body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body));
-        log.Verbose("HTTP Body: {Url} {Body}", url, body);
+        try
+        {
+            body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body));
+        }
+        catch (JsonException)
+        {
+            // Ignore failures here because we'll log the body anyway.
+        }
+
+        log.Verbose("HTTP {Direction} Body: {Method} {Url} {Body}", direction, method, url, body);
     }
 
     public static Url SanitizeUrl(Url url)
