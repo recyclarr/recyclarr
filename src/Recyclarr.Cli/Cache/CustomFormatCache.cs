@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.TrashLib.Models;
 
@@ -9,7 +10,10 @@ public record CustomFormatCache
     public const int LatestVersion = 1;
 
     public int Version { get; init; } = LatestVersion;
+
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
     public string? InstanceName { get; init; }
+
     public IReadOnlyList<TrashIdMapping> TrashIdMappings { get; init; } = new List<TrashIdMapping>();
 
     public CustomFormatCache Update(CustomFormatTransactionData transactions)
