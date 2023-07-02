@@ -81,7 +81,7 @@ public class YamlConfigValidatorTest : TrashLibIntegrationFixture
         var config = new ServiceConfigYaml
         {
             ApiKey = "valid",
-            BaseUrl = "about:empty",
+            BaseUrl = "",
             CustomFormats = new List<CustomFormatConfigYaml>
             {
                 new()
@@ -105,7 +105,42 @@ public class YamlConfigValidatorTest : TrashLibIntegrationFixture
         var validator = Resolve<ServiceConfigYamlValidator>();
         var result = validator.TestValidate(config);
 
-        result.ShouldHaveValidationErrorFor(x => x.BaseUrl);
+        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+            .WithErrorMessage("'base_url' must not be empty.");
+    }
+
+    [Test]
+    public void Validation_failure_when_base_url_not_start_with_http()
+    {
+        var config = new ServiceConfigYaml
+        {
+            ApiKey = "valid",
+            BaseUrl = "ftp://foo.com",
+            CustomFormats = new List<CustomFormatConfigYaml>
+            {
+                new()
+                {
+                    TrashIds = new[] {"valid"},
+                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    {
+                        new()
+                        {
+                            Name = "valid"
+                        }
+                    }
+                }
+            },
+            QualityDefinition = new QualitySizeConfigYaml
+            {
+                Type = "valid"
+            }
+        };
+
+        var validator = Resolve<ServiceConfigYamlValidator>();
+        var result = validator.TestValidate(config);
+
+        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+            .WithErrorMessage("base_url must start with 'http' or 'https'");
     }
 
     public static string FirstCf { get; } = $"{nameof(ServiceConfigYaml.CustomFormats)}[0].";

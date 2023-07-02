@@ -9,19 +9,21 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 {
     public ServiceConfigYamlValidator()
     {
-        RuleFor(x => x.BaseUrl).NotEmpty().NotNull()
-            .WithMessage("'base_url' is required and must not be empty");
+        RuleFor(x => x.BaseUrl).Cascade(CascadeMode.Stop)
+            .NotEmpty().Must(x => x!.StartsWith("http"))
+            .WithMessage("{PropertyName} must start with 'http' or 'https'")
+            .WithName("base_url");
 
-        RuleFor(x => x.BaseUrl).NotEmpty().Must(x => x is not null && x.StartsWith("http"))
-            .WithMessage("'base_url' must start with 'http' or 'https'");
+        // RuleFor(x => x.BaseUrl)
+        //     .When(x => x.BaseUrl is {Length: > 0}, ApplyConditionTo.CurrentValidator)
+        //     .WithMessage("{PropertyName} must start with 'http' or 'https'");
 
-        RuleFor(x => x.ApiKey).NotEmpty()
-            .WithMessage("'api_key' is required");
+        RuleFor(x => x.ApiKey).NotEmpty().WithName("api_key");
 
-        RuleFor(x => x.CustomFormats).NotEmpty()
-            .When(x => x.CustomFormats is not null)
-            .WithName("custom_formats")
-            .ForEach(x => x.SetValidator(new CustomFormatConfigYamlValidator()));
+        RuleFor(x => x.CustomFormats)
+            .NotEmpty().When(x => x.CustomFormats is not null)
+            .ForEach(x => x.SetValidator(new CustomFormatConfigYamlValidator()))
+            .WithName("custom_formats");
 
         RuleFor(x => x.QualityDefinition)
             .SetNonNullableValidator(new QualitySizeConfigYamlValidator());

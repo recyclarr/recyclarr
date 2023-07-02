@@ -120,7 +120,6 @@
     "radarr_instance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["base_url", "api_key"],
       "properties": {
         "base_url": {
           "$ref": "#/$defs/base_url",
@@ -155,7 +154,6 @@
     "sonarr_instance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["base_url", "api_key"],
       "properties": {
         "base_url": {
           "$ref": "#/$defs/base_url",

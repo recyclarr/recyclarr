@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using AutoMapper;
+using Recyclarr.TrashLib.Config.Parsing.PostProcessing;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
@@ -9,12 +10,18 @@ public class ConfigurationLoader : IConfigurationLoader
     private readonly ConfigParser _parser;
     private readonly IMapper _mapper;
     private readonly ConfigValidationExecutor _validator;
+    private readonly IEnumerable<IConfigPostProcessor> _postProcessors;
 
-    public ConfigurationLoader(ConfigParser parser, IMapper mapper, ConfigValidationExecutor validator)
+    public ConfigurationLoader(
+        ConfigParser parser,
+        IMapper mapper,
+        ConfigValidationExecutor validator,
+        IEnumerable<IConfigPostProcessor> postProcessors)
     {
         _parser = parser;
         _mapper = mapper;
         _validator = validator;
+        _postProcessors = postProcessors;
     }
 
     public ICollection<IServiceConfiguration> LoadMany(
@@ -52,6 +59,8 @@ public class ConfigurationLoader : IConfigurationLoader
             return Array.Empty<IServiceConfiguration>();
         }
 
+        config = _postProcessors.Aggregate(config, (current, processor) => processor.Process(current));
+
         if (!_validator.Validate(config))
         {
             return Array.Empty<IServiceConfiguration>();
@@ -61,20 +70,18 @@ public class ConfigurationLoader : IConfigurationLoader
 
         if (desiredServiceType is null or SupportedServices.Radarr)
         {
-            convertedConfigs.AddRange(
-                ValidateAndMap<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
+            convertedConfigs.AddRange(MapConfigs<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
         }
 
         if (desiredServiceType is null or SupportedServices.Sonarr)
         {
-            convertedConfigs.AddRange(
-                ValidateAndMap<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
+            convertedConfigs.AddRange(MapConfigs<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
         }
 
         return convertedConfigs;
     }
 
-    private IEnumerable<IServiceConfiguration> ValidateAndMap<TConfigYaml, TServiceConfig>(
+    private IEnumerable<IServiceConfiguration> MapConfigs<TConfigYaml, TServiceConfig>(
         IReadOnlyDictionary<string, TConfigYaml>? configs)
         where TServiceConfig : ServiceConfiguration
         where TConfigYaml : ServiceConfigYaml
