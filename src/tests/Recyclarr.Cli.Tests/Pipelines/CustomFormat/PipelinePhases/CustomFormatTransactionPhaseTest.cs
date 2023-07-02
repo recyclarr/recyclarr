@@ -446,4 +446,42 @@ public class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         result.DeletedCustomFormats.Should().BeEmpty();
     }
+
+    [Test]
+    public void Add_new_cf_when_in_cache_but_not_in_service()
+    {
+        var sut = Resolve<CustomFormatTransactionPhase>();
+
+        var guideCfs = new[]
+        {
+            NewCf.Data("two", "cf2", 2)
+        };
+
+        var serviceData = Array.Empty<CustomFormatData>();
+
+        var cache = new CustomFormatCache
+        {
+            TrashIdMappings = new[]
+            {
+                new TrashIdMapping("cf2", "two", 200)
+            }
+        };
+
+        var config = NewConfig.Radarr();
+
+        var result = sut.Execute(config, guideCfs, serviceData, cache);
+
+        result.Should().BeEquivalentTo(new CustomFormatTransactionData
+        {
+            NewCustomFormats =
+            {
+                new CustomFormatData
+                {
+                    Name = "two",
+                    TrashId = "cf2",
+                    Id = 200
+                }
+            }
+        });
+    }
 }
