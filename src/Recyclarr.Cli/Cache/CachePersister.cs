@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Cache;
@@ -31,14 +32,12 @@ public class CachePersister : ICachePersister
             throw new CacheException("Version mismatch");
         }
 
-        _log.Debug("Loaded Cache");
         return cache;
     }
 
     public void Save(IServiceConfiguration config, CustomFormatCache cache)
     {
-        _log.Debug("Saving Cache with {Mappings}", cache.TrashIdMappings
-            .Select(x => $"TrashID: {x.TrashId}, Name: {x.CustomFormatName}, FormatID: {x.CustomFormatId}"));
+        _log.Debug("Saving Cache with {Mappings}", JsonConvert.SerializeObject(cache.TrashIdMappings));
         _cache.Save(cache, config);
     }
 }

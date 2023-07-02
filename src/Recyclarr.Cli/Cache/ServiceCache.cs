@@ -13,11 +13,12 @@ public partial class ServiceCache : IServiceCache
 {
     private readonly ICacheStoragePath _storagePath;
     private readonly JsonSerializerSettings _jsonSettings;
+    private readonly ILogger _log;
 
     public ServiceCache(ICacheStoragePath storagePath, ILogger log)
     {
         _storagePath = storagePath;
-        Log = log;
+        _log = log;
         _jsonSettings = new JsonSerializerSettings
         {
             Formatting = Formatting.Indented,
@@ -28,13 +29,13 @@ public partial class ServiceCache : IServiceCache
         };
     }
 
-    private ILogger Log { get; }
-
     public T? Load<T>(IServiceConfiguration config) where T : class
     {
         var path = PathFromAttribute<T>(config);
+        _log.Debug("Loading cache from path: {Path}", path.FullName);
         if (!path.Exists)
         {
+            _log.Debug("Cache path does not exist");
             return null;
         }
 
@@ -47,7 +48,7 @@ public partial class ServiceCache : IServiceCache
         }
         catch (JsonException e)
         {
-            Log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
+            _log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
         }
 
         return null;
@@ -56,6 +57,7 @@ public partial class ServiceCache : IServiceCache
     public void Save<T>(T obj, IServiceConfiguration config) where T : class
     {
         var path = PathFromAttribute<T>(config);
+        _log.Debug("Saving cache to path: {Path}", path.FullName);
         path.CreateParentDirectory();
 
         var serializer = JsonSerializer.Create(_jsonSettings);
