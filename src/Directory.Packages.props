@@ -9,17 +9,17 @@
     <PackageVersion Include="AutoMapper" Version="12.0.1" />
     <PackageVersion Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="7.1.0" />
-    <PackageVersion Include="CliWrap" Version="3.6.3" />
+    <PackageVersion Include="CliWrap" Version="3.6.4" />
     <PackageVersion Include="FluentValidation" Version="11.5.2" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
     <PackageVersion Include="Flurl.Http" Version="3.2.4" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2022.3.1" />
-    <PackageVersion Include="MudBlazor" Version="6.4.1" />
+    <PackageVersion Include="MudBlazor" Version="6.6.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Schema" Version="3.0.15" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="19.2.1" />
-    <PackageVersion Include="Serilog" Version="2.12.0" />
+    <PackageVersion Include="Serilog" Version="3.0.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="3.4.1" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
@@ -45,10 +45,10 @@
     <PackageVersion Include="AutoFixture.NUnit3" Version="4.18.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="FluentAssertions" Version="6.11.0" />
-    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.20.0" />
+    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.21.0" />
     <PackageVersion Include="FluentAssertions.Json" Version="6.1.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.3.2" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
     <PackageVersion Include="NSubstitute" Version="5.0.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.16" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
