@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
@@ -11,7 +10,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
 
-internal static partial class Program
+internal static class Program
 {
     private static ILifetimeScope? _scope;
     private static IBaseCommandSetupTask[] _tasks = Array.Empty<IBaseCommandSetupTask>();
@@ -53,12 +52,6 @@ internal static partial class Program
         {
             result = app.Run(args);
         }
-        catch (CommandRuntimeException ex)
-        {
-            var msg = CommandMessageRegex().Replace(ex.Message, "[gold1]$0[/]");
-            AnsiConsole.Markup($"[red]Error:[/] [white]{msg}[/]");
-            _log?.Debug(ex, "Command Exception");
-        }
         catch (Exception ex)
         {
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
@@ -90,7 +83,4 @@ internal static partial class Program
     {
         _tasks.Reverse().ForEach(x => x.OnFinish());
     }
-
-    [GeneratedRegex("'.*?'", RegexOptions.None, 1000)]
-    private static partial Regex CommandMessageRegex();
 }
