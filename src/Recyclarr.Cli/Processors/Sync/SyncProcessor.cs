@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using Flurl.Http;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.TrashLib.Compatibility;
@@ -20,6 +21,7 @@ public class SyncProcessor : ISyncProcessor
     private readonly IConfigurationLoader _configLoader;
     private readonly SyncPipelineExecutor _pipelines;
     private readonly ServiceAgnosticCapabilityEnforcer _capabilityEnforcer;
+    private readonly IFileSystem _fs;
 
     public SyncProcessor(
         IAnsiConsole console,
@@ -27,7 +29,8 @@ public class SyncProcessor : ISyncProcessor
         IConfigurationFinder configFinder,
         IConfigurationLoader configLoader,
         SyncPipelineExecutor pipelines,
-        ServiceAgnosticCapabilityEnforcer capabilityEnforcer)
+        ServiceAgnosticCapabilityEnforcer capabilityEnforcer,
+        IFileSystem fs)
     {
         _console = console;
         _log = log;
@@ -35,6 +38,7 @@ public class SyncProcessor : ISyncProcessor
         _configLoader = configLoader;
         _pipelines = pipelines;
         _capabilityEnforcer = capabilityEnforcer;
+        _fs = fs;
     }
 
     public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
@@ -42,7 +46,22 @@ public class SyncProcessor : ISyncProcessor
         bool failureDetected;
         try
         {
-            var configs = _configLoader.LoadMany(_configFinder.GetConfigFiles(settings.Configs));
+            var configFiles = settings.Configs
+                .Select(x => _fs.FileInfo.New(x))
+                .ToLookup(x => x.Exists);
+
+            if (configFiles[false].Any())
+            {
+                foreach (var file in configFiles[false])
+                {
+                    _log.Error("Manually-specified configuration file does not exist: {File}", file);
+                }
+
+                _log.Error("Exiting due to non-existent configuration files");
+                return ExitStatus.Failed;
+            }
+
+            var configs = _configLoader.LoadMany(_configFinder.GetConfigFiles(configFiles[true].ToList()));
 
             LogInvalidInstances(settings.Instances, configs);
 
@@ -93,6 +112,8 @@ public class SyncProcessor : ISyncProcessor
 
     private void HandleException(Exception e)
     {
+        _log.Debug(e, "Sync Processor Exception");
+
         switch (e)
         {
             case GitCmdException e2:
@@ -105,8 +126,7 @@ public class SyncProcessor : ISyncProcessor
                 break;
 
             default:
-                _log.Error(e, "Exception");
-                break;
+                throw e;
         }
     }
 

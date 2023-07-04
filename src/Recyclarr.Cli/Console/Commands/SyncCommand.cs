@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.IO.Abstractions;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
@@ -33,10 +32,9 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
 
         [CommandOption("-c|--config")]
         [Description("One or more YAML configuration files to load & use.")]
-        [TypeConverter(typeof(FileInfoConverter))]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public IFileInfo[] ConfigsOption { get; init; } = Array.Empty<IFileInfo>();
-        public IReadOnlyCollection<IFileInfo> Configs => ConfigsOption;
+        public string[] ConfigsOption { get; init; } = Array.Empty<string>();
+        public IReadOnlyCollection<string> Configs => ConfigsOption;
 
         [CommandOption("-p|--preview")]
         [Description("Perform a dry run: preview the results without syncing.")]

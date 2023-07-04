@@ -38,7 +38,6 @@ internal static class Program
             config.Settings.StrictParsing = true;
 
             config.SetApplicationName("recyclarr");
-            // config.SetApplicationVersion("v1.2.3");
 
             var interceptor = new CliInterceptor(logLevelSwitch, appDataPathProvider);
             interceptor.OnIntercepted.Subscribe(_ => OnAppInitialized());

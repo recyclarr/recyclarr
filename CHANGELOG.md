@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `base_url` and `api_key` are now optional. These can be implicitly set via secrets that follow a
   naming convention. See the Secrets reference page on the wiki for details.
 
+### Changed
+
+- Better error messages for manually-specified, non-existent config files.
+
 ### Fixed
 
 - Resolved error during exception message formatting that occurred in some cases (#192).
