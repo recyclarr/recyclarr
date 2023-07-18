@@ -53,8 +53,14 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-            _log?.Debug(ex, "Non-recoverable Exception");
+            if (_log is null)
+            {
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            }
+            else
+            {
+                _log.Error(ex, "Non-recoverable Exception");
+            }
         }
         finally
         {

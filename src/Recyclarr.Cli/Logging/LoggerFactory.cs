@@ -31,9 +31,7 @@ public class LoggerFactory
 
     private static ExpressionTemplate GetConsoleTemplate()
     {
-        var template = "[{@l:u3}] " + GetBaseTemplateString() +
-            "{#if ExceptionMessage is not null}: {ExceptionMessage}{#end}" +
-            "\n";
+        var template = "[{@l:u3}] " + GetBaseTemplateString() + "\n{@x}";
 
         return new ExpressionTemplate(template, theme: TemplateTheme.Code);
     }

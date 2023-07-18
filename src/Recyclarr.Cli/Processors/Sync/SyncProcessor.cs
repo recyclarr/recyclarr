@@ -112,8 +112,6 @@ public class SyncProcessor : ISyncProcessor
 
     private void HandleException(Exception e)
     {
-        _log.Debug(e, "Sync Processor Exception");
-
         switch (e)
         {
             case GitCmdException e2:
