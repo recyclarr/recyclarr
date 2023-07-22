@@ -1,9 +1,15 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
+using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 public enum FormatScoreUpdateReason
 {
+    /// <summary>
+    /// A score who's value did not change.
+    /// </summary>
+    NoChange,
+
     /// <summary>
     /// A score that is changed.
     /// </summary>
@@ -22,16 +28,23 @@ public enum FormatScoreUpdateReason
     New
 }
 
-public record UpdatedFormatScore
+public record UpdatedFormatScore(ProfileFormatItemDto Dto, int NewScore, FormatScoreUpdateReason Reason)
 {
-    public required ProfileFormatItemDto Dto { get; init; }
-    public required int NewScore { get; init; }
-    public required FormatScoreUpdateReason Reason { get; init; }
-
-    public void Deconstruct(out ProfileFormatItemDto dto, out int newScore, out FormatScoreUpdateReason reason)
+    public static UpdatedFormatScore New(ProcessedQualityProfileScore score)
     {
-        dto = Dto;
-        newScore = NewScore;
-        reason = Reason;
+        var dto = new ProfileFormatItemDto {Format = score.FormatId, Name = score.CfName};
+        return new UpdatedFormatScore(dto, score.Score, FormatScoreUpdateReason.New);
+    }
+
+    public static UpdatedFormatScore Reset(ProfileFormatItemDto dto, ProcessedQualityProfileData profileData)
+    {
+        var score = profileData.Profile.ResetUnmatchedScores ? 0 : dto.Score;
+        return new UpdatedFormatScore(dto, score, FormatScoreUpdateReason.Reset);
+    }
+
+    public static UpdatedFormatScore Updated(ProfileFormatItemDto dto, ProcessedQualityProfileScore score)
+    {
+        var reason = dto.Score == score.Score ? FormatScoreUpdateReason.NoChange : FormatScoreUpdateReason.Updated;
+        return new UpdatedFormatScore(dto, score.Score, reason);
     }
 }

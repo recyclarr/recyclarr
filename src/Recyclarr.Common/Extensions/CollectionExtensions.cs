@@ -78,4 +78,9 @@ public static class CollectionExtensions
         var list = source.ToList();
         return list.Any() ? list : null;
     }
+
+    public static IEnumerable<T> Flatten<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> flattenWhich)
+    {
+        return items.SelectMany(x => flattenWhich(x).Flatten(flattenWhich).Append(x));
+    }
 }

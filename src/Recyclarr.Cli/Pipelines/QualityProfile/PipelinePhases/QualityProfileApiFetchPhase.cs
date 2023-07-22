@@ -3,6 +3,8 @@ using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
+public record QualityProfileServiceData(IReadOnlyList<QualityProfileDto> Profiles, QualityProfileDto Schema);
+
 public class QualityProfileApiFetchPhase
 {
     private readonly IQualityProfileService _api;
@@ -12,8 +14,10 @@ public class QualityProfileApiFetchPhase
         _api = api;
     }
 
-    public async Task<IList<QualityProfileDto>> Execute(IServiceConfiguration config)
+    public async Task<QualityProfileServiceData> Execute(IServiceConfiguration config)
     {
-        return await _api.GetQualityProfiles(config);
+        var profiles = await _api.GetQualityProfiles(config);
+        var schema = await _api.GetSchema(config);
+        return new QualityProfileServiceData(profiles.AsReadOnly(), schema);
     }
 }

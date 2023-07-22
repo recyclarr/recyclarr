@@ -85,6 +85,36 @@ public class SonarrCapabilityEnforcerTest
 
         var act = () => sut.Check(config);
 
-        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*v4*");
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*custom formats*v4*");
+    }
+
+    [Test, AutoMockData]
+    public void Qualities_not_allowed_in_v3(
+        [Frozen] ISonarrCapabilityFetcher fetcher,
+        SonarrCapabilityEnforcer sut)
+    {
+        var config = NewConfig.Sonarr() with
+        {
+            QualityProfiles = new[]
+            {
+                new QualityProfileConfig
+                {
+                    Qualities = new[]
+                    {
+                        new QualityProfileQualityConfig()
+                    }
+                }
+            }
+        };
+
+        fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
+        {
+            SupportsNamedReleaseProfiles = true,
+            SupportsCustomFormats = false
+        });
+
+        var act = () => sut.Check(config);
+
+        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*qualities*v4*");
     }
 }

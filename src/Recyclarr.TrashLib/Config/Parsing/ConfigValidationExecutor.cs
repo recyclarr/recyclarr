@@ -1,7 +1,5 @@
-using FluentValidation;
 using JetBrains.Annotations;
 using Recyclarr.Common.FluentValidation;
-using Serilog.Events;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
@@ -25,27 +23,13 @@ public class ConfigValidationExecutor
             return true;
         }
 
-        var anyErrorsDetected = false;
-
-        foreach (var error in result.Errors)
+        var numErrors = result.Errors.LogValidationErrors(_log, "Config Validation");
+        if (numErrors == 0)
         {
-            var level = error.Severity switch
-            {
-                Severity.Error => LogEventLevel.Error,
-                Severity.Warning => LogEventLevel.Warning,
-                Severity.Info => LogEventLevel.Information,
-                _ => LogEventLevel.Debug
-            };
-
-            anyErrorsDetected |= level == LogEventLevel.Error;
-            _log.Write(level, "Config Validation: {Msg}", error.ErrorMessage);
+            return true;
         }
 
-        if (anyErrorsDetected)
-        {
-            _log.Error("Config validation failed with {Count} errors", result.Errors.Count);
-        }
-
-        return !anyErrorsDetected;
+        _log.Error("Config validation failed with {Count} errors", numErrors);
+        return false;
     }
 }

@@ -9,6 +9,7 @@ public record ProcessedQualityProfileScore(string TrashId, string CfName, int Fo
 
 public record ProcessedQualityProfileData(QualityProfileConfig Profile)
 {
+    public bool ShouldCreate { get; init; } = true;
     public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
 }
 
@@ -37,28 +38,31 @@ public class QualityProfileConfigPhase
                 .NotNull()
                 .Select(y => (x.Profile, Cf: y)));
 
-        var allProfiles =
-            new Dictionary<string, ProcessedQualityProfileData>(StringComparer.InvariantCultureIgnoreCase);
+        var allProfiles = config.QualityProfiles
+            .Select(x => new ProcessedQualityProfileData(x))
+            .ToDictionary(x => x.Profile.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
 
         foreach (var (profile, cf) in profileAndCfs)
         {
             if (!allProfiles.TryGetValue(profile.Name, out var profileCfs))
             {
-                profileCfs = new ProcessedQualityProfileData(
-                    config.QualityProfiles.FirstOrDefault(
-                        x => x.Name.EqualsIgnoreCase(profile.Name),
-                        // If the user did not specify a quality profile in their config, we still create the QP object
-                        // for consistency (at the very least for the name).
-                        new QualityProfileConfig {Name = profile.Name}));
-                allProfiles[profile.Name] = profileCfs;
+                _log.Debug("Implicitly adding quality profile config for {ProfileName}", profile.Name);
+
+                // If the user did not specify a quality profile in their config, we still create the QP object
+                // for consistency (at the very least for the name).
+                allProfiles[profile.Name] = profileCfs =
+                    new ProcessedQualityProfileData(new QualityProfileConfig {Name = profile.Name})
+                    {
+                        // The user must explicitly specify a profile in the top-level `quality_profiles` section of
+                        // their config, otherwise we do not implicitly create them in the service.
+                        ShouldCreate = false
+                    };
             }
 
             AddCustomFormatScoreData(profileCfs.CfScores, profile, cf);
         }
 
-        return allProfiles.Values
-            .Where(x => x.CfScores.IsNotEmpty())
-            .ToList();
+        return allProfiles.Values.ToList();
     }
 
     private void AddCustomFormatScoreData(

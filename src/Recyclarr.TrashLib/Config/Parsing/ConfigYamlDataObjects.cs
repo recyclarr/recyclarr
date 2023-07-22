@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using Recyclarr.TrashLib.Config.Services;
 using YamlDotNet.Serialization;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
@@ -22,10 +23,27 @@ public record QualitySizeConfigYaml
     public decimal? PreferredRatio { get; [UsedImplicitly] init; }
 }
 
+public record QualityProfileFormatUpgradeYaml
+{
+    public int? UntilScore { get; init; }
+    public string? UntilQuality { get; init; }
+}
+
+public record QualityProfileQualityConfigYaml
+{
+    public string? Name { get; init; }
+    public bool? Enabled { get; init; }
+    public IReadOnlyCollection<string>? Qualities { get; init; }
+}
+
 public record QualityProfileConfigYaml
 {
     public string? Name { get; [UsedImplicitly] init; }
+    public QualityProfileFormatUpgradeYaml? UpgradesAllowed { get; init; }
+    public int? MinFormatScore { get; init; }
     public bool ResetUnmatchedScores { get; [UsedImplicitly] init; }
+    public QualitySortAlgorithm? QualitySort { get; init; }
+    public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
 }
 
 public record ServiceConfigYaml

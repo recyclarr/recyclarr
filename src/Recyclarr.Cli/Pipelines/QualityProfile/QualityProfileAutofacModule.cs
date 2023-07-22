@@ -12,6 +12,7 @@ public class QualityProfileAutofacModule : Module
         base.Load(builder);
 
         builder.RegisterType<QualityProfileService>().As<IQualityProfileService>();
+        builder.RegisterType<QualityProfileStatCalculator>();
 
         builder.RegisterAggregateService<IQualityProfilePipelinePhases>();
         builder.RegisterType<QualityProfileConfigPhase>();
@@ -19,5 +20,6 @@ public class QualityProfileAutofacModule : Module
         builder.RegisterType<QualityProfileTransactionPhase>();
         builder.RegisterType<QualityProfilePreviewPhase>();
         builder.RegisterType<QualityProfileApiPersistencePhase>();
+        builder.RegisterType<QualityProfileNoticePhase>();
     }
 }

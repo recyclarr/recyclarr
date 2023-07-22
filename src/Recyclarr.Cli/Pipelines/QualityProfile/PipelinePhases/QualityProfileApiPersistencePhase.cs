@@ -7,66 +7,72 @@ public class QualityProfileApiPersistencePhase
 {
     private readonly ILogger _log;
     private readonly IQualityProfileService _api;
+    private readonly QualityProfileStatCalculator _statCalculator;
 
-    public QualityProfileApiPersistencePhase(ILogger log, IQualityProfileService api)
+    public QualityProfileApiPersistencePhase(
+        ILogger log,
+        IQualityProfileService api,
+        QualityProfileStatCalculator statCalculator)
     {
         _log = log;
         _api = api;
+        _statCalculator = statCalculator;
     }
 
     public async Task Execute(IServiceConfiguration config, QualityProfileTransactionData transactions)
     {
-        var profilesToUpdate = transactions.UpdatedProfiles.Select(x => x.UpdatedProfile with
-        {
-            FormatItems = x.UpdatedScores.Select(y => y.Dto with {Score = y.NewScore}).ToList()
-        });
+        var profilesWithStats = transactions.UpdatedProfiles
+            .Select(x => _statCalculator.Calculate(x))
+            .ToLookup(x => x.HasChanges);
 
-        foreach (var profile in profilesToUpdate)
+        // Profiles without changes (false) get logged
+        var unchangedProfiles = profilesWithStats[false].ToList();
+        if (unchangedProfiles.Any())
         {
-            await _api.UpdateQualityProfile(config, profile);
+            _log.Debug("These profiles have no changes and will not be persisted: {Profiles}",
+                unchangedProfiles.Select(x => x.Profile.ProfileName));
         }
 
-        LogQualityProfileUpdates(transactions);
+        // Profiles with changes (true) get sent to the service
+        var changedProfiles = profilesWithStats[true].ToList();
+        foreach (var profile in changedProfiles.Select(x => x.Profile))
+        {
+            var dto = profile.BuildUpdatedDto();
+
+            switch (profile.UpdateReason)
+            {
+                case QualityProfileUpdateReason.New:
+                    await _api.CreateQualityProfile(config, dto);
+                    break;
+
+                case QualityProfileUpdateReason.Changed:
+                    await _api.UpdateQualityProfile(config, dto);
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unsupported UpdateReason: {profile.UpdateReason}");
+            }
+        }
+
+        LogUpdates(changedProfiles);
     }
 
-    private void LogQualityProfileUpdates(QualityProfileTransactionData transactions)
+    private void LogUpdates(IReadOnlyCollection<ProfileWithStats> changedProfiles)
     {
-        var updatedScores = transactions.UpdatedProfiles
-            .Select(x => (
-                ProfileName: x.UpdatedProfile.Name,
-                Scores: x.UpdatedScores
-                    .Where(y => y.Reason != FormatScoreUpdateReason.New && y.Dto.Score != y.NewScore)
-                    .ToList()))
-            .Where(x => x.Scores.Any())
-            .ToList();
-
-        if (updatedScores.Count > 0)
+        if (changedProfiles.Count > 0)
         {
-            foreach (var (profileName, scores) in updatedScores)
-            {
-                _log.Debug("> Scores updated for quality profile: {ProfileName}", profileName);
+            var numProfiles = changedProfiles.Count;
+            var numQuality = changedProfiles.Count(x => x.QualitiesChanged);
+            var numScores = changedProfiles.Count(x => x.ScoresChanged);
 
-                foreach (var (dto, newScore, reason) in scores)
-                {
-                    _log.Debug("  - {Format} ({Id}): {OldScore} -> {NewScore} ({Reason})",
-                        dto.Name, dto.Format, dto.Score, newScore, reason);
-                }
-            }
-
-            _log.Information("Updated {ProfileCount} profiles and a total of {ScoreCount} scores",
-                transactions.UpdatedProfiles.Count,
-                updatedScores.Sum(s => s.Scores.Count));
+            _log.Information(
+                "A total of {NumProfiles} profiles changed: {NumQuality} contain quality changes; " +
+                "{NumScores} contain updated scores",
+                numProfiles, numQuality, numScores);
         }
         else
         {
-            _log.Information("All quality profile scores are already up to date!");
-        }
-
-        if (transactions.InvalidProfileNames.Count > 0)
-        {
-            _log.Warning("The following quality profile names are not valid and should either be " +
-                "removed or renamed in your YAML config");
-            _log.Warning("{QualityProfileNames}", transactions.InvalidProfileNames);
+            _log.Information("All quality profiles are up to date!");
         }
     }
 }

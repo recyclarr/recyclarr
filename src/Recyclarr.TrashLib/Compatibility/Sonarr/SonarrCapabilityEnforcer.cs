@@ -40,5 +40,23 @@ public class SonarrCapabilityEnforcer
                     "Custom formats require Sonarr v4 or greater. " +
                     "Please use `release_profiles` instead or use the right version of Sonarr.");
         }
+
+        // Check for aspects of quality profile sync that are not supported by Sonarr v3
+        if (!capabilities.SupportsCustomFormats)
+        {
+            if (config.QualityProfiles.Any(x => x.UpgradeUntilScore is not null))
+            {
+                throw new ServiceIncompatibilityException(
+                    "`until_score` under `upgrades_allowed` is not supported by Sonarr v3. " +
+                    "Remove the until_score property or use Sonarr v4.");
+            }
+
+            if (config.QualityProfiles.Any(x => x.MinFormatScore is not null))
+            {
+                throw new ServiceIncompatibilityException(
+                    "`min_format_score` under `quality_profiles` is not supported by Sonarr v3. " +
+                    "Remove the min_format_score property or use Sonarr v4.");
+            }
+        }
     }
 }

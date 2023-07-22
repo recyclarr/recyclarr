@@ -1,5 +1,6 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
@@ -77,12 +78,74 @@ public class QualitySizeConfigYamlValidator : AbstractValidator<QualitySizeConfi
 }
 
 [UsedImplicitly]
+public class QualityProfileFormatUpgradeYamlValidator : AbstractValidator<QualityProfileFormatUpgradeYaml>
+{
+    public QualityProfileFormatUpgradeYamlValidator()
+    {
+        RuleFor(x => x.UntilQuality)
+            .NotEmpty()
+            .WithMessage("'until_quality' is required when allowing profile upgrades");
+    }
+}
+
+[UsedImplicitly]
 public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfileConfigYaml>
 {
     public QualityProfileConfigYamlValidator()
     {
-        RuleFor(x => x.Name).NotEmpty()
-            .WithMessage("'name' is required for root-level 'quality_profiles' elements");
+        RuleFor(x => x.Name)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage(x => $"For profile {x.Name}, 'name' is required for root-level 'quality_profiles' elements");
+
+        RuleFor(x => x.UpgradesAllowed)
+            .SetNonNullableValidator(new QualityProfileFormatUpgradeYamlValidator());
+
+        RuleFor(x => x.Qualities)
+            .Cascade(CascadeMode.Stop)
+            .Must((o, x) => !x!
+                .Where(y => y.Qualities is not null)
+                .SelectMany(y => y.Qualities!)
+                .Contains(o.UpgradesAllowed!.UntilQuality))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'until_quality' must not refer to qualities contained within groups")
+            .Must((o, x) => !x!
+                .Where(y => y is {Enabled: false, Name: not null})
+                .Select(y => y.Name!)
+                .Contains(o.UpgradesAllowed!.UntilQuality))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities")
+            .Must((o, x) => x!
+                .Select(y => y.Name)
+                .Contains(o.UpgradesAllowed!.UntilQuality))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
+                $"which is '{o.UpgradesAllowed!.UntilQuality}'")
+            .When(x => x is {UpgradesAllowed: not null, Qualities.Count: > 0});
+
+        RuleFor(x => x.Qualities)
+            .Custom(ValidateHaveNoDuplicates!)
+            .When(x => x is {Qualities.Count: > 0});
+    }
+
+    private static void ValidateHaveNoDuplicates(
+        IReadOnlyCollection<QualityProfileQualityConfigYaml> qualities,
+        ValidationContext<QualityProfileConfigYaml> context)
+    {
+        var dupes = qualities
+            .Select(x => x.Name)
+            .Concat(qualities.Where(x => x.Qualities is not null).SelectMany(x => x.Qualities!))
+            .NotNull()
+            .GroupBy(x => x)
+            .Select(x => x.Skip(1).FirstOrDefault())
+            .NotNull();
+
+        foreach (var dupe in dupes)
+        {
+            var x = context.InstanceToValidate;
+            context.AddFailure(
+                $"For profile {x.Name}, 'qualities' contains duplicates for quality '{dupe}'");
+        }
     }
 }
 

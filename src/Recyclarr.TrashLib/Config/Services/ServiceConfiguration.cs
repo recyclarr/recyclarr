@@ -45,8 +45,29 @@ public record QualityDefinitionConfig
     public decimal? PreferredRatio { get; set; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public record QualityProfileQualityConfig
+{
+    public string Name { get; init; } = "";
+    public bool Enabled { get; init; }
+    public IReadOnlyCollection<string> Qualities { get; init; } = Array.Empty<string>();
+}
+
+public enum QualitySortAlgorithm
+{
+    Top,
+    Bottom
+}
+
 public record QualityProfileConfig
 {
-    public bool ResetUnmatchedScores { get; init; }
     public string Name { get; init; } = "";
+    public bool? UpgradeAllowed => UpgradeUntilQuality is not null;
+    public string? UpgradeUntilQuality { get; init; }
+    public int? UpgradeUntilScore { get; init; }
+    public int? MinFormatScore { get; init; }
+    public bool ResetUnmatchedScores { get; init; }
+    public QualitySortAlgorithm QualitySort { get; init; }
+    public IReadOnlyCollection<QualityProfileQualityConfig> Qualities { get; init; } =
+        Array.Empty<QualityProfileQualityConfig>();
 }

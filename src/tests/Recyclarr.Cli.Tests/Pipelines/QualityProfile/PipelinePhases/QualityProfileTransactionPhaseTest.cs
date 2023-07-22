@@ -10,28 +10,74 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 public class QualityProfileTransactionPhaseTest
 {
     [Test, AutoMockData]
-    public void Invalid_profile_names(
+    public void Non_existent_profile_names_with_updated(
         QualityProfileTransactionPhase sut)
     {
         var guideData = new[]
         {
-            NewQp.Processed("invalid_profile_name", ("id1", 1, 100))
+            NewQp.Processed("invalid_profile_name", ("id1", 1, 100)) with
+            {
+                ShouldCreate = false
+            },
+            NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
         };
 
-        var serviceData = new[]
+        var dtos = new[]
         {
-            new QualityProfileDto
-            {
-                Name = "profile1"
-            }
+            new QualityProfileDto {Name = "profile1"}
         };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
 
         var result = sut.Execute(guideData, serviceData);
 
         result.Should().BeEquivalentTo(new QualityProfileTransactionData
+            {
+                NonExistentProfiles = new[] {"invalid_profile_name"},
+                UpdatedProfiles =
+                {
+                    new UpdatedQualityProfile
+                    {
+                        ProfileConfig = guideData[1],
+                        ProfileDto = dtos[0],
+                        UpdateReason = QualityProfileUpdateReason.Changed
+                    }
+                }
+            },
+            o => o.Excluding(x => x.Name.Contains(nameof(UpdatedQualityProfile.UpdatedScores))));
+    }
+
+    [Test, AutoMockData]
+    public void New_profiles(
+        QualityProfileTransactionPhase sut)
+    {
+        var guideData = new[]
         {
-            InvalidProfileNames = {"invalid_profile_name"}
-        });
+            NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
+        };
+
+        var dtos = new[]
+        {
+            new QualityProfileDto {Name = "irrelevant_profile"}
+        };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+
+        var result = sut.Execute(guideData, serviceData);
+
+        result.Should().BeEquivalentTo(new QualityProfileTransactionData
+            {
+                UpdatedProfiles =
+                {
+                    new UpdatedQualityProfile
+                    {
+                        ProfileConfig = guideData[0],
+                        ProfileDto = serviceData.Schema,
+                        UpdateReason = QualityProfileUpdateReason.New
+                    }
+                }
+            },
+            o => o.Excluding(x => x.Name.Contains(nameof(UpdatedQualityProfile.UpdatedScores))));
     }
 
     [Test, AutoMockData]
@@ -43,7 +89,7 @@ public class QualityProfileTransactionPhaseTest
             NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
         };
 
-        var serviceData = new[]
+        var dtos = new[]
         {
             new QualityProfileDto
             {
@@ -65,6 +111,8 @@ public class QualityProfileTransactionPhaseTest
                 }
             }
         };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
 
         var result = sut.Execute(guideData, serviceData);
 
@@ -83,7 +131,7 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = Array.Empty<ProcessedQualityProfileData>();
 
-        var serviceData = new[]
+        var dtos = new[]
         {
             new QualityProfileDto
             {
@@ -106,13 +154,15 @@ public class QualityProfileTransactionPhaseTest
             }
         };
 
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+
         var result = sut.Execute(guideData, serviceData);
 
         result.Should().BeEquivalentTo(new QualityProfileTransactionData());
     }
 
     [Test, AutoMockData]
-    public void Skip_unchanged_scores(
+    public void Unchanged_scores(
         QualityProfileTransactionPhase sut)
     {
         // Must simulate at least 1 custom format coming from configuration otherwise processing doesn't happen.
@@ -122,7 +172,7 @@ public class QualityProfileTransactionPhaseTest
             NewQp.Processed("profile1", ("id1", 1, 200), ("id2", 2, 300))
         };
 
-        var serviceData = new[]
+        var dtos = new[]
         {
             new QualityProfileDto
             {
@@ -145,9 +195,17 @@ public class QualityProfileTransactionPhaseTest
             }
         };
 
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+
         var result = sut.Execute(guideData, serviceData);
 
-        result.Should().BeEquivalentTo(new QualityProfileTransactionData());
+        result.UpdatedProfiles.Should()
+            .ContainSingle().Which.UpdatedScores.Should()
+            .BeEquivalentTo(new[]
+            {
+                NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.NoChange),
+                NewQp.UpdatedScore("quality2", 300, 300, FormatScoreUpdateReason.NoChange)
+            }, o => o.Excluding(x => x.Dto.Format));
     }
 
     [Test, AutoMockData]
@@ -159,7 +217,7 @@ public class QualityProfileTransactionPhaseTest
             NewQp.Processed("profile1", true, ("quality3", "id3", 3, 100), ("quality4", "id4", 4, 500))
         };
 
-        var serviceData = new[]
+        var dtos = new[]
         {
             new QualityProfileDto
             {
@@ -181,6 +239,8 @@ public class QualityProfileTransactionPhaseTest
                 }
             }
         };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
 
         var result = sut.Execute(guideData, serviceData);
 
@@ -203,7 +263,7 @@ public class QualityProfileTransactionPhaseTest
             NewQp.Processed("profile1", false, ("quality3", "id3", 3, 100), ("quality4", "id4", 4, 500))
         };
 
-        var serviceData = new[]
+        var dtos = new[]
         {
             new QualityProfileDto
             {
@@ -225,6 +285,8 @@ public class QualityProfileTransactionPhaseTest
                 }
             }
         };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
 
         var result = sut.Execute(guideData, serviceData);
 

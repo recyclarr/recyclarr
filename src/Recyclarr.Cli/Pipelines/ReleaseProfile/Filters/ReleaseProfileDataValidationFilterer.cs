@@ -12,7 +12,7 @@ public class ReleaseProfileDataValidationFilterer
         _log = log;
     }
 
-    private void LogInvalidTerm(List<ValidationFailure> failures, string filterDescription)
+    private void LogInvalidTerm(IReadOnlyCollection<ValidationFailure> failures, string filterDescription)
     {
         _log.Debug("Validation failed on term data ({Filter}): {Failures}", filterDescription, failures);
     }

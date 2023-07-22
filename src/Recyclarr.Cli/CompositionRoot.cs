@@ -16,6 +16,7 @@ using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
+using Recyclarr.Common.FluentValidation;
 using Recyclarr.TrashLib;
 using Recyclarr.TrashLib.Interfaces;
 using Recyclarr.TrashLib.Startup;
@@ -46,6 +47,7 @@ public static class CompositionRoot
 
         builder.RegisterAssemblyTypes(thisAssembly)
             .AsClosedTypesOf(typeof(IValidator<>))
+            .Where(x => !typeof(IManualValidator).IsAssignableFrom(x))
             .As<IValidator>();
     }
 

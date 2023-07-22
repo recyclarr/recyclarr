@@ -45,9 +45,10 @@ public class QualityProfileConfigPhaseTest
         var result = sut.Execute(config);
 
         result.Should().BeEquivalentTo(new[]
-        {
-            NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
-        });
+            {
+                NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
+            },
+            o => o.Excluding(x => x.ShouldCreate));
     }
 
     [Test, AutoMockData]
@@ -76,9 +77,10 @@ public class QualityProfileConfigPhaseTest
         var result = sut.Execute(config);
 
         result.Should().BeEquivalentTo(new[]
-        {
-            NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
-        });
+            {
+                NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
+            },
+            o => o.Excluding(x => x.ShouldCreate));
     }
 
     [Test, AutoMockData]
@@ -106,7 +108,11 @@ public class QualityProfileConfigPhaseTest
 
         var result = sut.Execute(config);
 
-        result.Should().BeEmpty();
+        result.Should().BeEquivalentTo(new[]
+            {
+                NewQp.Processed("test_profile")
+            },
+            o => o.Excluding(x => x.ShouldCreate));
     }
 
     [Test, AutoMockData]
@@ -161,9 +167,10 @@ public class QualityProfileConfigPhaseTest
         var result = sut.Execute(config);
 
         result.Should().BeEquivalentTo(new[]
-        {
-            NewQp.Processed("test_profile1", ("id1", 1, 100)),
-            NewQp.Processed("test_profile2", ("id1", 1, 200))
-        });
+            {
+                NewQp.Processed("test_profile1", ("id1", 1, 100)),
+                NewQp.Processed("test_profile2", ("id1", 1, 200))
+            },
+            o => o.Excluding(x => x.ShouldCreate));
     }
 }

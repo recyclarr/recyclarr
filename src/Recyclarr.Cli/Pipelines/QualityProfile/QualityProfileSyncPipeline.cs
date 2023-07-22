@@ -11,6 +11,7 @@ public interface IQualityProfilePipelinePhases
     QualityProfileTransactionPhase TransactionPhase { get; }
     Lazy<QualityProfilePreviewPhase> PreviewPhase { get; }
     QualityProfileApiPersistencePhase ApiPersistencePhase { get; }
+    QualityProfileNoticePhase NoticePhase { get; }
 }
 
 public class QualityProfileSyncPipeline : ISyncPipeline
@@ -35,6 +36,8 @@ public class QualityProfileSyncPipeline : ISyncPipeline
 
         var serviceData = await _phases.ApiFetchPhase.Execute(config);
         var transactions = _phases.TransactionPhase.Execute(guideData, serviceData);
+
+        _phases.NoticePhase.Execute(transactions);
 
         if (settings.Preview)
         {
