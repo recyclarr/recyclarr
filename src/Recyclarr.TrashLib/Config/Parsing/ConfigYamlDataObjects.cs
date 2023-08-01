@@ -5,30 +5,35 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityScoreConfigYaml
 {
-    public string? Name { get; [UsedImplicitly] init; }
-    public int? Score { get; [UsedImplicitly] init; }
+    public string? Name { get; init; }
+    public int? Score { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatConfigYaml
 {
-    public IReadOnlyCollection<string>? TrashIds { get; [UsedImplicitly] init; }
-    public IReadOnlyCollection<QualityScoreConfigYaml>? QualityProfiles { get; [UsedImplicitly] init; }
+    public IReadOnlyCollection<string>? TrashIds { get; init; }
+    public IReadOnlyCollection<QualityScoreConfigYaml>? QualityProfiles { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeConfigYaml
 {
-    public string? Type { get; [UsedImplicitly] init; }
-    public decimal? PreferredRatio { get; [UsedImplicitly] init; }
+    public string? Type { get; init; }
+    public decimal? PreferredRatio { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileFormatUpgradeYaml
 {
     public int? UntilScore { get; init; }
     public string? UntilQuality { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileQualityConfigYaml
 {
     public string? Name { get; init; }
@@ -36,58 +41,64 @@ public record QualityProfileQualityConfigYaml
     public IReadOnlyCollection<string>? Qualities { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileConfigYaml
 {
-    public string? Name { get; [UsedImplicitly] init; }
+    public string? Name { get; init; }
     public QualityProfileFormatUpgradeYaml? UpgradesAllowed { get; init; }
     public int? MinFormatScore { get; init; }
-    public bool ResetUnmatchedScores { get; [UsedImplicitly] init; }
+    public bool ResetUnmatchedScores { get; init; }
     public QualitySortAlgorithm? QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ServiceConfigYaml
 {
-    public string? ApiKey { get; [UsedImplicitly] init; }
+    public string? ApiKey { get; init; }
 
     [SuppressMessage("Design", "CA1056:URI-like properties should not be strings")]
-    public string? BaseUrl { get; [UsedImplicitly] init; }
+    public string? BaseUrl { get; init; }
 
-    public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
-    public bool ReplaceExistingCustomFormats { get; [UsedImplicitly] init; }
+    public bool DeleteOldCustomFormats { get; init; }
+    public bool ReplaceExistingCustomFormats { get; init; }
 
-    public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; [UsedImplicitly] init; }
-    public QualitySizeConfigYaml? QualityDefinition { get; [UsedImplicitly] init; }
-    public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; [UsedImplicitly] init; }
+    public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; init; }
+    public QualitySizeConfigYaml? QualityDefinition { get; init; }
+    public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ReleaseProfileFilterConfigYaml
 {
-    public IReadOnlyCollection<string>? Include { get; [UsedImplicitly] init; }
-    public IReadOnlyCollection<string>? Exclude { get; [UsedImplicitly] init; }
+    public IReadOnlyCollection<string>? Include { get; init; }
+    public IReadOnlyCollection<string>? Exclude { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ReleaseProfileConfigYaml
 {
-    public IReadOnlyCollection<string>? TrashIds { get; [UsedImplicitly] init; }
-    public bool StrictNegativeScores { get; [UsedImplicitly] init; }
-    public IReadOnlyCollection<string>? Tags { get; [UsedImplicitly] init; }
-    public ReleaseProfileFilterConfigYaml? Filter { get; [UsedImplicitly] init; }
+    public IReadOnlyCollection<string>? TrashIds { get; init; }
+    public bool StrictNegativeScores { get; init; }
+    public IReadOnlyCollection<string>? Tags { get; init; }
+    public ReleaseProfileFilterConfigYaml? Filter { get; init; }
 }
 
 // This is usually empty (or the same as ServiceConfigYaml) on purpose.
 // If empty, it is kept around to make it clear that this one is dedicated to Radarr.
 public record RadarrConfigYaml : ServiceConfigYaml;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record SonarrConfigYaml : ServiceConfigYaml
 {
-    public IReadOnlyCollection<ReleaseProfileConfigYaml>? ReleaseProfiles { get; [UsedImplicitly] init; }
+    public IReadOnlyCollection<ReleaseProfileConfigYaml>? ReleaseProfiles { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record RootConfigYaml
 {
-    public IReadOnlyDictionary<string, RadarrConfigYaml>? Radarr { get; [UsedImplicitly] init; }
-    public IReadOnlyDictionary<string, SonarrConfigYaml>? Sonarr { get; [UsedImplicitly] init; }
+    public IReadOnlyDictionary<string, RadarrConfigYaml>? Radarr { get; init; }
+    public IReadOnlyDictionary<string, SonarrConfigYaml>? Sonarr { get; init; }
 
     // This exists for validation purposes only.
     [YamlIgnore]
