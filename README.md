@@ -13,24 +13,15 @@ Formerly named "Trash Updater".
 
 ## Features
 
-The following information can be synced to \*arr services from the TRaSH Guides. For a more detailed
-features list, see the [Features] page.
+Recyclarr supports Radarr, Sonarr v3, and Sonarr v4. The following information can be synced to
+these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
 
 [Features]: https://recyclarr.dev/wiki/features
 
-**Sonarr**:
-
-- Sync Release Profiles from the guide to Sonarr v3.
-- Supports Sonarr v4 Custom Formats.
-- Sync Quality Definitions (sizes) from the guide.
-- Add Tags to Release Profiles.
-- Assign scores from the guide to quality profiles.
-
-**Radarr**:
-
-- Sync Custom Formats from the guide.
-- Sync Quality Definitions from the guide.
-- Assign CF scores to quality profile (manual or use values from the guide).
+- Release Profiles, including tags
+- Quality Profiles, including qualities and quality groups
+- Custom Formats, including scores (from guide or manual)
+- Quality Definitions (file sizes)
 
 ### Read the Documentation
 
