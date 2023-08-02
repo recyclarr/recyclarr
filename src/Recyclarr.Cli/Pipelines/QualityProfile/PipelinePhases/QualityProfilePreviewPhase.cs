@@ -50,37 +50,29 @@ public class QualityProfilePreviewPhase
             .AddColumn("[bold]Current[/]")
             .AddColumn("[bold]New[/]");
 
-        static string YesNo(bool? val) => val is true ? "Yes" : "No";
-        static string Null<T>(T? val) => val is null ? "<unset>" : val.ToString() ?? "<invalid>";
+        var oldDto = profile.ProfileDto;
+        var newDto = profile.BuildUpdatedDto();
 
-        var dto = profile.ProfileDto;
-        var config = profile.ProfileConfig.Profile;
+        table.AddRow("Name", oldDto.Name, newDto.Name);
+        table.AddRow("Upgrades Allowed?", YesNo(oldDto.UpgradeAllowed), YesNo(newDto.UpgradeAllowed));
+        table.AddRow("Minimum Format Score", Null(oldDto.MinFormatScore), Null(newDto.MinFormatScore));
 
-        table.AddRow("Name", dto.Name, config.Name);
-        table.AddRow("Upgrades Allowed?", YesNo(dto.UpgradeAllowed), YesNo(config.UpgradeAllowed));
-
-        if (config.UpgradeUntilQuality is not null)
+        // ReSharper disable once InvertIf
+        if (newDto.UpgradeAllowed is true)
         {
             table.AddRow("Upgrade Until Quality",
-                Null(dto.Items.FindGroupById(dto.Cutoff)?.Name),
-                Null(config.UpgradeUntilQuality));
-        }
+                Null(oldDto.Items.FindCutoff(oldDto.Cutoff)),
+                Null(newDto.Items.FindCutoff(newDto.Cutoff)));
 
-        if (config.MinFormatScore is not null)
-        {
-            table.AddRow("Minimum Format Score",
-                Null(dto.MinFormatScore),
-                Null(config.MinFormatScore));
-        }
-
-        if (config.UpgradeUntilScore is not null)
-        {
             table.AddRow("Upgrade Until Score",
-                Null(dto.CutoffFormatScore),
-                Null(config.UpgradeUntilScore));
+                Null(oldDto.CutoffFormatScore),
+                Null(newDto.CutoffFormatScore));
         }
 
         return table;
+
+        static string YesNo(bool? val) => val is true ? "Yes" : "No";
+        static string Null<T>(T? val) => val is null ? "<unset>" : val.ToString() ?? "<invalid>";
     }
 
     private static IRenderable SetupQualityItemTable(UpdatedQualityProfile profile)

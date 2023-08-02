@@ -37,25 +37,20 @@ public class QualityProfileStatCalculator
 
     private void ProfileUpdates(ProfileWithStats stats, UpdatedQualityProfile profile)
     {
-        var dto = profile.ProfileDto;
-        var config = profile.ProfileConfig.Profile;
+        var oldDto = profile.ProfileDto;
+        var newDto = profile.BuildUpdatedDto();
+
+        Log("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
+        Log("Cutoff", oldDto.Items.FindCutoff(oldDto.Cutoff), newDto.Items.FindCutoff(newDto.Cutoff));
+        Log("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
+        Log("Minimum Score", oldDto.MinFormatScore, newDto.MinFormatScore);
+        return;
 
         void Log<T>(string msg, T oldValue, T newValue)
         {
             _log.Debug("{Msg}: {Old} -> {New}", msg, oldValue, newValue);
             stats.ProfileChanged |= !EqualityComparer<T>.Default.Equals(oldValue, newValue);
         }
-
-        var upgradeAllowed = config.UpgradeAllowed is not null;
-        Log("Upgrade Allowed", dto.UpgradeAllowed, upgradeAllowed);
-
-        if (upgradeAllowed)
-        {
-            Log("Cutoff", dto.Items.FindCutoff(dto.Cutoff), config.UpgradeUntilQuality);
-            Log("Cutoff Score", dto.CutoffFormatScore, config.UpgradeUntilScore);
-        }
-
-        Log("Minimum Score", dto.MinFormatScore, config.MinFormatScore);
     }
 
     private static void QualityUpdates(ProfileWithStats stats, UpdatedQualityProfile profile)
