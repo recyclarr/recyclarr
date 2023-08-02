@@ -37,7 +37,7 @@ public record UpdatedQualityProfile
 
         // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set to `false`.
         // Because of this, we cannot set cutoff to null. We pick the first available if the user didn't specify one.
-        var cutoff = config.UpgradeAllowed is true
+        var cutoff = config.UpgradeAllowed
             ? UpdatedQualities.Items.FindCutoff(config.UpgradeUntilQuality)
             : UpdatedQualities.Items.First().Id;
 
