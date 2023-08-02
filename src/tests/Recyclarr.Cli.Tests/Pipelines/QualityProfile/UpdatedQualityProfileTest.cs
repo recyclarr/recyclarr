@@ -57,14 +57,7 @@ public class UpdatedQualityProfileTest
                 MinFormatScore = 100,
                 CutoffFormatScore = 200,
                 UpgradeAllowed = false,
-                Cutoff = 1,
-                Items = new List<ProfileItemDto>
-                {
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(3, "Quality Item 3", true,
-                        NewQp.QualityDto(4, "Quality Item 4", true))
-                }
+                Cutoff = 1
             },
             ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
             {
@@ -73,6 +66,16 @@ public class UpdatedQualityProfileTest
                 UpgradeUntilScore = 220,
                 UpgradeUntilQuality = "Quality Item 3"
             }),
+            UpdatedQualities = new UpdatedQualities
+            {
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(1, "Quality Item 1", true),
+                    NewQp.QualityDto(2, "Quality Item 2", true),
+                    NewQp.GroupDto(3, "Quality Item 3", true,
+                        NewQp.QualityDto(4, "Quality Item 4", true))
+                }
+            },
             UpdateReason = QualityProfileUpdateReason.New
         };
 
@@ -89,10 +92,7 @@ public class UpdatedQualityProfileTest
             CutoffFormatScore = 220,
             UpgradeAllowed = true,
             Cutoff = 3,
-
-            // Since we didn't process quality items, the assignment in BuildUpdatedDto() will not change the Items
-            // collection.
-            Items = profile.ProfileDto.Items
+            Items = profile.UpdatedQualities.Items
         });
     }
 
@@ -101,14 +101,15 @@ public class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            ProfileDto = new QualityProfileDto {Name = ""},
+            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig {Name = "config_name"}),
+            UpdatedQualities = new UpdatedQualities
             {
-                Name = ""
+                Items = new[]
+                {
+                    new ProfileItemDto()
+                }
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
-            {
-                Name = "config_name"
-            }),
             UpdateReason = QualityProfileUpdateReason.New
         };
 
