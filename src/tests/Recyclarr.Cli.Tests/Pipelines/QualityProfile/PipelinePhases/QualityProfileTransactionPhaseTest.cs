@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.TestLibrary;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
@@ -15,11 +16,11 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = new[]
         {
-            NewQp.Processed("invalid_profile_name", ("id1", 1, 100)) with
+            NewQp.Processed("invalid_profile_name") with
             {
                 ShouldCreate = false
             },
-            NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
+            NewQp.Processed("profile1")
         };
 
         var dtos = new[]
@@ -32,28 +33,34 @@ public class QualityProfileTransactionPhaseTest
         var result = sut.Execute(guideData, serviceData);
 
         result.Should().BeEquivalentTo(new QualityProfileTransactionData
+        {
+            NonExistentProfiles = new[] {"invalid_profile_name"},
+            UpdatedProfiles =
             {
-                NonExistentProfiles = new[] {"invalid_profile_name"},
-                UpdatedProfiles =
+                new UpdatedQualityProfile
                 {
-                    new UpdatedQualityProfile
-                    {
-                        ProfileConfig = guideData[1],
-                        ProfileDto = dtos[0],
-                        UpdateReason = QualityProfileUpdateReason.Changed
-                    }
+                    ProfileConfig = guideData[1],
+                    ProfileDto = dtos[0],
+                    UpdateReason = QualityProfileUpdateReason.Changed
                 }
-            },
-            o => o.Excluding(x => x.Name.Contains(nameof(UpdatedQualityProfile.UpdatedScores))));
+            }
+        });
     }
 
     [Test, AutoMockData]
     public void New_profiles(
         QualityProfileTransactionPhase sut)
     {
-        var guideData = new[]
+        var configData = new[]
         {
-            NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
+            new ProcessedQualityProfileData(new QualityProfileConfig
+            {
+                Name = "profile1",
+                Qualities = new[]
+                {
+                    new QualityProfileQualityConfig {Name = "quality1", Enabled = true}
+                }
+            })
         };
 
         var dtos = new[]
@@ -61,23 +68,46 @@ public class QualityProfileTransactionPhaseTest
             new QualityProfileDto {Name = "irrelevant_profile"}
         };
 
-        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto())
+        {
+            Schema = new QualityProfileDto
+            {
+                Items = new[]
+                {
+                    new ProfileItemDto {Quality = new ProfileItemQualityDto {Name = "quality1"}}
+                }
+            }
+        };
 
-        var result = sut.Execute(guideData, serviceData);
+        var result = sut.Execute(configData, serviceData);
 
         result.Should().BeEquivalentTo(new QualityProfileTransactionData
+        {
+            UpdatedProfiles =
             {
-                UpdatedProfiles =
+                new UpdatedQualityProfile
                 {
-                    new UpdatedQualityProfile
+                    ProfileConfig = configData[0],
+                    ProfileDto = serviceData.Schema,
+                    UpdateReason = QualityProfileUpdateReason.New,
+                    UpdatedQualities = new UpdatedQualities
                     {
-                        ProfileConfig = guideData[0],
-                        ProfileDto = serviceData.Schema,
-                        UpdateReason = QualityProfileUpdateReason.New
+                        NumWantedItems = 1,
+                        Items = new[]
+                        {
+                            new ProfileItemDto
+                            {
+                                Allowed = true,
+                                Quality = new ProfileItemQualityDto
+                                {
+                                    Name = "quality1"
+                                }
+                            }
+                        }
                     }
                 }
-            },
-            o => o.Excluding(x => x.Name.Contains(nameof(UpdatedQualityProfile.UpdatedScores))));
+            }
+        });
     }
 
     [Test, AutoMockData]

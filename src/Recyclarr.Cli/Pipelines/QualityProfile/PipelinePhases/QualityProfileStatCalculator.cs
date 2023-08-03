@@ -27,19 +27,18 @@ public class QualityProfileStatCalculator
         _log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
 
         var stats = new ProfileWithStats {Profile = profile};
+        var oldDto = profile.ProfileDto;
+        var newDto = profile.BuildUpdatedDto();
 
-        ProfileUpdates(stats, profile);
-        QualityUpdates(stats, profile);
+        ProfileUpdates(stats, oldDto, newDto);
+        QualityUpdates(stats, oldDto, newDto);
         ScoreUpdates(stats, profile.ProfileDto, profile.UpdatedScores);
 
         return stats;
     }
 
-    private void ProfileUpdates(ProfileWithStats stats, UpdatedQualityProfile profile)
+    private void ProfileUpdates(ProfileWithStats stats, QualityProfileDto newDto, QualityProfileDto oldDto)
     {
-        var oldDto = profile.ProfileDto;
-        var newDto = profile.BuildUpdatedDto();
-
         Log("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
         Log("Cutoff", oldDto.Items.FindCutoff(oldDto.Cutoff), newDto.Items.FindCutoff(newDto.Cutoff));
         Log("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
@@ -53,10 +52,10 @@ public class QualityProfileStatCalculator
         }
     }
 
-    private static void QualityUpdates(ProfileWithStats stats, UpdatedQualityProfile profile)
+    private static void QualityUpdates(ProfileWithStats stats, QualityProfileDto newDto, QualityProfileDto oldDto)
     {
-        var dtoQualities = JToken.FromObject(profile.ProfileDto.Items);
-        var updatedQualities = JToken.FromObject(profile.UpdatedQualities.Items);
+        var dtoQualities = JToken.FromObject(newDto.Items);
+        var updatedQualities = JToken.FromObject(oldDto.Items);
         stats.QualitiesChanged = !JToken.DeepEquals(dtoQualities, updatedQualities);
     }
 

@@ -139,6 +139,28 @@ public class ConfigYamlDataObjectsValidationTest
     }
 
     [Test]
+    public void Quality_profile_qualities_must_have_at_least_one_enabled()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "My QP",
+            Qualities = new[]
+            {
+                new QualityProfileQualityConfigYaml {Name = "Quality 1", Enabled = false},
+                new QualityProfileQualityConfigYaml {Name = "Quality 2", Enabled = false}
+            }
+        };
+
+        var validator = new QualityProfileConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldHaveValidationErrorFor(x => x.Qualities);
+
+        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
+            $"For profile {data.Name}, at least one explicitly listed quality under 'qualities' must be enabled.");
+    }
+
+    [Test]
     public void Quality_profile_cutoff_quality_should_not_refer_to_disabled_qualities()
     {
         var data = new QualityProfileConfigYaml
@@ -146,15 +168,12 @@ public class ConfigYamlDataObjectsValidationTest
             Name = "My QP",
             UpgradesAllowed = new QualityProfileFormatUpgradeYaml
             {
-                UntilQuality = "Test Quality"
+                UntilQuality = "Disabled Quality"
             },
             Qualities = new[]
             {
-                new QualityProfileQualityConfigYaml
-                {
-                    Name = "Test Quality",
-                    Enabled = false
-                }
+                new QualityProfileQualityConfigYaml {Name = "Enabled Quality"},
+                new QualityProfileQualityConfigYaml {Name = "Disabled Quality", Enabled = false}
             }
         };
 

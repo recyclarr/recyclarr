@@ -19,10 +19,10 @@ public record QualityProfileDto
 {
     private readonly bool? _upgradeAllowed;
     private readonly int? _minFormatScore;
-    private readonly int? _cutoff;
+    private int? _cutoff;
     private readonly int? _cutoffFormatScore;
     private readonly string _name = "";
-    private readonly IReadOnlyCollection<ProfileItemDto> _items = new List<ProfileItemDto>();
+    private IReadOnlyCollection<ProfileItemDto> _items = new List<ProfileItemDto>();
 
     public int? Id { get; set; }
 
@@ -53,7 +53,7 @@ public record QualityProfileDto
     public int? Cutoff
     {
         get => _cutoff;
-        init => DtoUtil.SetIfNotNull(ref _cutoff, value);
+        set => DtoUtil.SetIfNotNull(ref _cutoff, value);
     }
 
     public int? CutoffFormatScore
@@ -67,7 +67,7 @@ public record QualityProfileDto
     public IReadOnlyCollection<ProfileItemDto> Items
     {
         get => _items;
-        init
+        set
         {
             if (value.Count > 0)
             {

@@ -59,6 +59,14 @@ public static class QualityProfileExtensions
             .FirstOrDefault(x => x.Quality!.Name.EqualsIgnoreCase(name));
     }
 
+    private static IEnumerable<(string? Name, int? Id)> GetEligibleCutoffs(IEnumerable<ProfileItemDto> items)
+    {
+        return items
+            .Where(x => x.Allowed is true)
+            .Select(x => x.Quality is null ? (x.Name, x.Id) : (x.Quality.Name, x.Quality.Id))
+            .Where(x => x.Name is not null);
+    }
+
     public static int? FindCutoff(this IEnumerable<ProfileItemDto> items, string? name)
     {
         if (name is null)
@@ -66,9 +74,7 @@ public static class QualityProfileExtensions
             return null;
         }
 
-        var result = items
-            .Select(x => x.Quality is null ? (x.Name, x.Id) : (x.Quality.Name, x.Quality.Id))
-            .Where(x => x.Name is not null)
+        var result = GetEligibleCutoffs(items)
             .FirstOrDefault(x => x.Name.EqualsIgnoreCase(name));
 
         return result.Id;
@@ -81,9 +87,7 @@ public static class QualityProfileExtensions
             return null;
         }
 
-        var result = items
-            .Select(x => x.Quality is null ? (x.Name, x.Id) : (x.Quality.Name, x.Quality.Id))
-            .Where(x => x.Name is not null)
+        var result = GetEligibleCutoffs(items)
             .FirstOrDefault(x => x.Id == id);
 
         return result.Name;

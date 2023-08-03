@@ -7,6 +7,7 @@ public record UpdatedQualities
 {
     public ICollection<string> InvalidQualityNames { get; init; } = new List<string>();
     public IReadOnlyCollection<ProfileItemDto> Items { get; init; } = new List<ProfileItemDto>();
+    public int NumWantedItems { get; init; }
 }
 
 public record UpdatedQualityProfile
@@ -34,22 +35,29 @@ public record UpdatedQualityProfile
     public QualityProfileDto BuildUpdatedDto()
     {
         var config = ProfileConfig.Profile;
-
-        // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set to `false`.
-        // Because of this, we cannot set cutoff to null. We pick the first available if the user didn't specify one.
-        var cutoff = config.UpgradeAllowed
-            ? UpdatedQualities.Items.FindCutoff(config.UpgradeUntilQuality)
-            : UpdatedQualities.Items.First().Id;
-
-        return ProfileDto with
+        var newDto = ProfileDto with
         {
             Name = config.Name, // Must keep this for NEW profile syncing. It will only assign if src is not null.
             UpgradeAllowed = config.UpgradeAllowed,
             MinFormatScore = config.MinFormatScore,
-            Cutoff = cutoff,
             CutoffFormatScore = config.UpgradeUntilScore,
-            FormatItems = UpdatedScores.Select(x => x.Dto with {Score = x.NewScore}).ToList(),
-            Items = UpdatedQualities.Items
+            FormatItems = UpdatedScores.Select(x => x.Dto with {Score = x.NewScore}).ToList()
         };
+
+        if (UpdatedQualities.NumWantedItems > 0)
+        {
+            newDto.Items = UpdatedQualities.Items;
+        }
+
+        // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set to `false`.
+        // Because of this, we cannot set cutoff to null. We pick the first available if the user didn't specify one.
+        //
+        // Also: It's important that we assign the cutoff *after* we set Items. Because we pull from a different list of
+        // items depending on if the `qualities` property is set in config.
+        newDto.Cutoff = config.UpgradeAllowed
+            ? newDto.Items.FindCutoff(config.UpgradeUntilQuality)
+            : newDto.Items.FirstOrDefault()?.Id;
+
+        return newDto;
     }
 }

@@ -83,6 +83,7 @@ public class QualityProfileFormatUpgradeYamlValidator : AbstractValidator<Qualit
     public QualityProfileFormatUpgradeYamlValidator()
     {
         RuleFor(x => x.UntilQuality)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("'until_quality' is required when allowing profile upgrades");
     }
@@ -106,18 +107,18 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
             .Must((o, x) => !x!
                 .Where(y => y.Qualities is not null)
                 .SelectMany(y => y.Qualities!)
-                .Contains(o.UpgradesAllowed!.UntilQuality))
+                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
             .WithMessage(o =>
                 $"For profile {o.Name}, 'until_quality' must not refer to qualities contained within groups")
             .Must((o, x) => !x!
                 .Where(y => y is {Enabled: false, Name: not null})
                 .Select(y => y.Name!)
-                .Contains(o.UpgradesAllowed!.UntilQuality))
+                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
             .WithMessage(o =>
                 $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities")
             .Must((o, x) => x!
                 .Select(y => y.Name)
-                .Contains(o.UpgradesAllowed!.UntilQuality))
+                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
             .WithMessage(o =>
                 $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
                 $"which is '{o.UpgradesAllowed!.UntilQuality}'")
@@ -125,6 +126,9 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
 
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)
+            .Must(x => x!.Any(y => y.Enabled is true or null))
+            .WithMessage(x =>
+                $"For profile {x.Name}, at least one explicitly listed quality under 'qualities' must be enabled.")
             .When(x => x is {Qualities.Count: > 0});
     }
 

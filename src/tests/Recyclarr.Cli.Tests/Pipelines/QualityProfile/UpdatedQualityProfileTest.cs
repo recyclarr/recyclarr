@@ -46,7 +46,7 @@ public class UpdatedQualityProfileTest
     }
 
     [Test]
-    public void Dto_updated_from_config()
+    public void Dto_updated_from_config_with_qualities()
     {
         var profile = new UpdatedQualityProfile
         {
@@ -68,6 +68,7 @@ public class UpdatedQualityProfileTest
             }),
             UpdatedQualities = new UpdatedQualities
             {
+                NumWantedItems = 1,
                 Items = new List<ProfileItemDto>
                 {
                     NewQp.QualityDto(1, "Quality Item 1", true),
@@ -94,6 +95,39 @@ public class UpdatedQualityProfileTest
             Cutoff = 3,
             Items = profile.UpdatedQualities.Items
         });
+    }
+
+    [Test]
+    public void Dto_quality_items_updated_from_config_with_no_qualities()
+    {
+        var profile = new UpdatedQualityProfile
+        {
+            ProfileDto = new QualityProfileDto
+            {
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(8, "Quality Item 8", true),
+                    NewQp.QualityDto(9, "Quality Item 9", true)
+                }
+            },
+            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig()),
+            UpdatedQualities = new UpdatedQualities
+            {
+                NumWantedItems = 0,
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(1, "Quality Item 1", true),
+                    NewQp.QualityDto(2, "Quality Item 2", true),
+                    NewQp.GroupDto(3, "Quality Item 3", true,
+                        NewQp.QualityDto(4, "Quality Item 4", true))
+                }
+            },
+            UpdateReason = QualityProfileUpdateReason.New
+        };
+
+        var result = profile.BuildUpdatedDto();
+
+        result.Items.Should().BeEquivalentTo(profile.ProfileDto.Items);
     }
 
     [Test]

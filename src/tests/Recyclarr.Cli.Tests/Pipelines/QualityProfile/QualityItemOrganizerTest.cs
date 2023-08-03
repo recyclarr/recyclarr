@@ -57,6 +57,7 @@ public class QualityItemOrganizerTest
         result.Should().BeEquivalentTo(new UpdatedQualities
         {
             InvalidQualityNames = new[] {"nonexistent1"},
+            NumWantedItems = 7,
             Items = new[]
             {
                 // ------ IN CONFIG ------
@@ -92,6 +93,7 @@ public class QualityItemOrganizerTest
         result.Should().BeEquivalentTo(new UpdatedQualities
         {
             InvalidQualityNames = new[] {"nonexistent1"},
+            NumWantedItems = 7,
             Items = new[]
             {
                 // ------ NOT IN CONFIG ------

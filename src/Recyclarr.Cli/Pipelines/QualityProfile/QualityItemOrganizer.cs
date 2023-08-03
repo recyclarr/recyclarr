@@ -19,6 +19,7 @@ public class QualityItemOrganizer
         return new UpdatedQualities
         {
             InvalidQualityNames = _invalidItemNames,
+            NumWantedItems = wanted.Count,
             Items = combined
         };
     }
@@ -31,18 +32,6 @@ public class QualityItemOrganizer
 
         foreach (var configQuality in configQualities)
         {
-            void AddQualityFromDto(ICollection<ProfileItemDto> items, string name)
-            {
-                var dtoItem = dtoItems.FindQualityByName(name);
-                if (dtoItem is null)
-                {
-                    _invalidItemNames.Add(name);
-                    return;
-                }
-
-                items.Add(dtoItem with {Allowed = configQuality.Enabled});
-            }
-
             // If the nested qualities list is NOT empty, then this is considered a quality group.
             if (configQuality.Qualities.IsNotEmpty())
             {
@@ -68,6 +57,19 @@ public class QualityItemOrganizer
             }
 
             AddQualityFromDto(updatedItems, configQuality.Name);
+            continue;
+
+            void AddQualityFromDto(ICollection<ProfileItemDto> items, string name)
+            {
+                var dtoItem = dtoItems.FindQualityByName(name);
+                if (dtoItem is null)
+                {
+                    _invalidItemNames.Add(name);
+                    return;
+                }
+
+                items.Add(dtoItem with {Allowed = configQuality.Enabled});
+            }
         }
 
         return updatedItems;
