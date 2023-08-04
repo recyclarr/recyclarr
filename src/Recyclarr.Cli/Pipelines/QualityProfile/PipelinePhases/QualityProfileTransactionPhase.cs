@@ -74,16 +74,16 @@ public class QualityProfileTransactionPhase
                 continue;
             }
 
+            var organizer = new QualityItemOrganizer();
             var newDto = dto ?? serviceData.Schema;
-            var updatedProfile = new UpdatedQualityProfile
+
+            transactions.UpdatedProfiles.Add(new UpdatedQualityProfile
             {
                 ProfileConfig = config,
                 ProfileDto = newDto,
                 UpdateReason = dto is null ? QualityProfileUpdateReason.New : QualityProfileUpdateReason.Changed,
-                UpdatedQualities = newDto.BuildUpdatedQualityItems(config.Profile)
-            };
-
-            transactions.UpdatedProfiles.Add(updatedProfile);
+                UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile)
+            });
         }
     }
 

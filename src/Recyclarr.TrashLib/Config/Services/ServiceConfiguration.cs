@@ -62,7 +62,7 @@ public enum QualitySortAlgorithm
 public record QualityProfileConfig
 {
     public string Name { get; init; } = "";
-    public bool UpgradeAllowed => UpgradeUntilQuality is not null;
+    public bool? UpgradeAllowed { get; init; }
     public string? UpgradeUntilQuality { get; init; }
     public int? UpgradeUntilScore { get; init; }
     public int? MinFormatScore { get; init; }

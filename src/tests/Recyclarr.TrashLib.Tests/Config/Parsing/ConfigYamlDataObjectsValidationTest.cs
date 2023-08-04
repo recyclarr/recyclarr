@@ -8,6 +8,44 @@ namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 public class ConfigYamlDataObjectsValidationTest
 {
     [Test]
+    public void Quality_profile_format_upgrade_allowed_required()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "My QP",
+            Upgrade = new QualityProfileFormatUpgradeYaml()
+        };
+
+        var validator = new QualityProfileFormatUpgradeYamlValidator(data);
+        var result = validator.TestValidate(data.Upgrade);
+
+        result.ShouldHaveValidationErrorFor(x => x.Allowed).WithErrorMessage(
+            $"For profile {data.Name}, 'allowed' under 'upgrade' is required. " +
+            $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block.");
+    }
+
+    [Test]
+    public void Quality_profile_format_upgrade_until_quality_required()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "My QP",
+            Upgrade = new QualityProfileFormatUpgradeYaml
+            {
+                Allowed = true
+            },
+            Qualities = new List<QualityProfileQualityConfigYaml>()
+        };
+
+        var validator = new QualityProfileFormatUpgradeYamlValidator(data);
+        var result = validator.TestValidate(data.Upgrade);
+
+        result.ShouldHaveValidationErrorFor(x => x.UntilQuality).WithErrorMessage(
+            $"For profile {data.Name}, 'until_quality' is required when 'allowed' is set to 'true' and " +
+            $"an explicit 'qualities' list is provided.");
+    }
+
+    [Test]
     public void Quality_profile_name_required()
     {
         var data = new QualityProfileConfigYaml();
@@ -19,27 +57,14 @@ public class ConfigYamlDataObjectsValidationTest
     }
 
     [Test]
-    public void Quality_profile_until_quality_required()
-    {
-        var data = new QualityProfileConfigYaml
-        {
-            UpgradesAllowed = new QualityProfileFormatUpgradeYaml()
-        };
-
-        var validator = new QualityProfileConfigYamlValidator();
-        var result = validator.TestValidate(data);
-
-        result.ShouldHaveValidationErrorFor(x => x.UpgradesAllowed!.UntilQuality);
-    }
-
-    [Test]
     public void Quality_profile_qualities_must_have_cutoff_quality()
     {
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            UpgradesAllowed = new QualityProfileFormatUpgradeYaml
+            Upgrade = new QualityProfileFormatUpgradeYaml
             {
+                Allowed = true,
                 UntilQuality = "Test Quality"
             },
             Qualities = new[]
@@ -55,23 +80,7 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
             $"For profile {data.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
-            $"which is '{data.UpgradesAllowed!.UntilQuality}'");
-    }
-
-    [Test]
-    public void Quality_profile_qualities_cutoff_required()
-    {
-        var data = new QualityProfileConfigYaml
-        {
-            Name = "My QP",
-            UpgradesAllowed = new QualityProfileFormatUpgradeYaml()
-        };
-
-        var validator = new QualityProfileConfigYamlValidator();
-        var result = validator.TestValidate(data);
-
-        result.ShouldHaveValidationErrorFor(x => x.UpgradesAllowed!.UntilQuality)
-            .WithErrorMessage("'until_quality' is required when allowing profile upgrades");
+            $"which is '{data.Upgrade!.UntilQuality}'");
     }
 
     [Test]
@@ -80,8 +89,9 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            UpgradesAllowed = new QualityProfileFormatUpgradeYaml
+            Upgrade = new QualityProfileFormatUpgradeYaml
             {
+                Allowed = true,
                 UntilQuality = "Child Quality"
             },
             Qualities = new[]
@@ -166,8 +176,9 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            UpgradesAllowed = new QualityProfileFormatUpgradeYaml
+            Upgrade = new QualityProfileFormatUpgradeYaml
             {
+                Allowed = true,
                 UntilQuality = "Disabled Quality"
             },
             Qualities = new[]

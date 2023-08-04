@@ -63,8 +63,8 @@ public class UpdatedQualityProfileTest
             {
                 Name = "config_name",
                 MinFormatScore = 110,
-                UpgradeUntilScore = 220,
-                UpgradeUntilQuality = "Quality Item 3"
+                UpgradeAllowed = true,
+                UpgradeUntilScore = 220
             }),
             UpdatedQualities = new UpdatedQualities
             {
@@ -92,9 +92,8 @@ public class UpdatedQualityProfileTest
             MinFormatScore = 110,
             CutoffFormatScore = 220,
             UpgradeAllowed = true,
-            Cutoff = 3,
             Items = profile.UpdatedQualities.Items
-        });
+        }, o => o.Excluding(x => x.Cutoff));
     }
 
     [Test]
@@ -150,5 +149,113 @@ public class UpdatedQualityProfileTest
         var dto = profile.BuildUpdatedDto();
 
         dto.Name.Should().Be("config_name");
+    }
+
+    [Test]
+    public void Cutoff_obtained_from_updated_qualities()
+    {
+        var profile = new UpdatedQualityProfile
+        {
+            ProfileDto = new QualityProfileDto
+            {
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(8, "Quality Item 8", true),
+                    NewQp.QualityDto(9, "Quality Item 9", true)
+                }
+            },
+            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            {
+                UpgradeUntilQuality = "Quality Item 2"
+            }),
+            UpdatedQualities = new UpdatedQualities
+            {
+                NumWantedItems = 1,
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(1, "Quality Item 1", true),
+                    NewQp.QualityDto(2, "Quality Item 2", true),
+                    NewQp.GroupDto(3, "Quality Item 3", true,
+                        NewQp.QualityDto(4, "Quality Item 4", true))
+                }
+            },
+            UpdateReason = QualityProfileUpdateReason.New
+        };
+
+        var dto = profile.BuildUpdatedDto();
+
+        dto.Cutoff.Should().Be(2);
+    }
+
+    [Test]
+    public void Cutoff_obtained_from_original_qualities()
+    {
+        var profile = new UpdatedQualityProfile
+        {
+            ProfileDto = new QualityProfileDto
+            {
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(8, "Quality Item 8", true),
+                    NewQp.QualityDto(9, "Quality Item 9", true)
+                }
+            },
+            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            {
+                UpgradeUntilQuality = "Quality Item 9"
+            }),
+            UpdatedQualities = new UpdatedQualities
+            {
+                NumWantedItems = 0, // zero forces cutoff search to fall back to original DTO items
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(1, "Quality Item 1", true),
+                    NewQp.QualityDto(2, "Quality Item 2", true),
+                    NewQp.GroupDto(3, "Quality Item 3", true,
+                        NewQp.QualityDto(4, "Quality Item 4", true))
+                }
+            },
+            UpdateReason = QualityProfileUpdateReason.New
+        };
+
+        var dto = profile.BuildUpdatedDto();
+
+        dto.Cutoff.Should().Be(9);
+    }
+
+    [Test]
+    public void Cutoff_fall_back_to_first()
+    {
+        var profile = new UpdatedQualityProfile
+        {
+            ProfileDto = new QualityProfileDto
+            {
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(8, "Quality Item 8", true),
+                    NewQp.QualityDto(9, "Quality Item 9", true)
+                }
+            },
+            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            {
+                // UpgradeUntilQuality = "Quality Item 9"
+            }),
+            UpdatedQualities = new UpdatedQualities
+            {
+                NumWantedItems = 1,
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(1, "Quality Item 1", true),
+                    NewQp.QualityDto(2, "Quality Item 2", true),
+                    NewQp.GroupDto(3, "Quality Item 3", true,
+                        NewQp.QualityDto(4, "Quality Item 4", true))
+                }
+            },
+            UpdateReason = QualityProfileUpdateReason.New
+        };
+
+        var dto = profile.BuildUpdatedDto();
+
+        dto.Cutoff.Should().Be(1);
     }
 }

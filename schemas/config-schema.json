@@ -116,11 +116,14 @@
             "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
             "default": false
           },
-          "upgrades_allowed": {
+          "upgrade": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["until_quality"],
+            "required": ["allowed"],
             "properties": {
+              "allowed": {
+                "type": "boolean"
+              },
               "until_quality": {
                 "type": "string"
               },

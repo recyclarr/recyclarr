@@ -17,10 +17,6 @@ public class ConfigAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterAssemblyTypes(ThisAssembly)
-            .AsClosedTypesOf(typeof(IValidator<>))
-            .As<IValidator>();
-
-        builder.RegisterAssemblyTypes(ThisAssembly)
             .AssignableTo<IYamlBehavior>()
             .As<IYamlBehavior>();
 
@@ -42,5 +38,8 @@ public class ConfigAutofacModule : Module
 
         // Config Post Processors
         builder.RegisterType<ImplicitUrlAndKeyPostProcessor>().As<IConfigPostProcessor>();
+
+        // Validators
+        builder.RegisterType<RootConfigYamlValidator>().As<IValidator>();
     }
 }

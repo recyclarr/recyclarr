@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -93,6 +92,11 @@ public static class QualityProfileExtensions
         return result.Name;
     }
 
+    public static int? FirstCutoffId(this IEnumerable<ProfileItemDto> items)
+    {
+        return GetEligibleCutoffs(items).FirstOrDefault().Id;
+    }
+
     public static int NewItemId(this IEnumerable<ProfileItemDto> items)
     {
         // This implementation is based on how the Radarr frontend calculates IDs.
@@ -106,14 +110,6 @@ public static class QualityProfileExtensions
             .Max();
 
         return Math.Max(1000, maxExisting) + 1;
-    }
-
-    public static UpdatedQualities BuildUpdatedQualityItems(
-        this QualityProfileDto dto,
-        QualityProfileConfig configProfile)
-    {
-        var organizer = new QualityItemOrganizer();
-        return organizer.OrganizeItems(dto, configProfile);
     }
 
     public static QualityProfileDto ReverseItems(this QualityProfileDto dto)

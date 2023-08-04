@@ -54,9 +54,7 @@ public record UpdatedQualityProfile
         //
         // Also: It's important that we assign the cutoff *after* we set Items. Because we pull from a different list of
         // items depending on if the `qualities` property is set in config.
-        newDto.Cutoff = config.UpgradeAllowed
-            ? newDto.Items.FindCutoff(config.UpgradeUntilQuality)
-            : newDto.Items.FirstOrDefault()?.Id;
+        newDto.Cutoff = newDto.Items.FindCutoff(config.UpgradeUntilQuality) ?? newDto.Items.FirstCutoffId();
 
         return newDto;
     }

@@ -1,11 +1,9 @@
 using FluentValidation;
-using JetBrains.Annotations;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
-[UsedImplicitly]
 public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 {
     public ServiceConfigYamlValidator()
@@ -36,7 +34,6 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
     }
 }
 
-[UsedImplicitly]
 public class CustomFormatConfigYamlValidator : AbstractValidator<CustomFormatConfigYaml>
 {
     public CustomFormatConfigYamlValidator()
@@ -53,7 +50,6 @@ public class CustomFormatConfigYamlValidator : AbstractValidator<CustomFormatCon
     }
 }
 
-[UsedImplicitly]
 public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreConfigYaml>
 {
     public QualityScoreConfigYamlValidator()
@@ -63,7 +59,6 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
     }
 }
 
-[UsedImplicitly]
 public class QualitySizeConfigYamlValidator : AbstractValidator<QualitySizeConfigYaml>
 {
     public QualitySizeConfigYamlValidator()
@@ -77,52 +72,39 @@ public class QualitySizeConfigYamlValidator : AbstractValidator<QualitySizeConfi
     }
 }
 
-[UsedImplicitly]
 public class QualityProfileFormatUpgradeYamlValidator : AbstractValidator<QualityProfileFormatUpgradeYaml>
 {
-    public QualityProfileFormatUpgradeYamlValidator()
+    public QualityProfileFormatUpgradeYamlValidator(QualityProfileConfigYaml config)
     {
+        RuleFor(x => x.Allowed)
+            .NotNull()
+            .WithMessage(
+                $"For profile {config.Name}, 'allowed' under 'upgrade' is required. " +
+                $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block.");
+
         RuleFor(x => x.UntilQuality)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("'until_quality' is required when allowing profile upgrades");
+            .NotNull()
+            .When(x => x.Allowed is true && config.Qualities is not null)
+            .WithMessage(
+                $"For profile {config.Name}, 'until_quality' is required when 'allowed' is set to 'true' and " +
+                $"an explicit 'qualities' list is provided.");
     }
 }
 
-[UsedImplicitly]
 public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfileConfigYaml>
 {
     public QualityProfileConfigYamlValidator()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+        RuleLevelCascadeMode = CascadeMode.Stop;
+
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage(x => $"For profile {x.Name}, 'name' is required for root-level 'quality_profiles' elements");
 
-        RuleFor(x => x.UpgradesAllowed)
-            .SetNonNullableValidator(new QualityProfileFormatUpgradeYamlValidator());
-
-        RuleFor(x => x.Qualities)
-            .Cascade(CascadeMode.Stop)
-            .Must((o, x) => !x!
-                .Where(y => y.Qualities is not null)
-                .SelectMany(y => y.Qualities!)
-                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
-            .WithMessage(o =>
-                $"For profile {o.Name}, 'until_quality' must not refer to qualities contained within groups")
-            .Must((o, x) => !x!
-                .Where(y => y is {Enabled: false, Name: not null})
-                .Select(y => y.Name!)
-                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
-            .WithMessage(o =>
-                $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities")
-            .Must((o, x) => x!
-                .Select(y => y.Name)
-                .Contains(o.UpgradesAllowed!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
-            .WithMessage(o =>
-                $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
-                $"which is '{o.UpgradesAllowed!.UntilQuality}'")
-            .When(x => x is {UpgradesAllowed: not null, Qualities.Count: > 0});
+        RuleFor(x => x.Upgrade)
+            .SetNonNullableValidator(x => new QualityProfileFormatUpgradeYamlValidator(x));
 
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)
@@ -130,6 +112,27 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
             .WithMessage(x =>
                 $"For profile {x.Name}, at least one explicitly listed quality under 'qualities' must be enabled.")
             .When(x => x is {Qualities.Count: > 0});
+
+        RuleFor(x => x.Qualities)
+            .Must((o, x) => !x!
+                .Where(y => y.Qualities is not null)
+                .SelectMany(y => y.Qualities!)
+                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'until_quality' must not refer to qualities contained within groups")
+            .Must((o, x) => !x!
+                .Where(y => y is {Enabled: false, Name: not null})
+                .Select(y => y.Name!)
+                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities")
+            .Must((o, x) => x!
+                .Select(y => y.Name)
+                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
+            .WithMessage(o =>
+                $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
+                $"which is '{o.Upgrade!.UntilQuality}'")
+            .When(x => x is {Upgrade.Allowed: not false, Qualities.Count: > 0});
     }
 
     private static void ValidateHaveNoDuplicates(
@@ -153,7 +156,6 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
     }
 }
 
-[UsedImplicitly]
 public class RadarrConfigYamlValidator : CustomValidator<RadarrConfigYaml>
 {
     public RadarrConfigYamlValidator()
@@ -162,7 +164,6 @@ public class RadarrConfigYamlValidator : CustomValidator<RadarrConfigYaml>
     }
 }
 
-[UsedImplicitly]
 public class SonarrConfigYamlValidator : CustomValidator<SonarrConfigYaml>
 {
     public SonarrConfigYamlValidator()
@@ -177,7 +178,6 @@ public class SonarrConfigYamlValidator : CustomValidator<SonarrConfigYaml>
     }
 }
 
-[UsedImplicitly]
 public class ReleaseProfileConfigYamlValidator : CustomValidator<ReleaseProfileConfigYaml>
 {
     public ReleaseProfileConfigYamlValidator()
@@ -190,7 +190,6 @@ public class ReleaseProfileConfigYamlValidator : CustomValidator<ReleaseProfileC
     }
 }
 
-[UsedImplicitly]
 public class ReleaseProfileFilterConfigYamlValidator : CustomValidator<ReleaseProfileFilterConfigYaml>
 {
     public ReleaseProfileFilterConfigYamlValidator()
@@ -212,7 +211,6 @@ public class ReleaseProfileFilterConfigYamlValidator : CustomValidator<ReleasePr
     }
 }
 
-[UsedImplicitly]
 public class RootConfigYamlValidator : CustomValidator<RootConfigYaml>
 {
     public RootConfigYamlValidator()

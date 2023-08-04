@@ -18,8 +18,9 @@ public class ConfigYamlMapperProfile : Profile
             .ForMember(x => x.Enabled, o => o.NullSubstitute(true));
 
         CreateMap<QualityProfileConfigYaml, QualityProfileConfig>()
-            .ForMember(x => x.UpgradeUntilQuality, o => o.MapFrom(x => x.UpgradesAllowed!.UntilQuality))
-            .ForMember(x => x.UpgradeUntilScore, o => o.MapFrom(x => x.UpgradesAllowed!.UntilScore))
+            .ForMember(x => x.UpgradeAllowed, o => o.MapFrom(x => x.Upgrade!.Allowed))
+            .ForMember(x => x.UpgradeUntilQuality, o => o.MapFrom(x => x.Upgrade!.UntilQuality))
+            .ForMember(x => x.UpgradeUntilScore, o => o.MapFrom(x => x.Upgrade!.UntilScore))
             .ForMember(x => x.QualitySort, o => o.NullSubstitute(QualitySortAlgorithm.Top));
 
         CreateMap<ServiceConfigYaml, ServiceConfiguration>()

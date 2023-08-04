@@ -29,6 +29,7 @@ public record QualitySizeConfigYaml
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileFormatUpgradeYaml
 {
+    public bool? Allowed { get; init; }
     public int? UntilScore { get; init; }
     public string? UntilQuality { get; init; }
 }
@@ -45,7 +46,7 @@ public record QualityProfileQualityConfigYaml
 public record QualityProfileConfigYaml
 {
     public string? Name { get; init; }
-    public QualityProfileFormatUpgradeYaml? UpgradesAllowed { get; init; }
+    public QualityProfileFormatUpgradeYaml? Upgrade { get; init; }
     public int? MinFormatScore { get; init; }
     public bool ResetUnmatchedScores { get; init; }
     public QualitySortAlgorithm? QualitySort { get; init; }

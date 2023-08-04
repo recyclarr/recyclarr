@@ -47,7 +47,7 @@ public class SonarrCapabilityEnforcer
             if (config.QualityProfiles.Any(x => x.UpgradeUntilScore is not null))
             {
                 throw new ServiceIncompatibilityException(
-                    "`until_score` under `upgrades_allowed` is not supported by Sonarr v3. " +
+                    "`until_score` under `upgrade` is not supported by Sonarr v3. " +
                     "Remove the until_score property or use Sonarr v4.");
             }
 
