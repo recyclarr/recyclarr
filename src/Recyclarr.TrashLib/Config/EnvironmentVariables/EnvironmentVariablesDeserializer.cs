@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -5,6 +6,7 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.TrashLib.Config.EnvironmentVariables;
 
+[SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
 public record EnvironmentVariableTag;
 
 public class EnvironmentVariablesDeserializer : INodeDeserializer

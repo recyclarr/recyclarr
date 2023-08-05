@@ -13,6 +13,10 @@
     <PackageReference Include="Serilog.Expressions" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="SonarAnalyzer.CSharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />

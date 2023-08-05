@@ -37,12 +37,13 @@ public class QualityProfileStatCalculator
         return stats;
     }
 
-    private void ProfileUpdates(ProfileWithStats stats, QualityProfileDto newDto, QualityProfileDto oldDto)
+    private void ProfileUpdates(ProfileWithStats stats, QualityProfileDto oldDto, QualityProfileDto newDto)
     {
         Log("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
         Log("Cutoff", oldDto.Items.FindCutoff(oldDto.Cutoff), newDto.Items.FindCutoff(newDto.Cutoff));
         Log("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
         Log("Minimum Score", oldDto.MinFormatScore, newDto.MinFormatScore);
+
         return;
 
         void Log<T>(string msg, T oldValue, T newValue)
@@ -52,11 +53,10 @@ public class QualityProfileStatCalculator
         }
     }
 
-    private static void QualityUpdates(ProfileWithStats stats, QualityProfileDto newDto, QualityProfileDto oldDto)
+    private static void QualityUpdates(ProfileWithStats stats, QualityProfileDto oldDto, QualityProfileDto newDto)
     {
-        var dtoQualities = JToken.FromObject(newDto.Items);
-        var updatedQualities = JToken.FromObject(oldDto.Items);
-        stats.QualitiesChanged = !JToken.DeepEquals(dtoQualities, updatedQualities);
+        stats.QualitiesChanged = !JToken.DeepEquals(
+            JToken.FromObject(oldDto.Items), JToken.FromObject(newDto.Items));
     }
 
     private void ScoreUpdates(

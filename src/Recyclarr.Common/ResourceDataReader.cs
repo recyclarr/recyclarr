@@ -5,7 +5,7 @@ namespace Recyclarr.Common;
 
 public class ResourceDataReader : IResourceDataReader
 {
-    private readonly Assembly? _assembly;
+    private readonly Assembly _assembly;
     private readonly string? _namespace;
     private readonly string _subdirectory;
 
@@ -19,7 +19,8 @@ public class ResourceDataReader : IResourceDataReader
     {
         _subdirectory = subdirectory;
         _namespace = typeWithNamespaceToUse.Namespace;
-        _assembly = Assembly.GetAssembly(typeWithNamespaceToUse);
+        _assembly = Assembly.GetAssembly(typeWithNamespaceToUse)
+            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse));
     }
 
     public string ReadData(string filename)
@@ -49,8 +50,7 @@ public class ResourceDataReader : IResourceDataReader
 
     private string FindResourcePath(string resourcePath)
     {
-        var foundResource = _assembly?.GetManifestResourceNames()
-            .FirstOrDefault(x => x.EndsWith(resourcePath));
+        var foundResource = Array.Find(_assembly.GetManifestResourceNames(), x => x.EndsWith(resourcePath));
         if (foundResource is null)
         {
             throw new ArgumentException($"Embedded resource not found: {resourcePath}");
@@ -61,7 +61,7 @@ public class ResourceDataReader : IResourceDataReader
 
     private string GetResourceData(string resourcePath)
     {
-        using var stream = _assembly?.GetManifestResourceStream(resourcePath);
+        using var stream = _assembly.GetManifestResourceStream(resourcePath);
         if (stream is null)
         {
             throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");

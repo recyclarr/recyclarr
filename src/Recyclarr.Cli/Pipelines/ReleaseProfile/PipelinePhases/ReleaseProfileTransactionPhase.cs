@@ -52,7 +52,7 @@ public class ReleaseProfileTransactionPhase
             .Where(sonarrProfile =>
             {
                 return sonarrProfile.Name.StartsWithIgnoreCase("[Trash]") &&
-                    !profiles.Any(profile => sonarrProfile.Name.EndsWithIgnoreCase(profile.Name));
+                    !profiles.Exists(profile => sonarrProfile.Name.EndsWithIgnoreCase(profile.Name));
             })
             .ToList();
     }

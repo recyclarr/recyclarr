@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
 namespace Recyclarr.TrashLib.Config.Secrets;
 
+[SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
 public record SecretTag;
 
 public class SecretsDeserializer : INodeDeserializer

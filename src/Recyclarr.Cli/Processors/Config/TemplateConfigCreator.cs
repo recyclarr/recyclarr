@@ -14,8 +14,6 @@ public class TemplateConfigCreator : IConfigCreator
     private readonly IConfigTemplateGuideService _templates;
 
     private readonly IAppPaths _paths;
-    // private readonly IConfigManipulator _configManipulator;
-    // private readonly IAnsiConsole _console;
 
     public TemplateConfigCreator(
         ILogger log,
@@ -25,8 +23,6 @@ public class TemplateConfigCreator : IConfigCreator
         _log = log;
         _templates = templates;
         _paths = paths;
-        // _configManipulator = configManipulator;
-        // _console = console;
     }
 
     public bool CanHandle(ICreateConfigSettings settings)
@@ -66,19 +62,6 @@ public class TemplateConfigCreator : IConfigCreator
                 {
                     _log.Information("Created configuration file: {Path}", destinationFile);
                 }
-
-                // -- See comment in ConfigManipulator.cs --
-                // _configManipulator.LoadAndSave(templateFile, destinationFile, (instanceName, config) =>
-                // {
-                //     _console.MarkupLineInterpolated($"Enter configuration info for instance [green]{instanceName}[/]:");
-                //     var baseUrl = _console.Prompt(new TextPrompt<string>("Base URL:"));
-                //     var apiKey = _console.Prompt(new TextPrompt<string>("API Key:"));
-                //     return config with
-                //     {
-                //         BaseUrl = baseUrl,
-                //         ApiKey = apiKey
-                //     };
-                // });
             }
             catch (FileExistsException e)
             {

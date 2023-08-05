@@ -87,6 +87,7 @@ public record ReleaseProfileConfigYaml
 
 // This is usually empty (or the same as ServiceConfigYaml) on purpose.
 // If empty, it is kept around to make it clear that this one is dedicated to Radarr.
+[SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
 public record RadarrConfigYaml : ServiceConfigYaml;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

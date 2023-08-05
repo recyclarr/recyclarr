@@ -13,10 +13,6 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
             .WithMessage("{PropertyName} must start with 'http' or 'https'")
             .WithName("base_url");
 
-        // RuleFor(x => x.BaseUrl)
-        //     .When(x => x.BaseUrl is {Length: > 0}, ApplyConditionTo.CurrentValidator)
-        //     .WithMessage("{PropertyName} must start with 'http' or 'https'");
-
         RuleFor(x => x.ApiKey).NotEmpty().WithName("api_key");
 
         RuleFor(x => x.CustomFormats)

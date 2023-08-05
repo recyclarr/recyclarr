@@ -20,7 +20,7 @@ public sealed class SyntaxErrorHelper : INodeTypeResolver
     // just says "no node type resolver could resolve the type", or something along those lines -- which isn't helpful!
     private static void CheckSequenceAssignedToNonSequence(ParsingEvent? nodeEvent, MemberInfo currentType)
     {
-        if (nodeEvent is SequenceStart && !CollectionKeywords.Any(x => currentType.Name.Contains(x)))
+        if (nodeEvent is SequenceStart && !Array.Exists(CollectionKeywords, x => currentType.Name.Contains(x)))
         {
             throw new YamlException(nodeEvent.Start, nodeEvent.End,
                 $"A list/array/sequence is not allowed for {currentType.Name}");

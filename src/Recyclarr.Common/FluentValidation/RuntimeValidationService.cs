@@ -9,9 +9,8 @@ public class RuntimeValidationService : IRuntimeValidationService
 
     private static Type? GetValidatorInterface(Type type)
     {
-        return type.GetInterfaces()
-            .FirstOrDefault(i
-                => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
+        return Array.Find(type.GetInterfaces(),
+            i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
     }
 
     public RuntimeValidationService(IEnumerable<IValidator> validators)

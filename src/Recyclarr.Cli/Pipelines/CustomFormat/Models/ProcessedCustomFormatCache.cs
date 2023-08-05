@@ -19,11 +19,11 @@ public class ProcessedCustomFormatCache : IPipelineCache
 
     public CustomFormatData? LookupByTrashId(string trashId)
     {
-        return _customFormats.FirstOrDefault(x => x.TrashId.EqualsIgnoreCase(trashId));
+        return _customFormats.Find(x => x.TrashId.EqualsIgnoreCase(trashId));
     }
 
     public CustomFormatData? LookupByServiceId(int id)
     {
-        return _customFormats.FirstOrDefault(x => x.Id == id);
+        return _customFormats.Find(x => x.Id == id);
     }
 }

@@ -226,6 +226,12 @@ dotnet_diagnostic.ca1001.severity = none
 dotnet_diagnostic.ca1032.severity = none
 dotnet_diagnostic.ca1310.severity = none
 
+# Jump statements should not be redundant
+# https://rules.sonarsource.com/csharp/RSPEC-3626/
+# Justification: Used by Resharper to separate local methods from logic
+dotnet_diagnostic.s3626.severity = none
+dotnet_diagnostic.s1751.severity = none
+
 # ReSharper properties
 resharper_accessor_owner_body = expression_body
 resharper_alignment_tab_fill_style = use_spaces
