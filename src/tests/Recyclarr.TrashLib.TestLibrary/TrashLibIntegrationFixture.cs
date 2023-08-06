@@ -18,9 +18,10 @@ public abstract class TrashLibIntegrationFixture : IDisposable
 {
     protected TrashLibIntegrationFixture()
     {
-        // todo: Remove later. Needed because of this issue:
-        // https://github.com/TestableIO/System.IO.Abstractions/issues/983
-        Fs.Directory.Delete("temp", true);
+        Fs = new MockFileSystem(new MockFileSystemOptions
+        {
+            CreateDefaultTempDir = false
+        });
 
         Paths = new AppPaths(Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr"));
         Logger = CreateLogger();
@@ -76,7 +77,7 @@ public abstract class TrashLibIntegrationFixture : IDisposable
     private readonly Lazy<IContainer> _container;
     protected ILifetimeScope Container => _container.Value;
 
-    protected MockFileSystem Fs { get; } = new();
+    protected MockFileSystem Fs { get; }
     protected TestConsole Console { get; } = new();
     protected IAppPaths Paths { get; }
     protected ILogger Logger { get; }

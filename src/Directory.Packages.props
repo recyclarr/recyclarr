@@ -32,9 +32,9 @@
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.29" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.51" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="1.0.42" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.29" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.51" />
     <PackageVersion Include="YamlDotNet" Version="13.1.1" />
   </ItemGroup>
   <!-- Unit Test Packages -->
@@ -58,7 +58,7 @@
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" />
     <PackageVersion Include="Serilog.Sinks.TestCorrelator" Version="3.2.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.47.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.29" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.51" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
