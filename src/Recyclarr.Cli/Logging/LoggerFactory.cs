@@ -48,11 +48,6 @@ public class LoggerFactory
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
         var logDir = _paths.LogDirectory;
 
-        string LogFilePath(string type)
-        {
-            return logDir.File($"{logFilePrefix}.{type}.log").FullName;
-        }
-
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.With<ExceptionMessageEnricher>()
@@ -65,5 +60,10 @@ public class LoggerFactory
                 .WriteTo.File(GetFileTemplate(), LogFilePath("verbose")))
             .Enrich.FromLogContext()
             .CreateLogger();
+
+        string LogFilePath(string type)
+        {
+            return logDir.File($"{logFilePrefix}.{type}.log").FullName;
+        }
     }
 }

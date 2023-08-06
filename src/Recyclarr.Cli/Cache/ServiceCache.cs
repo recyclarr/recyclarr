@@ -94,6 +94,6 @@ public partial class ServiceCache : IServiceCache
         return _storagePath.CalculatePath(config, objectName);
     }
 
-    [GeneratedRegex("^[\\w-]+$", RegexOptions.None, 1000)]
+    [GeneratedRegex(@"^[\w-]+$", RegexOptions.None, 1000)]
     private static partial Regex AllowedObjectNameCharactersRegex();
 }

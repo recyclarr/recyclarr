@@ -68,14 +68,15 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
 
         return tableRows
             // Filter out the `|---|---|---|` part of the table between the heading & data rows.
-            .Where(x => !Regex.IsMatch(x[0], @"^-+$", RegexOptions.None, TimeSpan.FromMilliseconds(1000)));
+            .Where(x => !Regex.IsMatch(x[0], "^-+$", RegexOptions.None, TimeSpan.FromMilliseconds(1000)));
     }
 
     private static List<string> GetTableRow(string line)
     {
         var fields = new List<string>();
-
         var match = TableRegex().Match(line);
+
+        // ReSharper disable once InvertIf
         if (match.Success)
         {
             var tableRow = match.Groups[1].Value;
@@ -85,9 +86,9 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
         return fields;
     }
 
-    [GeneratedRegex("^\\s*\\|(.*)\\|\\s*$", RegexOptions.None, 1000)]
+    [GeneratedRegex(@"^\s*\|(.*)\|\s*$", RegexOptions.None, 1000)]
     private static partial Regex TableRegex();
 
-    [GeneratedRegex("^\\[(.+?)\\]\\(#(.+?)\\)$", RegexOptions.None, 1000)]
+    [GeneratedRegex(@"^\[(.+?)\]\(#(.+?)\)$", RegexOptions.None, 1000)]
     private static partial Regex LinkRegex();
 }
