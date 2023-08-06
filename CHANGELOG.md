@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `base_url` and `api_key` are now optional. These can be implicitly set via secrets that follow a
   naming convention. See the Secrets reference page on the wiki for details.
-- Quality Profiles can now be created & synced to Radarr, Sonarr v3, and Sonarr v4.
+- Quality Profiles can now be created & synced to Radarr, Sonarr v3, and Sonarr v4 (#144).
 
 ### Changed
 
