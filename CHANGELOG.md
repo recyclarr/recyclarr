@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.2.0] - 2023-08-06
+
 ### Added
 
 - `base_url` and `api_key` are now optional. These can be implicitly set via secrets that follow a
@@ -768,7 +770,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.1.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.2.0...HEAD
+[5.2.0]: https://github.com/recyclarr/recyclarr/compare/v5.1.1...v5.2.0
 [5.1.1]: https://github.com/recyclarr/recyclarr/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/recyclarr/recyclarr/compare/v5.0.3...v5.1.0
 [5.0.3]: https://github.com/recyclarr/recyclarr/compare/v5.0.2...v5.0.3
