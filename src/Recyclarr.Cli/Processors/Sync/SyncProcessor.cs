@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Flurl.Http;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
@@ -69,7 +70,7 @@ public class SyncProcessor : ISyncProcessor
         }
         catch (Exception e)
         {
-            HandleException(e);
+            await HandleException(e);
             failureDetected = true;
         }
 
@@ -102,7 +103,7 @@ public class SyncProcessor : ISyncProcessor
             }
             catch (Exception e)
             {
-                HandleException(e);
+                await HandleException(e);
                 failureDetected = true;
             }
         }
@@ -110,7 +111,7 @@ public class SyncProcessor : ISyncProcessor
         return failureDetected;
     }
 
-    private void HandleException(Exception e)
+    private async Task HandleException(Exception e)
     {
         switch (e)
         {
@@ -121,6 +122,11 @@ public class SyncProcessor : ISyncProcessor
 
             case FlurlHttpException e2:
                 _log.Error("HTTP error: {Message}", e2.SanitizedExceptionMessage());
+                foreach (var error in await GetValidationErrorsAsync(e2))
+                {
+                    _log.Error("Reason: {Error}", error);
+                }
+
                 break;
 
             default:
@@ -128,15 +134,32 @@ public class SyncProcessor : ISyncProcessor
         }
     }
 
+    private static async Task<IReadOnlyCollection<string>> GetValidationErrorsAsync(FlurlHttpException e)
+    {
+        var response = await e.GetResponseJsonAsync<List<dynamic>>();
+        if (response is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        return response
+            .Select(x => (string)x.errorMessage)
+            .NotNull(x => !string.IsNullOrEmpty(x))
+            .ToList();
+    }
+
     private void PrintProcessingHeader(SupportedServices serviceType, IServiceConfiguration config)
     {
         var instanceName = config.InstanceName;
 
-        _console.WriteLine($@"
-===========================================
-Processing {serviceType} Server: [{instanceName}]
-===========================================
-");
+        _console.WriteLine(
+            $"""
+
+             ===========================================
+             Processing {serviceType} Server: [{instanceName}]
+             ===========================================
+
+             """);
 
         _log.Debug("Processing {Server} server {Name}", serviceType, instanceName);
     }

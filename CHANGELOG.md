@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Better error messages for manually-specified, non-existent config files.
+- More detail in error messages when Radarr/Sonarr API calls respond with HTTP 400 "Bad Data".
 
 ### Fixed
 

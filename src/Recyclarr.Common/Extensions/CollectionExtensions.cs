@@ -52,6 +52,12 @@ public static class CollectionExtensions
         return source.Where(x => x is not null).Select(x => x!);
     }
 
+    public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source, Func<T, bool> predicate)
+        where T : class
+    {
+        return source.Where(x => x is not null && predicate(x)).Select(x => x!);
+    }
+
     public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> source)
         where T : struct
     {
