@@ -9,6 +9,8 @@ on:
       - .github/workflows/sonarcloud.yml
       - sonar-project.properties
       - "src/**"
+    tags-ignore:
+      - "*"
 
 env:
   dotnetVersion: "7.0.x"
