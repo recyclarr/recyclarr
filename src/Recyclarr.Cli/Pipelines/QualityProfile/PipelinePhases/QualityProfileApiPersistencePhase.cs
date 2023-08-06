@@ -59,14 +59,34 @@ public class QualityProfileApiPersistencePhase
 
     private void LogUpdates(IReadOnlyCollection<ProfileWithStats> changedProfiles)
     {
-        if (changedProfiles.Count > 0)
+        var createdProfiles = changedProfiles
+            .Where(x => x.Profile.UpdateReason == QualityProfileUpdateReason.New)
+            .Select(x => x.Profile.ProfileName)
+            .ToList();
+
+        if (createdProfiles.Count > 0)
+        {
+            _log.Information("Created {Count} Profiles: {Names}", createdProfiles.Count, createdProfiles);
+        }
+
+        var updatedProfiles = changedProfiles
+            .Where(x => x.Profile.UpdateReason == QualityProfileUpdateReason.Changed)
+            .Select(x => x.Profile.ProfileName)
+            .ToList();
+
+        if (updatedProfiles.Count > 0)
+        {
+            _log.Information("Updated {Count} Profiles: {Names}", updatedProfiles.Count, updatedProfiles);
+        }
+
+        if (changedProfiles.Count != 0)
         {
             var numProfiles = changedProfiles.Count;
             var numQuality = changedProfiles.Count(x => x.QualitiesChanged);
             var numScores = changedProfiles.Count(x => x.ScoresChanged);
 
             _log.Information(
-                "A total of {NumProfiles} profiles changed: {NumQuality} contain quality changes; " +
+                "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and " +
                 "{NumScores} contain updated scores",
                 numProfiles, numQuality, numScores);
         }
