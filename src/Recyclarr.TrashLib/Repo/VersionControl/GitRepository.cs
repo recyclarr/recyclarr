@@ -87,6 +87,9 @@ public sealed class GitRepository : IGitRepository
             args.AddRange(new[] {"-b", branch});
         }
 
+        // create a shallow clone to make initial checkout faster
+        args.AddRange(new[] {"--depth", "1"});
+
         args.AddRange(new[] {cloneUrl.ToString(), "."});
         await RunGitCmd(args);
     }
