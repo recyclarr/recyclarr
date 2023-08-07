@@ -29,7 +29,6 @@ public class CacheStoragePath : ICacheStoragePath
         return _hash.ComputeHash(Encoding.ASCII.GetBytes(url)).AsHexString();
     }
 
-    // TODO: Remove backward compatibility for cache dir names later
     private string BuildOldUniqueServiceDir(IServiceConfiguration config)
     {
         var url = config.BaseUrl.OriginalString;
