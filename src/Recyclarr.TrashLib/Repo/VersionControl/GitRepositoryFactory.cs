@@ -20,7 +20,7 @@ public class GitRepositoryFactory : IGitRepositoryFactory
         if (!repoPath.Exists)
         {
             _log.Information("Cloning '{RepoName}' repository...", repoPath.Name);
-            await repo.Clone(repoUrl, branch);
+            await repo.Clone(repoUrl, branch, 1);
         }
         else
         {

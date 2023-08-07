@@ -79,12 +79,17 @@ public sealed class GitRepository : IGitRepository
         await RunGitCmd("remote", "set-url", name, newUrl.ToString());
     }
 
-    public async Task Clone(Uri cloneUrl, string? branch = null)
+    public async Task Clone(Uri cloneUrl, string? branch = null, int depth = 0)
     {
         var args = new List<string> {"clone"};
         if (branch is not null)
         {
             args.AddRange(new[] {"-b", branch});
+        }
+
+        if (depth != 0)
+        {
+            args.AddRange(new[] {"--depth", depth.ToString()});
         }
 
         args.AddRange(new[] {cloneUrl.ToString(), "."});
