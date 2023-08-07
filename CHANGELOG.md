@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduce the time it takes to clone the config and trash repositories by performing shallow clones
   (#201).
 
+### Fixed
+
+- Better error message to console when no configuration files are found.
+
 ## [5.2.0] - 2023-08-06
 
 ### Added

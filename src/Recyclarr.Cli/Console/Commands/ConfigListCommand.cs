@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashLib.Config.Listers;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Spectre.Console.Cli;
 
@@ -44,6 +45,10 @@ public class ConfigListCommand : AsyncCommand<ConfigListCommand.CliSettings>
                 "delete/move the existing file and run this command again", e.AttemptedPath);
 
             return 1;
+        }
+        catch (NoConfigurationFilesException)
+        {
+            _log.Error("No configuration files found");
         }
 
         return 0;

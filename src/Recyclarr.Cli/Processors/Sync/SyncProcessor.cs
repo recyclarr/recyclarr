@@ -6,6 +6,7 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
@@ -129,6 +130,10 @@ public class SyncProcessor : ISyncProcessor
 
                 break;
 
+            case NoConfigurationFilesException:
+                _log.Error("No configuration files found");
+                break;
+
             default:
                 throw e;
         }
@@ -143,7 +148,7 @@ public class SyncProcessor : ISyncProcessor
         }
 
         return response
-            .Select(x => (string)x.errorMessage)
+            .Select(x => (string) x.errorMessage)
             .NotNull(x => !string.IsNullOrEmpty(x))
             .ToList();
     }
