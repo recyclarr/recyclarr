@@ -84,36 +84,6 @@ public class ConfigYamlDataObjectsValidationTest
     }
 
     [Test]
-    public void Quality_profile_cutoff_must_not_reference_child_qualities()
-    {
-        var data = new QualityProfileConfigYaml
-        {
-            Name = "My QP",
-            Upgrade = new QualityProfileFormatUpgradeYaml
-            {
-                Allowed = true,
-                UntilQuality = "Child Quality"
-            },
-            Qualities = new[]
-            {
-                new QualityProfileQualityConfigYaml
-                {
-                    Name = "Parent Group",
-                    Qualities = new[] {"Child Quality"}
-                }
-            }
-        };
-
-        var validator = new QualityProfileConfigYamlValidator();
-        var result = validator.TestValidate(data);
-
-        result.ShouldHaveValidationErrorFor(x => x.Qualities);
-
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'until_quality' must not refer to qualities contained within groups");
-    }
-
-    [Test]
     public void Quality_profile_qualities_must_have_no_duplicates()
     {
         var data = new QualityProfileConfigYaml
@@ -125,13 +95,21 @@ public class ConfigYamlDataObjectsValidationTest
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality 2"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality 2"},
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality 3"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality 4"},
                 new QualityProfileQualityConfigYaml
                 {
-                    Name = "Dupe Quality 3",
-                    Qualities = new[] {"Dupe Quality 4"}
+                    Name = "Dupe Quality 2",
+                    Qualities = new[] {"Dupe Quality 3"}
+                },
+                new QualityProfileQualityConfigYaml
+                {
+                    Name = "Dupe Quality 4",
+                    Qualities = new[] {"Dupe Quality 5"}
+                },
+                new QualityProfileQualityConfigYaml
+                {
+                    Name = "Dupe Quality 4",
+                    Qualities = new[] {"Dupe Quality 5"}
                 }
             }
         };
@@ -143,9 +121,9 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
             $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality'",
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 2'",
             $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 3'",
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 4'");
+            $"For profile {data.Name}, 'qualities' contains duplicates for quality group 'Dupe Quality 4'",
+            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 5'");
     }
 
     [Test]

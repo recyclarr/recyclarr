@@ -111,12 +111,6 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
 
         RuleFor(x => x.Qualities)
             .Must((o, x) => !x!
-                .Where(y => y.Qualities is not null)
-                .SelectMany(y => y.Qualities!)
-                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
-            .WithMessage(o =>
-                $"For profile {o.Name}, 'until_quality' must not refer to qualities contained within groups")
-            .Must((o, x) => !x!
                 .Where(y => y is {Enabled: false, Name: not null})
                 .Select(y => y.Name!)
                 .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
@@ -135,19 +129,35 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         IReadOnlyCollection<QualityProfileQualityConfigYaml> qualities,
         ValidationContext<QualityProfileConfigYaml> context)
     {
-        var dupes = qualities
+        // Check for quality duplicates between non-groups and groups
+        var qualityDupes = qualities
+            .Where(x => x.Qualities is null)
             .Select(x => x.Name)
             .Concat(qualities.Where(x => x.Qualities is not null).SelectMany(x => x.Qualities!))
-            .NotNull()
             .GroupBy(x => x)
             .Select(x => x.Skip(1).FirstOrDefault())
             .NotNull();
 
-        foreach (var dupe in dupes)
+        foreach (var dupe in qualityDupes)
         {
             var x = context.InstanceToValidate;
             context.AddFailure(
                 $"For profile {x.Name}, 'qualities' contains duplicates for quality '{dupe}'");
+        }
+
+        // Check for quality duplicates between non-groups and groups
+        var groupDupes = qualities
+            .Where(x => x.Qualities is not null)
+            .Select(x => x.Name)
+            .GroupBy(x => x)
+            .Select(x => x.Skip(1).FirstOrDefault())
+            .NotNull();
+
+        foreach (var dupe in groupDupes)
+        {
+            var x = context.InstanceToValidate;
+            context.AddFailure(
+                $"For profile {x.Name}, 'qualities' contains duplicates for quality group '{dupe}'");
         }
     }
 }

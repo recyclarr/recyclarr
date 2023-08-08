@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Better error message to console when no configuration files are found.
+- Allow quality group names to duplicate quality names (#200).
 
 ## [5.2.0] - 2023-08-06
 
