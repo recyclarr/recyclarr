@@ -29,7 +29,7 @@ foreach ($dir in $archiveTargets) {
     else {
         "> Tarballing: $dir"
         Push-Location "$PublishDir/$dir"
-        tar cJvf "$archiveName.tar.xz" *
+        tar -cJv --owner=0 --group=0 -f "$archiveName.tar.xz" *
         Move-Item "$archiveName.tar.xz" $OutputDir
         Pop-Location
     }
