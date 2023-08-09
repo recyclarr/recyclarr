@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 
 $archiveTargets = @()
 if ($ArchiveDirName) {
-    $archiveTargets += "$PublishDir/$ArchiveDirName"
+    $archiveTargets += "$ArchiveDirName"
 }
 else {
     $archiveTargets += Get-ChildItem -Path $PublishDir -Directory -Name
