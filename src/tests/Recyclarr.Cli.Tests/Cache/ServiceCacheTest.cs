@@ -113,9 +113,12 @@ public class ServiceCacheTest
 
         var expectedFile = fs.GetFile(testJsonPath);
         expectedFile.Should().NotBeNull();
-        expectedFile.TextContents.Should().Be(@"{
-  ""test_value"": ""Foo""
-}");
+        expectedFile.TextContents.Should().Be(
+            """
+            {
+              "test_value": "Foo"
+            }
+            """);
     }
 
     [Test, AutoMockData]
@@ -184,18 +187,19 @@ public class ServiceCacheTest
         IServiceConfiguration config,
         ServiceCache sut)
     {
-        const string cacheJson = @"
-{
-  'version': 1,
-  'trash_id_mappings': [
-    {
-      'custom_format_name': '4K Remaster',
-      'trash_id': 'eca37840c13c6ef2dd0262b141a5482f',
-      'custom_format_id': 4
-    }
-  ]
-}
-";
+        const string cacheJson =
+            """
+            {
+              'version': 1,
+              'trash_id_mappings': [
+                {
+                  'custom_format_name': '4K Remaster',
+                  'trash_id': 'eca37840c13c6ef2dd0262b141a5482f',
+                  'custom_format_id': 4
+                }
+              ]
+            }
+            """;
 
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
         storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));

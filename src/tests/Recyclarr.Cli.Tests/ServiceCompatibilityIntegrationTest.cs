@@ -14,11 +14,12 @@ public class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
         var sut = Resolve<SettingsProvider>();
         // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects.
         // This test only ensures that the data deserialized is from the actual correct file.
-        const string yamlData = @"
-repositories:
-  trash_guides:
-    clone_url: http://the_url.com
-";
+        const string yamlData =
+            """
+            repositories:
+              trash_guides:
+                clone_url: http://the_url.com
+            """;
 
         Fs.AddFile(Paths.AppDataDirectory.File("settings.yml"), new MockFileData(yamlData));
 

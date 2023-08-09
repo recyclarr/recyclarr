@@ -93,25 +93,27 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
     [Test]
     public async Task Template_id_matching_works()
     {
-        const string templatesJson = @"
-{
-  'radarr': [
-    {
-      'template': 'template-file1.yml',
-      'id': 'template1'
-    }
-  ],
-  'sonarr': [
-    {
-      'template': 'template-file2.yml',
-      'id': 'template2'
-    },
-    {
-      'template': 'template-file3.yml',
-      'id': 'template3'
-    }
-  ]
-}";
+        const string templatesJson =
+            """
+            {
+              "radarr": [
+                {
+                  "template": "template-file1.yml",
+                  "id": "template1"
+                }
+              ],
+              "sonarr": [
+                {
+                  "template": "template-file2.yml",
+                  "id": "template2"
+                },
+                {
+                  "template": "template-file3.yml",
+                  "id": "template3"
+                }
+              ]
+            }
+            """;
 
         var repo = Resolve<IConfigTemplatesRepo>();
         Fs.AddFile(repo.Path.File("templates.json"), new MockFileData(templatesJson));

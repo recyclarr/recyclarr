@@ -17,17 +17,19 @@ public class QualityGuideServiceTest : CliIntegrationFixture
     public void Get_data_for_service(SupportedServices service, string serviceDir)
     {
         var repo = Resolve<ITrashGuidesRepo>();
-        const string metadataJson = @"
-{
-  'json_paths': {
-    'radarr': {
-      'qualities': ['docs/json/radarr/quality-size']
-    },
-    'sonarr': {
-      'qualities': ['docs/json/sonarr/quality-size']
-    }
-  }
-}";
+        const string metadataJson =
+            """
+            {
+              "json_paths": {
+                "radarr": {
+                  "qualities": ["docs/json/radarr/quality-size"]
+                },
+                "sonarr": {
+                  "qualities": ["docs/json/sonarr/quality-size"]
+                }
+              }
+            }
+            """;
 
         Fs.AddFile(repo.Path.File("metadata.json"), new MockFileData(metadataJson));
 

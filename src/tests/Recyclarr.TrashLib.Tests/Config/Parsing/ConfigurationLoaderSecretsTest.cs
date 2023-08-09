@@ -15,21 +15,23 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance1:
-    api_key: !secret api_key
-    base_url: !secret 123GARBAGE_
-    release_profiles:
-      - trash_ids:
-          - !secret secret_rp
-";
+        const string testYml =
+            """
+            sonarr:
+              instance1:
+                api_key: !secret api_key
+                base_url: !secret 123GARBAGE_
+                release_profiles:
+                  - trash_ids:
+                      - !secret secret_rp
+            """;
 
-        const string secretsYml = @"
-api_key: 95283e6b156c42f3af8a9b16173f876b
-123GARBAGE_: 'https://radarr:7878'
-secret_rp: 1234567
-";
+        const string secretsYml =
+            """
+            api_key: 95283e6b156c42f3af8a9b16173f876b
+            123GARBAGE_: 'https://radarr:7878'
+            secret_rp: 1234567
+            """;
 
         Fs.AddFile(Paths.AppDataDirectory.File("secrets.yml").FullName, new MockFileData(secretsYml));
         var expected = new[]
@@ -59,12 +61,13 @@ secret_rp: 1234567
         using var logContext = TestCorrelator.CreateContext();
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance2:
-    api_key: !secret api_key
-    base_url: fake_url
-";
+        const string testYml =
+            """
+            sonarr:
+              instance2:
+                api_key: !secret api_key
+                base_url: fake_url
+            """;
 
         const string secretsYml = "no_api_key: 95283e6b156c42f3af8a9b16173f876b";
 
@@ -79,12 +82,13 @@ sonarr:
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance3:
-    api_key: !secret api_key
-    base_url: fake_url
-";
+        const string testYml =
+            """
+            sonarr:
+              instance3:
+                api_key: !secret api_key
+                base_url: fake_url
+            """;
 
         var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
         result.Should().BeEmpty();
@@ -95,12 +99,13 @@ sonarr:
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance4:
-    api_key: !secret { property: value }
-    base_url: fake_url
-";
+        const string testYml =
+            """
+            sonarr:
+              instance4:
+                api_key: !secret { property: value }
+                base_url: fake_url
+            """;
 
         var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
         result.Should().BeEmpty();
@@ -111,13 +116,14 @@ sonarr:
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance5:
-    api_key: fake_key
-    base_url: fake_url
-    release_profiles: !secret bogus_profile
-";
+        const string testYml =
+            """
+            sonarr:
+              instance5:
+                api_key: fake_key
+                base_url: fake_url
+                release_profiles: !secret bogus_profile
+            """;
 
         const string secretsYml = @"bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 

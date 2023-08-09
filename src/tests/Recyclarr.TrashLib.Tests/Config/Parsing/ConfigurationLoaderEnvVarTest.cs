@@ -17,12 +17,13 @@ public class ConfigurationLoaderEnvVarTest : TrashLibIntegrationFixture
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    api_key: !env_var SONARR_API_KEY
-    base_url: !env_var SONARR_URL http://sonarr:1233
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                api_key: !env_var SONARR_API_KEY
+                base_url: !env_var SONARR_URL http://sonarr:1233
+            """;
 
         var config = sut.Load(testYml);
 
@@ -41,12 +42,13 @@ sonarr:
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL http://sonarr:1233
-    api_key: value
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL http://sonarr:1233
+                api_key: value
+            """;
 
         var config = sut.Load(testYml);
         config.Should().BeEquivalentTo(new[]
@@ -66,12 +68,13 @@ sonarr:
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL http://somevalue
-    api_key: value
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL http://somevalue
+                api_key: value
+            """;
 
         var config = sut.Load(testYml);
         config.Should().BeEquivalentTo(new[]
@@ -91,12 +94,13 @@ sonarr:
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL ""http://theurl""
-    api_key: !env_var SONARR_API 'the key'
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL "http://theurl"
+                api_key: !env_var SONARR_API 'the key'
+            """;
 
         var config = sut.Load(testYml);
         config.Should().BeEquivalentTo(new[]
@@ -114,12 +118,13 @@ sonarr:
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL    http://somevalue
-    api_key: value
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL    http://somevalue
+                api_key: value
+            """;
 
         var config = sut.Load(testYml);
         config.Should().BeEquivalentTo(new[]
@@ -136,12 +141,13 @@ sonarr:
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = $@"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL {"\t"}http://somevalue
-    api_key: value
-";
+        const string testYml =
+            $"""
+             sonarr:
+               instance:
+                 base_url: !env_var SONARR_URL {"\t"}http://somevalue
+                 api_key: value
+             """;
 
         var config = sut.Load(testYml);
         config.Should().BeEquivalentTo(new[]
@@ -158,12 +164,13 @@ sonarr:
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml = @"
-sonarr:
-  instance:
-    base_url: !env_var SONARR_URL
-    api_key: value
-";
+        const string testYml =
+            """
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL
+                api_key: value
+            """;
 
         var result = sut.Load(testYml);
         result.Should().BeEmpty();

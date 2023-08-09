@@ -58,12 +58,13 @@ public class ConfigSaverTest : TrashLibIntegrationFixture
 
         sut.Save(config, destFile);
 
-        var expectedYaml = @"
-radarr:
-  instance1:
-    api_key: apikey
-    base_url: http://baseurl.com
-".TrimStart();
+        var expectedYaml =
+            """
+            radarr:
+              instance1:
+                api_key: apikey
+                base_url: http://baseurl.com
+            """;
 
         var expectedFile = Fs.GetFile(destFile);
         expectedFile.Should().NotBeNull();

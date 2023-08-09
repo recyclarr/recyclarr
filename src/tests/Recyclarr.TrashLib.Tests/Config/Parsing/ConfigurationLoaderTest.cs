@@ -37,10 +37,12 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
         static string MockYaml(string sectionName, params object[] args)
         {
             var str = new StringBuilder($"{sectionName}:");
-            const string templateYaml = @"
-  instance{1}:
-    base_url: http://{0}
-    api_key: abc";
+            const string templateYaml =
+                """
+                  instance{1}:
+                    base_url: http://{0}
+                    api_key: abc
+                """;
 
             var counter = 0;
             str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p, counter++)));
@@ -124,12 +126,13 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
         using var logContext = TestCorrelator.CreateContext();
 
         var sut = Resolve<ConfigurationLoader>();
-        const string testYml = @"
-not_wanted:
-  instance:
-    base_url: abc
-    api_key: xyz
-";
+        const string testYml =
+            """
+            not_wanted:
+              instance:
+                base_url: abc
+                api_key: xyz
+            """;
 
         sut.Load(testYml, SupportedServices.Sonarr);
 
