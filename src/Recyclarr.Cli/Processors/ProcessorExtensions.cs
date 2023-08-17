@@ -17,4 +17,26 @@ public static class ProcessorExtensions
             .Where(x => settings.Instances.IsEmpty() ||
                 settings.Instances!.Any(y => y.EqualsIgnoreCase(x.InstanceName)));
     }
+
+    public static IEnumerable<string> GetSplitInstances(this IEnumerable<IServiceConfiguration> configs)
+    {
+        return configs
+            .GroupBy(x => x.BaseUrl)
+            .Where(x => x.Count() > 1)
+            .SelectMany(x => x.Select(y => y.InstanceName));
+    }
+
+    public static IEnumerable<string> GetInvalidInstanceNames(
+        this ISyncSettings settings,
+        IEnumerable<IServiceConfiguration> configs)
+    {
+        if (settings.Instances is null)
+        {
+            return Array.Empty<string>();
+        }
+
+        var configInstances = configs.Select(x => x.InstanceName).ToList();
+        return settings.Instances
+            .Where(x => !configInstances.Contains(x, StringComparer.InvariantCultureIgnoreCase));
+    }
 }

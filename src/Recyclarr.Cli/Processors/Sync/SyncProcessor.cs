@@ -8,6 +8,7 @@ using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Spectre.Console;
@@ -63,9 +64,7 @@ public class SyncProcessor : ISyncProcessor
                 return ExitStatus.Failed;
             }
 
-            var configs = _configLoader.LoadMany(_configFinder.GetConfigFiles(configFiles[true].ToList()));
-
-            LogInvalidInstances(settings.Instances, configs);
+            var configs = LoadAndFilterConfigs(_configFinder.GetConfigFiles(configFiles[true].ToList()), settings);
 
             failureDetected = await ProcessService(settings, configs);
         }
@@ -78,23 +77,32 @@ public class SyncProcessor : ISyncProcessor
         return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 
-    private void LogInvalidInstances(IEnumerable<string>? instanceNames, ICollection<IServiceConfiguration> configs)
+    private IEnumerable<IServiceConfiguration> LoadAndFilterConfigs(
+        IEnumerable<IFileInfo> configs,
+        ISyncSettings settings)
     {
-        var invalidInstances = instanceNames?
-            .Where(x => !configs.DoesConfigExist(x))
-            .ToList();
+        var loadedConfigs = configs.SelectMany(x => _configLoader.Load(x)).ToList();
 
-        if (invalidInstances != null && invalidInstances.Any())
+        var invalidInstances = settings.GetInvalidInstanceNames(loadedConfigs).ToList();
+        if (invalidInstances.Any())
         {
-            _log.Warning("These instances do not exist: {Instances}", invalidInstances);
+            throw new InvalidInstancesException(invalidInstances);
         }
+
+        var splitInstances = loadedConfigs.GetSplitInstances().ToList();
+        if (splitInstances.Any())
+        {
+            throw new SplitInstancesException(splitInstances);
+        }
+
+        return loadedConfigs.GetConfigsBasedOnSettings(settings);
     }
 
-    private async Task<bool> ProcessService(ISyncSettings settings, ICollection<IServiceConfiguration> configs)
+    private async Task<bool> ProcessService(ISyncSettings settings, IEnumerable<IServiceConfiguration> configs)
     {
         var failureDetected = false;
 
-        foreach (var config in configs.GetConfigsBasedOnSettings(settings))
+        foreach (var config in configs)
         {
             try
             {
@@ -112,18 +120,18 @@ public class SyncProcessor : ISyncProcessor
         return failureDetected;
     }
 
-    private async Task HandleException(Exception e)
+    private async Task HandleException(Exception sourceException)
     {
-        switch (e)
+        switch (sourceException)
         {
-            case GitCmdException e2:
-                _log.Error(e2, "Non-zero exit code {ExitCode} while executing Git command: {Error}",
-                    e2.ExitCode, e2.Error);
+            case GitCmdException e:
+                _log.Error(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}",
+                    e.ExitCode, e.Error);
                 break;
 
-            case FlurlHttpException e2:
-                _log.Error("HTTP error: {Message}", e2.SanitizedExceptionMessage());
-                foreach (var error in await GetValidationErrorsAsync(e2))
+            case FlurlHttpException e:
+                _log.Error("HTTP error: {Message}", e.SanitizedExceptionMessage());
+                foreach (var error in await GetValidationErrorsAsync(e))
                 {
                     _log.Error("Reason: {Error}", error);
                 }
@@ -134,8 +142,20 @@ public class SyncProcessor : ISyncProcessor
                 _log.Error("No configuration files found");
                 break;
 
+            case InvalidInstancesException e:
+                _log.Error("The following instances do not exist: {Names}", e.InstanceNames);
+                break;
+
+            case SplitInstancesException e:
+                _log.Error("The following configs share the same `base_url`, which isn't allowed: {Instances}",
+                    e.InstanceNames);
+                _log.Error(
+                    "Consolidate the config files manually to fix. " +
+                    "See: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance");
+                break;
+
             default:
-                throw e;
+                throw sourceException;
         }
     }
 

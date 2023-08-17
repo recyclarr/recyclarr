@@ -51,8 +51,9 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
             }
         };
 
-        var parsedSecret = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
-        parsedSecret.Should().BeEquivalentTo(expected);
+        configLoader.Load(() => new StringReader(testYml))
+            .GetConfigsOfType(SupportedServices.Sonarr)
+            .Should().BeEquivalentTo(expected);
     }
 
     [Test]
@@ -73,8 +74,9 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
 
         Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
 
-        var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
-        result.Should().BeEmpty();
+        configLoader.Load(() => new StringReader(testYml))
+            .GetConfigsOfType(SupportedServices.Sonarr)
+            .Should().BeEmpty();
     }
 
     [Test]
@@ -90,8 +92,9 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
                 base_url: fake_url
             """;
 
-        var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
-        result.Should().BeEmpty();
+        configLoader.Load(() => new StringReader(testYml))
+            .GetConfigsOfType(SupportedServices.Sonarr)
+            .Should().BeEmpty();
     }
 
     [Test]
@@ -107,8 +110,9 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
                 base_url: fake_url
             """;
 
-        var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
-        result.Should().BeEmpty();
+        configLoader.Load(() => new StringReader(testYml))
+            .GetConfigsOfType(SupportedServices.Sonarr)
+            .Should().BeEmpty();
     }
 
     [Test]
@@ -128,7 +132,8 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
         const string secretsYml = @"bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
         Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
-        var result = configLoader.Load(() => new StringReader(testYml), SupportedServices.Sonarr);
-        result.Should().BeEmpty();
+        configLoader.Load(() => new StringReader(testYml))
+            .GetConfigsOfType(SupportedServices.Sonarr)
+            .Should().BeEmpty();
     }
 }

@@ -1,4 +1,3 @@
-using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
 
@@ -11,11 +10,6 @@ public static class ConfigExtensions
         SupportedServices? serviceType)
     {
         return configs.Where(x => serviceType is null || serviceType.Value == x.ServiceType);
-    }
-
-    public static bool DoesConfigExist(this IEnumerable<IServiceConfiguration> configs, string name)
-    {
-        return configs.Any(x => x.InstanceName.EqualsIgnoreCase(name));
     }
 
     public static bool IsConfigEmpty(this RootConfigYaml? config)

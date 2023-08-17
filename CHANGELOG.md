@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Program now exits when invalid instances are specified.
+
+### Fixed
+
+- If multiple configuration files refer to the same `base_url` (i.e. the same instance), this is now
+  an error and the program will exit. To use multiple config templates against a single instance of
+  Radarr or Sonarr, you need to manually merge those config files. See [this page][configmerge].
+
+[configmerge]: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance
+
 ## [5.2.1] - 2023-08-07
 
 ### Changed

@@ -24,35 +24,22 @@ public class ConfigurationLoader : IConfigurationLoader
         _postProcessors = postProcessors;
     }
 
-    public ICollection<IServiceConfiguration> LoadMany(
-        IEnumerable<IFileInfo> configFiles,
-        SupportedServices? desiredServiceType = null)
+    public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
     {
-        return configFiles
-            .SelectMany(x => Load(x, desiredServiceType))
-            .ToList();
+        return ProcessLoadedConfigs(_parser.Load(file));
     }
 
-    public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file, SupportedServices? desiredServiceType = null)
+    public IReadOnlyCollection<IServiceConfiguration> Load(string yaml)
     {
-        return ProcessLoadedConfigs(_parser.Load(file), desiredServiceType);
+        return ProcessLoadedConfigs(_parser.Load(yaml));
     }
 
-    public IReadOnlyCollection<IServiceConfiguration> Load(string yaml, SupportedServices? desiredServiceType = null)
+    public IReadOnlyCollection<IServiceConfiguration> Load(Func<TextReader> streamFactory)
     {
-        return ProcessLoadedConfigs(_parser.Load(yaml), desiredServiceType);
+        return ProcessLoadedConfigs(_parser.Load(streamFactory));
     }
 
-    public IReadOnlyCollection<IServiceConfiguration> Load(
-        Func<TextReader> streamFactory,
-        SupportedServices? desiredServiceType = null)
-    {
-        return ProcessLoadedConfigs(_parser.Load(streamFactory), desiredServiceType);
-    }
-
-    private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(
-        RootConfigYaml? config,
-        SupportedServices? desiredServiceType)
+    private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(RootConfigYaml? config)
     {
         if (config is null)
         {
@@ -67,17 +54,8 @@ public class ConfigurationLoader : IConfigurationLoader
         }
 
         var convertedConfigs = new List<IServiceConfiguration>();
-
-        if (desiredServiceType is null or SupportedServices.Radarr)
-        {
-            convertedConfigs.AddRange(MapConfigs<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
-        }
-
-        if (desiredServiceType is null or SupportedServices.Sonarr)
-        {
-            convertedConfigs.AddRange(MapConfigs<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
-        }
-
+        convertedConfigs.AddRange(MapConfigs<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
+        convertedConfigs.AddRange(MapConfigs<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
         return convertedConfigs;
     }
 

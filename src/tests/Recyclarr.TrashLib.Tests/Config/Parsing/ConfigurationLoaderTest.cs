@@ -34,23 +34,6 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
     [Test]
     public void Load_many_iterations_of_config()
     {
-        static string MockYaml(string sectionName, params object[] args)
-        {
-            var str = new StringBuilder($"{sectionName}:");
-            const string templateYaml =
-                """
-
-                  instance{1}:
-                    base_url: http://{0}
-                    api_key: abc
-
-                """;
-
-            var counter = 0;
-            str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p, counter++)));
-            return str.ToString();
-        }
-
         var baseDir = Fs.CurrentDirectory();
         var fileData = new[]
         {
@@ -79,18 +62,38 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
 
         var loader = Resolve<IConfigurationLoader>();
 
-        loader.LoadMany(fileData.Select(x => x.Item1), SupportedServices.Sonarr)
-            .Should().BeEquivalentTo(expectedSonarr);
+        LoadMany(SupportedServices.Sonarr).Should().BeEquivalentTo(expectedSonarr);
+        LoadMany(SupportedServices.Radarr).Should().BeEquivalentTo(expectedRadarr);
 
-        loader.LoadMany(fileData.Select(x => x.Item1), SupportedServices.Radarr)
-            .Should().BeEquivalentTo(expectedRadarr);
+        return;
+
+        static string MockYaml(string sectionName, params object[] args)
+        {
+            var str = new StringBuilder($"{sectionName}:");
+            const string templateYaml =
+                """
+
+                  instance{1}:
+                    base_url: http://{0}
+                    api_key: abc
+
+                """;
+
+            var counter = 0;
+            str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p, counter++)));
+            return str.ToString();
+        }
+
+        IEnumerable<IServiceConfiguration> LoadMany(SupportedServices service)
+            => fileData.SelectMany(x => loader.Load(x.Item1)).GetConfigsOfType(service);
     }
 
     [Test]
     public void Parse_using_stream()
     {
         var configLoader = Resolve<ConfigurationLoader>();
-        configLoader.Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"), SupportedServices.Sonarr)
+        configLoader.Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"))
+            .GetConfigsOfType(SupportedServices.Sonarr)
             .Should().BeEquivalentTo(new List<SonarrConfiguration>
             {
                 new()
@@ -136,7 +139,7 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
                 api_key: xyz
             """;
 
-        sut.Load(testYml, SupportedServices.Sonarr);
+        sut.Load(testYml).GetConfigsOfType(SupportedServices.Sonarr);
 
         TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
             .Select(x => x.RenderMessage())

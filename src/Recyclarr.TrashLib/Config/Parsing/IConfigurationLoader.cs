@@ -5,10 +5,6 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 
 public interface IConfigurationLoader
 {
-    ICollection<IServiceConfiguration> LoadMany(
-        IEnumerable<IFileInfo> configFiles,
-        SupportedServices? desiredServiceType = null);
-
-    IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file, SupportedServices? desiredServiceType = null);
-    IReadOnlyCollection<IServiceConfiguration> Load(string yaml, SupportedServices? desiredServiceType = null);
+    IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file);
+    IReadOnlyCollection<IServiceConfiguration> Load(string yaml);
 }
