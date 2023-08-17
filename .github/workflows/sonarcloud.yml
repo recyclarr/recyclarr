@@ -9,8 +9,10 @@ on:
       - .github/workflows/sonarcloud.yml
       - sonar-project.properties
       - "src/**"
-    tags-ignore:
-      - "*"
+
+    # Explicitly specifying this results in tags being ignored, which is the goal.
+    branches:
+      - "**"
 
 env:
   dotnetVersion: "7.0.x"
