@@ -72,15 +72,16 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
             var str = new StringBuilder($"{sectionName}:");
             const string templateYaml =
                 """
-
                   instance{1}:
                     base_url: http://{0}
                     api_key: abc
-
                 """;
 
-            var counter = 0;
-            str.Append(args.Aggregate("", (current, p) => current + templateYaml.FormatWith(p, counter++)));
+            for (var i = 0; i < args.Length; ++i)
+            {
+                str.Append($"\n{templateYaml.FormatWith(args[i], i)}\n");
+            }
+
             return str.ToString();
         }
 
