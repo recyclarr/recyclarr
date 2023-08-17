@@ -21,8 +21,8 @@ internal class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSetti
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings
     {
-        [CommandArgument(0, "<service>")]
-        [EnumDescription<SupportedServices>("The service to obtain information about.")]
+        [CommandArgument(0, "<service_type>")]
+        [EnumDescription<SupportedServices>("The service type to obtain information about.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
     }
