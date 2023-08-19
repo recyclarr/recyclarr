@@ -5,7 +5,6 @@ using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Schemas;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 
@@ -30,10 +29,6 @@ public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCom
         SonarrReleaseProfile profile)
     {
         var capabilities = await _capabilityFetcher.GetCapabilities(config);
-        if (capabilities is null)
-        {
-            throw new ServiceIncompatibilityException("Capabilities could not be obtained");
-        }
 
         return capabilities.ArraysNeededForReleaseProfileRequiredAndIgnored
             ? profile

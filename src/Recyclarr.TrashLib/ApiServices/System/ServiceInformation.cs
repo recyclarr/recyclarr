@@ -1,6 +1,5 @@
 using Flurl.Http;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.Http;
 
 namespace Recyclarr.TrashLib.ApiServices.System;
 
@@ -15,7 +14,7 @@ public class ServiceInformation : IServiceInformation
         _log = log;
     }
 
-    public async Task<Version?> GetVersion(IServiceConfiguration config)
+    public async Task<Version> GetVersion(IServiceConfiguration config)
     {
         try
         {
@@ -23,11 +22,10 @@ public class ServiceInformation : IServiceInformation
             _log.Debug("{Service} Version: {Version}", status.AppName, status.Version);
             return new Version(status.Version);
         }
-        catch (FlurlHttpException ex)
+        catch (FlurlHttpException)
         {
-            _log.Error("Exception trying to obtain service version: {Message}", ex.SanitizedExceptionMessage());
+            _log.Error("Unable to obtain service version information");
+            throw;
         }
-
-        return null;
     }
 }

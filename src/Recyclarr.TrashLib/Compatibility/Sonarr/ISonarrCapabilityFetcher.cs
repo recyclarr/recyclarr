@@ -4,5 +4,5 @@ namespace Recyclarr.TrashLib.Compatibility.Sonarr;
 
 public interface ISonarrCapabilityFetcher
 {
-    Task<SonarrCapabilities?> GetCapabilities(IServiceConfiguration config);
+    Task<SonarrCapabilities> GetCapabilities(IServiceConfiguration config);
 }

@@ -12,10 +12,10 @@ public abstract class ServiceCapabilityFetcher<T> where T : class
         _info = info;
     }
 
-    public async Task<T?> GetCapabilities(IServiceConfiguration config)
+    public async Task<T> GetCapabilities(IServiceConfiguration config)
     {
         var version = await _info.GetVersion(config);
-        return version is not null ? BuildCapabilitiesObject(version) : null;
+        return BuildCapabilitiesObject(version);
     }
 
     protected abstract T BuildCapabilitiesObject(Version version);

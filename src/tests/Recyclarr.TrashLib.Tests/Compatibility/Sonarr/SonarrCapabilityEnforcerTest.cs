@@ -10,20 +10,6 @@ namespace Recyclarr.TrashLib.Tests.Compatibility.Sonarr;
 public class SonarrCapabilityEnforcerTest
 {
     [Test, AutoMockData]
-    public void Fail_when_capabilities_not_obtained(
-        [Frozen] ISonarrCapabilityFetcher fetcher,
-        SonarrCapabilityEnforcer sut)
-    {
-        var config = NewConfig.Sonarr();
-
-        fetcher.GetCapabilities(default!).ReturnsForAnyArgs((SonarrCapabilities?) null);
-
-        var act = () => sut.Check(config);
-
-        act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*obtained*");
-    }
-
-    [Test, AutoMockData]
     public void Minimum_version_not_met(
         [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)

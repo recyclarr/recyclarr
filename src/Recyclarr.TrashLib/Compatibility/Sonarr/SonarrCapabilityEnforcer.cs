@@ -16,10 +16,6 @@ public class SonarrCapabilityEnforcer
     public async Task Check(SonarrConfiguration config)
     {
         var capabilities = await _capabilityFetcher.GetCapabilities(config);
-        if (capabilities is null)
-        {
-            throw new ServiceIncompatibilityException("Capabilities could not be obtained");
-        }
 
         if (!capabilities.SupportsNamedReleaseProfiles)
         {
