@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Api;
+using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
@@ -15,22 +16,28 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
     private readonly IAnsiConsole _console;
     private readonly ICustomFormatService _api;
     private readonly IConfigurationRegistry _configRegistry;
+    private readonly ISonarrCapabilityFetcher _sonarCapabilities;
 
     public DeleteCustomFormatsProcessor(
         ILogger log,
         IAnsiConsole console,
         ICustomFormatService api,
-        IConfigurationRegistry configRegistry)
+        IConfigurationRegistry configRegistry,
+        ISonarrCapabilityFetcher sonarCapabilities)
     {
         _log = log;
         _console = console;
         _api = api;
         _configRegistry = configRegistry;
+        _sonarCapabilities = sonarCapabilities;
     }
 
     public async Task Process(IDeleteCustomFormatSettings settings)
     {
         var config = GetTargetConfig(settings);
+
+        await CheckCustomFormatSupport(config);
+
         var cfs = await ObtainCustomFormats(config);
 
         if (!settings.All)
@@ -65,6 +72,18 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
         }
 
         await DeleteCustomFormats(cfs, config);
+    }
+
+    private async Task CheckCustomFormatSupport(IServiceConfiguration config)
+    {
+        if (config is SonarrConfiguration)
+        {
+            var capabilities = await _sonarCapabilities.GetCapabilities(config);
+            if (!capabilities.SupportsCustomFormats)
+            {
+                throw new ServiceIncompatibilityException("Custom formats are not supported in Sonarr v3");
+            }
+        }
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
