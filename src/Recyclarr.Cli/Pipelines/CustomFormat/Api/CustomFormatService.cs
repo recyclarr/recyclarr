@@ -33,9 +33,12 @@ public class CustomFormatService : ICustomFormatService
             .PutJsonAsync(cf);
     }
 
-    public async Task DeleteCustomFormat(IServiceConfiguration config, int customFormatId)
+    public async Task DeleteCustomFormat(
+        IServiceConfiguration config,
+        int customFormatId,
+        CancellationToken cancellationToken = default)
     {
         await _service.Request(config, "customformat", customFormatId)
-            .DeleteAsync();
+            .DeleteAsync(cancellationToken);
     }
 }

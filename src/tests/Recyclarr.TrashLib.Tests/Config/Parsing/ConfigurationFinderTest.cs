@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Startup;
@@ -51,30 +50,9 @@ public class ConfigurationFinderTest
             fs.AddEmptyFile(path);
         }
 
-        var result = sut.GetConfigFiles(new List<IFileInfo>());
+        var result = sut.GetConfigFiles();
 
         result.Should().BeEquivalentTo(yamlPaths, o => o.Including(x => x.FullName));
-    }
-
-    [Test, AutoMockData]
-    public void Use_explicit_paths_instead_of_default(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
-    {
-        var yamlPaths = GetYamlPaths(paths);
-
-        foreach (var path in yamlPaths)
-        {
-            fs.AddFile(path.FullName, new MockFileData(""));
-        }
-
-        var manualConfig = fs.CurrentDirectory().File("manual-config.yml");
-        fs.AddEmptyFile(manualConfig);
-
-        var result = sut.GetConfigFiles(new[] {manualConfig});
-
-        result.Should().ContainSingle(x => x.FullName == manualConfig.FullName);
     }
 
     [Test, AutoMockData]
@@ -86,7 +64,7 @@ public class ConfigurationFinderTest
         var testFile = paths.ConfigsDirectory.File("test.yml");
         fs.AddEmptyFile(testFile);
 
-        var result = sut.GetConfigFiles(Array.Empty<IFileInfo>());
+        var result = sut.GetConfigFiles();
 
         result.Should().ContainSingle(x => x.FullName == testFile.FullName);
     }
@@ -100,7 +78,7 @@ public class ConfigurationFinderTest
         var configFile = paths.AppDataDirectory.File("recyclarr.yml");
         fs.AddEmptyFile(configFile);
 
-        var result = sut.GetConfigFiles(Array.Empty<IFileInfo>());
+        var result = sut.GetConfigFiles();
 
         result.Should().ContainSingle(x => x.FullName == configFile.FullName);
     }
@@ -111,7 +89,7 @@ public class ConfigurationFinderTest
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
         ConfigurationFinder sut)
     {
-        var act = () => sut.GetConfigFiles(Array.Empty<IFileInfo>());
+        var act = () => sut.GetConfigFiles();
 
         act.Should().Throw<NoConfigurationFilesException>();
     }

@@ -24,6 +24,7 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
 
+        builder.RegisterType<ConfigurationRegistry>().As<IConfigurationRegistry>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
         builder.RegisterType<ConfigurationLoader>().As<IConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();

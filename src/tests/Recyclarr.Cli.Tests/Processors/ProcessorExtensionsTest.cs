@@ -1,6 +1,3 @@
-using NSubstitute.ReturnsExtensions;
-using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Processors;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 
@@ -21,10 +18,10 @@ public class ProcessorExtensionsTest
             }
         };
 
-        var settings = Substitute.For<ISyncSettings>();
-        settings.Instances.Returns(new[] {"valid_name", "invalid_name"});
-
-        var invalidInstanceNames = settings.GetInvalidInstanceNames(configs);
+        var invalidInstanceNames = configs.GetInvalidInstanceNames(new ConfigFilterCriteria
+        {
+            Instances = new[] {"valid_name", "invalid_name"}
+        });
 
         invalidInstanceNames.Should().BeEquivalentTo("invalid_name");
     }
@@ -40,10 +37,10 @@ public class ProcessorExtensionsTest
             }
         };
 
-        var settings = Substitute.For<ISyncSettings>();
-        settings.Instances.ReturnsNull();
-
-        var invalidInstanceNames = settings.GetInvalidInstanceNames(configs);
+        var invalidInstanceNames = configs.GetInvalidInstanceNames(new ConfigFilterCriteria
+        {
+            Instances = null
+        });
 
         invalidInstanceNames.Should().BeEmpty();
     }
@@ -63,11 +60,11 @@ public class ProcessorExtensionsTest
             new SonarrConfiguration {InstanceName = "sonarr4"}
         };
 
-        var settings = Substitute.For<ISyncSettings>();
-        settings.Service.Returns(SupportedServices.Radarr);
-        settings.Instances.Returns(new[] {"radarr2", "radarr4", "radarr5", "sonarr2"});
-
-        var result = configs.GetConfigsBasedOnSettings(settings);
+        var result = configs.GetConfigsBasedOnSettings(new ConfigFilterCriteria
+        {
+            Service = SupportedServices.Radarr,
+            Instances = new[] {"radarr2", "radarr4", "radarr5", "sonarr2"}
+        });
 
         result.Select(x => x.InstanceName).Should().BeEquivalentTo("radarr2", "radarr4");
     }
@@ -81,10 +78,10 @@ public class ProcessorExtensionsTest
             new SonarrConfiguration {InstanceName = "sonarr1"}
         };
 
-        var settings = Substitute.For<ISyncSettings>();
-        settings.Instances.Returns(Array.Empty<string>());
-
-        var result = configs.GetConfigsBasedOnSettings(settings);
+        var result = configs.GetConfigsBasedOnSettings(new ConfigFilterCriteria
+        {
+            Instances = Array.Empty<string>()
+        });
 
         result.Select(x => x.InstanceName).Should().BeEquivalentTo("radarr1", "sonarr1");
     }

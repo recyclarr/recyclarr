@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `delete` command added for deleting one, many, or all custom formats from Radarr or Sonarr.
+
 ### Changed
 
 - Program now exits when invalid instances are specified.

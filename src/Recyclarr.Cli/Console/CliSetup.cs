@@ -28,5 +28,11 @@ public static class CliSetup
             config.AddCommand<ConfigCreateCommand>("create");
             config.AddCommand<ConfigListCommand>("list");
         });
+
+        cli.AddBranch("delete", delete =>
+        {
+            delete.SetDescription("Delete operations for remote services (e.g. Radarr, Sonarr)");
+            delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
+        });
     }
 }

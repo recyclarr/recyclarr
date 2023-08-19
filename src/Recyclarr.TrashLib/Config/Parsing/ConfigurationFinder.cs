@@ -34,14 +34,9 @@ public class ConfigurationFinder : IConfigurationFinder
         return configs;
     }
 
-    public IReadOnlyCollection<IFileInfo> GetConfigFiles(IReadOnlyCollection<IFileInfo>? configs = null)
+    public IReadOnlyCollection<IFileInfo> GetConfigFiles()
     {
-        if (configs is not null && configs.Any())
-        {
-            return configs;
-        }
-
-        configs = FindDefaultConfigFiles();
+        var configs = FindDefaultConfigFiles();
         if (configs.Count == 0)
         {
             throw new NoConfigurationFilesException();
