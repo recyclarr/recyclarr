@@ -42,11 +42,8 @@ public class SonarrReleaseProfileCompatibilityHandler : ISonarrReleaseProfileCom
 
     public SonarrReleaseProfile CompatibleReleaseProfileForReceiving(JObject profile)
     {
-        JSchema? schema;
-        IList<string>? errorMessages;
-
-        schema = JSchema.Parse(SonarrReleaseProfileSchema.V2);
-        if (profile.IsValid(schema, out errorMessages))
+        var schema = JSchema.Parse(SonarrReleaseProfileSchema.V2);
+        if (profile.IsValid(schema, out IList<string>? errorMessages))
         {
             return profile.ToObject<SonarrReleaseProfile>()
                 ?? throw new InvalidDataException("SonarrReleaseProfile V2 parsing failed");
