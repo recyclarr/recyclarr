@@ -131,6 +131,11 @@
               }
             }
           },
+          "score_set": {
+            "type": "string",
+            "description": "The set of scores to use for custom formats assigned to a profile.",
+            "default": "default"
+          },
           "upgrade": {
             "type": "object",
             "additionalProperties": false,
