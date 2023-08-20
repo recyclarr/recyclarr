@@ -35,13 +35,9 @@ public record CustomFormatData
     [JsonNoSerialize]
     public string TrashId { get; init; } = "";
 
-    [JsonProperty("trash_score")]
-    [JsonNoSerialize]
-    public int? TrashScore { get; init; }
-
     [JsonProperty("trash_scores")]
     [JsonNoSerialize]
-    public Dictionary<string, int> TrashScores { get; init; } = new();
+    public Dictionary<string, int> TrashScores { get; init; } = new(StringComparer.InvariantCultureIgnoreCase);
 
     [JsonIgnore]
     public int? DefaultScore => TrashScores.TryGetValue("default", out var score) ? score : null;

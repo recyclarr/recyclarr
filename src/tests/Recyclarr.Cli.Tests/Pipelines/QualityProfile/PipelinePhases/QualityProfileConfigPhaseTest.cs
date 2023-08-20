@@ -173,4 +173,50 @@ public class QualityProfileConfigPhaseTest
             },
             o => o.Excluding(x => x.ShouldCreate));
     }
+
+    [Test, AutoMockData]
+    public void All_cfs_use_score_set(
+        [Frozen] ProcessedCustomFormatCache cache,
+        QualityProfileConfigPhase sut)
+    {
+        cache.AddCustomFormats(new[]
+        {
+            NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
+            NewCf.DataWithScores("", "id2", 2, ("default", 201), ("set2", 202))
+        });
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats = new[]
+            {
+                new CustomFormatConfig
+                {
+                    TrashIds = new[] {"id1", "id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityProfileScoreConfig {Name = "test_profile"}
+                    }
+                }
+            },
+            QualityProfiles = new[]
+            {
+                new QualityProfileConfig
+                {
+                    Name = "test_profile",
+                    ScoreSet = "set1"
+                }
+            }
+        };
+
+        var result = sut.Execute(config);
+
+        result.Should().BeEquivalentTo(new[]
+            {
+                NewQp.Processed("test_profile", ("id1", 1, 102), ("id2", 2, 201)) with
+                {
+                    Profile = config.QualityProfiles.First()
+                }
+            },
+            o => o.Excluding(x => x.ShouldCreate));
+    }
 }

@@ -61,18 +61,20 @@ public class QualityProfileConfigPhase
                     };
             }
 
-            AddCustomFormatScoreData(profileCfs.CfScores, profile, cf);
+            AddCustomFormatScoreData(profileCfs, profile, cf);
         }
 
         return allProfiles.Values.ToList();
     }
 
     private void AddCustomFormatScoreData(
-        ICollection<ProcessedQualityProfileScore> existingScoreData,
-        QualityProfileScoreConfig profile,
+        ProcessedQualityProfileData profile,
+        QualityProfileScoreConfig scoreConfig,
         CustomFormatData cf)
     {
-        var scoreToUse = profile.Score ?? cf.DefaultScore ?? cf.TrashScore;
+        var existingScoreData = profile.CfScores;
+
+        var scoreToUse = DetermineScore(profile.Profile, scoreConfig, cf);
         if (scoreToUse is null)
         {
             _log.Information("No score in guide or config for CF {Name} ({TrashId})", cf.Name, cf.TrashId);
@@ -87,7 +89,7 @@ public class QualityProfileConfigPhase
                 _log.Warning(
                     "Custom format {Name} ({TrashId}) is duplicated in quality profile {ProfileName} with a score " +
                     "of {NewScore}, which is different from the original score of {OriginalScore}",
-                    cf.Name, cf.TrashId, profile.Name, scoreToUse, existingScore);
+                    cf.Name, cf.TrashId, scoreConfig.Name, scoreToUse, existingScore);
             }
             else
             {
@@ -98,5 +100,28 @@ public class QualityProfileConfigPhase
         }
 
         existingScoreData.Add(new ProcessedQualityProfileScore(cf.TrashId, cf.Name, cf.Id, scoreToUse.Value));
+    }
+
+    private int? DetermineScore(
+        QualityProfileConfig profile,
+        QualityProfileScoreConfig scoreConfig,
+        CustomFormatData cf)
+    {
+        if (scoreConfig.Score is not null)
+        {
+            return scoreConfig.Score;
+        }
+
+        if (profile.ScoreSet is not null)
+        {
+            if (cf.TrashScores.TryGetValue(profile.ScoreSet, out var scoreFromSet))
+            {
+                return scoreFromSet;
+            }
+
+            _log.Debug("CF {CfName} has no Score Set with name '{ScoreSetName}'", cf.Name, profile.ScoreSet);
+        }
+
+        return cf.DefaultScore;
     }
 }
