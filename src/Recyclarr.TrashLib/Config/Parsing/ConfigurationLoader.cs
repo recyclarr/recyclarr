@@ -2,6 +2,7 @@
 using AutoMapper;
 using Recyclarr.TrashLib.Config.Parsing.PostProcessing;
 using Recyclarr.TrashLib.Config.Services;
+using Serilog.Context;
 
 namespace Recyclarr.TrashLib.Config.Parsing;
 
@@ -26,6 +27,7 @@ public class ConfigurationLoader : IConfigurationLoader
 
     public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
     {
+        using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
         return ProcessLoadedConfigs(_parser.Load(file));
     }
 

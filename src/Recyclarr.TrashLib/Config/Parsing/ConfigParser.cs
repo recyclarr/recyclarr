@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.Config.Yaml;
-using Serilog.Context;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
@@ -23,7 +22,6 @@ public class ConfigParser
     public RootConfigYaml? Load(IFileInfo file)
     {
         _log.Debug("Loading config file: {File}", file);
-        using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
         return Load(file.OpenText);
     }
 
