@@ -72,7 +72,7 @@ public class QualityProfileConfigPhase
         QualityProfileScoreConfig profile,
         CustomFormatData cf)
     {
-        var scoreToUse = profile.Score ?? cf.TrashScore;
+        var scoreToUse = profile.Score ?? cf.DefaultScore ?? cf.TrashScore;
         if (scoreToUse is null)
         {
             _log.Information("No score in guide or config for CF {Name} ({TrashId})", cf.Name, cf.TrashId);

@@ -231,7 +231,7 @@ public class CustomFormatDataComparerTest
         {
             FileName = "file1.json",
             TrashId = "a",
-            TrashScore = 1,
+            TrashScores = {["default"] = 1},
             Category = "one"
         };
 
@@ -239,7 +239,7 @@ public class CustomFormatDataComparerTest
         {
             FileName = "file2.json",
             TrashId = "b",
-            TrashScore = 2,
+            TrashScores = {["default"] = 2},
             Category = "two"
         };
 

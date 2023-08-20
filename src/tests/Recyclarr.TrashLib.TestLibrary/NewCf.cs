@@ -11,7 +11,7 @@ public static class NewCf
             Id = id,
             Name = name,
             TrashId = trashId,
-            TrashScore = score
+            TrashScores = {["default"] = score}
         };
     }
 

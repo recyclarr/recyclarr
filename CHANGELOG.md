@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Program now exits when invalid instances are specified.
+- Scores are now pulled from the `trash_scores` object in the guide's CF json files.
 
 ### Deprecated
 

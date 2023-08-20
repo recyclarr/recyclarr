@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Json;
@@ -34,15 +33,18 @@ public record CustomFormatData
 
     [JsonProperty("trash_id")]
     [JsonNoSerialize]
-    [SuppressMessage("Design", "CA1044:Properties should not be write only",
-        Justification = "We want to deserialize but not serialize this property")]
     public string TrashId { get; init; } = "";
 
     [JsonProperty("trash_score")]
     [JsonNoSerialize]
-    [SuppressMessage("Design", "CA1044:Properties should not be write only",
-        Justification = "We want to deserialize but not serialize this property")]
     public int? TrashScore { get; init; }
+
+    [JsonProperty("trash_scores")]
+    [JsonNoSerialize]
+    public Dictionary<string, int> TrashScores { get; init; } = new();
+
+    [JsonIgnore]
+    public int? DefaultScore => TrashScores.TryGetValue("default", out var score) ? score : null;
 
     public int Id { get; set; }
     public string Name { get; init; } = "";
