@@ -65,7 +65,6 @@ public record QualityProfileConfigYaml
     public int? MinFormatScore { get; init; }
     public QualitySortAlgorithm? QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
-
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
