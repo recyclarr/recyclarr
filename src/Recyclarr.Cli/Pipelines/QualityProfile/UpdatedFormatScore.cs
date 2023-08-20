@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -38,8 +39,12 @@ public record UpdatedFormatScore(ProfileFormatItemDto Dto, int NewScore, FormatS
 
     public static UpdatedFormatScore Reset(ProfileFormatItemDto dto, ProcessedQualityProfileData profileData)
     {
-        var score = profileData.Profile.ResetUnmatchedScores ? 0 : dto.Score;
-        return new UpdatedFormatScore(dto, score, FormatScoreUpdateReason.Reset);
+        var reset = profileData.Profile.ResetUnmatchedScores;
+        var shouldReset = reset.Enabled && reset.Except.All(x => !dto.Name.EqualsIgnoreCase(x));
+
+        var score = shouldReset ? 0 : dto.Score;
+        var reason = shouldReset ? FormatScoreUpdateReason.Reset : FormatScoreUpdateReason.NoChange;
+        return new UpdatedFormatScore(dto, score, reason);
     }
 
     public static UpdatedFormatScore Updated(ProfileFormatItemDto dto, ProcessedQualityProfileScore score)

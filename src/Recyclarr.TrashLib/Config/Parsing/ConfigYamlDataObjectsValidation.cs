@@ -87,6 +87,23 @@ public class QualityProfileFormatUpgradeYamlValidator : AbstractValidator<Qualit
     }
 }
 
+public class ResetUnmatchedScoresConfigYamlValidator : AbstractValidator<ResetUnmatchedScoresConfigYaml>
+{
+    public ResetUnmatchedScoresConfigYamlValidator()
+    {
+        RuleFor(x => x.Enabled)
+            .NotNull()
+            .WithMessage("Under `reset_unmatched_scores`, the `enabled` property is required.");
+
+        RuleFor(x => x.FromBool)
+            .Must(x => !x) // must be false
+            .WithMessage(
+                "Using true/false with `reset_unmatched_scores` is deprecated. " +
+                "See: https://recyclarr.dev/wiki/upgrade-guide/v6.0/#reset-scores")
+            .WithSeverity(Severity.Warning);
+    }
+}
+
 public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfileConfigYaml>
 {
     public QualityProfileConfigYamlValidator()
@@ -101,6 +118,9 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
 
         RuleFor(x => x.Upgrade)
             .SetNonNullableValidator(x => new QualityProfileFormatUpgradeYamlValidator(x));
+
+        RuleFor(x => x.ResetUnmatchedScores)
+            .SetNonNullableValidator(new ResetUnmatchedScoresConfigYamlValidator());
 
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)

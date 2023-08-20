@@ -53,5 +53,16 @@ public class QualityProfileNoticePhase
             _log.Warning("Quality profile '{ProfileName}' references invalid quality names: {InvalidNames}",
                 profileName, invalidNames);
         }
+
+        var invalidCfExceptNames = transactions.UpdatedProfiles
+            .Where(x => x.InvalidExceptCfNames.Any())
+            .Select(x => (x.ProfileName, x.InvalidExceptCfNames));
+
+        foreach (var (profileName, invalidNames) in invalidCfExceptNames)
+        {
+            _log.Warning(
+                "`except` under `reset_unmatched_scores` in quality profile '{ProfileName}' has invalid " +
+                "CF names: {CfNames}", profileName, invalidNames);
+        }
     }
 }

@@ -17,6 +17,8 @@ public class ConfigYamlMapperProfile : Profile
         CreateMap<QualityProfileQualityConfigYaml, QualityProfileQualityConfig>()
             .ForMember(x => x.Enabled, o => o.NullSubstitute(true));
 
+        CreateMap<ResetUnmatchedScoresConfigYaml, ResetUnmatchedScoresConfig>();
+
         CreateMap<QualityProfileConfigYaml, QualityProfileConfig>()
             .ForMember(x => x.UpgradeAllowed, o => o.MapFrom(x => x.Upgrade!.Allowed))
             .ForMember(x => x.UpgradeUntilQuality, o => o.MapFrom(x => x.Upgrade!.UntilQuality))

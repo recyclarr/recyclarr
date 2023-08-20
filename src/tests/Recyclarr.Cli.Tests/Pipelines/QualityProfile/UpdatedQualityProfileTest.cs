@@ -229,8 +229,7 @@ public class UpdatedQualityProfileTest
             },
             ProfileConfig = NewQp.Processed(new QualityProfileConfig
             {
-                // todo: Why is this commented out?
-                // UpgradeUntilQuality = "Quality Item 9"
+                // Do not specify an `UpgradeUntilQuality` here to simulate fallback
             }),
             UpdatedQualities = new UpdatedQualities
             {

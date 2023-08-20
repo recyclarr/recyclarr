@@ -59,6 +59,12 @@ public enum QualitySortAlgorithm
     Bottom
 }
 
+public record ResetUnmatchedScoresConfig
+{
+    public bool Enabled { get; init; }
+    public IReadOnlyCollection<string> Except { get; init; } = Array.Empty<string>();
+}
+
 public record QualityProfileConfig
 {
     public string Name { get; init; } = "";
@@ -66,7 +72,7 @@ public record QualityProfileConfig
     public string? UpgradeUntilQuality { get; init; }
     public int? UpgradeUntilScore { get; init; }
     public int? MinFormatScore { get; init; }
-    public bool ResetUnmatchedScores { get; init; }
+    public ResetUnmatchedScoresConfig ResetUnmatchedScores { get; init; } = new();
     public QualitySortAlgorithm QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfig> Qualities { get; init; } =
         Array.Empty<QualityProfileQualityConfig>();

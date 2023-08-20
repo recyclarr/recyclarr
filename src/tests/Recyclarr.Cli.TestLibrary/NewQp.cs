@@ -32,7 +32,10 @@ public static class NewQp
         var profileConfig = new QualityProfileConfig
         {
             Name = profileName,
-            ResetUnmatchedScores = resetUnmatchedScores
+            ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+            {
+                Enabled = resetUnmatchedScores
+            }
         };
 
         return Processed(profileConfig, scores);

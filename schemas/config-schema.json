@@ -109,12 +109,27 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the quality profile to which settings should apply"
+            "description": "The name of the quality profile to which settings should apply."
           },
           "reset_unmatched_scores": {
-            "type": "boolean",
-            "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide).",
-            "default": false
+            "type": "object",
+            "description": "Settings related to resetting unmatched CF scores.",
+            "additionalProperties": false,
+            "required": ["enabled"],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide)."
+              },
+              "except": {
+                "type": "array",
+                "description": "An array of strings that match custom formats to exclude when resetting scores. Matching is case-insensitive.",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "upgrade": {
             "type": "object",

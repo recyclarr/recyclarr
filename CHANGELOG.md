@@ -11,10 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New `delete` command added for deleting one, many, or all custom formats from Radarr or Sonarr.
+- Exclusions are now supported under `reset_unmatched_scores`. This is used to prevent score resets
+  to specific custom formats. See [the docs][except] for more info.
 
 ### Changed
 
 - Program now exits when invalid instances are specified.
+
+### Deprecated
+
+- `reset_unmatched_scores` has a new syntax. The old syntax [has been deprecated][resetdeprecate].
 
 ### Fixed
 
@@ -23,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Radarr or Sonarr, you need to manually merge those config files. See [this page][configmerge].
 
 [configmerge]: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance
+[except]: https://recyclarr.dev/wiki/yaml/config-reference/#qp-reset-unmatched-scores
+[resetdeprecate]: https://recyclarr.dev/wiki/upgrade-guide/v6.0/#breaking-changes
 
 ## [5.2.1] - 2023-08-07
 

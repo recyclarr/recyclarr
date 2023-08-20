@@ -293,7 +293,18 @@ public class QualityProfileTransactionPhaseTest
     {
         var guideData = new[]
         {
-            NewQp.Processed("profile1", false, ("quality3", "id3", 3, 100), ("quality4", "id4", 4, 500))
+            NewQp.Processed(new QualityProfileConfig
+                {
+                    Name = "profile1",
+                    ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                    {
+                        Enabled = false,
+                        // Throw in some exceptions here, just to test whether or not these somehow affect the result
+                        // despite Enable being set to false.
+                        Except = new[] {"cf1"}
+                    }
+                },
+                ("cf3", "id3", 3, 100), ("cf4", "id4", 4, 500))
         };
 
         var dtos = new[]
@@ -305,13 +316,13 @@ public class QualityProfileTransactionPhaseTest
                 {
                     new ProfileFormatItemDto
                     {
-                        Name = "quality1",
+                        Name = "cf1",
                         Format = 1,
                         Score = 200
                     },
                     new ProfileFormatItemDto
                     {
-                        Name = "quality2",
+                        Name = "cf2",
                         Format = 2,
                         Score = 300
                     }
@@ -327,10 +338,113 @@ public class QualityProfileTransactionPhaseTest
             .ContainSingle().Which.UpdatedScores.Should()
             .BeEquivalentTo(new[]
             {
-                NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.Reset),
-                NewQp.UpdatedScore("quality2", 300, 300, FormatScoreUpdateReason.Reset),
-                NewQp.UpdatedScore("quality3", 0, 100, FormatScoreUpdateReason.New),
-                NewQp.UpdatedScore("quality4", 0, 500, FormatScoreUpdateReason.New)
+                NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
+                NewQp.UpdatedScore("cf2", 300, 300, FormatScoreUpdateReason.NoChange),
+                NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
+                NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New)
             }, o => o.Excluding(x => x.Dto.Format));
+    }
+
+    [Test, AutoMockData]
+    public void Reset_scores_with_reset_exceptions(QualityProfileTransactionPhase sut)
+    {
+        var guideData = new[]
+        {
+            NewQp.Processed(new QualityProfileConfig
+                {
+                    Name = "profile1",
+                    ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                    {
+                        Enabled = true,
+                        Except = new[] {"cf1"}
+                    }
+                },
+                ("cf3", "id3", 3, 100), ("cf4", "id4", 4, 500))
+        };
+
+        var dtos = new[]
+        {
+            new QualityProfileDto
+            {
+                Name = "profile1",
+                FormatItems = new[]
+                {
+                    new ProfileFormatItemDto
+                    {
+                        Name = "cf1",
+                        Format = 1,
+                        Score = 200
+                    },
+                    new ProfileFormatItemDto
+                    {
+                        Name = "cf2",
+                        Format = 2,
+                        Score = 300
+                    }
+                }
+            }
+        };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+
+        var result = sut.Execute(guideData, serviceData);
+
+        result.UpdatedProfiles.Should()
+            .ContainSingle().Which.UpdatedScores.Should()
+            .BeEquivalentTo(new[]
+            {
+                NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
+                NewQp.UpdatedScore("cf2", 300, 0, FormatScoreUpdateReason.Reset),
+                NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
+                NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New)
+            }, o => o.Excluding(x => x.Dto.Format));
+    }
+
+    [Test, AutoMockData]
+    public void Reset_scores_with_invalid_except_list_items(QualityProfileTransactionPhase sut)
+    {
+        var guideData = new[]
+        {
+            NewQp.Processed(new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    Except = new[] {"cf50"}
+                }
+            })
+        };
+
+        var dtos = new[]
+        {
+            new QualityProfileDto
+            {
+                Name = "profile1",
+                FormatItems = new[]
+                {
+                    new ProfileFormatItemDto
+                    {
+                        Name = "cf1",
+                        Format = 1,
+                        Score = 200
+                    },
+                    new ProfileFormatItemDto
+                    {
+                        Name = "cf2",
+                        Format = 2,
+                        Score = 300
+                    }
+                }
+            }
+        };
+
+        var serviceData = new QualityProfileServiceData(dtos, new QualityProfileDto());
+
+        var result = sut.Execute(guideData, serviceData);
+
+        result.UpdatedProfiles.Should()
+            .ContainSingle().Which.InvalidExceptCfNames.Should()
+            .BeEquivalentTo("cf50");
     }
 }

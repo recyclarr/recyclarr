@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.Results;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.TrashLib.Config.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
@@ -91,8 +93,28 @@ public class QualityProfileTransactionPhase
     {
         foreach (var profile in updatedProfiles)
         {
+            profile.InvalidExceptCfNames = GetInvalidExceptCfNames(
+                profile.ProfileConfig.Profile.ResetUnmatchedScores, profile.ProfileDto);
+
             profile.UpdatedScores = ProcessScoreUpdates(profile.ProfileConfig, profile.ProfileDto);
         }
+    }
+
+    private static IReadOnlyCollection<string> GetInvalidExceptCfNames(
+        ResetUnmatchedScoresConfig resetConfig,
+        QualityProfileDto profileDto)
+    {
+        var except = resetConfig.Except;
+        if (!except.Any())
+        {
+            return Array.Empty<string>();
+        }
+
+        var serviceCfNames = profileDto.FormatItems.Select(x => x.Name).ToList();
+        return except
+            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+            .Where(x => serviceCfNames.TrueForAll(y => !y.EqualsIgnoreCase(x)))
+            .ToList();
     }
 
     private static List<UpdatedFormatScore> ProcessScoreUpdates(
