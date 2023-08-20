@@ -14,9 +14,4 @@ public static class DictionaryExtensions
 
         return val;
     }
-
-    public static TValue? GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
-    {
-        return dict.TryGetValue(key, out var val) ? val : default;
-    }
 }

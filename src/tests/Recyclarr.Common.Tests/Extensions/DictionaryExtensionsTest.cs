@@ -15,7 +15,7 @@ public class DictionaryExtensionsTest
     {
         var dict = new Dictionary<int, MySampleValue>();
         var theValue = dict.GetOrCreate(100);
-        dict.Should().HaveCount(1);
+        dict.Should().ContainSingle();
         dict.Should().Contain(100, theValue);
     }
 
@@ -25,7 +25,7 @@ public class DictionaryExtensionsTest
         var sample = new MySampleValue();
         var dict = new Dictionary<int, MySampleValue> {{100, sample}};
 
-        var theValue = dict.GetOrDefault(200);
+        var theValue = dict.GetValueOrDefault(200);
 
         dict.Should().HaveCount(1).And.Contain(100, sample);
         theValue.Should().BeNull();
@@ -38,7 +38,7 @@ public class DictionaryExtensionsTest
         var dict = new Dictionary<int, MySampleValue> {{100, sample}};
 
         var theValue = dict.GetOrCreate(100);
-        dict.Should().HaveCount(1);
+        dict.Should().ContainSingle();
         dict.Should().Contain(100, sample);
         dict.Should().ContainValue(theValue);
         theValue.Should().Be(sample);
@@ -50,10 +50,10 @@ public class DictionaryExtensionsTest
         var sample = new MySampleValue();
         var dict = new Dictionary<int, MySampleValue> {{100, sample}};
 
-        var theValue = dict.GetOrDefault(100);
+        var theValue = dict.GetValueOrDefault(100);
 
         // Ensure the container hasn't been mutated
-        dict.Should().HaveCount(1).And.Contain(100, sample);
+        dict.Should().ContainSingle().And.Contain(100, sample);
         theValue.Should().Be(sample);
     }
 }
