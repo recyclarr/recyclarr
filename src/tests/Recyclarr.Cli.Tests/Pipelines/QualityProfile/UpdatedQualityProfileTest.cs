@@ -15,14 +15,8 @@ public class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
-            {
-                Name = "dto_name"
-            },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
-            {
-                Name = "config_name"
-            }),
+            ProfileDto = new QualityProfileDto {Name = "dto_name"},
+            ProfileConfig = NewQp.Processed("config_name"),
             UpdateReason = QualityProfileUpdateReason.New
         };
 
@@ -35,10 +29,7 @@ public class UpdatedQualityProfileTest
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
-            {
-                Name = "config_name"
-            }),
+            ProfileConfig = NewQp.Processed("config_name"),
             UpdateReason = QualityProfileUpdateReason.New
         };
 
@@ -59,7 +50,7 @@ public class UpdatedQualityProfileTest
                 UpgradeAllowed = false,
                 Cutoff = 1
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            ProfileConfig = NewQp.Processed(new QualityProfileConfig
             {
                 Name = "config_name",
                 MinFormatScore = 110,
@@ -109,7 +100,7 @@ public class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true)
                 }
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig()),
+            ProfileConfig = NewQp.Processed(""),
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 0,
@@ -135,7 +126,7 @@ public class UpdatedQualityProfileTest
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto {Name = ""},
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig {Name = "config_name"}),
+            ProfileConfig = NewQp.Processed("config_name"),
             UpdatedQualities = new UpdatedQualities
             {
                 Items = new[]
@@ -164,7 +155,7 @@ public class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true)
                 }
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            ProfileConfig = NewQp.Processed(new QualityProfileConfig
             {
                 UpgradeUntilQuality = "Quality Item 2"
             }),
@@ -200,7 +191,7 @@ public class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true)
                 }
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            ProfileConfig = NewQp.Processed(new QualityProfileConfig
             {
                 UpgradeUntilQuality = "Quality Item 9"
             }),
@@ -236,8 +227,9 @@ public class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true)
                 }
             },
-            ProfileConfig = new ProcessedQualityProfileData(new QualityProfileConfig
+            ProfileConfig = NewQp.Processed(new QualityProfileConfig
             {
+                // todo: Why is this commented out?
                 // UpgradeUntilQuality = "Quality Item 9"
             }),
             UpdatedQualities = new UpdatedQualities

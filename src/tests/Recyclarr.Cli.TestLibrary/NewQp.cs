@@ -29,12 +29,22 @@ public static class NewQp
         bool resetUnmatchedScores,
         params (string CfName, string TrashId, int FormatId, int Score)[] scores)
     {
-        return new ProcessedQualityProfileData(new QualityProfileConfig
+        var profileConfig = new QualityProfileConfig
         {
             Name = profileName,
             ResetUnmatchedScores = resetUnmatchedScores
-        })
+        };
+
+        return Processed(profileConfig, scores);
+    }
+
+    public static ProcessedQualityProfileData Processed(
+        QualityProfileConfig profileConfig,
+        params (string CfName, string TrashId, int FormatId, int Score)[] scores)
+    {
+        return new ProcessedQualityProfileData
         {
+            Profile = profileConfig,
             CfScores = scores
                 .Select(x => new ProcessedQualityProfileScore(x.TrashId, x.CfName, x.FormatId, x.Score))
                 .ToList()

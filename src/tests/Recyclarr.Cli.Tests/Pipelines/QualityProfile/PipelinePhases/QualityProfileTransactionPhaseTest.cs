@@ -53,14 +53,17 @@ public class QualityProfileTransactionPhaseTest
     {
         var configData = new[]
         {
-            new ProcessedQualityProfileData(new QualityProfileConfig
+            new ProcessedQualityProfileData
             {
-                Name = "profile1",
-                Qualities = new[]
+                Profile = new QualityProfileConfig
                 {
-                    new QualityProfileQualityConfig {Name = "quality1", Enabled = true}
+                    Name = "profile1",
+                    Qualities = new[]
+                    {
+                        new QualityProfileQualityConfig {Name = "quality1", Enabled = true}
+                    }
                 }
-            })
+            }
         };
 
         var dtos = new[]

@@ -28,7 +28,7 @@ public class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset)
             },
             ProfileDto = new QualityProfileDto {Name = "ProfileName"},
-            ProfileConfig = new ProcessedQualityProfileData(profileConfig),
+            ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.Changed
         };
 
@@ -65,7 +65,7 @@ public class UpdatedQualityProfileValidatorTest
                 InvalidQualityNames = new[] {"foo1"}
             },
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = new ProcessedQualityProfileData(profileConfig),
+            ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New
         };
 
@@ -84,7 +84,7 @@ public class UpdatedQualityProfileValidatorTest
         var updatedProfile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = new ProcessedQualityProfileData(profileConfig),
+            ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New
         };
 
@@ -112,7 +112,7 @@ public class UpdatedQualityProfileValidatorTest
                     NewQp.QualityDto(1, "disabled_quality", false)
                 }
             },
-            ProfileConfig = new ProcessedQualityProfileData(profileConfig),
+            ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New
         };
 

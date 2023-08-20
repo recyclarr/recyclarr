@@ -7,8 +7,9 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 public record ProcessedQualityProfileScore(string TrashId, string CfName, int FormatId, int Score);
 
-public record ProcessedQualityProfileData(QualityProfileConfig Profile)
+public record ProcessedQualityProfileData
 {
+    public required QualityProfileConfig Profile { get; init; }
     public bool ShouldCreate { get; init; } = true;
     public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
 }
@@ -39,7 +40,7 @@ public class QualityProfileConfigPhase
                 .Select(y => (x.Profile, Cf: y)));
 
         var allProfiles = config.QualityProfiles
-            .Select(x => new ProcessedQualityProfileData(x))
+            .Select(x => new ProcessedQualityProfileData {Profile = x})
             .ToDictionary(x => x.Profile.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
 
         foreach (var (profile, cf) in profileAndCfs)
@@ -51,8 +52,9 @@ public class QualityProfileConfigPhase
                 // If the user did not specify a quality profile in their config, we still create the QP object
                 // for consistency (at the very least for the name).
                 allProfiles[profile.Name] = profileCfs =
-                    new ProcessedQualityProfileData(new QualityProfileConfig {Name = profile.Name})
+                    new ProcessedQualityProfileData
                     {
+                        Profile = new QualityProfileConfig {Name = profile.Name},
                         // The user must explicitly specify a profile in the top-level `quality_profiles` section of
                         // their config, otherwise we do not implicitly create them in the service.
                         ShouldCreate = false
