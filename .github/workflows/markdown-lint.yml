@@ -3,6 +3,8 @@ name: Markdown Lint
 
 on:
   push:
+    # Explicitly specifying this results in tags being ignored, which is the goal.
+    branches: ["**"]
     paths:
       - "**.md"
       - .github/workflows/markdown-lint.yml

@@ -3,8 +3,8 @@ name: Inspect Code
 
 on:
   push:
+    # Explicitly specifying this results in tags being ignored, which is the goal.
     branches: ["**"]
-    tags: ["!**"]
     paths:
       - .github/workflows/inspect-code.yml
       - '**.cs'

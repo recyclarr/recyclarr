@@ -5,14 +5,12 @@ on:
   # Do not run on pull-request because the required tokens
   # cannot be read from there.
   push:
+    # Explicitly specifying this results in tags being ignored, which is the goal.
+    branches: ["**"]
     paths:
       - .github/workflows/sonarcloud.yml
       - sonar-project.properties
       - "src/**"
-
-    # Explicitly specifying this results in tags being ignored, which is the goal.
-    branches:
-      - "**"
 
 env:
   dotnetVersion: "7.0.x"
