@@ -67,6 +67,7 @@ public class SyncProcessor : ISyncProcessor
                 PrintProcessingHeader(config.ServiceType, config);
                 await _capabilityEnforcer.Check(config);
                 await _pipelines.Process(settings, config);
+                _log.Information("Completed at {Date}", DateTime.Now);
             }
             catch (Exception e)
             {

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Print date & time log at the end of each completed instance sync.
+
 ## [5.3.1] - 2023-08-21
 
 ### Fixed
