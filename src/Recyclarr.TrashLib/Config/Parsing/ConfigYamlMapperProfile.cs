@@ -23,7 +23,8 @@ public class ConfigYamlMapperProfile : Profile
             .ForMember(x => x.UpgradeAllowed, o => o.MapFrom(x => x.Upgrade!.Allowed))
             .ForMember(x => x.UpgradeUntilQuality, o => o.MapFrom(x => x.Upgrade!.UntilQuality))
             .ForMember(x => x.UpgradeUntilScore, o => o.MapFrom(x => x.Upgrade!.UntilScore))
-            .ForMember(x => x.QualitySort, o => o.NullSubstitute(QualitySortAlgorithm.Top));
+            .ForMember(x => x.QualitySort, o => o.NullSubstitute(QualitySortAlgorithm.Top))
+            .ForMember(x => x.ResetUnmatchedScores, o => o.UseDestinationValue());
 
         CreateMap<ServiceConfigYaml, ServiceConfiguration>()
             .ForMember(x => x.InstanceName, o => o.Ignore());

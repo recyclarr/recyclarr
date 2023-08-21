@@ -41,4 +41,15 @@ public class ConfigYamlMapperProfileTest
 
         result.QualitySort.Should().Be(QualitySortAlgorithm.Top);
     }
+
+    [Test]
+    public void Non_null_reset_unmatched_scores_when_source_is_null()
+    {
+        var yaml = new QualityProfileConfigYaml();
+
+        var mapper = CreateMapper();
+        var result = mapper.Map<QualityProfileConfig>(yaml);
+
+        result.ResetUnmatchedScores.Should().BeEquivalentTo(new ResetUnmatchedScoresConfig());
+    }
 }
