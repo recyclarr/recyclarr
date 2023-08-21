@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `score_set` property available to each profile defined under the top-level `quality_profiles`
   list. This allows different kinds of pre-defined scores to be chosen from the guide, without
   having to explicitly override scores in your YAML.
+- New `--score-sets` option added to `list custom-formats` which lists all score sets that CFs are a
+  member of, instead of the CFs themselves.
+- New `--raw` option added to `list custom-formats` which omits boilerplate output and formatting.
+  Useful for scripting.
 
 ### Changed
 

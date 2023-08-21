@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.TrashLib.Config;
 using Spectre.Console;
 
@@ -14,9 +15,48 @@ public class CustomFormatDataLister
         _guide = guide;
     }
 
-    public void ListCustomFormats(SupportedServices serviceType)
+    public void List(IListCustomFormatSettings settings)
     {
-        _console.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
+        switch (settings)
+        {
+            case {ScoreSets: true}:
+                ListScoreSets(settings.Service, settings.Raw);
+                break;
+
+            default:
+                ListCustomFormats(settings.Service, settings.Raw);
+                break;
+        }
+    }
+
+    private void ListScoreSets(SupportedServices serviceType, bool raw)
+    {
+        if (!raw)
+        {
+            _console.WriteLine(
+                "\nThe following score sets are available. Use these with the `score_set` property in any " +
+                "quality profile defined under the top-level `quality_profiles` list.");
+
+            _console.WriteLine();
+        }
+
+        var scoreSets = _guide.GetCustomFormatData(serviceType)
+            .SelectMany(x => x.TrashScores.Keys)
+            .Distinct(StringComparer.InvariantCultureIgnoreCase)
+            .Order(StringComparer.InvariantCultureIgnoreCase);
+
+        foreach (var set in scoreSets)
+        {
+            _console.WriteLine(raw ? set : $" - {set}");
+        }
+    }
+
+    private void ListCustomFormats(SupportedServices serviceType, bool raw)
+    {
+        if (!raw)
+        {
+            _console.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
+        }
 
         var categories = _guide.GetCustomFormatData(serviceType)
             .OrderBy(x => x.Name)
@@ -34,8 +74,11 @@ public class CustomFormatDataLister
             }
         }
 
-        _console.WriteLine(
-            "\nThe above Custom Formats are in YAML format and ready to be copied & pasted " +
-            "under the `trash_ids:` property.");
+        if (!raw)
+        {
+            _console.WriteLine(
+                "\nThe above Custom Formats are in YAML format and ready to be copied & pasted " +
+                "under the `trash_ids:` property.");
+        }
     }
 }

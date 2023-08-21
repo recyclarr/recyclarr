@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
@@ -12,6 +13,7 @@ public class CustomFormatDataListerTest
     public void Custom_formats_appear_in_console_output(
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         [Frozen] ICustomFormatGuideService guide,
+        IListCustomFormatSettings settings,
         CustomFormatDataLister sut)
     {
         var testData = new[]
@@ -21,8 +23,9 @@ public class CustomFormatDataListerTest
         };
 
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
+        settings.ScoreSets.Returns(false);
 
-        sut.ListCustomFormats(default!);
+        sut.List(settings);
 
         console.Output.Should().ContainAll(
             testData.SelectMany(x => new[] {x.Name, x.TrashId}));
