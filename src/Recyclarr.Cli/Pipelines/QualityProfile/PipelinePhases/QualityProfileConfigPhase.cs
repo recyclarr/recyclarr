@@ -12,6 +12,7 @@ public record ProcessedQualityProfileData
     public required QualityProfileConfig Profile { get; init; }
     public bool ShouldCreate { get; init; } = true;
     public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
+    public IList<CustomFormatData> ScorelessCfs { get; } = new List<CustomFormatData>();
 }
 
 public class QualityProfileConfigPhase
@@ -64,7 +65,31 @@ public class QualityProfileConfigPhase
             AddCustomFormatScoreData(profileCfs, profile, cf);
         }
 
-        return allProfiles.Values.ToList();
+        var profilesToReturn = allProfiles.Values.ToList();
+        PrintDiagnostics(profilesToReturn);
+        return profilesToReturn;
+    }
+
+    private void PrintDiagnostics(IEnumerable<ProcessedQualityProfileData> profiles)
+    {
+        var scoreless = profiles
+            .SelectMany(x => x.ScorelessCfs)
+            .Select(x => (x.Name, x.TrashId))
+            .ToList();
+
+        if (!scoreless.Any())
+        {
+            return;
+        }
+
+        _log.Information(
+            "A total of {Count} custom formats have no scores assigned. See the debug logs for a detailed listing.",
+            scoreless.Count);
+
+        foreach (var (name, trashId) in scoreless)
+        {
+            _log.Debug("CF has no score in the guide or config YAML: {Name} ({TrashId})", name, trashId);
+        }
     }
 
     private void AddCustomFormatScoreData(
@@ -77,7 +102,7 @@ public class QualityProfileConfigPhase
         var scoreToUse = DetermineScore(profile.Profile, scoreConfig, cf);
         if (scoreToUse is null)
         {
-            _log.Information("No score in guide or config for CF {Name} ({TrashId})", cf.Name, cf.TrashId);
+            profile.ScorelessCfs.Add(cf);
             return;
         }
 
