@@ -112,7 +112,7 @@ public class QualityProfileConfigPhaseTest
             {
                 NewQp.Processed("test_profile")
             },
-            o => o.Excluding(x => x.ShouldCreate));
+            o => o.Excluding(x => x.ShouldCreate).Excluding(x => x.ScorelessCfs));
     }
 
     [Test, AutoMockData]
