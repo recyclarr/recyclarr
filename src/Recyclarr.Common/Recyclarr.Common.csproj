@@ -6,10 +6,6 @@
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Serilog" />
-    <PackageReference Include="SonarAnalyzer.CSharp">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="System.Reactive" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />

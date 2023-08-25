@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Packages we don't want from the root props -->
+    <PackageReference Remove="SonarAnalyzer.CSharp" />
+
+    <!-- Packages that apply to all tests -->
     <PackageReference Include="AgileObjects.ReadableExpressions" PrivateAssets="All" />
     <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
     <PackageReference Include="AutoFixture" PrivateAssets="All" />
