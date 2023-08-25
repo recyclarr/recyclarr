@@ -233,6 +233,7 @@ dotnet_diagnostic.s3626.severity = none
 dotnet_diagnostic.s1751.severity = none
 
 # ReSharper properties
+resharper_convert_constructor_to_member_initializers_highlighting = none
 resharper_accessor_owner_body = expression_body
 resharper_alignment_tab_fill_style = use_spaces
 resharper_align_first_arg_by_paren = false
