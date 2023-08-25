@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Print date & time log at the end of each completed instance sync (#165).
 
+### Fixed
+
+- Service failures (e.g. HTTP 500) no longer cause exceptions (#206).
+
 ## [5.3.1] - 2023-08-21
 
 ### Fixed

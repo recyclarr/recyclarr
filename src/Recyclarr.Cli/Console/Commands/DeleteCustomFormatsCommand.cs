@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
+using Recyclarr.Cli.Processors.ErrorHandling;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

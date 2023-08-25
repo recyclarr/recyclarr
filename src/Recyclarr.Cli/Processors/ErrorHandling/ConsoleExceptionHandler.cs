@@ -1,19 +1,20 @@
 using Flurl.Http;
-using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Http;
 using Recyclarr.TrashLib.Repo.VersionControl;
 
-namespace Recyclarr.Cli.Processors;
+namespace Recyclarr.Cli.Processors.ErrorHandling;
 
 public class ConsoleExceptionHandler
 {
     private readonly ILogger _log;
+    private readonly IFlurlHttpExceptionHandler _httpExceptionHandler;
 
-    public ConsoleExceptionHandler(ILogger log)
+    public ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler httpExceptionHandler)
     {
         _log = log;
+        _httpExceptionHandler = httpExceptionHandler;
     }
 
     public async Task HandleException(Exception sourceException)
@@ -27,11 +28,7 @@ public class ConsoleExceptionHandler
 
             case FlurlHttpException e:
                 _log.Error("HTTP error: {Message}", e.SanitizedExceptionMessage());
-                foreach (var error in await GetValidationErrorsAsync(e))
-                {
-                    _log.Error("Reason: {Error}", error);
-                }
-
+                await _httpExceptionHandler.ProcessServiceErrorMessages(new ServiceErrorMessageExtractor(e));
                 break;
 
             case NoConfigurationFilesException:
@@ -62,19 +59,5 @@ public class ConsoleExceptionHandler
             default:
                 throw sourceException;
         }
-    }
-
-    private static async Task<IReadOnlyCollection<string>> GetValidationErrorsAsync(FlurlHttpException e)
-    {
-        var response = await e.GetResponseJsonAsync<List<dynamic>>();
-        if (response is null)
-        {
-            return Array.Empty<string>();
-        }
-
-        return response
-            .Select(x => (string) x.errorMessage)
-            .NotNull(x => !string.IsNullOrEmpty(x))
-            .ToList();
     }
 }

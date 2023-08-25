@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;

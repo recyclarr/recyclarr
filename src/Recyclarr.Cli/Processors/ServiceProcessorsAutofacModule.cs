@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
+using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
 
 namespace Recyclarr.Cli.Processors;
@@ -13,6 +14,7 @@ public class ServiceProcessorsAutofacModule : Module
         base.Load(builder);
 
         builder.RegisterType<ConsoleExceptionHandler>();
+        builder.RegisterType<FlurlHttpExceptionHandler>().As<IFlurlHttpExceptionHandler>();
 
         // Sync
         builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
