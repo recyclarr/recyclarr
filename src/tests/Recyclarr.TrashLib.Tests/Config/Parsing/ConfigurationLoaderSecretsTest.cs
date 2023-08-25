@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.TestLibrary;
-using Serilog.Sinks.TestCorrelator;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -59,7 +58,6 @@ public class ConfigurationLoaderSecretsTest : TrashLibIntegrationFixture
     [Test]
     public void Throw_when_referencing_invalid_secret()
     {
-        using var logContext = TestCorrelator.CreateContext();
         var configLoader = Resolve<ConfigurationLoader>();
 
         const string testYml =

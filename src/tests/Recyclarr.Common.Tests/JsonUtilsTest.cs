@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.Extensions;
-using Serilog.Events;
-using Serilog.Sinks.TestCorrelator;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Common.Tests;
 
@@ -12,34 +11,23 @@ public class JsonUtilsTest
     [Test]
     public void Log_files_that_do_not_exist()
     {
-        using var logContext = TestCorrelator.CreateContext();
         var fs = new MockFileSystem();
-        var log = new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Debug)
-            .WriteTo.TestCorrelator()
-            .CreateLogger();
+        var log = new TestableLogger();
 
         var path = fs.CurrentDirectory().SubDirectory("doesnt_exist");
 
         var result = JsonUtils.GetJsonFilesInDirectories(new[] {path}, log);
 
         result.Should().BeEmpty();
-        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
-            .Should().ContainSingle()
-            .Which.RenderMessage()
-            .Should().Match("*doesnt_exist*");
+        log.Messages.Should().ContainSingle()
+            .Which.Should().Match("*doesnt_exist*");
     }
 
     [Test]
     public void Log_files_that_only_exist()
     {
         var fs = new MockFileSystem();
-        var log = new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Debug)
-            .WriteTo.TestCorrelator()
-            .CreateLogger();
-
-        using var logContext = TestCorrelator.CreateContext();
+        var log = new TestableLogger();
 
         var path = fs.CurrentDirectory().SubDirectory("exists").File("test.json");
         fs.AddFile(path.FullName, new MockFileData(""));
@@ -50,21 +38,14 @@ public class JsonUtilsTest
             .Which.FullName
             .Should().Be(path.FullName);
 
-        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
-            .Should().BeEmpty();
+        log.Messages.Should().BeEmpty();
     }
 
     [Test]
     public void Log_files_that_both_exist_and_do_not_exist()
     {
         var fs = new MockFileSystem();
-        var log = new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Debug)
-            .WriteTo.TestCorrelator()
-            .CreateLogger();
-
-        using var logContext = TestCorrelator.CreateContext();
-
+        var log = new TestableLogger();
         var paths = new[]
         {
             fs.CurrentDirectory().SubDirectory("does_not_exist"),
@@ -82,10 +63,8 @@ public class JsonUtilsTest
             .Which.FullName
             .Should().Be(existingFile);
 
-        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
-            .Should().ContainSingle()
-            .Which.RenderMessage()
-            .Should().Match("*does_not_exist*");
+        log.Messages.Should().ContainSingle()
+            .Which.Should().Match("*does_not_exist*");
     }
 
     [Test]

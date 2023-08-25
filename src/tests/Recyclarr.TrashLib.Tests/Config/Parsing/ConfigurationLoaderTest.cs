@@ -10,7 +10,6 @@ using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
-using Serilog.Sinks.TestCorrelator;
 
 namespace Recyclarr.TrashLib.Tests.Config.Parsing;
 
@@ -129,8 +128,6 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
     [Test]
     public void No_log_when_file_not_empty_but_has_no_desired_sections()
     {
-        using var logContext = TestCorrelator.CreateContext();
-
         var sut = Resolve<ConfigurationLoader>();
         const string testYml =
             """
@@ -142,8 +139,6 @@ public class ConfigurationLoaderTest : TrashLibIntegrationFixture
 
         sut.Load(testYml).GetConfigsOfType(SupportedServices.Sonarr);
 
-        TestCorrelator.GetLogEventsFromContextGuid(logContext.Guid)
-            .Select(x => x.RenderMessage())
-            .Should().NotContain("Configuration is empty");
+        Logger.Messages.Should().NotContain("Configuration is empty");
     }
 }

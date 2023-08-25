@@ -22,8 +22,8 @@
     <PackageReference Include="NUnit" PrivateAssets="All" />
     <PackageReference Include="NUnit.Analyzers" PrivateAssets="All" />
     <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
+    <PackageReference Include="Serilog.Sinks.Observable" PrivateAssets="All" />
     <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
-    <PackageReference Include="Serilog.Sinks.TestCorrelator" PrivateAssets="All" />
     <PackageReference Include="Spectre.Console.Testing" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />

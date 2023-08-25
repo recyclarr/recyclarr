@@ -1,23 +1,22 @@
+using JetBrains.Annotations;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.TestCorrelator;
 
 namespace Recyclarr.TestLibrary;
 
-public sealed class TestableLogger : ILogger, IDisposable
+[UsedImplicitly]
+public sealed class TestableLogger : ILogger
 {
     private readonly Logger _log;
-    private ITestCorrelatorContext _logContext;
+    private readonly List<string> _messages = new();
 
     public TestableLogger()
     {
         _log = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
-            .WriteTo.TestCorrelator()
+            .WriteTo.Observers(o => o.Subscribe(x => _messages.Add(x.RenderMessage())))
             .WriteTo.Console()
             .CreateLogger();
-
-        _logContext = TestCorrelator.CreateContext();
     }
 
     public void Write(LogEvent logEvent)
@@ -25,21 +24,5 @@ public sealed class TestableLogger : ILogger, IDisposable
         _log.Write(logEvent);
     }
 
-    public void Dispose()
-    {
-        _logContext.Dispose();
-        _log.Dispose();
-    }
-
-    public void ResetCapturedLogs()
-    {
-        _logContext.Dispose();
-        _logContext = TestCorrelator.CreateContext();
-    }
-
-    public IEnumerable<string> GetRenderedMessages()
-    {
-        return TestCorrelator.GetLogEventsFromContextGuid(_logContext.Guid)
-            .Select(x => x.RenderMessage());
-    }
+    public IEnumerable<string> Messages => _messages;
 }
