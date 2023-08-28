@@ -39,6 +39,11 @@ public class ConsoleExceptionHandler
                 _log.Error("The following instances do not exist: {Names}", e.InstanceNames);
                 break;
 
+            case DuplicateInstancesException e:
+                _log.Error("The following instance names are duplicated: {Names}", e.InstanceNames);
+                _log.Error("Instance names are unique and may not be reused");
+                break;
+
             case SplitInstancesException e:
                 _log.Error("The following configs share the same `base_url`, which isn't allowed: {Instances}",
                     e.InstanceNames);

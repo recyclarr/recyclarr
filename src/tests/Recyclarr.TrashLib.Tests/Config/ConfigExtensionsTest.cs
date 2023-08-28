@@ -105,4 +105,22 @@ public class ConfigExtensionsTest
 
         result.Should().BeEquivalentTo("radarr1", "radarr2", "sonarr2", "sonarr3");
     }
+
+    [Test]
+    public void Get_duplicate_instance_names()
+    {
+        var configs = new IServiceConfiguration[]
+        {
+            new RadarrConfiguration {InstanceName = "radarr1"},
+            new RadarrConfiguration {InstanceName = "radarr2"},
+            new RadarrConfiguration {InstanceName = "radarr2"},
+            new RadarrConfiguration {InstanceName = "radarr3"},
+            new SonarrConfiguration {InstanceName = "sonarr1"},
+            new SonarrConfiguration {InstanceName = "sonarr1"}
+        };
+
+        var result = configs.GetDuplicateInstanceNames();
+
+        result.Should().BeEquivalentTo("radarr2", "sonarr1");
+    }
 }

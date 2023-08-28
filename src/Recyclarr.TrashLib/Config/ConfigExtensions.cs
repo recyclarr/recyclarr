@@ -52,4 +52,13 @@ public static class ConfigExtensions
         return criteria.Instances
             .Where(x => !configInstances.Contains(x, StringComparer.InvariantCultureIgnoreCase));
     }
+
+    public static IEnumerable<string> GetDuplicateInstanceNames(this IEnumerable<IServiceConfiguration> configs)
+    {
+        return configs
+            .GroupBy(x => x.InstanceName, StringComparer.InvariantCultureIgnoreCase)
+            .Where(x => x.Count() > 1)
+            .Select(x => x.First().InstanceName)
+            .ToList();
+    }
 }

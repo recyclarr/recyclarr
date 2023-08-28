@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Service failures (e.g. HTTP 500) no longer cause exceptions (#206).
+- Error out when duplicate instance names are used.
 
 ## [5.3.1] - 2023-08-21
 

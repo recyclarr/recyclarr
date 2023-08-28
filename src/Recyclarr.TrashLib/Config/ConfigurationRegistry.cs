@@ -51,6 +51,12 @@ public class ConfigurationRegistry : IConfigurationRegistry
     {
         var loadedConfigs = configs.SelectMany(x => _loader.Load(x)).ToList();
 
+        var dupeInstances = loadedConfigs.GetDuplicateInstanceNames().ToList();
+        if (dupeInstances.Any())
+        {
+            throw new DuplicateInstancesException(dupeInstances);
+        }
+
         var invalidInstances = loadedConfigs.GetInvalidInstanceNames(filterCriteria).ToList();
         if (invalidInstances.Any())
         {

@@ -30,7 +30,8 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         builder
             .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
-            .WithObjectFactory(_objectFactory);
+            .WithObjectFactory(_objectFactory)
+            .WithDuplicateKeyChecking();
 
         foreach (var behavior in _behaviors)
         {

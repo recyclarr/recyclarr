@@ -99,4 +99,40 @@ public class ConfigurationRegistryTest : TrashLibIntegrationFixture
         act.Should().ThrowExactly<SplitInstancesException>()
             .Which.InstanceNames.Should().BeEquivalentTo("instance1", "instance2");
     }
+
+    [Test]
+    public void Duplicate_instance_names_are_prohibited()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile("config1.yml", new MockFileData(
+            """
+            radarr:
+              unique_name1:
+                base_url: http://localhost:7879
+                api_key: fdsa
+              same_instance_name:
+                base_url: http://localhost:7878
+                api_key: asdf
+            """));
+
+        Fs.AddFile("config2.yml", new MockFileData(
+            """
+            radarr:
+              same_instance_name:
+                base_url: http://localhost:7879
+                api_key: fdsa
+              unique_name2:
+                base_url: http://localhost:7879
+                api_key: fdsa
+            """));
+
+        var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
+        {
+            ManualConfigFiles = new[] {"config1.yml", "config2.yml"}
+        });
+
+        act.Should().ThrowExactly<DuplicateInstancesException>()
+            .Which.InstanceNames.Should().BeEquivalentTo("same_instance_name");
+    }
 }
