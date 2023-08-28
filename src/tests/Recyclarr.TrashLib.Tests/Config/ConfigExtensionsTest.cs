@@ -1,11 +1,11 @@
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 
-namespace Recyclarr.Cli.Tests.Processors;
+namespace Recyclarr.TrashLib.Tests.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ProcessorExtensionsTest
+public class ConfigExtensionsTest
 {
     [Test]
     public void Filter_invalid_instances()
