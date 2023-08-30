@@ -11,11 +11,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
-  <!-- Global Packages -->
-  <ItemGroup>
-    <PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="All" />
-  </ItemGroup>
-
   <ItemGroup>
     <Using Include="Serilog" />
   </ItemGroup>
