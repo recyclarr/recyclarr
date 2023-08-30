@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Newtonsoft.Json;
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Guide;

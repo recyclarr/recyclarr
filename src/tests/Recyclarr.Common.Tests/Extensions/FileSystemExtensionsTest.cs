@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary;

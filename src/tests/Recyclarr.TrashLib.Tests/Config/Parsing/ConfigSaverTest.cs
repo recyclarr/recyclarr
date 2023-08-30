@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.TestLibrary;

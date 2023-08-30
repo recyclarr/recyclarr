@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Common.Tests;

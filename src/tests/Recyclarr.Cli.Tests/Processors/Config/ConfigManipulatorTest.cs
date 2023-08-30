@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Common.Extensions;

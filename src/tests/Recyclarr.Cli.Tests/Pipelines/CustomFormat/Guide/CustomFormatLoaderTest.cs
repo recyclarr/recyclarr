@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.IO.Abstractions.Extensions;
 using Newtonsoft.Json.Linq;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Cli.TestLibrary;
