@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Autofac;
 using Recyclarr.Cli.Console.Commands;
@@ -22,6 +23,8 @@ public class ConfigCommandsIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
+    [SuppressMessage("Usage", "NS5000:Received check.", Justification =
+        "See: https://github.com/nsubstitute/NSubstitute.Analyzers/issues/211")]
     public async Task Repo_update_is_called_on_config_list()
     {
         var repo = Resolve<IConfigTemplatesRepo>();
@@ -40,6 +43,8 @@ public class ConfigCommandsIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
+    [SuppressMessage("Usage", "NS5000:Received check.", Justification =
+        "See: https://github.com/nsubstitute/NSubstitute.Analyzers/issues/211")]
     public async Task Repo_update_is_called_on_config_create()
     {
         var repo = Resolve<IConfigTemplatesRepo>();
