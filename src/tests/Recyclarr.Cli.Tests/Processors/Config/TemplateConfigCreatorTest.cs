@@ -3,10 +3,8 @@ using System.IO.Abstractions.Extensions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
-using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Tests.Processors.Config;
 
@@ -35,110 +33,44 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
     }
 
     [Test, AutoMockData]
-    public void Throw_when_file_exists_and_not_forced(
+    public async Task No_replace_when_file_exists_and_not_forced(
         [Frozen] IConfigTemplateGuideService templates,
-        MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IAppPaths paths,
         ICreateConfigSettings settings,
         TemplateConfigCreator sut)
     {
-        templates.LoadTemplateData().Returns(new[]
-        {
-            new TemplatePath
-            {
-                Id = "template1",
-                TemplateFile = fs.CurrentDirectory().File("template-file1.yml"),
-                Service = SupportedServices.Radarr
-            }
-        });
+        var templateFile = fs.CurrentDirectory().File("template-file1.yml");
+        var destFile = paths.ConfigsDirectory.File(templateFile.Name);
+
+        fs.AddFile(templateFile, new MockFileData("a"));
+        fs.AddFile(destFile, new MockFileData("b"));
 
         settings.Force.Returns(false);
-        settings.Templates.Returns(new[]
-        {
-            "template1"
-        });
+        settings.Path.Returns(templateFile.FullName);
 
-        var act = () => sut.Create(settings);
+        await sut.Create(settings);
 
-        act.Should().ThrowAsync<FileExistsException>();
+        fs.GetFile(destFile).TextContents.Should().Be("b");
     }
 
     [Test, AutoMockData]
-    public void No_throw_when_file_exists_and_forced(
+    public async Task No_throw_when_file_exists_and_forced(
         [Frozen] IConfigTemplateGuideService templates,
-        MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
+        [Frozen] IAppPaths paths,
         ICreateConfigSettings settings,
         TemplateConfigCreator sut)
     {
-        templates.LoadTemplateData().Returns(new[]
-        {
-            new TemplatePath
-            {
-                Id = "template1",
-                TemplateFile = fs.CurrentDirectory().File("template-file1.yml"),
-                Service = SupportedServices.Radarr
-            }
-        });
+        var templateFile = fs.CurrentDirectory().File("template-file1.yml");
+        fs.AddEmptyFile(templateFile);
+        fs.AddEmptyFile(paths.ConfigsDirectory.File(templateFile.Name));
 
         settings.Force.Returns(true);
-        settings.Templates.Returns(new[]
-        {
-            "template1"
-        });
+        settings.Path.Returns(templateFile.FullName);
 
         var act = () => sut.Create(settings);
 
-        act.Should().NotThrowAsync();
-    }
-
-    [Test]
-    public async Task Template_id_matching_works()
-    {
-        const string templatesJson =
-            """
-            {
-              "radarr": [
-                {
-                  "template": "template-file1.yml",
-                  "id": "template1"
-                }
-              ],
-              "sonarr": [
-                {
-                  "template": "template-file2.yml",
-                  "id": "template2"
-                },
-                {
-                  "template": "template-file3.yml",
-                  "id": "template3"
-                }
-              ]
-            }
-            """;
-
-        var repo = Resolve<IConfigTemplatesRepo>();
-        Fs.AddFile(repo.Path.File("templates.json"), new MockFileData(templatesJson));
-        Fs.AddEmptyFile(repo.Path.File("template-file1.yml"));
-        Fs.AddEmptyFile(repo.Path.File("template-file2.yml"));
-        // This one shouldn't show up in the result because the user didn't ask for it
-        Fs.AddEmptyFile(repo.Path.File("template-file3.yml"));
-
-        var settings = Substitute.For<ICreateConfigSettings>();
-        settings.Templates.Returns(new[]
-        {
-            "template1",
-            "template2",
-            // This one shouldn't show up in the results because:
-            // User specified it, but no template file exists for it.
-            "template4"
-        });
-
-        var sut = Resolve<TemplateConfigCreator>();
-        await sut.Create(settings);
-
-        Fs.AllFiles.Should().Contain(new[]
-        {
-            Paths.ConfigsDirectory.File("template-file1.yml").FullName,
-            Paths.ConfigsDirectory.File("template-file2.yml").FullName
-        });
+        await act.Should().NotThrowAsync();
     }
 }

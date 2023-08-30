@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
@@ -30,7 +29,6 @@ public class TemplateConfigCreator : IConfigCreator
         return settings.Templates.Any();
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task Create(ICreateConfigSettings settings)
     {
         _log.Debug("Creating config from templates: {Templates}", settings.Templates);
@@ -41,27 +39,9 @@ public class TemplateConfigCreator : IConfigCreator
 
         foreach (var templateFile in matchingTemplateData)
         {
-            var destinationFile = _paths.ConfigsDirectory.File(templateFile.Name);
-
             try
             {
-                if (destinationFile.Exists && !settings.Force)
-                {
-                    throw new FileExistsException($"{destinationFile} already exists");
-                }
-
-                destinationFile.CreateParentDirectory();
-                templateFile.CopyTo(destinationFile.FullName, true);
-
-                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                if (destinationFile.Exists)
-                {
-                    _log.Information("Replacing existing file: {Path}", destinationFile);
-                }
-                else
-                {
-                    _log.Information("Created configuration file: {Path}", destinationFile);
-                }
+                CopyTemplate(templateFile, settings);
             }
             catch (FileExistsException e)
             {
@@ -75,7 +55,31 @@ public class TemplateConfigCreator : IConfigCreator
             catch (Exception e)
             {
                 _log.Error(e, "Unable to save configuration template file");
+                throw;
             }
+        }
+    }
+
+    private void CopyTemplate(IFileInfo templateFile, ICreateConfigSettings settings)
+    {
+        var destinationFile = _paths.ConfigsDirectory.File(templateFile.Name);
+
+        if (destinationFile.Exists && !settings.Force)
+        {
+            throw new FileExistsException($"{destinationFile} already exists");
+        }
+
+        destinationFile.CreateParentDirectory();
+        templateFile.CopyTo(destinationFile.FullName, true);
+
+        // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+        if (destinationFile.Exists)
+        {
+            _log.Information("Replacing existing file: {Path}", destinationFile);
+        }
+        else
+        {
+            _log.Information("Created configuration file: {Path}", destinationFile);
         }
     }
 }
