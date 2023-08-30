@@ -28,6 +28,13 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
+      # GH Runners come with Java 11, which is deprecated by Sonarcloud
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
@@ -52,7 +59,7 @@ jobs:
           -k:"recyclarr_recyclarr"
           -n:"Recyclarr"
           -v:"${{ steps.gitversion.outputs.fullSemVer }}"
-          -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
           -d:sonar.host.url="https://sonarcloud.io"
           -d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
 
@@ -67,4 +74,4 @@ jobs:
       - name: End Sonar Scanner
         run: >
           dotnet sonarscanner end
-          -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
