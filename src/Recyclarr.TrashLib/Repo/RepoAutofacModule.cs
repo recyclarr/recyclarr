@@ -8,9 +8,12 @@ public class RepoAutofacModule : Module
     {
         base.Load(builder);
 
-        builder.RegisterType<ConfigTemplatesRepo>().As<IConfigTemplatesRepo>();
-        builder.RegisterType<TrashGuidesRepo>().As<ITrashGuidesRepo>();
+        // Unique Repo Registrations
+        builder.RegisterType<ConfigTemplatesRepo>().As<IConfigTemplatesRepo>().As<IUpdateableRepo>();
+        builder.RegisterType<TrashGuidesRepo>().As<ITrashGuidesRepo>().As<IUpdateableRepo>();
+
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
+        builder.RegisterType<ConsoleMultiRepoUpdater>().As<IMultiRepoUpdater>();
         builder.RegisterType<RepoMetadataBuilder>().As<IRepoMetadataBuilder>().InstancePerLifetimeScope();
     }
 }

@@ -31,10 +31,8 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
         _repo = repo;
     }
 
-    public async Task<IReadOnlyCollection<TemplatePath>> LoadTemplateData()
+    public IReadOnlyCollection<TemplatePath> LoadTemplateData()
     {
-        await _repo.Update();
-
         var templatesPath = _repo.Path.File("templates.json");
         if (!templatesPath.Exists)
         {

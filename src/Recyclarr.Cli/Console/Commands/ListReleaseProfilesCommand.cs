@@ -11,11 +11,11 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List Sonarr release profiles in the guide for a particular service.")]
-internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesCommand.CliSettings>
+public class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesCommand.CliSettings>
 {
     private readonly ILogger _log;
     private readonly ReleaseProfileDataLister _lister;
-    private readonly ITrashGuidesRepo _repoUpdater;
+    private readonly IMultiRepoUpdater _repoUpdater;
 
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -29,19 +29,19 @@ internal class ListReleaseProfilesCommand : AsyncCommand<ListReleaseProfilesComm
         public string? ListTerms { get; init; }
     }
 
-    public ListReleaseProfilesCommand(ILogger log, ReleaseProfileDataLister lister, ITrashGuidesRepo repo)
+    public ListReleaseProfilesCommand(ILogger log, ReleaseProfileDataLister lister, IMultiRepoUpdater repoUpdater)
     {
         _log = log;
         _lister = lister;
-        _repoUpdater = repo;
+        _repoUpdater = repoUpdater;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
+        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+
         try
         {
-            await _repoUpdater.Update();
-
             if (settings.ListTerms is not null)
             {
                 // Ignore nullability of ListTerms since the Settings.Validate() method will check for null/empty.

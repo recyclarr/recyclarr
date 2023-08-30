@@ -16,9 +16,9 @@ public class ConfigTemplateLister : IConfigLister
         _guideService = guideService;
     }
 
-    public async Task List()
+    public void List()
     {
-        var data = await _guideService.LoadTemplateData();
+        var data = _guideService.LoadTemplateData();
 
         var table = new Table();
         var empty = new Markup("");

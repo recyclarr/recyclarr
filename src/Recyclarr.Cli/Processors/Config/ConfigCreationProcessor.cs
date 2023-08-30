@@ -12,7 +12,7 @@ public class ConfigCreationProcessor : IConfigCreationProcessor
         _creators = creators;
     }
 
-    public async Task Process(ICreateConfigSettings settings)
+    public void Process(ICreateConfigSettings settings)
     {
         var creator = _creators.FirstOrDefault(x => x.CanHandle(settings));
         if (creator is null)
@@ -20,6 +20,6 @@ public class ConfigCreationProcessor : IConfigCreationProcessor
             throw new FatalException("Unable to determine which config creation logic to use");
         }
 
-        await creator.Create(settings);
+        creator.Create(settings);
     }
 }

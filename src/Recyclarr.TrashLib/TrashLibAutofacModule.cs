@@ -50,7 +50,6 @@ public class TrashLibAutofacModule : Module
     private static void CommonRegistrations(ContainerBuilder builder)
     {
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
-        builder.RegisterType<FileUtilities>().As<IFileUtilities>();
         builder.RegisterType<RuntimeValidationService>().As<IRuntimeValidationService>();
     }
 

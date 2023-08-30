@@ -27,7 +27,7 @@ public class LocalConfigCreator : IConfigCreator
         return true;
     }
 
-    public async Task Create(ICreateConfigSettings settings)
+    public void Create(ICreateConfigSettings settings)
     {
         var configFile = settings.Path is null
             ? _paths.AppDataDirectory.File("recyclarr.yml")
@@ -39,10 +39,10 @@ public class LocalConfigCreator : IConfigCreator
         }
 
         configFile.CreateParentDirectory();
-        await using var stream = configFile.CreateText();
+        using var stream = configFile.CreateText();
 
         var ymlData = _resources.ReadData("config-template.yml");
-        await stream.WriteAsync(ymlData);
+        stream.Write(ymlData);
 
         _log.Information("Created configuration at: {Path}", configFile.FullName);
     }

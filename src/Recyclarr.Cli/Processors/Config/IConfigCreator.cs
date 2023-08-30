@@ -5,5 +5,5 @@ namespace Recyclarr.Cli.Processors.Config;
 public interface IConfigCreator
 {
     bool CanHandle(ICreateConfigSettings settings);
-    Task Create(ICreateConfigSettings settings);
+    void Create(ICreateConfigSettings settings);
 }

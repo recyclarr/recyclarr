@@ -2,10 +2,11 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Settings;
 using Recyclarr.TrashLib.Startup;
+using Serilog.Context;
 
 namespace Recyclarr.TrashLib.Repo;
 
-public class TrashGuidesRepo : ITrashGuidesRepo
+public class TrashGuidesRepo : ITrashGuidesRepo, IUpdateableRepo
 {
     private readonly IRepoUpdater _repoUpdater;
     private readonly ISettingsProvider _settings;
@@ -19,8 +20,9 @@ public class TrashGuidesRepo : ITrashGuidesRepo
 
     public IDirectoryInfo Path { get; }
 
-    public Task Update()
+    public Task Update(CancellationToken token)
     {
-        return _repoUpdater.UpdateRepo(Path, _settings.Settings.Repositories.TrashGuides);
+        using var logScope = LogContext.PushProperty(LogProperty.Scope, "Trash Guides Repo");
+        return _repoUpdater.UpdateRepo(Path, _settings.Settings.Repositories.TrashGuides, token);
     }
 }

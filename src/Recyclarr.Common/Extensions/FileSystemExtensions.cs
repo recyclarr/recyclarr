@@ -105,4 +105,25 @@ public static class FileSystemExtensions
 
         dir.Delete(true);
     }
+
+    public static void DeleteReadOnlyDirectory(this IDirectoryInfo directory)
+    {
+        if (!directory.Exists)
+        {
+            return;
+        }
+
+        foreach (var subdirectory in directory.EnumerateDirectories())
+        {
+            DeleteReadOnlyDirectory(subdirectory);
+        }
+
+        foreach (var fileInfo in directory.EnumerateFiles())
+        {
+            fileInfo.Attributes = FileAttributes.Normal;
+            fileInfo.Delete();
+        }
+
+        directory.Delete();
+    }
 }

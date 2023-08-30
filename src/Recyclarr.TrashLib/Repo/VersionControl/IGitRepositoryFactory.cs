@@ -4,5 +4,9 @@ namespace Recyclarr.TrashLib.Repo.VersionControl;
 
 public interface IGitRepositoryFactory
 {
-    Task<IGitRepository> CreateAndCloneIfNeeded(Uri repoUrl, IDirectoryInfo repoPath, string branch);
+    Task<IGitRepository> CreateAndCloneIfNeeded(
+        Uri repoUrl,
+        IDirectoryInfo repoPath,
+        string branch,
+        CancellationToken token);
 }

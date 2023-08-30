@@ -4,5 +4,5 @@ namespace Recyclarr.Cli.Processors.Config;
 
 public interface IConfigCreationProcessor
 {
-    Task Process(ICreateConfigSettings settings);
+    void Process(ICreateConfigSettings settings);
 }

@@ -26,7 +26,7 @@ public class ConfigLocalLister : IConfigLister
         _paths = paths;
     }
 
-    public Task List()
+    public void List()
     {
         var tree = new Tree(_paths.AppDataDirectory.ToString()!);
 
@@ -54,7 +54,6 @@ public class ConfigLocalLister : IConfigLister
 
         _console.WriteLine();
         _console.Write(tree);
-        return Task.CompletedTask;
     }
 
     private string MakeRelative(IFileInfo path)

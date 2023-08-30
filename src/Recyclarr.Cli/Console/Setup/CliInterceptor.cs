@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.TrashLib.Startup;
 using Serilog.Core;
 using Serilog.Events;
@@ -14,6 +15,7 @@ public class CliInterceptor : ICommandInterceptor
     private readonly LoggingLevelSwitch _loggingLevelSwitch;
     private readonly AppDataPathProvider _appDataPathProvider;
     private readonly Subject<Unit> _interceptedSubject = new();
+    private readonly ConsoleAppCancellationTokenSource _ct = new();
 
     public IObservable<Unit> OnIntercepted => _interceptedSubject.AsObservable();
 
@@ -49,6 +51,8 @@ public class CliInterceptor : ICommandInterceptor
 
     private void HandleBaseCommand(BaseCommandSettings cmd)
     {
+        cmd.CancellationToken = _ct.Token;
+
         _loggingLevelSwitch.MinimumLevel = cmd.Debug switch
         {
             true => LogEventLevel.Debug,

@@ -22,13 +22,13 @@ public class ConfigCreationProcessorTest
     }
 
     [Test, AutoMockData]
-    public async Task Throw_when_no_config_creators_can_handle(
+    public void Throw_when_no_config_creators_can_handle(
         [CustomizeWith(typeof(EmptyOrderedEnumerable))] ConfigCreationProcessor sut)
     {
         var settings = new ConfigCreateCommand.CliSettings();
 
         var act = () => sut.Process(settings);
 
-        await act.Should().ThrowAsync<FatalException>();
+        act.Should().Throw<FatalException>();
     }
 }

@@ -32,7 +32,7 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
     }
 
     [Test, AutoMockData]
-    public async Task No_replace_when_file_exists_and_not_forced(
+    public void No_replace_when_file_exists_and_not_forced(
         [Frozen] IConfigTemplateGuideService templates,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths paths,
@@ -48,13 +48,13 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
         settings.Force.Returns(false);
         settings.Path.Returns(templateFile.FullName);
 
-        await sut.Create(settings);
+        sut.Create(settings);
 
         fs.GetFile(destFile).TextContents.Should().Be("b");
     }
 
     [Test, AutoMockData]
-    public async Task No_throw_when_file_exists_and_forced(
+    public void No_throw_when_file_exists_and_forced(
         [Frozen] IConfigTemplateGuideService templates,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths paths,
@@ -70,6 +70,6 @@ public class TemplateConfigCreatorTest : CliIntegrationFixture
 
         var act = () => sut.Create(settings);
 
-        await act.Should().NotThrowAsync();
+        act.Should().NotThrow();
     }
 }

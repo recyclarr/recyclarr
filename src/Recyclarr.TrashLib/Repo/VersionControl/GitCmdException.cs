@@ -14,3 +14,11 @@ public class GitCmdException : Exception
         ExitCode = exitCode;
     }
 }
+
+public class InvalidGitRepoException : Exception
+{
+    public InvalidGitRepoException(string? message)
+        : base(message)
+    {
+    }
+}

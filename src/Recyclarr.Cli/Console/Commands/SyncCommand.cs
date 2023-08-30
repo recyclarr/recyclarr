@@ -16,7 +16,7 @@ namespace Recyclarr.Cli.Console.Commands;
 public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
 {
     private readonly IMigrationExecutor _migration;
-    private readonly ITrashGuidesRepo _repoUpdater;
+    private readonly IMultiRepoUpdater _repoUpdater;
     private readonly ISyncProcessor _syncProcessor;
 
     [UsedImplicitly]
@@ -48,10 +48,10 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 
-    public SyncCommand(IMigrationExecutor migration, ITrashGuidesRepo repo, ISyncProcessor syncProcessor)
+    public SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
     {
         _migration = migration;
-        _repoUpdater = repo;
+        _repoUpdater = repoUpdater;
         _syncProcessor = syncProcessor;
     }
 
@@ -61,7 +61,7 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
         // Will throw if migration is required, otherwise just a warning is issued.
         _migration.CheckNeededMigrations();
 
-        await _repoUpdater.Update();
+        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
 
         return (int) await _syncProcessor.ProcessConfigs(settings);
     }

@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashLib.ExceptionTypes;
+using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -13,6 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     private readonly IConfigCreationProcessor _processor;
+    private readonly IMultiRepoUpdater _repoUpdater;
     private readonly ILogger _log;
 
     [UsedImplicitly]
@@ -40,9 +42,10 @@ public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
         public bool Force { get; init; }
     }
 
-    public ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor)
+    public ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor, IMultiRepoUpdater repoUpdater)
     {
         _processor = processor;
+        _repoUpdater = repoUpdater;
         _log = log;
     }
 
@@ -50,7 +53,8 @@ public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
     {
         try
         {
-            await _processor.Process(settings);
+            await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+            _processor.Process(settings);
         }
         catch (FileExistsException e)
         {

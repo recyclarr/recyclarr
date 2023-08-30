@@ -1,73 +1,15 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Repo;
 
-namespace Recyclarr.Cli.Tests.Processors;
+namespace Recyclarr.Cli.Tests.Processors.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
+public class TemplateConfigCreatorIntegrationTest : CliIntegrationFixture
 {
-    [Test]
-    public void Config_file_created_when_using_default_path()
-    {
-        var repo = Resolve<IConfigTemplatesRepo>();
-        Fs.AddFile(repo.Path.File("templates.json"), new MockFileData("{}"));
-
-        var sut = Resolve<ConfigCreationProcessor>();
-
-        sut.Process(new ConfigCreateCommand.CliSettings
-        {
-            Path = null
-        });
-
-        var file = Fs.GetFile(Paths.AppDataDirectory.File("recyclarr.yml"));
-        file.Should().NotBeNull();
-        file.Contents.Should().NotBeEmpty();
-    }
-
-    [Test]
-    public void Config_file_created_when_using_user_specified_path()
-    {
-        var sut = Resolve<ConfigCreationProcessor>();
-
-        var settings = new ConfigCreateCommand.CliSettings
-        {
-            Path = Fs.CurrentDirectory()
-                .SubDirectory("user")
-                .SubDirectory("specified")
-                .File("file.yml")
-                .FullName
-        };
-
-        sut.Process(settings);
-
-        var file = Fs.GetFile(settings.Path);
-        file.Should().NotBeNull();
-        file.Contents.Should().NotBeEmpty();
-    }
-
-    [Test]
-    public void Should_throw_if_file_already_exists()
-    {
-        var sut = Resolve<ConfigCreationProcessor>();
-
-        var settings = new ConfigCreateCommand.CliSettings
-        {
-            Path = Fs.CurrentDirectory().File("file.yml").FullName
-        };
-
-        Fs.AddEmptyFile(settings.Path);
-
-        var act = () => sut.Process(settings);
-
-        act.Should().Throw<FileExistsException>();
-    }
-
     [Test]
     public void Template_id_matching_works()
     {
@@ -110,8 +52,8 @@ public class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
             "template4"
         });
 
-        var sut = Resolve<ConfigCreationProcessor>();
-        sut.Process(settings);
+        var sut = Resolve<TemplateConfigCreator>();
+        sut.Create(settings);
 
         Fs.AllFiles.Should().Contain(new[]
         {

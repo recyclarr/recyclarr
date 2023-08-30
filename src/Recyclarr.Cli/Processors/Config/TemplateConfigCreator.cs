@@ -29,11 +29,11 @@ public class TemplateConfigCreator : IConfigCreator
         return settings.Templates.Any();
     }
 
-    public async Task Create(ICreateConfigSettings settings)
+    public void Create(ICreateConfigSettings settings)
     {
         _log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
-        var matchingTemplateData = (await _templates.LoadTemplateData())
+        var matchingTemplateData = _templates.LoadTemplateData()
             .IntersectBy(settings.Templates, path => path.Id, StringComparer.CurrentCultureIgnoreCase)
             .Select(x => x.TemplateFile);
 

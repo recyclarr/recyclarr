@@ -5,5 +5,5 @@ namespace Recyclarr.TrashLib.Repo;
 
 public interface IRepoUpdater
 {
-    Task UpdateRepo(IDirectoryInfo repoPath, IRepositorySettings repoSettings);
+    Task UpdateRepo(IDirectoryInfo repoPath, IRepositorySettings repoSettings, CancellationToken token);
 }

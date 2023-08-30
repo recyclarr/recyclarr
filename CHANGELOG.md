@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Print date & time log at the end of each completed instance sync (#165).
+- Add status indicator when cloning or updating git repos.
 
 ### Changed
 

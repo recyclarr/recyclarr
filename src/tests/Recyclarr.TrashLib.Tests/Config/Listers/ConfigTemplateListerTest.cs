@@ -12,7 +12,7 @@ namespace Recyclarr.TrashLib.Tests.Config.Listers;
 public class ConfigTemplateListerTest : TrashLibIntegrationFixture
 {
     [Test, AutoMockData]
-    public async Task Hidden_templates_are_not_rendered(
+    public void Hidden_templates_are_not_rendered(
         IFileInfo stubFile,
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         [Frozen] IConfigTemplateGuideService guideService,
@@ -26,7 +26,7 @@ public class ConfigTemplateListerTest : TrashLibIntegrationFixture
             new TemplatePath {Id = "s2", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = true}
         });
 
-        await sut.List();
+        sut.List();
 
         console.Output.Should().NotContain("s2");
     }
