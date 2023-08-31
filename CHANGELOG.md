@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Less-verbose console logging for scoreless custom formats.
+- Git repository updates are now parallelized.
 
 ### Fixed
 
