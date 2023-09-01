@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.Internal;
 using FluentValidation.Results;
 
 namespace Recyclarr.Common.FluentValidation;
@@ -21,13 +22,17 @@ public class RuntimeValidationService : IRuntimeValidationService
             .ToDictionary(x => x.Item2!.GetGenericArguments()[0], x => x.Item1);
     }
 
-    public ValidationResult Validate(object instance)
+    public ValidationResult Validate(object instance, params string[] ruleSets)
     {
         if (!_validators.TryGetValue(instance.GetType(), out var validator))
         {
             throw new ValidationException($"No validator is available for type: {instance.GetType().FullName}");
         }
 
-        return validator.Validate(new ValidationContext<object>(instance));
+        IValidatorSelector validatorSelector = ruleSets.Any()
+            ? new RulesetValidatorSelector(ruleSets)
+            : new DefaultValidatorSelector();
+
+        return validator.Validate(new ValidationContext<object>(instance, new PropertyChain(), validatorSelector));
     }
 }

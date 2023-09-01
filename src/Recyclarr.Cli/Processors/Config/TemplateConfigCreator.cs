@@ -33,7 +33,7 @@ public class TemplateConfigCreator : IConfigCreator
     {
         _log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
-        var matchingTemplateData = _templates.LoadTemplateData()
+        var matchingTemplateData = _templates.GetTemplateData()
             .IntersectBy(settings.Templates, path => path.Id, StringComparer.CurrentCultureIgnoreCase)
             .Select(x => x.TemplateFile);
 

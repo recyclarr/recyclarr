@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Print date & time log at the end of each completed instance sync (#165).
 - Add status indicator when cloning or updating git repos.
+- YAML includes are now supported (#175) ([docs][includes]).
 
 ### Changed
 
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Service failures (e.g. HTTP 500) no longer cause exceptions (#206).
 - Error out when duplicate instance names are used.
+
+[includes]: https://recyclarr.dev/wiki/yaml/config-reference/include/
 
 ## [5.3.1] - 2023-08-21
 

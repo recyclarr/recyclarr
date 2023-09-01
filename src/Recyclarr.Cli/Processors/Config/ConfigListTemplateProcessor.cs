@@ -22,7 +22,7 @@ public class ConfigListTemplateProcessor
 
     private void ListTemplates()
     {
-        var data = _guideService.LoadTemplateData();
+        var data = _guideService.GetTemplateData();
 
         var table = new Table();
         var empty = new Markup("");

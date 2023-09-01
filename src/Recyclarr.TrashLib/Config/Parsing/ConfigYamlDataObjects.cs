@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.TrashLib.Config.Parsing.BackwardCompatibility;
+using Recyclarr.TrashLib.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.TrashLib.Config.Services;
 using YamlDotNet.Serialization;
 
@@ -76,12 +77,13 @@ public record ServiceConfigYaml
     [SuppressMessage("Design", "CA1056:URI-like properties should not be strings")]
     public string? BaseUrl { get; init; }
 
-    public bool DeleteOldCustomFormats { get; init; }
-    public bool ReplaceExistingCustomFormats { get; init; }
+    public bool? DeleteOldCustomFormats { get; init; }
+    public bool? ReplaceExistingCustomFormats { get; init; }
 
     public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; init; }
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
     public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; init; }
+    public IReadOnlyCollection<IYamlInclude>? Include { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

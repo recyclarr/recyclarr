@@ -56,6 +56,10 @@ public class ConsoleExceptionHandler
                 _log.Error("Manually-specified configuration files do not exist: {Files}", e.InvalidFiles);
                 break;
 
+            case PostProcessingException e:
+                _log.Error("Configuration post-processing failed: {Message}", e.Message);
+                break;
+
             case CommandException e:
                 _log.Error(e.Message);
                 break;

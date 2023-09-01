@@ -15,7 +15,7 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
     public void Throw_when_templates_dir_does_not_exist(
         ConfigTemplateGuideService sut)
     {
-        var act = () => _ = sut.LoadTemplateData();
+        var act = () => _ = sut.GetTemplateData();
 
         act.Should().Throw<InvalidDataException>().WithMessage("Recyclarr*templates*");
     }
@@ -43,7 +43,7 @@ public class ConfigTemplateGuideServiceTest : TrashLibIntegrationFixture
 
         var sut = Resolve<ConfigTemplateGuideService>();
 
-        var data = sut.LoadTemplateData();
+        var data = sut.GetTemplateData();
         data.Should().BeEquivalentTo(expectedPaths, o => o.Excluding(x => x.TemplateFile));
         data.Select(x => x.TemplateFile.FullName)
             .Should().BeEquivalentTo(expectedPaths.Select(x => x.TemplateFile.FullName));

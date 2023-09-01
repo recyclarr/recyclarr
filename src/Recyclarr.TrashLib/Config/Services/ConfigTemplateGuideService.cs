@@ -25,15 +25,27 @@ public record TemplatePath
 public class ConfigTemplateGuideService : IConfigTemplateGuideService
 {
     private readonly IConfigTemplatesRepo _repo;
+    private IReadOnlyCollection<TemplatePath>? _templateData;
+    private IReadOnlyCollection<TemplatePath>? _includeData;
 
     public ConfigTemplateGuideService(IConfigTemplatesRepo repo)
     {
         _repo = repo;
     }
 
-    public IReadOnlyCollection<TemplatePath> LoadTemplateData()
+    public IReadOnlyCollection<TemplatePath> GetTemplateData()
     {
-        var templatesPath = _repo.Path.File("templates.json");
+        return _templateData ??= LoadTemplateData("templates.json");
+    }
+
+    public IReadOnlyCollection<TemplatePath> GetIncludeData()
+    {
+        return _includeData ??= LoadTemplateData("includes.json");
+    }
+
+    private IReadOnlyCollection<TemplatePath> LoadTemplateData(string templateFileName)
+    {
+        var templatesPath = _repo.Path.File(templateFileName);
         if (!templatesPath.Exists)
         {
             throw new InvalidDataException(
@@ -41,6 +53,11 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
         }
 
         var templates = TrashRepoJsonParser.Deserialize<TemplatesData>(templatesPath);
+
+        return templates.Radarr
+            .Select(x => NewTemplatePath(x, SupportedServices.Radarr))
+            .Concat(templates.Sonarr.Select(x => NewTemplatePath(x, SupportedServices.Sonarr)))
+            .ToList();
 
         TemplatePath NewTemplatePath(TemplateEntry entry, SupportedServices service)
         {
@@ -52,10 +69,5 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
                 Hidden = entry.Hidden
             };
         }
-
-        return templates.Radarr
-            .Select(x => NewTemplatePath(x, SupportedServices.Radarr))
-            .Concat(templates.Sonarr.Select(x => NewTemplatePath(x, SupportedServices.Sonarr)))
-            .ToList();
     }
 }

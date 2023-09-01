@@ -17,4 +17,11 @@ public class StringExtensionsTest
     {
         "\n test \r".TrimNewlines().Should().Be(" test ");
     }
+
+    [Test]
+    public void Snake_case_works()
+    {
+        "UpperCamelCase".ToSnakeCase().Should().Be("upper_camel_case");
+        "lowerCamelCase".ToSnakeCase().Should().Be("lower_camel_case");
+    }
 }

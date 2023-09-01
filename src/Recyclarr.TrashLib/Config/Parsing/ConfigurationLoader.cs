@@ -8,17 +8,20 @@ namespace Recyclarr.TrashLib.Config.Parsing;
 
 public class ConfigurationLoader : IConfigurationLoader
 {
+    private readonly ILogger _log;
     private readonly ConfigParser _parser;
     private readonly IMapper _mapper;
     private readonly ConfigValidationExecutor _validator;
     private readonly IEnumerable<IConfigPostProcessor> _postProcessors;
 
     public ConfigurationLoader(
+        ILogger log,
         ConfigParser parser,
         IMapper mapper,
         ConfigValidationExecutor validator,
         IEnumerable<IConfigPostProcessor> postProcessors)
     {
+        _log = log;
         _parser = parser;
         _mapper = mapper;
         _validator = validator;
@@ -28,17 +31,17 @@ public class ConfigurationLoader : IConfigurationLoader
     public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
-        return ProcessLoadedConfigs(_parser.Load(file));
+        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(file));
     }
 
     public IReadOnlyCollection<IServiceConfiguration> Load(string yaml)
     {
-        return ProcessLoadedConfigs(_parser.Load(yaml));
+        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(yaml));
     }
 
     public IReadOnlyCollection<IServiceConfiguration> Load(Func<TextReader> streamFactory)
     {
-        return ProcessLoadedConfigs(_parser.Load(streamFactory));
+        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(streamFactory));
     }
 
     private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(RootConfigYaml? config)
@@ -49,6 +52,11 @@ public class ConfigurationLoader : IConfigurationLoader
         }
 
         config = _postProcessors.Aggregate(config, (current, processor) => processor.Process(current));
+
+        if (config.IsConfigEmpty())
+        {
+            _log.Warning("Configuration is empty");
+        }
 
         if (!_validator.Validate(config))
         {

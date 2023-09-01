@@ -15,9 +15,9 @@ public class ConfigValidationExecutor
         _validationService = validationService;
     }
 
-    public bool Validate(object config)
+    public bool Validate(object config, params string[] ruleSets)
     {
-        var result = _validationService.Validate(config);
+        var result = _validationService.Validate(config, ruleSets);
         if (result.IsValid)
         {
             return true;

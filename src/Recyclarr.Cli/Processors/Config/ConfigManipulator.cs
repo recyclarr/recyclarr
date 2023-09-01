@@ -60,7 +60,7 @@ public class ConfigManipulator : IConfigManipulator
         // - Run validation & report issues
         // - Consistently reformat the output file (when it is saved again)
         // - Ignore stuff for diffing purposes, such as comments.
-        var config = _configParser.Load(source);
+        var config = _configParser.Load<RootConfigYaml>(source);
         if (config is null)
         {
             // Do not log here, since ConfigParser already has substantial logging
@@ -73,7 +73,7 @@ public class ConfigManipulator : IConfigManipulator
             Sonarr = InvokeCallbackForEach(editCallback, config.Sonarr)
         };
 
-        if (!_validator.Validate(config))
+        if (!_validator.Validate(config, YamlValidatorRuleSets.RootConfig))
         {
             _console.WriteLine(
                 "The configuration file will still be created, despite the previous validation errors. " +

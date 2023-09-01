@@ -70,7 +70,7 @@ public class YamlConfigValidatorTest : TrashLibIntegrationFixture
         };
 
         var validator = Resolve<ServiceConfigYamlValidator>();
-        var result = validator.TestValidate(config);
+        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.ApiKey);
     }
@@ -103,7 +103,7 @@ public class YamlConfigValidatorTest : TrashLibIntegrationFixture
         };
 
         var validator = Resolve<ServiceConfigYamlValidator>();
-        var result = validator.TestValidate(config);
+        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("'base_url' must not be empty.");
@@ -137,7 +137,7 @@ public class YamlConfigValidatorTest : TrashLibIntegrationFixture
         };
 
         var validator = Resolve<ServiceConfigYamlValidator>();
-        var result = validator.TestValidate(config);
+        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("base_url must start with 'http' or 'https'");

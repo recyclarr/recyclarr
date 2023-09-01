@@ -19,30 +19,24 @@ public class ConfigParser
         _deserializer = yamlFactory.CreateDeserializer();
     }
 
-    public RootConfigYaml? Load(IFileInfo file)
+    public T? Load<T>(IFileInfo file) where T : class
     {
         _log.Debug("Loading config file: {File}", file);
-        return Load(file.OpenText);
+        return Load<T>(file.OpenText);
     }
 
-    public RootConfigYaml? Load(string yaml)
+    public T? Load<T>(string yaml) where T : class
     {
         _log.Debug("Loading config from string data");
-        return Load(() => new StringReader(yaml));
+        return Load<T>(() => new StringReader(yaml));
     }
 
-    public RootConfigYaml? Load(Func<TextReader> streamFactory)
+    public T? Load<T>(Func<TextReader> streamFactory) where T : class
     {
         try
         {
             using var stream = streamFactory();
-            var config = _deserializer.Deserialize<RootConfigYaml?>(stream);
-            if (config.IsConfigEmpty())
-            {
-                _log.Warning("Configuration is empty");
-            }
-
-            return config;
+            return _deserializer.Deserialize<T?>(stream);
         }
         catch (FeatureRemovalException e)
         {
@@ -69,6 +63,6 @@ public class ConfigParser
         }
 
         _log.Error("Due to previous exception, this config will be skipped");
-        return null;
+        return default;
     }
 }
