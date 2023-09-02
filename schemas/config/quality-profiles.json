@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/quality-profiles.json",
+  "type": "array",
+  "description": "An array of quality profiles that exist in the remote service along with any configuration properties that Recyclarr should use to modify that quality profile.",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["name"],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The name of the quality profile to which settings should apply."
+      },
+      "reset_unmatched_scores": {
+        "type": "object",
+        "description": "Settings related to resetting unmatched CF scores.",
+        "additionalProperties": false,
+        "required": ["enabled"],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide)."
+          },
+          "except": {
+            "type": "array",
+            "description": "An array of strings that match custom formats to exclude when resetting scores. Matching is case-insensitive.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "score_set": {
+        "type": "string",
+        "description": "The set of scores to use for custom formats assigned to a profile.",
+        "default": "default"
+      },
+      "upgrade": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["allowed"],
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "until_quality": {
+            "type": "string"
+          },
+          "until_score": {
+            "type": "number"
+          }
+        }
+      },
+      "min_format_score": {
+        "type": "number"
+      },
+      "quality_sort": {
+        "enum": ["bottom", "top"],
+        "default": "top"
+      },
+      "qualities": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "qualities": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

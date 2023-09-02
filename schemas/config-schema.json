@@ -22,20 +22,6 @@
     }
   },
   "$defs": {
-    "trash_id": {
-      "type": "string",
-      "minLength": 32,
-      "pattern": "^[0-9a-fA-F]+$"
-    },
-    "trash_ids_list": {
-      "type": "array",
-      "description": "A list of one or more Trash IDs taken from the Trash Guide Sonarr JSON files.",
-      "minItems": 1,
-      "uniqueItems": true,
-      "items": {
-        "$ref": "#/$defs/trash_id"
-      }
-    },
     "base_url": {
       "type": "string",
       "description": "The base URL of your instance. Basically this is the URL you bookmark to get to the front page."
@@ -49,143 +35,6 @@
       "type": "boolean",
       "description": "If disabled, custom formats that Recyclarr didn't explicitly create or know about will not be replaced.",
       "default": false
-    },
-    "custom_formats": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "A list of one or more sets of custom formats each with an optional set of quality profiles names that identify which quality profiles to assign the scores for those custom formats to.",
-        "required": ["trash_ids"],
-        "properties": {
-          "trash_ids": {
-            "$ref": "#/$defs/trash_ids_list"
-          },
-          "quality_profiles": {
-            "type": "array",
-            "description": "One or more quality profiles to update with the scores from the specified custom formats.",
-            "minItems": 1,
-            "items": {
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "The name of one of the quality profiles in Radarr."
-                },
-                "score": {
-                  "type": "integer",
-                  "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "quality_definition": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string"
-        },
-        "preferred_ratio": {
-          "type": "number",
-          "default": 1.0,
-          "minimum": 0.0,
-          "maximum": 1.0
-        }
-      }
-    },
-    "quality_profiles": {
-      "type": "array",
-      "description": "An array of quality profiles that exist in the remote service along with any configuration properties that Recyclarr should use to modify that quality profile.",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["name"],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The name of the quality profile to which settings should apply."
-          },
-          "reset_unmatched_scores": {
-            "type": "object",
-            "description": "Settings related to resetting unmatched CF scores.",
-            "additionalProperties": false,
-            "required": ["enabled"],
-            "properties": {
-              "enabled": {
-                "type": "boolean",
-                "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide)."
-              },
-              "except": {
-                "type": "array",
-                "description": "An array of strings that match custom formats to exclude when resetting scores. Matching is case-insensitive.",
-                "minItems": 1,
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "score_set": {
-            "type": "string",
-            "description": "The set of scores to use for custom formats assigned to a profile.",
-            "default": "default"
-          },
-          "upgrade": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["allowed"],
-            "properties": {
-              "allowed": {
-                "type": "boolean"
-              },
-              "until_quality": {
-                "type": "string"
-              },
-              "until_score": {
-                "type": "number"
-              }
-            }
-          },
-          "min_format_score": {
-            "type": "number"
-          },
-          "quality_sort": {
-            "enum": ["bottom", "top"],
-            "default": "top"
-          },
-          "qualities": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["name"],
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "enabled": {
-                  "type": "boolean",
-                  "default": true
-                },
-                "qualities": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     },
     "radarr_instance": {
       "type": "object",
@@ -205,10 +54,10 @@
           "description": "The API key from Radarr"
         },
         "quality_definition": {
-          "$ref": "#/$defs/quality_definition"
+          "$ref": "config/quality-definition.json"
         },
         "quality_profiles": {
-          "$ref": "#/$defs/quality_profiles"
+          "$ref": "config/quality-profiles.json"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
@@ -217,7 +66,10 @@
           "$ref": "#/$defs/replace_existing_custom_formats"
         },
         "custom_formats": {
-          "$ref": "#/$defs/custom_formats"
+          "$ref": "config/custom-formats.json"
+        },
+        "include": {
+          "$ref": "config/includes.json"
         }
       }
     },
@@ -239,10 +91,10 @@
           "description": "The API key from Sonarr."
         },
         "quality_definition": {
-          "$ref": "#/$defs/quality_definition"
+          "$ref": "config/quality-definition.json"
         },
         "quality_profiles": {
-          "$ref": "#/$defs/quality_profiles"
+          "$ref": "config/quality-profiles.json"
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
@@ -251,55 +103,13 @@
           "$ref": "#/$defs/replace_existing_custom_formats"
         },
         "custom_formats": {
-          "$ref": "#/$defs/custom_formats"
+          "$ref": "config/custom-formats.json"
+        },
+        "include": {
+          "$ref": "config/includes.json"
         },
         "release_profiles": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "additionalProperties": false,
-            "required": ["trash_ids"],
-            "properties": {
-              "trash_ids": {
-                "$ref": "#/$defs/trash_ids_list"
-              },
-              "strict_negative_scores": {
-                "type": "boolean",
-                "default": false,
-                "description": "Enables preferred term scores less than 0 to be instead treated as \"Must Not Contain\" (ignored) terms."
-              },
-              "tags": {
-                "type": "array",
-                "description": "A list of one or more strings representing tags that will be applied to this release profile.",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "filter": {
-                "type": "object",
-                "additionalProperties": false,
-                "description": "Defines various ways that release profile terms from the guide are synchronized with Sonarr.",
-                "oneOf": [
-                  {
-                    "required": ["include"]
-                  },
-                  {
-                    "required": ["exclude"]
-                  }
-                ],
-                "properties": {
-                  "include": {
-                    "$ref": "#/$defs/trash_ids_list",
-                    "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be included in the created Release Profile in Sonarr."
-                  },
-                  "exclude": {
-                    "$ref": "#/$defs/trash_ids_list",
-                    "description": "A list of trash_id values representing terms (Required, Ignored, or Preferred) that should be excluded from the created Release Profile in Sonarr."
-                  }
-                }
-              }
-            }
-          }
+          "$ref": "config/release-profiles.json"
         }
       }
     }

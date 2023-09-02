@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/trash-ids.json",
+  "type": "array",
+  "description": "A list of one or more Trash IDs taken from the Trash Guide Sonarr JSON files.",
+  "minItems": 1,
+  "uniqueItems": true,
+  "items": {
+    "trash_id": {
+      "type": "string",
+      "minLength": 32,
+      "pattern": "^[0-9a-fA-F]+$"
+    }
+  }
+}
