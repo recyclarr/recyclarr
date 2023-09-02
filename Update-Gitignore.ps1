@@ -1,5 +1,7 @@
 $ErrorActionPreference = "Stop"
 
+$gitIgnorePath = "$PSScriptRoot/.gitignore"
+
 Function gig {
   param(
     [Parameter(Mandatory=$true)]
@@ -8,7 +10,12 @@ Function gig {
   $params = ($list | ForEach-Object { [uri]::EscapeDataString($_) }) -join ","
   Invoke-WebRequest -Uri "https://www.toptal.com/developers/gitignore/api/$params" | `
     Select-Object -ExpandProperty content | `
-    Out-File -FilePath $(Join-Path -path $pwd -ChildPath ".gitignore") -Encoding ascii
+    Set-Content -Path $gitIgnorePath -Encoding utf8 -NoNewline
 }
 
-gig windows,rider,csharp,macos
+gig windows,jetbrains,csharp,macos,sonarqube
+
+# Replace specific ignore patterns
+$(Get-Content $gitIgnorePath) `
+    -replace '^\.idea', '**/.idea' `
+| Set-Content -Path $gitIgnorePath

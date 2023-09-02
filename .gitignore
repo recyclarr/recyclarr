@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/windows,jetbrains,csharp,macos
-# Edit at https://www.toptal.com/developers/gitignore?templates=windows,jetbrains,csharp,macos
+# Created by https://www.toptal.com/developers/gitignore/api/windows,jetbrains,csharp,macos,sonarqube
+# Edit at https://www.toptal.com/developers/gitignore?templates=windows,jetbrains,csharp,macos,sonarqube
 
 ### Csharp ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -545,6 +545,19 @@ Temporary Items
 # iCloud generated files
 *.icloud
 
+### SonarQube ###
+# SonarQube ignore files.
+#
+# https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
+# Sonar Scanner working directories
+.sonar/
+.sonarqube/
+.scannerwork/
+
+# http://www.sonarlint.org/commandline/
+# SonarLint working directories, configuration files (including credentials)
+.sonarlint/
+
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -566,4 +579,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/windows,jetbrains,csharp,macos
+# End of https://www.toptal.com/developers/gitignore/api/windows,jetbrains,csharp,macos,sonarqube

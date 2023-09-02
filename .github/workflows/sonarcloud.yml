@@ -29,10 +29,11 @@ jobs:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
       # GH Runners come with Java 11, which is deprecated by Sonarcloud
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 20
+          java-package: jre
           distribution: temurin
 
       - name: Setup dotnet
@@ -40,38 +41,10 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
-        with:
-          versionSpec: 5.x
+      - name: Install Tooling
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global GitVersion.Tool
 
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0
-        id: gitversion
-
-      - name: Install Sonar Scanner
-        run: dotnet tool install --global dotnet-sonarscanner
-
-      - name: Begin Sonar Scanner
-        run: >
-          dotnet sonarscanner begin
-          -o:"recyclarr"
-          -k:"recyclarr_recyclarr"
-          -n:"Recyclarr"
-          -v:"${{ steps.gitversion.outputs.fullSemVer }}"
-          -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-          -d:sonar.host.url="https://sonarcloud.io"
-          -d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage.opencover.xml"
-
-      # Run a full build command because if we just do the tests, it will not build everything.
-      # Building everything is important to ensure we analyze all code in the solution.
-      - name: Build
-        run: dotnet build src
-
-      - name: Test
-        run: dotnet test src --no-build --collect:"XPLat Code Coverage;Format=opencover"
-
-      - name: End Sonar Scanner
-        run: >
-          dotnet sonarscanner end
-          -d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      - name: Perform Scan
+        run: pwsh ci/RunSonarScan.ps1 -SonarToken "${{ secrets.SONAR_TOKEN }}"
