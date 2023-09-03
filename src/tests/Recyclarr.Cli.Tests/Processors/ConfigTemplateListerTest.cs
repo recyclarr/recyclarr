@@ -1,11 +1,11 @@
 using System.IO.Abstractions;
+using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 
-namespace Recyclarr.TrashLib.Tests.Config.Listers;
+namespace Recyclarr.Cli.Tests.Processors;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
@@ -16,7 +16,7 @@ public class ConfigTemplateListerTest : TrashLibIntegrationFixture
         IFileInfo stubFile,
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         [Frozen] IConfigTemplateGuideService guideService,
-        ConfigTemplateLister sut)
+        ConfigListTemplateProcessor sut)
     {
         guideService.LoadTemplateData().Returns(new[]
         {
@@ -26,7 +26,7 @@ public class ConfigTemplateListerTest : TrashLibIntegrationFixture
             new TemplatePath {Id = "s2", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = true}
         });
 
-        sut.List();
+        sut.Process();
 
         console.Output.Should().NotContain("s2");
     }

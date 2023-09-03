@@ -26,7 +26,12 @@ public static class CliSetup
         {
             config.SetDescription("Operations for configuration files");
             config.AddCommand<ConfigCreateCommand>("create");
-            config.AddCommand<ConfigListCommand>("list");
+            config.AddBranch("list", list =>
+            {
+                list.SetDescription("List configuration files in various ways");
+                list.AddCommand<ConfigListLocalCommand>("local");
+                list.AddCommand<ConfigListTemplatesCommand>("templates");
+            });
         });
 
         cli.AddBranch("delete", delete =>

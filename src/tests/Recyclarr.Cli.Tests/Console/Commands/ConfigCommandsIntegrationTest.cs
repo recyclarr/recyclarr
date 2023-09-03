@@ -11,9 +11,9 @@ public class ConfigCommandsIntegrationTest : CliIntegrationFixture
     [Test, AutoMockData]
     public async Task Repo_update_is_called_on_config_list(
         [Frozen] IMultiRepoUpdater updater,
-        ConfigListCommand sut)
+        ConfigListLocalCommand sut)
     {
-        await sut.ExecuteAsync(default!, new ConfigListCommand.CliSettings());
+        await sut.ExecuteAsync(default!, new ConfigListLocalCommand.CliSettings());
 
         await updater.ReceivedWithAnyArgs().UpdateAllRepositories(default);
     }

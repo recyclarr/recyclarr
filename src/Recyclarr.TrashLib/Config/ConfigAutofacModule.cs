@@ -1,6 +1,5 @@
 using Autofac;
 using FluentValidation;
-using Recyclarr.TrashLib.Config.Listers;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Parsing.PostProcessing;
 using Recyclarr.TrashLib.Config.Secrets;
@@ -32,10 +31,6 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
         builder.RegisterType<ConfigSaver>();
-
-        // Config Listers
-        builder.RegisterType<ConfigTemplateLister>().Keyed<IConfigLister>(ConfigCategory.Templates);
-        builder.RegisterType<ConfigLocalLister>().Keyed<IConfigLister>(ConfigCategory.Local);
 
         // Config Post Processors
         builder.RegisterType<ImplicitUrlAndKeyPostProcessor>().As<IConfigPostProcessor>();

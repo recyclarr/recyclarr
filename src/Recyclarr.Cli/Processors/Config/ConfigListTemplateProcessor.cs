@@ -1,22 +1,26 @@
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Spectre.Console;
 
-namespace Recyclarr.TrashLib.Config.Listers;
+namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigTemplateLister : IConfigLister
+public class ConfigListTemplateProcessor
 {
     private readonly IAnsiConsole _console;
     private readonly IConfigTemplateGuideService _guideService;
 
-    public ConfigTemplateLister(
-        IAnsiConsole console,
-        IConfigTemplateGuideService guideService)
+    public ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGuideService guideService)
     {
         _console = console;
         _guideService = guideService;
     }
 
-    public void List()
+    public void Process()
+    {
+        ListTemplates();
+    }
+
+    private void ListTemplates()
     {
         var data = _guideService.LoadTemplateData();
 

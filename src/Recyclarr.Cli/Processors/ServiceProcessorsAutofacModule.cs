@@ -23,7 +23,8 @@ public class ServiceProcessorsAutofacModule : Module
         // Configuration
         builder.RegisterType<ConfigManipulator>().As<IConfigManipulator>();
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
-        builder.RegisterType<ConfigListProcessor>();
+        builder.RegisterType<ConfigListLocalProcessor>();
+        builder.RegisterType<ConfigListTemplateProcessor>();
 
         // Delete
         builder.RegisterType<DeleteCustomFormatsProcessor>().As<IDeleteCustomFormatsProcessor>();

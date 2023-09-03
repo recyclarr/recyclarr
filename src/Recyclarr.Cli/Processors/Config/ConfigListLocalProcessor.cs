@@ -1,20 +1,21 @@
 using System.IO.Abstractions;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Startup;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace Recyclarr.TrashLib.Config.Listers;
+namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigLocalLister : IConfigLister
+public class ConfigListLocalProcessor
 {
     private readonly IAnsiConsole _console;
     private readonly IConfigurationFinder _configFinder;
     private readonly IConfigurationLoader _configLoader;
     private readonly IAppPaths _paths;
 
-    public ConfigLocalLister(
+    public ConfigListLocalProcessor(
         IAnsiConsole console,
         IConfigurationFinder configFinder,
         IConfigurationLoader configLoader,
@@ -26,7 +27,7 @@ public class ConfigLocalLister : IConfigLister
         _paths = paths;
     }
 
-    public void List()
+    public void Process()
     {
         var tree = new Tree(_paths.AppDataDirectory.ToString()!);
 
