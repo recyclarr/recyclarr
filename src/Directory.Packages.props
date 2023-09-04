@@ -45,7 +45,7 @@
     <PackageVersion Include="AutoFixture.NUnit3" Version="4.18.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.23.1" />
+    <PackageVersion Include="FluentAssertions.Analyzers" Version="0.24.0" />
     <PackageVersion Include="FluentAssertions.Json" Version="6.1.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.3.3" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
