@@ -7,6 +7,7 @@ internal class TermDataConverter : JsonConverter
 {
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
+        // Not to be used for serialization
         throw new NotImplementedException();
     }
 
