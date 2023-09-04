@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Console.Commands;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Services;
 using Spectre.Console;
@@ -15,15 +16,19 @@ public class ConfigListTemplateProcessor
         _guideService = guideService;
     }
 
-    public void Process()
+    public void Process(IConfigListTemplatesSettings settings)
     {
-        ListTemplates();
+        if (settings.Includes)
+        {
+            ListData(_guideService.GetIncludeData());
+            return;
+        }
+
+        ListData(_guideService.GetTemplateData());
     }
 
-    private void ListTemplates()
+    private void ListData(IReadOnlyCollection<TemplatePath> data)
     {
-        var data = _guideService.GetTemplateData();
-
         var table = new Table();
         var empty = new Markup("");
 

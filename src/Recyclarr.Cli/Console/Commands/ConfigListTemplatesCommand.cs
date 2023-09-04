@@ -17,8 +17,13 @@ public class ConfigListTemplatesCommand : AsyncCommand<ConfigListTemplatesComman
     private readonly IMultiRepoUpdater _repoUpdater;
 
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings
+    public class CliSettings : BaseCommandSettings, IConfigListTemplatesSettings
     {
+        [CommandOption("-i|--includes")]
+        [Description(
+            "List templates that may be included in YAML, instead of root templates used with `config create`.")]
+        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+        public bool Includes { get; init; }
     }
 
     public ConfigListTemplatesCommand(ILogger log, ConfigListTemplateProcessor processor, IMultiRepoUpdater repoUpdater)
@@ -33,7 +38,7 @@ public class ConfigListTemplatesCommand : AsyncCommand<ConfigListTemplatesComman
         try
         {
             await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
-            _processor.Process();
+            _processor.Process(settings);
             return 0;
         }
         catch (NoConfigurationFilesException)
@@ -43,4 +48,9 @@ public class ConfigListTemplatesCommand : AsyncCommand<ConfigListTemplatesComman
 
         return 1;
     }
+}
+
+public interface IConfigListTemplatesSettings
+{
+    bool Includes { get; }
 }
