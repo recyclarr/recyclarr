@@ -3,8 +3,8 @@
 First, thank you for your interest in contributing to my project. Below is a list of requirements
 that everyone should follow.
 
-1. To avoid wasting your time and effort, please ensure all ideas get discussed first. Either visit
-   [the Ideas discussion board][ideas] and open a thread there. I ask that you do this to avoid the
+1. To avoid wasting your time and effort, please ensure all ideas get discussed first. Visit [the
+   Ideas discussion board][ideas] and open a thread there. I ask that you do this to avoid the
    potential of rejecting work already done in a pull request.
 
 1. **For Markdown changes,** any and all changes must pass configured [markdownlint] rules (see the
