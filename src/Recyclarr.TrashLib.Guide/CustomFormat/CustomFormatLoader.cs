@@ -29,8 +29,7 @@ public class CustomFormatLoader : ICustomFormatLoader
 
             return cf.Obj with
             {
-                Category = matchingCategory?.CategoryName,
-                FileName = cf.File.Name
+                Category = matchingCategory?.CategoryName
             };
         }));
     }

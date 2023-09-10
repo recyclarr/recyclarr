@@ -23,8 +23,8 @@ public class CustomFormatLoaderIntegrationTest : GuideIntegrationFixture
 
         results.Should().BeEquivalentTo(new[]
         {
-            NewCf.Data("first", "1") with {FileName = "first.json"},
-            NewCf.Data("second", "2") with {FileName = "second.json"}
+            NewCf.Data("first", "1"),
+            NewCf.Data("second", "2")
         }, o => o.Excluding(x => x.Type == typeof(JObject)));
     }
 }

@@ -229,7 +229,6 @@ public class CustomFormatDataComparerTest
     {
         var a = new CustomFormatData
         {
-            FileName = "file1.json",
             TrashId = "a",
             TrashScores = {["default"] = 1},
             Category = "one"
@@ -237,7 +236,6 @@ public class CustomFormatDataComparerTest
 
         var b = new CustomFormatData
         {
-            FileName = "file2.json",
             TrashId = "b",
             TrashScores = {["default"] = 2},
             Category = "two"

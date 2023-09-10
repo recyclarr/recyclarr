@@ -28,9 +28,6 @@ public record CustomFormatData
     [JsonIgnore]
     public string? Category { get; init; }
 
-    [JsonIgnore]
-    public string FileName { get; init; } = "";
-
     [JsonProperty("trash_id")]
     [JsonNoSerialize]
     public string TrashId { get; init; } = "";
