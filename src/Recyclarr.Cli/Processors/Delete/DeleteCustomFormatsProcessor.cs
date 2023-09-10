@@ -3,7 +3,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Models;
 using Spectre.Console;

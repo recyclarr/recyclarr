@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualitySize.Api;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 

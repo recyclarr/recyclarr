@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 

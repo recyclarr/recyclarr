@@ -14,6 +14,6 @@ public class RepoAutofacModule : Module
 
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
         builder.RegisterType<ConsoleMultiRepoUpdater>().As<IMultiRepoUpdater>();
-        builder.RegisterType<RepoMetadataBuilder>().As<IRepoMetadataBuilder>().InstancePerLifetimeScope();
+        builder.RegisterType<TrashRepoMetadataBuilder>().As<IRepoMetadataBuilder>().InstancePerLifetimeScope();
     }
 }

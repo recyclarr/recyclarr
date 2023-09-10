@@ -24,5 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Yaml\Recyclarr.Yaml.csproj" />
   </ItemGroup>
 </Project>

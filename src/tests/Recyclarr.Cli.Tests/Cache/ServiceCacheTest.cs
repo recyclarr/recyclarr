@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Cache;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.Cli.Tests.Cache;
@@ -9,6 +10,8 @@ namespace Recyclarr.Cli.Tests.Cache;
 [Parallelizable(ParallelScope.All)]
 public class ServiceCacheTest
 {
+    [SuppressMessage("SonarLint", "S2094", Justification =
+        "Used for unit test scenario")]
     private sealed class ObjectWithoutAttribute
     {
     }

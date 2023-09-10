@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
+using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;

@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Guide;
 using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 

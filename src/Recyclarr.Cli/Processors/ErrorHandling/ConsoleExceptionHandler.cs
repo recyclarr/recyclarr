@@ -1,4 +1,5 @@
 using Flurl.Http;
+using Recyclarr.TrashLib.Config.ExceptionTypes;
 using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashLib.Http;

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.QualitySize.Api;
+using Recyclarr.TrashLib.Guide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 

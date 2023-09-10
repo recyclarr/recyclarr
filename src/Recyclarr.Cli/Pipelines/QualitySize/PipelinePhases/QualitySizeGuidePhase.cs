@@ -1,15 +1,15 @@
-using Recyclarr.Cli.Pipelines.QualitySize.Guide;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 public class QualitySizeGuidePhase
 {
     private readonly ILogger _log;
-    private readonly IQualityGuideService _guide;
+    private readonly IQualitySizeGuideService _guide;
 
-    public QualitySizeGuidePhase(ILogger log, IQualityGuideService guide)
+    public QualitySizeGuidePhase(ILogger log, IQualitySizeGuideService guide)
     {
         _log = log;
         _guide = guide;

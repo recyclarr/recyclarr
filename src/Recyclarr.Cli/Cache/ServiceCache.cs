@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Interfaces;
 using Recyclarr.TrashLib.Json;
 

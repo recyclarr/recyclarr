@@ -1,7 +1,7 @@
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;

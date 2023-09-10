@@ -7,7 +7,7 @@ using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.Cli.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile.Api;
 

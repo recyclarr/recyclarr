@@ -11,10 +11,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Using Include="Serilog" />
-  </ItemGroup>
-
   <!--
     To prevent System.Reactive.xml (and other XML docs) from being in the publish dir.
     See: https://github.com/dotnet/reactive/issues/1066#issuecomment-548941146

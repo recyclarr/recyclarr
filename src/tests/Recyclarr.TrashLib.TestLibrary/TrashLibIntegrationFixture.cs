@@ -55,10 +55,6 @@ public abstract class TrashLibIntegrationFixture : IDisposable
     protected virtual void RegisterTypes(ContainerBuilder builder)
     {
         builder.RegisterModule<TrashLibAutofacModule>();
-
-        // Normally, the CLI's composition root registers this (because we can only do it once, and it must include
-        // dependent assemblies). The TrashLib assembly does have its own mapping profiles. We register those here, but
-        // not in the TrashLibAutofacModule.
     }
 
     // ReSharper disable MemberCanBePrivate.Global

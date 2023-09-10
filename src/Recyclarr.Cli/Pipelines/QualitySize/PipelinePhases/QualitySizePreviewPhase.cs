@@ -1,3 +1,4 @@
+using Recyclarr.TrashLib.Guide.QualitySize;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;

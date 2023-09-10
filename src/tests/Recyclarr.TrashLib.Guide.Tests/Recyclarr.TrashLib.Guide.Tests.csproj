@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\Recyclarr.TrashLib.Guide\Recyclarr.TrashLib.Guide.csproj" />
+    <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashLib.Guide.TestLibrary\Recyclarr.TrashLib.Guide.TestLibrary.csproj" />
+  </ItemGroup>
+</Project>

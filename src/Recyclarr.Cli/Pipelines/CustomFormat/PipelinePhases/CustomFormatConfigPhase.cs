@@ -1,7 +1,7 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide.CustomFormat;
 using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;

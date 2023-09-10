@@ -31,10 +31,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="NUnit.Framework" />
-    <Using Include="NSubstitute" />
-    <Using Include="FluentAssertions" />
     <Using Include="AutoFixture.NUnit3" />
+    <Using Include="FluentAssertions" />
+    <Using Include="NSubstitute" />
+    <Using Include="NUnit.Framework" />
+    <Using Include="Serilog" />
     <Using Include="System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 

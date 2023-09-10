@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
+using Recyclarr.TrashLib.Guide;
 using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Processors.Config;

@@ -4,7 +4,7 @@ using Newtonsoft.Json.Schema;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Schemas;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 

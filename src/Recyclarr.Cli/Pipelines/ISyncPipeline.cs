@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Pipelines;
 

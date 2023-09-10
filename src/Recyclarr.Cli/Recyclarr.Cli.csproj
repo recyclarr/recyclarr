@@ -29,10 +29,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashLib.Config\Recyclarr.TrashLib.Config.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashLib.Guide\Recyclarr.TrashLib.Guide.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="config-template.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Pipelines\ReleaseProfile\Guide\" />
   </ItemGroup>
 </Project>

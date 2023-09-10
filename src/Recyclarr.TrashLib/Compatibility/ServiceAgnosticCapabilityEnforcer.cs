@@ -1,6 +1,6 @@
 using Recyclarr.TrashLib.Compatibility.Radarr;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.TrashLib.Compatibility;
 

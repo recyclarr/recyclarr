@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Processors.Sync;
 

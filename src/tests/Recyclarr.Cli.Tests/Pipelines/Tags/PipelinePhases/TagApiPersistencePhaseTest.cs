@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Pipelines.Tags.Api;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 

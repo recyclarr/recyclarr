@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Config.Parsing;
-using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Startup;
 using Spectre.Console;
 using Spectre.Console.Rendering;

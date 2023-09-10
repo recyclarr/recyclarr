@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Cache;
 

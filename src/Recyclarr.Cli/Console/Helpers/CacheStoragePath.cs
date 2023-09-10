@@ -2,7 +2,7 @@ using System.Data.HashFunction.FNV;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Interfaces;
 using Recyclarr.TrashLib.Startup;
 

@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Pipelines.QualitySize.Guide;
+using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Repo;
 using Spectre.Console.Cli;

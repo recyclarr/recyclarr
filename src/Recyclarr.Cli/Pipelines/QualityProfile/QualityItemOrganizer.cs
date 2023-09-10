@@ -1,6 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -24,6 +25,8 @@ public class QualityItemOrganizer
         };
     }
 
+    [SuppressMessage("SonarLint", "S1751", Justification =
+        "'continue' used here is for separating local methods")]
     private List<ProfileItemDto> ProcessWantedItems(
         IReadOnlyCollection<ProfileItemDto> dtoItems,
         IReadOnlyCollection<QualityProfileQualityConfig> configQualities)

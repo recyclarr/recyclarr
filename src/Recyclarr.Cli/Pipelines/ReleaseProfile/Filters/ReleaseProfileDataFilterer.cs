@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 

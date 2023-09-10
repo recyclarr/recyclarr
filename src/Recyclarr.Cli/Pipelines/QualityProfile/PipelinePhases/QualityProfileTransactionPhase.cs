@@ -3,7 +3,7 @@ using FluentValidation.Results;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 

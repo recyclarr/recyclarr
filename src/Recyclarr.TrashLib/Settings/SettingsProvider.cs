@@ -1,8 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
-using Recyclarr.TrashLib.Config.Yaml;
 using Recyclarr.TrashLib.Startup;
+using Recyclarr.Yaml;
 using YamlDotNet.Core;
 
 namespace Recyclarr.TrashLib.Settings;
@@ -41,7 +40,7 @@ public class SettingsProvider : ISettingsProvider
             _log.Debug(e, "Exception while parsing settings file");
 
             var line = e.Start.Line;
-            var msg = ContextualMessages.GetContextualErrorFromException(e);
+            var msg = SettingsContextualMessages.GetContextualErrorFromException(e);
             _log.Error("Exception while parsing settings.yml at line {Line}: {Msg}", line, msg);
 
             throw;

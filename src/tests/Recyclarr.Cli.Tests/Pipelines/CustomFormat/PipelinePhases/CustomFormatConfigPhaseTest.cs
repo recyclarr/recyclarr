@@ -1,6 +1,6 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide.CustomFormat;
 using Recyclarr.TrashLib.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.PipelinePhases;

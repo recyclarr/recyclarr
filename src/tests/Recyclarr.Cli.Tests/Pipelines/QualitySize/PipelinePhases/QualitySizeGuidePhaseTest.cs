@@ -1,8 +1,7 @@
 using NSubstitute.ReturnsExtensions;
-using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.Cli.Pipelines.QualitySize.Guide;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
@@ -23,7 +22,7 @@ public class QualitySizeGuidePhaseTest
 
     [Test, AutoMockData]
     public void Do_nothing_if_no_matching_quality_definition(
-        [Frozen] IQualityGuideService guide,
+        [Frozen] IQualitySizeGuideService guide,
         QualitySizeGuidePhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
@@ -45,7 +44,7 @@ public class QualitySizeGuidePhaseTest
     public void Preferred_ratio_clamping_works(
         string testPreferred,
         string expectedPreferred,
-        [Frozen] IQualityGuideService guide,
+        [Frozen] IQualitySizeGuideService guide,
         QualitySizeGuidePhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
@@ -68,7 +67,7 @@ public class QualitySizeGuidePhaseTest
 
     [Test, AutoMockData]
     public void Preferred_is_set_via_ratio(
-        [Frozen] IQualityGuideService guide,
+        [Frozen] IQualitySizeGuideService guide,
         QualitySizeGuidePhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
@@ -105,7 +104,7 @@ public class QualitySizeGuidePhaseTest
 
     [Test, AutoMockData]
     public void Preferred_is_set_via_guide(
-        [Frozen] IQualityGuideService guide,
+        [Frozen] IQualitySizeGuideService guide,
         QualitySizeGuidePhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();

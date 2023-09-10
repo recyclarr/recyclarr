@@ -2,6 +2,8 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
+using AutoMapper.Contrib.Autofac.DependencyInjection;
+using AutoMapper.EquivalencyExpression;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
@@ -16,8 +18,11 @@ using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
 using Recyclarr.TrashLib;
+using Recyclarr.TrashLib.Config;
+using Recyclarr.TrashLib.Guide;
 using Recyclarr.TrashLib.Interfaces;
 using Recyclarr.TrashLib.Startup;
+using Recyclarr.Yaml;
 using Serilog.Core;
 using Spectre.Console.Cli;
 
@@ -32,13 +37,18 @@ public static class CompositionRoot
         RegisterLogger(builder);
 
         builder.RegisterModule<MigrationAutofacModule>();
-        builder.RegisterModule(new TrashLibAutofacModule {AdditionalMapperProfileAssembly = thisAssembly});
+        builder.RegisterModule<TrashLibAutofacModule>();
+        builder.RegisterModule<ConfigAutofacModule>();
+        builder.RegisterModule<GuideAutofacModule>();
+        builder.RegisterModule<YamlAutofacModule>();
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
         builder.RegisterModule<CacheAutofacModule>();
 
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
+
+        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), thisAssembly);
 
         CommandRegistrations(builder);
         PipelineRegistrations(builder);

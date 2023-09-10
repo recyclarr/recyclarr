@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;

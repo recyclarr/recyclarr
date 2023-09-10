@@ -1,5 +1,5 @@
 using Flurl.Http;
-using Recyclarr.TrashLib.Config.Services;
+using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Api;
