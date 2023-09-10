@@ -1,16 +1,12 @@
-using Spectre.Console;
-
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 public class CustomFormatPreviewPhase
 {
     private readonly ILogger _log;
-    private readonly IAnsiConsole _console;
 
-    public CustomFormatPreviewPhase(ILogger log, IAnsiConsole console)
+    public CustomFormatPreviewPhase(ILogger log)
     {
         _log = log;
-        _console = console;
     }
 
     public void Execute(CustomFormatTransactionData transactions)
@@ -28,11 +24,10 @@ public class CustomFormatPreviewPhase
         if (created.Count > 0)
         {
             _log.Information("Created {Count} New Custom Formats", created.Count);
-            _log.Debug("Custom formats Created: {CustomFormats}", created.Select(x => x.Name));
 
             foreach (var cf in created)
             {
-                _console.WriteLine($"> Created: {cf.TrashId} ({cf.Name})");
+                _log.Debug("> Created: {TrashId} ({Name})", cf.TrashId, cf.Name);
             }
         }
 
@@ -40,12 +35,10 @@ public class CustomFormatPreviewPhase
         if (updated.Count > 0)
         {
             _log.Information("Updated {Count} Existing Custom Formats", updated.Count);
-            _log.Debug("Custom formats Updated: {CustomFormats}",
-                updated.ToDictionary(k => k.TrashId, v => v.Name));
 
             foreach (var cf in updated)
             {
-                _console.WriteLine($"> Updated: {cf.TrashId} ({cf.Name})");
+                _log.Debug("> Updated: {TrashId} ({Name})", cf.TrashId, cf.Name);
             }
         }
 
@@ -63,12 +56,10 @@ public class CustomFormatPreviewPhase
         if (deleted.Count > 0)
         {
             _log.Information("Deleted {Count} Custom Formats", deleted.Count);
-            _log.Debug("Custom formats Deleted: {CustomFormats}",
-                deleted.ToDictionary(k => k.TrashId, v => v.CustomFormatName));
 
             foreach (var mapping in deleted)
             {
-                _console.WriteLine($"> Deleted: {mapping.TrashId} ({mapping.CustomFormatName})");
+                _log.Debug("> Deleted: {TrashId} ({CustomFormatName})", mapping.TrashId, mapping.CustomFormatName);
             }
         }
 

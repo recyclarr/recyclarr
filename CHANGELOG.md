@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Less-verbose console logging for scoreless custom formats.
 - Git repository updates are now parallelized.
+- Individual updated, created, and deleted CF logs are now debug severity. This makes the console
+  output less verbose when syncing custom formats.
 
 ### Fixed
 
