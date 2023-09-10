@@ -30,7 +30,7 @@ public class FlurlClientFactory : IFlurlClientFactory
     {
         var settings = new ClientFlurlHttpSettings
         {
-            JsonSerializer = new NewtonsoftJsonSerializer(ServiceJsonSerializerFactory.Settings)
+            JsonSerializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services)
         };
 
         FlurlLogging.SetupLogging(settings, _log);

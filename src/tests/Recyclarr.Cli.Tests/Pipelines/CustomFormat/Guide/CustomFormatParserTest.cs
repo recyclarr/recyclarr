@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Recyclarr.Cli.Pipelines.CustomFormat.Guide;
 using Recyclarr.Common.Extensions;
@@ -123,7 +124,7 @@ public class CustomFormatParserTest
             IncludeCustomFormatWhenRenaming = false
         };
 
-        var json = JObject.FromObject(cf, ServiceJsonSerializerFactory.Create());
+        var json = JObject.FromObject(cf, JsonSerializer.Create(GlobalJsonSerializerSettings.Services));
 
         json.Children<JProperty>().Should().NotContain(x => x.Name.ContainsIgnoreCase("trash"));
     }

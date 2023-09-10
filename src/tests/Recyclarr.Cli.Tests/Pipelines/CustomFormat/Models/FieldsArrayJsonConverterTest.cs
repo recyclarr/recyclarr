@@ -11,7 +11,7 @@ public class FieldsArrayJsonConverterTest
     [Test]
     public void Read_multiple_as_array()
     {
-        var serializer = new NewtonsoftJsonSerializer(ServiceJsonSerializerFactory.Settings);
+        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
 
         const string json =
             """
@@ -58,7 +58,7 @@ public class FieldsArrayJsonConverterTest
     [Test]
     public void Read_single_as_array()
     {
-        var serializer = new NewtonsoftJsonSerializer(ServiceJsonSerializerFactory.Settings);
+        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
 
         const string json =
             """
@@ -89,7 +89,7 @@ public class FieldsArrayJsonConverterTest
     [Test]
     public void Read_throws_on_unsupported_token_type()
     {
-        var serializer = new NewtonsoftJsonSerializer(ServiceJsonSerializerFactory.Settings);
+        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
 
         const string json =
             """

@@ -2,10 +2,10 @@ using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Recyclarr.Common.Extensions;
 using Recyclarr.TrashLib.Config.Services;
 using Recyclarr.TrashLib.Interfaces;
+using Recyclarr.TrashLib.Json;
 
 namespace Recyclarr.Cli.Cache;
 
@@ -19,14 +19,7 @@ public partial class ServiceCache : IServiceCache
     {
         _storagePath = storagePath;
         _log = log;
-        _jsonSettings = new JsonSerializerSettings
-        {
-            Formatting = Formatting.Indented,
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new SnakeCaseNamingStrategy()
-            }
-        };
+        _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
     }
 
     public T? Load<T>(IServiceConfiguration config) where T : class

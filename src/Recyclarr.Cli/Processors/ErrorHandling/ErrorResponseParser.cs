@@ -14,7 +14,7 @@ public sealed class ErrorResponseParser
     {
         _log = log;
         _streamFactory = () => new JsonTextReader(new StringReader(responseBody));
-        _serializer = ServiceJsonSerializerFactory.Create();
+        _serializer = JsonSerializer.Create(GlobalJsonSerializerSettings.Services);
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
