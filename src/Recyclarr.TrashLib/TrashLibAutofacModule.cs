@@ -9,6 +9,7 @@ using Recyclarr.TrashLib.ApiServices;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
+using Recyclarr.TrashLib.Json;
 using Recyclarr.TrashLib.Repo;
 using Recyclarr.TrashLib.Repo.VersionControl;
 using Recyclarr.TrashLib.Startup;
@@ -37,6 +38,7 @@ public class TrashLibAutofacModule : Module
         builder.RegisterModule<ConfigAutofacModule>();
         builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
         builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
+        builder.RegisterType<BulkJsonLoader>();
 
         var mapperAssemblies = new List<Assembly> {ThisAssembly};
         if (AdditionalMapperProfileAssembly is not null)

@@ -18,7 +18,6 @@ public class CustomFormatAutofacModule : Module
         builder.RegisterType<CustomFormatService>().As<ICustomFormatService>();
         builder.RegisterType<CachePersister>().As<ICachePersister>();
         builder.RegisterType<CustomFormatLoader>().As<ICustomFormatLoader>();
-        builder.RegisterType<CustomFormatParser>().As<ICustomFormatParser>();
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
         builder.RegisterType<CustomFormatDataLister>();
 

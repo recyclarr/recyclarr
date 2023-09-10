@@ -8,12 +8,12 @@ namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Guide;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class CustomFormatLoaderTest : CliIntegrationFixture
+public class CustomFormatLoaderIntegrationTest : CliIntegrationFixture
 {
     [Test]
     public void Get_custom_format_json_works()
     {
-        var sut = Resolve<ICustomFormatLoader>();
+        var sut = Resolve<CustomFormatLoader>();
         Fs.AddFile("first.json", new MockFileData("{'name':'first','trash_id':'1'}"));
         Fs.AddFile("second.json", new MockFileData("{'name':'second','trash_id':'2'}"));
         Fs.AddFile("collection_of_cfs.md", new MockFileData(""));
