@@ -25,18 +25,7 @@ public class ImplicitUrlAndKeyPostProcessor : IConfigPostProcessor
     private IReadOnlyDictionary<string, T>? ProcessService<T>(IReadOnlyDictionary<string, T>? services)
         where T : ServiceConfigYaml
     {
-        if (services is null)
-        {
-            return null;
-        }
-
-        var updatedServices = new Dictionary<string, T>();
-        foreach (var (name, service) in services)
-        {
-            updatedServices.Add(name, FillUrlAndKey(name, service));
-        }
-
-        return updatedServices;
+        return services?.ToDictionary(x => x.Key, x => FillUrlAndKey(x.Key, x.Value));
     }
 
     private T FillUrlAndKey<T>(string instanceName, T config)

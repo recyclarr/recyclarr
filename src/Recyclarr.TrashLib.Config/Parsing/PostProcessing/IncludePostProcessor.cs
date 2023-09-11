@@ -60,6 +60,9 @@ public class IncludePostProcessor : IConfigPostProcessor
             // Merge the config into the aggregated includes so that root config values overwrite included values.
             mergedConfigs.Add(key, merger.Merge(aggregateInclude, config) with
             {
+                BaseUrl = config.BaseUrl,
+                ApiKey = config.ApiKey,
+
                 // No reason to keep these around anymore now that they have been merged
                 Include = null
             });

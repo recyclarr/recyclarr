@@ -129,6 +129,8 @@ public class IncludePostProcessorIntegrationTest : ConfigIntegrationFixture
             {
                 ["service1"] = new()
                 {
+                    BaseUrl = "the_base_url",
+                    ApiKey = "the_api_key",
                     CustomFormats = new[]
                     {
                         new CustomFormatConfigYaml
@@ -157,6 +159,9 @@ public class IncludePostProcessorIntegrationTest : ConfigIntegrationFixture
             {
                 ["service1"] = new()
                 {
+                    BaseUrl = "the_base_url",
+                    ApiKey = "the_api_key",
+                    Include = null,
                     CustomFormats = new[]
                     {
                         new CustomFormatConfigYaml {TrashIds = new[] {"496f355514737f7d83bf7aa4d24f8169"}},
