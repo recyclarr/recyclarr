@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.4.0] - 2023-09-11
+
 ### Added
 
 - Print date & time log at the end of each completed instance sync (#165).
@@ -846,7 +848,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.3.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.4.0...HEAD
+[5.4.0]: https://github.com/recyclarr/recyclarr/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/recyclarr/recyclarr/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/recyclarr/recyclarr/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/recyclarr/recyclarr/compare/v5.2.0...v5.2.1
