@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Service failures (e.g. HTTP 500) no longer cause exceptions (#206).
 - Error out when duplicate instance names are used.
+- Print score instead of object in duplicate score detection warning
 
 [includes]: https://recyclarr.dev/wiki/yaml/config-reference/include/
 [listoption]: http://recyclarr.dev/wiki/cli/config/list/templates/#include

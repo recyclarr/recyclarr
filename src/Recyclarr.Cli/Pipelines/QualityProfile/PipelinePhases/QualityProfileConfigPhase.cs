@@ -114,7 +114,7 @@ public class QualityProfileConfigPhase
                 _log.Warning(
                     "Custom format {Name} ({TrashId}) is duplicated in quality profile {ProfileName} with a score " +
                     "of {NewScore}, which is different from the original score of {OriginalScore}",
-                    cf.Name, cf.TrashId, scoreConfig.Name, scoreToUse, existingScore);
+                    cf.Name, cf.TrashId, scoreConfig.Name, scoreToUse, existingScore.Score);
             }
             else
             {
