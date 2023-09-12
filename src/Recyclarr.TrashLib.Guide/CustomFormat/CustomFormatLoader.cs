@@ -8,10 +8,10 @@ namespace Recyclarr.TrashLib.Guide.CustomFormat;
 
 public class CustomFormatLoader : ICustomFormatLoader
 {
-    private readonly BulkJsonLoader _loader;
+    private readonly ServiceJsonLoader _loader;
     private readonly ICustomFormatCategoryParser _categoryParser;
 
-    public CustomFormatLoader(BulkJsonLoader loader, ICustomFormatCategoryParser categoryParser)
+    public CustomFormatLoader(ServiceJsonLoader loader, ICustomFormatCategoryParser categoryParser)
     {
         _loader = loader;
         _categoryParser = categoryParser;

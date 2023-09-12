@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- If the guide data for "Include Custom Format when Renaming" is set to "true", it now syncs that
+  correctly instead of always setting to "false" (#213).
+
 ## [5.4.0] - 2023-09-11
 
 ### Added

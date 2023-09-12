@@ -8,13 +8,15 @@ namespace Recyclarr.TrashLib.Json;
 
 public record LoadedJsonObject<T>(IFileInfo File, T Obj);
 
-public class BulkJsonLoader
+public class BulkJsonLoader : IBulkJsonLoader
 {
     private readonly ILogger _log;
+    private readonly JsonSerializerSettings _serializerSettings;
 
-    public BulkJsonLoader(ILogger log)
+    public BulkJsonLoader(ILogger log, JsonSerializerSettings serializerSettings)
     {
         _log = log;
+        _serializerSettings = serializerSettings;
     }
 
     public ICollection<T> LoadAllFilesAtPaths<T>(
@@ -31,9 +33,9 @@ public class BulkJsonLoader
         return convertedObservable.ToEnumerable().ToList();
     }
 
-    private static T ParseJson<T>(string guideData, string fileName)
+    private T ParseJson<T>(string guideData, string fileName)
     {
-        var obj = JsonConvert.DeserializeObject<T>(guideData, GlobalJsonSerializerSettings.Guide);
+        var obj = JsonConvert.DeserializeObject<T>(guideData, _serializerSettings);
         if (obj is null)
         {
             throw new JsonSerializationException($"Unable to parse JSON at file {fileName}");

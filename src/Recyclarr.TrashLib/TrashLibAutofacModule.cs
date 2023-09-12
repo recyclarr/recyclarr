@@ -25,14 +25,15 @@ public class TrashLibAutofacModule : Module
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
-        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
         builder.RegisterModule<CompatibilityAutofacModule>();
         builder.RegisterModule<ApiServicesAutofacModule>();
+        builder.RegisterModule<JsonAutofacModule>();
+
+        builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
         builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
         builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
-        builder.RegisterType<BulkJsonLoader>();
     }
 
     private static void CommonRegistrations(ContainerBuilder builder)
