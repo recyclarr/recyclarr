@@ -32,7 +32,7 @@ public sealed class ErrorResponseParser
             var parsed = expr(value);
             foreach (var s in parsed)
             {
-                _log.Error("Reason: {Message:l}", (string) s);
+                _log.Error("Error message from remote service: {Message:l}", (string) s);
             }
 
             return true;
@@ -55,7 +55,7 @@ public sealed class ErrorResponseParser
                 return false;
             }
 
-            _log.Error("Reason: {Message:l}", (string) expr(value));
+            _log.Error("Error message from remote service: {Message:l}", (string) expr(value));
             return true;
         }
         catch
