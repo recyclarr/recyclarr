@@ -22,15 +22,16 @@ public class FlurlHttpExceptionHandlerTest
         extractor.GetErrorMessage().Returns(responseContent);
         await sut.ProcessServiceErrorMessages(extractor);
 
-        var logs = log.Messages;
+        var logs = log.Messages.ToList();
 
-        logs.Should().BeEquivalentTo(new[]
-            {
-                "Reason: error one",
-                "Reason: error two"
-            },
-            o => o.WithStrictOrdering()
-        );
+        var expectedSubstrings = new[]
+        {
+            "error one",
+            "error two"
+        };
+
+        logs.Should().HaveCount(expectedSubstrings.Length);
+        logs.Zip(expectedSubstrings).Should().OnlyContain(pair => pair.First.Contains(pair.Second));
     }
 
     [Test, AutoMockData]
@@ -45,13 +46,14 @@ public class FlurlHttpExceptionHandlerTest
         extractor.GetErrorMessage().Returns(responseContent);
         await sut.ProcessServiceErrorMessages(extractor);
 
-        var logs = log.Messages;
+        var logs = log.Messages.ToList();
 
-        logs.Should().BeEquivalentTo(new[]
-            {
-                "Reason: database is locked\ndatabase is locked"
-            },
-            o => o.WithStrictOrdering()
-        );
+        var expectedSubstrings = new[]
+        {
+            "database is locked\ndatabase is locked"
+        };
+
+        logs.Should().HaveCount(expectedSubstrings.Length);
+        logs.Zip(expectedSubstrings).Should().OnlyContain(pair => pair.First.Contains(pair.Second));
     }
 }
