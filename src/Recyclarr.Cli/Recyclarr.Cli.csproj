@@ -37,8 +37,4 @@
   <ItemGroup>
     <EmbeddedResource Include="config-template.yml" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pipelines\ReleaseProfile\Guide\" />
-  </ItemGroup>
 </Project>
