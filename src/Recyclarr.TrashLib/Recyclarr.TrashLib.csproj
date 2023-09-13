@@ -11,7 +11,6 @@
     <PackageReference Include="Flurl" />
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="JetBrains.Annotations" />
-    <PackageReference Include="Newtonsoft.Json.Schema" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="SuperLinq" />
     <PackageReference Include="System.Data.HashFunction.FNV" />

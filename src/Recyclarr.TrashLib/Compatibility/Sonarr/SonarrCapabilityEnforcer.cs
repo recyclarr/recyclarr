@@ -17,7 +17,7 @@ public class SonarrCapabilityEnforcer
     {
         var capabilities = await _capabilityFetcher.GetCapabilities(config);
 
-        if (!capabilities.SupportsNamedReleaseProfiles)
+        if (capabilities.Version < SonarrCapabilities.MinimumVersion)
         {
             throw new ServiceIncompatibilityException(
                 $"Your Sonarr version {capabilities.Version} does not meet the minimum " +

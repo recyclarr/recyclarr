@@ -17,9 +17,6 @@ public class ReleaseProfileAutofacModule : Module
         builder.RegisterType<ReleaseProfileFilterPipeline>().As<IReleaseProfileFilterPipeline>();
         builder.RegisterType<ReleaseProfileDataLister>();
 
-        builder.RegisterType<SonarrReleaseProfileCompatibilityHandler>()
-            .As<ISonarrReleaseProfileCompatibilityHandler>();
-
         builder.RegisterAggregateService<IReleaseProfilePipelinePhases>();
         builder.RegisterType<ReleaseProfileConfigPhase>();
         builder.RegisterType<ReleaseProfileApiFetchPhase>();

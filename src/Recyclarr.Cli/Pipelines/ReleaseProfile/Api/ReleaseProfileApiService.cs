@@ -1,5 +1,4 @@
 using Flurl.Http;
-using Newtonsoft.Json.Linq;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
@@ -8,45 +7,32 @@ namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 
 public class ReleaseProfileApiService : IReleaseProfileApiService
 {
-    private readonly ISonarrReleaseProfileCompatibilityHandler _profileHandler;
     private readonly IServiceRequestBuilder _service;
 
-    public ReleaseProfileApiService(
-        ISonarrReleaseProfileCompatibilityHandler profileHandler,
-        IServiceRequestBuilder service)
+    public ReleaseProfileApiService(IServiceRequestBuilder service)
     {
-        _profileHandler = profileHandler;
         _service = service;
     }
 
     public async Task UpdateReleaseProfile(IServiceConfiguration config, SonarrReleaseProfile profile)
     {
-        var profileToSend = await _profileHandler.CompatibleReleaseProfileForSending(config, profile);
         await _service.Request(config, "releaseprofile", profile.Id)
-            .PutJsonAsync(profileToSend);
+            .PutJsonAsync(profile);
     }
 
     public async Task<SonarrReleaseProfile> CreateReleaseProfile(
         IServiceConfiguration config,
         SonarrReleaseProfile profile)
     {
-        var profileToSend = await _profileHandler.CompatibleReleaseProfileForSending(config, profile);
-
-        var response = await _service.Request(config, "releaseprofile")
-            .PostJsonAsync(profileToSend)
-            .ReceiveJson<JObject>();
-
-        return _profileHandler.CompatibleReleaseProfileForReceiving(response);
+        return await _service.Request(config, "releaseprofile")
+            .PostJsonAsync(profile)
+            .ReceiveJson<SonarrReleaseProfile>();
     }
 
     public async Task<IList<SonarrReleaseProfile>> GetReleaseProfiles(IServiceConfiguration config)
     {
-        var response = await _service.Request(config, "releaseprofile")
-            .GetJsonAsync<List<JObject>>();
-
-        return response
-            .Select(_profileHandler.CompatibleReleaseProfileForReceiving)
-            .ToList();
+        return await _service.Request(config, "releaseprofile")
+            .GetJsonAsync<List<SonarrReleaseProfile>>();
     }
 
     public async Task DeleteReleaseProfile(IServiceConfiguration config, int releaseProfileId)

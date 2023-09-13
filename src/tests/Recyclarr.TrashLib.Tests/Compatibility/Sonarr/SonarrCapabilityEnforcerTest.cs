@@ -15,10 +15,11 @@ public class SonarrCapabilityEnforcerTest
         SonarrCapabilityEnforcer sut)
     {
         var config = NewConfig.Sonarr();
+        var min = SonarrCapabilities.MinimumVersion;
 
         fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
-            SupportsNamedReleaseProfiles = false
+            Version = new Version(min.Major, min.Minor, min.Build, min.Revision - 1)
         });
 
         var act = () => sut.Check(config);
@@ -41,7 +42,6 @@ public class SonarrCapabilityEnforcerTest
 
         fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
-            SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = true
         });
 
@@ -65,7 +65,6 @@ public class SonarrCapabilityEnforcerTest
 
         fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
-            SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = false
         });
 
@@ -95,7 +94,6 @@ public class SonarrCapabilityEnforcerTest
 
         fetcher.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
         {
-            SupportsNamedReleaseProfiles = true,
             SupportsCustomFormats = false
         });
 

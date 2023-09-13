@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v6.0 Upgrade Guide][breaking6] for required
+changes you may need to make.
+
+[breaking6]: https://recyclarr.dev/wiki/upgrade-guide/v6.0/
+
+### Changed
+
+- **BREAKING**: Minimum required Sonarr version increased to `3.0.9.1549` (Previous minimum version
+  was `3.0.4.1098`).
+
 ## [5.4.3] - 2023-09-16
 
 ### Changed

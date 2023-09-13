@@ -15,12 +15,6 @@ public class SonarrCapabilityFetcher : ServiceCapabilityFetcher<SonarrCapabiliti
         {
             Version = version,
 
-            SupportsNamedReleaseProfiles =
-                version >= SonarrCapabilities.MinimumVersion,
-
-            ArraysNeededForReleaseProfileRequiredAndIgnored =
-                version >= new Version("3.0.6.1355"),
-
             SupportsCustomFormats =
                 version >= new Version(4, 0)
         };
