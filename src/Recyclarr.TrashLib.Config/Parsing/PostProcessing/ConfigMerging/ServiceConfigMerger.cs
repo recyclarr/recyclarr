@@ -45,10 +45,10 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
         IReadOnlyCollection<QualityProfileConfigYaml>? a,
         IReadOnlyCollection<QualityProfileConfigYaml>? b)
     {
-        return Combine(a, b, (x1, y1) =>
+        return Combine(a, b, (a1, b1) =>
         {
-            return x1
-                .FullOuterJoin(y1, JoinType.Hash,
+            return a1
+                .FullOuterJoin(b1, JoinType.Hash,
                     x => x.Name,
                     x => x.Name,
                     l => l,
@@ -63,24 +63,24 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
     {
         return a with
         {
-            Upgrade = Combine(a.Upgrade, b.Upgrade, (x1, y1) => x1 with
+            Upgrade = Combine(a.Upgrade, b.Upgrade, (a1, b1) => a1 with
             {
-                Allowed = y1.Allowed ?? x1.Allowed,
-                UntilQuality = y1.UntilQuality ?? x1.UntilQuality,
-                UntilScore = y1.UntilScore ?? x1.UntilScore
+                Allowed = b1.Allowed ?? a1.Allowed,
+                UntilQuality = b1.UntilQuality ?? a1.UntilQuality,
+                UntilScore = b1.UntilScore ?? a1.UntilScore
             }),
             MinFormatScore = b.MinFormatScore ?? a.MinFormatScore,
             QualitySort = b.QualitySort ?? a.QualitySort,
             ScoreSet = b.ScoreSet ?? a.ScoreSet,
-            ResetUnmatchedScores = Combine(a.ResetUnmatchedScores, b.ResetUnmatchedScores, (x1, y1) => x1 with
+            ResetUnmatchedScores = Combine(a.ResetUnmatchedScores, b.ResetUnmatchedScores, (a1, b1) => a1 with
             {
-                Enabled = y1.Enabled ?? x1.Enabled,
-                Except = Combine(x1.Except, y1.Except, (x2, y2) => Combine(x2, y2, (x3, y3) => x3
-                    .Concat(y3)
+                Enabled = b1.Enabled ?? a1.Enabled,
+                Except = Combine(a1.Except, b1.Except, (a2, b2) => Combine(a2, b2, (a3, b3) => a3
+                    .Concat(b3)
                     .Distinct(StringComparer.InvariantCultureIgnoreCase)
                     .ToList()))
             }),
-            Qualities = Combine(a.Qualities, b.Qualities, (x1, y1) => x1.Concat(y1).ToList())
+            Qualities = Combine(a.Qualities, b.Qualities, (a1, b1) => a1.Concat(b1).ToList())
         };
     }
 }
