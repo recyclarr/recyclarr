@@ -80,7 +80,7 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
                     .Distinct(StringComparer.InvariantCultureIgnoreCase)
                     .ToList()))
             }),
-            Qualities = Combine(a.Qualities, b.Qualities, (a1, b1) => a1.Concat(b1).ToList())
+            Qualities = b.Qualities ?? a.Qualities
         };
     }
 }

@@ -500,12 +500,6 @@ public class ServiceConfigMergerTest
                     {
                         new QualityProfileQualityConfigYaml
                         {
-                            Enabled = true,
-                            Name = "quality1",
-                            Qualities = new[] {"quality"}
-                        },
-                        new QualityProfileQualityConfigYaml
-                        {
                             Enabled = false,
                             Name = "quality2",
                             Qualities = new[] {"quality3"}

@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print error information about HTTP 401 instead of "Unable to determine".
 - Improved wording of remote service error messages.
 
+### Changed
+
+- `qualities` (inside `quality_profiles`) is now a "Replace" merge operation instead of "Add". This
+  means only one YAML file manages the full list of qualities. Either an include does it, or you
+  override the full list in your configuration file. There is no longer any combination.
+
 ## [5.4.1] - 2023-09-12
 
 ### Fixed
