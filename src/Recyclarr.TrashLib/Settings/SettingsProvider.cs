@@ -50,11 +50,13 @@ public class SettingsProvider : ISettingsProvider
     private IFileInfo CreateDefaultSettingsFile()
     {
         const string fileData =
-            "# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json\n" +
-            "\n" +
-            "# Edit this file to customize the behavior of Recyclarr beyond its defaults\n" +
-            "# For the settings file reference guide, visit the link to the wiki below:\n" +
-            "# https://recyclarr.dev/wiki/yaml/settings-reference/\n";
+            """
+            # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
+
+            # Edit this file to customize the behavior of Recyclarr beyond its defaults
+            # For the settings file reference guide, visit the link to the wiki below:
+            # https://recyclarr.dev/wiki/yaml/settings-reference/
+            """;
 
         var settingsFile = _paths.AppDataDirectory.File("settings.yml");
         settingsFile.CreateParentDirectory();
