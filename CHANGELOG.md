@@ -17,6 +17,7 @@ changes you may need to make.
 
 - **BREAKING**: Minimum required Sonarr version increased to `3.0.9.1549` (Previous minimum version
   was `3.0.4.1098`).
+- **BREAKING**: Old boolean syntax for `reset_unmatched_scores` is no longer supported.
 
 ## [5.4.3] - 2023-09-16
 

@@ -40,7 +40,7 @@ public class SettingsProvider : ISettingsProvider
             _log.Debug(e, "Exception while parsing settings file");
 
             var line = e.Start.Line;
-            var msg = SettingsContextualMessages.GetContextualErrorFromException(e);
+            var msg = SettingsContextualMessages.GetContextualErrorFromException(e) ?? e.Message;
             _log.Error("Exception while parsing settings.yml at line {Line}: {Msg}", line, msg);
 
             throw;

@@ -47,18 +47,25 @@ public class ConfigParser
             _log.Debug(e, "Exception while parsing config file");
 
             var line = e.Start.Line;
-            switch (e.InnerException)
-            {
-                case InvalidCastException:
-                    _log.Error("Incompatible value assigned/used at line {Line}: {Msg}", line,
-                        e.InnerException.Message);
-                    break;
 
-                default:
-                    var msg = ConfigContextualMessages.GetContextualErrorFromException(e) ??
-                        e.InnerException?.Message ?? e.Message;
-                    _log.Error("Exception at line {Line}: {Msg}", line, msg);
-                    break;
+            var contextualMsg = ConfigContextualMessages.GetContextualErrorFromException(e);
+            if (contextualMsg is not null)
+            {
+                _log.Error("Exception at line {Line}: {Msg}", line, contextualMsg);
+            }
+            else
+            {
+                switch (e.InnerException)
+                {
+                    case InvalidCastException:
+                        _log.Error("Incompatible value assigned/used at line {Line}: {Msg}", line,
+                            e.InnerException.Message);
+                        break;
+
+                    default:
+                        _log.Error("Exception at line {Line}: {Msg}", line, e.InnerException?.Message ?? e.Message);
+                        break;
+                }
             }
         }
 

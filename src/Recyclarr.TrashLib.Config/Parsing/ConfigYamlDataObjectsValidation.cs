@@ -93,13 +93,6 @@ public class ResetUnmatchedScoresConfigYamlValidator : AbstractValidator<ResetUn
         RuleFor(x => x.Enabled)
             .NotNull()
             .WithMessage("Under `reset_unmatched_scores`, the `enabled` property is required.");
-
-        RuleFor(x => x.FromBool)
-            .Must(x => !x) // must be false
-            .WithMessage(
-                "Using true/false with `reset_unmatched_scores` is deprecated. " +
-                "See: https://recyclarr.dev/wiki/upgrade-guide/v6.0/#reset-scores")
-            .WithSeverity(Severity.Warning);
     }
 }
 

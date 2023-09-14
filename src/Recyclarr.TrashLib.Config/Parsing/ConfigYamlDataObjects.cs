@@ -1,7 +1,5 @@
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using Recyclarr.TrashLib.Config.Parsing.BackwardCompatibility;
 using Recyclarr.TrashLib.Config.Parsing.PostProcessing.ConfigMerging;
 using YamlDotNet.Serialization;
 
@@ -45,13 +43,8 @@ public record QualityProfileQualityConfigYaml
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-[TypeConverter(typeof(ResetUnmatchedScoresYamlTypeConverter))]
 public record ResetUnmatchedScoresConfigYaml
 {
-    // This exists so that we know if this value came from the legacy 'true|false' value.
-    [YamlIgnore]
-    public bool FromBool { get; set; }
-
     public bool? Enabled { get; init; }
     public IReadOnlyCollection<string>? Except { get; init; }
 }

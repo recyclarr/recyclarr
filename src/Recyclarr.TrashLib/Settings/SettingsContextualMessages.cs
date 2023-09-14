@@ -6,7 +6,17 @@ public static class SettingsContextualMessages
 {
     public static string? GetContextualErrorFromException(YamlException e)
     {
-        if (e.Message.Contains(
+        return LookupMessage(e.Message) ?? LookupMessage(e.InnerException?.Message);
+    }
+
+    private static string? LookupMessage(string? msg)
+    {
+        if (msg is null)
+        {
+            return null;
+        }
+
+        if (msg.Contains(
             "Property 'repository' not found on type " +
             $"'{typeof(SettingsValues).FullName}'"))
         {
