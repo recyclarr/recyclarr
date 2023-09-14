@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Print error information about HTTP 401 instead of "Unable to determine".
+
 ## [5.4.1] - 2023-09-12
 
 ### Fixed

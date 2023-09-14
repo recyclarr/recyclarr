@@ -15,4 +15,9 @@ public class ServiceErrorMessageExtractor : IServiceErrorMessageExtractor
     {
         return await _e.GetResponseStringAsync();
     }
+
+    public int? GetHttpStatusCode()
+    {
+        return _e.StatusCode;
+    }
 }

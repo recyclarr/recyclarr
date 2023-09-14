@@ -15,12 +15,27 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
-        var responseBody = await extractor.GetErrorMessage();
+        var statusCode = extractor.GetHttpStatusCode();
+
+        switch (statusCode)
+        {
+            case 401:
+                _log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
+                break;
+
+            default:
+                ProcessBody(await extractor.GetErrorMessage());
+                break;
+        }
+    }
+
+    private void ProcessBody(string responseBody)
+    {
         var parser = new ErrorResponseParser(_log, responseBody);
 
         if (parser.DeserializeList(s => s
-                .Select(x => (string) x.errorMessage)
-                .NotNull(x => !string.IsNullOrEmpty(x))))
+            .Select(x => (string) x.errorMessage)
+            .NotNull(x => !string.IsNullOrEmpty(x))))
         {
             return;
         }
