@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Print error information about HTTP 401 instead of "Unable to determine".
+- Improved wording of remote service error messages.
 
 ## [5.4.1] - 2023-09-12
 
