@@ -14,8 +14,8 @@ public class LogJanitor : ILogJanitor
     public void DeleteOldestLogFiles(int numberOfNewestToKeep)
     {
         foreach (var file in _paths.LogDirectory.GetFiles()
-                     .OrderByDescending(f => f.Name)
-                     .Skip(numberOfNewestToKeep))
+            .OrderByDescending(f => f.Name)
+            .Skip(numberOfNewestToKeep))
         {
             file.Delete();
         }

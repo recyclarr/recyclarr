@@ -7,8 +7,8 @@ public static class ConfigContextualMessages
     public static string? GetContextualErrorFromException(YamlException e)
     {
         if (e.Message.Contains(
-                "Property 'reset_unmatched_scores' not found on type " +
-                $"'{typeof(QualityScoreConfigYaml).FullName}'"))
+            "Property 'reset_unmatched_scores' not found on type " +
+            $"'{typeof(QualityScoreConfigYaml).FullName}'"))
         {
             return
                 "Usage of 'reset_unmatched_scores' inside 'quality_profiles' under 'custom_formats' is no " +

@@ -7,8 +7,8 @@ public static class SettingsContextualMessages
     public static string? GetContextualErrorFromException(YamlException e)
     {
         if (e.Message.Contains(
-                "Property 'repository' not found on type " +
-                $"'{typeof(SettingsValues).FullName}'"))
+            "Property 'repository' not found on type " +
+            $"'{typeof(SettingsValues).FullName}'"))
         {
             return
                 "Usage of 'repository' setting is no " +
