@@ -82,10 +82,6 @@ public class QualityProfileConfigPhase
             return;
         }
 
-        _log.Information(
-            "A total of {Count} custom formats have no scores assigned. See the debug logs for a detailed listing.",
-            scoreless.Count);
-
         foreach (var (name, trashId) in scoreless)
         {
             _log.Debug("CF has no score in the guide or config YAML: {Name} ({TrashId})", name, trashId);

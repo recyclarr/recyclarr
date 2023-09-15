@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Remove INF log that showed a total count of CFs without scores assigned. This log caused a lot of
+  confusion in support channels. You can still see a list of CFs without scores in the debug logs.
+
 ## [5.4.2] - 2023-09-14
 
 ### Fixed
