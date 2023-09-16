@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.4.3] - 2023-09-16
+
 ### Changed
 
 - Remove INF log that showed a total count of CFs without scores assigned. This log caused a lot of
@@ -882,7 +884,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.4.2...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v5.4.3...HEAD
+[5.4.3]: https://github.com/recyclarr/recyclarr/compare/v5.4.2...v5.4.3
 [5.4.2]: https://github.com/recyclarr/recyclarr/compare/v5.4.1...v5.4.2
 [5.4.1]: https://github.com/recyclarr/recyclarr/compare/v5.4.0...v5.4.1
 [5.4.0]: https://github.com/recyclarr/recyclarr/compare/v5.3.1...v5.4.0
