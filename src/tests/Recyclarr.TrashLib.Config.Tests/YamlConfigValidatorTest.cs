@@ -145,39 +145,6 @@ public class YamlConfigValidatorTest : ConfigIntegrationFixture
     public static string FirstCf { get; } = $"{nameof(ServiceConfigYaml.CustomFormats)}[0].";
 
     [Test]
-    public void Validation_failure_when_cf_trash_ids_empty()
-    {
-        var config = new ServiceConfigYaml
-        {
-            ApiKey = "valid",
-            BaseUrl = "http://valid",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
-                {
-                    TrashIds = Array.Empty<string>(),
-                    QualityProfiles = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
-            },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
-        };
-
-        var validator = Resolve<ServiceConfigYamlValidator>();
-        var result = validator.TestValidate(config);
-
-        result.ShouldHaveValidationErrorFor(FirstCf + nameof(CustomFormatConfig.TrashIds));
-    }
-
-    [Test]
     public void Validation_failure_when_quality_definition_type_empty()
     {
         var config = new ServiceConfigYaml

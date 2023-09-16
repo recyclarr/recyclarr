@@ -32,10 +32,9 @@ public class QualityProfileConfigPhase
         // 2. For each quality profile score config in that CF group
         // 3. For each CF in the group above, match it to a Guide CF object and pair it with the quality profile config
         var profileAndCfs = config.CustomFormats
-            .Where(x => x.QualityProfiles.IsNotEmpty())
             .SelectMany(x => x.QualityProfiles
-                .Select(y => (Config: x, Profile: y)))
-            .SelectMany(x => x.Config.TrashIds
+                .Select(y => (Profile: y, x.TrashIds)))
+            .SelectMany(x => x.TrashIds
                 .Select(_cache.LookupByTrashId)
                 .NotNull()
                 .Select(y => (x.Profile, Cf: y)));

@@ -40,14 +40,7 @@ public class CustomFormatConfigYamlValidator : AbstractValidator<CustomFormatCon
 {
     public CustomFormatConfigYamlValidator()
     {
-        RuleFor(x => x.TrashIds).NotEmpty()
-            .When(x => x.TrashIds is not null)
-            .WithName("trash_ids")
-            .ForEach(x => x.Length(32).Matches(@"^[0-9a-fA-F]+$"));
-
-        RuleForEach(x => x.QualityProfiles).NotEmpty()
-            .When(x => x.QualityProfiles is not null)
-            .WithName("quality_profiles")
+        RuleForEach(x => x.QualityProfiles)
             .SetValidator(new QualityScoreConfigYamlValidator());
     }
 }

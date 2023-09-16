@@ -219,4 +219,49 @@ public class QualityProfileConfigPhaseTest
             },
             o => o.Excluding(x => x.ShouldCreate));
     }
+
+    [Test, AutoMockData]
+    public void Empty_trash_ids_list_is_ignored(
+        [Frozen] ProcessedCustomFormatCache cache,
+        QualityProfileConfigPhase sut)
+    {
+        var config = SetupCfs(new CustomFormatConfig
+        {
+            TrashIds = Array.Empty<string>(),
+            QualityProfiles = new List<QualityProfileScoreConfig>
+            {
+                new()
+                {
+                    Name = "test_profile",
+                    Score = 100
+                }
+            }
+        });
+
+        var result = sut.Execute(config);
+
+        result.Should().BeEmpty();
+    }
+
+    [Test, AutoMockData]
+    public void Empty_quality_profiles_is_ignored(
+        [Frozen] ProcessedCustomFormatCache cache,
+        QualityProfileConfigPhase sut)
+    {
+        cache.AddCustomFormats(new[]
+        {
+            NewCf.DataWithScore("", "id1", 101, 1),
+            NewCf.DataWithScore("", "id2", 201, 2)
+        });
+
+        var config = SetupCfs(new CustomFormatConfig
+        {
+            TrashIds = new[] {"id1", "id2"},
+            QualityProfiles = Array.Empty<QualityProfileScoreConfig>()
+        });
+
+        var result = sut.Execute(config);
+
+        result.Should().BeEmpty();
+    }
 }

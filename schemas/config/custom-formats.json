@@ -10,12 +10,16 @@
     "required": ["trash_ids"],
     "properties": {
       "trash_ids": {
-        "$ref": "trash-ids.json"
+        "type": ["null", "array"],
+        "description": "A list of one or more Trash IDs taken from the Trash Guide JSON files.",
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
       },
       "quality_profiles": {
-        "type": "array",
+        "type": ["null", "array"],
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",
-        "minItems": 1,
         "items": {
           "properties": {
             "name": {

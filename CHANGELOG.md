@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove INF log that showed a total count of CFs without scores assigned. This log caused a lot of
   confusion in support channels. You can still see a list of CFs without scores in the debug logs.
+- Relaxed validation rules for `trash_ids` and `quality_profiles` under `custom_formats`. Both of
+  these nodes may now be empty. This is mostly to make commenting out parts of configuration
+  templates easier.
 
 ## [5.4.2] - 2023-09-14
 
