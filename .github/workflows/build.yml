@@ -77,7 +77,8 @@ jobs:
   codesign:
     name: Apple Signing
     runs-on: macos-latest
-    if: github.event_name != 'pull_request'
+    # Ignore pull requests & non-master branches
+    if: github.ref == 'refs/heads/master'
     needs: [build-osx]
     strategy:
       matrix:
