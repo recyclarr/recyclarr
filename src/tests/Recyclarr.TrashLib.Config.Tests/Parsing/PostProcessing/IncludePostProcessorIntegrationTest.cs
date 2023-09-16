@@ -164,9 +164,21 @@ public class IncludePostProcessorIntegrationTest : ConfigIntegrationFixture
                     Include = null,
                     CustomFormats = new[]
                     {
-                        new CustomFormatConfigYaml {TrashIds = new[] {"496f355514737f7d83bf7aa4d24f8169"}},
-                        new CustomFormatConfigYaml {TrashIds = new[] {"2f22d89048b01681dde8afe203bf2e95"}},
-                        new CustomFormatConfigYaml {TrashIds = new[] {"240770601cc226190c367ef59aba7463"}}
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = new[]
+                            {
+                                "496f355514737f7d83bf7aa4d24f8169",
+                                "240770601cc226190c367ef59aba7463"
+                            }
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = new[]
+                            {
+                                "2f22d89048b01681dde8afe203bf2e95"
+                            }
+                        }
                     },
                     QualityDefinition = new QualitySizeConfigYaml
                     {

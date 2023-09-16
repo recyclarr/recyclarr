@@ -263,7 +263,17 @@ public class ServiceConfigMergerTest
                     TrashIds = new[] {"id1", "id2"},
                     QualityProfiles = new[]
                     {
-                        new QualityScoreConfigYaml {Name = "c", Score = 100}
+                        new QualityScoreConfigYaml {Name = "c", Score = 100},
+                        new QualityScoreConfigYaml {Name = "d", Score = 101},
+                        new QualityScoreConfigYaml {Name = "e", Score = 102}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "f", Score = 100}
                     }
                 }
             }
@@ -288,6 +298,14 @@ public class ServiceConfigMergerTest
                     {
                         new QualityScoreConfigYaml {Name = "e", Score = 300}
                     }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id1"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "c", Score = 50}
+                    }
                 }
             }
         };
@@ -298,7 +316,65 @@ public class ServiceConfigMergerTest
 
         result.Should().BeEquivalentTo(new SonarrConfigYaml
         {
-            CustomFormats = leftConfig.CustomFormats.Concat(rightConfig.CustomFormats).ToList()
+            CustomFormats = new[]
+            {
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "c", Score = 100}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id1", "id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "d", Score = 101}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id1", "id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "e", Score = 102}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id2"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "f", Score = 100}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id3", "id4"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "d", Score = 200}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id5", "id6"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "e", Score = 300}
+                    }
+                },
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = new[] {"id1"},
+                    QualityProfiles = new[]
+                    {
+                        new QualityScoreConfigYaml {Name = "c", Score = 50}
+                    }
+                }
+            }
         });
     }
 

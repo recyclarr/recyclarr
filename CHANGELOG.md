@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relaxed validation rules for `trash_ids` and `quality_profiles` under `custom_formats`. Both of
   these nodes may now be empty. This is mostly to make commenting out parts of configuration
   templates easier.
+- The merge operation for `custom_formats` is now "Join" (previously "Add"). If, for the same
+  profile, you "reassign" a different score to a CF, the score now gets updated without having to
+  remove the CF from `custom_formats` sections in included YAML files.
 
 ## [5.4.2] - 2023-09-14
 
