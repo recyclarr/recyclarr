@@ -7,27 +7,26 @@
 
   <ItemGroup>
     <!-- Packages that apply to all tests -->
-    <PackageReference Include="AgileObjects.ReadableExpressions" PrivateAssets="All" />
-    <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="All" />
-    <PackageReference Include="AutoFixture" PrivateAssets="All" />
-    <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="All" />
-    <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="All" />
-    <PackageReference Include="coverlet.collector" PrivateAssets="All" />
-    <PackageReference Include="FluentAssertions" PrivateAssets="All" />
-    <PackageReference Include="FluentAssertions.Analyzers" PrivateAssets="All" />
-    <PackageReference Include="FluentAssertions.Json" PrivateAssets="All" />
-    <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" PrivateAssets="All" />
-    <PackageReference Include="NSubstitute" PrivateAssets="All" />
-    <PackageReference Include="NSubstitute.Analyzers.CSharp" PrivateAssets="All" />
-    <PackageReference Include="NUnit" PrivateAssets="All" />
-    <PackageReference Include="NUnit.Analyzers" PrivateAssets="All" />
-    <PackageReference Include="NUnit3TestAdapter" PrivateAssets="All" />
-    <PackageReference Include="Serilog.Sinks.Observable" PrivateAssets="All" />
-    <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="All" />
-    <PackageReference Include="Spectre.Console.Testing" PrivateAssets="All" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="All" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" PrivateAssets="All" />
+    <PackageReference Include="AgileObjects.ReadableExpressions" PrivateAssets="all" />
+    <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="all" />
+    <PackageReference Include="AutoFixture" PrivateAssets="all" />
+    <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="all" />
+    <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="all" />
+    <PackageReference Include="coverlet.collector" PrivateAssets="all" />
+    <PackageReference Include="FluentAssertions" PrivateAssets="all" />
+    <PackageReference Include="FluentAssertions.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
+    <PackageReference Include="NSubstitute" PrivateAssets="all" />
+    <PackageReference Include="NSubstitute.Analyzers.CSharp" PrivateAssets="all" />
+    <PackageReference Include="NUnit" PrivateAssets="all" />
+    <PackageReference Include="NUnit.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="NUnit3TestAdapter" PrivateAssets="all" />
+    <PackageReference Include="Serilog.Sinks.Observable" PrivateAssets="all" />
+    <PackageReference Include="Serilog.Sinks.NUnit" PrivateAssets="all" />
+    <PackageReference Include="Spectre.Console.Testing" PrivateAssets="all" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" PrivateAssets="all" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
