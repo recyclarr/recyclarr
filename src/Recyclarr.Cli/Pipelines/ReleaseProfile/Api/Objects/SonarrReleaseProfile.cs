@@ -1,5 +1,5 @@
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 
@@ -12,10 +12,10 @@ public class SonarrPreferredTerm
         Score = score;
     }
 
-    [JsonProperty("key")]
+    [JsonPropertyName("key")]
     public string Term { get; set; }
 
-    [JsonProperty("value")]
+    [JsonPropertyName("value")]
     public int Score { get; set; }
 }
 

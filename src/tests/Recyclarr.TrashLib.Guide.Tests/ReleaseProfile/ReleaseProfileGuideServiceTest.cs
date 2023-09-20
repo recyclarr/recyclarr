@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Newtonsoft.Json;
+using Recyclarr.Json;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.AutoFixture;
 using Recyclarr.TrashLib.Guide.ReleaseProfile;
@@ -30,18 +30,16 @@ public class ReleaseProfileGuideServiceTest
             };
         }
 
-        static MockFileData MockFileData(dynamic obj)
-        {
-            return new MockFileData(JsonConvert.SerializeObject(obj));
-        }
-
         var mockData1 = MakeMockObject("first");
         var mockData2 = MakeMockObject("second");
         var baseDir = fs.CurrentDirectory().SubDirectory("files");
         baseDir.Create();
 
-        fs.AddFile(baseDir.File("first.json").FullName, MockFileData(mockData1));
-        fs.AddFile(baseDir.File("second.json").FullName, MockFileData(mockData2));
+        fs.AddFile(baseDir.File("first.json").FullName,
+            MockData.FromJson(mockData1, GlobalJsonSerializerSettings.Services));
+
+        fs.AddFile(baseDir.File("second.json").FullName,
+            MockData.FromJson(mockData2, GlobalJsonSerializerSettings.Services));
 
         metadataBuilder.ToDirectoryInfoList(default!).ReturnsForAnyArgs(new[] {baseDir});
 
@@ -74,8 +72,11 @@ public class ReleaseProfileGuideServiceTest
             }
         };
 
-        fs.AddFile(rootPath.File("0_bad_data.json").FullName, MockData.FromString(badData));
-        fs.AddFile(rootPath.File("1_good_data.json").FullName, MockData.FromJson(goodData));
+        fs.AddFile(rootPath.File("0_bad_data.json").FullName,
+            MockData.FromString(badData));
+
+        fs.AddFile(rootPath.File("1_good_data.json").FullName,
+            MockData.FromJson(goodData, GlobalJsonSerializerSettings.Services));
 
         metadataBuilder.ToDirectoryInfoList(default!).ReturnsForAnyArgs(new[] {rootPath});
 

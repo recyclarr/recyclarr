@@ -12,11 +12,11 @@
     <PackageVersion Include="CliWrap" Version="3.6.4" />
     <PackageVersion Include="FluentValidation" Version="11.7.1" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
-    <PackageVersion Include="Flurl.Http" Version="3.2.4" />
+    <PackageVersion Include="Flurl.Http" Version="4.0.0-pre3" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.2.0" />
+    <PackageVersion Include="JorgeSerrano.Json.JsonSnakeCaseNamingPolicy" Version="0.9.0" />
     <PackageVersion Include="MudBlazor" Version="6.9.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="19.4.1" />
     <PackageVersion Include="Serilog" Version="3.0.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0" />
@@ -30,6 +30,8 @@
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
     <PackageVersion Include="System.Reactive" Version="6.0.0" />
+    <PackageVersion Include="System.Text.Json" Version="7.0.3" />
+    <PackageVersion Include="SystemTextJson.JsonDiffPatch" Version="1.3.1" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.69" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="2.0.5" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.69" />

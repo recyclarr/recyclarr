@@ -39,6 +39,6 @@ public class CustomFormatService : ICustomFormatService
         CancellationToken cancellationToken = default)
     {
         await _service.Request(config, "customformat", customFormatId)
-            .DeleteAsync(cancellationToken);
+            .DeleteAsync(cancellationToken: cancellationToken);
     }
 }

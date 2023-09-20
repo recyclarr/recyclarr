@@ -1,18 +1,18 @@
 using System.IO.Abstractions;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Json;
 using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Interfaces;
-using Recyclarr.TrashLib.Json;
 
 namespace Recyclarr.Cli.Cache;
 
 public partial class ServiceCache : IServiceCache
 {
     private readonly ICacheStoragePath _storagePath;
-    private readonly JsonSerializerSettings _jsonSettings;
+    private readonly JsonSerializerOptions _jsonSettings;
     private readonly ILogger _log;
 
     public ServiceCache(ICacheStoragePath storagePath, ILogger log)
@@ -37,7 +37,7 @@ public partial class ServiceCache : IServiceCache
 
         try
         {
-            return JsonConvert.DeserializeObject<T>(json, _jsonSettings);
+            return JsonSerializer.Deserialize<T>(json, _jsonSettings);
         }
         catch (JsonException e)
         {
@@ -53,10 +53,8 @@ public partial class ServiceCache : IServiceCache
         _log.Debug("Saving cache to path: {Path}", path.FullName);
         path.CreateParentDirectory();
 
-        var serializer = JsonSerializer.Create(_jsonSettings);
-
-        using var stream = new JsonTextWriter(path.CreateText());
-        serializer.Serialize(stream, obj);
+        using var stream = path.Create();
+        JsonSerializer.Serialize(stream, obj, _jsonSettings);
     }
 
     private static string GetCacheObjectNameAttribute<T>()

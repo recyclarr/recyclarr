@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="JorgeSerrano.Json.JsonSnakeCaseNamingPolicy" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="SystemTextJson.JsonDiffPatch" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
+</Project>

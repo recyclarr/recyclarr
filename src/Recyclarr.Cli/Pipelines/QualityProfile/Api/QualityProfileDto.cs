@@ -1,5 +1,5 @@
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Api;
 

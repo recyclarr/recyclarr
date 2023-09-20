@@ -1,12 +1,12 @@
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Recyclarr.TestLibrary;
 
 public static class MockData
 {
-    public static MockFileData FromJson(object json)
+    public static MockFileData FromJson(object json, JsonSerializerOptions options)
     {
-        return new MockFileData(JsonConvert.SerializeObject(json));
+        return new MockFileData(JsonSerializer.Serialize(json, options));
     }
 
     public static MockFileData FromString(string data)

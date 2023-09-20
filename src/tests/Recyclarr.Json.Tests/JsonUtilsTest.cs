@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.TestLibrary;
 
-namespace Recyclarr.Common.Tests;
+namespace Recyclarr.Json.Tests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

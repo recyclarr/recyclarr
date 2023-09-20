@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Json\Recyclarr.Json.csproj" />
     <ProjectReference Include="..\Recyclarr.Yaml\Recyclarr.Yaml.csproj" />
   </ItemGroup>
 </Project>

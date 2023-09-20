@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using Newtonsoft.Json;
-using Recyclarr.TrashLib.Json;
+using System.Text.Json;
+using Recyclarr.Json;
 
 namespace Recyclarr.TrashLib.Repo;
 
@@ -17,11 +17,9 @@ public class TrashRepoMetadataBuilder : IRepoMetadataBuilder
 
     private static RepoMetadata Deserialize(IFileInfo jsonFile)
     {
-        var serializer = JsonSerializer.Create(GlobalJsonSerializerSettings.Guide);
+        using var stream = jsonFile.OpenRead();
 
-        using var stream = new JsonTextReader(jsonFile.OpenText());
-
-        var obj = serializer.Deserialize<RepoMetadata>(stream);
+        var obj = JsonSerializer.Deserialize<RepoMetadata>(stream, GlobalJsonSerializerSettings.Guide);
         if (obj is null)
         {
             throw new InvalidDataException($"Unable to deserialize {jsonFile}");

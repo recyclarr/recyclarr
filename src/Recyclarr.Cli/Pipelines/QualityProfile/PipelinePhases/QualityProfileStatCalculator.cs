@@ -1,4 +1,5 @@
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.JsonDiffPatch;
 using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
@@ -55,8 +56,9 @@ public class QualityProfileStatCalculator
 
     private static void QualityUpdates(ProfileWithStats stats, QualityProfileDto oldDto, QualityProfileDto newDto)
     {
-        stats.QualitiesChanged = !JToken.DeepEquals(
-            JToken.FromObject(oldDto.Items), JToken.FromObject(newDto.Items));
+        using var oldJson = JsonSerializer.SerializeToDocument(oldDto.Items);
+        using var newJson = JsonSerializer.SerializeToDocument(newDto.Items);
+        stats.QualitiesChanged = !oldJson.DeepEquals(newJson);
     }
 
     private void ScoreUpdates(

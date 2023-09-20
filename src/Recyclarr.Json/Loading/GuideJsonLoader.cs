@@ -1,15 +1,15 @@
 using System.IO.Abstractions;
-using Newtonsoft.Json;
+using System.Text.Json;
 
-namespace Recyclarr.TrashLib.Json;
+namespace Recyclarr.Json.Loading;
 
-public class ServiceJsonLoader : IBulkJsonLoader
+public class GuideJsonLoader : IBulkJsonLoader
 {
     private readonly IBulkJsonLoader _loader;
 
-    public ServiceJsonLoader(Func<JsonSerializerSettings, IBulkJsonLoader> jsonLoaderFactory)
+    public GuideJsonLoader(Func<JsonSerializerOptions, IBulkJsonLoader> jsonLoaderFactory)
     {
-        _loader = jsonLoaderFactory(GlobalJsonSerializerSettings.Services);
+        _loader = jsonLoaderFactory(GlobalJsonSerializerSettings.Guide);
     }
 
     public ICollection<T> LoadAllFilesAtPaths<T>(

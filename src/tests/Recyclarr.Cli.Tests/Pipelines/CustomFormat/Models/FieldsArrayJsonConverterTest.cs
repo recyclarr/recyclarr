@@ -1,5 +1,5 @@
-using Flurl.Http.Configuration;
-using Recyclarr.TrashLib.Json;
+using System.Text.Json;
+using Recyclarr.Json;
 using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
@@ -11,8 +11,6 @@ public class FieldsArrayJsonConverterTest
     [Test]
     public void Read_multiple_as_array()
     {
-        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
-
         const string json =
             """
             {
@@ -40,26 +38,20 @@ public class FieldsArrayJsonConverterTest
               ]
             }
             """;
-        var result = serializer.Deserialize<CustomFormatSpecificationData>(json);
 
-        result.Fields.Should().BeEquivalentTo(new[]
+        var result =
+            JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
+
+        result!.Fields.Should().BeEquivalentTo(new[]
         {
-            new CustomFormatFieldData
-            {
-                Value = 25
-            },
-            new CustomFormatFieldData
-            {
-                Value = 40
-            }
+            new CustomFormatFieldData {Value = 25},
+            new CustomFormatFieldData {Value = 40}
         });
     }
 
     [Test]
     public void Read_single_as_array()
     {
-        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
-
         const string json =
             """
             {
@@ -69,36 +61,34 @@ public class FieldsArrayJsonConverterTest
                 "label": "Minimum Size",
                 "unit": "GB",
                 "helpText": "Release must be greater than this size",
-                "value": 25,
+                "value": "25",
                 "type": "number",
                 "advanced": false
               }
             }
             """;
-        var result = serializer.Deserialize<CustomFormatSpecificationData>(json);
+        var result =
+            JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
 
-        result.Fields.Should().BeEquivalentTo(new[]
+        result!.Fields.Should().BeEquivalentTo(new[]
         {
-            new CustomFormatFieldData
-            {
-                Value = 25
-            }
+            new CustomFormatFieldData {Value = "25"}
         });
     }
 
     [Test]
     public void Read_throws_on_unsupported_token_type()
     {
-        var serializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services);
-
         const string json =
             """
             {
               "fields": 0
             }
             """;
-        var act = () => serializer.Deserialize<CustomFormatSpecificationData>(json);
 
-        act.Should().Throw<InvalidOperationException>();
+        var act = () => JsonSerializer.Deserialize<CustomFormatSpecificationData>(
+            json, GlobalJsonSerializerSettings.Services);
+
+        act.Should().Throw<JsonException>();
     }
 }

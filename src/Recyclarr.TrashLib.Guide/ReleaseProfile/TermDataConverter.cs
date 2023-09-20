@@ -1,33 +1,24 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Recyclarr.Json;
 
 namespace Recyclarr.TrashLib.Guide.ReleaseProfile;
 
-internal class TermDataConverter : JsonConverter
+public class TermDataConverter : JsonConverter<TermData>
 {
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    public override TermData? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        // Not to be used for serialization
-        throw new NotImplementedException();
-    }
-
-    public override object? ReadJson(
-        JsonReader reader,
-        Type objectType,
-        object? existingValue,
-        JsonSerializer serializer)
-    {
-        var token = JToken.Load(reader);
-        return token.Type switch
+        if (reader.TokenType is JsonTokenType.String)
         {
-            JTokenType.Object => token.ToObject<TermData>(),
-            JTokenType.String => new TermData {Term = token.ToString()},
-            _ => null
-        };
+            var str = reader.GetString();
+            return str is not null ? new TermData {Term = str} : null;
+        }
+
+        return JsonSerializer.Deserialize<TermData>(ref reader, options.CopyOptionsWithout<TermDataConverter>());
     }
 
-    public override bool CanConvert(Type objectType)
+    public override void Write(Utf8JsonWriter writer, TermData value, JsonSerializerOptions options)
     {
-        return objectType == typeof(TermData);
+        JsonSerializer.Serialize(writer, value, options.CopyOptionsWithout<TermDataConverter>());
     }
 }

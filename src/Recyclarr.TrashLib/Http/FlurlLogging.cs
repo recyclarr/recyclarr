@@ -1,6 +1,6 @@
+using System.Text.Json;
 using Flurl;
 using Flurl.Http.Configuration;
-using Newtonsoft.Json;
 
 namespace Recyclarr.TrashLib.Http;
 
@@ -51,7 +51,7 @@ public static class FlurlLogging
 
         try
         {
-            body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body));
+            body = JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(body));
         }
         catch (JsonException)
         {

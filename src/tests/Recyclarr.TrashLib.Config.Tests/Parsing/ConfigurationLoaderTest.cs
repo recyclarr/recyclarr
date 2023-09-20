@@ -21,9 +21,9 @@ public class ConfigurationLoaderTest : ConfigIntegrationFixture
         return () => new StringReader(testData.ReadData(file));
     }
 
-    protected override void RegisterTypes(ContainerBuilder builder)
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
-        base.RegisterTypes(builder);
+        base.RegisterStubsAndMocks(builder);
         builder.RegisterMockFor<IValidator<RadarrConfigYaml>>();
         builder.RegisterMockFor<IValidator<SonarrConfigYaml>>();
     }

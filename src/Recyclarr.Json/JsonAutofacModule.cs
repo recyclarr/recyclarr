@@ -1,14 +1,15 @@
+using System.Text.Json;
 using Autofac;
-using Newtonsoft.Json;
+using Recyclarr.Json.Loading;
 
-namespace Recyclarr.TrashLib.Json;
+namespace Recyclarr.Json;
 
 public class JsonAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-        builder.Register<Func<JsonSerializerSettings, IBulkJsonLoader>>(c =>
+        builder.Register<Func<JsonSerializerOptions, IBulkJsonLoader>>(c =>
         {
             return settings => new BulkJsonLoader(c.Resolve<ILogger>(), settings);
         });

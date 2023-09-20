@@ -34,13 +34,13 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
         var parser = new ErrorResponseParser(_log, responseBody);
 
         if (parser.DeserializeList(s => s
-            .Select(x => (string) x.errorMessage)
+            .Select(x => x.GetProperty("errorMessage").GetString())
             .NotNull(x => !string.IsNullOrEmpty(x))))
         {
             return;
         }
 
-        if (parser.Deserialize(s => s.message))
+        if (parser.Deserialize(s => s.GetProperty("message").GetString()))
         {
             return;
         }

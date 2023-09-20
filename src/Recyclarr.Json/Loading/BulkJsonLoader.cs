@@ -1,19 +1,18 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using Newtonsoft.Json;
-using Recyclarr.Common;
+using System.Text.Json;
 
-namespace Recyclarr.TrashLib.Json;
+namespace Recyclarr.Json.Loading;
 
 public record LoadedJsonObject<T>(IFileInfo File, T Obj);
 
 public class BulkJsonLoader : IBulkJsonLoader
 {
     private readonly ILogger _log;
-    private readonly JsonSerializerSettings _serializerSettings;
+    private readonly JsonSerializerOptions _serializerSettings;
 
-    public BulkJsonLoader(ILogger log, JsonSerializerSettings serializerSettings)
+    public BulkJsonLoader(ILogger log, JsonSerializerOptions serializerSettings)
     {
         _log = log;
         _serializerSettings = serializerSettings;
@@ -35,10 +34,10 @@ public class BulkJsonLoader : IBulkJsonLoader
 
     private T ParseJson<T>(string guideData, string fileName)
     {
-        var obj = JsonConvert.DeserializeObject<T>(guideData, _serializerSettings);
+        var obj = JsonSerializer.Deserialize<T>(guideData, _serializerSettings);
         if (obj is null)
         {
-            throw new JsonSerializationException($"Unable to parse JSON at file {fileName}");
+            throw new JsonException($"Unable to parse JSON at file {fileName}");
         }
 
         return obj;

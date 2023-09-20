@@ -1,12 +1,14 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Json;
+using Recyclarr.Json;
 
 namespace Recyclarr.TrashLib.Models;
 
 public record CustomFormatFieldData
 {
     public string Name { get; } = nameof(Value).ToCamelCase();
+
+    [JsonConverter(typeof(FieldValueConverter))]
     public object? Value { get; init; }
 }
 
@@ -28,11 +30,11 @@ public record CustomFormatData
     [JsonIgnore]
     public string? Category { get; init; }
 
-    [JsonProperty("trash_id")]
+    [JsonPropertyName("trash_id")]
     [JsonNoSerialize]
     public string TrashId { get; init; } = "";
 
-    [JsonProperty("trash_scores")]
+    [JsonPropertyName("trash_scores")]
     [JsonNoSerialize]
     public Dictionary<string, int> TrashScores { get; init; } = new(StringComparer.InvariantCultureIgnoreCase);
 

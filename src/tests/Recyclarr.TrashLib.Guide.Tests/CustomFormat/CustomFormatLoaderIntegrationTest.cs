@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using Recyclarr.TrashLib.Guide.CustomFormat;
 using Recyclarr.TrashLib.Guide.TestLibrary;
 using Recyclarr.TrashLib.TestLibrary;
@@ -14,8 +14,8 @@ public class CustomFormatLoaderIntegrationTest : GuideIntegrationFixture
     public void Get_custom_format_json_works()
     {
         var sut = Resolve<CustomFormatLoader>();
-        Fs.AddFile("first.json", new MockFileData("{'name':'first','trash_id':'1'}"));
-        Fs.AddFile("second.json", new MockFileData("{'name':'second','trash_id':'2'}"));
+        Fs.AddFile("first.json", new MockFileData("""{"name":"first","trash_id":"1"}"""));
+        Fs.AddFile("second.json", new MockFileData("""{"name":"second","trash_id":"2"}"""));
         Fs.AddFile("collection_of_cfs.md", new MockFileData(""));
 
         var dir = Fs.CurrentDirectory();
@@ -25,6 +25,6 @@ public class CustomFormatLoaderIntegrationTest : GuideIntegrationFixture
         {
             NewCf.Data("first", "1"),
             NewCf.Data("second", "2")
-        }, o => o.Excluding(x => x.Type == typeof(JObject)));
+        }, o => o.Excluding(x => x.Type == typeof(JsonElement)));
     }
 }

@@ -15,6 +15,7 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
     <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
     <PackageReference Include="YamlDotNet" />

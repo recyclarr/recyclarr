@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json;
 using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.Cli.Cache;
@@ -37,7 +37,7 @@ public class CachePersister : ICachePersister
 
     public void Save(IServiceConfiguration config, CustomFormatCache cache)
     {
-        _log.Debug("Saving Cache with {Mappings}", JsonConvert.SerializeObject(cache.TrashIdMappings));
+        _log.Debug("Saving Cache with {Mappings}", JsonSerializer.Serialize(cache.TrashIdMappings));
 
         _cache.Save(cache, config);
     }

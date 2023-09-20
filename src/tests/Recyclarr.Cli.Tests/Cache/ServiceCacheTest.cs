@@ -46,7 +46,10 @@ public class ServiceCacheTest
         IServiceConfiguration config,
         ServiceCache sut)
     {
-        const string testJson = @"{'test_value': 'Foo'}";
+        const string testJson =
+            """
+            {"test_value": "Foo"}
+            """;
 
         const string testJsonPath = "cacheFile.json";
         fs.AddFile(testJsonPath, new MockFileData(testJson));
@@ -193,12 +196,12 @@ public class ServiceCacheTest
         const string cacheJson =
             """
             {
-              'version': 1,
-              'trash_id_mappings': [
+              "version": 1,
+              "trash_id_mappings": [
                 {
-                  'custom_format_name': '4K Remaster',
-                  'trash_id': 'eca37840c13c6ef2dd0262b141a5482f',
-                  'custom_format_id': 4
+                  "custom_format_name": "4K Remaster",
+                  "trash_id": "eca37840c13c6ef2dd0262b141a5482f",
+                  "custom_format_id": 4
                 }
               ]
             }

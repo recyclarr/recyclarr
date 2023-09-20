@@ -1,34 +1,29 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Recyclarr.TrashLib.Models;
 
-public class FieldsArrayJsonConverter : JsonConverter
+public class FieldsArrayJsonConverter : JsonConverter<object>
 {
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    public override bool CanConvert(Type typeToConvert)
     {
-        serializer.Serialize(writer, value);
+        return typeToConvert == typeof(CustomFormatFieldData) ||
+            Array.Exists(typeToConvert.GetInterfaces(),
+                x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>));
     }
 
-    public override object? ReadJson(
-        JsonReader reader,
-        Type objectType,
-        object? existingValue,
-        JsonSerializer serializer)
+    public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var token = JToken.Load(reader);
-
-        // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
-        return token.Type switch
+        if (reader.TokenType is JsonTokenType.StartObject)
         {
-            JTokenType.Object => new[] {token.ToObject<CustomFormatFieldData>()},
-            JTokenType.Array => token.ToObject<CustomFormatFieldData[]>(),
-            _ => throw new InvalidOperationException("Unsupported token type for CustomFormatFieldData")
-        };
+            return new[] {JsonSerializer.Deserialize<CustomFormatFieldData>(ref reader, options)!};
+        }
+
+        return JsonSerializer.Deserialize<CustomFormatFieldData[]>(ref reader, options)!;
     }
 
-    public override bool CanConvert(Type objectType)
+    public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
     {
-        return objectType.IsArray;
+        JsonSerializer.Serialize(writer, value, options);
     }
 }

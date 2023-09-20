@@ -1,29 +1,30 @@
 using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
-using Recyclarr.TrashLib.Json;
+using System.Text;
+using System.Text.Json;
+using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
 public sealed class ErrorResponseParser
 {
     private readonly ILogger _log;
-    private readonly Func<JsonTextReader> _streamFactory;
-    private readonly JsonSerializer _serializer;
+    private readonly Func<Stream> _streamFactory;
+    private readonly JsonSerializerOptions _jsonSettings;
 
     public ErrorResponseParser(ILogger log, string responseBody)
     {
         _log = log;
-        _streamFactory = () => new JsonTextReader(new StringReader(responseBody));
-        _serializer = JsonSerializer.Create(GlobalJsonSerializerSettings.Services);
+        _streamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(responseBody));
+        _jsonSettings = GlobalJsonSerializerSettings.Services;
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public bool DeserializeList(Func<IEnumerable<dynamic>, IEnumerable<object>> expr)
+    public bool DeserializeList(Func<IEnumerable<JsonElement>, IEnumerable<string>> expr)
     {
         try
         {
             using var stream = _streamFactory();
-            var value = _serializer.Deserialize<List<dynamic>>(stream);
+            var value = JsonSerializer.Deserialize<List<JsonElement>>(stream, _jsonSettings);
             if (value is null)
             {
                 return false;
@@ -32,7 +33,7 @@ public sealed class ErrorResponseParser
             var parsed = expr(value);
             foreach (var s in parsed)
             {
-                _log.Error("Error message from remote service: {Message:l}", (string) s);
+                _log.Error("Error message from remote service: {Message:l}", s);
             }
 
             return true;
@@ -44,18 +45,18 @@ public sealed class ErrorResponseParser
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public bool Deserialize(Func<dynamic, object> expr)
+    public bool Deserialize(Func<JsonElement, string?> expr)
     {
         try
         {
             using var stream = _streamFactory();
-            var value = _serializer.Deserialize<dynamic>(stream);
+            var value = expr(JsonSerializer.Deserialize<JsonElement>(stream, _jsonSettings));
             if (value is null)
             {
                 return false;
             }
 
-            _log.Error("Error message from remote service: {Message:l}", (string) expr(value));
+            _log.Error("Error message from remote service: {Message:l}", value);
             return true;
         }
         catch

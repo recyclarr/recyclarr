@@ -1,12 +1,12 @@
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
 namespace Recyclarr.TrashLib.Guide.ReleaseProfile;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record TermData
 {
-    [JsonProperty("trash_id")]
+    [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = string.Empty;
 
     public string Name { get; init; } = string.Empty;
@@ -39,7 +39,7 @@ public record PreferredTermData
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ReleaseProfileData
 {
-    [JsonProperty("trash_id")]
+    [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = string.Empty;
 
     public string Name { get; init; } = string.Empty;

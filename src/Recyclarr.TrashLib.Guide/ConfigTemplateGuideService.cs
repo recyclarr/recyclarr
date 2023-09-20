@@ -1,9 +1,8 @@
-using System.Collections.ObjectModel;
 using System.IO.Abstractions;
+using System.Text.Json;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
+using Recyclarr.Json;
 using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Json;
 using Recyclarr.TrashLib.Repo;
 
 namespace Recyclarr.TrashLib.Guide;
@@ -13,8 +12,8 @@ public record TemplateEntry(string Id, string Template, bool Hidden = false);
 
 public record TemplatesData
 {
-    public ReadOnlyCollection<TemplateEntry> Radarr { get; [UsedImplicitly] init; } = new(Array.Empty<TemplateEntry>());
-    public ReadOnlyCollection<TemplateEntry> Sonarr { get; [UsedImplicitly] init; } = new(Array.Empty<TemplateEntry>());
+    public IReadOnlyCollection<TemplateEntry> Radarr { get; [UsedImplicitly] init; } = Array.Empty<TemplateEntry>();
+    public IReadOnlyCollection<TemplateEntry> Sonarr { get; [UsedImplicitly] init; } = Array.Empty<TemplateEntry>();
 }
 
 public record TemplatePath
@@ -76,11 +75,8 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
 
     private static TemplatesData Deserialize(IFileInfo jsonFile)
     {
-        var serializer = JsonSerializer.Create(GlobalJsonSerializerSettings.Recyclarr);
-
-        using var stream = new JsonTextReader(jsonFile.OpenText());
-
-        var obj = serializer.Deserialize<TemplatesData>(stream);
+        using var stream = jsonFile.OpenRead();
+        var obj = JsonSerializer.Deserialize<TemplatesData>(stream, GlobalJsonSerializerSettings.Recyclarr);
         if (obj is null)
         {
             throw new InvalidDataException($"Unable to deserialize {jsonFile}");

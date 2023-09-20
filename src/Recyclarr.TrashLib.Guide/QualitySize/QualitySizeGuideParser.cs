@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Recyclarr.Common;
+using System.Text.Json;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Json;
 
 namespace Recyclarr.TrashLib.Guide.QualitySize;
 
@@ -28,21 +27,13 @@ public class QualitySizeGuideParser
         "Exceptions not rethrown so we can continue processing other files")]
     private QualitySizeData? ParseQuality(IFileInfo jsonFile)
     {
-        var serializer = JsonSerializer.Create(new JsonSerializerSettings
-        {
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new SnakeCaseNamingStrategy()
-            }
-        });
-
         QualitySizeData? quality = null;
         Exception? exception = null;
 
-        using var json = new JsonTextReader(jsonFile.OpenText());
         try
         {
-            quality = serializer.Deserialize<QualitySizeData>(json);
+            using var stream = jsonFile.OpenRead();
+            quality = JsonSerializer.Deserialize<QualitySizeData>(stream, GlobalJsonSerializerSettings.Guide);
         }
         catch (Exception e)
         {

@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Json;
+using Recyclarr.Json.Loading;
 using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.TrashLib.Guide.CustomFormat;

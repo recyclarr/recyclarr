@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 
-namespace Recyclarr.TrashLib.Json;
+namespace Recyclarr.Json.Loading;
 
 public interface IBulkJsonLoader
 {

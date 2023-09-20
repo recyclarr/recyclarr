@@ -1,17 +1,19 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
-using Recyclarr.TrashLib.Json;
-using Recyclarr.TrashLib.Models;
-using Recyclarr.TrashLib.TestLibrary;
+using Recyclarr.Json.Loading;
+using Recyclarr.Json.TestLibrary;
 
-namespace Recyclarr.TrashLib.Tests.Json;
+namespace Recyclarr.Json.Tests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class BulkJsonLoaderIntegrationTest : TrashLibIntegrationFixture
+public class BulkJsonLoaderIntegrationTest : JsonIntegrationFixture
 {
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
-    private sealed record TestJsonObject(string TrashId, int TrashScore, string Name);
+    private sealed record TestGuideObject(string TrashId, int TrashScore, string Name);
+
+    [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
+    private sealed record TestServiceObject(int Id, string Name, bool IncludeCustomFormatWhenRenaming);
 
     [Test]
     public void Guide_deserialize_works()
@@ -29,11 +31,11 @@ public class BulkJsonLoaderIntegrationTest : TrashLibIntegrationFixture
 
         Fs.AddFile(Fs.CurrentDirectory().File("file.json"), new MockFileData(jsonData));
 
-        var result = sut.LoadAllFilesAtPaths<TestJsonObject>(new[] {Fs.CurrentDirectory()});
+        var result = sut.LoadAllFilesAtPaths<TestGuideObject>(new[] {Fs.CurrentDirectory()});
 
         result.Should().BeEquivalentTo(new[]
         {
-            new TestJsonObject("90cedc1fea7ea5d11298bebd3d1d3223", -10000, "TheName")
+            new TestGuideObject("90cedc1fea7ea5d11298bebd3d1d3223", -10000, "TheName")
         });
     }
 
@@ -53,16 +55,11 @@ public class BulkJsonLoaderIntegrationTest : TrashLibIntegrationFixture
 
         Fs.AddFile(Fs.CurrentDirectory().File("file.json"), new MockFileData(jsonData));
 
-        var result = sut.LoadAllFilesAtPaths<CustomFormatData>(new[] {Fs.CurrentDirectory()});
+        var result = sut.LoadAllFilesAtPaths<TestServiceObject>(new[] {Fs.CurrentDirectory()});
 
         result.Should().BeEquivalentTo(new[]
         {
-            new CustomFormatData
-            {
-                Id = 22,
-                Name = "FUNi",
-                IncludeCustomFormatWhenRenaming = true
-            }
+            new TestServiceObject(22, "FUNi", true)
         });
     }
 }

@@ -1,7 +1,7 @@
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Common.Networking;
-using Recyclarr.TrashLib.Json;
+using Recyclarr.Json;
 using Recyclarr.TrashLib.Settings;
 
 namespace Recyclarr.TrashLib.Http;
@@ -30,7 +30,7 @@ public class FlurlClientFactory : IFlurlClientFactory
     {
         var settings = new ClientFlurlHttpSettings
         {
-            JsonSerializer = new NewtonsoftJsonSerializer(GlobalJsonSerializerSettings.Services)
+            JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services)
         };
 
         FlurlLogging.SetupLogging(settings, _log);
