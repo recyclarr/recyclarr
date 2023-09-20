@@ -56,4 +56,28 @@ public class FlurlHttpExceptionHandlerTest
         logs.Should().HaveCount(expectedSubstrings.Length);
         logs.Zip(expectedSubstrings).Should().OnlyContain(pair => pair.First.Contains(pair.Second));
     }
+
+    [Test, AutoMockData]
+    public async Task Http_exception_print_title_and_errors_list(
+        [Frozen(Matching.ImplementedInterfaces)] TestableLogger log,
+        IServiceErrorMessageExtractor extractor,
+        FlurlHttpExceptionHandler sut)
+    {
+        var resourceReader = new ResourceDataReader(typeof(FlurlHttpExceptionHandlerTest), "Data");
+        var responseContent = resourceReader.ReadData("title_errors_list.json");
+
+        extractor.GetErrorMessage().Returns(responseContent);
+        await sut.ProcessServiceErrorMessages(extractor);
+
+        var logs = log.Messages.ToList();
+
+        var expectedSubstrings = new[]
+        {
+            "One or more validation errors occurred",
+            "$.items[0].id: The JSON value could not be converted to System.Int32. Path: $.items[0].id | LineNumber: 0 | BytePositionInLine: 3789."
+        };
+
+        logs.Should().HaveCount(expectedSubstrings.Length);
+        logs.Zip(expectedSubstrings).Should().OnlyContain(pair => pair.First.Contains(pair.Second));
+    }
 }

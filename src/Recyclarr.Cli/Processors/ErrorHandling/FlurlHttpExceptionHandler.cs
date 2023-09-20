@@ -33,6 +33,7 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
     {
         var parser = new ErrorResponseParser(_log, responseBody);
 
+        // Try to parse validation errors
         if (parser.DeserializeList(s => s
             .Select(x => x.GetProperty("errorMessage").GetString())
             .NotNull(x => !string.IsNullOrEmpty(x))))
@@ -40,7 +41,14 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
             return;
         }
 
+        // Try to parse single error message
         if (parser.Deserialize(s => s.GetProperty("message").GetString()))
+        {
+            return;
+        }
+
+        // A list of errors with a title
+        if (parser.DeserializeServiceErrorList())
         {
             return;
         }
