@@ -1,7 +1,7 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
-using Recyclarr.Cli.Pipelines.QualitySize.Api;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
+using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
 
@@ -10,7 +10,6 @@ public class QualitySizeAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-        builder.RegisterType<QualityDefinitionService>().As<IQualityDefinitionService>();
         builder.RegisterType<QualitySizeDataLister>();
 
         builder.RegisterAggregateService<IQualitySizePipelinePhases>();

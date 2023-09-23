@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.Tags.Api;
 using Recyclarr.Common.Extensions;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 

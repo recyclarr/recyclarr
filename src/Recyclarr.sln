@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Repo", "Recyclarr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Settings", "Recyclarr.Settings\Recyclarr.Settings.csproj", "{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.ServarrApi", "Recyclarr.ServarrApi\Recyclarr.ServarrApi.csproj", "{5B48995A-1181-46AA-AC38-C040BDD3D7B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -178,6 +180,10 @@ Global
 		{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B48995A-1181-46AA-AC38-C040BDD3D7B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B48995A-1181-46AA-AC38-C040BDD3D7B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B48995A-1181-46AA-AC38-C040BDD3D7B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B48995A-1181-46AA-AC38-C040BDD3D7B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

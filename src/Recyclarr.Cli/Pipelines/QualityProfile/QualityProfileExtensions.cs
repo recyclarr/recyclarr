@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Common.Extensions;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -110,13 +110,5 @@ public static class QualityProfileExtensions
             .Max();
 
         return Math.Max(1000, maxExisting) + 1;
-    }
-
-    public static QualityProfileDto ReverseItems(this QualityProfileDto dto)
-    {
-        static ICollection<ProfileItemDto> ReverseItemsImpl(IEnumerable<ProfileItemDto> items)
-            => items.Reverse().Select(x => x with {Items = ReverseItemsImpl(x.Items)}).ToList();
-
-        return dto with {Items = ReverseItemsImpl(dto.Items).AsReadOnly()};
     }
 }

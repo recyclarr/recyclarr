@@ -11,6 +11,8 @@ public class CompatibilityAutofacModule : Module
         base.Load(builder);
 
         builder.RegisterType<ServiceAgnosticCapabilityEnforcer>();
+        builder.RegisterType<ServiceInformation>().As<IServiceInformation>()
+            .InstancePerLifetimeScope();
 
         // Sonarr
         builder.RegisterType<SonarrCapabilityFetcher>().As<ISonarrCapabilityFetcher>();

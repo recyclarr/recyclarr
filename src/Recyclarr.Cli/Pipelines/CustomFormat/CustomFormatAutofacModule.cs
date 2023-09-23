@@ -1,9 +1,9 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -13,7 +13,6 @@ public class CustomFormatAutofacModule : Module
     {
         builder.RegisterType<ProcessedCustomFormatCache>().As<IPipelineCache>().AsSelf().InstancePerLifetimeScope();
 
-        builder.RegisterType<CustomFormatService>().As<ICustomFormatService>();
         builder.RegisterType<CachePersister>().As<ICachePersister>();
         builder.RegisterType<CustomFormatDataLister>();
 

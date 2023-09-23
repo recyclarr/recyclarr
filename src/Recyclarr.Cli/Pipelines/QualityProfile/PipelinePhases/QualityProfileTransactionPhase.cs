@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.Results;
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 

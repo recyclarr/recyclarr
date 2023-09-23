@@ -1,5 +1,3 @@
-using Recyclarr.TrashLib.ApiServices.System;
-
 namespace Recyclarr.TrashLib.Compatibility.Radarr;
 
 public class RadarrCapabilityFetcher : ServiceCapabilityFetcher<RadarrCapabilities>, IRadarrCapabilityFetcher

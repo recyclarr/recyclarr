@@ -5,10 +5,9 @@ using Recyclarr.Common.FluentValidation;
 using Recyclarr.Json;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.ServarrApi;
 using Recyclarr.Settings;
-using Recyclarr.TrashLib.ApiServices;
 using Recyclarr.TrashLib.Compatibility;
-using Recyclarr.TrashLib.Http;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.TrashLib;
@@ -32,8 +31,6 @@ public class TrashLibAutofacModule : Module
         builder.RegisterModule<JsonAutofacModule>();
 
         builder.RegisterType<SettingsProvider>().As<ISettingsProvider>().SingleInstance();
-        builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
-        builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
     }
 
     private static void CommonRegistrations(ContainerBuilder builder)

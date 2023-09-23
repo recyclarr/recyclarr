@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 

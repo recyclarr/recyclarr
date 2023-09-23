@@ -1,9 +1,9 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
 using Autofac.Extras.Ordering;
-using Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
+using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile;
 

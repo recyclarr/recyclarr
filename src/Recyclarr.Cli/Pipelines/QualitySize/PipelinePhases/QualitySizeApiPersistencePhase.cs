@@ -1,5 +1,6 @@
-using Recyclarr.Cli.Pipelines.QualitySize.Api;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 

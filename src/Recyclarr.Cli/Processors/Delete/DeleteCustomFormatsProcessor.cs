@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Services;
 using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;

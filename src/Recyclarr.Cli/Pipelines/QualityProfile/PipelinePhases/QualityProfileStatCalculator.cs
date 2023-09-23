@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 

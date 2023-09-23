@@ -3,7 +3,7 @@ using Autofac;
 using Recyclarr.Platform;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
-using Recyclarr.TrashLib.ApiServices.System;
+using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.TrashLib.TestLibrary;

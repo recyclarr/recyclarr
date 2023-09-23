@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Services;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;

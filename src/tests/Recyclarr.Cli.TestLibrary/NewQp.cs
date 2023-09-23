@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.TestLibrary;
 

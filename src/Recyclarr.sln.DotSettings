@@ -114,4 +114,5 @@
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Persister/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=radarr/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Recyclarr/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Servarr/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Sonarr/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

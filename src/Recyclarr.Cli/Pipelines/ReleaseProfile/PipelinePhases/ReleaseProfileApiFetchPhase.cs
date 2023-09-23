@@ -1,6 +1,6 @@
-using Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
-using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.Config.Models;
+using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 

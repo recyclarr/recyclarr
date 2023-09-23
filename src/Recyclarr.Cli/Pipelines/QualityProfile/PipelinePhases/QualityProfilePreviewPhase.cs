@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.QualityProfile.Api;
+using Recyclarr.ServarrApi.Dto;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 

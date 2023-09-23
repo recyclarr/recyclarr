@@ -1,7 +1,7 @@
-using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Common.Extensions;
+using Recyclarr.ServarrApi.Dto;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
