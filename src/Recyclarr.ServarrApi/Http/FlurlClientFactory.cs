@@ -1,3 +1,4 @@
+using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Common.Networking;
@@ -7,7 +8,7 @@ using Serilog;
 
 namespace Recyclarr.ServarrApi.Http;
 
-public class FlurlClientFactory : IFlurlClientFactory
+public sealed class FlurlClientFactory : IFlurlClientFactory
 {
     private readonly ILogger _log;
     private readonly ISettingsProvider _settingsProvider;
@@ -20,9 +21,9 @@ public class FlurlClientFactory : IFlurlClientFactory
         _factory = new PerBaseUrlFlurlClientFactory();
     }
 
-    public IFlurlClient BuildClient(Uri baseUrl)
+    public IFlurlClient Get(Url url)
     {
-        var client = _factory.Get(baseUrl);
+        var client = _factory.Get(url);
         client.Settings = GetClientSettings();
         return client;
     }
@@ -46,5 +47,10 @@ public class FlurlClientFactory : IFlurlClientFactory
         }
 
         return settings;
+    }
+
+    public void Dispose()
+    {
+        _factory.Dispose();
     }
 }

@@ -3,7 +3,6 @@ using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
-using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 

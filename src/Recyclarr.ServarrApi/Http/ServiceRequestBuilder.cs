@@ -1,4 +1,5 @@
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.ServarrApi.Http;
@@ -14,7 +15,7 @@ public class ServiceRequestBuilder : IServiceRequestBuilder
 
     public IFlurlRequest Request(IServiceConfiguration config, params object[] path)
     {
-        var client = _clientFactory.BuildClient(config.BaseUrl);
+        var client = _clientFactory.Get(config.BaseUrl);
         return client.Request(new[] {"api", "v3"}.Concat(path).ToArray())
             .WithHeader("X-Api-Key", config.ApiKey);
     }

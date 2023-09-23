@@ -1,7 +1,6 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.ServarrApi.Services;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
 
