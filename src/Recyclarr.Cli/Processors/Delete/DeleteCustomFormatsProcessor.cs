@@ -2,9 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Api;
 using Recyclarr.TrashLib.Compatibility.Sonarr;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config;
+using Recyclarr.Config.Models;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Models;
+using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;

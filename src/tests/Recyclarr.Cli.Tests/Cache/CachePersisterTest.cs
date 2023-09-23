@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using Recyclarr.Cli.Cache;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Tests.Cache;
 

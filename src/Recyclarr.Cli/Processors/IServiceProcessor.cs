@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Processors;
 

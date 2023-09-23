@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Api;
 

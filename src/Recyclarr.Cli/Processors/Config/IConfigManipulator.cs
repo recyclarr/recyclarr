@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.Cli.Processors.Config;
 

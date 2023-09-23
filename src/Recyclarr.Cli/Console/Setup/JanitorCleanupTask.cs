@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Logging;
-using Recyclarr.TrashLib.Settings;
+using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Console.Setup;
 

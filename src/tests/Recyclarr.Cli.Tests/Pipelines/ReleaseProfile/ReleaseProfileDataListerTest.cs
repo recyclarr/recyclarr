@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
-using Recyclarr.TrashLib.Guide.ReleaseProfile;
+using Recyclarr.TrashGuide.ReleaseProfile;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile;

@@ -3,13 +3,13 @@ using Autofac.Extras.Ordering;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Json;
+using Recyclarr.Platform;
+using Recyclarr.Repo;
+using Recyclarr.Settings;
 using Recyclarr.TrashLib.ApiServices;
 using Recyclarr.TrashLib.Compatibility;
 using Recyclarr.TrashLib.Http;
-using Recyclarr.TrashLib.Repo;
-using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Settings;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.VersionControl;
 
 namespace Recyclarr.TrashLib;
 

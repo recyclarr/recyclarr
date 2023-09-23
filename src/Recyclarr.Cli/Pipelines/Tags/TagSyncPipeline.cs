@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.Tags;
 

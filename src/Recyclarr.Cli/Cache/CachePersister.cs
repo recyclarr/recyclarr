@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Cache;
 

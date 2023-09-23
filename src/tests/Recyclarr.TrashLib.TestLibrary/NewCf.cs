@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Models;
+using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.TrashLib.TestLibrary;
 

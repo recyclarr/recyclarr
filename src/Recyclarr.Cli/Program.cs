@@ -3,7 +3,7 @@ using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Platform;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;

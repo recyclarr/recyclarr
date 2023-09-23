@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Repo;
 
 namespace Recyclarr.Cli.Tests.Console.Commands;
 

@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Platform;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;

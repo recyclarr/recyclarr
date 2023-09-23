@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Common;
+using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

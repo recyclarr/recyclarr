@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Platform;
 using Serilog.Core;
 using Serilog.Events;
 using Spectre.Console.Cli;

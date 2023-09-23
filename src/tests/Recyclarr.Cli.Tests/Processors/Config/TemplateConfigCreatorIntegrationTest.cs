@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Repo;
 
 namespace Recyclarr.Cli.Tests.Processors.Config;
 

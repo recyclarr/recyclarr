@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Common;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Platform;
 
 namespace Recyclarr.TrashLib.Tests.Startup;
 

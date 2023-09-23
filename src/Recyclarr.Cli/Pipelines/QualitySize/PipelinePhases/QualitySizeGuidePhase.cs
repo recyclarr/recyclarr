@@ -1,6 +1,6 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Guide.QualitySize;
+using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 

@@ -1,5 +1,5 @@
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Guide.ReleaseProfile;
+using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 

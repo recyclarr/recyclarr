@@ -2,8 +2,8 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.TrashLib.Config.Parsing.ErrorHandling;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

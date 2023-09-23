@@ -1,7 +1,7 @@
 using Flurl.Http;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.TrashLib.Http;
-using Recyclarr.TrashLib.Models;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Api;
 

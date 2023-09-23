@@ -1,5 +1,5 @@
 using Flurl.Http;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.TrashLib.Http;
 

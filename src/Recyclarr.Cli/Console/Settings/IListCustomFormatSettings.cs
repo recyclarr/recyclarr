@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Common;
 
 namespace Recyclarr.Cli.Console.Settings;
 

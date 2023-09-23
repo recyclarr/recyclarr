@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765

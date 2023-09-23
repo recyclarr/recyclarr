@@ -1,6 +1,6 @@
 using Flurl.Http;
+using Recyclarr.Config.Models;
 using Recyclarr.TrashLib.ApiServices.System.Dto;
-using Recyclarr.TrashLib.Config;
 using Recyclarr.TrashLib.Http;
 
 namespace Recyclarr.TrashLib.ApiServices.System;

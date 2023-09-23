@@ -1,7 +1,7 @@
 using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Guide.QualitySize;
+using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 

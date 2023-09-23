@@ -1,6 +1,6 @@
 using Flurl.Http;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 using Recyclarr.TrashLib.Http;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Api;

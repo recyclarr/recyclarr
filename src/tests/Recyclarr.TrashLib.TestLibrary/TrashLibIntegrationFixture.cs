@@ -1,10 +1,10 @@
 using System.IO.Abstractions;
 using Autofac;
+using Recyclarr.Platform;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashLib.ApiServices.System;
-using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.VersionControl;
 
 namespace Recyclarr.TrashLib.TestLibrary;
 

@@ -15,6 +15,7 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
     <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="System.Data.HashFunction.FNV" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
@@ -30,8 +31,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashLib.Config\Recyclarr.TrashLib.Config.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashLib.Guide\Recyclarr.TrashLib.Guide.csproj" />
+    <ProjectReference Include="..\Recyclarr.Config\Recyclarr.Config.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
 

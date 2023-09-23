@@ -2,9 +2,9 @@ using System.Data.HashFunction.FNV;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
+using Recyclarr.Platform;
 using Recyclarr.TrashLib.Interfaces;
-using Recyclarr.TrashLib.Startup;
 
 namespace Recyclarr.Cli.Console.Helpers;
 

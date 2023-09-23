@@ -5,8 +5,8 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Repo;
+using Recyclarr.Common;
+using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

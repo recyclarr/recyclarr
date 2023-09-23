@@ -1,6 +1,6 @@
 using System.Text;
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Guide.ReleaseProfile;
+using Recyclarr.TrashGuide.ReleaseProfile;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile;

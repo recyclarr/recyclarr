@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="Serilog" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
+    <ProjectReference Include="..\Recyclarr.Yaml\Recyclarr.Yaml.csproj" />
+  </ItemGroup>
+</Project>

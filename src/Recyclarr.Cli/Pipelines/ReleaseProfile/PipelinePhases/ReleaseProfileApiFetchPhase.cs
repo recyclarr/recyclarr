@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Api.Objects;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 

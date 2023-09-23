@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="AutoMapper.Collection" />
+    <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="SuperLinq" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
+    <ProjectReference Include="..\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj" />
+    <ProjectReference Include="..\Recyclarr.Yaml\Recyclarr.Yaml.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Console.Commands;
-using Recyclarr.TrashLib.Config;
-using Recyclarr.TrashLib.Guide;
+using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;

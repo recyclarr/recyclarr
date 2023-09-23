@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Startup;
+using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Console.Setup;
 

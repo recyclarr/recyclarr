@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.TrashLib.Models;
+using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Cache;
 

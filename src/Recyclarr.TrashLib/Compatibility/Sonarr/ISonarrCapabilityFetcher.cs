@@ -1,4 +1,4 @@
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.TrashLib.Compatibility.Sonarr;
 

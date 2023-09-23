@@ -1,5 +1,5 @@
+using Recyclarr.Config.Models;
 using Recyclarr.TrashLib.ApiServices.System;
-using Recyclarr.TrashLib.Config;
 
 namespace Recyclarr.TrashLib.Compatibility;
 

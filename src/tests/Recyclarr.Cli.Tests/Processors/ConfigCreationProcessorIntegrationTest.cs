@@ -3,8 +3,8 @@ using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Repo;
 using Recyclarr.TrashLib.ExceptionTypes;
-using Recyclarr.TrashLib.Repo;
 
 namespace Recyclarr.Cli.Tests.Processors;
 

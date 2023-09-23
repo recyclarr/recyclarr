@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Core;
 using NUnit.Framework.Internal;
+using Recyclarr.Platform;
 using Recyclarr.TestLibrary.Autofac;
-using Recyclarr.TrashLib.Startup;
 using Serilog.Core;
 using Spectre.Console;
 

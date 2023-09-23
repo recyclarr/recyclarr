@@ -1,5 +1,5 @@
-using Recyclarr.TrashLib.Repo.VersionControl;
-using Recyclarr.TrashLib.Settings;
+using Recyclarr.Repo;
+using Recyclarr.Settings;
 
 namespace Recyclarr.TrashLib.Tests.Repo.VersionControl;
 

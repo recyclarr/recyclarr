@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.ErrorHandling;
+using Recyclarr.Common;
 using Recyclarr.TrashLib.Compatibility;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config;
+using Recyclarr.Config.Models;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;

@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Recyclarr.TrashLib.Config.Parsing;
+using Recyclarr.Config.Parsing;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;

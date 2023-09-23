@@ -1,5 +1,5 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.TrashLib.Compatibility.Sonarr;

@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Recyclarr.TrashLib.Config;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.TrashLib.Interfaces;
 
