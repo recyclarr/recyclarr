@@ -1,7 +1,7 @@
 using Autofac;
+using Flurl.Http.Configuration;
 using Recyclarr.ServarrApi.Http;
 using Recyclarr.ServarrApi.Services;
-using IFlurlClientFactory = Flurl.Http.Configuration.IFlurlClientFactory;
 
 namespace Recyclarr.ServarrApi;
 

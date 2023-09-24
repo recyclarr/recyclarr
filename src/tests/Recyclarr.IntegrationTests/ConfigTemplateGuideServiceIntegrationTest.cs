@@ -25,7 +25,8 @@ public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
     {
         var repo = Resolve<IConfigTemplatesRepo>();
         var templateDir = repo.Path;
-        Fs.AddSameFileFromEmbeddedResource(templateDir.File("templates.json"), typeof(ConfigTemplateGuideServiceIntegrationTest));
+        Fs.AddSameFileFromEmbeddedResource(templateDir.File("templates.json"),
+            typeof(ConfigTemplateGuideServiceIntegrationTest));
 
         TemplatePath MakeTemplatePath(SupportedServices service, string id, string path)
         {

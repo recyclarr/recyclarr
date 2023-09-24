@@ -8,7 +8,6 @@ using Recyclarr.Platform;
 
 #pragma warning disable CA1506
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
