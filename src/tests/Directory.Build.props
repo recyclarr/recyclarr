@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <DefaultItemExcludes>$(DefaultItemExcludes);TestResults\*\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

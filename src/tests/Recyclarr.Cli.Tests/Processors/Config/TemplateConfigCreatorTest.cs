@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
 
@@ -9,7 +8,7 @@ namespace Recyclarr.Cli.Tests.Processors.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class TemplateConfigCreatorTest : CliIntegrationFixture
+public class TemplateConfigCreatorTest
 {
     [Test, AutoMockData]
     public void Can_handle_returns_true_with_templates(

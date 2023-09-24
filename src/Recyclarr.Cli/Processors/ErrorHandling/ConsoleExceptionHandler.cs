@@ -1,8 +1,8 @@
 using Flurl.Http;
+using Recyclarr.Cli.Console;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.ServarrApi.Http;
-using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;

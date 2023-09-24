@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Cache;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.Cli.Tests.Cache;
 

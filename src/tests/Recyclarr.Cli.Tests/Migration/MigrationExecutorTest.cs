@@ -1,13 +1,12 @@
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
-using Recyclarr.Cli.TestLibrary;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Migration;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class MigrationExecutorTest : CliIntegrationFixture
+public class MigrationExecutorTest
 {
     [Test]
     public void Step_not_executed_if_check_returns_false()

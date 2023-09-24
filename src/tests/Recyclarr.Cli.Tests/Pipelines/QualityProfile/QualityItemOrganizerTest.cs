@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.Dto;
 

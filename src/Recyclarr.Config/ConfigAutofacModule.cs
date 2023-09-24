@@ -1,6 +1,5 @@
 using Autofac;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
-using AutoMapper.EquivalencyExpression;
 using FluentValidation;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.PostProcessing;
@@ -14,7 +13,7 @@ public class ConfigAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), ThisAssembly);
+        builder.RegisterAutoMapper(ThisAssembly);
 
         builder.RegisterAssemblyTypes(ThisAssembly)
             .AssignableTo<IYamlBehavior>()

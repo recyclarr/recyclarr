@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Autofac" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Config\Recyclarr.Config.csproj" />
+    <ProjectReference Include="..\Recyclarr.ServarrApi\Recyclarr.ServarrApi.csproj" />
+  </ItemGroup>
+</Project>

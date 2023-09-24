@@ -3,14 +3,13 @@ using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Common;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Processors;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class ConfigTemplateListerTest : TrashLibIntegrationFixture
+public class ConfigTemplateListerTest
 {
     [Test, AutoMockData]
     public void Hidden_templates_are_not_rendered(

@@ -3,7 +3,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
-using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.Cli.Processors.Config;
 

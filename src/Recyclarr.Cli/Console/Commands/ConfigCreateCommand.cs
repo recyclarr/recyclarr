@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Repo;
-using Recyclarr.TrashLib.ExceptionTypes;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

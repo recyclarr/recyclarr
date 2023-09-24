@@ -1,10 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.TrashLib.Compatibility.Sonarr;
+using Recyclarr.Compatibility;
+using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.Services;
-using Recyclarr.TrashLib.ExceptionTypes;
 using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
 

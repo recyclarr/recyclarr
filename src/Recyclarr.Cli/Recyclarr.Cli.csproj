@@ -31,9 +31,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj" />
     <ProjectReference Include="..\Recyclarr.Config\Recyclarr.Config.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

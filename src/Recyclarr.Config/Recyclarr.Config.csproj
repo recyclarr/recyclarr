@@ -2,7 +2,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="AutoMapper" />
-    <PackageReference Include="AutoMapper.Collection" />
     <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="JetBrains.Annotations" />

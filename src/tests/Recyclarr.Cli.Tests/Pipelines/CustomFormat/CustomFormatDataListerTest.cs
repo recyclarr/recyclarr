@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;
-using Recyclarr.TrashLib.TestLibrary;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;

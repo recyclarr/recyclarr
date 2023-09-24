@@ -2,8 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac.Extras.Ordering;
 using AutoFixture;
 using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.Cli.Tests.Processors;
 

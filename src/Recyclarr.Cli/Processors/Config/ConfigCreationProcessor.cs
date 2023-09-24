@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.TrashLib.ExceptionTypes;
 
 namespace Recyclarr.Cli.Processors.Config;
 

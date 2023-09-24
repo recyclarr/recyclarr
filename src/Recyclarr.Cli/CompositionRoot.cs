@@ -3,7 +3,6 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
-using AutoMapper.EquivalencyExpression;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
@@ -17,11 +16,15 @@ using Recyclarr.Cli.Pipelines.ReleaseProfile;
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
-using Recyclarr.Platform;
-using Recyclarr.TrashLib;
+using Recyclarr.Compatibility;
 using Recyclarr.Config;
+using Recyclarr.Json;
+using Recyclarr.Platform;
+using Recyclarr.Repo;
+using Recyclarr.ServarrApi;
+using Recyclarr.Settings;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashLib.Interfaces;
+using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
 using Serilog.Core;
 using Spectre.Console.Cli;
@@ -34,21 +37,31 @@ public static class CompositionRoot
     {
         var thisAssembly = typeof(CompositionRoot).Assembly;
 
+        // Needed for Autofac.Extras.Ordering
+        builder.RegisterSource<OrderedRegistrationSource>();
+
         RegisterLogger(builder);
 
         builder.RegisterModule<MigrationAutofacModule>();
-        builder.RegisterModule<TrashLibAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
         builder.RegisterModule<GuideAutofacModule>();
         builder.RegisterModule<YamlAutofacModule>();
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
         builder.RegisterModule<CacheAutofacModule>();
+        builder.RegisterModule<SettingsAutofacModule>();
+        builder.RegisterModule<ApiServicesAutofacModule>();
+        builder.RegisterModule<VersionControlAutofacModule>();
+        builder.RegisterModule<RepoAutofacModule>();
+        builder.RegisterModule<CompatibilityAutofacModule>();
+        builder.RegisterModule<JsonAutofacModule>();
+        builder.RegisterModule<PlatformAutofacModule>();
+        builder.RegisterModule<CommonAutofacModule>();
 
         builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
-        builder.RegisterAutoMapper(c => c.AddCollectionMappers(), thisAssembly);
+        builder.RegisterAutoMapper(thisAssembly);
 
         CommandRegistrations(builder);
         PipelineRegistrations(builder);

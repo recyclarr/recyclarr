@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.Text;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
-using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.Cli.Console.Helpers;
 

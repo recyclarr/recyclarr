@@ -2,10 +2,10 @@ using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.Json;
-using Recyclarr.TrashLib.Interfaces;
 
 namespace Recyclarr.Cli.Cache;
 
