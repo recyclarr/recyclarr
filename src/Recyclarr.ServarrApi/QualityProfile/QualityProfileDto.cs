@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
-namespace Recyclarr.ServarrApi.Dto;
+namespace Recyclarr.ServarrApi.QualityProfile;
 
 [UsedImplicitly]
 public record QualityProfileDto

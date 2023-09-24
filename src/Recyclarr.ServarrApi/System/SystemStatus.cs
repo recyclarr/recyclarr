@@ -1,4 +1,4 @@
-namespace Recyclarr.ServarrApi.Dto;
+namespace Recyclarr.ServarrApi.System;
 
 public record SystemStatus(
     string AppName,

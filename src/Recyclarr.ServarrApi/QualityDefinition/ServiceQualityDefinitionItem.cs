@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 
-namespace Recyclarr.ServarrApi.Dto;
+namespace Recyclarr.ServarrApi.QualityDefinition;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public class ServiceQualityItem

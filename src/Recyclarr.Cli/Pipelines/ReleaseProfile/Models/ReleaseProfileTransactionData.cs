@@ -1,4 +1,4 @@
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
 

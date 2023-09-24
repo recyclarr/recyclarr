@@ -1,17 +1,17 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 public class QualityProfileApiPersistencePhase
 {
     private readonly ILogger _log;
-    private readonly IQualityProfileService _api;
+    private readonly IQualityProfileApiService _api;
     private readonly QualityProfileStatCalculator _statCalculator;
 
     public QualityProfileApiPersistencePhase(
         ILogger log,
-        IQualityProfileService api,
+        IQualityProfileApiService api,
         QualityProfileStatCalculator statCalculator)
     {
         _log = log;

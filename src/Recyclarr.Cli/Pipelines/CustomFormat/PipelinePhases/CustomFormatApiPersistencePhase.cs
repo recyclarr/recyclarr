@@ -1,13 +1,13 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 public class CustomFormatApiPersistencePhase
 {
-    private readonly ICustomFormatService _api;
+    private readonly ICustomFormatApiService _api;
 
-    public CustomFormatApiPersistencePhase(ICustomFormatService api)
+    public CustomFormatApiPersistencePhase(ICustomFormatApiService api)
     {
         _api = api;
     }

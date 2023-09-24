@@ -1,6 +1,5 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
@@ -8,9 +7,9 @@ public record QualityProfileServiceData(IReadOnlyList<QualityProfileDto> Profile
 
 public class QualityProfileApiFetchPhase
 {
-    private readonly IQualityProfileService _api;
+    private readonly IQualityProfileApiService _api;
 
-    public QualityProfileApiFetchPhase(IQualityProfileService api)
+    public QualityProfileApiFetchPhase(IQualityProfileApiService api)
     {
         _api = api;
     }

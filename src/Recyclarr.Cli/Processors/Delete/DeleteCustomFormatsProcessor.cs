@@ -5,7 +5,7 @@ using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.CustomFormat;
 using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
 
@@ -15,14 +15,14 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
 {
     private readonly ILogger _log;
     private readonly IAnsiConsole _console;
-    private readonly ICustomFormatService _api;
+    private readonly ICustomFormatApiService _api;
     private readonly IConfigurationRegistry _configRegistry;
     private readonly ISonarrCapabilityFetcher _sonarCapabilities;
 
     public DeleteCustomFormatsProcessor(
         ILogger log,
         IAnsiConsole console,
-        ICustomFormatService api,
+        ICustomFormatApiService api,
         IConfigurationRegistry configRegistry,
         ISonarrCapabilityFetcher sonarCapabilities)
     {

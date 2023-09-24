@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 

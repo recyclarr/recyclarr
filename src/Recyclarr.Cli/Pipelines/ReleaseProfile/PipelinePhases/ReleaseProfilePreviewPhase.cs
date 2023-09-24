@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.ReleaseProfile;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;

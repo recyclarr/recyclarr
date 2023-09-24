@@ -1,5 +1,5 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 

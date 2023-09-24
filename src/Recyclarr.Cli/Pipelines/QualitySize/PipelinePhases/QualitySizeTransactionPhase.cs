@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;

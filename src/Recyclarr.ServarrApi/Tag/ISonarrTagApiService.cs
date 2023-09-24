@@ -1,7 +1,6 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.Tag;
 
 public interface ISonarrTagApiService
 {

@@ -1,7 +1,6 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.ServarrApi.Dto;
 
-namespace Recyclarr.ServarrApi.Extensions;
+namespace Recyclarr.ServarrApi.QualityProfile;
 
 public static class QualityProfileApiExtensions
 {

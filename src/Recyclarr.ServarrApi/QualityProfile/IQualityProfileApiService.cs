@@ -1,9 +1,8 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.QualityProfile;
 
-public interface IQualityProfileService
+public interface IQualityProfileApiService
 {
     Task<IList<QualityProfileDto>> GetQualityProfiles(IServiceConfiguration config);
     Task UpdateQualityProfile(IServiceConfiguration config, QualityProfileDto profile);

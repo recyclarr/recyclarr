@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 

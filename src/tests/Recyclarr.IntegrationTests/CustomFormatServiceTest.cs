@@ -1,7 +1,7 @@
 using Flurl.Http.Testing;
 using Recyclarr.Common;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.IntegrationTests;
 
@@ -18,7 +18,7 @@ public class CustomFormatServiceTest : IntegrationTestFixture
         using var http = new HttpTest();
         http.RespondWith(jsonBody);
 
-        var sut = Resolve<CustomFormatService>();
+        var sut = Resolve<CustomFormatApiService>();
         var result = await sut.GetCustomFormats(Substitute.ForPartsOf<ServiceConfiguration>());
 
         result.Should().HaveCountGreaterThan(5);

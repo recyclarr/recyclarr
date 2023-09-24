@@ -1,4 +1,4 @@
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.Api;
 

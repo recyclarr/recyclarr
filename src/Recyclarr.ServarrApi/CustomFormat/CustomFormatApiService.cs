@@ -3,13 +3,13 @@ using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.Http;
 using Recyclarr.TrashGuide.CustomFormat;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.CustomFormat;
 
-public class CustomFormatService : ICustomFormatService
+public class CustomFormatApiService : ICustomFormatApiService
 {
     private readonly IServiceRequestBuilder _service;
 
-    public CustomFormatService(IServiceRequestBuilder service)
+    public CustomFormatApiService(IServiceRequestBuilder service)
     {
         _service = service;
     }

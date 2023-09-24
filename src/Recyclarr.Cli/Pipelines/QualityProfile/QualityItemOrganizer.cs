@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 

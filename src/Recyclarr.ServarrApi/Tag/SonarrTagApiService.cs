@@ -1,9 +1,8 @@
 using Flurl.Http;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
 using Recyclarr.ServarrApi.Http;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.Tag;
 
 public class SonarrTagApiService : ISonarrTagApiService
 {

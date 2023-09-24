@@ -1,16 +1,14 @@
 using Flurl.Http;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Extensions;
 using Recyclarr.ServarrApi.Http;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.QualityProfile;
 
-internal class QualityProfileService : IQualityProfileService
+internal class QualityProfileApiService : IQualityProfileApiService
 {
     private readonly IServiceRequestBuilder _service;
 
-    public QualityProfileService(IServiceRequestBuilder service)
+    public QualityProfileApiService(IServiceRequestBuilder service)
     {
         _service = service;
     }

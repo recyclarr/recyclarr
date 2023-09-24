@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Extensions;
+using Recyclarr.ServarrApi.QualityProfile;
 
 // ReSharper disable CollectionNeverUpdated.Local
 

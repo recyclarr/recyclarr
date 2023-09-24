@@ -1,6 +1,5 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 

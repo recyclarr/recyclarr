@@ -1,9 +1,8 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
 
-namespace Recyclarr.ServarrApi.Services;
+namespace Recyclarr.ServarrApi.QualityDefinition;
 
-public interface IQualityDefinitionService
+public interface IQualityDefinitionApiService
 {
     Task<IList<ServiceQualityDefinitionItem>> GetQualityDefinition(IServiceConfiguration config);
 

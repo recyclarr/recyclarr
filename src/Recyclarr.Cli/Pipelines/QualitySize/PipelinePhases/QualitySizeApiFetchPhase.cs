@@ -1,14 +1,13 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.QualityDefinition;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 public class QualitySizeApiFetchPhase
 {
-    private readonly IQualityDefinitionService _api;
+    private readonly IQualityDefinitionApiService _api;
 
-    public QualitySizeApiFetchPhase(IQualityDefinitionService api)
+    public QualitySizeApiFetchPhase(IQualityDefinitionApiService api)
     {
         _api = api;
     }

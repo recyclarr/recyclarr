@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using Recyclarr.Common;
 
-namespace Recyclarr.ServarrApi.Dto;
+namespace Recyclarr.ServarrApi.Tag;
 
 public class SonarrTag
 {

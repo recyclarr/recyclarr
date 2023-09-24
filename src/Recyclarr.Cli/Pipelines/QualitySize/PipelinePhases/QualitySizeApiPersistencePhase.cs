@@ -1,15 +1,14 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Dto;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.QualityDefinition;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 public class QualitySizeApiPersistencePhase
 {
     private readonly ILogger _log;
-    private readonly IQualityDefinitionService _api;
+    private readonly IQualityDefinitionApiService _api;
 
-    public QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionService api)
+    public QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApiService api)
     {
         _log = log;
         _api = api;

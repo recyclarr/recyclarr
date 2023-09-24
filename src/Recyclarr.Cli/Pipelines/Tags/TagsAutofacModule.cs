@@ -1,7 +1,7 @@
 using Autofac;
 using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Pipelines.Tags;
 

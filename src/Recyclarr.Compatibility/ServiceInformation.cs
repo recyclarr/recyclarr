@@ -1,6 +1,6 @@
 using Flurl.Http;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Services;
+using Recyclarr.ServarrApi.System;
 using Serilog;
 
 namespace Recyclarr.Compatibility;
