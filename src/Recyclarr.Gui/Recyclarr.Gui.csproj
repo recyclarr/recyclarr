@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <ItemGroup>
     <Using Remove="Microsoft.Extensions.Logging" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
@@ -12,13 +10,13 @@
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="ReactiveUI.Blazor" />
+    <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashLib\Recyclarr.TrashLib.csproj" />
+    <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
   </ItemGroup>
-
 </Project>

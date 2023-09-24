@@ -1,14 +1,13 @@
 // [CA1506] '<Main>$' is coupled with '54' different types from '34' different namespaces. Rewrite or refactor the code
 // to decrease its class coupling below '41'.
 
-#pragma warning disable CA1506
-
-using System.IO.Abstractions;
 using Autofac.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using Recyclarr.Gui;
-using Recyclarr.TrashLib.Startup;
-using Serilog;
+using Recyclarr.Platform;
+
+#pragma warning disable CA1506
+
 
 var builder = WebApplication.CreateBuilder(args);
 
