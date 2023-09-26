@@ -70,6 +70,9 @@
         },
         "include": {
           "$ref": "config/includes.json"
+        },
+        "media_naming": {
+          "$ref": "config/media-naming-radarr.json"
         }
       }
     },
@@ -110,6 +113,9 @@
         },
         "release_profiles": {
           "$ref": "config/release-profiles.json"
+        },
+        "media_naming": {
+          "$ref": "config/media-naming-sonarr.json"
         }
       }
     }

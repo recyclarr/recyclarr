@@ -8,4 +8,7 @@
     <EmbeddedResource Include="Common\DefaultDataFile.txt" />
     <EmbeddedResource Include="Common\TestData\DataFile.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TrashGuide\MediaNaming\" />
+  </ItemGroup>
 </Project>

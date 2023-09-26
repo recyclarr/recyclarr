@@ -80,33 +80,6 @@ public record ServiceConfigYaml
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public record ReleaseProfileFilterConfigYaml
-{
-    public IReadOnlyCollection<string>? Include { get; init; }
-    public IReadOnlyCollection<string>? Exclude { get; init; }
-}
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public record ReleaseProfileConfigYaml
-{
-    public IReadOnlyCollection<string>? TrashIds { get; init; }
-    public bool StrictNegativeScores { get; init; }
-    public IReadOnlyCollection<string>? Tags { get; init; }
-    public ReleaseProfileFilterConfigYaml? Filter { get; init; }
-}
-
-// This is usually empty (or the same as ServiceConfigYaml) on purpose.
-// If empty, it is kept around to make it clear that this one is dedicated to Radarr.
-[SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
-public record RadarrConfigYaml : ServiceConfigYaml;
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public record SonarrConfigYaml : ServiceConfigYaml
-{
-    public IReadOnlyCollection<ReleaseProfileConfigYaml>? ReleaseProfiles { get; init; }
-}
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record RootConfigYaml
 {
     public IReadOnlyDictionary<string, RadarrConfigYaml>? Radarr { get; init; }

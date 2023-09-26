@@ -1,0 +1,17 @@
+{
+  "season": {
+    "default": "season_default"
+  },
+  "series": {
+    "plex": "series_plex",
+    "emby": "series_emby"
+  },
+  "episodes": {
+    "standard": {
+      "default:4": "episodes_standard_default_4"
+    },
+    "daily": {
+      "default:3": "episodes_daily_default_3"
+    }
+  }
+}

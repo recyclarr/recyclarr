@@ -14,10 +14,16 @@ public class ConfigYamlMapperProfile : Profile
         CreateMap<QualitySizeConfigYaml, QualityDefinitionConfig>();
         CreateMap<ReleaseProfileConfigYaml, ReleaseProfileConfig>();
         CreateMap<ReleaseProfileFilterConfigYaml, SonarrProfileFilterConfig>();
+        CreateMap<ResetUnmatchedScoresConfigYaml, ResetUnmatchedScoresConfig>();
+
+        CreateMap<RadarrMediaNamingConfigYaml, RadarrMediaNamingConfig>();
+        CreateMap<RadarrMovieNamingConfigYaml, RadarrMovieNamingConfig>();
+
+        CreateMap<SonarrMediaNamingConfigYaml, SonarrMediaNamingConfig>();
+        CreateMap<SonarrEpisodeNamingConfigYaml, SonarrEpisodeNamingConfig>();
+
         CreateMap<QualityProfileQualityConfigYaml, QualityProfileQualityConfig>()
             .ForMember(x => x.Enabled, o => o.NullSubstitute(true));
-
-        CreateMap<ResetUnmatchedScoresConfigYaml, ResetUnmatchedScoresConfig>();
 
         CreateMap<QualityProfileConfigYaml, QualityProfileConfig>()
             .ForMember(x => x.UpgradeAllowed, o => o.MapFrom(x => x.Upgrade!.Allowed))
@@ -30,9 +36,11 @@ public class ConfigYamlMapperProfile : Profile
             .ForMember(x => x.InstanceName, o => o.Ignore());
 
         CreateMap<RadarrConfigYaml, RadarrConfiguration>()
-            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>();
+            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>()
+            .ForMember(x => x.MediaNaming, o => o.UseDestinationValue());
 
         CreateMap<SonarrConfigYaml, SonarrConfiguration>()
-            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>();
+            .IncludeBase<ServiceConfigYaml, ServiceConfiguration>()
+            .ForMember(x => x.MediaNaming, o => o.UseDestinationValue());
     }
 }

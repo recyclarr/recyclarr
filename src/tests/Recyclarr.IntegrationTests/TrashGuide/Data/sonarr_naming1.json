@@ -1,0 +1,19 @@
+{
+  "series": {
+    "default": "series_default"
+  },
+  "episodes": {
+    "standard": {
+      "default:3": "episodes_standard_default_3",
+      "original": "episodes_standard_original"
+    },
+    "daily": {
+      "default:4": "episodes_daily_default_4",
+      "original": "episodes_daily_original"
+    },
+    "anime": {
+      "default:3": "episodes_anime_default_3",
+      "default:4": "episodes_anime_default_4"
+    }
+  }
+}

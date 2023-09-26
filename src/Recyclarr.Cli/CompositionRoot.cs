@@ -10,6 +10,7 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.ReleaseProfile;
@@ -74,13 +75,15 @@ public static class CompositionRoot
         builder.RegisterModule<QualityProfileAutofacModule>();
         builder.RegisterModule<QualitySizeAutofacModule>();
         builder.RegisterModule<ReleaseProfileAutofacModule>();
+        builder.RegisterModule<MediaNamingAutofacModule>();
 
         builder.RegisterTypes(
                 typeof(TagSyncPipeline),
                 typeof(CustomFormatSyncPipeline),
                 typeof(QualityProfileSyncPipeline),
                 typeof(QualitySizeSyncPipeline),
-                typeof(ReleaseProfileSyncPipeline))
+                typeof(ReleaseProfileSyncPipeline),
+                typeof(MediaNamingSyncPipeline))
             .As<ISyncPipeline>()
             .OrderByRegistration();
     }

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using FluentAssertions.Execution;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
@@ -7,10 +6,10 @@ namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
-public class SonarrConfigMergerTest
+public class MergeReleaseProfilesTest
 {
     [Test]
-    public void Merge_release_profiles_from_empty_right_to_non_empty_left()
+    public void Empty_right_to_non_empty_left()
     {
         var leftConfig = new SonarrConfigYaml
         {
@@ -40,7 +39,7 @@ public class SonarrConfigMergerTest
     }
 
     [Test]
-    public void Merge_release_profiles_from_non_empty_right_to_empty_left()
+    public void Non_empty_right_to_empty_left()
     {
         var leftConfig = new SonarrConfigYaml();
 
@@ -71,7 +70,7 @@ public class SonarrConfigMergerTest
 
     [Test]
     [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
-    public void Merge_release_profiles_from_non_empty_right_to_non_empty_left()
+    public void Non_empty_right_to_non_empty_left()
     {
         var leftConfig = new SonarrConfigYaml
         {
@@ -123,8 +122,6 @@ public class SonarrConfigMergerTest
         var sut = new SonarrConfigMerger();
 
         var result = sut.Merge(leftConfig, rightConfig);
-
-        using var scope = new AssertionScope().UsingLineBreaks;
 
         result.Should().BeEquivalentTo(new SonarrConfigYaml
         {

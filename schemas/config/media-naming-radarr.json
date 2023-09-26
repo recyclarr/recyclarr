@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/media-naming-radarr.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "folder": { "type": "string" },
+    "movie": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rename": { "type": "boolean" },
+        "format": { "type": "string" }
+      }
+    }
+  }
+}

@@ -13,6 +13,10 @@ changes you may need to make.
 
 [breaking6]: https://recyclarr.dev/wiki/upgrade-guide/v6.0/
 
+### Added
+
+- Added Naming Sync (Media Management) for Sonarr v3, Sonarr v4, and Radarr (#179).
+
 ### Changed
 
 - **BREAKING**: Minimum required Sonarr version increased to `3.0.9.1549` (Previous minimum version

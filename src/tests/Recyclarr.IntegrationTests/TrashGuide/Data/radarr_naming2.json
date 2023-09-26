@@ -1,0 +1,10 @@
+{
+  "folder": {
+    "default": "folder_default",
+    "emby": "folder_emby"
+  },
+  "file": {
+    "default": "file_default",
+    "jellyfin": "file_jellyfin"
+  }
+}
