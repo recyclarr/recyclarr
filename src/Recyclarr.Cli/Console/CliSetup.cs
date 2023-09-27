@@ -20,6 +20,7 @@ public static class CliSetup
             list.AddCommand<ListCustomFormatsCommand>("custom-formats");
             list.AddCommand<ListReleaseProfilesCommand>("release-profiles");
             list.AddCommand<ListQualitiesCommand>("qualities");
+            list.AddCommand<ListMediaNamingCommand>("naming");
         });
 
         cli.AddBranch("config", config =>

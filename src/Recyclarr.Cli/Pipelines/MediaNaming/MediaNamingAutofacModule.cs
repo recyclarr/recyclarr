@@ -9,6 +9,7 @@ public class MediaNamingAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
+        builder.RegisterType<MediaNamingDataLister>();
 
         builder.RegisterAggregateService<IMediaNamingPipelinePhases>();
         builder.RegisterType<MediaNamingConfigPhase>();

@@ -16,6 +16,7 @@ changes you may need to make.
 ### Added
 
 - Added Naming Sync (Media Management) for Sonarr v3, Sonarr v4, and Radarr (#179).
+- A `list naming` command to show Sonarr and Radarr naming formats available from the guide.
 
 ### Changed
 
