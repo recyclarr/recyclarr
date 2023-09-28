@@ -224,7 +224,7 @@ public class MediaNamingConfigPhaseTest
                 Movie = new RadarrMovieNamingConfig
                 {
                     Rename = true,
-                    Format = "emby"
+                    Standard = "emby"
                 }
             }
         };

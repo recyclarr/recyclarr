@@ -19,7 +19,7 @@ public class MergeMediaNamingRadarrTest
                 Movie = new RadarrMovieNamingConfigYaml
                 {
                     Rename = false,
-                    Format = "format1"
+                    Standard = "format1"
                 }
             }
         };
@@ -46,7 +46,7 @@ public class MergeMediaNamingRadarrTest
                 Movie = new RadarrMovieNamingConfigYaml
                 {
                     Rename = false,
-                    Format = "format1"
+                    Standard = "format1"
                 }
             }
         };
@@ -70,7 +70,7 @@ public class MergeMediaNamingRadarrTest
                 Movie = new RadarrMovieNamingConfigYaml
                 {
                     Rename = false,
-                    Format = "format1"
+                    Standard = "format1"
                 }
             }
         };
@@ -83,7 +83,7 @@ public class MergeMediaNamingRadarrTest
                 Movie = new RadarrMovieNamingConfigYaml
                 {
                     Rename = false,
-                    Format = "format2"
+                    Standard = "format2"
                 }
             }
         };

@@ -5,7 +5,7 @@ namespace Recyclarr.Config.Models;
 public record RadarrMovieNamingConfig
 {
     public bool? Rename { get; init; }
-    public string? Format { get; init; }
+    public string? Standard { get; init; }
 }
 
 public record RadarrMediaNamingConfig

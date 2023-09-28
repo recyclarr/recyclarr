@@ -46,7 +46,7 @@ public class MediaNamingConfigPhase
 
         return new RadarrMediaNamingDto
         {
-            StandardMovieFormat = ObtainFormat(guideData.File, configData.Movie?.Format, "Movie File Format"),
+            StandardMovieFormat = ObtainFormat(guideData.File, configData.Movie?.Standard, "Standard Movie Format"),
             MovieFolderFormat = ObtainFormat(guideData.Folder, configData.Folder, "Movie Folder Format"),
             RenameMovies = configData.Movie?.Rename
         };

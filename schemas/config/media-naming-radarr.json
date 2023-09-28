@@ -10,7 +10,7 @@
       "additionalProperties": false,
       "properties": {
         "rename": { "type": "boolean" },
-        "format": { "type": "string" }
+        "standard": { "type": "string" }
       }
     }
   }

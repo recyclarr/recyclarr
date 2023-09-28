@@ -23,7 +23,7 @@ public class RadarrConfigMerger : ServiceConfigMerger<RadarrConfigYaml>
             Movie = Combine(a.Movie, b.Movie, (a1, b1) => a1 with
             {
                 Rename = b1.Rename ?? a1.Rename,
-                Format = b1.Format ?? a1.Format
+                Standard = b1.Standard ?? a1.Standard
             })
         };
     }

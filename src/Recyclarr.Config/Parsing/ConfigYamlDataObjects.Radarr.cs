@@ -6,7 +6,7 @@ namespace Recyclarr.Config.Parsing;
 public record RadarrMovieNamingConfigYaml
 {
     public bool? Rename { get; init; }
-    public string? Format { get; init; }
+    public string? Standard { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
