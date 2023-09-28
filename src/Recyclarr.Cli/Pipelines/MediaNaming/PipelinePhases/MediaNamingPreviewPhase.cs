@@ -39,7 +39,7 @@ public class MediaNamingPreviewPhase
 
     private void AddRow(string field, object? value)
     {
-        _table?.AddRow(field, value?.ToString() ?? "UNSET");
+        _table?.AddRow(field.EscapeMarkup(), value?.ToString().EscapeMarkup() ?? "UNSET");
     }
 
     private void PreviewRadarr(RadarrMediaNamingDto dto)
