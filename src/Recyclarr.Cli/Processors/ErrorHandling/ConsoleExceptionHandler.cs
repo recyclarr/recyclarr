@@ -18,7 +18,7 @@ public class ConsoleExceptionHandler
         _httpExceptionHandler = httpExceptionHandler;
     }
 
-    public async Task HandleException(Exception sourceException)
+    public async Task<bool> HandleException(Exception sourceException)
     {
         switch (sourceException)
         {
@@ -65,9 +65,10 @@ public class ConsoleExceptionHandler
                 _log.Error(e.Message);
                 break;
 
-            // This handles non-deterministic/unexpected exceptions.
             default:
-                throw sourceException;
+                return false;
         }
+
+        return true;
     }
 }

@@ -6,8 +6,8 @@ namespace Recyclarr.Cli.Processors;
 [Serializable]
 public class FatalException : Exception
 {
-    public FatalException(string? message)
-        : base(message)
+    public FatalException(string? message, Exception? innerException = null)
+        : base(message, innerException)
     {
     }
 

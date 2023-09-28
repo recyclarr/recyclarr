@@ -61,7 +61,12 @@ public class DeleteCustomFormatsCommand : AsyncCommand<DeleteCustomFormatsComman
         }
         catch (Exception e)
         {
-            await _exceptionHandler.HandleException(e);
+            if (!await _exceptionHandler.HandleException(e))
+            {
+                // This means we didn't handle the exception; rethrow it.
+                throw;
+            }
+
             return (int) ExitStatus.Failed;
         }
 
