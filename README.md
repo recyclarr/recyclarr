@@ -16,12 +16,13 @@ Formerly named "Trash Updater".
 Recyclarr supports Radarr, Sonarr v3, and Sonarr v4. The following information can be synced to
 these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
 
-[Features]: https://recyclarr.dev/wiki/features
+[Features]: https://recyclarr.dev/wiki/features/
 
 - Release Profiles, including tags
 - Quality Profiles, including qualities and quality groups
 - Custom Formats, including scores (from guide or manual)
 - Quality Definitions (file sizes)
+- Media Naming Formats
 
 ### Read the Documentation
 
@@ -30,6 +31,6 @@ some main topics.
 
 - [Installation](https://recyclarr.dev/wiki/installation/)
 - [Command Line Reference](https://recyclarr.dev/wiki/cli/)
-- [Configuration Reference](https://recyclarr.dev/wiki/yaml/config-reference)
-- [Settings Reference](https://recyclarr.dev/wiki/yaml/settings-reference)
-- [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help)
+- [Configuration Reference](https://recyclarr.dev/wiki/yaml/config-reference/)
+- [Settings Reference](https://recyclarr.dev/wiki/yaml/settings-reference/)
+- [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help/)
