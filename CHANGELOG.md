@@ -24,6 +24,11 @@ changes you may need to make.
   was `3.0.4.1098`).
 - **BREAKING**: Old boolean syntax for `reset_unmatched_scores` is no longer supported.
 
+### Fixed
+
+- Status text rendered during git repo updates is no longer shown when `--raw` is used with the
+  `list custom-formats` command (#215).
+
 ## [5.4.3] - 2023-09-16
 
 ### Changed

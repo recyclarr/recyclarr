@@ -56,7 +56,9 @@ public class CustomFormatDataLister
     {
         if (!raw)
         {
-            _console.WriteLine("\nList of Custom Formats in the TRaSH Guides:");
+            _console.WriteLine();
+            _console.WriteLine("List of Custom Formats in the TRaSH Guides:");
+            _console.WriteLine();
         }
 
         var categories = _guide.GetCustomFormatData(serviceType)
@@ -67,18 +69,21 @@ public class CustomFormatDataLister
         foreach (var cat in categories)
         {
             var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
-            _console.WriteLine($"\n          # {title}");
+
+            _console.WriteLine($"          # {title}");
 
             foreach (var cf in cat)
             {
                 _console.WriteLine($"          - {cf.TrashId} # {cf.Name}");
             }
+
+            _console.WriteLine();
         }
 
         if (!raw)
         {
             _console.WriteLine(
-                "\nThe above Custom Formats are in YAML format and ready to be copied & pasted " +
+                "The above Custom Formats are in YAML format and ready to be copied & pasted " +
                 "under the `trash_ids:` property.");
         }
     }

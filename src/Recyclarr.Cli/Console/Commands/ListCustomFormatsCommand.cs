@@ -45,7 +45,7 @@ public class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.Cl
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
         _lister.List(settings);
         return 0;
     }

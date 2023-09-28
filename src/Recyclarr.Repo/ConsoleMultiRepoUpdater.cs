@@ -13,7 +13,7 @@ public class ConsoleMultiRepoUpdater : IMultiRepoUpdater
         _repos = repos;
     }
 
-    public async Task UpdateAllRepositories(CancellationToken token)
+    public async Task UpdateAllRepositories(CancellationToken token, bool hideConsoleOutput = false)
     {
         var options = new ParallelOptions
         {
@@ -21,9 +21,15 @@ public class ConsoleMultiRepoUpdater : IMultiRepoUpdater
             MaxDegreeOfParallelism = 3
         };
 
-        await _console.Status().StartAsync("Updating Git Repositories...", async _ =>
+        var task = Parallel.ForEachAsync(_repos, options, async (repo, innerToken) => await repo.Update(innerToken));
+
+        if (!hideConsoleOutput)
         {
-            await Parallel.ForEachAsync(_repos, options, async (repo, innerToken) => await repo.Update(innerToken));
-        });
+            await _console.Status().StartAsync("Updating Git Repositories...", _ => task);
+        }
+        else
+        {
+            await task;
+        }
     }
 }
