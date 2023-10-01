@@ -7,9 +7,9 @@ public record SonarrMediaNamingDto : MediaNamingDto
 {
     private readonly string? _seriesFolderFormat;
     private readonly string? _seasonFolderFormat;
-    private string? _standardEpisodeFormat;
-    private string? _dailyEpisodeFormat;
-    private string? _animeEpisodeFormat;
+    private readonly string? _standardEpisodeFormat;
+    private readonly string? _dailyEpisodeFormat;
+    private readonly string? _animeEpisodeFormat;
     private readonly bool? _renameEpisodes;
 
     public string? SeriesFolderFormat
@@ -27,19 +27,19 @@ public record SonarrMediaNamingDto : MediaNamingDto
     public string? StandardEpisodeFormat
     {
         get => _standardEpisodeFormat;
-        set => DtoUtil.SetIfNotNull(ref _standardEpisodeFormat, value);
+        init => DtoUtil.SetIfNotNull(ref _standardEpisodeFormat, value);
     }
 
     public string? DailyEpisodeFormat
     {
         get => _dailyEpisodeFormat;
-        set => DtoUtil.SetIfNotNull(ref _dailyEpisodeFormat, value);
+        init => DtoUtil.SetIfNotNull(ref _dailyEpisodeFormat, value);
     }
 
     public string? AnimeEpisodeFormat
     {
         get => _animeEpisodeFormat;
-        set => DtoUtil.SetIfNotNull(ref _animeEpisodeFormat, value);
+        init => DtoUtil.SetIfNotNull(ref _animeEpisodeFormat, value);
     }
 
     public bool? RenameEpisodes
@@ -48,6 +48,6 @@ public record SonarrMediaNamingDto : MediaNamingDto
         init => DtoUtil.SetIfNotNull(ref _renameEpisodes, value);
     }
 
-    [UsedImplicitly, JsonExtensionData]
+    [UsedImplicitly] [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
 }

@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 [Parallelizable(ParallelScope.All)]
 public class MediaNamingTransactionPhaseRadarrTest
 {
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Radarr_left_null(
         MediaNamingTransactionPhase sut)
     {
@@ -28,7 +28,7 @@ public class MediaNamingTransactionPhaseRadarrTest
         result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Radarr_right_null(
         MediaNamingTransactionPhase sut)
     {
@@ -49,7 +49,7 @@ public class MediaNamingTransactionPhaseRadarrTest
         result.Should().BeEquivalentTo(left, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Radarr_right_and_left_with_rename(
         MediaNamingTransactionPhase sut)
     {
@@ -75,7 +75,7 @@ public class MediaNamingTransactionPhaseRadarrTest
         result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Radarr_right_and_left_without_rename(
         MediaNamingTransactionPhase sut)
     {
@@ -101,7 +101,7 @@ public class MediaNamingTransactionPhaseRadarrTest
         result.Should().BeEquivalentTo(new RadarrMediaNamingDto
             {
                 RenameMovies = false,
-                StandardMovieFormat = "file_format",
+                StandardMovieFormat = "file_format2",
                 MovieFolderFormat = "folder_format2"
             },
             o => o.RespectingRuntimeTypes());

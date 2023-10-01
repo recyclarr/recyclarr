@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 [Parallelizable(ParallelScope.All)]
 public class MediaNamingTransactionPhaseSonarrTest
 {
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Sonarr_left_null(
         MediaNamingTransactionPhase sut)
     {
@@ -31,7 +31,7 @@ public class MediaNamingTransactionPhaseSonarrTest
         result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Sonarr_right_null(
         MediaNamingTransactionPhase sut)
     {
@@ -55,7 +55,7 @@ public class MediaNamingTransactionPhaseSonarrTest
         result.Should().BeEquivalentTo(left, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Sonarr_right_and_left_with_rename(
         MediaNamingTransactionPhase sut)
     {
@@ -87,7 +87,7 @@ public class MediaNamingTransactionPhaseSonarrTest
         result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
     }
 
-    [Test, AutoMockData]
+    [Test] [AutoMockData]
     public void Sonarr_right_and_left_without_rename(
         MediaNamingTransactionPhase sut)
     {
@@ -121,9 +121,9 @@ public class MediaNamingTransactionPhaseSonarrTest
                 RenameEpisodes = false,
                 SeasonFolderFormat = "season_default2",
                 SeriesFolderFormat = "series_plex2",
-                StandardEpisodeFormat = "episodes_standard_default",
-                DailyEpisodeFormat = "episodes_daily_default",
-                AnimeEpisodeFormat = "episodes_anime_default"
+                StandardEpisodeFormat = "episodes_standard_default2",
+                DailyEpisodeFormat = "episodes_daily_default2",
+                AnimeEpisodeFormat = "episodes_anime_default2"
             },
             o => o.RespectingRuntimeTypes());
     }

@@ -5,14 +5,14 @@ namespace Recyclarr.ServarrApi.MediaNaming;
 
 public record RadarrMediaNamingDto : MediaNamingDto
 {
-    private string? _movieFormat;
+    private readonly string? _movieFormat;
     private readonly string? _folderFormat;
     private readonly bool? _renameMovies;
 
     public string? StandardMovieFormat
     {
         get => _movieFormat;
-        set => DtoUtil.SetIfNotNull(ref _movieFormat, value);
+        init => DtoUtil.SetIfNotNull(ref _movieFormat, value);
     }
 
     public string? MovieFolderFormat
@@ -27,6 +27,6 @@ public record RadarrMediaNamingDto : MediaNamingDto
         init => DtoUtil.SetIfNotNull(ref _renameMovies, value);
     }
 
-    [UsedImplicitly, JsonExtensionData]
+    [UsedImplicitly] [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
 }

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync file naming configuration even if `rename` is not set to `true`.
+
 ## [6.0.0] - 2023-09-29
 
 This release contains **BREAKING CHANGES**. See the [v6.0 Upgrade Guide][breaking6] for required

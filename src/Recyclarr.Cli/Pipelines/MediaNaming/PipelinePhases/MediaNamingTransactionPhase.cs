@@ -19,37 +19,25 @@ public class MediaNamingTransactionPhase
     private static RadarrMediaNamingDto UpdateRadarrDto(RadarrMediaNamingDto serviceDto, ProcessedNamingConfig config)
     {
         var configDto = (RadarrMediaNamingDto) config.Dto;
-        var combinedDto = serviceDto with
+        return serviceDto with
         {
             RenameMovies = configDto.RenameMovies,
-            MovieFolderFormat = configDto.MovieFolderFormat
+            MovieFolderFormat = configDto.MovieFolderFormat,
+            StandardMovieFormat = configDto.StandardMovieFormat
         };
-
-        if (configDto.RenameMovies is true)
-        {
-            combinedDto.StandardMovieFormat = configDto.StandardMovieFormat;
-        }
-
-        return combinedDto;
     }
 
     private static SonarrMediaNamingDto UpdateSonarrDto(SonarrMediaNamingDto serviceDto, ProcessedNamingConfig config)
     {
         var configDto = (SonarrMediaNamingDto) config.Dto;
-        var combinedDto = serviceDto with
+        return serviceDto with
         {
             RenameEpisodes = configDto.RenameEpisodes,
             SeriesFolderFormat = configDto.SeriesFolderFormat,
-            SeasonFolderFormat = configDto.SeasonFolderFormat
+            SeasonFolderFormat = configDto.SeasonFolderFormat,
+            StandardEpisodeFormat = configDto.StandardEpisodeFormat,
+            DailyEpisodeFormat = configDto.DailyEpisodeFormat,
+            AnimeEpisodeFormat = configDto.AnimeEpisodeFormat
         };
-
-        if (configDto.RenameEpisodes is true)
-        {
-            combinedDto.StandardEpisodeFormat = configDto.StandardEpisodeFormat;
-            combinedDto.DailyEpisodeFormat = configDto.DailyEpisodeFormat;
-            combinedDto.AnimeEpisodeFormat = configDto.AnimeEpisodeFormat;
-        }
-
-        return combinedDto;
     }
 }
