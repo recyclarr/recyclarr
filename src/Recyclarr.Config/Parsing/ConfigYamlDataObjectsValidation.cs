@@ -116,6 +116,7 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
 
         RuleFor(x => x.Qualities)
             .Custom(ValidateHaveNoDuplicates!)
+            .Custom(ValidateGroupQualityCount!)
             .Must(x => x!.Any(y => y.Enabled is true or null))
             .WithMessage(x =>
                 $"For profile {x.Name}, at least one explicitly listed quality under 'qualities' must be enabled.")
@@ -135,6 +136,22 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
                 $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
                 $"which is '{o.Upgrade!.UntilQuality}'")
             .When(x => x is {Upgrade.Allowed: not false, Qualities.Count: > 0});
+    }
+
+    private static void ValidateGroupQualityCount(
+        IReadOnlyCollection<QualityProfileQualityConfigYaml> qualities,
+        ValidationContext<QualityProfileConfigYaml> context)
+    {
+        // Find groups with less than 2 items
+        var invalidCount = qualities
+            .Count(x => x.Qualities?.Count < 2);
+
+        if (invalidCount != 0)
+        {
+            var profile = context.InstanceToValidate;
+            context.AddFailure(
+                $"For profile {profile.Name}, 'qualities' contains {invalidCount} groups with less than 2 qualities");
+        }
     }
 
     private static void ValidateHaveNoDuplicates(

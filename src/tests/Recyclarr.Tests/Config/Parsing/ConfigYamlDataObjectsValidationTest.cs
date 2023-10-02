@@ -174,4 +174,83 @@ public class ConfigYamlDataObjectsValidationTest
         result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
             $"For profile {data.Name}, 'until_quality' must not refer to explicitly disabled qualities");
     }
+
+    [Test]
+    public void Empty_qualities_in_groups_not_allowed()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "Profile",
+            Qualities = new[]
+            {
+                new QualityProfileQualityConfigYaml
+                {
+                    Name = "Group",
+                    Qualities = Array.Empty<string>()
+                }
+            }
+        };
+
+        var validator = new QualityProfileConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldHaveValidationErrorFor(x => x.Qualities);
+
+        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
+            $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities");
+    }
+
+    [Test]
+    public void Only_one_quality_in_groups_not_allowed()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "Profile",
+            Qualities = new[]
+            {
+                new QualityProfileQualityConfigYaml
+                {
+                    Name = "Group",
+                    Qualities = new[]
+                    {
+                        "One Quality"
+                    }
+                }
+            }
+        };
+
+        var validator = new QualityProfileConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldHaveValidationErrorFor(x => x.Qualities);
+
+        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
+            $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities");
+    }
+
+    [Test]
+    public void Two_qualities_in_group_passes_validation()
+    {
+        var data = new QualityProfileConfigYaml
+        {
+            Name = "Profile",
+            Qualities = new[]
+            {
+                new QualityProfileQualityConfigYaml
+                {
+                    Name = "Group",
+                    Qualities = new[]
+                    {
+                        "One Quality",
+                        "Two Quality"
+                    }
+                }
+            }
+        };
+
+        var validator = new QualityProfileConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldNotHaveAnyValidationErrors();
+    }
 }

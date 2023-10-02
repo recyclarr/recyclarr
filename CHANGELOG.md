@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Sync file naming configuration even if `rename` is not set to `true`.
+- Media Naming: Sync file naming configuration even if `rename` is not set to `true`.
+- Quality Profiles: Validation check added for quality groups with less than 2 qualities.
 
 ## [6.0.0] - 2023-09-29
 
