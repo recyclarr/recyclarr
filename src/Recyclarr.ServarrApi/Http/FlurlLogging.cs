@@ -45,7 +45,7 @@ public static class FlurlLogging
 
     private static void LogBody(ILogger log, Url url, string direction, HttpMethod method, string? body)
     {
-        if (body is null)
+        if (string.IsNullOrEmpty(body))
         {
             return;
         }
