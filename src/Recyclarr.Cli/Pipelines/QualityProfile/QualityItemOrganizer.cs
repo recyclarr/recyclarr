@@ -96,6 +96,9 @@ public class QualityItemOrganizer
                     .Select(y => y with {Allowed = false})
                     .ToList()
             })
+            // Find item groups that have less than 2 nested qualities remaining in them. Those get flattened out.
+            // If Count == 0, that gets handled by the `Where()` below.
+            .Select(x => x.Items.Count == 1 ? x.Items.First() : x)
             .Where(x => x is not {Quality: null, Items.Count: 0});
     }
 
