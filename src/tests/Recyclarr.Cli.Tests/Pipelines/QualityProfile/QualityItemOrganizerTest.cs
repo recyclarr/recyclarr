@@ -207,4 +207,40 @@ public class QualityItemOrganizerTest
                 NewQp.QualityDto(3, "three", false))
         });
     }
+
+    [Test]
+    public void Remove_quality_from_existing_group()
+    {
+        var config = new QualityProfileConfig
+        {
+            Qualities = new[]
+            {
+                NewQp.GroupConfig("group1", "one", "two", "three")
+            }
+        };
+
+        var dto = new QualityProfileDto
+        {
+            Items = new[]
+            {
+                NewQp.GroupDto(1001, "group1", true,
+                    NewQp.QualityDto(1, "one", true),
+                    NewQp.QualityDto(2, "two", true),
+                    NewQp.QualityDto(3, "three", true),
+                    NewQp.QualityDto(4, "four", true))
+            }
+        };
+
+        var sut = new QualityItemOrganizer();
+        var result = sut.OrganizeItems(dto, config);
+
+        result.Items.Should().BeEquivalentTo(new[]
+        {
+            NewQp.GroupDto(1001, "group1", true,
+                NewQp.QualityDto(1, "one", true),
+                NewQp.QualityDto(2, "two", true),
+                NewQp.QualityDto(3, "three", true)),
+            NewQp.QualityDto(4, "four", false)
+        });
+    }
 }

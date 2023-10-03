@@ -11,8 +11,8 @@ public class QualityItemOrganizer
 
     public UpdatedQualities OrganizeItems(QualityProfileDto dto, QualityProfileConfig config)
     {
-        var wanted = ProcessWantedItems(dto.Items, config.Qualities);
-        var unwanted = ProcessUnwantedItems(dto.Items, wanted);
+        var wanted = GetWantedItems(dto.Items, config.Qualities);
+        var unwanted = GetUnwantedItems(dto.Items, wanted);
         var combined = CombineAndSortItems(config.QualitySort, wanted, unwanted);
 
         AssignMissingGroupIds(combined);
@@ -27,7 +27,7 @@ public class QualityItemOrganizer
 
     [SuppressMessage("SonarLint", "S1751", Justification =
         "'continue' used here is for separating local methods")]
-    private List<ProfileItemDto> ProcessWantedItems(
+    private List<ProfileItemDto> GetWantedItems(
         IReadOnlyCollection<ProfileItemDto> dtoItems,
         IReadOnlyCollection<QualityProfileQualityConfig> configQualities)
     {
@@ -78,24 +78,55 @@ public class QualityItemOrganizer
         return updatedItems;
     }
 
-    private static IEnumerable<ProfileItemDto> ProcessUnwantedItems(
+    private static IEnumerable<ProfileItemDto> FilterUnwantedItems(
+        ProfileItemDto dto,
+        IReadOnlyCollection<ProfileItemDto> wantedItems)
+    {
+        // Quality
+        if (dto.Quality is not null)
+        {
+            if (wantedItems.FindQualityByName(dto.Quality.Name) is null)
+            {
+                // Not in wanted list, so we keep
+                return new[] {dto};
+            }
+        }
+        // Group
+        else
+        {
+            // If this is actually a quality instead of a group, this will effectively be a no-op since the Items
+            // array will already be empty.
+            var unwantedQualities = dto.Items
+                .Where(y => wantedItems.FindQualityByName(y.Quality?.Name) is null);
+
+            // If the group is in the wanted list, then we only want to add qualities inside it that are NOT wanted
+            if (wantedItems.FindGroupByName(dto.Name) is not null)
+            {
+                return unwantedQualities;
+            }
+
+            // If the group is NOT in the wanted list, keep the group and add its children (if they are not wanted)
+            return new[]
+            {
+                dto with
+                {
+                    Items = unwantedQualities
+                        .Select(y => y with {Allowed = false})
+                        .ToList()
+                }
+            };
+        }
+
+        return Array.Empty<ProfileItemDto>();
+    }
+
+    private static IEnumerable<ProfileItemDto> GetUnwantedItems(
         IEnumerable<ProfileItemDto> dtoItems,
         IReadOnlyCollection<ProfileItemDto> wantedItems)
     {
-        // Find remaining items in the DTO that were *not* handled by the user's config.
         return dtoItems
-            .Where(x => !ExistsInWantedItems(wantedItems, x))
-            .Select(x => x with
-            {
-                Allowed = false,
-
-                // If this is actually a quality instead of a group, this will effectively be a no-op since the Items
-                // array will already be empty.
-                Items = x.Items
-                    .Where(y => wantedItems.FindQualityByName(y.Quality?.Name) is null)
-                    .Select(y => y with {Allowed = false})
-                    .ToList()
-            })
+            .SelectMany(x => FilterUnwantedItems(x, wantedItems))
+            .Select(x => x with {Allowed = false})
             // Find item groups that have less than 2 nested qualities remaining in them. Those get flattened out.
             // If Count == 0, that gets handled by the `Where()` below.
             .Select(x => x.Items.Count == 1 ? x.Items.First() : x)
@@ -123,14 +154,5 @@ public class QualityItemOrganizer
         {
             item.Id = nextItemId++;
         }
-    }
-
-    private static bool ExistsInWantedItems(IEnumerable<ProfileItemDto> wantedItems, ProfileItemDto dto)
-    {
-        var existingItem = dto.Quality is null
-            ? wantedItems.FindGroupByName(dto.Name)
-            : wantedItems.FindQualityByName(dto.Quality.Name);
-
-        return existingItem is not null;
     }
 }
