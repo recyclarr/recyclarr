@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.1] - 2023-10-02
+
 ### Fixed
 
 - Media Naming: Sync file naming configuration even if `rename` is not set to `true`.
@@ -914,7 +916,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v6.0.1...HEAD
+[6.0.1]: https://github.com/recyclarr/recyclarr/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/recyclarr/recyclarr/compare/v5.4.3...v6.0.0
 [5.4.3]: https://github.com/recyclarr/recyclarr/compare/v5.4.2...v5.4.3
 [5.4.2]: https://github.com/recyclarr/recyclarr/compare/v5.4.1...v5.4.2
