@@ -7,9 +7,9 @@ namespace Recyclarr.ServarrApi.MediaNaming;
 
 public class MediaNamingApiService : IMediaNamingApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public MediaNamingApiService(IServiceRequestBuilder service)
+    public MediaNamingApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

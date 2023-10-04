@@ -7,9 +7,9 @@ namespace Recyclarr.ServarrApi.CustomFormat;
 
 public class CustomFormatApiService : ICustomFormatApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public CustomFormatApiService(IServiceRequestBuilder service)
+    public CustomFormatApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

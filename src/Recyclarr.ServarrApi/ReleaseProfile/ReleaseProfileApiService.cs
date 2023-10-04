@@ -6,9 +6,9 @@ namespace Recyclarr.ServarrApi.ReleaseProfile;
 
 public class ReleaseProfileApiService : IReleaseProfileApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public ReleaseProfileApiService(IServiceRequestBuilder service)
+    public ReleaseProfileApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

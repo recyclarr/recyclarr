@@ -6,9 +6,9 @@ namespace Recyclarr.ServarrApi.System;
 
 public class SystemApiService : ISystemApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public SystemApiService(IServiceRequestBuilder service)
+    public SystemApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

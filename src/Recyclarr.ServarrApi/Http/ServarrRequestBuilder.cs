@@ -2,30 +2,32 @@ using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Common.Networking;
+using Recyclarr.Config.Models;
 using Recyclarr.Json;
 using Recyclarr.Settings;
 using Serilog;
 
 namespace Recyclarr.ServarrApi.Http;
 
-public sealed class FlurlClientFactory : IFlurlClientFactory
+public class ServarrRequestBuilder : IServarrRequestBuilder
 {
     private readonly ILogger _log;
     private readonly ISettingsProvider _settingsProvider;
-    private readonly PerBaseUrlFlurlClientFactory _factory;
+    private readonly IFlurlClientFactory _clientFactory;
 
-    public FlurlClientFactory(ILogger log, ISettingsProvider settingsProvider)
+    public ServarrRequestBuilder(ILogger log, ISettingsProvider settingsProvider, IFlurlClientFactory clientFactory)
     {
         _log = log;
         _settingsProvider = settingsProvider;
-        _factory = new PerBaseUrlFlurlClientFactory();
+        _clientFactory = clientFactory;
     }
 
-    public IFlurlClient Get(Url url)
+    public IFlurlRequest Request(IServiceConfiguration config, params object[] path)
     {
-        var client = _factory.Get(url);
+        var client = _clientFactory.Get(config.BaseUrl.AppendPathSegments("api", "v3"));
         client.Settings = GetClientSettings();
-        return client;
+        return client.Request(path)
+            .WithHeader("X-Api-Key", config.ApiKey);
     }
 
     private ClientFlurlHttpSettings GetClientSettings()
@@ -47,10 +49,5 @@ public sealed class FlurlClientFactory : IFlurlClientFactory
         }
 
         return settings;
-    }
-
-    public void Dispose()
-    {
-        _factory.Dispose();
     }
 }

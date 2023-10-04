@@ -6,9 +6,9 @@ namespace Recyclarr.ServarrApi.Tag;
 
 public class SonarrTagApiService : ISonarrTagApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public SonarrTagApiService(IServiceRequestBuilder service)
+    public SonarrTagApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

@@ -14,10 +14,10 @@ public class ApiServicesAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-        builder.RegisterType<FlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
+        builder.RegisterType<PerBaseUrlFlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
 
         builder.RegisterType<SystemApiService>().As<ISystemApiService>();
-        builder.RegisterType<ServiceRequestBuilder>().As<IServiceRequestBuilder>();
+        builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
         builder.RegisterType<QualityProfileApiService>().As<IQualityProfileApiService>();
         builder.RegisterType<CustomFormatApiService>().As<ICustomFormatApiService>();
         builder.RegisterType<QualityDefinitionApiService>().As<IQualityDefinitionApiService>();

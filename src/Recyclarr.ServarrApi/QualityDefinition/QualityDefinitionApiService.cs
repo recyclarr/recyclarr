@@ -6,9 +6,9 @@ namespace Recyclarr.ServarrApi.QualityDefinition;
 
 internal class QualityDefinitionApiService : IQualityDefinitionApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public QualityDefinitionApiService(IServiceRequestBuilder service)
+    public QualityDefinitionApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }

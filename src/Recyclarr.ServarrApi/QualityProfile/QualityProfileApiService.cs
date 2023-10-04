@@ -6,9 +6,9 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 
 internal class QualityProfileApiService : IQualityProfileApiService
 {
-    private readonly IServiceRequestBuilder _service;
+    private readonly IServarrRequestBuilder _service;
 
-    public QualityProfileApiService(IServiceRequestBuilder service)
+    public QualityProfileApiService(IServarrRequestBuilder service)
     {
         _service = service;
     }
