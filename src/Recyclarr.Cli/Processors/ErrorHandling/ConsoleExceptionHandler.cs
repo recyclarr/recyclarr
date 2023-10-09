@@ -1,5 +1,6 @@
 using Flurl.Http;
 using Recyclarr.Cli.Console;
+using Recyclarr.Compatibility;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.ServarrApi.Http;
@@ -59,6 +60,10 @@ public class ConsoleExceptionHandler
 
             case PostProcessingException e:
                 _log.Error("Configuration post-processing failed: {Message}", e.Message);
+                break;
+
+            case ServiceIncompatibilityException e:
+                _log.Error(e.Message);
                 break;
 
             case CommandException e:
