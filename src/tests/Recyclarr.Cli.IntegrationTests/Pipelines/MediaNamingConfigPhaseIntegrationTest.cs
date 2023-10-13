@@ -1,4 +1,5 @@
 using Autofac.Core.Registration;
+using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Common;
 using Recyclarr.Config.Models;
@@ -18,7 +19,7 @@ internal class MediaNamingConfigPhaseIntegrationTest : CliIntegrationFixture
     public async Task Throw_on_unknown_config_type()
     {
         var sut = Resolve<MediaNamingConfigPhase>();
-        var act = () => sut.Execute(new UnsupportedConfigType {InstanceName = ""});
+        var act = () => sut.Execute(new MediaNamingPipelineContext(), new UnsupportedConfigType {InstanceName = ""});
         await act.Should().ThrowAsync<ComponentNotRegisteredException>();
     }
 }

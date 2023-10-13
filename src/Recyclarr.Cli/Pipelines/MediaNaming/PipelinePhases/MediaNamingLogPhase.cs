@@ -1,12 +1,15 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingPhaseLogger(ILogger log)
+public class MediaNamingLogPhase(ILogger log) : ILogPipelinePhase<MediaNamingPipelineContext>
 {
     // Returning 'true' means to exit. 'false' means to proceed.
-    public bool LogConfigPhaseAndExitIfNeeded(ProcessedNamingConfig config)
+    public bool LogConfigPhaseAndExitIfNeeded(MediaNamingPipelineContext context)
     {
+        var config = context.ConfigOutput;
+
         if (config.InvalidNaming.Count != 0)
         {
             foreach (var (topic, invalidValue) in config.InvalidNaming)
@@ -33,12 +36,12 @@ public class MediaNamingPhaseLogger(ILogger log)
         return false;
     }
 
-    public void LogPersistenceResults(MediaNamingDto oldDto, MediaNamingDto newDto)
+    public void LogPersistenceResults(MediaNamingPipelineContext context)
     {
-        var differences = oldDto switch
+        var differences = context.ApiFetchOutput switch
         {
-            RadarrMediaNamingDto x => x.GetDifferences(newDto),
-            SonarrMediaNamingDto x => x.GetDifferences(newDto),
+            RadarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
+            SonarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
             _ => throw new ArgumentException("Unsupported configuration type in LogPersistenceResults method")
         };
 

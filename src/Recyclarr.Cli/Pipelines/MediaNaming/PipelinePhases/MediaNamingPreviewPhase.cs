@@ -1,19 +1,20 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.MediaNaming;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingPreviewPhase(IAnsiConsole console)
+public class MediaNamingPreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<MediaNamingPipelineContext>
 {
     private Table? _table;
 
-    public void Execute(MediaNamingDto serviceDto)
+    public void Execute(MediaNamingPipelineContext context)
     {
         _table = new Table()
             .Title("Media Naming [red](Preview)[/]")
             .AddColumns("[b]Field[/]", "[b]Value[/]");
 
-        switch (serviceDto)
+        switch (context.TransactionOutput)
         {
             case RadarrMediaNamingDto dto:
                 PreviewRadarr(dto);

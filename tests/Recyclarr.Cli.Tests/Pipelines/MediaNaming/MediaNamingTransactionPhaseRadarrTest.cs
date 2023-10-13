@@ -1,103 +1,115 @@
+using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 
 [TestFixture]
+[SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification =
+    "Do not care about disposal in a testing context")]
 public class MediaNamingTransactionPhaseRadarrTest
 {
-    [Test] [AutoMockData]
+    [Test, AutoMockData]
     public void Radarr_left_null(
         MediaNamingTransactionPhase sut)
     {
-        var left = new RadarrMediaNamingDto();
-
-        var right = new ProcessedNamingConfig
+        var context = new MediaNamingPipelineContext
         {
-            Dto = new RadarrMediaNamingDto
+            ApiFetchOutput = new RadarrMediaNamingDto(),
+            ConfigOutput = new ProcessedNamingConfig
+            {
+                Dto = new RadarrMediaNamingDto
+                {
+                    RenameMovies = true,
+                    StandardMovieFormat = "file_format",
+                    MovieFolderFormat = "folder_format"
+                }
+            }
+        };
+
+        sut.Execute(context);
+
+        context.TransactionOutput.Should().BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
+    }
+
+    [Test, AutoMockData]
+    public void Radarr_right_null(
+        MediaNamingTransactionPhase sut)
+    {
+        var context = new MediaNamingPipelineContext
+        {
+            ApiFetchOutput = new RadarrMediaNamingDto
             {
                 RenameMovies = true,
                 StandardMovieFormat = "file_format",
                 MovieFolderFormat = "folder_format"
+            },
+            ConfigOutput = new ProcessedNamingConfig
+            {
+                Dto = new RadarrMediaNamingDto()
             }
         };
 
-        var result = sut.Execute(left, right);
+        sut.Execute(context);
 
-        result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
+        context.TransactionOutput.Should().BeEquivalentTo(context.ApiFetchOutput, o => o.RespectingRuntimeTypes());
     }
 
-    [Test] [AutoMockData]
-    public void Radarr_right_null(
-        MediaNamingTransactionPhase sut)
-    {
-        var left = new RadarrMediaNamingDto
-        {
-            RenameMovies = true,
-            StandardMovieFormat = "file_format",
-            MovieFolderFormat = "folder_format"
-        };
-
-        var right = new ProcessedNamingConfig
-        {
-            Dto = new RadarrMediaNamingDto()
-        };
-
-        var result = sut.Execute(left, right);
-
-        result.Should().BeEquivalentTo(left, o => o.RespectingRuntimeTypes());
-    }
-
-    [Test] [AutoMockData]
+    [Test, AutoMockData]
     public void Radarr_right_and_left_with_rename(
         MediaNamingTransactionPhase sut)
     {
-        var left = new RadarrMediaNamingDto
+        var context = new MediaNamingPipelineContext
         {
-            RenameMovies = false,
-            StandardMovieFormat = "file_format",
-            MovieFolderFormat = "folder_format"
-        };
-
-        var right = new ProcessedNamingConfig
-        {
-            Dto = new RadarrMediaNamingDto
+            ApiFetchOutput = new RadarrMediaNamingDto
             {
-                RenameMovies = true,
-                StandardMovieFormat = "file_format2",
-                MovieFolderFormat = "folder_format2"
+                RenameMovies = false,
+                StandardMovieFormat = "file_format",
+                MovieFolderFormat = "folder_format"
+            },
+            ConfigOutput = new ProcessedNamingConfig
+            {
+                Dto = new RadarrMediaNamingDto
+                {
+                    RenameMovies = true,
+                    StandardMovieFormat = "file_format2",
+                    MovieFolderFormat = "folder_format2"
+                }
             }
         };
 
-        var result = sut.Execute(left, right);
+        sut.Execute(context);
 
-        result.Should().BeEquivalentTo(right.Dto, o => o.RespectingRuntimeTypes());
+        context.TransactionOutput.Should().BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
     }
 
-    [Test] [AutoMockData]
+    [Test, AutoMockData]
     public void Radarr_right_and_left_without_rename(
         MediaNamingTransactionPhase sut)
     {
-        var left = new RadarrMediaNamingDto
+        var context = new MediaNamingPipelineContext
         {
-            RenameMovies = true,
-            StandardMovieFormat = "file_format",
-            MovieFolderFormat = "folder_format"
-        };
-
-        var right = new ProcessedNamingConfig
-        {
-            Dto = new RadarrMediaNamingDto
+            ApiFetchOutput = new RadarrMediaNamingDto
             {
-                RenameMovies = false,
-                StandardMovieFormat = "file_format2",
-                MovieFolderFormat = "folder_format2"
+                RenameMovies = true,
+                StandardMovieFormat = "file_format",
+                MovieFolderFormat = "folder_format"
+            },
+            ConfigOutput = new ProcessedNamingConfig
+            {
+                Dto = new RadarrMediaNamingDto
+                {
+                    RenameMovies = false,
+                    StandardMovieFormat = "file_format2",
+                    MovieFolderFormat = "folder_format2"
+                }
             }
         };
 
-        var result = sut.Execute(left, right);
+        sut.Execute(context);
 
-        result.Should().BeEquivalentTo(new RadarrMediaNamingDto
+        context.TransactionOutput.Should().BeEquivalentTo(new RadarrMediaNamingDto
             {
                 RenameMovies = false,
                 StandardMovieFormat = "file_format2",

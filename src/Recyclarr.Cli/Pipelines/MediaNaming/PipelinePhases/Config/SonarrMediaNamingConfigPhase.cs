@@ -5,15 +5,9 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-public class SonarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<SonarrConfiguration>
+public class SonarrMediaNamingConfigPhase(ISonarrCapabilityFetcher sonarrCapabilities)
+    : ServiceBasedMediaNamingConfigPhase<SonarrConfiguration>
 {
-    private readonly ISonarrCapabilityFetcher _sonarrCapabilities;
-
-    public SonarrMediaNamingConfigPhase(ISonarrCapabilityFetcher sonarrCapabilities)
-    {
-        _sonarrCapabilities = sonarrCapabilities;
-    }
-
     protected override async Task<MediaNamingDto> ProcessNaming(
         SonarrConfiguration config,
         IMediaNamingGuideService guide,
@@ -21,7 +15,7 @@ public class SonarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<S
     {
         var guideData = guide.GetSonarrNamingData();
         var configData = config.MediaNaming;
-        var capabilities = await _sonarrCapabilities.GetCapabilities(config);
+        var capabilities = await sonarrCapabilities.GetCapabilities(config);
         var keySuffix = capabilities.SupportsCustomFormats ? ":4" : ":3";
 
         return new SonarrMediaNamingDto

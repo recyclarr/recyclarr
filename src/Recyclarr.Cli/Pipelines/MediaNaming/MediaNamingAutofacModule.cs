@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Common;
@@ -18,12 +17,13 @@ public class MediaNamingAutofacModule : Module
         builder.RegisterType<SonarrMediaNamingConfigPhase>()
             .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Sonarr);
 
-        builder.RegisterAggregateService<IMediaNamingPipelinePhases>();
-        builder.RegisterType<MediaNamingConfigPhase>();
-        builder.RegisterType<MediaNamingApiFetchPhase>();
-        builder.RegisterType<MediaNamingTransactionPhase>();
-        builder.RegisterType<MediaNamingPreviewPhase>();
-        builder.RegisterType<MediaNamingApiPersistencePhase>();
-        builder.RegisterType<MediaNamingPhaseLogger>();
+        builder.RegisterTypes(
+                typeof(MediaNamingConfigPhase),
+                typeof(MediaNamingApiFetchPhase),
+                typeof(MediaNamingTransactionPhase),
+                typeof(MediaNamingPreviewPhase),
+                typeof(MediaNamingApiPersistencePhase),
+                typeof(MediaNamingLogPhase))
+            .AsImplementedInterfaces();
     }
 }

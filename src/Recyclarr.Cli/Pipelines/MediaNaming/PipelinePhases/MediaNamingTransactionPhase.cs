@@ -1,17 +1,16 @@
-using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingTransactionPhase
+public class MediaNamingTransactionPhase : ITransactionPipelinePhase<MediaNamingPipelineContext>
 {
-    [SuppressMessage("Performance", "CA1822:Mark members as static")]
-    public MediaNamingDto Execute(MediaNamingDto serviceData, ProcessedNamingConfig config)
+    public void Execute(MediaNamingPipelineContext context)
     {
-        return serviceData switch
+        context.TransactionOutput = context.ApiFetchOutput switch
         {
-            RadarrMediaNamingDto dto => UpdateRadarrDto(dto, config),
-            SonarrMediaNamingDto dto => UpdateSonarrDto(dto, config),
+            RadarrMediaNamingDto dto => UpdateRadarrDto(dto, context.ConfigOutput),
+            SonarrMediaNamingDto dto => UpdateSonarrDto(dto, context.ConfigOutput),
             _ => throw new ArgumentException("Config type not supported in media naming transation phase")
         };
     }

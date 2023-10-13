@@ -1,4 +1,5 @@
 using Autofac.Features.Indexed;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Common;
 using Recyclarr.Config.Models;
@@ -18,13 +19,14 @@ public record ProcessedNamingConfig
 public class MediaNamingConfigPhase(
     IMediaNamingGuideService guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory)
+    : IConfigPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task<ProcessedNamingConfig> Execute(IServiceConfiguration config)
+    public async Task Execute(MediaNamingPipelineContext context, IServiceConfiguration config)
     {
         var lookup = new NamingFormatLookup();
         var strategy = configPhaseStrategyFactory[config.ServiceType];
         var dto = await strategy.ProcessNaming(config, guide, lookup);
 
-        return new ProcessedNamingConfig {Dto = dto, InvalidNaming = lookup.Errors};
+        context.ConfigOutput = new ProcessedNamingConfig {Dto = dto, InvalidNaming = lookup.Errors};
     }
 }
