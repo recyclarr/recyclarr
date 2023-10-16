@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CLI: Some custom formats were not properly categorized when running `list custom-formats`.
+
 ## [6.0.1] - 2023-10-02
 
 ### Fixed
