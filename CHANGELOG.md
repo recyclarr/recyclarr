@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - CLI: Some custom formats were not properly categorized when running `list custom-formats`.
+- Media Naming: In order to avoid confusion, the `v3` and `v4` version indicators for certain naming
+  format keys has been moved to their own column in the `list` command table.
 
 ## [6.0.1] - 2023-10-02
 
