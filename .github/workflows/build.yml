@@ -112,12 +112,12 @@ jobs:
           "publish/recyclarr"
 
       - name: Notarize
-        uses: recyclarr/xcode-notarize@main
-        with:
-          product-path: publish/recyclarr
-          appstore-connect-username: ${{ secrets.MAC_DEV_USERNAME }}
-          appstore-connect-password: ${{ secrets.MAC_DEV_PASSWORD }}
-          primary-bundle-id: dev.recyclarr.cli
+        run: >-
+          ci/notarize.sh
+          "${{ secrets.MAC_DEV_USERNAME }}"
+          "${{ secrets.MAC_DEV_PASSWORD }}"
+          AVLRN599D8
+          publish/recyclarr
 
       # Cannot staple directly to a binary:
       # https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution/customizing_the_notarization_workflow?language=objc#3087720
