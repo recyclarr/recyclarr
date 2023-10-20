@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.2] - 2023-10-20
+
 ### Fixed
 
 - CLI: Some custom formats were not properly categorized when running `list custom-formats`.
@@ -923,7 +925,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v6.0.2...HEAD
+[6.0.2]: https://github.com/recyclarr/recyclarr/compare/v6.0.1...v6.0.2
 [6.0.1]: https://github.com/recyclarr/recyclarr/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/recyclarr/recyclarr/compare/v5.4.3...v6.0.0
 [5.4.3]: https://github.com/recyclarr/recyclarr/compare/v5.4.2...v5.4.3
