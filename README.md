@@ -24,7 +24,7 @@ these services from the TRaSH Guides. For a more detailed features list, see the
 - Quality Definitions (file sizes)
 - Media Naming Formats
 
-### Read the Documentation
+## Read the Documentation
 
 Main documentation is located in [the wiki](https://recyclarr.dev/wiki). Links provided below for
 some main topics.
@@ -34,3 +34,4 @@ some main topics.
 - [Configuration Reference](https://recyclarr.dev/wiki/yaml/config-reference/)
 - [Settings Reference](https://recyclarr.dev/wiki/yaml/settings-reference/)
 - [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help/)
+- [Upgrade Guides](https://recyclarr.dev/wiki/upgrade-guide/)
