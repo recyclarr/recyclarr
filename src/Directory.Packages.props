@@ -9,14 +9,14 @@
     <PackageVersion Include="AutoMapper" Version="12.0.1" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="7.2.0" />
     <PackageVersion Include="CliWrap" Version="3.6.4" />
-    <PackageVersion Include="FluentValidation" Version="11.7.1" />
+    <PackageVersion Include="FluentValidation" Version="11.8.0" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
     <PackageVersion Include="Flurl.Http" Version="4.0.0-pre3" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.2.0" />
     <PackageVersion Include="JorgeSerrano.Json.JsonSnakeCaseNamingPolicy" Version="0.9.0" />
-    <PackageVersion Include="MudBlazor" Version="6.9.0" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="19.4.1" />
+    <PackageVersion Include="MudBlazor" Version="6.11.0" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="19.5.1" />
     <PackageVersion Include="Serilog" Version="3.0.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="3.4.1" />
@@ -34,11 +34,11 @@
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="19.2.69" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="2.0.5" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.69" />
-    <PackageVersion Include="YamlDotNet" Version="13.5.2" />
+    <PackageVersion Include="YamlDotNet" Version="13.7.1" />
   </ItemGroup>
   <!-- Unit Test Packages -->
   <ItemGroup>
-    <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.0" />
+    <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.1" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
     <PackageVersion Include="AutoFixture" Version="4.18.0" />
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="4.18.0" />
