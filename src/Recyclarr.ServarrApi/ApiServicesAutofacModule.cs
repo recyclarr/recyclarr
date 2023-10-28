@@ -14,7 +14,14 @@ public class ApiServicesAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-        builder.RegisterType<PerBaseUrlFlurlClientFactory>().As<IFlurlClientFactory>().SingleInstance();
+        builder.RegisterType<FlurlConfigurator>();
+        builder.Register(c =>
+            {
+                var config = c.Resolve<FlurlConfigurator>();
+                return new FlurlClientCache().ConfigureAll(x => config.Configure(x));
+            })
+            .As<IFlurlClientCache>()
+            .SingleInstance();
 
         builder.RegisterType<SystemApiService>().As<ISystemApiService>();
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();

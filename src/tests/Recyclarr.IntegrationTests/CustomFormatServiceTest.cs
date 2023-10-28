@@ -14,12 +14,13 @@ public class CustomFormatServiceTest : IntegrationTestFixture
     {
         var resourceData = new ResourceDataReader(typeof(CustomFormatServiceTest), "Data");
         var jsonBody = resourceData.ReadData("issue_178.json");
+        var config = new RadarrConfiguration {InstanceName = "instance"};
 
         using var http = new HttpTest();
         http.RespondWith(jsonBody);
 
         var sut = Resolve<CustomFormatApiService>();
-        var result = await sut.GetCustomFormats(Substitute.ForPartsOf<ServiceConfiguration>());
+        var result = await sut.GetCustomFormats(config);
 
         result.Should().HaveCountGreaterThan(5);
     }
