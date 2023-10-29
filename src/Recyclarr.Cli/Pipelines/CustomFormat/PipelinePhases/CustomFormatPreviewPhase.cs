@@ -1,9 +1,13 @@
+using Recyclarr.Cli.Pipelines.Generic;
+
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatPreviewPhase(ILogger log)
+public class CustomFormatPreviewPhase(ILogger log) : IPreviewPipelinePhase<CustomFormatPipelineContext>
 {
-    public void Execute(CustomFormatTransactionData transactions)
+    public void Execute(CustomFormatPipelineContext context)
     {
+        var transactions = context.TransactionOutput;
+
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
             log.Warning(
@@ -66,4 +70,5 @@ public class CustomFormatPreviewPhase(ILogger log)
             log.Information("All custom formats are already up to date!");
         }
     }
+
 }

@@ -1,6 +1,5 @@
 using FluentValidation;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
-using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;

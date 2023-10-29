@@ -1,11 +1,12 @@
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
 public class MediaNamingTransactionPhase : ITransactionPipelinePhase<MediaNamingPipelineContext>
 {
-    public void Execute(MediaNamingPipelineContext context)
+    public void Execute(MediaNamingPipelineContext context, IServiceConfiguration config)
     {
         context.TransactionOutput = context.ApiFetchOutput switch
         {

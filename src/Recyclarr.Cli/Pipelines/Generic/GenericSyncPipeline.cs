@@ -13,6 +13,7 @@ public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TC
         {
             log.Debug("Skipping {Description} because it does not support service type {Service}",
                 context.PipelineDescription, config.ServiceType);
+            return;
         }
 
         await phases.ConfigPhase.Execute(context, config);
@@ -22,7 +23,7 @@ public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TC
         }
 
         await phases.ApiFetchPhase.Execute(context, config);
-        phases.TransactionPhase.Execute(context);
+        phases.TransactionPhase.Execute(context, config);
 
         phases.LogPhase.LogTransactionNotices(context);
 

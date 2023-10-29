@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -7,7 +8,7 @@ namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhase<QualitySizePipelineContext>
 {
-    public void Execute(QualitySizePipelineContext context)
+    public void Execute(QualitySizePipelineContext context, IServiceConfiguration config)
     {
         // Do not check ConfigOutput for null since the LogPhase does it for us
         var guideQuality = context.ConfigOutput!.Qualities;

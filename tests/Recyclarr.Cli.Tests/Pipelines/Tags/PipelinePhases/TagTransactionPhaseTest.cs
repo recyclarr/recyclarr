@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
+using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
@@ -20,7 +21,7 @@ public class TagTransactionPhaseTest
             }
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEquivalentTo("one", "two");
     }
@@ -34,7 +35,7 @@ public class TagTransactionPhaseTest
             ApiFetchOutput = Array.Empty<SonarrTag>()
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEquivalentTo("one", "two", "three");
     }
@@ -52,7 +53,7 @@ public class TagTransactionPhaseTest
             }
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEmpty();
     }

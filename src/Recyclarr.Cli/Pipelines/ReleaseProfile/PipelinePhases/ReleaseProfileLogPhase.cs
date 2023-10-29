@@ -6,7 +6,7 @@ public class ReleaseProfileLogPhase(ILogger log) : ILogPipelinePhase<ReleaseProf
 {
     public bool LogConfigPhaseAndExitIfNeeded(ReleaseProfilePipelineContext context)
     {
-        if (context.ConfigOutput.Any())
+        if (context.ConfigOutput is {Count: > 0})
         {
             return false;
         }
@@ -26,19 +26,21 @@ public class ReleaseProfileLogPhase(ILogger log) : ILogPipelinePhase<ReleaseProf
 
         if (transactions.UpdatedProfiles.Count != 0)
         {
-            log.Information("Update existing profiles: {ProfileNames}", transactions.UpdatedProfiles);
+            log.Information("Update existing profiles: {ProfileNames}",
+                transactions.UpdatedProfiles.Select(x => x.Name));
             somethingChanged = true;
         }
 
         if (transactions.CreatedProfiles.Count != 0)
         {
-            log.Information("Create new profiles: {ProfileNames}", transactions.CreatedProfiles);
+            log.Information("Create new profiles: {ProfileNames}", transactions.CreatedProfiles.Select(x => x.Name));
             somethingChanged = true;
         }
 
         if (transactions.DeletedProfiles.Count != 0)
         {
-            log.Information("Deleting old release profiles: {ProfileNames}", transactions.DeletedProfiles);
+            log.Information("Deleting old release profiles: {ProfileNames}",
+                transactions.DeletedProfiles.Select(x => x.Name));
             somethingChanged = true;
         }
 

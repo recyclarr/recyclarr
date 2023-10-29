@@ -10,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCalculator)
     : ITransactionPipelinePhase<QualityProfilePipelineContext>
 {
-    public void Execute(QualityProfilePipelineContext context)
+    public void Execute(QualityProfilePipelineContext context, IServiceConfiguration config)
     {
         var transactions = new QualityProfileTransactionData();
 

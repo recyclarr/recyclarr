@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;

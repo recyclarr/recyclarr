@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Cache;

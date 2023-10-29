@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
@@ -9,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
     : ITransactionPipelinePhase<ReleaseProfilePipelineContext>
 {
-    public void Execute(ReleaseProfilePipelineContext context)
+    public void Execute(ReleaseProfilePipelineContext context, IServiceConfiguration config)
     {
         var created = new List<SonarrReleaseProfile>();
         var updated = new List<SonarrReleaseProfile>();

@@ -81,7 +81,7 @@ public static class CompositionRoot
                 // ORDER HERE IS IMPORTANT!
                 // There are indirect dependencies between pipelines.
                 typeof(GenericSyncPipeline<TagPipelineContext>),
-                typeof(CustomFormatSyncPipeline),
+                typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
                 typeof(GenericSyncPipeline<ReleaseProfilePipelineContext>),

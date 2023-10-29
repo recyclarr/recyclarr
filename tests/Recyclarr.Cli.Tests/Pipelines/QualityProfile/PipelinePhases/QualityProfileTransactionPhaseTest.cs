@@ -31,7 +31,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData
         {
@@ -88,7 +88,7 @@ public class QualityProfileTransactionPhaseTest
             }
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData
         {
@@ -159,7 +159,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.ChangedProfiles.Should()
             .ContainSingle().Which.Profile.UpdatedScores.Should()
@@ -203,7 +203,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData());
     }
@@ -246,7 +246,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.UnchangedProfiles.Should()
             .ContainSingle().Which.Profile.UpdatedScores.Should()
@@ -293,7 +293,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.ChangedProfiles.Should()
             .ContainSingle().Which.Profile.UpdatedScores.Should()
@@ -352,7 +352,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.ChangedProfiles.Should()
             .ContainSingle().Which.Profile.UpdatedScores.Should()
@@ -409,7 +409,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.ChangedProfiles.Should()
             .ContainSingle().Which.Profile.UpdatedScores.Should()
@@ -465,7 +465,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
         };
 
-        sut.Execute(context);
+        sut.Execute(context, Substitute.For<IServiceConfiguration>());
 
         context.TransactionOutput.ChangedProfiles.Should()
             .ContainSingle().Which.Profile.InvalidExceptCfNames.Should()

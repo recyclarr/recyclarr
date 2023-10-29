@@ -1,37 +1,31 @@
-using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatTransactionPhase(ILogger log)
+public class CustomFormatTransactionPhase(ILogger log) : ITransactionPipelinePhase<CustomFormatPipelineContext>
 {
-    [SuppressMessage("Performance", "CA1822:Mark members as static")]
-    public CustomFormatTransactionData Execute(
-        IServiceConfiguration config,
-        IReadOnlyCollection<CustomFormatData> guideCfs,
-        IReadOnlyCollection<CustomFormatData> serviceData,
-        CustomFormatCache cache)
+    public void Execute(CustomFormatPipelineContext context, IServiceConfiguration config)
     {
         var transactions = new CustomFormatTransactionData();
 
-        foreach (var guideCf in guideCfs)
+        foreach (var guideCf in context.ConfigOutput)
         {
             log.Debug("Process transaction for guide CF {TrashId} ({Name})", guideCf.TrashId, guideCf.Name);
 
-            guideCf.Id = cache.FindId(guideCf) ?? 0;
+            guideCf.Id = context.Cache.FindId(guideCf) ?? 0;
 
-            var serviceCf = FindServiceCfByName(serviceData, guideCf.Name);
+            var serviceCf = FindServiceCfByName(context.ApiFetchOutput, guideCf.Name);
             if (serviceCf is not null)
             {
                 ProcessExistingCf(config, guideCf, serviceCf, transactions);
                 continue;
             }
 
-            serviceCf = FindServiceCfById(serviceData, guideCf.Id);
+            serviceCf = FindServiceCfById(context.ApiFetchOutput, guideCf.Id);
             if (serviceCf is not null)
             {
                 // We do not use AddUpdatedCustomFormat() here because it's impossible for the CFs to be identical if we
@@ -47,14 +41,14 @@ public class CustomFormatTransactionPhase(ILogger log)
 
         if (config.DeleteOldCustomFormats)
         {
-            transactions.DeletedCustomFormats.AddRange(cache.Mappings
+            transactions.DeletedCustomFormats.AddRange(context.Cache.Mappings
                 // Custom format must be in the cache but NOT in the user's config
-                .Where(map => guideCfs.All(cf => cf.TrashId != map.TrashId))
+                .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
                 // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
-                .Where(map => serviceData.Any(cf => cf.Id == map.CustomFormatId)));
+                .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.CustomFormatId)));
         }
 
-        return transactions;
+        context.TransactionOutput = transactions;
     }
 
     private void ProcessExistingCf(

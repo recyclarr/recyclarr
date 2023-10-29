@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Config.Models;
 using Recyclarr.Tests.TestLibrary;
@@ -34,9 +35,11 @@ public class CustomFormatConfigPhaseTest
             }
         };
 
-        var result = sut.Execute(config);
+        var context = new CustomFormatPipelineContext();
 
-        result.Should().BeEquivalentTo(new[]
+        sut.Execute(context, config);
+
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
         {
             NewCf.Data("one", "cf1"),
             NewCf.Data("two", "cf2")
@@ -69,8 +72,10 @@ public class CustomFormatConfigPhaseTest
             }
         };
 
-        var result = sut.Execute(config);
+        var context = new CustomFormatPipelineContext();
 
-        result.Should().BeEmpty();
+        sut.Execute(context, config);
+
+        context.ConfigOutput.Should().BeEmpty();
     }
 }
