@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
@@ -11,89 +12,104 @@ public class QualitySizeTransactionPhaseTest
     public void Skip_guide_qualities_that_do_not_exist_in_service(
         QualitySizeTransactionPhase sut)
     {
-        var guideData = new[]
+        var context = new QualitySizePipelineContext
         {
-            new QualitySizeItem("non_existent1", 0, 2, 1),
-            new QualitySizeItem("non_existent2", 0, 2, 1)
-        };
-
-        var serviceData = new List<ServiceQualityDefinitionItem>
-        {
-            new()
+            ConfigOutput = new QualitySizeData
             {
-                Quality = new ServiceQualityItem {Name = "exists"}
+                Qualities = new[]
+                {
+                    new QualitySizeItem("non_existent1", 0, 2, 1),
+                    new QualitySizeItem("non_existent2", 0, 2, 1)
+                }
+            },
+            ApiFetchOutput = new List<ServiceQualityDefinitionItem>
+            {
+                new()
+                {
+                    Quality = new ServiceQualityItem {Name = "exists"}
+                }
             }
         };
 
-        var result = sut.Execute(guideData, serviceData);
+        sut.Execute(context);
 
-        result.Should().BeEmpty();
+        context.TransactionOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
     public void Skip_guide_qualities_that_are_not_different_from_service(
         QualitySizeTransactionPhase sut)
     {
-        var guideData = new[]
+        var context = new QualitySizePipelineContext
         {
-            new QualitySizeItem("same1", 0, 2, 1),
-            new QualitySizeItem("same2", 0, 2, 1)
-        };
-
-        var serviceData = new List<ServiceQualityDefinitionItem>
-        {
-            new()
+            ConfigOutput = new QualitySizeData
             {
-                Quality = new ServiceQualityItem {Name = "same1"},
-                MinSize = 0,
-                MaxSize = 2,
-                PreferredSize = 1
+                Qualities = new[]
+                {
+                    new QualitySizeItem("same1", 0, 2, 1),
+                    new QualitySizeItem("same2", 0, 2, 1)
+                }
             },
-            new()
+            ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
-                Quality = new ServiceQualityItem {Name = "same2"},
-                MinSize = 0,
-                MaxSize = 2,
-                PreferredSize = 1
+                new()
+                {
+                    Quality = new ServiceQualityItem {Name = "same1"},
+                    MinSize = 0,
+                    MaxSize = 2,
+                    PreferredSize = 1
+                },
+                new()
+                {
+                    Quality = new ServiceQualityItem {Name = "same2"},
+                    MinSize = 0,
+                    MaxSize = 2,
+                    PreferredSize = 1
+                }
             }
         };
 
-        var result = sut.Execute(guideData, serviceData);
+        sut.Execute(context);
 
-        result.Should().BeEmpty();
+        context.TransactionOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
     public void Sync_guide_qualities_that_are_different_from_service(
         QualitySizeTransactionPhase sut)
     {
-        var guideData = new[]
+        var context = new QualitySizePipelineContext
         {
-            new QualitySizeItem("same1", 0, 2, 1),
-            new QualitySizeItem("different1", 0, 3, 1)
-        };
-
-        var serviceData = new List<ServiceQualityDefinitionItem>
-        {
-            new()
+            ConfigOutput = new QualitySizeData
             {
-                Quality = new ServiceQualityItem {Name = "same1"},
-                MinSize = 0,
-                MaxSize = 2,
-                PreferredSize = 1
+                Qualities = new[]
+                {
+                    new QualitySizeItem("same1", 0, 2, 1),
+                    new QualitySizeItem("different1", 0, 3, 1)
+                }
             },
-            new()
+            ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
-                Quality = new ServiceQualityItem {Name = "different1"},
-                MinSize = 0,
-                MaxSize = 2,
-                PreferredSize = 1
+                new()
+                {
+                    Quality = new ServiceQualityItem {Name = "same1"},
+                    MinSize = 0,
+                    MaxSize = 2,
+                    PreferredSize = 1
+                },
+                new()
+                {
+                    Quality = new ServiceQualityItem {Name = "different1"},
+                    MinSize = 0,
+                    MaxSize = 2,
+                    PreferredSize = 1
+                }
             }
         };
 
-        var result = sut.Execute(guideData, serviceData);
+        sut.Execute(context);
 
-        result.Should().BeEquivalentTo(new List<ServiceQualityDefinitionItem>
+        context.TransactionOutput.Should().BeEquivalentTo(new List<ServiceQualityDefinitionItem>
         {
             new()
             {

@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
@@ -11,11 +10,13 @@ public class QualitySizeAutofacModule : Module
         base.Load(builder);
         builder.RegisterType<QualitySizeDataLister>();
 
-        builder.RegisterAggregateService<IQualitySizePipelinePhases>();
-        builder.RegisterType<QualitySizeGuidePhase>();
-        builder.RegisterType<QualitySizePreviewPhase>();
-        builder.RegisterType<QualitySizeApiFetchPhase>();
-        builder.RegisterType<QualitySizeTransactionPhase>();
-        builder.RegisterType<QualitySizeApiPersistencePhase>();
+        builder.RegisterTypes(
+                typeof(QualitySizeConfigPhase),
+                typeof(QualitySizePreviewPhase),
+                typeof(QualitySizeApiFetchPhase),
+                typeof(QualitySizeTransactionPhase),
+                typeof(QualitySizeApiPersistencePhase),
+                typeof(QualitySizeLogPhase))
+            .AsImplementedInterfaces();
     }
 }

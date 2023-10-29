@@ -1,18 +1,20 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeGuidePhase(ILogger log, IQualitySizeGuideService guide)
+public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide)
+    : IConfigPipelinePhase<QualitySizePipelineContext>
 {
-    public QualitySizeData? Execute(IServiceConfiguration config)
+    public Task Execute(QualitySizePipelineContext context, IServiceConfiguration config)
     {
         var qualityDef = config.QualityDefinition;
         if (qualityDef is null)
         {
             log.Debug("{Instance} has no quality definition", config.InstanceName);
-            return null;
+            return Task.CompletedTask;
         }
 
         var qualityDefinitions = guide.GetQualitySizeData(config.ServiceType);
@@ -21,13 +23,13 @@ public class QualitySizeGuidePhase(ILogger log, IQualitySizeGuideService guide)
 
         if (selectedQuality == null)
         {
-            log.Error("The specified quality definition type does not exist: {Type}", qualityDef.Type);
-            return null;
+            context.ConfigError = $"The specified quality definition type does not exist: {qualityDef.Type}";
+            return Task.CompletedTask;
         }
 
-        log.Information("Processing Quality Definition: {QualityDefinition}", qualityDef.Type);
         AdjustPreferredRatio(qualityDef, selectedQuality);
-        return selectedQuality;
+        context.ConfigOutput = selectedQuality;
+        return Task.CompletedTask;
     }
 
     private void AdjustPreferredRatio(QualityDefinitionConfig config, QualitySizeData selectedQuality)

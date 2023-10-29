@@ -1,11 +1,11 @@
-using Recyclarr.TrashGuide.QualitySize;
+using Recyclarr.Cli.Pipelines.Generic;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizePreviewPhase(IAnsiConsole console)
+public class QualitySizePreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<QualitySizePipelineContext>
 {
-    public void Execute(QualitySizeData selectedQuality)
+    public void Execute(QualitySizePipelineContext context)
     {
         var table = new Table();
 
@@ -15,7 +15,8 @@ public class QualitySizePreviewPhase(IAnsiConsole console)
         table.AddColumn("[bold]Max[/]");
         table.AddColumn("[bold]Preferred[/]");
 
-        foreach (var q in selectedQuality.Qualities)
+        // Do not check ConfigOutput for null here since the LogPhase checks that for us
+        foreach (var q in context.ConfigOutput!.Qualities)
         {
             var quality = $"[dodgerblue1]{q.Quality}[/]";
             table.AddRow(quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);

@@ -83,7 +83,7 @@ public static class CompositionRoot
                 typeof(GenericSyncPipeline<TagPipelineContext>),
                 typeof(CustomFormatSyncPipeline),
                 typeof(QualityProfileSyncPipeline),
-                typeof(QualitySizeSyncPipeline),
+                typeof(GenericSyncPipeline<QualitySizePipelineContext>),
                 typeof(GenericSyncPipeline<ReleaseProfilePipelineContext>),
                 typeof(GenericSyncPipeline<MediaNamingPipelineContext>))
             .As<ISyncPipeline>()

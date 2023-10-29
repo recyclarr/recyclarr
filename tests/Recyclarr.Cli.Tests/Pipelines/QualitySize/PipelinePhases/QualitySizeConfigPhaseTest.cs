@@ -1,4 +1,5 @@
 using NSubstitute.ReturnsExtensions;
+using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.QualitySize;
@@ -6,23 +7,24 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-public class QualitySizeGuidePhaseTest
+public class QualitySizeConfigPhaseTest
 {
     [Test, AutoMockData]
-    public void Do_nothing_if_no_quality_definition(QualitySizeGuidePhase sut)
+    public void Do_nothing_if_no_quality_definition(QualitySizeConfigPhase sut)
     {
+        var context = new QualitySizePipelineContext();
         var config = Substitute.For<IServiceConfiguration>();
         config.QualityDefinition.ReturnsNull();
 
-        var result = sut.Execute(config);
+        sut.Execute(context, config);
 
-        result.Should().BeNull();
+        context.ConfigOutput.Should().BeNull();
     }
 
     [Test, AutoMockData]
     public void Do_nothing_if_no_matching_quality_definition(
         [Frozen] IQualitySizeGuideService guide,
-        QualitySizeGuidePhase sut)
+        QualitySizeConfigPhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
         config.QualityDefinition.Returns(new QualityDefinitionConfig {Type = "not_real"});
@@ -32,9 +34,11 @@ public class QualitySizeGuidePhaseTest
             new QualitySizeData {Type = "real"}
         });
 
-        var result = sut.Execute(config);
+        var context = new QualitySizePipelineContext();
 
-        result.Should().BeNull();
+        sut.Execute(context, config);
+
+        context.ConfigOutput.Should().BeNull();
     }
 
     [Test]
@@ -44,7 +48,7 @@ public class QualitySizeGuidePhaseTest
         string testPreferred,
         string expectedPreferred,
         [Frozen] IQualitySizeGuideService guide,
-        QualitySizeGuidePhase sut)
+        QualitySizeConfigPhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
         config.QualityDefinition.Returns(new QualityDefinitionConfig
@@ -58,7 +62,9 @@ public class QualitySizeGuidePhaseTest
             new QualitySizeData {Type = "real"}
         });
 
-        _ = sut.Execute(config);
+        var context = new QualitySizePipelineContext();
+
+        sut.Execute(context, config);
 
         config.QualityDefinition.Should().NotBeNull();
         config.QualityDefinition!.PreferredRatio.Should().Be(decimal.Parse(expectedPreferred));
@@ -67,7 +73,7 @@ public class QualitySizeGuidePhaseTest
     [Test, AutoMockData]
     public void Preferred_is_set_via_ratio(
         [Frozen] IQualitySizeGuideService guide,
-        QualitySizeGuidePhase sut)
+        QualitySizeConfigPhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
         config.QualityDefinition.Returns(new QualityDefinitionConfig
@@ -88,9 +94,12 @@ public class QualitySizeGuidePhaseTest
             }
         });
 
-        var result = sut.Execute(config);
-        result.Should().NotBeNull();
-        result!.Qualities.Should().BeEquivalentTo(new[]
+        var context = new QualitySizePipelineContext();
+
+        sut.Execute(context, config);
+
+        context.ConfigOutput.Should().NotBeNull();
+        context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
             {
                 new QualitySizeItem("quality1", 0, 100, 50)
             },
@@ -104,7 +113,7 @@ public class QualitySizeGuidePhaseTest
     [Test, AutoMockData]
     public void Preferred_is_set_via_guide(
         [Frozen] IQualitySizeGuideService guide,
-        QualitySizeGuidePhase sut)
+        QualitySizeConfigPhase sut)
     {
         var config = Substitute.For<IServiceConfiguration>();
         config.QualityDefinition.Returns(new QualityDefinitionConfig
@@ -124,9 +133,12 @@ public class QualitySizeGuidePhaseTest
             }
         });
 
-        var result = sut.Execute(config);
-        result.Should().NotBeNull();
-        result!.Qualities.Should().BeEquivalentTo(new[]
+        var context = new QualitySizePipelineContext();
+
+        sut.Execute(context, config);
+
+        context.ConfigOutput.Should().NotBeNull();
+        context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
             {
                 new QualitySizeItem("quality1", 0, 100, 90)
             },

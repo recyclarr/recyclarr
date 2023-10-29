@@ -1,15 +1,18 @@
 using System.Collections.ObjectModel;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeTransactionPhase(ILogger log)
+public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhase<QualitySizePipelineContext>
 {
-    public Collection<ServiceQualityDefinitionItem> Execute(
-        IEnumerable<QualitySizeItem> guideQuality,
-        IList<ServiceQualityDefinitionItem> serverQuality)
+    public void Execute(QualitySizePipelineContext context)
     {
+        // Do not check ConfigOutput for null since the LogPhase does it for us
+        var guideQuality = context.ConfigOutput!.Qualities;
+        var serverQuality = context.ApiFetchOutput;
+
         var newQuality = new Collection<ServiceQualityDefinitionItem>();
         foreach (var qualityData in guideQuality)
         {
@@ -37,7 +40,7 @@ public class QualitySizeTransactionPhase(ILogger log)
                 serverEntry.PreferredSize);
         }
 
-        return newQuality;
+        context.TransactionOutput = newQuality;
     }
 
     private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualitySizeItem b)
