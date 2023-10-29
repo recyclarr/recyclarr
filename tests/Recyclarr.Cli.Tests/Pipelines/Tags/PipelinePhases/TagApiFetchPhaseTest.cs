@@ -8,9 +8,10 @@ namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 public class TagApiFetchPhaseTest
 {
     [Test, AutoMockData]
-    public async Task Cache_is_cleared_and_updated(
+    public async Task Cache_is_updated(
         [Frozen] ISonarrTagApiService api,
         [Frozen] ServiceTagCache cache,
+        TagPipelineContext context,
         TagApiFetchPhase sut)
     {
         var expectedData = new[]
@@ -22,13 +23,7 @@ public class TagApiFetchPhaseTest
 
         api.GetTags(default!).ReturnsForAnyArgs(expectedData);
 
-        cache.AddTags(new[]
-        {
-            new SonarrTag {Id = 1},
-            new SonarrTag {Id = 2}
-        });
-
-        await sut.Execute(default!);
+        await sut.Execute(context, default!);
         cache.Tags.Should().BeEquivalentTo(expectedData);
     }
 }

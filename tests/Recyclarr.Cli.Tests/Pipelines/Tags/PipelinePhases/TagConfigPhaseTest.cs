@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 using Recyclarr.Config.Models;
 using Recyclarr.Tests.TestLibrary;
@@ -8,19 +9,20 @@ namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 public class TagConfigPhaseTest
 {
     [Test, AutoMockData]
-    public void Return_null_when_list_empty(TagConfigPhase sut)
+    public async Task Output_empty_when_config_has_no_tags(TagConfigPhase sut)
     {
+        var context = new TagPipelineContext();
         var config = NewConfig.Sonarr() with
         {
             ReleaseProfiles = Array.Empty<ReleaseProfileConfig>()
         };
 
-        var result = sut.Execute(config);
-        result.Should().BeNull();
+        await sut.Execute(context, config);
+        context.ConfigOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
-    public void Return_tags(TagConfigPhase sut)
+    public void Output_not_empty_when_config_has_tags(TagConfigPhase sut)
     {
         var config = NewConfig.Sonarr() with
         {
@@ -33,7 +35,8 @@ public class TagConfigPhaseTest
             }
         };
 
-        var result = sut.Execute(config);
-        result.Should().BeEquivalentTo(config.ReleaseProfiles[0].Tags);
+        var context = new TagPipelineContext();
+        sut.Execute(context, config);
+        context.ConfigOutput.Should().BeEquivalentTo(config.ReleaseProfiles[0].Tags);
     }
 }

@@ -1,7 +1,5 @@
 using Autofac;
-using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
-using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Pipelines.Tags;
 
@@ -15,13 +13,13 @@ public class TagsAutofacModule : Module
             .AsSelf()
             .InstancePerLifetimeScope();
 
-        builder.RegisterType<SonarrTagApiService>().As<ISonarrTagApiService>();
-
-        builder.RegisterAggregateService<ITagPipelinePhases>();
-        builder.RegisterType<TagConfigPhase>();
-        builder.RegisterType<TagPreviewPhase>();
-        builder.RegisterType<TagApiFetchPhase>();
-        builder.RegisterType<TagTransactionPhase>();
-        builder.RegisterType<TagApiPersistencePhase>();
+        builder.RegisterTypes(
+                typeof(TagConfigPhase),
+                typeof(TagPreviewPhase),
+                typeof(TagApiFetchPhase),
+                typeof(TagTransactionPhase),
+                typeof(TagApiPersistencePhase),
+                typeof(TagLogPhase))
+            .AsImplementedInterfaces();
     }
 }

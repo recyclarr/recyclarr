@@ -78,7 +78,9 @@ public static class CompositionRoot
 
         builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
         builder.RegisterTypes(
-                typeof(TagSyncPipeline),
+                // ORDER HERE IS IMPORTANT!
+                // There are indirect dependencies between pipelines.
+                typeof(GenericSyncPipeline<TagPipelineContext>),
                 typeof(CustomFormatSyncPipeline),
                 typeof(QualityProfileSyncPipeline),
                 typeof(QualitySizeSyncPipeline),

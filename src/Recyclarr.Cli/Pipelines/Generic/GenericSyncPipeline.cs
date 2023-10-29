@@ -3,12 +3,17 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.Generic;
 
-public class GenericSyncPipeline<TContext>(GenericPipelinePhases<TContext> phases) : ISyncPipeline
-    where TContext : new()
+public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TContext> phases) : ISyncPipeline
+    where TContext : IPipelineContext, new()
 {
     public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
     {
         var context = new TContext();
+        if (!context.SupportedServiceTypes.Contains(config.ServiceType))
+        {
+            log.Debug("Skipping {Description} because it does not support service type {Service}",
+                context.PipelineDescription, config.ServiceType);
+        }
 
         await phases.ConfigPhase.Execute(context, config);
         if (phases.LogPhase.LogConfigPhaseAndExitIfNeeded(context))

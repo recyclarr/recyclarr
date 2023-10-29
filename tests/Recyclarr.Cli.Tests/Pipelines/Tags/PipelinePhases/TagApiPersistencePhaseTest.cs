@@ -21,12 +21,15 @@ public class TagApiPersistencePhaseTest
         });
 
         var config = Substitute.For<IServiceConfiguration>();
-        var tagsToCreate = new[] {"three", "four"};
+        var context = new TagPipelineContext
+        {
+            TransactionOutput = new[] {"three", "four"}
+        };
 
         api.CreateTag(config, "three").Returns(new SonarrTag {Id = 3});
         api.CreateTag(config, "four").Returns(new SonarrTag {Id = 4});
 
-        await sut.Execute(config, tagsToCreate);
+        await sut.Execute(context, config);
 
         cache.Tags.Should().BeEquivalentTo(new[]
         {

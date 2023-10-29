@@ -1,6 +1,7 @@
 namespace Recyclarr.Cli.Pipelines.Generic;
 
 public class GenericPipelinePhases<TContext>
+    where TContext : IPipelineContext
 {
     public required IConfigPipelinePhase<TContext> ConfigPhase { get; init; }
     public required ILogPipelinePhase<TContext> LogPhase { get; init; }

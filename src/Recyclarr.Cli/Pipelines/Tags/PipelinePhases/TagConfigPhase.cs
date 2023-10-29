@@ -1,18 +1,17 @@
-using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Common.Extensions;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 
-public class TagConfigPhase
+public class TagConfigPhase : IConfigPipelinePhase<TagPipelineContext>
 {
-    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification =
-        "This non-static method establishes a pattern that will eventually become an interface")]
-    public IList<string>? Execute(SonarrConfiguration config)
+    public Task Execute(TagPipelineContext context, IServiceConfiguration config)
     {
-        return config.ReleaseProfiles
+        context.ConfigOutput = ((SonarrConfiguration) config).ReleaseProfiles
             .SelectMany(x => x.Tags)
             .Distinct()
-            .ToListOrNull();
+            .ToList();
+
+        return Task.CompletedTask;
     }
 }
