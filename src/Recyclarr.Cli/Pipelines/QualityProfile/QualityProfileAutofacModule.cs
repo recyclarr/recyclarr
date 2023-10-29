@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extras.AggregateService;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
@@ -12,12 +11,13 @@ public class QualityProfileAutofacModule : Module
 
         builder.RegisterType<QualityProfileStatCalculator>();
 
-        builder.RegisterAggregateService<IQualityProfilePipelinePhases>();
-        builder.RegisterType<QualityProfileConfigPhase>();
-        builder.RegisterType<QualityProfileApiFetchPhase>();
-        builder.RegisterType<QualityProfileTransactionPhase>();
-        builder.RegisterType<QualityProfilePreviewPhase>();
-        builder.RegisterType<QualityProfileApiPersistencePhase>();
-        builder.RegisterType<QualityProfileNoticePhase>();
+        builder.RegisterTypes(
+                typeof(QualityProfileConfigPhase),
+                typeof(QualityProfilePreviewPhase),
+                typeof(QualityProfileApiFetchPhase),
+                typeof(QualityProfileTransactionPhase),
+                typeof(QualityProfileApiPersistencePhase),
+                typeof(QualityProfileLogPhase))
+            .AsImplementedInterfaces();
     }
 }

@@ -36,6 +36,10 @@ public class MediaNamingLogPhase(ILogger log) : ILogPipelinePhase<MediaNamingPip
         return false;
     }
 
+    public void LogTransactionNotices(MediaNamingPipelineContext context)
+    {
+    }
+
     public void LogPersistenceResults(MediaNamingPipelineContext context)
     {
         var differences = context.ApiFetchOutput switch

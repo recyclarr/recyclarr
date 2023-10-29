@@ -1,5 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
-using FluentValidation.Results;
+using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
@@ -7,52 +7,47 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public enum QualityProfileUpdateReason
+public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCalculator)
+    : ITransactionPipelinePhase<QualityProfilePipelineContext>
 {
-    New,
-    Changed
-}
-
-public record InvalidProfileData(UpdatedQualityProfile Profile, IReadOnlyCollection<ValidationFailure> Errors);
-
-public record QualityProfileTransactionData
-{
-    [SuppressMessage("Usage", "CA2227:Collection properties should be read only")]
-    public ICollection<UpdatedQualityProfile> UpdatedProfiles { get; set; } = new List<UpdatedQualityProfile>();
-    public ICollection<string> NonExistentProfiles { get; init; } = new List<string>();
-    public ICollection<InvalidProfileData> InvalidProfiles { get; init; } = new List<InvalidProfileData>();
-}
-
-public class QualityProfileTransactionPhase
-{
-    [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
-    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification =
-        "This non-static method establishes a pattern that will eventually become an interface")]
-    public QualityProfileTransactionData Execute(
-        IReadOnlyCollection<ProcessedQualityProfileData> guideData,
-        QualityProfileServiceData serviceData)
+    public void Execute(QualityProfilePipelineContext context)
     {
         var transactions = new QualityProfileTransactionData();
 
-        BuildUpdatedProfiles(transactions, guideData, serviceData);
-        UpdateProfileScores(transactions.UpdatedProfiles);
+        var updatedProfiles = BuildUpdatedProfiles(transactions, context.ConfigOutput, context.ApiFetchOutput);
+        UpdateProfileScores(updatedProfiles);
 
-        ValidateProfiles(transactions);
+        updatedProfiles = ValidateProfiles(updatedProfiles, transactions.InvalidProfiles);
 
-        return transactions;
+        AssignProfiles(transactions, updatedProfiles);
+        context.TransactionOutput = transactions;
     }
 
-    private static void ValidateProfiles(QualityProfileTransactionData transactions)
+    private void AssignProfiles(
+        QualityProfileTransactionData transactions,
+        IEnumerable<UpdatedQualityProfile> updatedProfiles)
+    {
+        var profilesWithStats = updatedProfiles
+            .Select(statCalculator.Calculate)
+            .ToLookup(x => x.HasChanges);
+
+        transactions.UnchangedProfiles = profilesWithStats[false].ToList();
+        transactions.ChangedProfiles = profilesWithStats[true].ToList();
+    }
+
+    private static List<UpdatedQualityProfile> ValidateProfiles(
+        IEnumerable<UpdatedQualityProfile> transactions,
+        ICollection<InvalidProfileData> invalidProfiles)
     {
         var validator = new UpdatedQualityProfileValidator();
 
-        transactions.UpdatedProfiles = transactions.UpdatedProfiles
+        return transactions
             .IsValid(validator, (errors, profile) =>
-                transactions.InvalidProfiles.Add(new InvalidProfileData(profile, errors)))
+                invalidProfiles.Add(new InvalidProfileData(profile, errors)))
             .ToList();
     }
 
-    private static void BuildUpdatedProfiles(
+    private static List<UpdatedQualityProfile> BuildUpdatedProfiles(
         QualityProfileTransactionData transactions,
         IEnumerable<ProcessedQualityProfileData> guideData,
         QualityProfileServiceData serviceData)
@@ -68,6 +63,8 @@ public class QualityProfileTransactionPhase
                 (x, y) => (x, y.FirstOrDefault()),
                 StringComparer.InvariantCultureIgnoreCase);
 
+        var updatedProfiles = new List<UpdatedQualityProfile>();
+
         foreach (var (config, dto) in matchedProfiles)
         {
             if (dto is null && !config.ShouldCreate)
@@ -79,7 +76,7 @@ public class QualityProfileTransactionPhase
             var organizer = new QualityItemOrganizer();
             var newDto = dto ?? serviceData.Schema;
 
-            transactions.UpdatedProfiles.Add(new UpdatedQualityProfile
+            updatedProfiles.Add(new UpdatedQualityProfile
             {
                 ProfileConfig = config,
                 ProfileDto = newDto,
@@ -87,6 +84,8 @@ public class QualityProfileTransactionPhase
                 UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile)
             });
         }
+
+        return updatedProfiles;
     }
 
     private static void UpdateProfileScores(IEnumerable<UpdatedQualityProfile> updatedProfiles)

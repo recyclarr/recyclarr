@@ -1,16 +1,17 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfilePreviewPhase(IAnsiConsole console)
+public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<QualityProfilePipelineContext>
 {
-    public void Execute(QualityProfileTransactionData transactions)
+    public void Execute(QualityProfilePipelineContext context)
     {
         var tree = new Tree("Quality Profile Changes [red](Preview)[/]");
 
-        foreach (var profile in transactions.UpdatedProfiles)
+        foreach (var profile in context.TransactionOutput.ChangedProfiles.Select(x => x.Profile))
         {
             var profileTree = new Tree(Markup.FromInterpolated(
                 $"[yellow]{profile.ProfileName}[/] (Change Reason: [green]{profile.UpdateReason}[/])"));

@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
 using Recyclarr.ServarrApi.QualityProfile;
 
-namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 public record ProfileWithStats
 {

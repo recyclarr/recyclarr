@@ -1,23 +1,16 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public record ProcessedQualityProfileScore(string TrashId, string CfName, int FormatId, int Score);
-
-public record ProcessedQualityProfileData
-{
-    public required QualityProfileConfig Profile { get; init; }
-    public bool ShouldCreate { get; init; } = true;
-    public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
-    public IList<CustomFormatData> ScorelessCfs { get; } = new List<CustomFormatData>();
-}
-
 public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache cache)
+    : IConfigPipelinePhase<QualityProfilePipelineContext>
 {
-    public IReadOnlyCollection<ProcessedQualityProfileData> Execute(IServiceConfiguration config)
+    public Task Execute(QualityProfilePipelineContext context, IServiceConfiguration config)
     {
         // 1. For each group of CFs that has a quality profile specified
         // 2. For each quality profile score config in that CF group
@@ -57,7 +50,8 @@ public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache c
 
         var profilesToReturn = allProfiles.Values.ToList();
         PrintDiagnostics(profilesToReturn);
-        return profilesToReturn;
+        context.ConfigOutput = profilesToReturn;
+        return Task.CompletedTask;
     }
 
     private void PrintDiagnostics(IEnumerable<ProcessedQualityProfileData> profiles)

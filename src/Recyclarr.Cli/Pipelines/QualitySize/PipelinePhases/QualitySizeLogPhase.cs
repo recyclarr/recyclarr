@@ -21,6 +21,10 @@ public class QualitySizeLogPhase(ILogger log) : ILogPipelinePhase<QualitySizePip
         return false;
     }
 
+    public void LogTransactionNotices(QualitySizePipelineContext context)
+    {
+    }
+
     public void LogPersistenceResults(QualitySizePipelineContext context)
     {
         // Do not check ConfigOutput for null here since that is done for us in the LogConfigPhase method

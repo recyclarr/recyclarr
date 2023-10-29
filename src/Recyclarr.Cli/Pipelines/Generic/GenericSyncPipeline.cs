@@ -24,6 +24,8 @@ public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TC
         await phases.ApiFetchPhase.Execute(context, config);
         phases.TransactionPhase.Execute(context);
 
+        phases.LogPhase.LogTransactionNotices(context);
+
         if (settings.Preview)
         {
             phases.PreviewPhase.Execute(context);

@@ -15,6 +15,10 @@ public class TagLogPhase(ILogger log) : ILogPipelinePhase<TagPipelineContext>
         return false;
     }
 
+    public void LogTransactionNotices(TagPipelineContext context)
+    {
+    }
+
     public void LogPersistenceResults(TagPipelineContext context)
     {
         if (context.TransactionOutput.Any())

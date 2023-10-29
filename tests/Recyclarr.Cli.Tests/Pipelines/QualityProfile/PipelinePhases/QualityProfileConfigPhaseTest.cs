@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Config.Models;
 using Recyclarr.Tests.TestLibrary;
@@ -40,9 +41,10 @@ public class QualityProfileConfigPhaseTest
             }
         });
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEquivalentTo(new[]
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
             },
@@ -72,9 +74,10 @@ public class QualityProfileConfigPhaseTest
             }
         });
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEquivalentTo(new[]
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
             },
@@ -104,9 +107,10 @@ public class QualityProfileConfigPhaseTest
             }
         });
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEquivalentTo(new[]
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
                 NewQp.Processed("test_profile")
             },
@@ -162,9 +166,10 @@ public class QualityProfileConfigPhaseTest
             }
         );
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEquivalentTo(new[]
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
                 NewQp.Processed("test_profile1", ("id1", 1, 100)),
                 NewQp.Processed("test_profile2", ("id1", 1, 200))
@@ -206,9 +211,10 @@ public class QualityProfileConfigPhaseTest
             }
         };
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEquivalentTo(new[]
+        context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
                 NewQp.Processed("test_profile", ("id1", 1, 102), ("id2", 2, 201)) with
                 {
@@ -236,9 +242,10 @@ public class QualityProfileConfigPhaseTest
             }
         });
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEmpty();
+        context.ConfigOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
@@ -258,8 +265,9 @@ public class QualityProfileConfigPhaseTest
             QualityProfiles = Array.Empty<QualityProfileScoreConfig>()
         });
 
-        var result = sut.Execute(config);
+        var context = new QualityProfilePipelineContext();
+        sut.Execute(context, config);
 
-        result.Should().BeEmpty();
+        context.ConfigOutput.Should().BeEmpty();
     }
 }

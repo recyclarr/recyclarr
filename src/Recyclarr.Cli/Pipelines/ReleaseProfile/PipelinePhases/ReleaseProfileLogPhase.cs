@@ -15,6 +15,10 @@ public class ReleaseProfileLogPhase(ILogger log) : ILogPipelinePhase<ReleaseProf
         return true;
     }
 
+    public void LogTransactionNotices(ReleaseProfilePipelineContext context)
+    {
+    }
+
     public void LogPersistenceResults(ReleaseProfilePipelineContext context)
     {
         var transactions = context.TransactionOutput;

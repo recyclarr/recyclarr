@@ -1,5 +1,6 @@
 using FluentValidation.TestHelper;
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
