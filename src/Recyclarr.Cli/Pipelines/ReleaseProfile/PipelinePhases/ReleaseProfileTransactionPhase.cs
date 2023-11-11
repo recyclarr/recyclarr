@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
 using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Common.Extensions;
@@ -6,18 +7,17 @@ using Recyclarr.ServarrApi.ReleaseProfile;
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
 public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
+    : ITransactionPipelinePhase<ReleaseProfilePipelineContext>
 {
-    public ReleaseProfileTransactionData Execute(
-        IReadOnlyList<ProcessedReleaseProfileData> configProfiles,
-        IList<SonarrReleaseProfile> serviceData)
+    public void Execute(ReleaseProfilePipelineContext context)
     {
         var created = new List<SonarrReleaseProfile>();
         var updated = new List<SonarrReleaseProfile>();
 
-        foreach (var configProfile in configProfiles)
+        foreach (var configProfile in context.ConfigOutput)
         {
             var title = $"[Trash] {configProfile.Profile.Name}";
-            var matchingServiceProfile = serviceData.FirstOrDefault(x => x.Name.EqualsIgnoreCase(title));
+            var matchingServiceProfile = context.ApiFetchOutput.FirstOrDefault(x => x.Name.EqualsIgnoreCase(title));
             if (matchingServiceProfile is not null)
             {
                 SetupProfileRequestObject(matchingServiceProfile, configProfile);
@@ -31,9 +31,8 @@ public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
             }
         }
 
-        var deleted = DeleteOldManagedProfiles(serviceData, configProfiles);
-
-        return new ReleaseProfileTransactionData(updated, created, deleted);
+        var deleted = DeleteOldManagedProfiles(context.ApiFetchOutput, context.ConfigOutput.AsReadOnly());
+        context.TransactionOutput = new ReleaseProfileTransactionData(updated, created, deleted);
     }
 
     private static List<SonarrReleaseProfile> DeleteOldManagedProfiles(

@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extras.AggregateService;
 using Autofac.Extras.Ordering;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
@@ -17,18 +16,20 @@ public class ReleaseProfileAutofacModule : Module
         builder.RegisterType<ReleaseProfileFilterPipeline>().As<IReleaseProfileFilterPipeline>();
         builder.RegisterType<ReleaseProfileDataLister>();
 
-        builder.RegisterAggregateService<IReleaseProfilePipelinePhases>();
-        builder.RegisterType<ReleaseProfileConfigPhase>();
-        builder.RegisterType<ReleaseProfileApiFetchPhase>();
-        builder.RegisterType<ReleaseProfileTransactionPhase>();
-        builder.RegisterType<ReleaseProfilePreviewPhase>();
-        builder.RegisterType<ReleaseProfileApiPersistencePhase>();
-
         // Release Profile Filters (ORDER MATTERS!)
         builder.RegisterTypes(
                 typeof(IncludeExcludeFilter),
                 typeof(StrictNegativeScoresFilter))
             .As<IReleaseProfileFilter>()
             .OrderByRegistration();
+
+        builder.RegisterTypes(
+                typeof(ReleaseProfileConfigPhase),
+                typeof(ReleaseProfilePreviewPhase),
+                typeof(ReleaseProfileApiFetchPhase),
+                typeof(ReleaseProfileTransactionPhase),
+                typeof(ReleaseProfileApiPersistencePhase),
+                typeof(ReleaseProfileLogPhase))
+            .AsImplementedInterfaces();
     }
 }

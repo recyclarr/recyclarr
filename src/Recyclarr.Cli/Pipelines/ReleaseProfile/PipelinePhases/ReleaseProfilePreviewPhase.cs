@@ -1,13 +1,15 @@
-using Recyclarr.Cli.Pipelines.ReleaseProfile.Models;
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.ReleaseProfile;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
-public class ReleaseProfilePreviewPhase(IAnsiConsole console)
+public class ReleaseProfilePreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<ReleaseProfilePipelineContext>
 {
-    public void Execute(ReleaseProfileTransactionData profiles)
+    public void Execute(ReleaseProfilePipelineContext context)
     {
+        var profiles = context.TransactionOutput;
+
         var tree = new Tree("Release Profiles [red](Preview)[/]");
 
         PrintCategoryOfChanges("Created Profiles", tree, profiles.CreatedProfiles);

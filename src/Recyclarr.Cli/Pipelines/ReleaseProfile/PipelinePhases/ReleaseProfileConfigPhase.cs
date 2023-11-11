@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
@@ -14,19 +15,21 @@ public class ReleaseProfileConfigPhase(
     ILogger log,
     IReleaseProfileGuideService guide,
     IReleaseProfileFilterPipeline filters)
+    : IConfigPipelinePhase<ReleaseProfilePipelineContext>
 {
-    public IReadOnlyList<ProcessedReleaseProfileData>? Execute(SonarrConfiguration config)
+    public Task Execute(ReleaseProfilePipelineContext context, IServiceConfiguration config)
     {
-        if (config.ReleaseProfiles.IsEmpty())
+        var releaseProfiles = ((SonarrConfiguration) config).ReleaseProfiles;
+        if (!releaseProfiles.Any())
         {
             log.Debug("{Instance} has no release profiles", config.InstanceName);
-            return null;
+            return Task.CompletedTask;
         }
 
         var profilesFromGuide = guide.GetReleaseProfileData();
         var filteredProfiles = new List<ProcessedReleaseProfileData>();
 
-        var configProfiles = config.ReleaseProfiles.SelectMany(x => x.TrashIds.Select(y => (TrashId: y, Config: x)));
+        var configProfiles = releaseProfiles.SelectMany(x => x.TrashIds.Select(y => (TrashId: y, Config: x)));
         foreach (var (trashId, configProfile) in configProfiles)
         {
             // For each release profile specified in our YAML config, find the matching profile in the guide.
@@ -44,6 +47,7 @@ public class ReleaseProfileConfigPhase(
             filteredProfiles.Add(new ProcessedReleaseProfileData(selectedProfile, configProfile.Tags));
         }
 
-        return filteredProfiles;
+        context.ConfigOutput = filteredProfiles;
+        return Task.CompletedTask;
     }
 }
