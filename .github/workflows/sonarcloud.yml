@@ -13,7 +13,7 @@ on:
       - "src/**"
 
 env:
-  dotnetVersion: "7.0.x"
+  dotnetVersion: 8.0.x
 
 jobs:
   sonarcloud:

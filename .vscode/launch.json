@@ -6,11 +6,11 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net7.0/recyclarr",
+      "program": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net8.0/recyclarr",
       "args": [
         "radarr"
       ],
-      "cwd": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net7.0/",
+      "cwd": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net8.0/",
       "stopAtEntry": false,
       "console": "internalConsole"
     }

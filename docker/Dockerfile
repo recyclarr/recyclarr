@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/runtime:7.0-alpine as base
+FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine as base
 
 FROM base AS base-arm
 ENV RUNTIME=linux-musl-arm
