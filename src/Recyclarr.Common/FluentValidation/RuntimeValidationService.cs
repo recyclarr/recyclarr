@@ -29,7 +29,7 @@ public class RuntimeValidationService : IRuntimeValidationService
             throw new ValidationException($"No validator is available for type: {instance.GetType().FullName}");
         }
 
-        IValidatorSelector validatorSelector = ruleSets.Any()
+        IValidatorSelector validatorSelector = ruleSets.Length != 0
             ? new RulesetValidatorSelector(ruleSets)
             : new DefaultValidatorSelector();
 

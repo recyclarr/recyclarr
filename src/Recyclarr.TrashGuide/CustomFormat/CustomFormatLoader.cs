@@ -5,6 +5,7 @@ using Recyclarr.Json.Loading;
 
 namespace Recyclarr.TrashGuide.CustomFormat;
 
+// ReSharper disable once SuggestBaseTypeForParameterInConstructor
 public class CustomFormatLoader(ServiceJsonLoader loader, ICustomFormatCategoryParser categoryParser, IFileSystem fs)
     : ICustomFormatLoader
 {

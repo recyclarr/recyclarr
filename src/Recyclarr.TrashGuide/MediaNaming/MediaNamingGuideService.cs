@@ -19,7 +19,7 @@ public class MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, Guide
         };
     }
 
-    private static IReadOnlyDictionary<string, string> JoinDictionaries(
+    private static Dictionary<string, string> JoinDictionaries(
         IEnumerable<IReadOnlyDictionary<string, string>> dictionaries)
     {
         return dictionaries

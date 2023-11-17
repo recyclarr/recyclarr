@@ -14,14 +14,14 @@ public class ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFi
         filterCriteria ??= new ConfigFilterCriteria();
 
         var manualConfigs = filterCriteria.ManualConfigFiles;
-        var configs = manualConfigs is not null && manualConfigs.Any()
+        var configs = manualConfigs is not null && manualConfigs.Count != 0
             ? PrepareManualConfigs(manualConfigs)
             : finder.GetConfigFiles();
 
         return LoadAndFilterConfigs(configs, filterCriteria).ToList();
     }
 
-    private IReadOnlyCollection<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
+    private List<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
     {
         var configFiles = manualConfigs
             .Select(x => fs.FileInfo.New(x))
@@ -42,19 +42,19 @@ public class ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFi
         var loadedConfigs = configs.SelectMany(x => loader.Load(x)).ToList();
 
         var dupeInstances = loadedConfigs.GetDuplicateInstanceNames().ToList();
-        if (dupeInstances.Any())
+        if (dupeInstances.Count != 0)
         {
             throw new DuplicateInstancesException(dupeInstances);
         }
 
         var invalidInstances = loadedConfigs.GetInvalidInstanceNames(filterCriteria).ToList();
-        if (invalidInstances.Any())
+        if (invalidInstances.Count != 0)
         {
             throw new InvalidInstancesException(invalidInstances);
         }
 
         var splitInstances = loadedConfigs.GetSplitInstances().ToList();
-        if (splitInstances.Any())
+        if (splitInstances.Count != 0)
         {
             throw new SplitInstancesException(splitInstances);
         }

@@ -67,7 +67,7 @@ public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache c
             .Select(x => (x.Name, x.TrashId))
             .ToList();
 
-        if (!scoreless.Any())
+        if (scoreless.Count == 0)
         {
             return;
         }

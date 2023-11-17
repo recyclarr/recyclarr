@@ -7,7 +7,7 @@ public class MediaNamingPhaseLogger(ILogger log)
     // Returning 'true' means to exit. 'false' means to proceed.
     public bool LogConfigPhaseAndExitIfNeeded(ProcessedNamingConfig config)
     {
-        if (config.InvalidNaming.Any())
+        if (config.InvalidNaming.Count != 0)
         {
             foreach (var (topic, invalidValue) in config.InvalidNaming)
             {
@@ -24,7 +24,7 @@ public class MediaNamingPhaseLogger(ILogger log)
             _ => throw new ArgumentException("Unsupported configuration type in LogConfigPhase method")
         };
 
-        if (!differences.Any())
+        if (differences.Count == 0)
         {
             log.Debug("No media naming changes to process");
             return true;
@@ -42,7 +42,7 @@ public class MediaNamingPhaseLogger(ILogger log)
             _ => throw new ArgumentException("Unsupported configuration type in LogPersistenceResults method")
         };
 
-        if (differences.Any())
+        if (differences.Count != 0)
         {
             log.Information("Media naming has been updated");
             log.Debug("Naming differences: {Diff}", differences);

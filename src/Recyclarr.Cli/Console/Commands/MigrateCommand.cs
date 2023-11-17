@@ -35,7 +35,7 @@ public class MigrateCommand(
             msg.AppendLine($"Failure Reason:    {e.OriginalException.Message}");
 
             // ReSharper disable once InvertIf
-            if (e.Remediation.Any())
+            if (e.Remediation.Count != 0)
             {
                 msg.AppendLine("\nPossible remediation steps:");
                 foreach (var remedy in e.Remediation)

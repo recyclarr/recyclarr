@@ -64,8 +64,8 @@ public class ReleaseProfileDataLister(IAnsiConsole console, IReleaseProfileGuide
 
     private void PrintTerms(IEnumerable<TermData> terms, string category)
     {
-        var filteredTerms = terms.Where(x => x.TrashId.Any()).ToList();
-        if (!filteredTerms.Any())
+        var filteredTerms = terms.Where(x => x.TrashId.Length != 0).ToList();
+        if (filteredTerms.Count == 0)
         {
             return;
         }
@@ -74,7 +74,7 @@ public class ReleaseProfileDataLister(IAnsiConsole console, IReleaseProfileGuide
         foreach (var term in filteredTerms)
         {
             var line = new StringBuilder($"            - {term.TrashId}");
-            if (term.Name.Any())
+            if (term.Name.Length != 0)
             {
                 line.Append($" # {term.Name}");
             }

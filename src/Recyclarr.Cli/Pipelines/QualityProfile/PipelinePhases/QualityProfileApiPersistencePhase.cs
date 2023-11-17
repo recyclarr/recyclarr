@@ -16,7 +16,7 @@ public class QualityProfileApiPersistencePhase(
 
         // Profiles without changes (false) get logged
         var unchangedProfiles = profilesWithStats[false].ToList();
-        if (unchangedProfiles.Any())
+        if (unchangedProfiles.Count != 0)
         {
             log.Debug("These profiles have no changes and will not be persisted: {Profiles}",
                 unchangedProfiles.Select(x => x.Profile.ProfileName));

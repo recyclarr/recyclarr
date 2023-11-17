@@ -19,7 +19,7 @@ public class QualityProfilePreviewPhase(IAnsiConsole console)
                 new Markup("[b]Profile Updates[/]"),
                 SetupProfileTable(profile)));
 
-            if (profile.ProfileConfig.Profile.Qualities.Any())
+            if (profile.ProfileConfig.Profile.Qualities.Count != 0)
             {
                 profileTree.AddNode(SetupQualityItemTable(profile));
             }
@@ -68,7 +68,7 @@ public class QualityProfilePreviewPhase(IAnsiConsole console)
         static string Null<T>(T? val) => val is null ? "<unset>" : val.ToString() ?? "<invalid>";
     }
 
-    private static IRenderable SetupQualityItemTable(UpdatedQualityProfile profile)
+    private static Rows SetupQualityItemTable(UpdatedQualityProfile profile)
     {
         static IRenderable BuildName(ProfileItemDto item)
         {
@@ -121,7 +121,7 @@ public class QualityProfilePreviewPhase(IAnsiConsole console)
             .Where(x => x.Reason != FormatScoreUpdateReason.NoChange && x.Dto.Score != x.NewScore)
             .ToList();
 
-        if (!updatedScores.Any())
+        if (updatedScores.Count == 0)
         {
             return new Markup("[hotpink]No score changes[/]");
         }

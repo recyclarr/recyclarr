@@ -27,7 +27,7 @@ public class ConfigListLocalProcessor(
             BuildInstanceTree(rows, configs, SupportedServices.Radarr);
             BuildInstanceTree(rows, configs, SupportedServices.Sonarr);
 
-            if (!rows.Any())
+            if (rows.Count == 0)
             {
                 rows.Add(new Markup("([red]Empty[/])"));
             }
@@ -53,12 +53,12 @@ public class ConfigListLocalProcessor(
     }
 
     private static void BuildInstanceTree(
-        ICollection<IRenderable> rows,
+        List<IRenderable> rows,
         IReadOnlyCollection<IServiceConfiguration> registry,
         SupportedServices service)
     {
         var configs = registry.GetConfigsOfType(service).ToList();
-        if (!configs.Any())
+        if (configs.Count == 0)
         {
             return;
         }

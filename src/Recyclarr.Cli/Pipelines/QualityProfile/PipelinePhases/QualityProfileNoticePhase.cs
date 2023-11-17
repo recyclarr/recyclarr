@@ -38,7 +38,7 @@ public class QualityProfileNoticePhase(ILogger log)
 
         var invalidQualityNames = transactions.UpdatedProfiles
             .Select(x => (x.ProfileName, x.UpdatedQualities.InvalidQualityNames))
-            .Where(x => x.InvalidQualityNames.Any())
+            .Where(x => x.InvalidQualityNames.Count != 0)
             .ToList();
 
         foreach (var (profileName, invalidNames) in invalidQualityNames)
@@ -48,7 +48,7 @@ public class QualityProfileNoticePhase(ILogger log)
         }
 
         var invalidCfExceptNames = transactions.UpdatedProfiles
-            .Where(x => x.InvalidExceptCfNames.Any())
+            .Where(x => x.InvalidExceptCfNames.Count != 0)
             .Select(x => (x.ProfileName, x.InvalidExceptCfNames));
 
         foreach (var (profileName, invalidNames) in invalidCfExceptNames)

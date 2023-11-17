@@ -36,7 +36,7 @@ public class ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGu
         console.Write(table);
     }
 
-    private static IEnumerable<Markup> RenderTemplates(
+    private static List<Markup> RenderTemplates(
         Table table,
         IEnumerable<TemplatePath> templatePaths,
         SupportedServices service)

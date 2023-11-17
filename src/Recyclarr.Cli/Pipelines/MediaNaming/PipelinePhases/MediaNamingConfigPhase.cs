@@ -31,7 +31,7 @@ public class MediaNamingConfigPhase(IMediaNamingGuideService guide, ISonarrCapab
         return new ProcessedNamingConfig {Dto = dto, InvalidNaming = _errors};
     }
 
-    private MediaNamingDto ProcessRadarrNaming(RadarrConfiguration config)
+    private RadarrMediaNamingDto ProcessRadarrNaming(RadarrConfiguration config)
     {
         var guideData = guide.GetRadarrNamingData();
         var configData = config.MediaNaming;

@@ -39,7 +39,7 @@ public class ConfigTemplateGuideService(IConfigTemplatesRepo repo) : IConfigTemp
         return _includeData ??= LoadTemplateData("includes.json");
     }
 
-    private IReadOnlyCollection<TemplatePath> LoadTemplateData(string templateFileName)
+    private List<TemplatePath> LoadTemplateData(string templateFileName)
     {
         var templatesPath = repo.Path.File(templateFileName);
         if (!templatesPath.Exists)

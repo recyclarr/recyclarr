@@ -13,7 +13,7 @@ public class ImplicitUrlAndKeyPostProcessor(ILogger log, ISecretsProvider secret
         };
     }
 
-    private IReadOnlyDictionary<string, T>? ProcessService<T>(IReadOnlyDictionary<string, T>? services)
+    private Dictionary<string, T>? ProcessService<T>(IReadOnlyDictionary<string, T>? services)
         where T : ServiceConfigYaml
     {
         return services?.ToDictionary(x => x.Key, x => FillUrlAndKey(x.Key, x.Value));

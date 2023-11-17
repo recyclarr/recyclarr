@@ -14,7 +14,7 @@ public class TemplateConfigCreator(
 {
     public bool CanHandle(ICreateConfigSettings settings)
     {
-        return settings.Templates.Any();
+        return settings.Templates.Count != 0;
     }
 
     public void Create(ICreateConfigSettings settings)

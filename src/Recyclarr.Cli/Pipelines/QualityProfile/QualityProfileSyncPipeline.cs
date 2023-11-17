@@ -19,7 +19,7 @@ public class QualityProfileSyncPipeline(ILogger log, IQualityProfilePipelinePhas
     public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
     {
         var guideData = phases.ConfigPhase.Execute(config);
-        if (!guideData.Any())
+        if (guideData.Count == 0)
         {
             log.Debug("No quality profiles to process");
             return;

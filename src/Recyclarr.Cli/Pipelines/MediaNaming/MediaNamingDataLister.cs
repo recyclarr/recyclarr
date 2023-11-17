@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common;
 using Recyclarr.TrashGuide.MediaNaming;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
@@ -53,7 +52,7 @@ public class MediaNamingDataLister(
         console.Write(DictionaryToTableSonarr("Anime Episode Format", guideData.Episodes.Anime));
     }
 
-    private static IRenderable DictionaryToTableRadarr(string title, IReadOnlyDictionary<string, string> formats)
+    private static Rows DictionaryToTableRadarr(string title, IReadOnlyDictionary<string, string> formats)
     {
         var table = new Table()
             .AddColumns("Key", "Format");
@@ -73,7 +72,7 @@ public class MediaNamingDataLister(
         return new Rows(Markup.FromInterpolated($"[orange3]{title}[/]"), table);
     }
 
-    private static IRenderable DictionaryToTableSonarr(string title, IReadOnlyDictionary<string, string> formats)
+    private static Rows DictionaryToTableSonarr(string title, IReadOnlyDictionary<string, string> formats)
     {
         var table = new Table()
             .AddColumns("Key", "Sonarr Version", "Format");

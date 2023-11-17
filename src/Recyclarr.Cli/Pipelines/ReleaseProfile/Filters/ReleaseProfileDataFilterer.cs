@@ -56,7 +56,7 @@ public class ReleaseProfileDataFilterer(ILogger log)
         ReleaseProfileData selectedProfile,
         SonarrProfileFilterConfig profileFilter)
     {
-        if (profileFilter.Include.Any())
+        if (profileFilter.Include.Count != 0)
         {
             log.Debug("Using inclusion filter");
             return selectedProfile with
@@ -67,7 +67,7 @@ public class ReleaseProfileDataFilterer(ILogger log)
             };
         }
 
-        if (profileFilter.Exclude.Any())
+        if (profileFilter.Exclude.Count != 0)
         {
             log.Debug("Using exclusion filter");
             return selectedProfile with

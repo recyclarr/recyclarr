@@ -36,7 +36,7 @@ public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
         return new ReleaseProfileTransactionData(updated, created, deleted);
     }
 
-    private static IReadOnlyList<SonarrReleaseProfile> DeleteOldManagedProfiles(
+    private static List<SonarrReleaseProfile> DeleteOldManagedProfiles(
         IList<SonarrReleaseProfile> serviceData,
         IReadOnlyList<ProcessedReleaseProfileData> configProfiles)
     {
@@ -60,7 +60,7 @@ public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
         profileToUpdate.Required = profile.Profile.Required.Select(x => x.Term).ToList();
         profileToUpdate.IncludePreferredWhenRenaming = profile.Profile.IncludePreferredWhenRenaming;
         profileToUpdate.Tags = profile.Tags
-            .Select(x => tagCache.GetTagIdByName(x))
+            .Select(tagCache.GetTagIdByName)
             .NotNull()
             .ToList();
     }

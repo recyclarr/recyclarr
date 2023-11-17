@@ -18,7 +18,7 @@ public class ConfigManipulator(
     ConfigValidationExecutor validator)
     : IConfigManipulator
 {
-    private static IReadOnlyDictionary<string, TConfig> InvokeCallbackForEach<TConfig>(
+    private static Dictionary<string, TConfig> InvokeCallbackForEach<TConfig>(
         Func<string, ServiceConfigYaml, ServiceConfigYaml> editCallback,
         IReadOnlyDictionary<string, TConfig>? configs)
         where TConfig : ServiceConfigYaml

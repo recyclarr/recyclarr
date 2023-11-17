@@ -26,7 +26,7 @@ public class ReleaseProfileDataValidator : AbstractValidator<ReleaseProfileData>
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.TrashId).NotEmpty();
         RuleFor(x => x)
-            .Must(x => x.Required.Any() || x.Ignored.Any() || x.Preferred.Any())
+            .Must(x => x.Required.Count != 0 || x.Ignored.Count != 0 || x.Preferred.Count != 0)
             .WithMessage("Must have at least one of Required, Ignored, or Preferred terms");
     }
 }

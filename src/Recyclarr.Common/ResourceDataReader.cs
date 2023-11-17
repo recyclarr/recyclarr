@@ -9,7 +9,8 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
 
     public ResourceDataReader(Type typeWithNamespaceToUse, string subdirectory = "")
         : this(Assembly.GetAssembly(typeWithNamespaceToUse)
-            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse)), subdirectory)
+            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse)),
+            subdirectory)
     {
         _namespace = typeWithNamespaceToUse.Namespace;
     }

@@ -7,7 +7,7 @@ namespace Recyclarr.Config.Parsing;
 
 public class ConfigurationFinder(IAppPaths paths) : IConfigurationFinder
 {
-    private IReadOnlyCollection<IFileInfo> FindDefaultConfigFiles()
+    private List<IFileInfo> FindDefaultConfigFiles()
     {
         var configs = new List<IFileInfo>();
 

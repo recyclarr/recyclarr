@@ -7,11 +7,7 @@ public static class CollectionExtensions
     // From: https://stackoverflow.com/a/34362585/157971
     public static IReadOnlyCollection<T> AsReadOnly<T>(this ICollection<T> source)
     {
-        if (source is null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
+        ArgumentNullException.ThrowIfNull(source);
         return source as IReadOnlyCollection<T> ?? new ReadOnlyCollectionAdapter<T>(source);
     }
 
@@ -75,7 +71,7 @@ public static class CollectionExtensions
     public static IList<T>? ToListOrNull<T>(this IEnumerable<T> source)
     {
         var list = source.ToList();
-        return list.Any() ? list : null;
+        return list.Count != 0 ? list : null;
     }
 
     public static IEnumerable<T> Flatten<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> flattenWhich)

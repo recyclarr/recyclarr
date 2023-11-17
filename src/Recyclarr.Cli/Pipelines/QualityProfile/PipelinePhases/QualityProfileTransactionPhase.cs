@@ -105,7 +105,7 @@ public class QualityProfileTransactionPhase
         QualityProfileDto profileDto)
     {
         var except = resetConfig.Except;
-        if (!except.Any())
+        if (except.Count == 0)
         {
             return Array.Empty<string>();
         }

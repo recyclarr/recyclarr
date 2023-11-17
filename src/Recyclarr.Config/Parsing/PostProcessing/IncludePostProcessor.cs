@@ -21,7 +21,7 @@ public class IncludePostProcessor(
         };
     }
 
-    private IReadOnlyDictionary<string, T>? ProcessIncludes<T>(
+    private Dictionary<string, T>? ProcessIncludes<T>(
         IReadOnlyDictionary<string, T>? configs,
         ServiceConfigMerger<T> merger,
         SupportedServices serviceType)

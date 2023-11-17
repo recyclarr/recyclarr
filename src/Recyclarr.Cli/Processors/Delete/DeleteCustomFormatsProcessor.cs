@@ -29,7 +29,7 @@ public class DeleteCustomFormatsProcessor(
 
         if (!settings.All)
         {
-            if (!settings.CustomFormatNames.Any())
+            if (settings.CustomFormatNames.Count == 0)
             {
                 throw new CommandException("Custom format names must be specified if the `--all` option is not used.");
             }
