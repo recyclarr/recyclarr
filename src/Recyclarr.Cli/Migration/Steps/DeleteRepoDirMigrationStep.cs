@@ -7,15 +7,8 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Migration.Steps;
 
 [UsedImplicitly]
-public class DeleteRepoDirMigrationStep : IMigrationStep
+public class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {
-    private readonly IAppPaths _paths;
-
-    public DeleteRepoDirMigrationStep(IAppPaths paths)
-    {
-        _paths = paths;
-    }
-
     public int Order => 1;
     public string Description => "Delete old repo directory";
     public IReadOnlyCollection<string> Remediation => new[]
@@ -25,7 +18,7 @@ public class DeleteRepoDirMigrationStep : IMigrationStep
     };
 
     public bool Required => false;
-    private IDirectoryInfo RepoDir => _paths.AppDataDirectory.SubDir("repo");
+    private IDirectoryInfo RepoDir => paths.AppDataDirectory.SubDir("repo");
 
     public bool CheckIfNeeded()
     {

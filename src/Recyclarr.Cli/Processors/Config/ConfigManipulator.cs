@@ -11,25 +11,13 @@ namespace Recyclarr.Cli.Processors.Config;
 /// opportunity to use this
 /// with the GUI.
 /// </remarks>
-public class ConfigManipulator : IConfigManipulator
+public class ConfigManipulator(
+    IAnsiConsole console,
+    ConfigParser configParser,
+    ConfigSaver configSaver,
+    ConfigValidationExecutor validator)
+    : IConfigManipulator
 {
-    private readonly IAnsiConsole _console;
-    private readonly ConfigParser _configParser;
-    private readonly ConfigSaver _configSaver;
-    private readonly ConfigValidationExecutor _validator;
-
-    public ConfigManipulator(
-        IAnsiConsole console,
-        ConfigParser configParser,
-        ConfigSaver configSaver,
-        ConfigValidationExecutor validator)
-    {
-        _console = console;
-        _configParser = configParser;
-        _configSaver = configSaver;
-        _validator = validator;
-    }
-
     private static IReadOnlyDictionary<string, TConfig> InvokeCallbackForEach<TConfig>(
         Func<string, ServiceConfigYaml, ServiceConfigYaml> editCallback,
         IReadOnlyDictionary<string, TConfig>? configs)
@@ -60,7 +48,7 @@ public class ConfigManipulator : IConfigManipulator
         // - Run validation & report issues
         // - Consistently reformat the output file (when it is saved again)
         // - Ignore stuff for diffing purposes, such as comments.
-        var config = _configParser.Load<RootConfigYaml>(source);
+        var config = configParser.Load<RootConfigYaml>(source);
         if (config is null)
         {
             // Do not log here, since ConfigParser already has substantial logging
@@ -73,13 +61,13 @@ public class ConfigManipulator : IConfigManipulator
             Sonarr = InvokeCallbackForEach(editCallback, config.Sonarr)
         };
 
-        if (!_validator.Validate(config, YamlValidatorRuleSets.RootConfig))
+        if (!validator.Validate(config, YamlValidatorRuleSets.RootConfig))
         {
-            _console.WriteLine(
+            console.WriteLine(
                 "The configuration file will still be created, despite the previous validation errors. " +
                 "You must open the file and correct the above issues before running a sync command.");
         }
 
-        _configSaver.Save(config, destinationFile);
+        configSaver.Save(config, destinationFile);
     }
 }

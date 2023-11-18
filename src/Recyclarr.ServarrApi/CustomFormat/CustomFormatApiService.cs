@@ -5,31 +5,24 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
-public class CustomFormatApiService : ICustomFormatApiService
+public class CustomFormatApiService(IServarrRequestBuilder service) : ICustomFormatApiService
 {
-    private readonly IServarrRequestBuilder _service;
-
-    public CustomFormatApiService(IServarrRequestBuilder service)
-    {
-        _service = service;
-    }
-
     public async Task<IList<CustomFormatData>> GetCustomFormats(IServiceConfiguration config)
     {
-        return await _service.Request(config, "customformat")
+        return await service.Request(config, "customformat")
             .GetJsonAsync<IList<CustomFormatData>>();
     }
 
     public async Task<CustomFormatData?> CreateCustomFormat(IServiceConfiguration config, CustomFormatData cf)
     {
-        return await _service.Request(config, "customformat")
+        return await service.Request(config, "customformat")
             .PostJsonAsync(cf)
             .ReceiveJson<CustomFormatData>();
     }
 
     public async Task UpdateCustomFormat(IServiceConfiguration config, CustomFormatData cf)
     {
-        await _service.Request(config, "customformat", cf.Id)
+        await service.Request(config, "customformat", cf.Id)
             .PutJsonAsync(cf);
     }
 
@@ -38,7 +31,7 @@ public class CustomFormatApiService : ICustomFormatApiService
         int customFormatId,
         CancellationToken cancellationToken = default)
     {
-        await _service.Request(config, "customformat", customFormatId)
+        await service.Request(config, "customformat", customFormatId)
             .DeleteAsync(cancellationToken: cancellationToken);
     }
 }

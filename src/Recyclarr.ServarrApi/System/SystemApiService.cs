@@ -4,18 +4,11 @@ using Recyclarr.ServarrApi.Http;
 
 namespace Recyclarr.ServarrApi.System;
 
-public class SystemApiService : ISystemApiService
+public class SystemApiService(IServarrRequestBuilder service) : ISystemApiService
 {
-    private readonly IServarrRequestBuilder _service;
-
-    public SystemApiService(IServarrRequestBuilder service)
-    {
-        _service = service;
-    }
-
     public async Task<SystemStatus> GetStatus(IServiceConfiguration config)
     {
-        return await _service.Request(config, "system", "status")
+        return await service.Request(config, "system", "status")
             .GetJsonAsync<SystemStatus>();
     }
 }

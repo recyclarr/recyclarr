@@ -1,12 +1,7 @@
 namespace Recyclarr.Cli.Cache;
 
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class CacheObjectNameAttribute : Attribute
+public sealed class CacheObjectNameAttribute(string name) : Attribute
 {
-    public CacheObjectNameAttribute(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 }

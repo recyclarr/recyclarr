@@ -4,19 +4,13 @@ using JetBrains.Annotations;
 namespace Recyclarr.ServarrApi.ReleaseProfile;
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.Members)]
-public class SonarrPreferredTerm
+public class SonarrPreferredTerm(int score, string term)
 {
-    public SonarrPreferredTerm(int score, string term)
-    {
-        Term = term;
-        Score = score;
-    }
-
     [JsonPropertyName("key")]
-    public string Term { get; set; }
+    public string Term { get; set; } = term;
 
     [JsonPropertyName("value")]
-    public int Score { get; set; }
+    public int Score { get; set; } = score;
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.Members)]

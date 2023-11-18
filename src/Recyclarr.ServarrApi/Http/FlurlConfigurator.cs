@@ -7,17 +7,8 @@ using Serilog;
 
 namespace Recyclarr.ServarrApi.Http;
 
-public class FlurlConfigurator
+public class FlurlConfigurator(ILogger log, ISettingsProvider settingsProvider)
 {
-    private readonly ILogger _log;
-    private readonly ISettingsProvider _settingsProvider;
-
-    public FlurlConfigurator(ILogger log, ISettingsProvider settingsProvider)
-    {
-        _log = log;
-        _settingsProvider = settingsProvider;
-    }
-
     [SuppressMessage("SonarCloud", "S4830:Server certificates should be verified during SSL/TLS connections")]
     [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
     public void Configure(IFlurlClientBuilder builder)
@@ -25,14 +16,14 @@ public class FlurlConfigurator
         builder.WithSettings(settings =>
         {
             settings.JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services);
-            FlurlLogging.SetupLogging(settings, _log);
+            FlurlLogging.SetupLogging(settings, log);
         });
 
         builder.ConfigureInnerHandler(handler =>
         {
-            if (!_settingsProvider.Settings.EnableSslCertificateValidation)
+            if (!settingsProvider.Settings.EnableSslCertificateValidation)
             {
-                _log.Warning(
+                log.Warning(
                     "Security Risk: Certificate validation is being DISABLED because setting " +
                     "`enable_ssl_certificate_validation` is set to `false`");
 

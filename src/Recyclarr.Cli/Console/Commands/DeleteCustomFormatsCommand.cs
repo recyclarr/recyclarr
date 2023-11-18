@@ -11,11 +11,11 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Delete things from services like Radarr & Sonarr")]
 [UsedImplicitly]
-public class DeleteCustomFormatsCommand : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
+public class DeleteCustomFormatsCommand(
+    IDeleteCustomFormatsProcessor processor,
+    ConsoleExceptionHandler exceptionHandler)
+    : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
-    private readonly IDeleteCustomFormatsProcessor _processor;
-    private readonly ConsoleExceptionHandler _exceptionHandler;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
@@ -44,24 +44,16 @@ public class DeleteCustomFormatsCommand : AsyncCommand<DeleteCustomFormatsComman
         public bool Preview { get; init; } = false;
     }
 
-    public DeleteCustomFormatsCommand(
-        IDeleteCustomFormatsProcessor processor,
-        ConsoleExceptionHandler exceptionHandler)
-    {
-        _processor = processor;
-        _exceptionHandler = exceptionHandler;
-    }
-
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         try
         {
-            await _processor.Process(settings);
+            await processor.Process(settings);
         }
         catch (Exception e)
         {
-            if (!await _exceptionHandler.HandleException(e))
+            if (!await exceptionHandler.HandleException(e))
             {
                 // This means we didn't handle the exception; rethrow it.
                 throw;

@@ -3,14 +3,10 @@ using System.Text.Json;
 
 namespace Recyclarr.Json.Loading;
 
-public class GuideJsonLoader : IBulkJsonLoader
+public class GuideJsonLoader(Func<JsonSerializerOptions, IBulkJsonLoader> jsonLoaderFactory)
+    : IBulkJsonLoader
 {
-    private readonly IBulkJsonLoader _loader;
-
-    public GuideJsonLoader(Func<JsonSerializerOptions, IBulkJsonLoader> jsonLoaderFactory)
-    {
-        _loader = jsonLoaderFactory(GlobalJsonSerializerSettings.Guide);
-    }
+    private readonly IBulkJsonLoader _loader = jsonLoaderFactory(GlobalJsonSerializerSettings.Guide);
 
     public ICollection<T> LoadAllFilesAtPaths<T>(
         IEnumerable<IDirectoryInfo> jsonPaths,

@@ -3,30 +3,23 @@ using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualitySizeGuideService : IQualitySizeGuideService
+public class QualitySizeGuideService(
+    IRepoMetadataBuilder metadataBuilder,
+    QualitySizeGuideParser parser)
+    : IQualitySizeGuideService
 {
-    private readonly IRepoMetadataBuilder _metadataBuilder;
-    private readonly QualitySizeGuideParser _parser;
     private readonly Dictionary<SupportedServices, IReadOnlyList<QualitySizeData>> _cache = new();
-
-    public QualitySizeGuideService(
-        IRepoMetadataBuilder metadataBuilder,
-        QualitySizeGuideParser parser)
-    {
-        _metadataBuilder = metadataBuilder;
-        _parser = parser;
-    }
 
     private QualitySizePaths CreatePaths(SupportedServices serviceType)
     {
-        var metadata = _metadataBuilder.GetMetadata();
+        var metadata = metadataBuilder.GetMetadata();
         return serviceType switch
         {
             SupportedServices.Radarr => new QualitySizePaths(
-                _metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.Qualities)
+                metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.Qualities)
             ),
             SupportedServices.Sonarr => new QualitySizePaths(
-                _metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities)
+                metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null)
         };
@@ -40,6 +33,6 @@ public class QualitySizeGuideService : IQualitySizeGuideService
         }
 
         var paths = CreatePaths(serviceType);
-        return _cache[serviceType] = _parser.GetQualities(paths.QualitySizeDirectories);
+        return _cache[serviceType] = parser.GetQualities(paths.QualitySizeDirectories);
     }
 }

@@ -3,42 +3,33 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Cache;
 
-public class CachePersister : ICachePersister
+public class CachePersister(ILogger log, IServiceCache cache) : ICachePersister
 {
-    private readonly IServiceCache _cache;
-    private readonly ILogger _log;
-
-    public CachePersister(ILogger log, IServiceCache cache)
-    {
-        _log = log;
-        _cache = cache;
-    }
-
     public CustomFormatCache Load(IServiceConfiguration config)
     {
-        var cache = _cache.Load<CustomFormatCache>(config);
-        if (cache == null)
+        var cache1 = cache.Load<CustomFormatCache>(config);
+        if (cache1 == null)
         {
-            _log.Debug("Custom format cache does not exist; proceeding without it");
+            log.Debug("Custom format cache does not exist; proceeding without it");
             return new CustomFormatCache();
         }
 
         // If the version is higher OR lower, we invalidate the cache. It means there's an
         // incompatibility that we do not support.
-        if (cache.Version != CustomFormatCache.LatestVersion)
+        if (cache1.Version != CustomFormatCache.LatestVersion)
         {
-            _log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
-                cache.Version, CustomFormatCache.LatestVersion);
+            log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
+                cache1.Version, CustomFormatCache.LatestVersion);
             throw new CacheException("Version mismatch");
         }
 
-        return cache;
+        return cache1;
     }
 
-    public void Save(IServiceConfiguration config, CustomFormatCache cache)
+    public void Save(IServiceConfiguration config, CustomFormatCache cache1)
     {
-        _log.Debug("Saving Cache with {Mappings}", JsonSerializer.Serialize(cache.TrashIdMappings));
+        log.Debug("Saving Cache with {Mappings}", JsonSerializer.Serialize(cache1.TrashIdMappings));
 
-        _cache.Save(cache, config);
+        cache.Save(cache1, config);
     }
 }

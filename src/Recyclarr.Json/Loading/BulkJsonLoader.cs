@@ -7,22 +7,13 @@ namespace Recyclarr.Json.Loading;
 
 public record LoadedJsonObject<T>(IFileInfo File, T Obj);
 
-public class BulkJsonLoader : IBulkJsonLoader
+public class BulkJsonLoader(ILogger log, JsonSerializerOptions serializerSettings) : IBulkJsonLoader
 {
-    private readonly ILogger _log;
-    private readonly JsonSerializerOptions _serializerSettings;
-
-    public BulkJsonLoader(ILogger log, JsonSerializerOptions serializerSettings)
-    {
-        _log = log;
-        _serializerSettings = serializerSettings;
-    }
-
     public ICollection<T> LoadAllFilesAtPaths<T>(
         IEnumerable<IDirectoryInfo> jsonPaths,
         Func<IObservable<LoadedJsonObject<T>>, IObservable<T>>? extra = null)
     {
-        var jsonFiles = JsonUtils.GetJsonFilesInDirectories(jsonPaths, _log);
+        var jsonFiles = JsonUtils.GetJsonFilesInDirectories(jsonPaths, log);
         var observable = jsonFiles.ToObservable()
             .Select(x => Observable.Defer(() => LoadJsonFromFile<T>(x)))
             .Merge(8);
@@ -34,7 +25,7 @@ public class BulkJsonLoader : IBulkJsonLoader
 
     private T ParseJson<T>(string guideData, string fileName)
     {
-        var obj = JsonSerializer.Deserialize<T>(guideData, _serializerSettings);
+        var obj = JsonSerializer.Deserialize<T>(guideData, serializerSettings);
         if (obj is null)
         {
             throw new JsonException($"Unable to parse JSON at file {fileName}");
@@ -49,7 +40,7 @@ public class BulkJsonLoader : IBulkJsonLoader
             .Select(x => new LoadedJsonObject<T>(file, ParseJson<T>(x, file.Name)))
             .Catch((JsonException e) =>
             {
-                _log.Warning("Failed to parse JSON file: {File} ({Reason})", file.Name, e.Message);
+                log.Warning("Failed to parse JSON file: {File} ({Reason})", file.Name, e.Message);
                 return Observable.Empty<LoadedJsonObject<T>>();
             });
     }

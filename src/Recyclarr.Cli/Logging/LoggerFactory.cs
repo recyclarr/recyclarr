@@ -8,17 +8,8 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LoggerFactory
+public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
 {
-    private readonly IAppPaths _paths;
-    private readonly LoggingLevelSwitch _levelSwitch;
-
-    public LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
-    {
-        _paths = paths;
-        _levelSwitch = levelSwitch;
-    }
-
     private static string GetBaseTemplateString()
     {
         var scope = LogProperty.Scope;
@@ -45,12 +36,12 @@ public class LoggerFactory
     public ILogger Create()
     {
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
-        var logDir = _paths.LogDirectory;
+        var logDir = paths.LogDirectory;
 
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.With<ExceptionMessageEnricher>()
-            .WriteTo.Console(GetConsoleTemplate(), levelSwitch: _levelSwitch)
+            .WriteTo.Console(GetConsoleTemplate(), levelSwitch: levelSwitch)
             .WriteTo.Logger(c => c
                 .MinimumLevel.Debug()
                 .WriteTo.File(GetFileTemplate(), LogFilePath("debug")))

@@ -4,15 +4,8 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfilePreviewPhase
+public class QualityProfilePreviewPhase(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
-
-    public QualityProfilePreviewPhase(IAnsiConsole console)
-    {
-        _console = console;
-    }
-
     public void Execute(QualityProfileTransactionData transactions)
     {
         var tree = new Tree("Quality Profile Changes [red](Preview)[/]");
@@ -38,9 +31,9 @@ public class QualityProfilePreviewPhase
             tree.AddNode(profileTree);
         }
 
-        _console.WriteLine();
-        _console.Write(tree);
-        _console.WriteLine();
+        console.WriteLine();
+        console.Write(tree);
+        console.WriteLine();
     }
 
     private static Table SetupProfileTable(UpdatedQualityProfile profile)

@@ -1,11 +1,6 @@
 namespace Recyclarr.Config.ExceptionTypes;
 
-public class SplitInstancesException : Exception
+public class SplitInstancesException(IReadOnlyCollection<string> instanceNames) : Exception
 {
-    public IReadOnlyCollection<string> InstanceNames { get; }
-
-    public SplitInstancesException(IReadOnlyCollection<string> instanceNames)
-    {
-        InstanceNames = instanceNames;
-    }
+    public IReadOnlyCollection<string> InstanceNames { get; } = instanceNames;
 }

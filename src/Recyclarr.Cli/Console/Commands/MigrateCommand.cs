@@ -12,31 +12,22 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Perform migration steps that may be needed between versions")]
-public class MigrateCommand : Command<MigrateCommand.CliSettings>
+public class MigrateCommand(
+    IAnsiConsole console,
+    IMigrationExecutor migration) : Command<MigrateCommand.CliSettings>
 {
-    private readonly IMigrationExecutor _migration;
-    private readonly IAnsiConsole _console;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : ServiceCommandSettings
     {
     }
 
-    public MigrateCommand(
-        IAnsiConsole console,
-        IMigrationExecutor migration)
-    {
-        _console = console;
-        _migration = migration;
-    }
-
     public override int Execute(CommandContext context, CliSettings settings)
     {
         try
         {
-            _migration.PerformAllMigrationSteps(settings.Debug);
-            _console.WriteLine("All migration steps completed");
+            migration.PerformAllMigrationSteps(settings.Debug);
+            console.WriteLine("All migration steps completed");
         }
         catch (MigrationException e)
         {
@@ -55,12 +46,12 @@ public class MigrateCommand : Command<MigrateCommand.CliSettings>
                 }
             }
 
-            _console.Write(msg.ToString());
+            console.Write(msg.ToString());
             return 1;
         }
         catch (RequiredMigrationException ex)
         {
-            _console.WriteLine($"ERROR: {ex.Message}");
+            console.WriteLine($"ERROR: {ex.Message}");
             return 1;
         }
 

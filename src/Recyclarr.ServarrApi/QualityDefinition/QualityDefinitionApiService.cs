@@ -4,18 +4,11 @@ using Recyclarr.ServarrApi.Http;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
-internal class QualityDefinitionApiService : IQualityDefinitionApiService
+internal class QualityDefinitionApiService(IServarrRequestBuilder service) : IQualityDefinitionApiService
 {
-    private readonly IServarrRequestBuilder _service;
-
-    public QualityDefinitionApiService(IServarrRequestBuilder service)
-    {
-        _service = service;
-    }
-
     public async Task<IList<ServiceQualityDefinitionItem>> GetQualityDefinition(IServiceConfiguration config)
     {
-        return await _service.Request(config, "qualitydefinition")
+        return await service.Request(config, "qualitydefinition")
             .GetJsonAsync<List<ServiceQualityDefinitionItem>>();
     }
 
@@ -23,7 +16,7 @@ internal class QualityDefinitionApiService : IQualityDefinitionApiService
         IServiceConfiguration config,
         IList<ServiceQualityDefinitionItem> newQuality)
     {
-        return await _service.Request(config, "qualityDefinition", "update")
+        return await service.Request(config, "qualityDefinition", "update")
             .PutJsonAsync(newQuality)
             .ReceiveJson<List<ServiceQualityDefinitionItem>>();
     }

@@ -13,42 +13,33 @@ public interface IReleaseProfilePipelinePhases
     ReleaseProfileApiPersistencePhase ApiPersistencePhase { get; }
 }
 
-public class ReleaseProfileSyncPipeline : ISyncPipeline
+public class ReleaseProfileSyncPipeline(ILogger log, IReleaseProfilePipelinePhases phases) : ISyncPipeline
 {
-    private readonly ILogger _log;
-    private readonly IReleaseProfilePipelinePhases _phases;
-
-    public ReleaseProfileSyncPipeline(ILogger log, IReleaseProfilePipelinePhases phases)
-    {
-        _log = log;
-        _phases = phases;
-    }
-
     public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
     {
         if (config is not SonarrConfiguration sonarrConfig)
         {
-            _log.Debug("Skipping release profile pipeline because {Instance} is not a Sonarr config",
+            log.Debug("Skipping release profile pipeline because {Instance} is not a Sonarr config",
                 config.InstanceName);
             return;
         }
 
-        var profiles = _phases.ConfigPhase.Execute(sonarrConfig);
+        var profiles = phases.ConfigPhase.Execute(sonarrConfig);
         if (profiles is null)
         {
-            _log.Debug("No release profiles to process");
+            log.Debug("No release profiles to process");
             return;
         }
 
-        var serviceData = await _phases.ApiFetchPhase.Execute(config);
-        var transactions = _phases.TransactionPhase.Execute(profiles, serviceData);
+        var serviceData = await phases.ApiFetchPhase.Execute(config);
+        var transactions = phases.TransactionPhase.Execute(profiles, serviceData);
 
         if (settings.Preview)
         {
-            _phases.PreviewPhase.Value.Execute(transactions);
+            phases.PreviewPhase.Value.Execute(transactions);
             return;
         }
 
-        await _phases.ApiPersistencePhase.Execute(config, transactions);
+        await phases.ApiPersistencePhase.Execute(config, transactions);
     }
 }

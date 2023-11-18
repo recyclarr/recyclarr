@@ -1,9 +1,3 @@
 namespace Recyclarr.Compatibility;
 
-public class ServiceIncompatibilityException : Exception
-{
-    public ServiceIncompatibilityException(string msg)
-        : base(msg)
-    {
-    }
-}
+public class ServiceIncompatibilityException(string msg) : Exception(msg);

@@ -3,17 +3,10 @@ using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingApiFetchPhase
+public class MediaNamingApiFetchPhase(IMediaNamingApiService api)
 {
-    private readonly IMediaNamingApiService _api;
-
-    public MediaNamingApiFetchPhase(IMediaNamingApiService api)
-    {
-        _api = api;
-    }
-
     public async Task<MediaNamingDto> Execute(IServiceConfiguration config)
     {
-        return await _api.GetNaming(config);
+        return await api.GetNaming(config);
     }
 }

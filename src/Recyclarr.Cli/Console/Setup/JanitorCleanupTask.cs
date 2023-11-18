@@ -3,19 +3,9 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class JanitorCleanupTask : IBaseCommandSetupTask
+public class JanitorCleanupTask(ILogJanitor janitor, ILogger log, ISettingsProvider settingsProvider)
+    : IBaseCommandSetupTask
 {
-    private readonly ILogJanitor _janitor;
-    private readonly ILogger _log;
-    private readonly ISettingsProvider _settingsProvider;
-
-    public JanitorCleanupTask(ILogJanitor janitor, ILogger log, ISettingsProvider settingsProvider)
-    {
-        _janitor = janitor;
-        _log = log;
-        _settingsProvider = settingsProvider;
-    }
-
     public void OnStart()
     {
         // No work to do for this event
@@ -23,8 +13,8 @@ public class JanitorCleanupTask : IBaseCommandSetupTask
 
     public void OnFinish()
     {
-        var maxFiles = _settingsProvider.Settings.LogJanitor.MaxFiles;
-        _log.Debug("Cleaning up logs using max files of {MaxFiles}", maxFiles);
-        _janitor.DeleteOldestLogFiles(maxFiles);
+        var maxFiles = settingsProvider.Settings.LogJanitor.MaxFiles;
+        log.Debug("Cleaning up logs using max files of {MaxFiles}", maxFiles);
+        janitor.DeleteOldestLogFiles(maxFiles);
     }
 }

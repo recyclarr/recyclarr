@@ -5,28 +5,19 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile;
 
-public class ReleaseProfileDataLister
+public class ReleaseProfileDataLister(IAnsiConsole console, IReleaseProfileGuideService guide)
 {
-    private readonly IAnsiConsole _console;
-    private readonly IReleaseProfileGuideService _guide;
-
-    public ReleaseProfileDataLister(IAnsiConsole console, IReleaseProfileGuideService guide)
-    {
-        _console = console;
-        _guide = guide;
-    }
-
     public void ListReleaseProfiles()
     {
-        _console.WriteLine("\nList of Release Profiles in the TRaSH Guides:\n");
+        console.WriteLine("\nList of Release Profiles in the TRaSH Guides:\n");
 
-        var profilesFromGuide = _guide.GetReleaseProfileData();
+        var profilesFromGuide = guide.GetReleaseProfileData();
         foreach (var profile in profilesFromGuide)
         {
-            _console.WriteLine($"          - {profile.TrashId} # {profile.Name}");
+            console.WriteLine($"          - {profile.TrashId} # {profile.Name}");
         }
 
-        _console.WriteLine(
+        console.WriteLine(
             "\nThe above Release Profiles are in YAML format and ready to be copied & pasted under the `trash_ids:` property.");
     }
 
@@ -45,7 +36,7 @@ public class ReleaseProfileDataLister
 
     public void ListTerms(string releaseProfileId)
     {
-        var profile = _guide.GetReleaseProfileData()
+        var profile = guide.GetReleaseProfileData()
             .FirstOrDefault(x => x.TrashId.EqualsIgnoreCase(releaseProfileId));
 
         if (profile is null)
@@ -60,14 +51,14 @@ public class ReleaseProfileDataLister
                 "(terms must have Trash IDs assigned in order to be filtered)");
         }
 
-        _console.WriteLine();
-        _console.WriteLine($"List of Terms for the '{profile.Name}' Release Profile that may be filtered:\n");
+        console.WriteLine();
+        console.WriteLine($"List of Terms for the '{profile.Name}' Release Profile that may be filtered:\n");
 
         PrintTerms(profile.Required, "Required");
         PrintTerms(profile.Ignored, "Ignored");
         PrintTerms(profile.Preferred.SelectMany(x => x.Terms), "Preferred");
 
-        _console.WriteLine(
+        console.WriteLine(
             "The above Term Filters are in YAML format and ready to be copied & pasted under the `include:` or `exclude:` filter properties.");
     }
 
@@ -79,7 +70,7 @@ public class ReleaseProfileDataLister
             return;
         }
 
-        _console.WriteLine($"{category} Terms:\n");
+        console.WriteLine($"{category} Terms:\n");
         foreach (var term in filteredTerms)
         {
             var line = new StringBuilder($"            - {term.TrashId}");
@@ -88,9 +79,9 @@ public class ReleaseProfileDataLister
                 line.Append($" # {term.Name}");
             }
 
-            _console.WriteLine(line.ToString());
+            console.WriteLine(line.ToString());
         }
 
-        _console.WriteLine();
+        console.WriteLine();
     }
 }

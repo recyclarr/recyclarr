@@ -4,17 +4,8 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class ConfigIncludeProcessor : IIncludeProcessor
+public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths) : IIncludeProcessor
 {
-    private readonly IFileSystem _fs;
-    private readonly IAppPaths _paths;
-
-    public ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths)
-    {
-        _fs = fs;
-        _paths = paths;
-    }
-
     public bool CanProcess(IYamlInclude includeDirective)
     {
         return includeDirective is ConfigYamlInclude;
@@ -29,11 +20,11 @@ public class ConfigIncludeProcessor : IIncludeProcessor
             throw new YamlIncludeException("`config` property is required.");
         }
 
-        var rooted = _fs.Path.IsPathRooted(include.Config);
+        var rooted = fs.Path.IsPathRooted(include.Config);
 
         var configFile = rooted
-            ? _fs.FileInfo.New(include.Config)
-            : _paths.ConfigsDirectory.File(include.Config);
+            ? fs.FileInfo.New(include.Config)
+            : paths.ConfigsDirectory.File(include.Config);
 
         if (!configFile.Exists)
         {

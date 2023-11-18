@@ -13,12 +13,9 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
 [UsedImplicitly]
-public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
+public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
+    : AsyncCommand<SyncCommand.CliSettings>
 {
-    private readonly IMigrationExecutor _migration;
-    private readonly IMultiRepoUpdater _repoUpdater;
-    private readonly ISyncProcessor _syncProcessor;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
@@ -48,21 +45,14 @@ public class SyncCommand : AsyncCommand<SyncCommand.CliSettings>
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 
-    public SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
-    {
-        _migration = migration;
-        _repoUpdater = repoUpdater;
-        _syncProcessor = syncProcessor;
-    }
-
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         // Will throw if migration is required, otherwise just a warning is issued.
-        _migration.CheckNeededMigrations();
+        migration.CheckNeededMigrations();
 
-        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
 
-        return (int) await _syncProcessor.ProcessConfigs(settings);
+        return (int) await syncProcessor.ProcessConfigs(settings);
     }
 }

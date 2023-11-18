@@ -3,18 +3,11 @@ using Recyclarr.Common;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class YamlIncludeResolver : IYamlIncludeResolver
+public class YamlIncludeResolver(IReadOnlyCollection<IIncludeProcessor> includeProcessors) : IYamlIncludeResolver
 {
-    private readonly IReadOnlyCollection<IIncludeProcessor> _includeProcessors;
-
-    public YamlIncludeResolver(IReadOnlyCollection<IIncludeProcessor> includeProcessors)
-    {
-        _includeProcessors = includeProcessors;
-    }
-
     public IFileInfo GetIncludePath(IYamlInclude includeType, SupportedServices serviceType)
     {
-        var processor = _includeProcessors.FirstOrDefault(x => x.CanProcess(includeType));
+        var processor = includeProcessors.FirstOrDefault(x => x.CanProcess(includeType));
         if (processor is null)
         {
             throw new YamlIncludeException("Include type is not supported");

@@ -16,20 +16,13 @@ public static class CollectionExtensions
     }
 
     // From: https://stackoverflow.com/a/34362585/157971
-    private sealed class ReadOnlyCollectionAdapter<T> : IReadOnlyCollection<T>
+    private sealed class ReadOnlyCollectionAdapter<T>(ICollection<T> source) : IReadOnlyCollection<T>
     {
-        private readonly ICollection<T> _source;
-
-        public ReadOnlyCollectionAdapter(ICollection<T> source)
-        {
-            _source = source;
-        }
-
-        public int Count => _source.Count;
+        public int Count => source.Count;
 
         public IEnumerator<T> GetEnumerator()
         {
-            return _source.GetEnumerator();
+            return source.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

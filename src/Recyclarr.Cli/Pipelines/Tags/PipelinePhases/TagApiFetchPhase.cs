@@ -3,22 +3,13 @@ using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.Cli.Pipelines.Tags.PipelinePhases;
 
-public class TagApiFetchPhase
+public class TagApiFetchPhase(ISonarrTagApiService api, ServiceTagCache cache)
 {
-    private readonly ISonarrTagApiService _api;
-    private readonly ServiceTagCache _cache;
-
-    public TagApiFetchPhase(ISonarrTagApiService api, ServiceTagCache cache)
-    {
-        _api = api;
-        _cache = cache;
-    }
-
     public async Task<IList<SonarrTag>> Execute(IServiceConfiguration config)
     {
-        var tags = await _api.GetTags(config);
-        _cache.Clear();
-        _cache.AddTags(tags);
+        var tags = await api.GetTags(config);
+        cache.Clear();
+        cache.AddTags(tags);
         return tags;
     }
 }

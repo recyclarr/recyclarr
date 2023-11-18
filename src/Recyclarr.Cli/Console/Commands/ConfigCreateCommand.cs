@@ -10,12 +10,9 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Create a starter configuration file.")]
-public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
+public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor, IMultiRepoUpdater repoUpdater)
+    : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
-    private readonly IConfigCreationProcessor _processor;
-    private readonly IMultiRepoUpdater _repoUpdater;
-    private readonly ILogger _log;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
@@ -41,23 +38,16 @@ public class ConfigCreateCommand : AsyncCommand<ConfigCreateCommand.CliSettings>
         public bool Force { get; init; }
     }
 
-    public ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor, IMultiRepoUpdater repoUpdater)
-    {
-        _processor = processor;
-        _repoUpdater = repoUpdater;
-        _log = log;
-    }
-
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         try
         {
-            await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
-            _processor.Process(settings);
+            await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+            processor.Process(settings);
         }
         catch (FileExistsException e)
         {
-            _log.Error(
+            log.Error(
                 "The file {ConfigFile} already exists. Please choose another path or " +
                 "delete/move the existing file and run this command again", e.AttemptedPath);
 

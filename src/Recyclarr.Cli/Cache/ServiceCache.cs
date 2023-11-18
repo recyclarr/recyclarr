@@ -9,26 +9,17 @@ using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Cache;
 
-public partial class ServiceCache : IServiceCache
+public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : IServiceCache
 {
-    private readonly ICacheStoragePath _storagePath;
-    private readonly JsonSerializerOptions _jsonSettings;
-    private readonly ILogger _log;
-
-    public ServiceCache(ICacheStoragePath storagePath, ILogger log)
-    {
-        _storagePath = storagePath;
-        _log = log;
-        _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
-    }
+    private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
 
     public T? Load<T>(IServiceConfiguration config) where T : class
     {
         var path = PathFromAttribute<T>(config);
-        _log.Debug("Loading cache from path: {Path}", path.FullName);
+        log.Debug("Loading cache from path: {Path}", path.FullName);
         if (!path.Exists)
         {
-            _log.Debug("Cache path does not exist");
+            log.Debug("Cache path does not exist");
             return null;
         }
 
@@ -41,7 +32,7 @@ public partial class ServiceCache : IServiceCache
         }
         catch (JsonException e)
         {
-            _log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
+            log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
         }
 
         return null;
@@ -50,7 +41,7 @@ public partial class ServiceCache : IServiceCache
     public void Save<T>(T obj, IServiceConfiguration config) where T : class
     {
         var path = PathFromAttribute<T>(config);
-        _log.Debug("Saving cache to path: {Path}", path.FullName);
+        log.Debug("Saving cache to path: {Path}", path.FullName);
         path.CreateParentDirectory();
 
         using var stream = path.Create();
@@ -76,7 +67,7 @@ public partial class ServiceCache : IServiceCache
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
 
-        return _storagePath.CalculatePath(config, objectName);
+        return storagePath.CalculatePath(config, objectName);
     }
 
     [GeneratedRegex(@"^[\w-]+$", RegexOptions.None, 1000)]

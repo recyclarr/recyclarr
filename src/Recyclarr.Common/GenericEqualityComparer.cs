@@ -3,17 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace Recyclarr.Common;
 
 [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
-public sealed class GenericEqualityComparer<T> : IEqualityComparer<T>
+public sealed class GenericEqualityComparer<T>(Func<T, T, bool> equalsPredicate, Func<T, int> hashPredicate)
+    : IEqualityComparer<T>
 {
-    private readonly Func<T, T, bool> _equalsPredicate;
-    private readonly Func<T, int> _hashPredicate;
-
-    public GenericEqualityComparer(Func<T, T, bool> equalsPredicate, Func<T, int> hashPredicate)
-    {
-        _equalsPredicate = equalsPredicate;
-        _hashPredicate = hashPredicate;
-    }
-
     public bool Equals(T? x, T? y)
     {
         if (ReferenceEquals(x, y))
@@ -36,11 +28,11 @@ public sealed class GenericEqualityComparer<T> : IEqualityComparer<T>
             return false;
         }
 
-        return _equalsPredicate(x, y);
+        return equalsPredicate(x, y);
     }
 
     public int GetHashCode(T obj)
     {
-        return _hashPredicate(obj);
+        return hashPredicate(obj);
     }
 }

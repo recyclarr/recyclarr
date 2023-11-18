@@ -4,15 +4,8 @@ using AutoFixture.Kernel;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 
-public class AutofacSpecimenBuilder : ISpecimenBuilder
+public class AutofacSpecimenBuilder(ILifetimeScope container) : ISpecimenBuilder
 {
-    private readonly ILifetimeScope _container;
-
-    public AutofacSpecimenBuilder(ILifetimeScope container)
-    {
-        _container = container;
-    }
-
     public object Create(object request, ISpecimenContext context)
     {
         if (request is not ParameterInfo paramInfo)
@@ -20,7 +13,7 @@ public class AutofacSpecimenBuilder : ISpecimenBuilder
             return new NoSpecimen();
         }
 
-        var instance = _container.ResolveOptional(paramInfo.ParameterType);
+        var instance = container.ResolveOptional(paramInfo.ParameterType);
         return instance ?? new NoSpecimen();
     }
 }

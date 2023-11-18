@@ -1,9 +1,3 @@
 namespace Recyclarr.Yaml;
 
-public class UnknownYamlException : Exception
-{
-    public UnknownYamlException(string msg)
-        : base(msg)
-    {
-    }
-}
+public class UnknownYamlException(string msg) : Exception(msg);

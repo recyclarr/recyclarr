@@ -4,17 +4,9 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Recyclarr.Yaml;
 
-public class YamlSerializerFactory : IYamlSerializerFactory
+public class YamlSerializerFactory(IObjectFactory objectFactory, IReadOnlyCollection<IYamlBehavior> behaviors)
+    : IYamlSerializerFactory
 {
-    private readonly IObjectFactory _objectFactory;
-    private readonly IReadOnlyCollection<IYamlBehavior> _behaviors;
-
-    public YamlSerializerFactory(IObjectFactory objectFactory, IReadOnlyCollection<IYamlBehavior> behaviors)
-    {
-        _objectFactory = objectFactory;
-        _behaviors = behaviors;
-    }
-
     public IDeserializer CreateDeserializer()
     {
         var builder = new DeserializerBuilder();
@@ -27,12 +19,12 @@ public class YamlSerializerFactory : IYamlSerializerFactory
         CommonSetup(builder);
 
         builder
-            .WithNodeDeserializer(new ForceEmptySequences(_objectFactory))
+            .WithNodeDeserializer(new ForceEmptySequences(objectFactory))
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
-            .WithObjectFactory(_objectFactory)
+            .WithObjectFactory(objectFactory)
             .WithDuplicateKeyChecking();
 
-        foreach (var behavior in _behaviors)
+        foreach (var behavior in behaviors)
         {
             behavior.Setup(builder);
         }

@@ -12,11 +12,9 @@ namespace Recyclarr.Cli.Console.Commands;
 #pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
-public class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSettings>
+public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
+    : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
-    private readonly QualitySizeDataLister _lister;
-    private readonly IMultiRepoUpdater _repoUpdater;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings
@@ -27,16 +25,10 @@ public class ListQualitiesCommand : AsyncCommand<ListQualitiesCommand.CliSetting
         public SupportedServices Service { get; init; }
     }
 
-    public ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
-    {
-        _lister = lister;
-        _repoUpdater = repoUpdater;
-    }
-
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken);
-        _lister.ListQualities(settings.Service);
+        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        lister.ListQualities(settings.Service);
         return 0;
     }
 }

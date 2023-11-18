@@ -6,23 +6,14 @@ using Serilog.Context;
 
 namespace Recyclarr.Repo;
 
-public class ConfigTemplatesRepo : IConfigTemplatesRepo, IUpdateableRepo
+public class ConfigTemplatesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
+    : IConfigTemplatesRepo, IUpdateableRepo
 {
-    private readonly IRepoUpdater _repoUpdater;
-    private readonly ISettingsProvider _settings;
-
-    public ConfigTemplatesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
-    {
-        _repoUpdater = repoUpdater;
-        _settings = settings;
-        Path = paths.ReposDirectory.SubDir("config-templates");
-    }
-
-    public IDirectoryInfo Path { get; }
+    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDir("config-templates");
 
     public Task Update(CancellationToken token)
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, "Config Templates Repo");
-        return _repoUpdater.UpdateRepo(Path, _settings.Settings.Repositories.ConfigTemplates, token);
+        return repoUpdater.UpdateRepo(Path, settings.Settings.Repositories.ConfigTemplates, token);
     }
 }

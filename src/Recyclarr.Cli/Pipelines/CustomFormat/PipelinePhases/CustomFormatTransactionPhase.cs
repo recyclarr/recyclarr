@@ -7,15 +7,8 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatTransactionPhase
+public class CustomFormatTransactionPhase(ILogger log)
 {
-    private readonly ILogger _log;
-
-    public CustomFormatTransactionPhase(ILogger log)
-    {
-        _log = log;
-    }
-
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public CustomFormatTransactionData Execute(
         IServiceConfiguration config,
@@ -27,7 +20,7 @@ public class CustomFormatTransactionPhase
 
         foreach (var guideCf in guideCfs)
         {
-            _log.Debug("Process transaction for guide CF {TrashId} ({Name})", guideCf.TrashId, guideCf.Name);
+            log.Debug("Process transaction for guide CF {TrashId} ({Name})", guideCf.TrashId, guideCf.Name);
 
             guideCf.Id = cache.FindId(guideCf) ?? 0;
 
@@ -76,7 +69,7 @@ public class CustomFormatTransactionPhase
             // - Use the ID from the service, not the cache, and do an update
             if (guideCf.Id != serviceCf.Id)
             {
-                _log.Debug(
+                log.Debug(
                     "Format IDs for CF {Name} did not match which indicates a manually-created CF is " +
                     "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
                     serviceCf.Name, guideCf.Id, serviceCf.Id);

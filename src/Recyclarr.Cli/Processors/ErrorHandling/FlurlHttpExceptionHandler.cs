@@ -3,15 +3,8 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
+public class FlurlHttpExceptionHandler(ILogger log) : IFlurlHttpExceptionHandler
 {
-    private readonly ILogger _log;
-
-    public FlurlHttpExceptionHandler(ILogger log)
-    {
-        _log = log;
-    }
-
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
@@ -20,7 +13,7 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
         switch (statusCode)
         {
             case 401:
-                _log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
+                log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
                 break;
 
             default:
@@ -31,7 +24,7 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
 
     private void ProcessBody(string responseBody)
     {
-        var parser = new ErrorResponseParser(_log, responseBody);
+        var parser = new ErrorResponseParser(log, responseBody);
 
         // Try to parse validation errors
         if (parser.DeserializeList(s => s
@@ -54,6 +47,6 @@ public class FlurlHttpExceptionHandler : IFlurlHttpExceptionHandler
         }
 
         // Last resort
-        _log.Error("Reason: Unable to determine. Please report this as a bug and attach your `verbose.log` file.");
+        log.Error("Reason: Unable to determine. Please report this as a bug and attach your `verbose.log` file.");
     }
 }

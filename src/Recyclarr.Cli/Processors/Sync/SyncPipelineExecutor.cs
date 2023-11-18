@@ -4,32 +4,21 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-public class SyncPipelineExecutor
+public class SyncPipelineExecutor(
+    ILogger log,
+    IOrderedEnumerable<ISyncPipeline> pipelines,
+    IEnumerable<IPipelineCache> caches)
 {
-    private readonly ILogger _log;
-    private readonly IOrderedEnumerable<ISyncPipeline> _pipelines;
-    private readonly IEnumerable<IPipelineCache> _caches;
-
-    public SyncPipelineExecutor(
-        ILogger log,
-        IOrderedEnumerable<ISyncPipeline> pipelines,
-        IEnumerable<IPipelineCache> caches)
-    {
-        _log = log;
-        _pipelines = pipelines;
-        _caches = caches;
-    }
-
     public async Task Process(ISyncSettings settings, IServiceConfiguration config)
     {
-        foreach (var cache in _caches)
+        foreach (var cache in caches)
         {
             cache.Clear();
         }
 
-        foreach (var pipeline in _pipelines)
+        foreach (var pipeline in pipelines)
         {
-            _log.Debug("Executing Pipeline: {Pipeline}", pipeline.GetType().Name);
+            log.Debug("Executing Pipeline: {Pipeline}", pipeline.GetType().Name);
             await pipeline.Execute(settings, config);
         }
     }

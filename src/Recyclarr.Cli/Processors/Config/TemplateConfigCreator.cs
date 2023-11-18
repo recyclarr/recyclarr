@@ -6,23 +6,12 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class TemplateConfigCreator : IConfigCreator
+public class TemplateConfigCreator(
+    ILogger log,
+    IConfigTemplateGuideService templates,
+    IAppPaths paths)
+    : IConfigCreator
 {
-    private readonly ILogger _log;
-    private readonly IConfigTemplateGuideService _templates;
-
-    private readonly IAppPaths _paths;
-
-    public TemplateConfigCreator(
-        ILogger log,
-        IConfigTemplateGuideService templates,
-        IAppPaths paths)
-    {
-        _log = log;
-        _templates = templates;
-        _paths = paths;
-    }
-
     public bool CanHandle(ICreateConfigSettings settings)
     {
         return settings.Templates.Any();
@@ -30,9 +19,9 @@ public class TemplateConfigCreator : IConfigCreator
 
     public void Create(ICreateConfigSettings settings)
     {
-        _log.Debug("Creating config from templates: {Templates}", settings.Templates);
+        log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
-        var matchingTemplateData = _templates.GetTemplateData()
+        var matchingTemplateData = templates.GetTemplateData()
             .IntersectBy(settings.Templates, path => path.Id, StringComparer.CurrentCultureIgnoreCase)
             .Select(x => x.TemplateFile);
 
@@ -44,7 +33,7 @@ public class TemplateConfigCreator : IConfigCreator
             }
             catch (FileExistsException e)
             {
-                _log.Error("Template configuration file could not be saved: {Reason}", e.AttemptedPath);
+                log.Error("Template configuration file could not be saved: {Reason}", e.AttemptedPath);
             }
             catch (FileLoadException)
             {
@@ -53,7 +42,7 @@ public class TemplateConfigCreator : IConfigCreator
             }
             catch (Exception e)
             {
-                _log.Error(e, "Unable to save configuration template file");
+                log.Error(e, "Unable to save configuration template file");
                 throw;
             }
         }
@@ -61,7 +50,7 @@ public class TemplateConfigCreator : IConfigCreator
 
     private void CopyTemplate(IFileInfo templateFile, ICreateConfigSettings settings)
     {
-        var destinationFile = _paths.ConfigsDirectory.File(templateFile.Name);
+        var destinationFile = paths.ConfigsDirectory.File(templateFile.Name);
 
         if (destinationFile.Exists && !settings.Force)
         {
@@ -74,11 +63,11 @@ public class TemplateConfigCreator : IConfigCreator
         // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
         if (destinationFile.Exists)
         {
-            _log.Information("Replacing existing file: {Path}", destinationFile);
+            log.Information("Replacing existing file: {Path}", destinationFile);
         }
         else
         {
-            _log.Information("Created configuration file: {Path}", destinationFile);
+            log.Information("Created configuration file: {Path}", destinationFile);
         }
     }
 }

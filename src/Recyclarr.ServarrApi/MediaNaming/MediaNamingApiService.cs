@@ -5,18 +5,11 @@ using Recyclarr.ServarrApi.Http;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-public class MediaNamingApiService : IMediaNamingApiService
+public class MediaNamingApiService(IServarrRequestBuilder service) : IMediaNamingApiService
 {
-    private readonly IServarrRequestBuilder _service;
-
-    public MediaNamingApiService(IServarrRequestBuilder service)
-    {
-        _service = service;
-    }
-
     public async Task<MediaNamingDto> GetNaming(IServiceConfiguration config)
     {
-        var response = await _service.Request(config, "config", "naming")
+        var response = await service.Request(config, "config", "naming")
             .GetAsync();
 
         return config.ServiceType switch
@@ -29,7 +22,7 @@ public class MediaNamingApiService : IMediaNamingApiService
 
     public async Task UpdateNaming(IServiceConfiguration config, MediaNamingDto dto)
     {
-        await _service.Request(config, "config", "naming")
+        await service.Request(config, "config", "naming")
             .PutJsonAsync(dto);
     }
 }

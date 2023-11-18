@@ -15,17 +15,8 @@ public record ProcessedQualityProfileData
     public IList<CustomFormatData> ScorelessCfs { get; } = new List<CustomFormatData>();
 }
 
-public class QualityProfileConfigPhase
+public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache cache)
 {
-    private readonly ILogger _log;
-    private readonly ProcessedCustomFormatCache _cache;
-
-    public QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache cache)
-    {
-        _log = log;
-        _cache = cache;
-    }
-
     public IReadOnlyCollection<ProcessedQualityProfileData> Execute(IServiceConfiguration config)
     {
         // 1. For each group of CFs that has a quality profile specified
@@ -35,7 +26,7 @@ public class QualityProfileConfigPhase
             .SelectMany(x => x.QualityProfiles
                 .Select(y => (Profile: y, x.TrashIds)))
             .SelectMany(x => x.TrashIds
-                .Select(_cache.LookupByTrashId)
+                .Select(cache.LookupByTrashId)
                 .NotNull()
                 .Select(y => (x.Profile, Cf: y)));
 
@@ -47,7 +38,7 @@ public class QualityProfileConfigPhase
         {
             if (!allProfiles.TryGetValue(profile.Name, out var profileCfs))
             {
-                _log.Debug("Implicitly adding quality profile config for {ProfileName}", profile.Name);
+                log.Debug("Implicitly adding quality profile config for {ProfileName}", profile.Name);
 
                 // If the user did not specify a quality profile in their config, we still create the QP object
                 // for consistency (at the very least for the name).
@@ -83,7 +74,7 @@ public class QualityProfileConfigPhase
 
         foreach (var (name, trashId) in scoreless)
         {
-            _log.Debug("CF has no score in the guide or config YAML: {Name} ({TrashId})", name, trashId);
+            log.Debug("CF has no score in the guide or config YAML: {Name} ({TrashId})", name, trashId);
         }
     }
 
@@ -106,14 +97,14 @@ public class QualityProfileConfigPhase
         {
             if (existingScore.Score != scoreToUse)
             {
-                _log.Warning(
+                log.Warning(
                     "Custom format {Name} ({TrashId}) is duplicated in quality profile {ProfileName} with a score " +
                     "of {NewScore}, which is different from the original score of {OriginalScore}",
                     cf.Name, cf.TrashId, scoreConfig.Name, scoreToUse, existingScore.Score);
             }
             else
             {
-                _log.Debug("Skipping duplicate score for {Name} ({TrashId})", cf.Name, cf.TrashId);
+                log.Debug("Skipping duplicate score for {Name} ({TrashId})", cf.Name, cf.TrashId);
             }
 
             return;
@@ -139,7 +130,7 @@ public class QualityProfileConfigPhase
                 return scoreFromSet;
             }
 
-            _log.Debug("CF {CfName} has no Score Set with name '{ScoreSetName}'", cf.Name, profile.ScoreSet);
+            log.Debug("CF {CfName} has no Score Set with name '{ScoreSetName}'", cf.Name, profile.ScoreSet);
         }
 
         return cf.DefaultScore;

@@ -5,26 +5,17 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigListTemplateProcessor
+public class ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGuideService guideService)
 {
-    private readonly IAnsiConsole _console;
-    private readonly IConfigTemplateGuideService _guideService;
-
-    public ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGuideService guideService)
-    {
-        _console = console;
-        _guideService = guideService;
-    }
-
     public void Process(IConfigListTemplatesSettings settings)
     {
         if (settings.Includes)
         {
-            ListData(_guideService.GetIncludeData());
+            ListData(guideService.GetIncludeData());
             return;
         }
 
-        ListData(_guideService.GetTemplateData());
+        ListData(guideService.GetTemplateData());
     }
 
     private void ListData(IReadOnlyCollection<TemplatePath> data)
@@ -42,7 +33,7 @@ public class ConfigListTemplateProcessor
             table.AddRow(s, r);
         }
 
-        _console.Write(table);
+        console.Write(table);
     }
 
     private static IEnumerable<Markup> RenderTemplates(

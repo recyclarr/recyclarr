@@ -3,18 +3,11 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Compatibility.Sonarr;
 
-public class SonarrCapabilityEnforcer
+public class SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
 {
-    private readonly ISonarrCapabilityFetcher _capabilityFetcher;
-
-    public SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
-    {
-        _capabilityFetcher = capabilityFetcher;
-    }
-
     public async Task Check(SonarrConfiguration config)
     {
-        var capabilities = await _capabilityFetcher.GetCapabilities(config);
+        var capabilities = await capabilityFetcher.GetCapabilities(config);
 
         if (capabilities.Version < SonarrCapabilities.MinimumVersion)
         {

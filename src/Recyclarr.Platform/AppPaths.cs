@@ -3,16 +3,11 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Platform;
 
-public class AppPaths : IAppPaths
+public class AppPaths(IDirectoryInfo appDataPath) : IAppPaths
 {
-    public AppPaths(IDirectoryInfo appDataPath)
-    {
-        AppDataDirectory = appDataPath;
-    }
-
     public static string DefaultAppDataDirectoryName => "recyclarr";
 
-    public IDirectoryInfo AppDataDirectory { get; }
+    public IDirectoryInfo AppDataDirectory { get; } = appDataPath;
     public IDirectoryInfo LogDirectory => AppDataDirectory.SubDir("logs", "cli");
     public IDirectoryInfo ReposDirectory => AppDataDirectory.SubDir("repositories");
     public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDir("cache");

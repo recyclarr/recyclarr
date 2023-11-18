@@ -14,37 +14,28 @@ public interface IQualityProfilePipelinePhases
     QualityProfileNoticePhase NoticePhase { get; }
 }
 
-public class QualityProfileSyncPipeline : ISyncPipeline
+public class QualityProfileSyncPipeline(ILogger log, IQualityProfilePipelinePhases phases) : ISyncPipeline
 {
-    private readonly ILogger _log;
-    private readonly IQualityProfilePipelinePhases _phases;
-
-    public QualityProfileSyncPipeline(ILogger log, IQualityProfilePipelinePhases phases)
-    {
-        _log = log;
-        _phases = phases;
-    }
-
     public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
     {
-        var guideData = _phases.ConfigPhase.Execute(config);
+        var guideData = phases.ConfigPhase.Execute(config);
         if (!guideData.Any())
         {
-            _log.Debug("No quality profiles to process");
+            log.Debug("No quality profiles to process");
             return;
         }
 
-        var serviceData = await _phases.ApiFetchPhase.Execute(config);
-        var transactions = _phases.TransactionPhase.Execute(guideData, serviceData);
+        var serviceData = await phases.ApiFetchPhase.Execute(config);
+        var transactions = phases.TransactionPhase.Execute(guideData, serviceData);
 
-        _phases.NoticePhase.Execute(transactions);
+        phases.NoticePhase.Execute(transactions);
 
         if (settings.Preview)
         {
-            _phases.PreviewPhase.Value.Execute(transactions);
+            phases.PreviewPhase.Value.Execute(transactions);
             return;
         }
 
-        await _phases.ApiPersistencePhase.Execute(config, transactions);
+        await phases.ApiPersistencePhase.Execute(config, transactions);
     }
 }

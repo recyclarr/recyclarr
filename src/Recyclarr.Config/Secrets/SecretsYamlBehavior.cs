@@ -5,19 +5,12 @@ using YamlDotNet.Serialization;
 namespace Recyclarr.Config.Secrets;
 
 [UsedImplicitly]
-public class SecretsYamlBehavior : IYamlBehavior
+public class SecretsYamlBehavior(ISecretsProvider secretsProvider) : IYamlBehavior
 {
-    private readonly ISecretsProvider _secretsProvider;
-
-    public SecretsYamlBehavior(ISecretsProvider secretsProvider)
-    {
-        _secretsProvider = secretsProvider;
-    }
-
     public void Setup(DeserializerBuilder builder)
     {
         builder
-            .WithNodeDeserializer(new SecretsDeserializer(_secretsProvider))
+            .WithNodeDeserializer(new SecretsDeserializer(secretsProvider))
             .WithTagMapping("!secret", typeof(SecretTag));
     }
 }

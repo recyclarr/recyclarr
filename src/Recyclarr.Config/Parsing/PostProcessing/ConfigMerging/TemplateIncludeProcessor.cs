@@ -5,15 +5,8 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class TemplateIncludeProcessor : IIncludeProcessor
+public class TemplateIncludeProcessor(IConfigTemplateGuideService templates) : IIncludeProcessor
 {
-    private readonly IConfigTemplateGuideService _templates;
-
-    public TemplateIncludeProcessor(IConfigTemplateGuideService templates)
-    {
-        _templates = templates;
-    }
-
     public bool CanProcess(IYamlInclude includeDirective)
     {
         return includeDirective is TemplateYamlInclude;
@@ -28,7 +21,7 @@ public class TemplateIncludeProcessor : IIncludeProcessor
             throw new YamlIncludeException("`template` property is required.");
         }
 
-        var includePath = _templates.GetIncludeData()
+        var includePath = templates.GetIncludeData()
             .Where(x => x.Service == serviceType)
             .FirstOrDefault(x => x.Id.EqualsIgnoreCase(include.Template));
 

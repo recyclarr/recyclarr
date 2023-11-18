@@ -3,16 +3,9 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 
-public class IncludeExcludeFilter : IReleaseProfileFilter
+public class IncludeExcludeFilter(ILogger log) : IReleaseProfileFilter
 {
-    private readonly ILogger _log;
-    private readonly ReleaseProfileDataFilterer _filterer;
-
-    public IncludeExcludeFilter(ILogger log)
-    {
-        _log = log;
-        _filterer = new ReleaseProfileDataFilterer(log);
-    }
+    private readonly ReleaseProfileDataFilterer _filterer = new(log);
 
     public ReleaseProfileData Transform(ReleaseProfileData profile, ReleaseProfileConfig config)
     {
@@ -21,7 +14,7 @@ public class IncludeExcludeFilter : IReleaseProfileFilter
             return profile;
         }
 
-        _log.Debug("This profile will be filtered");
+        log.Debug("This profile will be filtered");
         var newProfile = _filterer.FilterProfile(profile, config.Filter);
         return newProfile ?? profile;
     }

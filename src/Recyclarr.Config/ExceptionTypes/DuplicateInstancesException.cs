@@ -1,11 +1,6 @@
 namespace Recyclarr.Config.ExceptionTypes;
 
-public class DuplicateInstancesException : Exception
+public class DuplicateInstancesException(IReadOnlyCollection<string> instanceNames) : Exception
 {
-    public IReadOnlyCollection<string> InstanceNames { get; }
-
-    public DuplicateInstancesException(IReadOnlyCollection<string> instanceNames)
-    {
-        InstanceNames = instanceNames;
-    }
+    public IReadOnlyCollection<string> InstanceNames { get; } = instanceNames;
 }

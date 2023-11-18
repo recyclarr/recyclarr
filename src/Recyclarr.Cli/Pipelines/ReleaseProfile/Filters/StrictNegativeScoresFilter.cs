@@ -3,15 +3,8 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 
-public class StrictNegativeScoresFilter : IReleaseProfileFilter
+public class StrictNegativeScoresFilter(ILogger log) : IReleaseProfileFilter
 {
-    private readonly ILogger _log;
-
-    public StrictNegativeScoresFilter(ILogger log)
-    {
-        _log = log;
-    }
-
     public ReleaseProfileData Transform(ReleaseProfileData profile, ReleaseProfileConfig config)
     {
         if (!config.StrictNegativeScores)
@@ -19,7 +12,7 @@ public class StrictNegativeScoresFilter : IReleaseProfileFilter
             return profile;
         }
 
-        _log.Debug("Negative scores will be strictly ignored");
+        log.Debug("Negative scores will be strictly ignored");
         var splitPreferred = profile.Preferred.ToLookup(x => x.Score < 0);
 
         return profile with

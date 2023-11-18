@@ -3,15 +3,9 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingPreviewPhase
+public class MediaNamingPreviewPhase(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
     private Table? _table;
-
-    public MediaNamingPreviewPhase(IAnsiConsole console)
-    {
-        _console = console;
-    }
 
     public void Execute(MediaNamingDto serviceDto)
     {
@@ -33,8 +27,8 @@ public class MediaNamingPreviewPhase
                 throw new ArgumentException("Config type not supported in media naming preview");
         }
 
-        _console.WriteLine();
-        _console.Write(_table);
+        console.WriteLine();
+        console.Write(_table);
     }
 
     private void AddRow(string field, object? value)

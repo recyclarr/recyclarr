@@ -13,34 +13,25 @@ public interface IQualitySizePipelinePhases
     QualitySizeApiPersistencePhase ApiPersistencePhase { get; }
 }
 
-public class QualitySizeSyncPipeline : ISyncPipeline
+public class QualitySizeSyncPipeline(ILogger log, IQualitySizePipelinePhases phases) : ISyncPipeline
 {
-    private readonly ILogger _log;
-    private readonly IQualitySizePipelinePhases _phases;
-
-    public QualitySizeSyncPipeline(ILogger log, IQualitySizePipelinePhases phases)
-    {
-        _log = log;
-        _phases = phases;
-    }
-
     public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
     {
-        var selectedQuality = _phases.GuidePhase.Execute(config);
+        var selectedQuality = phases.GuidePhase.Execute(config);
         if (selectedQuality is null)
         {
-            _log.Debug("No quality definition to process");
+            log.Debug("No quality definition to process");
             return;
         }
 
         if (settings.Preview)
         {
-            _phases.PreviewPhase.Value.Execute(selectedQuality);
+            phases.PreviewPhase.Value.Execute(selectedQuality);
             return;
         }
 
-        var serviceData = await _phases.ApiFetchPhase.Execute(config);
-        var transactions = _phases.TransactionPhase.Execute(selectedQuality.Qualities, serviceData);
-        await _phases.ApiPersistencePhase.Execute(config, transactions);
+        var serviceData = await phases.ApiFetchPhase.Execute(config);
+        var transactions = phases.TransactionPhase.Execute(selectedQuality.Qualities, serviceData);
+        await phases.ApiPersistencePhase.Execute(config, transactions);
     }
 }

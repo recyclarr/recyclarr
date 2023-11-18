@@ -2,18 +2,11 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LogJanitor : ILogJanitor
+public class LogJanitor(IAppPaths paths) : ILogJanitor
 {
-    private readonly IAppPaths _paths;
-
-    public LogJanitor(IAppPaths paths)
-    {
-        _paths = paths;
-    }
-
     public void DeleteOldestLogFiles(int numberOfNewestToKeep)
     {
-        foreach (var file in _paths.LogDirectory.GetFiles()
+        foreach (var file in paths.LogDirectory.GetFiles()
             .OrderByDescending(f => f.Name)
             .Skip(numberOfNewestToKeep))
         {

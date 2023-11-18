@@ -14,18 +14,11 @@ public record ProfileWithStats
     public bool HasChanges => ProfileChanged || ScoresChanged || QualitiesChanged;
 }
 
-public class QualityProfileStatCalculator
+public class QualityProfileStatCalculator(ILogger log)
 {
-    private readonly ILogger _log;
-
-    public QualityProfileStatCalculator(ILogger log)
-    {
-        _log = log;
-    }
-
     public ProfileWithStats Calculate(UpdatedQualityProfile profile)
     {
-        _log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
+        log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
 
         var stats = new ProfileWithStats {Profile = profile};
         var oldDto = profile.ProfileDto;
@@ -49,7 +42,7 @@ public class QualityProfileStatCalculator
 
         void Log<T>(string msg, T oldValue, T newValue)
         {
-            _log.Debug("{Msg}: {Old} -> {New}", msg, oldValue, newValue);
+            log.Debug("{Msg}: {Old} -> {New}", msg, oldValue, newValue);
             stats.ProfileChanged |= !EqualityComparer<T>.Default.Equals(oldValue, newValue);
         }
     }
@@ -75,11 +68,11 @@ public class QualityProfileStatCalculator
             return;
         }
 
-        _log.Debug("> Scores updated for quality profile: {ProfileName}", profileDto.Name);
+        log.Debug("> Scores updated for quality profile: {ProfileName}", profileDto.Name);
 
         foreach (var (dto, newScore, reason) in scores)
         {
-            _log.Debug("  - {Format} ({Id}): {OldScore} -> {NewScore} ({Reason})",
+            log.Debug("  - {Format} ({Id}): {OldScore} -> {NewScore} ({Reason})",
                 dto.Name, dto.Format, dto.Score, newScore, reason);
         }
 

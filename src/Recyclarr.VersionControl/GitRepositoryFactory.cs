@@ -3,11 +3,8 @@ using Serilog;
 
 namespace Recyclarr.VersionControl;
 
-public class GitRepositoryFactory : IGitRepositoryFactory
+public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositoryFactory
 {
-    private readonly ILogger _log;
-    private readonly IGitPath _gitPath;
-
     // A few hand-picked files that should exist in a .git directory.
     private static readonly string[] ValidGitPaths =
     {
@@ -16,23 +13,17 @@ public class GitRepositoryFactory : IGitRepositoryFactory
         ".git/HEAD"
     };
 
-    public GitRepositoryFactory(ILogger log, IGitPath gitPath)
-    {
-        _log = log;
-        _gitPath = gitPath;
-    }
-
     public async Task<IGitRepository> CreateAndCloneIfNeeded(
         Uri repoUrl,
         IDirectoryInfo repoPath,
         string branch,
         CancellationToken token)
     {
-        var repo = new GitRepository(_log, _gitPath, repoPath);
+        var repo = new GitRepository(log, gitPath, repoPath);
 
         if (!repoPath.Exists)
         {
-            _log.Information("Cloning...");
+            log.Information("Cloning...");
             await repo.Clone(token, repoUrl, branch, 1);
         }
         else
@@ -50,7 +41,7 @@ public class GitRepositoryFactory : IGitRepositoryFactory
         }
 
         await repo.SetRemote(token, "origin", repoUrl);
-        _log.Debug("Remote 'origin' set to {Url}", repoUrl);
+        log.Debug("Remote 'origin' set to {Url}", repoUrl);
 
         return repo;
     }

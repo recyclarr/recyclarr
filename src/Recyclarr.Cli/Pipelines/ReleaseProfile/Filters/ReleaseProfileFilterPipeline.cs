@@ -3,17 +3,11 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 
-public class ReleaseProfileFilterPipeline : IReleaseProfileFilterPipeline
+public class ReleaseProfileFilterPipeline(IOrderedEnumerable<IReleaseProfileFilter> filters)
+    : IReleaseProfileFilterPipeline
 {
-    private readonly IOrderedEnumerable<IReleaseProfileFilter> _filters;
-
-    public ReleaseProfileFilterPipeline(IOrderedEnumerable<IReleaseProfileFilter> filters)
-    {
-        _filters = filters;
-    }
-
     public ReleaseProfileData Process(ReleaseProfileData profile, ReleaseProfileConfig config)
     {
-        return _filters.Aggregate(profile, (current, filter) => filter.Transform(current, config));
+        return filters.Aggregate(profile, (current, filter) => filter.Transform(current, config));
     }
 }
