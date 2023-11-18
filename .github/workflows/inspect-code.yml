@@ -14,8 +14,9 @@ on:
       - '**.cs'
 
 env:
-  BASE_REF: ${{ github.ref == 'refs/heads/master' && github.event.before ||
-                (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
+  baseRef: ${{ github.ref == 'refs/heads/master' && github.event.before ||
+              (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
+  dotnetVersion: 8.0.x
 
 jobs:
   inspect:
@@ -30,7 +31,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Restore
         run: dotnet restore src
@@ -55,7 +56,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Install Resharper Tools
         run: dotnet tool install -g JetBrains.ReSharper.GlobalTools
@@ -64,7 +65,7 @@ jobs:
         run: dotnet build src
 
       - name: Run Code Cleanup
-        run: ../ci/code_cleanup.sh "${{ env.BASE_REF }}"
+        run: ../ci/code_cleanup.sh "${{ env.baseRef }}"
         working-directory: src
 
       - name: Check Diff
