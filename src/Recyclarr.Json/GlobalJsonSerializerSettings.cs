@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using JorgeSerrano.Json;
 
 namespace Recyclarr.Json;
 
@@ -28,7 +27,7 @@ public static class GlobalJsonSerializerSettings
     /// </summary>
     public static JsonSerializerOptions Recyclarr { get; } = new()
     {
-        PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy(),
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         WriteIndented = true
     };
 
@@ -37,7 +36,7 @@ public static class GlobalJsonSerializerSettings
     /// </summary>
     public static JsonSerializerOptions Guide { get; } = new()
     {
-        PropertyNamingPolicy = new JsonSnakeCaseNamingPolicy(),
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         NumberHandling = JsonNumberHandling.AllowReadingFromString
     };
 }

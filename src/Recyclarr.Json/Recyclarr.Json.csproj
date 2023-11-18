@@ -2,7 +2,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="JetBrains.Annotations" />
-    <PackageReference Include="JorgeSerrano.Json.JsonSnakeCaseNamingPolicy" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
