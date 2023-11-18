@@ -14,9 +14,7 @@ public class ConfigListLocalCommand(ILogger log, ConfigListLocalProcessor proces
     : AsyncCommand<ConfigListLocalCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings
-    {
-    }
+    public class CliSettings : BaseCommandSettings;
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {

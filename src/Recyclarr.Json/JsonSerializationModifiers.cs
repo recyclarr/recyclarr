@@ -3,9 +3,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Recyclarr.Json;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class JsonNoSerializeAttribute : Attribute
-{
-}
+public sealed class JsonNoSerializeAttribute : Attribute;
 
 public static class JsonSerializationModifiers
 {

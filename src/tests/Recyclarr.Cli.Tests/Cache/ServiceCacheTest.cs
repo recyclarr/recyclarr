@@ -12,9 +12,7 @@ public class ServiceCacheTest
 {
     [SuppressMessage("SonarLint", "S2094", Justification =
         "Used for unit test scenario")]
-    private sealed class ObjectWithoutAttribute
-    {
-    }
+    private sealed class ObjectWithoutAttribute;
 
     private const string ValidObjectName = "azAZ_09";
 
@@ -25,9 +23,7 @@ public class ServiceCacheTest
     }
 
     [CacheObjectName("invalid+name")]
-    private sealed class ObjectWithAttributeInvalidChars
-    {
-    }
+    private sealed class ObjectWithAttributeInvalidChars;
 
     [Test, AutoMockData]
     public void Load_returns_null_when_file_does_not_exist(
