@@ -10,20 +10,13 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class CliInterceptor : ICommandInterceptor
+public class CliInterceptor(LoggingLevelSwitch loggingLevelSwitch, AppDataPathProvider appDataPathProvider)
+    : ICommandInterceptor
 {
-    private readonly LoggingLevelSwitch _loggingLevelSwitch;
-    private readonly AppDataPathProvider _appDataPathProvider;
     private readonly Subject<Unit> _interceptedSubject = new();
     private readonly ConsoleAppCancellationTokenSource _ct = new();
 
     public IObservable<Unit> OnIntercepted => _interceptedSubject.AsObservable();
-
-    public CliInterceptor(LoggingLevelSwitch loggingLevelSwitch, AppDataPathProvider appDataPathProvider)
-    {
-        _loggingLevelSwitch = loggingLevelSwitch;
-        _appDataPathProvider = appDataPathProvider;
-    }
 
     public void Intercept(CommandContext context, CommandSettings settings)
     {
@@ -46,14 +39,14 @@ public class CliInterceptor : ICommandInterceptor
     {
         HandleBaseCommand(cmd);
 
-        _appDataPathProvider.AppDataPath = cmd.AppData;
+        appDataPathProvider.AppDataPath = cmd.AppData;
     }
 
     private void HandleBaseCommand(BaseCommandSettings cmd)
     {
         cmd.CancellationToken = _ct.Token;
 
-        _loggingLevelSwitch.MinimumLevel = cmd.Debug switch
+        loggingLevelSwitch.MinimumLevel = cmd.Debug switch
         {
             true => LogEventLevel.Debug,
             _ => LogEventLevel.Information

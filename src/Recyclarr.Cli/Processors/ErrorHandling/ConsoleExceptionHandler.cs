@@ -8,66 +8,57 @@ using Recyclarr.VersionControl;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class ConsoleExceptionHandler
+public class ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler httpExceptionHandler)
 {
-    private readonly ILogger _log;
-    private readonly IFlurlHttpExceptionHandler _httpExceptionHandler;
-
-    public ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler httpExceptionHandler)
-    {
-        _log = log;
-        _httpExceptionHandler = httpExceptionHandler;
-    }
-
     public async Task<bool> HandleException(Exception sourceException)
     {
         switch (sourceException)
         {
             case GitCmdException e:
-                _log.Error(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}",
+                log.Error(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}",
                     e.ExitCode, e.Error);
                 break;
 
             case FlurlHttpException e:
-                _log.Error("HTTP error: {Message}", e.SanitizedExceptionMessage());
-                await _httpExceptionHandler.ProcessServiceErrorMessages(new ServiceErrorMessageExtractor(e));
+                log.Error("HTTP error: {Message}", e.SanitizedExceptionMessage());
+                await httpExceptionHandler.ProcessServiceErrorMessages(new ServiceErrorMessageExtractor(e));
                 break;
 
             case NoConfigurationFilesException:
-                _log.Error("No configuration files found");
+                log.Error("No configuration files found");
                 break;
 
             case InvalidInstancesException e:
-                _log.Error("The following instances do not exist: {Names}", e.InstanceNames);
+                log.Error("The following instances do not exist: {Names}", e.InstanceNames);
                 break;
 
             case DuplicateInstancesException e:
-                _log.Error("The following instance names are duplicated: {Names}", e.InstanceNames);
-                _log.Error("Instance names are unique and may not be reused");
+                log.Error("The following instance names are duplicated: {Names}", e.InstanceNames);
+                log.Error("Instance names are unique and may not be reused");
                 break;
 
             case SplitInstancesException e:
-                _log.Error("The following configs share the same `base_url`, which isn't allowed: {Instances}",
+                log.Error("The following configs share the same `base_url`, which isn't allowed: {Instances}",
                     e.InstanceNames);
-                _log.Error(
+                log.Error(
                     "Consolidate the config files manually to fix. " +
                     "See: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance");
                 break;
 
             case InvalidConfigurationFilesException e:
-                _log.Error("Manually-specified configuration files do not exist: {Files}", e.InvalidFiles);
+                log.Error("Manually-specified configuration files do not exist: {Files}", e.InvalidFiles);
                 break;
 
             case PostProcessingException e:
-                _log.Error("Configuration post-processing failed: {Message}", e.Message);
+                log.Error("Configuration post-processing failed: {Message}", e.Message);
                 break;
 
             case ServiceIncompatibilityException e:
-                _log.Error(e.Message);
+                log.Error(e.Message);
                 break;
 
             case CommandException e:
-                _log.Error(e.Message);
+                log.Error(e.Message);
                 break;
 
             default:

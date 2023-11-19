@@ -1,11 +1,6 @@
 namespace Recyclarr.Cli.Processors.Config;
 
-public class FileExistsException : Exception
+public class FileExistsException(string attemptedPath) : Exception
 {
-    public FileExistsException(string attemptedPath)
-    {
-        AttemptedPath = attemptedPath;
-    }
-
-    public string AttemptedPath { get; }
+    public string AttemptedPath { get; } = attemptedPath;
 }

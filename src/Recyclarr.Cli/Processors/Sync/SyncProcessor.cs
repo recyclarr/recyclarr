@@ -10,37 +10,21 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Sync;
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-public class SyncProcessor : ISyncProcessor
+public class SyncProcessor(
+    IAnsiConsole console,
+    ILogger log,
+    IConfigurationRegistry configRegistry,
+    SyncPipelineExecutor pipelines,
+    ServiceAgnosticCapabilityEnforcer capabilityEnforcer,
+    ConsoleExceptionHandler exceptionHandler)
+    : ISyncProcessor
 {
-    private readonly IAnsiConsole _console;
-    private readonly ILogger _log;
-    private readonly IConfigurationRegistry _configRegistry;
-    private readonly SyncPipelineExecutor _pipelines;
-    private readonly ServiceAgnosticCapabilityEnforcer _capabilityEnforcer;
-    private readonly ConsoleExceptionHandler _exceptionHandler;
-
-    public SyncProcessor(
-        IAnsiConsole console,
-        ILogger log,
-        IConfigurationRegistry configRegistry,
-        SyncPipelineExecutor pipelines,
-        ServiceAgnosticCapabilityEnforcer capabilityEnforcer,
-        ConsoleExceptionHandler exceptionHandler)
-    {
-        _console = console;
-        _log = log;
-        _configRegistry = configRegistry;
-        _pipelines = pipelines;
-        _capabilityEnforcer = capabilityEnforcer;
-        _exceptionHandler = exceptionHandler;
-    }
-
     public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
     {
         bool failureDetected;
         try
         {
-            var configs = _configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
+            var configs = configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
             {
                 ManualConfigFiles = settings.Configs,
                 Instances = settings.Instances,
@@ -51,7 +35,7 @@ public class SyncProcessor : ISyncProcessor
         }
         catch (Exception e)
         {
-            if (!await _exceptionHandler.HandleException(e))
+            if (!await exceptionHandler.HandleException(e))
             {
                 // This means we didn't handle the exception; rethrow it.
                 throw;
@@ -72,13 +56,13 @@ public class SyncProcessor : ISyncProcessor
             try
             {
                 PrintProcessingHeader(config.ServiceType, config);
-                await _capabilityEnforcer.Check(config);
-                await _pipelines.Process(settings, config);
-                _log.Information("Completed at {Date}", DateTime.Now);
+                await capabilityEnforcer.Check(config);
+                await pipelines.Process(settings, config);
+                log.Information("Completed at {Date}", DateTime.Now);
             }
             catch (Exception e)
             {
-                if (!await _exceptionHandler.HandleException(e))
+                if (!await exceptionHandler.HandleException(e))
                 {
                     // This means we didn't handle the exception; rethrow it.
                     throw;
@@ -95,7 +79,7 @@ public class SyncProcessor : ISyncProcessor
     {
         var instanceName = config.InstanceName;
 
-        _console.WriteLine(
+        console.WriteLine(
             $"""
 
              ===========================================
@@ -104,6 +88,6 @@ public class SyncProcessor : ISyncProcessor
 
              """);
 
-        _log.Debug("Processing {Server} server {Name}", serviceType, instanceName);
+        log.Debug("Processing {Server} server {Name}", serviceType, instanceName);
     }
 }

@@ -13,17 +13,9 @@ public record ProcessedNamingConfig
     public IReadOnlyCollection<InvalidNamingConfig> InvalidNaming { get; init; } = new List<InvalidNamingConfig>();
 }
 
-public class MediaNamingConfigPhase
+public class MediaNamingConfigPhase(IMediaNamingGuideService guide, ISonarrCapabilityFetcher sonarrCapabilities)
 {
-    private readonly IMediaNamingGuideService _guide;
-    private readonly ISonarrCapabilityFetcher _sonarrCapabilities;
     private List<InvalidNamingConfig> _errors = new();
-
-    public MediaNamingConfigPhase(IMediaNamingGuideService guide, ISonarrCapabilityFetcher sonarrCapabilities)
-    {
-        _guide = guide;
-        _sonarrCapabilities = sonarrCapabilities;
-    }
 
     public async Task<ProcessedNamingConfig> Execute(IServiceConfiguration config)
     {
@@ -39,9 +31,9 @@ public class MediaNamingConfigPhase
         return new ProcessedNamingConfig {Dto = dto, InvalidNaming = _errors};
     }
 
-    private MediaNamingDto ProcessRadarrNaming(RadarrConfiguration config)
+    private RadarrMediaNamingDto ProcessRadarrNaming(RadarrConfiguration config)
     {
-        var guideData = _guide.GetRadarrNamingData();
+        var guideData = guide.GetRadarrNamingData();
         var configData = config.MediaNaming;
 
         return new RadarrMediaNamingDto
@@ -54,9 +46,9 @@ public class MediaNamingConfigPhase
 
     private async Task<MediaNamingDto> ProcessSonarrNaming(SonarrConfiguration config)
     {
-        var guideData = _guide.GetSonarrNamingData();
+        var guideData = guide.GetSonarrNamingData();
         var configData = config.MediaNaming;
-        var capabilities = await _sonarrCapabilities.GetCapabilities(config);
+        var capabilities = await sonarrCapabilities.GetCapabilities(config);
         var keySuffix = capabilities.SupportsCustomFormats ? ":4" : ":3";
 
         return new SonarrMediaNamingDto

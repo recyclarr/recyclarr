@@ -5,9 +5,7 @@ namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 [SuppressMessage("Design", "CA1040:Avoid empty interfaces", Justification =
     "Used for type-discriminating node deserializer")]
-public interface IYamlInclude
-{
-}
+public interface IYamlInclude;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record ConfigYamlInclude : IYamlInclude

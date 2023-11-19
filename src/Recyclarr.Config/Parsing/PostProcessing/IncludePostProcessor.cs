@@ -5,25 +5,13 @@ using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing.PostProcessing;
 
-public class IncludePostProcessor : IConfigPostProcessor
+public class IncludePostProcessor(
+    ILogger log,
+    ConfigParser parser,
+    ConfigValidationExecutor validator,
+    IYamlIncludeResolver includeResolver)
+    : IConfigPostProcessor
 {
-    private readonly ILogger _log;
-    private readonly ConfigParser _parser;
-    private readonly ConfigValidationExecutor _validator;
-    private readonly IYamlIncludeResolver _includeResolver;
-
-    public IncludePostProcessor(
-        ILogger log,
-        ConfigParser parser,
-        ConfigValidationExecutor validator,
-        IYamlIncludeResolver includeResolver)
-    {
-        _log = log;
-        _parser = parser;
-        _validator = validator;
-        _includeResolver = includeResolver;
-    }
-
     public RootConfigYaml Process(RootConfigYaml config)
     {
         return new RootConfigYaml
@@ -33,7 +21,7 @@ public class IncludePostProcessor : IConfigPostProcessor
         };
     }
 
-    private IReadOnlyDictionary<string, T>? ProcessIncludes<T>(
+    private Dictionary<string, T>? ProcessIncludes<T>(
         IReadOnlyDictionary<string, T>? configs,
         ServiceConfigMerger<T> merger,
         SupportedServices serviceType)
@@ -76,33 +64,33 @@ public class IncludePostProcessor : IConfigPostProcessor
     private T LoadYamlInclude<T>(IYamlInclude includeType, SupportedServices serviceType)
         where T : ServiceConfigYaml
     {
-        var yamlFile = _includeResolver.GetIncludePath(includeType, serviceType);
+        var yamlFile = includeResolver.GetIncludePath(includeType, serviceType);
         using var logScope = LogContext.PushProperty(LogProperty.Scope, $"Include {yamlFile.Name}");
 
-        var configToMerge = _parser.Load<T>(yamlFile);
+        var configToMerge = parser.Load<T>(yamlFile);
         if (configToMerge is null)
         {
             throw new YamlIncludeException($"Failed to parse include file: {yamlFile.FullName}");
         }
 
-        if (!_validator.Validate(configToMerge))
+        if (!validator.Validate(configToMerge))
         {
             throw new YamlIncludeException($"Validation of included YAML failed: {yamlFile.FullName}");
         }
 
         if (configToMerge.BaseUrl is not null)
         {
-            _log.Warning("`base_url` is not allowed in YAML includes");
+            log.Warning("`base_url` is not allowed in YAML includes");
         }
 
         if (configToMerge.ApiKey is not null)
         {
-            _log.Warning("`api_key` is not allowed in YAML includes");
+            log.Warning("`api_key` is not allowed in YAML includes");
         }
 
         if (configToMerge.Include is not null)
         {
-            _log.Warning("Nested `include` directives are not supported");
+            log.Warning("Nested `include` directives are not supported");
         }
 
         return configToMerge;

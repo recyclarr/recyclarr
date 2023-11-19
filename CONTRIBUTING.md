@@ -24,7 +24,7 @@ that everyone should follow.
 
 The following tools are required:
 
-- .NET SDK 7.0 and tooling (e.g. `dotnet`)
+- .NET SDK 8.0 and tooling (e.g. `dotnet`)
 - Powershell v5.1 or greater
 - Docker CLI (Docker Desktop on Windows)
 

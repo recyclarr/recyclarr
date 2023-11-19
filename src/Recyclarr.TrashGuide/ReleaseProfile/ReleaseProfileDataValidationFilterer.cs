@@ -3,18 +3,11 @@ using Recyclarr.Common.FluentValidation;
 
 namespace Recyclarr.TrashGuide.ReleaseProfile;
 
-public class ReleaseProfileDataValidationFilterer
+public class ReleaseProfileDataValidationFilterer(ILogger log)
 {
-    private readonly ILogger _log;
-
-    public ReleaseProfileDataValidationFilterer(ILogger log)
-    {
-        _log = log;
-    }
-
     private void LogInvalidTerm(IReadOnlyCollection<ValidationFailure> failures, string filterDescription)
     {
-        _log.Debug("Validation failed on term data ({Filter}): {Failures}", filterDescription, failures);
+        log.Debug("Validation failed on term data ({Filter}): {Failures}", filterDescription, failures);
     }
 
     public IEnumerable<TermData> FilterTerms(IEnumerable<TermData> terms)
@@ -43,8 +36,8 @@ public class ReleaseProfileDataValidationFilterer
             .Select(FilterProfile)
             .IsValid(new ReleaseProfileDataValidator(), (e, x) =>
             {
-                _log.Warning("Excluding invalid release profile: {Profile}", x.ToString());
-                _log.Debug("Release profile excluded for these reasons: {Reasons}", e);
+                log.Warning("Excluding invalid release profile: {Profile}", x.ToString());
+                log.Debug("Release profile excluded for these reasons: {Reasons}", e);
             });
     }
 }

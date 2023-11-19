@@ -6,18 +6,10 @@ using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public sealed class ErrorResponseParser
+public sealed class ErrorResponseParser(ILogger log, string responseBody)
 {
-    private readonly ILogger _log;
-    private readonly Func<Stream> _streamFactory;
-    private readonly JsonSerializerOptions _jsonSettings;
-
-    public ErrorResponseParser(ILogger log, string responseBody)
-    {
-        _log = log;
-        _streamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(responseBody));
-        _jsonSettings = GlobalJsonSerializerSettings.Services;
-    }
+    private readonly Func<Stream> _streamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(responseBody));
+    private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Services;
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public bool DeserializeList(Func<IEnumerable<JsonElement>, IEnumerable<string>> expr)
@@ -34,7 +26,7 @@ public sealed class ErrorResponseParser
             var parsed = expr(value);
             foreach (var s in parsed)
             {
-                _log.Error("Error message from remote service: {Message:l}", s);
+                log.Error("Error message from remote service: {Message:l}", s);
             }
 
             return true;
@@ -57,7 +49,7 @@ public sealed class ErrorResponseParser
                 return false;
             }
 
-            _log.Error("Error message from remote service: {Message:l}", value);
+            log.Error("Error message from remote service: {Message:l}", value);
             return true;
         }
         catch
@@ -81,11 +73,11 @@ public sealed class ErrorResponseParser
                 return false;
             }
 
-            _log.Error("Error message from remote service: {Message:l}", value.Title);
+            log.Error("Error message from remote service: {Message:l}", value.Title);
 
             foreach (var (topic, msg) in value.Errors.SelectMany(x => x.Value.Select(y => (x.Key, Msg: y))))
             {
-                _log.Error("{Topic:l}: {Message:l}", topic, msg);
+                log.Error("{Topic:l}: {Message:l}", topic, msg);
             }
 
             return true;

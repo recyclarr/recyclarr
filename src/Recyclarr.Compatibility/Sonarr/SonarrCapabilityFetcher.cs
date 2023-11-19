@@ -1,12 +1,8 @@
 namespace Recyclarr.Compatibility.Sonarr;
 
-public class SonarrCapabilityFetcher : ServiceCapabilityFetcher<SonarrCapabilities>, ISonarrCapabilityFetcher
+public class SonarrCapabilityFetcher(IServiceInformation info)
+    : ServiceCapabilityFetcher<SonarrCapabilities>(info), ISonarrCapabilityFetcher
 {
-    public SonarrCapabilityFetcher(IServiceInformation info)
-        : base(info)
-    {
-    }
-
     protected override SonarrCapabilities BuildCapabilitiesObject(Version version)
     {
         return new SonarrCapabilities

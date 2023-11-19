@@ -6,23 +6,14 @@ using Serilog.Context;
 
 namespace Recyclarr.Repo;
 
-public class TrashGuidesRepo : ITrashGuidesRepo, IUpdateableRepo
+public class TrashGuidesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
+    : ITrashGuidesRepo, IUpdateableRepo
 {
-    private readonly IRepoUpdater _repoUpdater;
-    private readonly ISettingsProvider _settings;
-
-    public TrashGuidesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
-    {
-        _repoUpdater = repoUpdater;
-        _settings = settings;
-        Path = paths.ReposDirectory.SubDir("trash-guides");
-    }
-
-    public IDirectoryInfo Path { get; }
+    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDir("trash-guides");
 
     public Task Update(CancellationToken token)
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, "Trash Guides Repo");
-        return _repoUpdater.UpdateRepo(Path, _settings.Settings.Repositories.TrashGuides, token);
+        return repoUpdater.UpdateRepo(Path, settings.Settings.Repositories.TrashGuides, token);
     }
 }

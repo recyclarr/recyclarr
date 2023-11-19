@@ -3,10 +3,4 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Tests.TestLibrary;
 
-public sealed class TestAppPaths : AppPaths
-{
-    public TestAppPaths(IFileSystem fs)
-        : base(fs.CurrentDirectory().SubDirectory("recyclarr"))
-    {
-    }
-}
+public sealed class TestAppPaths(IFileSystem fs) : AppPaths(fs.CurrentDirectory().SubDirectory("recyclarr"));

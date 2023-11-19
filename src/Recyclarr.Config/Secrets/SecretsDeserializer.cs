@@ -8,15 +8,8 @@ namespace Recyclarr.Config.Secrets;
 [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
 public record SecretTag;
 
-public class SecretsDeserializer : INodeDeserializer
+public class SecretsDeserializer(ISecretsProvider secrets) : INodeDeserializer
 {
-    private readonly ISecretsProvider _secrets;
-
-    public SecretsDeserializer(ISecretsProvider secrets)
-    {
-        _secrets = secrets;
-    }
-
     public bool Deserialize(
         IParser reader,
         Type expectedType,
@@ -31,7 +24,7 @@ public class SecretsDeserializer : INodeDeserializer
         }
 
         var secretKey = reader.Consume<Scalar>();
-        if (!_secrets.Secrets.TryGetValue(secretKey.Value, out var secretsValue))
+        if (!secrets.Secrets.TryGetValue(secretKey.Value, out var secretsValue))
         {
             throw new SecretNotFoundException(secretKey.Start.Line, secretKey.Value);
         }

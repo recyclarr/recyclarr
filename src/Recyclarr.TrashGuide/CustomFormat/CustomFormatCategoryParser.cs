@@ -50,17 +50,17 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
                 break;
             }
 
-            if (line.Any())
+            if (line.Length != 0)
             {
                 var fields = GetTableRow(line);
-                if (fields.Any())
+                if (fields.Count != 0)
                 {
                     tableRows.Add(fields);
                     continue;
                 }
             }
 
-            if (tableRows.Any())
+            if (tableRows.Count != 0)
             {
                 break;
             }

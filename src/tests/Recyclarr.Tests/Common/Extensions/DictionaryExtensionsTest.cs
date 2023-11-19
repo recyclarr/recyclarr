@@ -6,9 +6,7 @@ namespace Recyclarr.Tests.Common.Extensions;
 [Parallelizable(ParallelScope.All)]
 public class DictionaryExtensionsTest
 {
-    private sealed class MySampleValue
-    {
-    }
+    private sealed class MySampleValue;
 
     [Test]
     public void Create_item_if_none_exists()

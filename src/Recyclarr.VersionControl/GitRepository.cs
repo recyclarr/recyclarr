@@ -8,19 +8,8 @@ namespace Recyclarr.VersionControl;
 
 [SuppressMessage("Design", "CA1068:CancellationToken parameters must come last", Justification =
     "Doesn't mix well with `params` (which has to be at the end)")]
-public sealed class GitRepository : IGitRepository
+public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir) : IGitRepository
 {
-    private readonly ILogger _log;
-    private readonly IGitPath _gitPath;
-    private readonly IDirectoryInfo _workDir;
-
-    public GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir)
-    {
-        _log = log;
-        _gitPath = gitPath;
-        _workDir = workDir;
-    }
-
     private Task RunGitCmd(CancellationToken token, params string[] args)
     {
         return RunGitCmd(token, (ICollection<string>) args);
@@ -28,24 +17,24 @@ public sealed class GitRepository : IGitRepository
 
     private async Task RunGitCmd(CancellationToken token, ICollection<string> args)
     {
-        _log.Debug("Executing git command with args: {Args}", args);
+        log.Debug("Executing git command with args: {Args}", args);
 
         var output = new StringBuilder();
         var error = new StringBuilder();
 
-        _log.Debug("Using working directory: {Dir}", _workDir.FullName);
-        _workDir.Create();
+        log.Debug("Using working directory: {Dir}", workDir.FullName);
+        workDir.Create();
 
-        var cli = Cli.Wrap(_gitPath.Path)
+        var cli = Cli.Wrap(gitPath.Path)
             .WithArguments(args)
             .WithValidation(CommandResultValidation.None)
             .WithStandardOutputPipe(PipeTarget.ToStringBuilder(output))
             .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error))
-            .WithWorkingDirectory(_workDir.FullName);
+            .WithWorkingDirectory(workDir.FullName);
 
         var result = await cli.ExecuteAsync(token);
 
-        _log.Debug("Command Output: {Output}", output.ToString().Trim());
+        log.Debug("Command Output: {Output}", output.ToString().Trim());
 
         if (result.ExitCode != 0)
         {

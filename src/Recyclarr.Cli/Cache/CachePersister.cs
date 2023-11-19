@@ -3,23 +3,14 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Cache;
 
-public class CachePersister : ICachePersister
+public class CachePersister(ILogger log, IServiceCache serviceCache) : ICachePersister
 {
-    private readonly IServiceCache _cache;
-    private readonly ILogger _log;
-
-    public CachePersister(ILogger log, IServiceCache cache)
-    {
-        _log = log;
-        _cache = cache;
-    }
-
     public CustomFormatCache Load(IServiceConfiguration config)
     {
-        var cache = _cache.Load<CustomFormatCache>(config);
+        var cache = serviceCache.Load<CustomFormatCache>(config);
         if (cache == null)
         {
-            _log.Debug("Custom format cache does not exist; proceeding without it");
+            log.Debug("Custom format cache does not exist; proceeding without it");
             return new CustomFormatCache();
         }
 
@@ -27,7 +18,7 @@ public class CachePersister : ICachePersister
         // incompatibility that we do not support.
         if (cache.Version != CustomFormatCache.LatestVersion)
         {
-            _log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
+            log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
                 cache.Version, CustomFormatCache.LatestVersion);
             throw new CacheException("Version mismatch");
         }
@@ -37,8 +28,8 @@ public class CachePersister : ICachePersister
 
     public void Save(IServiceConfiguration config, CustomFormatCache cache)
     {
-        _log.Debug("Saving Cache with {Mappings}", JsonSerializer.Serialize(cache.TrashIdMappings));
+        log.Debug("Saving Cache with {Mappings}", JsonSerializer.Serialize(cache.TrashIdMappings));
 
-        _cache.Save(cache, config);
+        serviceCache.Save(cache, config);
     }
 }

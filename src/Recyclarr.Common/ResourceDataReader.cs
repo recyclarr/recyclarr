@@ -3,24 +3,16 @@ using System.Text;
 
 namespace Recyclarr.Common;
 
-public class ResourceDataReader : IResourceDataReader
+public class ResourceDataReader(Assembly assembly, string subdirectory = "") : IResourceDataReader
 {
-    private readonly Assembly _assembly;
     private readonly string? _namespace;
-    private readonly string _subdirectory;
-
-    public ResourceDataReader(Assembly assembly, string subdirectory = "")
-    {
-        _subdirectory = subdirectory;
-        _assembly = assembly;
-    }
 
     public ResourceDataReader(Type typeWithNamespaceToUse, string subdirectory = "")
+        : this(Assembly.GetAssembly(typeWithNamespaceToUse)
+            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse)),
+            subdirectory)
     {
-        _subdirectory = subdirectory;
         _namespace = typeWithNamespaceToUse.Namespace;
-        _assembly = Assembly.GetAssembly(typeWithNamespaceToUse)
-            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse));
     }
 
     public string ReadData(string filename)
@@ -39,9 +31,9 @@ public class ResourceDataReader : IResourceDataReader
             nameBuilder.Append($"{_namespace}.");
         }
 
-        if (!string.IsNullOrEmpty(_subdirectory))
+        if (!string.IsNullOrEmpty(subdirectory))
         {
-            nameBuilder.Append($"{_subdirectory}.");
+            nameBuilder.Append($"{subdirectory}.");
         }
 
         nameBuilder.Append(filename);
@@ -50,7 +42,7 @@ public class ResourceDataReader : IResourceDataReader
 
     private string FindResourcePath(string resourcePath)
     {
-        var foundResource = Array.Find(_assembly.GetManifestResourceNames(), x => x.EndsWith(resourcePath));
+        var foundResource = Array.Find(assembly.GetManifestResourceNames(), x => x.EndsWith(resourcePath));
         if (foundResource is null)
         {
             throw new ArgumentException($"Embedded resource not found: {resourcePath}");
@@ -61,7 +53,7 @@ public class ResourceDataReader : IResourceDataReader
 
     private string GetResourceData(string resourcePath)
     {
-        using var stream = _assembly.GetManifestResourceStream(resourcePath);
+        using var stream = assembly.GetManifestResourceStream(resourcePath);
         if (stream is null)
         {
             throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");

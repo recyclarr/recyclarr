@@ -24,16 +24,10 @@ public record TemplatePath
     public bool Hidden { get; init; }
 }
 
-public class ConfigTemplateGuideService : IConfigTemplateGuideService
+public class ConfigTemplateGuideService(IConfigTemplatesRepo repo) : IConfigTemplateGuideService
 {
-    private readonly IConfigTemplatesRepo _repo;
     private IReadOnlyCollection<TemplatePath>? _templateData;
     private IReadOnlyCollection<TemplatePath>? _includeData;
-
-    public ConfigTemplateGuideService(IConfigTemplatesRepo repo)
-    {
-        _repo = repo;
-    }
 
     public IReadOnlyCollection<TemplatePath> GetTemplateData()
     {
@@ -45,9 +39,9 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
         return _includeData ??= LoadTemplateData("includes.json");
     }
 
-    private IReadOnlyCollection<TemplatePath> LoadTemplateData(string templateFileName)
+    private List<TemplatePath> LoadTemplateData(string templateFileName)
     {
-        var templatesPath = _repo.Path.File(templateFileName);
+        var templatesPath = repo.Path.File(templateFileName);
         if (!templatesPath.Exists)
         {
             throw new InvalidDataException(
@@ -66,7 +60,7 @@ public class ConfigTemplateGuideService : IConfigTemplateGuideService
             return new TemplatePath
             {
                 Id = entry.Id,
-                TemplateFile = _repo.Path.File(entry.Template),
+                TemplateFile = repo.Path.File(entry.Template),
                 Service = service,
                 Hidden = entry.Hidden
             };

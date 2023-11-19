@@ -5,19 +5,8 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatConfigPhase
+public class CustomFormatConfigPhase(ILogger log, ICustomFormatGuideService guide, ProcessedCustomFormatCache cache)
 {
-    private readonly ILogger _log;
-    private readonly ICustomFormatGuideService _guide;
-    private readonly ProcessedCustomFormatCache _cache;
-
-    public CustomFormatConfigPhase(ILogger log, ICustomFormatGuideService guide, ProcessedCustomFormatCache cache)
-    {
-        _log = log;
-        _guide = guide;
-        _cache = cache;
-    }
-
     public IReadOnlyCollection<CustomFormatData> Execute(IServiceConfiguration config)
     {
         // Match custom formats in the YAML config to those in the guide, by Trash ID
@@ -30,7 +19,7 @@ public class CustomFormatConfigPhase
         var processedCfs = config.CustomFormats
             .SelectMany(x => x.TrashIds)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .GroupJoin(_guide.GetCustomFormatData(config.ServiceType),
+            .GroupJoin(guide.GetCustomFormatData(config.ServiceType),
                 x => x,
                 x => x.TrashId,
                 (id, cf) => (Id: id, CustomFormats: cf))
@@ -39,11 +28,11 @@ public class CustomFormatConfigPhase
         var invalidCfs = processedCfs[false].Select(x => x.Id).ToList();
         if (invalidCfs.IsNotEmpty())
         {
-            _log.Warning("These Custom Formats do not exist in the guide and will be skipped: {Cfs}", invalidCfs);
+            log.Warning("These Custom Formats do not exist in the guide and will be skipped: {Cfs}", invalidCfs);
         }
 
         var validCfs = processedCfs[true].SelectMany(x => x.CustomFormats).ToList();
-        _cache.AddCustomFormats(validCfs);
+        cache.AddCustomFormats(validCfs);
         return validCfs;
     }
 }

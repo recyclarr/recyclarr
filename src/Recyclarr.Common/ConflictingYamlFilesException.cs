@@ -1,12 +1,7 @@
 namespace Recyclarr.Common;
 
-public class ConflictingYamlFilesException : Exception
+public class ConflictingYamlFilesException(IEnumerable<string> supportedFiles) : Exception(BuildMessage(supportedFiles))
 {
-    public ConflictingYamlFilesException(IEnumerable<string> supportedFiles)
-        : base(BuildMessage(supportedFiles))
-    {
-    }
-
     private static string BuildMessage(IEnumerable<string> supportedFiles)
     {
         return

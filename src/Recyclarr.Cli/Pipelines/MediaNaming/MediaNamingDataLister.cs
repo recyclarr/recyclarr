@@ -2,33 +2,23 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common;
 using Recyclarr.TrashGuide.MediaNaming;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
-public class MediaNamingDataLister
+public class MediaNamingDataLister(
+    IAnsiConsole console,
+    IMediaNamingGuideService guide)
 {
-    private readonly IAnsiConsole _console;
-    private readonly IMediaNamingGuideService _guide;
-
-    public MediaNamingDataLister(
-        IAnsiConsole console,
-        IMediaNamingGuideService guide)
-    {
-        _console = console;
-        _guide = guide;
-    }
-
     public void ListNaming(SupportedServices serviceType)
     {
         switch (serviceType)
         {
             case SupportedServices.Radarr:
-                ListRadarrNaming(_guide.GetRadarrNamingData());
+                ListRadarrNaming(guide.GetRadarrNamingData());
                 break;
 
             case SupportedServices.Sonarr:
-                ListSonarrNaming(_guide.GetSonarrNamingData());
+                ListSonarrNaming(guide.GetSonarrNamingData());
                 break;
 
             default:
@@ -38,31 +28,31 @@ public class MediaNamingDataLister
 
     private void ListRadarrNaming(RadarrMediaNamingData guideData)
     {
-        _console.MarkupLine("Media Naming Formats [red](Preview)[/]");
+        console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 
-        _console.WriteLine();
-        _console.Write(DictionaryToTableRadarr("Movie Folder Format", guideData.Folder));
-        _console.WriteLine();
-        _console.Write(DictionaryToTableRadarr("Standard Movie Format", guideData.File));
+        console.WriteLine();
+        console.Write(DictionaryToTableRadarr("Movie Folder Format", guideData.Folder));
+        console.WriteLine();
+        console.Write(DictionaryToTableRadarr("Standard Movie Format", guideData.File));
     }
 
     private void ListSonarrNaming(SonarrMediaNamingData guideData)
     {
-        _console.MarkupLine("Media Naming Formats [red](Preview)[/]");
+        console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 
-        _console.WriteLine();
-        _console.Write(DictionaryToTableSonarr("Season Folder Format", guideData.Season));
-        _console.WriteLine();
-        _console.Write(DictionaryToTableSonarr("Series Folder Format", guideData.Series));
-        _console.WriteLine();
-        _console.Write(DictionaryToTableSonarr("Standard Episode Format", guideData.Episodes.Standard));
-        _console.WriteLine();
-        _console.Write(DictionaryToTableSonarr("Daily Episode Format", guideData.Episodes.Daily));
-        _console.WriteLine();
-        _console.Write(DictionaryToTableSonarr("Anime Episode Format", guideData.Episodes.Anime));
+        console.WriteLine();
+        console.Write(DictionaryToTableSonarr("Season Folder Format", guideData.Season));
+        console.WriteLine();
+        console.Write(DictionaryToTableSonarr("Series Folder Format", guideData.Series));
+        console.WriteLine();
+        console.Write(DictionaryToTableSonarr("Standard Episode Format", guideData.Episodes.Standard));
+        console.WriteLine();
+        console.Write(DictionaryToTableSonarr("Daily Episode Format", guideData.Episodes.Daily));
+        console.WriteLine();
+        console.Write(DictionaryToTableSonarr("Anime Episode Format", guideData.Episodes.Anime));
     }
 
-    private static IRenderable DictionaryToTableRadarr(string title, IReadOnlyDictionary<string, string> formats)
+    private static Rows DictionaryToTableRadarr(string title, IReadOnlyDictionary<string, string> formats)
     {
         var table = new Table()
             .AddColumns("Key", "Format");
@@ -82,7 +72,7 @@ public class MediaNamingDataLister
         return new Rows(Markup.FromInterpolated($"[orange3]{title}[/]"), table);
     }
 
-    private static IRenderable DictionaryToTableSonarr(string title, IReadOnlyDictionary<string, string> formats)
+    private static Rows DictionaryToTableSonarr(string title, IReadOnlyDictionary<string, string> formats)
     {
         var table = new Table()
             .AddColumns("Key", "Sonarr Version", "Format");

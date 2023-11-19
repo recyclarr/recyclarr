@@ -2,18 +2,12 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Compatibility;
 
-public abstract class ServiceCapabilityFetcher<T> where T : class
+public abstract class ServiceCapabilityFetcher<T>(IServiceInformation info)
+    where T : class
 {
-    private readonly IServiceInformation _info;
-
-    protected ServiceCapabilityFetcher(IServiceInformation info)
-    {
-        _info = info;
-    }
-
     public async Task<T> GetCapabilities(IServiceConfiguration config)
     {
-        var version = await _info.GetVersion(config);
+        var version = await info.GetVersion(config);
         return BuildCapabilitiesObject(version);
     }
 

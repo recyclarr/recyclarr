@@ -5,29 +5,21 @@ using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.MediaNaming;
 
-public class MediaNamingGuideService : IMediaNamingGuideService
+public class MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, GuideJsonLoader jsonLoader)
+    : IMediaNamingGuideService
 {
-    private readonly IRepoMetadataBuilder _metadataBuilder;
-    private readonly GuideJsonLoader _jsonLoader;
-
-    public MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, GuideJsonLoader jsonLoader)
-    {
-        _metadataBuilder = metadataBuilder;
-        _jsonLoader = jsonLoader;
-    }
-
     private IReadOnlyList<IDirectoryInfo> CreatePaths(SupportedServices serviceType)
     {
-        var metadata = _metadataBuilder.GetMetadata();
+        var metadata = metadataBuilder.GetMetadata();
         return serviceType switch
         {
-            SupportedServices.Radarr => _metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.Naming),
-            SupportedServices.Sonarr => _metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Naming),
+            SupportedServices.Radarr => metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.Naming),
+            SupportedServices.Sonarr => metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Naming),
             _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null)
         };
     }
 
-    private static IReadOnlyDictionary<string, string> JoinDictionaries(
+    private static Dictionary<string, string> JoinDictionaries(
         IEnumerable<IReadOnlyDictionary<string, string>> dictionaries)
     {
         return dictionaries
@@ -38,7 +30,7 @@ public class MediaNamingGuideService : IMediaNamingGuideService
     public RadarrMediaNamingData GetRadarrNamingData()
     {
         var paths = CreatePaths(SupportedServices.Radarr);
-        var data = _jsonLoader.LoadAllFilesAtPaths<RadarrMediaNamingData>(paths);
+        var data = jsonLoader.LoadAllFilesAtPaths<RadarrMediaNamingData>(paths);
         return new RadarrMediaNamingData
         {
             File = JoinDictionaries(data.Select(x => x.File)),
@@ -49,7 +41,7 @@ public class MediaNamingGuideService : IMediaNamingGuideService
     public SonarrMediaNamingData GetSonarrNamingData()
     {
         var paths = CreatePaths(SupportedServices.Sonarr);
-        var data = _jsonLoader.LoadAllFilesAtPaths<SonarrMediaNamingData>(paths);
+        var data = jsonLoader.LoadAllFilesAtPaths<SonarrMediaNamingData>(paths);
         return new SonarrMediaNamingData
         {
             Season = JoinDictionaries(data.Select(x => x.Season)),

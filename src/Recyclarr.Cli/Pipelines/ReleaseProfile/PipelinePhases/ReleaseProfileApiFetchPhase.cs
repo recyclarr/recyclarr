@@ -3,18 +3,10 @@ using Recyclarr.ServarrApi.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
-public class ReleaseProfileApiFetchPhase
+public class ReleaseProfileApiFetchPhase(IReleaseProfileApiService rpService)
 {
-    private readonly IReleaseProfileApiService _rpService;
-
-    public ReleaseProfileApiFetchPhase(
-        IReleaseProfileApiService rpService)
-    {
-        _rpService = rpService;
-    }
-
     public async Task<IList<SonarrReleaseProfile>> Execute(IServiceConfiguration config)
     {
-        return await _rpService.GetReleaseProfiles(config);
+        return await rpService.GetReleaseProfiles(config);
     }
 }

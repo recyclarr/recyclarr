@@ -7,42 +7,28 @@ using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing;
 
-public class ConfigurationLoader : IConfigurationLoader
+public class ConfigurationLoader(
+    ILogger log,
+    ConfigParser parser,
+    IMapper mapper,
+    ConfigValidationExecutor validator,
+    IEnumerable<IConfigPostProcessor> postProcessors)
+    : IConfigurationLoader
 {
-    private readonly ILogger _log;
-    private readonly ConfigParser _parser;
-    private readonly IMapper _mapper;
-    private readonly ConfigValidationExecutor _validator;
-    private readonly IEnumerable<IConfigPostProcessor> _postProcessors;
-
-    public ConfigurationLoader(
-        ILogger log,
-        ConfigParser parser,
-        IMapper mapper,
-        ConfigValidationExecutor validator,
-        IEnumerable<IConfigPostProcessor> postProcessors)
-    {
-        _log = log;
-        _parser = parser;
-        _mapper = mapper;
-        _validator = validator;
-        _postProcessors = postProcessors;
-    }
-
     public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
-        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(file));
+        return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(file));
     }
 
     public IReadOnlyCollection<IServiceConfiguration> Load(string yaml)
     {
-        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(yaml));
+        return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(yaml));
     }
 
     public IReadOnlyCollection<IServiceConfiguration> Load(Func<TextReader> streamFactory)
     {
-        return ProcessLoadedConfigs(_parser.Load<RootConfigYaml>(streamFactory));
+        return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(streamFactory));
     }
 
     private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(RootConfigYaml? config)
@@ -52,14 +38,14 @@ public class ConfigurationLoader : IConfigurationLoader
             return Array.Empty<IServiceConfiguration>();
         }
 
-        config = _postProcessors.Aggregate(config, (current, processor) => processor.Process(current));
+        config = postProcessors.Aggregate(config, (current, processor) => processor.Process(current));
 
         if (config.IsConfigEmpty())
         {
-            _log.Warning("Configuration is empty");
+            log.Warning("Configuration is empty");
         }
 
-        if (!_validator.Validate(config))
+        if (!validator.Validate(config))
         {
             return Array.Empty<IServiceConfiguration>();
         }
@@ -80,6 +66,6 @@ public class ConfigurationLoader : IConfigurationLoader
             return Array.Empty<IServiceConfiguration>();
         }
 
-        return configs.Select(x => _mapper.Map<TServiceConfig>(x.Value) with {InstanceName = x.Key});
+        return configs.Select(x => mapper.Map<TServiceConfig>(x.Value) with {InstanceName = x.Key});
     }
 }

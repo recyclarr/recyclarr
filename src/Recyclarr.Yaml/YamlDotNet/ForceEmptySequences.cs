@@ -6,15 +6,8 @@ using YamlDotNet.Serialization;
 namespace Recyclarr.Yaml.YamlDotNet;
 
 // Borrowed from: https://github.com/aaubry/YamlDotNet/issues/443#issuecomment-544449498
-public sealed class ForceEmptySequences : INodeDeserializer
+public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDeserializer
 {
-    private readonly IObjectFactory _objectFactory;
-
-    public ForceEmptySequences(IObjectFactory objectFactory)
-    {
-        _objectFactory = objectFactory;
-    }
-
     bool INodeDeserializer.Deserialize(
         IParser reader,
         Type expectedType,
@@ -29,7 +22,7 @@ public sealed class ForceEmptySequences : INodeDeserializer
         }
 
         reader.SkipThisAndNestedEvents();
-        value = _objectFactory.Create(expectedType);
+        value = objectFactory.Create(expectedType);
         return true;
     }
 

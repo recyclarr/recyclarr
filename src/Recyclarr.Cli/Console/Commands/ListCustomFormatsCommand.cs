@@ -14,11 +14,9 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List custom formats in the guide for a particular service.")]
-public class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.CliSettings>
+public class ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoUpdater repoUpdater)
+    : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
-    private readonly CustomFormatDataLister _lister;
-    private readonly IMultiRepoUpdater _repoUpdater;
-
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings, IListCustomFormatSettings
@@ -37,16 +35,10 @@ public class ListCustomFormatsCommand : AsyncCommand<ListCustomFormatsCommand.Cl
         public bool Raw { get; init; } = false;
     }
 
-    public ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoUpdater repoUpdater)
-    {
-        _lister = lister;
-        _repoUpdater = repoUpdater;
-    }
-
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await _repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
-        _lister.List(settings);
+        await repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
+        lister.List(settings);
         return 0;
     }
 }

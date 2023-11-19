@@ -4,23 +4,16 @@ using Recyclarr.Json;
 
 namespace Recyclarr.TrashGuide.ReleaseProfile;
 
-public class ReleaseProfileGuideParser
+public class ReleaseProfileGuideParser(ILogger log)
 {
-    private readonly ILogger _log;
-    private readonly JsonSerializerOptions _jsonSettings;
-
-    public ReleaseProfileGuideParser(ILogger log)
+    private readonly JsonSerializerOptions _jsonSettings = new(GlobalJsonSerializerSettings.Services)
     {
-        _log = log;
-        _jsonSettings = new JsonSerializerOptions(GlobalJsonSerializerSettings.Services)
+        Converters =
         {
-            Converters =
-            {
-                new CollectionJsonConverter(),
-                new TermDataConverter()
-            }
-        };
-    }
+            new CollectionJsonConverter(),
+            new TermDataConverter()
+        }
+    };
 
     private async Task<ReleaseProfileData?> LoadAndParseFile(IFileInfo file)
     {
@@ -43,19 +36,19 @@ public class ReleaseProfileGuideParser
 
     private void HandleJsonException(JsonException exception, IFileInfo file)
     {
-        _log.Warning(exception,
+        log.Warning(exception,
             "Failed to parse Sonarr JSON file (This likely indicates a bug that should be " +
             "reported in the TRaSH repo): {File}", file.Name);
     }
 
     public IEnumerable<ReleaseProfileData> GetReleaseProfileData(IEnumerable<IDirectoryInfo> paths)
     {
-        var tasks = JsonUtils.GetJsonFilesInDirectories(paths, _log).Select(LoadAndParseFile);
+        var tasks = JsonUtils.GetJsonFilesInDirectories(paths, log).Select(LoadAndParseFile);
         var data = Task.WhenAll(tasks).Result
             // Make non-nullable type and filter out null values
             .Choose(x => x is not null ? (true, x) : default);
 
-        var validator = new ReleaseProfileDataValidationFilterer(_log);
+        var validator = new ReleaseProfileDataValidationFilterer(log);
         return validator.FilterProfiles(data);
     }
 }

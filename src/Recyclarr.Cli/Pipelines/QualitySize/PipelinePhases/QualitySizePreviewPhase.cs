@@ -3,15 +3,8 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizePreviewPhase
+public class QualitySizePreviewPhase(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
-
-    public QualitySizePreviewPhase(IAnsiConsole console)
-    {
-        _console = console;
-    }
-
     public void Execute(QualitySizeData selectedQuality)
     {
         var table = new Table();
@@ -28,7 +21,7 @@ public class QualitySizePreviewPhase
             table.AddRow(quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
         }
 
-        _console.WriteLine();
-        _console.Write(table);
+        console.WriteLine();
+        console.Write(table);
     }
 }

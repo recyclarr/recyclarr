@@ -4,15 +4,8 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
-public class ReleaseProfilePreviewPhase
+public class ReleaseProfilePreviewPhase(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
-
-    public ReleaseProfilePreviewPhase(IAnsiConsole console)
-    {
-        _console = console;
-    }
-
     public void Execute(ReleaseProfileTransactionData profiles)
     {
         var tree = new Tree("Release Profiles [red](Preview)[/]");
@@ -20,8 +13,8 @@ public class ReleaseProfilePreviewPhase
         PrintCategoryOfChanges("Created Profiles", tree, profiles.CreatedProfiles);
         PrintCategoryOfChanges("Updated Profiles", tree, profiles.UpdatedProfiles);
 
-        _console.WriteLine();
-        _console.Write(tree);
+        console.WriteLine();
+        console.Write(tree);
     }
 
     private void PrintCategoryOfChanges(string nodeTitle, Tree tree, IEnumerable<SonarrReleaseProfile> profiles)
@@ -44,7 +37,7 @@ public class ReleaseProfilePreviewPhase
         PrintTerms(rpNode, "Must Not Contain", profile.Ignored);
         PrintPreferredTerms(rpNode, "Preferred", profile.Preferred);
 
-        _console.WriteLine("");
+        console.WriteLine("");
     }
 
     private static void PrintTerms(TreeNode tree, string title, IReadOnlyCollection<string> terms)

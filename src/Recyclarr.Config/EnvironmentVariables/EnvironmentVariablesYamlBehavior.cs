@@ -6,19 +6,12 @@ using YamlDotNet.Serialization;
 namespace Recyclarr.Config.EnvironmentVariables;
 
 [UsedImplicitly]
-public class EnvironmentVariablesYamlBehavior : IYamlBehavior
+public class EnvironmentVariablesYamlBehavior(IEnvironment environment) : IYamlBehavior
 {
-    private readonly IEnvironment _environment;
-
-    public EnvironmentVariablesYamlBehavior(IEnvironment environment)
-    {
-        _environment = environment;
-    }
-
     public void Setup(DeserializerBuilder builder)
     {
         builder
-            .WithNodeDeserializer(new EnvironmentVariablesDeserializer(_environment))
+            .WithNodeDeserializer(new EnvironmentVariablesDeserializer(environment))
             .WithTagMapping("!env_var", typeof(EnvironmentVariableTag));
     }
 }

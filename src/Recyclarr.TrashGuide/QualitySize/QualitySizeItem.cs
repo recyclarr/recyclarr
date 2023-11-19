@@ -1,16 +1,11 @@
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualitySizeItem : QualityItem
+public class QualitySizeItem(string quality, decimal min, decimal max, decimal preferred)
+    : QualityItem(quality, min, max)
 {
-    public QualitySizeItem(string quality, decimal min, decimal max, decimal preferred)
-        : base(quality, min, max)
-    {
-        Preferred = preferred;
-    }
-
     public const decimal PreferredUnlimitedThreshold = 395;
 
-    public decimal Preferred { get; set; }
+    public decimal Preferred { get; set; } = preferred;
     public decimal? PreferredForApi => Preferred < PreferredUnlimitedThreshold ? Preferred : null;
     public string AnnotatedPreferred => AnnotatedValue(Preferred, PreferredUnlimitedThreshold);
 

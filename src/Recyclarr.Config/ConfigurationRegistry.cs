@@ -6,35 +6,25 @@ using Recyclarr.Config.Parsing.ErrorHandling;
 
 namespace Recyclarr.Config;
 
-public class ConfigurationRegistry : IConfigurationRegistry
+public class ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFinder finder, IFileSystem fs)
+    : IConfigurationRegistry
 {
-    private readonly IConfigurationLoader _loader;
-    private readonly IConfigurationFinder _finder;
-    private readonly IFileSystem _fs;
-
-    public ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFinder finder, IFileSystem fs)
-    {
-        _loader = loader;
-        _finder = finder;
-        _fs = fs;
-    }
-
     public IReadOnlyCollection<IServiceConfiguration> FindAndLoadConfigs(ConfigFilterCriteria? filterCriteria = null)
     {
         filterCriteria ??= new ConfigFilterCriteria();
 
         var manualConfigs = filterCriteria.ManualConfigFiles;
-        var configs = manualConfigs is not null && manualConfigs.Any()
+        var configs = manualConfigs is not null && manualConfigs.Count != 0
             ? PrepareManualConfigs(manualConfigs)
-            : _finder.GetConfigFiles();
+            : finder.GetConfigFiles();
 
         return LoadAndFilterConfigs(configs, filterCriteria).ToList();
     }
 
-    private IReadOnlyCollection<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
+    private List<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
     {
         var configFiles = manualConfigs
-            .Select(x => _fs.FileInfo.New(x))
+            .Select(x => fs.FileInfo.New(x))
             .ToLookup(x => x.Exists);
 
         if (configFiles[false].Any())
@@ -49,22 +39,22 @@ public class ConfigurationRegistry : IConfigurationRegistry
         IEnumerable<IFileInfo> configs,
         ConfigFilterCriteria filterCriteria)
     {
-        var loadedConfigs = configs.SelectMany(x => _loader.Load(x)).ToList();
+        var loadedConfigs = configs.SelectMany(x => loader.Load(x)).ToList();
 
         var dupeInstances = loadedConfigs.GetDuplicateInstanceNames().ToList();
-        if (dupeInstances.Any())
+        if (dupeInstances.Count != 0)
         {
             throw new DuplicateInstancesException(dupeInstances);
         }
 
         var invalidInstances = loadedConfigs.GetInvalidInstanceNames(filterCriteria).ToList();
-        if (invalidInstances.Any())
+        if (invalidInstances.Count != 0)
         {
             throw new InvalidInstancesException(invalidInstances);
         }
 
         var splitInstances = loadedConfigs.GetSplitInstances().ToList();
-        if (splitInstances.Any())
+        if (splitInstances.Count != 0)
         {
             throw new SplitInstancesException(splitInstances);
         }

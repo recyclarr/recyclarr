@@ -4,22 +4,15 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Yaml.YamlDotNet;
 
-internal class ValidatingDeserializer : INodeDeserializer
+internal class ValidatingDeserializer(INodeDeserializer nodeDeserializer) : INodeDeserializer
 {
-    private readonly INodeDeserializer _nodeDeserializer;
-
-    public ValidatingDeserializer(INodeDeserializer nodeDeserializer)
-    {
-        _nodeDeserializer = nodeDeserializer;
-    }
-
     public bool Deserialize(
         IParser reader,
         Type expectedType,
         Func<IParser, Type, object?> nestedObjectDeserializer,
         out object? value)
     {
-        if (!_nodeDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value) ||
+        if (!nodeDeserializer.Deserialize(reader, expectedType, nestedObjectDeserializer, out value) ||
             value == null)
         {
             return false;

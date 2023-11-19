@@ -3,20 +3,13 @@ using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatApiPersistencePhase
+public class CustomFormatApiPersistencePhase(ICustomFormatApiService api)
 {
-    private readonly ICustomFormatApiService _api;
-
-    public CustomFormatApiPersistencePhase(ICustomFormatApiService api)
-    {
-        _api = api;
-    }
-
     public async Task Execute(IServiceConfiguration config, CustomFormatTransactionData transactions)
     {
         foreach (var cf in transactions.NewCustomFormats)
         {
-            var response = await _api.CreateCustomFormat(config, cf);
+            var response = await api.CreateCustomFormat(config, cf);
             if (response is not null)
             {
                 cf.Id = response.Id;
@@ -25,12 +18,12 @@ public class CustomFormatApiPersistencePhase
 
         foreach (var dto in transactions.UpdatedCustomFormats)
         {
-            await _api.UpdateCustomFormat(config, dto);
+            await api.UpdateCustomFormat(config, dto);
         }
 
         foreach (var map in transactions.DeletedCustomFormats)
         {
-            await _api.DeleteCustomFormat(config, map.CustomFormatId);
+            await api.DeleteCustomFormat(config, map.CustomFormatId);
         }
     }
 }

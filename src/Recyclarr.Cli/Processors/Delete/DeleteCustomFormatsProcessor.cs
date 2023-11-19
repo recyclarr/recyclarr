@@ -11,28 +11,14 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;
 
-public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
+public class DeleteCustomFormatsProcessor(
+    ILogger log,
+    IAnsiConsole console,
+    ICustomFormatApiService api,
+    IConfigurationRegistry configRegistry,
+    ISonarrCapabilityFetcher sonarCapabilities)
+    : IDeleteCustomFormatsProcessor
 {
-    private readonly ILogger _log;
-    private readonly IAnsiConsole _console;
-    private readonly ICustomFormatApiService _api;
-    private readonly IConfigurationRegistry _configRegistry;
-    private readonly ISonarrCapabilityFetcher _sonarCapabilities;
-
-    public DeleteCustomFormatsProcessor(
-        ILogger log,
-        IAnsiConsole console,
-        ICustomFormatApiService api,
-        IConfigurationRegistry configRegistry,
-        ISonarrCapabilityFetcher sonarCapabilities)
-    {
-        _log = log;
-        _console = console;
-        _api = api;
-        _configRegistry = configRegistry;
-        _sonarCapabilities = sonarCapabilities;
-    }
-
     public async Task Process(IDeleteCustomFormatSettings settings)
     {
         var config = GetTargetConfig(settings);
@@ -43,7 +29,7 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
 
         if (!settings.All)
         {
-            if (!settings.CustomFormatNames.Any())
+            if (settings.CustomFormatNames.Count == 0)
             {
                 throw new CommandException("Custom format names must be specified if the `--all` option is not used.");
             }
@@ -53,7 +39,7 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
 
         if (!cfs.Any())
         {
-            _console.MarkupLine("[yellow]Done[/]: No custom formats found or specified to delete.");
+            console.MarkupLine("[yellow]Done[/]: No custom formats found or specified to delete.");
             return;
         }
 
@@ -61,14 +47,14 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
 
         if (settings.Preview)
         {
-            _console.MarkupLine("This is a preview! [u]No actual deletions will be performed.[/]");
+            console.MarkupLine("This is a preview! [u]No actual deletions will be performed.[/]");
             return;
         }
 
         if (!settings.Force &&
-            !_console.Confirm("\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?"))
+            !console.Confirm("\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?"))
         {
-            _console.WriteLine("Aborted!");
+            console.WriteLine("Aborted!");
             return;
         }
 
@@ -79,7 +65,7 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
     {
         if (config is SonarrConfiguration)
         {
-            var capabilities = await _sonarCapabilities.GetCapabilities(config);
+            var capabilities = await sonarCapabilities.GetCapabilities(config);
             if (!capabilities.SupportsCustomFormats)
             {
                 throw new ServiceIncompatibilityException("Custom formats are not supported in Sonarr v3");
@@ -90,7 +76,7 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     private async Task DeleteCustomFormats(ICollection<CustomFormatData> cfs, IServiceConfiguration config)
     {
-        await _console.Progress().StartAsync(async ctx =>
+        await console.Progress().StartAsync(async ctx =>
         {
             var task = ctx.AddTask("Deleting Custom Formats").MaxValue(cfs.Count);
 
@@ -99,13 +85,13 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
             {
                 try
                 {
-                    await _api.DeleteCustomFormat(config, cf.Id, token);
-                    _log.Debug("Deleted {Name}", cf.Name);
+                    await api.DeleteCustomFormat(config, cf.Id, token);
+                    log.Debug("Deleted {Name}", cf.Name);
                 }
                 catch (Exception e)
                 {
-                    _log.Debug(e, "Failed to delete CF");
-                    _console.WriteLine($"Failed to delete CF: {cf.Name}");
+                    log.Debug(e, "Failed to delete CF");
+                    console.WriteLine($"Failed to delete CF: {cf.Name}");
                 }
 
                 task.Increment(1);
@@ -117,9 +103,9 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
     {
         IList<CustomFormatData> cfs = new List<CustomFormatData>();
 
-        await _console.Status().StartAsync("Obtaining custom formats...", async _ =>
+        await console.Status().StartAsync("Obtaining custom formats...", async _ =>
         {
-            cfs = await _api.GetCustomFormats(config);
+            cfs = await api.GetCustomFormats(config);
         });
 
         return cfs;
@@ -141,10 +127,10 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
         if (result[false].Any())
         {
             var cfNames = result[false].Select(x => x.Name).ToList();
-            _log.Debug("Unmatched CFs: {Names}", cfNames);
+            log.Debug("Unmatched CFs: {Names}", cfNames);
             foreach (var name in cfNames)
             {
-                _console.MarkupLineInterpolated($"[yellow]Warning[/]: Unmatched CF Name: [teal]{name}[/]");
+                console.MarkupLineInterpolated($"[yellow]Warning[/]: Unmatched CF Name: [teal]{name}[/]");
             }
         }
 
@@ -156,8 +142,8 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
     [SuppressMessage("ReSharper", "CoVariantArrayConversion")]
     private void PrintPreview(ICollection<CustomFormatData> cfs)
     {
-        _console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");
-        _console.WriteLine();
+        console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");
+        console.WriteLine();
 
         var cfNames = cfs
             .Select(x => x.Name)
@@ -174,13 +160,13 @@ public class DeleteCustomFormatsProcessor : IDeleteCustomFormatsProcessor
                 .ToArray());
         }
 
-        _console.Write(grid);
-        _console.WriteLine();
+        console.Write(grid);
+        console.WriteLine();
     }
 
     private IServiceConfiguration GetTargetConfig(IDeleteCustomFormatSettings settings)
     {
-        var configs = _configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
+        var configs = configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
         {
             Instances = new[] {settings.InstanceName}
         });

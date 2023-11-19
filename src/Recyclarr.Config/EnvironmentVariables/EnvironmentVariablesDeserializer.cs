@@ -9,15 +9,8 @@ namespace Recyclarr.Config.EnvironmentVariables;
 [SuppressMessage("Minor Code Smell", "S2094:Classes should not be empty")]
 public record EnvironmentVariableTag;
 
-public class EnvironmentVariablesDeserializer : INodeDeserializer
+public class EnvironmentVariablesDeserializer(IEnvironment environment) : INodeDeserializer
 {
-    private readonly IEnvironment _environment;
-
-    public EnvironmentVariablesDeserializer(IEnvironment environment)
-    {
-        _environment = environment;
-    }
-
     public bool Deserialize(
         IParser reader,
         Type expectedType,
@@ -33,7 +26,7 @@ public class EnvironmentVariablesDeserializer : INodeDeserializer
 
         var scalar = reader.Consume<Scalar>();
         var split = scalar.Value.Trim().Split(' ', 2);
-        var envVarValue = _environment.GetEnvironmentVariable(split[0]);
+        var envVarValue = environment.GetEnvironmentVariable(split[0]);
         if (string.IsNullOrWhiteSpace(envVarValue))
         {
             // Trim whitespace + quotation characters

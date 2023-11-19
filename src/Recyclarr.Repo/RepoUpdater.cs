@@ -6,17 +6,8 @@ using Serilog;
 
 namespace Recyclarr.Repo;
 
-public class RepoUpdater : IRepoUpdater
+public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) : IRepoUpdater
 {
-    private readonly ILogger _log;
-    private readonly IGitRepositoryFactory _repositoryFactory;
-
-    public RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory)
-    {
-        _log = log;
-        _repositoryFactory = repositoryFactory;
-    }
-
     public async Task UpdateRepo(
         IDirectoryInfo repoPath,
         IRepositorySettings repoSettings,
@@ -34,16 +25,16 @@ public class RepoUpdater : IRepoUpdater
         }
         catch (GitCmdException e)
         {
-            _log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}", e.ExitCode, e.Error);
+            log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}", e.ExitCode, e.Error);
         }
         catch (InvalidGitRepoException e)
         {
-            _log.Debug(e, "Git repository is not valid (missing files in `.git` directory)");
+            log.Debug(e, "Git repository is not valid (missing files in `.git` directory)");
         }
 
         if (!succeeded)
         {
-            _log.Warning("Deleting local git repo and retrying git operation due to error");
+            log.Warning("Deleting local git repo and retrying git operation due to error");
             repoPath.DeleteReadOnlyDirectory();
             await CheckoutAndUpdateRepo(repoPath, repoSettings, token);
         }
@@ -57,13 +48,13 @@ public class RepoUpdater : IRepoUpdater
         var cloneUrl = repoSettings.CloneUrl;
         var branch = repoSettings.Branch;
 
-        _log.Debug("Using Branch & Clone URL: {Branch}, {Url}", branch, cloneUrl);
+        log.Debug("Using Branch & Clone URL: {Branch}, {Url}", branch, cloneUrl);
         if (repoSettings.Sha1 is not null)
         {
-            _log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
+            log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
         }
 
-        using var repo = await _repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, repoPath, branch, token);
+        using var repo = await repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, repoPath, branch, token);
         await repo.ForceCheckout(token, branch);
 
         try
@@ -72,8 +63,8 @@ public class RepoUpdater : IRepoUpdater
         }
         catch (GitCmdException e)
         {
-            _log.Debug(e, "Non-zero exit code {ExitCode} while running git fetch: {Error}", e.ExitCode, e.Error);
-            _log.Error(
+            log.Debug(e, "Non-zero exit code {ExitCode} while running git fetch: {Error}", e.ExitCode, e.Error);
+            log.Error(
                 "Updating the repo '{RepoDir}' (git fetch) failed. Proceeding with existing files. " +
                 "Check clone URL is correct and that github is not down",
                 repoPath.Name);

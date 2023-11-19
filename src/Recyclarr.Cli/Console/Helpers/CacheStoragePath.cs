@@ -7,16 +7,9 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
-public class CacheStoragePath : ICacheStoragePath
+public class CacheStoragePath(IAppPaths paths) : ICacheStoragePath
 {
-    private readonly IAppPaths _paths;
-    private readonly IFNV1a _hash;
-
-    public CacheStoragePath(IAppPaths paths)
-    {
-        _paths = paths;
-        _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(64));
-    }
+    private readonly IFNV1a _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(64));
 
     private string BuildUniqueServiceDir(IServiceConfiguration config)
     {
@@ -26,7 +19,7 @@ public class CacheStoragePath : ICacheStoragePath
 
     private IFileInfo CalculatePathInternal(IServiceConfiguration config, string cacheObjectName, string serviceDir)
     {
-        return _paths.CacheDirectory
+        return paths.CacheDirectory
             .SubDirectory(config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture))
             .SubDirectory(serviceDir)
             .File(cacheObjectName + ".json");

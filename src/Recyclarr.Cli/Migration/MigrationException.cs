@@ -1,18 +1,12 @@
 namespace Recyclarr.Cli.Migration;
 
-public class MigrationException : Exception
+public class MigrationException(
+    Exception originalException,
+    string operationDescription,
+    IReadOnlyCollection<string> remediation)
+    : Exception
 {
-    public MigrationException(
-        Exception originalException,
-        string operationDescription,
-        IReadOnlyCollection<string> remediation)
-    {
-        OperationDescription = operationDescription;
-        OriginalException = originalException;
-        Remediation = remediation;
-    }
-
-    public Exception OriginalException { get; }
-    public string OperationDescription { get; }
-    public IReadOnlyCollection<string> Remediation { get; }
+    public Exception OriginalException { get; } = originalException;
+    public string OperationDescription { get; } = operationDescription;
+    public IReadOnlyCollection<string> Remediation { get; } = remediation;
 }

@@ -4,15 +4,8 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfilePreviewPhase
+public class QualityProfilePreviewPhase(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
-
-    public QualityProfilePreviewPhase(IAnsiConsole console)
-    {
-        _console = console;
-    }
-
     public void Execute(QualityProfileTransactionData transactions)
     {
         var tree = new Tree("Quality Profile Changes [red](Preview)[/]");
@@ -26,7 +19,7 @@ public class QualityProfilePreviewPhase
                 new Markup("[b]Profile Updates[/]"),
                 SetupProfileTable(profile)));
 
-            if (profile.ProfileConfig.Profile.Qualities.Any())
+            if (profile.ProfileConfig.Profile.Qualities.Count != 0)
             {
                 profileTree.AddNode(SetupQualityItemTable(profile));
             }
@@ -38,9 +31,9 @@ public class QualityProfilePreviewPhase
             tree.AddNode(profileTree);
         }
 
-        _console.WriteLine();
-        _console.Write(tree);
-        _console.WriteLine();
+        console.WriteLine();
+        console.Write(tree);
+        console.WriteLine();
     }
 
     private static Table SetupProfileTable(UpdatedQualityProfile profile)
@@ -75,7 +68,7 @@ public class QualityProfilePreviewPhase
         static string Null<T>(T? val) => val is null ? "<unset>" : val.ToString() ?? "<invalid>";
     }
 
-    private static IRenderable SetupQualityItemTable(UpdatedQualityProfile profile)
+    private static Rows SetupQualityItemTable(UpdatedQualityProfile profile)
     {
         static IRenderable BuildName(ProfileItemDto item)
         {
@@ -128,7 +121,7 @@ public class QualityProfilePreviewPhase
             .Where(x => x.Reason != FormatScoreUpdateReason.NoChange && x.Dto.Score != x.NewScore)
             .ToList();
 
-        if (!updatedScores.Any())
+        if (updatedScores.Count == 0)
         {
             return new Markup("[hotpink]No score changes[/]");
         }

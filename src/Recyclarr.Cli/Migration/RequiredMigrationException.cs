@@ -1,9 +1,3 @@
 namespace Recyclarr.Cli.Migration;
 
-public class RequiredMigrationException : Exception
-{
-    public RequiredMigrationException()
-        : base("Some REQUIRED migrations did not pass")
-    {
-    }
-}
+public class RequiredMigrationException() : Exception("Some REQUIRED migrations did not pass");

@@ -4,15 +4,8 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeTransactionPhase
+public class QualitySizeTransactionPhase(ILogger log)
 {
-    private readonly ILogger _log;
-
-    public QualitySizeTransactionPhase(ILogger log)
-    {
-        _log = log;
-    }
-
     public Collection<ServiceQualityDefinitionItem> Execute(
         IEnumerable<QualitySizeItem> guideQuality,
         IList<ServiceQualityDefinitionItem> serverQuality)
@@ -23,7 +16,7 @@ public class QualitySizeTransactionPhase
             var serverEntry = serverQuality.FirstOrDefault(q => q.Quality?.Name == qualityData.Quality);
             if (serverEntry == null)
             {
-                _log.Warning("Server lacks quality definition for {Quality}; it will be skipped", qualityData.Quality);
+                log.Warning("Server lacks quality definition for {Quality}; it will be skipped", qualityData.Quality);
                 continue;
             }
 
@@ -38,7 +31,7 @@ public class QualitySizeTransactionPhase
             serverEntry.PreferredSize = qualityData.PreferredForApi;
             newQuality.Add(serverEntry);
 
-            _log.Debug("Setting Quality " +
+            log.Debug("Setting Quality " +
                 "[Name: {Name}] [Source: {Source}] [Min: {Min}] [Max: {Max}] [Preferred: {Preferred}]",
                 serverEntry.Quality?.Name, serverEntry.Quality?.Source, serverEntry.MinSize, serverEntry.MaxSize,
                 serverEntry.PreferredSize);

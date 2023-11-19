@@ -15,19 +15,12 @@ public static class Verify
         return ArgumentMatcher.Enqueue(new AssertionMatcher<T>(action));
     }
 
-    private sealed class AssertionMatcher<T> : IArgumentMatcher<T>
+    private sealed class AssertionMatcher<T>(Action<T> assertion) : IArgumentMatcher<T>
     {
-        private readonly Action<T> _assertion;
-
-        public AssertionMatcher(Action<T> assertion)
-        {
-            _assertion = assertion;
-        }
-
         public bool IsSatisfiedBy(T argument)
         {
             using var scope = new AssertionScope();
-            _assertion(argument);
+            assertion(argument);
 
             var failures = scope.Discard().ToList();
             if (failures.Count == 0)

@@ -4,16 +4,9 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.Filters;
 
-public class ReleaseProfileDataFilterer
+public class ReleaseProfileDataFilterer(ILogger log)
 {
-    private readonly ILogger _log;
-    private readonly ReleaseProfileDataValidationFilterer _validator;
-
-    public ReleaseProfileDataFilterer(ILogger log)
-    {
-        _log = log;
-        _validator = new ReleaseProfileDataValidationFilterer(log);
-    }
+    private readonly ReleaseProfileDataValidationFilterer _validator = new(log);
 
     public ReadOnlyCollection<TermData> ExcludeTerms(
         IEnumerable<TermData> terms,
@@ -63,9 +56,9 @@ public class ReleaseProfileDataFilterer
         ReleaseProfileData selectedProfile,
         SonarrProfileFilterConfig profileFilter)
     {
-        if (profileFilter.Include.Any())
+        if (profileFilter.Include.Count != 0)
         {
-            _log.Debug("Using inclusion filter");
+            log.Debug("Using inclusion filter");
             return selectedProfile with
             {
                 Required = IncludeTerms(selectedProfile.Required, profileFilter.Include),
@@ -74,9 +67,9 @@ public class ReleaseProfileDataFilterer
             };
         }
 
-        if (profileFilter.Exclude.Any())
+        if (profileFilter.Exclude.Count != 0)
         {
-            _log.Debug("Using exclusion filter");
+            log.Debug("Using exclusion filter");
             return selectedProfile with
             {
                 Required = ExcludeTerms(selectedProfile.Required, profileFilter.Exclude),
@@ -85,7 +78,7 @@ public class ReleaseProfileDataFilterer
             };
         }
 
-        _log.Debug("Filter property present but is empty");
+        log.Debug("Filter property present but is empty");
         return null;
     }
 }

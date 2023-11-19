@@ -11,10 +11,7 @@ public sealed class CustomizeWithAttribute : CustomizeAttribute
 
     public CustomizeWithAttribute(Type customizationType)
     {
-        if (customizationType == null)
-        {
-            throw new ArgumentNullException(nameof(customizationType));
-        }
+        ArgumentNullException.ThrowIfNull(customizationType);
 
         if (!typeof(ICustomization).IsAssignableFrom(customizationType))
         {

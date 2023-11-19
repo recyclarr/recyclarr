@@ -44,7 +44,7 @@ public static class ConfigExtensions
         this IEnumerable<IServiceConfiguration> configs,
         ConfigFilterCriteria criteria)
     {
-        if (criteria.Instances is null || !criteria.Instances.Any())
+        if (criteria.Instances is null || criteria.Instances.Count == 0)
         {
             return Array.Empty<string>();
         }

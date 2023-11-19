@@ -9,38 +9,25 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigListLocalProcessor
+public class ConfigListLocalProcessor(
+    IAnsiConsole console,
+    IConfigurationFinder configFinder,
+    IConfigurationLoader configLoader,
+    IAppPaths paths)
 {
-    private readonly IAnsiConsole _console;
-    private readonly IConfigurationFinder _configFinder;
-    private readonly IConfigurationLoader _configLoader;
-    private readonly IAppPaths _paths;
-
-    public ConfigListLocalProcessor(
-        IAnsiConsole console,
-        IConfigurationFinder configFinder,
-        IConfigurationLoader configLoader,
-        IAppPaths paths)
-    {
-        _console = console;
-        _configFinder = configFinder;
-        _configLoader = configLoader;
-        _paths = paths;
-    }
-
     public void Process()
     {
-        var tree = new Tree(_paths.AppDataDirectory.ToString()!);
+        var tree = new Tree(paths.AppDataDirectory.ToString()!);
 
-        foreach (var configPath in _configFinder.GetConfigFiles())
+        foreach (var configPath in configFinder.GetConfigFiles())
         {
-            var configs = _configLoader.Load(configPath);
+            var configs = configLoader.Load(configPath);
 
             var rows = new List<IRenderable>();
             BuildInstanceTree(rows, configs, SupportedServices.Radarr);
             BuildInstanceTree(rows, configs, SupportedServices.Sonarr);
 
-            if (!rows.Any())
+            if (rows.Count == 0)
             {
                 rows.Add(new Markup("([red]Empty[/])"));
             }
@@ -54,24 +41,24 @@ public class ConfigListLocalProcessor
             tree.AddNode(configTree);
         }
 
-        _console.WriteLine();
-        _console.Write(tree);
+        console.WriteLine();
+        console.Write(tree);
     }
 
     private string MakeRelative(IFileInfo path)
     {
         var configPath = new Uri(path.FullName, UriKind.Absolute);
-        var configDir = new Uri(_paths.ConfigsDirectory.FullName, UriKind.Absolute);
+        var configDir = new Uri(paths.ConfigsDirectory.FullName, UriKind.Absolute);
         return configDir.MakeRelativeUri(configPath).ToString();
     }
 
     private static void BuildInstanceTree(
-        ICollection<IRenderable> rows,
+        List<IRenderable> rows,
         IReadOnlyCollection<IServiceConfiguration> registry,
         SupportedServices service)
     {
         var configs = registry.GetConfigsOfType(service).ToList();
-        if (!configs.Any())
+        if (configs.Count == 0)
         {
             return;
         }

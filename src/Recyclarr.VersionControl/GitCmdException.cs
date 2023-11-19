@@ -1,24 +1,11 @@
 namespace Recyclarr.VersionControl;
 
-public class GitCmdException : Exception
+public class GitCmdException(int exitCode, string error) : Exception("Git command failed with a non-zero exit code")
 {
     // ReSharper disable UnusedAutoPropertyAccessor.Global
-    public string Error { get; }
-    public int ExitCode { get; }
+    public string Error { get; } = error;
+    public int ExitCode { get; } = exitCode;
     // ReSharper restore UnusedAutoPropertyAccessor.Global
-
-    public GitCmdException(int exitCode, string error)
-        : base("Git command failed with a non-zero exit code")
-    {
-        Error = error;
-        ExitCode = exitCode;
-    }
 }
 
-public class InvalidGitRepoException : Exception
-{
-    public InvalidGitRepoException(string? message)
-        : base(message)
-    {
-    }
-}
+public class InvalidGitRepoException(string? message) : Exception(message);

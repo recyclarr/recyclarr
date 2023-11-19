@@ -4,35 +4,26 @@ using Recyclarr.ServarrApi.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
-public class ReleaseProfileApiPersistencePhase
+public class ReleaseProfileApiPersistencePhase(ILogger log, IReleaseProfileApiService api)
 {
-    private readonly ILogger _log;
-    private readonly IReleaseProfileApiService _api;
-
-    public ReleaseProfileApiPersistencePhase(ILogger log, IReleaseProfileApiService api)
-    {
-        _log = log;
-        _api = api;
-    }
-
     public async Task Execute(IServiceConfiguration config, ReleaseProfileTransactionData transactions)
     {
         foreach (var profile in transactions.UpdatedProfiles)
         {
-            _log.Information("Update existing profile: {ProfileName}", profile.Name);
-            await _api.UpdateReleaseProfile(config, profile);
+            log.Information("Update existing profile: {ProfileName}", profile.Name);
+            await api.UpdateReleaseProfile(config, profile);
         }
 
         foreach (var profile in transactions.CreatedProfiles)
         {
-            _log.Information("Create new profile: {ProfileName}", profile.Name);
-            await _api.CreateReleaseProfile(config, profile);
+            log.Information("Create new profile: {ProfileName}", profile.Name);
+            await api.CreateReleaseProfile(config, profile);
         }
 
         foreach (var profile in transactions.DeletedProfiles)
         {
-            _log.Information("Deleting old release profile: {ProfileName}", profile.Name);
-            await _api.DeleteReleaseProfile(config, profile.Id);
+            log.Information("Deleting old release profile: {ProfileName}", profile.Name);
+            await api.DeleteReleaseProfile(config, profile.Id);
         }
     }
 }

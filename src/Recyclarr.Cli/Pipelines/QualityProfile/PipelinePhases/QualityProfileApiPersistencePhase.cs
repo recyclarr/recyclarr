@@ -3,33 +3,22 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileApiPersistencePhase
+public class QualityProfileApiPersistencePhase(
+    ILogger log,
+    IQualityProfileApiService api,
+    QualityProfileStatCalculator statCalculator)
 {
-    private readonly ILogger _log;
-    private readonly IQualityProfileApiService _api;
-    private readonly QualityProfileStatCalculator _statCalculator;
-
-    public QualityProfileApiPersistencePhase(
-        ILogger log,
-        IQualityProfileApiService api,
-        QualityProfileStatCalculator statCalculator)
-    {
-        _log = log;
-        _api = api;
-        _statCalculator = statCalculator;
-    }
-
     public async Task Execute(IServiceConfiguration config, QualityProfileTransactionData transactions)
     {
         var profilesWithStats = transactions.UpdatedProfiles
-            .Select(x => _statCalculator.Calculate(x))
+            .Select(x => statCalculator.Calculate(x))
             .ToLookup(x => x.HasChanges);
 
         // Profiles without changes (false) get logged
         var unchangedProfiles = profilesWithStats[false].ToList();
-        if (unchangedProfiles.Any())
+        if (unchangedProfiles.Count != 0)
         {
-            _log.Debug("These profiles have no changes and will not be persisted: {Profiles}",
+            log.Debug("These profiles have no changes and will not be persisted: {Profiles}",
                 unchangedProfiles.Select(x => x.Profile.ProfileName));
         }
 
@@ -42,11 +31,11 @@ public class QualityProfileApiPersistencePhase
             switch (profile.UpdateReason)
             {
                 case QualityProfileUpdateReason.New:
-                    await _api.CreateQualityProfile(config, dto);
+                    await api.CreateQualityProfile(config, dto);
                     break;
 
                 case QualityProfileUpdateReason.Changed:
-                    await _api.UpdateQualityProfile(config, dto);
+                    await api.UpdateQualityProfile(config, dto);
                     break;
 
                 default:
@@ -66,7 +55,7 @@ public class QualityProfileApiPersistencePhase
 
         if (createdProfiles.Count > 0)
         {
-            _log.Information("Created {Count} Profiles: {Names}", createdProfiles.Count, createdProfiles);
+            log.Information("Created {Count} Profiles: {Names}", createdProfiles.Count, createdProfiles);
         }
 
         var updatedProfiles = changedProfiles
@@ -76,7 +65,7 @@ public class QualityProfileApiPersistencePhase
 
         if (updatedProfiles.Count > 0)
         {
-            _log.Information("Updated {Count} Profiles: {Names}", updatedProfiles.Count, updatedProfiles);
+            log.Information("Updated {Count} Profiles: {Names}", updatedProfiles.Count, updatedProfiles);
         }
 
         if (changedProfiles.Count != 0)
@@ -85,14 +74,14 @@ public class QualityProfileApiPersistencePhase
             var numQuality = changedProfiles.Count(x => x.QualitiesChanged);
             var numScores = changedProfiles.Count(x => x.ScoresChanged);
 
-            _log.Information(
+            log.Information(
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and " +
                 "{NumScores} contain updated scores",
                 numProfiles, numQuality, numScores);
         }
         else
         {
-            _log.Information("All quality profiles are up to date!");
+            log.Information("All quality profiles are up to date!");
         }
     }
 }

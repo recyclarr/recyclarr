@@ -1,16 +1,10 @@
 namespace Recyclarr.Common;
 
-public class ScopedState<T>
+public class ScopedState<T>(T defaultValue = default!)
 {
-    private readonly T _defaultValue;
     private readonly Stack<Node> _scopeStack = new();
 
-    public ScopedState(T defaultValue = default!)
-    {
-        _defaultValue = defaultValue;
-    }
-
-    public T Value => _scopeStack.Count > 0 ? _scopeStack.Peek().Value : _defaultValue;
+    public T Value => _scopeStack.Count > 0 ? _scopeStack.Peek().Value : defaultValue;
 
     public int? ActiveScope => _scopeStack.Count > 0 ? _scopeStack.Peek().Scope : null;
 
@@ -44,15 +38,9 @@ public class ScopedState<T>
         return prevCount != StackSize;
     }
 
-    private sealed class Node
+    private sealed class Node(T value, int scope)
     {
-        public Node(T value, int scope)
-        {
-            Value = value;
-            Scope = scope;
-        }
-
-        public T Value { get; set; }
-        public int Scope { get; }
+        public T Value { get; set; } = value;
+        public int Scope { get; } = scope;
     }
 }

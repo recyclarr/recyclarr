@@ -5,17 +5,8 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-public class CustomFormatDataLister
+public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideService guide)
 {
-    private readonly IAnsiConsole _console;
-    private readonly ICustomFormatGuideService _guide;
-
-    public CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideService guide)
-    {
-        _console = console;
-        _guide = guide;
-    }
-
     public void List(IListCustomFormatSettings settings)
     {
         switch (settings)
@@ -34,21 +25,21 @@ public class CustomFormatDataLister
     {
         if (!raw)
         {
-            _console.WriteLine(
+            console.WriteLine(
                 "\nThe following score sets are available. Use these with the `score_set` property in any " +
                 "quality profile defined under the top-level `quality_profiles` list.");
 
-            _console.WriteLine();
+            console.WriteLine();
         }
 
-        var scoreSets = _guide.GetCustomFormatData(serviceType)
+        var scoreSets = guide.GetCustomFormatData(serviceType)
             .SelectMany(x => x.TrashScores.Keys)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Order(StringComparer.InvariantCultureIgnoreCase);
 
         foreach (var set in scoreSets)
         {
-            _console.WriteLine(raw ? set : $" - {set}");
+            console.WriteLine(raw ? set : $" - {set}");
         }
     }
 
@@ -56,12 +47,12 @@ public class CustomFormatDataLister
     {
         if (!raw)
         {
-            _console.WriteLine();
-            _console.WriteLine("List of Custom Formats in the TRaSH Guides:");
-            _console.WriteLine();
+            console.WriteLine();
+            console.WriteLine("List of Custom Formats in the TRaSH Guides:");
+            console.WriteLine();
         }
 
-        var categories = _guide.GetCustomFormatData(serviceType)
+        var categories = guide.GetCustomFormatData(serviceType)
             .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key);
@@ -70,19 +61,19 @@ public class CustomFormatDataLister
         {
             var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
 
-            _console.WriteLine($"          # {title}");
+            console.WriteLine($"          # {title}");
 
             foreach (var cf in cat)
             {
-                _console.WriteLine($"          - {cf.TrashId} # {cf.Name}");
+                console.WriteLine($"          - {cf.TrashId} # {cf.Name}");
             }
 
-            _console.WriteLine();
+            console.WriteLine();
         }
 
         if (!raw)
         {
-            _console.WriteLine(
+            console.WriteLine(
                 "The above Custom Formats are in YAML format and ready to be copied & pasted " +
                 "under the `trash_ids:` property.");
         }

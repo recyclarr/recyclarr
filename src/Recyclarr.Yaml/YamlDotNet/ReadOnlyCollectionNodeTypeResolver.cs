@@ -19,11 +19,10 @@ public sealed class ReadOnlyCollectionNodeTypeResolver : INodeTypeResolver
         return true;
     }
 
-    private static readonly IReadOnlyDictionary<Type, Type> CustomGenericInterfaceImplementations =
-        new Dictionary<Type, Type>
-        {
-            {typeof(IReadOnlyCollection<>), typeof(List<>)},
-            {typeof(IReadOnlyList<>), typeof(List<>)},
-            {typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>)}
-        };
+    private static readonly Dictionary<Type, Type> CustomGenericInterfaceImplementations = new()
+    {
+        {typeof(IReadOnlyCollection<>), typeof(List<>)},
+        {typeof(IReadOnlyList<>), typeof(List<>)},
+        {typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>)}
+    };
 }

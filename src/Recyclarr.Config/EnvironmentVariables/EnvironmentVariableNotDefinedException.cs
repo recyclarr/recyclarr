@@ -1,14 +1,8 @@
 namespace Recyclarr.Config.EnvironmentVariables;
 
-public class EnvironmentVariableNotDefinedException : Exception
+public class EnvironmentVariableNotDefinedException(int line, string envVarName) : Exception(
+    $"Line {line} refers to undefined environment variable {envVarName} and no default is specified.")
 {
-    public int Line { get; }
-    public string EnvironmentVariableName { get; }
-
-    public EnvironmentVariableNotDefinedException(int line, string envVarName)
-        : base($"Line {line} refers to undefined environment variable {envVarName} and no default is specified.")
-    {
-        Line = line;
-        EnvironmentVariableName = envVarName;
-    }
+    public int Line { get; } = line;
+    public string EnvironmentVariableName { get; } = envVarName;
 }

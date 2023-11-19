@@ -5,15 +5,8 @@ using Recyclarr.ServarrApi.ReleaseProfile;
 
 namespace Recyclarr.Cli.Pipelines.ReleaseProfile.PipelinePhases;
 
-public class ReleaseProfileTransactionPhase
+public class ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
 {
-    private readonly ServiceTagCache _tagCache;
-
-    public ReleaseProfileTransactionPhase(ServiceTagCache tagCache)
-    {
-        _tagCache = tagCache;
-    }
-
     public ReleaseProfileTransactionData Execute(
         IReadOnlyList<ProcessedReleaseProfileData> configProfiles,
         IList<SonarrReleaseProfile> serviceData)
@@ -43,7 +36,7 @@ public class ReleaseProfileTransactionPhase
         return new ReleaseProfileTransactionData(updated, created, deleted);
     }
 
-    private static IReadOnlyList<SonarrReleaseProfile> DeleteOldManagedProfiles(
+    private static List<SonarrReleaseProfile> DeleteOldManagedProfiles(
         IList<SonarrReleaseProfile> serviceData,
         IReadOnlyList<ProcessedReleaseProfileData> configProfiles)
     {
@@ -67,7 +60,7 @@ public class ReleaseProfileTransactionPhase
         profileToUpdate.Required = profile.Profile.Required.Select(x => x.Term).ToList();
         profileToUpdate.IncludePreferredWhenRenaming = profile.Profile.IncludePreferredWhenRenaming;
         profileToUpdate.Tags = profile.Tags
-            .Select(x => _tagCache.GetTagIdByName(x))
+            .Select(tagCache.GetTagIdByName)
             .NotNull()
             .ToList();
     }

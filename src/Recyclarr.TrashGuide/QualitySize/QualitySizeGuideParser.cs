@@ -6,18 +6,11 @@ using Recyclarr.Json;
 
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualitySizeGuideParser
+public class QualitySizeGuideParser(ILogger log)
 {
-    private readonly ILogger _log;
-
-    public QualitySizeGuideParser(ILogger log)
-    {
-        _log = log;
-    }
-
     public IReadOnlyList<QualitySizeData> GetQualities(IEnumerable<IDirectoryInfo> jsonDirectories)
     {
-        return JsonUtils.GetJsonFilesInDirectories(jsonDirectories, _log)
+        return JsonUtils.GetJsonFilesInDirectories(jsonDirectories, log)
             .Select(ParseQuality)
             .NotNull()
             .ToList();
@@ -42,7 +35,7 @@ public class QualitySizeGuideParser
 
         if (exception is not null || quality is null)
         {
-            _log.Warning(exception, "Failed to parse quality definition JSON file: {Filename}", jsonFile.FullName);
+            log.Warning(exception, "Failed to parse quality definition JSON file: {Filename}", jsonFile.FullName);
         }
 
         return quality;

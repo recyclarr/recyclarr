@@ -20,7 +20,7 @@ public static class FluentAssertionsExtensions
             {
                 using var scope = new AssertionScope();
                 item.Should().MatchRegex(regexPattern);
-                return !scope.Discard().Any();
+                return scope.Discard().Length == 0;
             });
         }
 
@@ -34,7 +34,7 @@ public static class FluentAssertionsExtensions
         {
             using var scope = new AssertionScope();
             item.Should().MatchRegex(regexPattern);
-            return !scope.Discard().Any();
+            return scope.Discard().Length == 0;
         });
 
         return new AndWhichConstraint<TAssertions, string>((TAssertions) assert, matched);
@@ -55,7 +55,7 @@ public static class FluentAssertionsExtensions
             {
                 using var scope = new AssertionScope();
                 item.Should().NotMatchRegex(regexPattern);
-                return !scope.Discard().Any();
+                return scope.Discard().Length == 0;
             });
         }
 
@@ -69,7 +69,7 @@ public static class FluentAssertionsExtensions
         {
             using var scope = new AssertionScope();
             item.Should().NotMatchRegex(regexPattern);
-            return !scope.Discard().Any();
+            return scope.Discard().Length == 0;
         });
 
         return new AndWhichConstraint<TAssertions, string>((TAssertions) assert, matched);

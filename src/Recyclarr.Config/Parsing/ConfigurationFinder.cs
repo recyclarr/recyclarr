@@ -5,27 +5,20 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Config.Parsing;
 
-public class ConfigurationFinder : IConfigurationFinder
+public class ConfigurationFinder(IAppPaths paths) : IConfigurationFinder
 {
-    private readonly IAppPaths _paths;
-
-    public ConfigurationFinder(IAppPaths paths)
-    {
-        _paths = paths;
-    }
-
-    private IReadOnlyCollection<IFileInfo> FindDefaultConfigFiles()
+    private List<IFileInfo> FindDefaultConfigFiles()
     {
         var configs = new List<IFileInfo>();
 
-        if (_paths.ConfigsDirectory.Exists)
+        if (paths.ConfigsDirectory.Exists)
         {
             var extensions = new[] {"*.yml", "*.yaml"};
-            var files = extensions.SelectMany(x => _paths.ConfigsDirectory.EnumerateFiles(x));
+            var files = extensions.SelectMany(x => paths.ConfigsDirectory.EnumerateFiles(x));
             configs.AddRange(files);
         }
 
-        var configPath = _paths.AppDataDirectory.YamlFile("recyclarr");
+        var configPath = paths.AppDataDirectory.YamlFile("recyclarr");
         if (configPath is not null)
         {
             configs.Add(configPath);

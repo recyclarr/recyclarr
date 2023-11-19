@@ -3,17 +3,10 @@ using Recyclarr.ServarrApi.QualityDefinition;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeApiFetchPhase
+public class QualitySizeApiFetchPhase(IQualityDefinitionApiService api)
 {
-    private readonly IQualityDefinitionApiService _api;
-
-    public QualitySizeApiFetchPhase(IQualityDefinitionApiService api)
-    {
-        _api = api;
-    }
-
     public async Task<IList<ServiceQualityDefinitionItem>> Execute(IServiceConfiguration config)
     {
-        return await _api.GetQualityDefinition(config);
+        return await api.GetQualityDefinition(config);
     }
 }

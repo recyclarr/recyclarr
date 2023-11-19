@@ -3,20 +3,13 @@ using System.Text;
 
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualityItem
+public class QualityItem(string quality, decimal min, decimal max)
 {
-    public QualityItem(string quality, decimal min, decimal max)
-    {
-        Quality = quality;
-        Min = min;
-        Max = max;
-    }
-
     public const decimal MaxUnlimitedThreshold = 400;
 
-    public string Quality { get; }
-    public decimal Min { get; }
-    public decimal Max { get; }
+    public string Quality { get; } = quality;
+    public decimal Min { get; } = min;
+    public decimal Max { get; } = max;
 
     public decimal? MaxForApi => Max < MaxUnlimitedThreshold ? Max : null;
     public decimal MinForApi => Min;
