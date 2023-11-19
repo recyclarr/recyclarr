@@ -11,6 +11,7 @@ on:
       - .github/workflows/sonarcloud.yml
       - sonar-project.properties
       - "src/**"
+      - "tests/**"
 
 env:
   dotnetVersion: 8.0.x

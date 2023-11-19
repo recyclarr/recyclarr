@@ -35,7 +35,7 @@ jobs:
 
       - name: Test
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
-        run: dotnet test src -c Release --logger GitHubActions
+        run: dotnet test -c Release --logger GitHubActions
 
       - name: Publish
         shell: pwsh

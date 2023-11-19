@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Recyclarr.Common\Recyclarr.Common.csproj" />
+      <ProjectReference Include="..\..\src\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj" />
+      <ProjectReference Include="..\..\src\Recyclarr.Platform\Recyclarr.Platform.csproj" />
+      <ProjectReference Include="..\..\src\Recyclarr.VersionControl\Recyclarr.VersionControl.csproj" />
+      <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
+      <ProjectReference Include="..\Recyclarr.Tests.TestLibrary\Recyclarr.Tests.TestLibrary.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Autofac.Extras.Ordering" />
+    </ItemGroup>
+</Project>

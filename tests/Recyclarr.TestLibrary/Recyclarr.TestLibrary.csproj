@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Common\Recyclarr.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" />

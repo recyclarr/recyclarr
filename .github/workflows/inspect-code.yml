@@ -34,12 +34,11 @@ jobs:
           dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Restore
-        run: dotnet restore src
+        run: dotnet restore
 
       - name: Inspect Code
         uses: muno92/resharper_inspectcode@v1
         with:
-          workingDirectory: src
           solutionPath: Recyclarr.sln
           minimumSeverity: warning
           include: '**.cs'
@@ -62,11 +61,10 @@ jobs:
         run: dotnet tool install -g JetBrains.ReSharper.GlobalTools
 
       - name: Build
-        run: dotnet build src
+        run: dotnet build
 
       - name: Run Code Cleanup
         run: ../ci/code_cleanup.sh "${{ env.baseRef }}"
-        working-directory: src
 
       - name: Check Diff
         run: |

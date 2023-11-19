@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\..\Recyclarr.Cli\Recyclarr.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Cli\Recyclarr.Cli.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.Tests.TestLibrary\Recyclarr.Tests.TestLibrary.csproj" />
   </ItemGroup>

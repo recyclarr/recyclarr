@@ -9,11 +9,13 @@ on:
       - "**.md"
       - .github/workflows/markdown-lint.yml
       - "!src/**"
+      - "!tests/**"
   pull_request:
     paths:
       - "**.md"
       - .github/workflows/markdown-lint.yml
       - "!src/**"
+      - "!tests/**"
 
 jobs:
   markdownlint:
@@ -28,3 +30,4 @@ jobs:
           globs: |
             **.md
             !src/**
+            !tests/**

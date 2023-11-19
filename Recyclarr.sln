@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Cli", "Recyclarr.Cli\Recyclarr.Cli.csproj", "{CD5C6F99-C587-4B7C-86AE-550FA4A5594A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Cli", "src\Recyclarr.Cli\Recyclarr.Cli.csproj", "{CD5C6F99-C587-4B7C-86AE-550FA4A5594A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.TestLibrary", "tests\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj", "{49F28A82-468F-4C48-9A59-D41B8FE26D6E}"
 EndProject
@@ -15,36 +15,36 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Common", "Recyclarr.Common\Recyclarr.Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Common", "src\Recyclarr.Common\Recyclarr.Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Tests", "tests\Recyclarr.Tests\Recyclarr.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Gui", "Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Gui", "src\Recyclarr.Gui\Recyclarr.Gui.csproj", "{53EECBC0-E0EA-4D6C-925C-5DB8C42CCB85}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{18E17C53-F600-40AE-82C1-3CD1E547C307}"
 	ProjectSection(SolutionItems) = preProject
 		tests\Directory.Build.props = tests\Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Config", "Recyclarr.Config\Recyclarr.Config.csproj", "{7B8F0720-A6E1-48FF-BD60-8B6964366B7F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Config", "src\Recyclarr.Config\Recyclarr.Config.csproj", "{7B8F0720-A6E1-48FF-BD60-8B6964366B7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Yaml", "Recyclarr.Yaml\Recyclarr.Yaml.csproj", "{62D0B120-75A0-4C86-B088-FD42E3FA1508}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Yaml", "src\Recyclarr.Yaml\Recyclarr.Yaml.csproj", "{62D0B120-75A0-4C86-B088-FD42E3FA1508}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TrashGuide", "Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj", "{37220364-7C1E-4561-A369-C32BA195A0C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.TrashGuide", "src\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj", "{37220364-7C1E-4561-A369-C32BA195A0C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Json", "Recyclarr.Json\Recyclarr.Json.csproj", "{A9E2F11E-73F8-48CC-8770-0AFD41E80141}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Json", "src\Recyclarr.Json\Recyclarr.Json.csproj", "{A9E2F11E-73F8-48CC-8770-0AFD41E80141}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Platform", "Recyclarr.Platform\Recyclarr.Platform.csproj", "{CB296D81-813B-48C3-9D4B-A52951EF26BF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Platform", "src\Recyclarr.Platform\Recyclarr.Platform.csproj", "{CB296D81-813B-48C3-9D4B-A52951EF26BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.VersionControl", "Recyclarr.VersionControl\Recyclarr.VersionControl.csproj", "{0495507A-0307-43EA-B97F-EDF2C0241839}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.VersionControl", "src\Recyclarr.VersionControl\Recyclarr.VersionControl.csproj", "{0495507A-0307-43EA-B97F-EDF2C0241839}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Repo", "Recyclarr.Repo\Recyclarr.Repo.csproj", "{6A4E06DF-464E-4DD4-890C-EC5182E96C13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Repo", "src\Recyclarr.Repo\Recyclarr.Repo.csproj", "{6A4E06DF-464E-4DD4-890C-EC5182E96C13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Settings", "Recyclarr.Settings\Recyclarr.Settings.csproj", "{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Settings", "src\Recyclarr.Settings\Recyclarr.Settings.csproj", "{CDB0249D-18F2-4262-BAF3-3A3DB10E31F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.ServarrApi", "Recyclarr.ServarrApi\Recyclarr.ServarrApi.csproj", "{5B48995A-1181-46AA-AC38-C040BDD3D7B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.ServarrApi", "src\Recyclarr.ServarrApi\Recyclarr.ServarrApi.csproj", "{5B48995A-1181-46AA-AC38-C040BDD3D7B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Compatibility", "Recyclarr.Compatibility\Recyclarr.Compatibility.csproj", "{03B4A46E-234D-47C9-8078-0B749800229A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Compatibility", "src\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj", "{03B4A46E-234D-47C9-8078-0B749800229A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Tests.TestLibrary", "tests\Recyclarr.Tests.TestLibrary\Recyclarr.Tests.TestLibrary.csproj", "{DE198BA1-2906-43BB-9CDB-977B9218A670}"
 EndProject

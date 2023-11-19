@@ -1591,7 +1591,7 @@ indent_size = 4
 [*.json]
 ij_javascript_array_initializer_right_brace_on_new_line = false
 
-[src/tests/**.cs]
+[tests/**.cs]
 dotnet_diagnostic.ca1707.severity = none
 
 # CA1861: Avoid constant arrays as arguments

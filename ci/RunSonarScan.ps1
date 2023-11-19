@@ -30,10 +30,10 @@ if ($LASTEXITCODE -ne 0) { throw "Failed: sonarscanner begin" }
 try {
     # Run a full build command because if we just do the tests, it will not build everything.
     # Building everything is important to ensure we analyze all code in the solution.
-    dotnet build src
+    dotnet build
     if ($LASTEXITCODE -ne 0) { throw "Failed: dotnet build" }
 
-    dotnet test src --no-build --collect:"XPLat Code Coverage;Format=opencover"
+    dotnet test --no-build --collect:"XPLat Code Coverage;Format=opencover"
     if ($LASTEXITCODE -ne 0) { throw "Failed: dotnet test" }
 }
 finally {
