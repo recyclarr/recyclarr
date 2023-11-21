@@ -17,6 +17,7 @@ env:
   baseRef: ${{ github.ref == 'refs/heads/master' && github.event.before ||
               (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
   dotnetVersion: 8.0.x
+  resharperVersion: 2023.3.0-eap08
 
 jobs:
   inspect:
@@ -39,6 +40,7 @@ jobs:
       - name: Inspect Code
         uses: muno92/resharper_inspectcode@v1
         with:
+          version: ${{ env.resharperVersion }}
           solutionPath: Recyclarr.sln
           minimumSeverity: warning
           include: '**.cs'
@@ -58,13 +60,15 @@ jobs:
           dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Install Resharper Tools
-        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools
+        run: >-
+          dotnet tool install -g JetBrains.ReSharper.GlobalTools
+          --version "${{ env.resharperVersion }}"
 
       - name: Build
         run: dotnet build
 
       - name: Run Code Cleanup
-        run: ../ci/code_cleanup.sh "${{ env.baseRef }}"
+        run: ci/code_cleanup.sh "${{ env.baseRef }}"
 
       - name: Check Diff
         run: |
