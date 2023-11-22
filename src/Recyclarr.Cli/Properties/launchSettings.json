@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "sync": {
+      "commandName": "Project",
+      "targetProject": "Recyclarr.Cli",
+      "commandLineArgs": "sync"
+    },
+    "config list local": {
+      "commandName": "Project",
+      "targetProject": "Recyclarr.Cli",
+      "commandLineArgs": "config list local"
+    },
+    "delete custom-formats": {
+      "commandName": "Project",
+      "targetProject": "Recyclarr.Cli",
+      "commandLineArgs": "delete custom-formats"
+    }
+  }
+}
