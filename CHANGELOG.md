@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The app data directory on OSX has changed. It now lives in `Library/Application Support/recyclarr`
+  instead of `~/.config/recyclarr`. Recyclarr will attempt to move this directory when run. If it
+  can't, then manual intervention is needed by users (e.g. `recyclarr migrate`).
+
 ## [6.0.2] - 2023-10-20
 
 ### Fixed
