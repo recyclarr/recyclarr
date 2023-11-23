@@ -5,11 +5,6 @@ namespace Recyclarr.Cli.Migration.Steps;
 public interface IMigrationStep
 {
     /// <summary>
-    /// Determines the order in which this migration step will run.
-    /// </summary>
-    int Order { get; }
-
-    /// <summary>
     /// A description printed to the user so that they understand the purpose of this migration step, and
     /// what it does.
     /// </summary>

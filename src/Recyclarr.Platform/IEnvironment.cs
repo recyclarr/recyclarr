@@ -1,4 +1,4 @@
-﻿namespace Recyclarr.Common;
+﻿namespace Recyclarr.Platform;
 
 public interface IEnvironment
 {

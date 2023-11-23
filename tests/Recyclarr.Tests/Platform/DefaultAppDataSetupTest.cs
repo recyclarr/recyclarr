@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common;
 using Recyclarr.Platform;
 
 namespace Recyclarr.Tests.Platform;
@@ -42,26 +41,7 @@ public class DefaultAppDataSetupTest
     }
 
     [Test, AutoMockData]
-    public void Force_creation_uses_correct_behavior_when_disabled(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut)
-    {
-        var overridePath = fs.CurrentDirectory()
-            .SubDirectory("override")
-            .SubDirectory("path");
-
-        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
-        env.GetFolderPath(default).ReturnsForAnyArgs(overridePath.FullName);
-
-        sut.CreateAppPaths(null, false);
-
-        env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.None);
-        fs.AllDirectories.Should().NotContain(overridePath.FullName);
-    }
-
-    [Test, AutoMockData]
-    public void Force_creation_uses_correct_behavior_when_enabled(
+    public void Creation_uses_correct_behavior(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
         DefaultAppDataSetup sut)

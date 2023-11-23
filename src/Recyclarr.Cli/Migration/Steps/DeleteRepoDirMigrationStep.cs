@@ -9,7 +9,6 @@ namespace Recyclarr.Cli.Migration.Steps;
 [UsedImplicitly]
 public class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {
-    public int Order => 1;
     public string Description => "Delete old repo directory";
     public IReadOnlyCollection<string> Remediation => new[]
     {

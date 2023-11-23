@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Common;
+using Recyclarr.Platform;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

@@ -1,5 +1,5 @@
 using JetBrains.Annotations;
-using Recyclarr.Common;
+using Recyclarr.Platform;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 

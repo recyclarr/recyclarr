@@ -1,3 +1,4 @@
+using Autofac.Extras.Ordering;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
 using Spectre.Console.Testing;
@@ -13,7 +14,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, console);
+        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(false);
 
@@ -28,7 +29,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, console);
+        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(true);
 
@@ -50,18 +51,14 @@ public class MigrationExecutorTest
             Substitute.For<IMigrationStep>()
         };
 
-        steps[0].Order.Returns(20);
-        steps[1].Order.Returns(10);
-        steps[2].Order.Returns(30);
-
-        var executor = new MigrationExecutor(steps, console);
+        var executor = new MigrationExecutor(steps.AsOrdered(), console);
 
         executor.PerformAllMigrationSteps(false);
 
         Received.InOrder(() =>
         {
-            steps[1].CheckIfNeeded();
             steps[0].CheckIfNeeded();
+            steps[1].CheckIfNeeded();
             steps[2].CheckIfNeeded();
         });
     }
@@ -71,7 +68,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, console);
+        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute(null)).Throw(new ArgumentException("test message"));
@@ -86,7 +83,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}, console);
+        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
         var exception = new MigrationException(new ArgumentException(), "a", new[] {"b"});
 
         step.CheckIfNeeded().Returns(true);

@@ -3,20 +3,11 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
 
-public class MigrationExecutor : IMigrationExecutor
+public class MigrationExecutor(IOrderedEnumerable<IMigrationStep> migrationSteps, IAnsiConsole console)
+    : IMigrationExecutor
 {
-    private readonly IAnsiConsole _console;
-    private readonly List<IMigrationStep> _migrationSteps;
-
-    public MigrationExecutor(IEnumerable<IMigrationStep> migrationSteps, IAnsiConsole console)
+    public void PerformAllMigrationSteps(bool withDiagnostics)
     {
-        _console = console;
-        _migrationSteps = migrationSteps.OrderBy(x => x.Order).ToList();
-    }
-
-    private void PerformMigrationStepsImpl(bool withDiagnostics, IEnumerable<IMigrationStep> migrationSteps)
-    {
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach (var step in migrationSteps)
         {
             // Do not use LINQ to filter using CheckIfNeeded(). If it returns true, then 'Execute()' must be invoked to
@@ -29,25 +20,20 @@ public class MigrationExecutor : IMigrationExecutor
 
             try
             {
-                step.Execute(withDiagnostics ? _console : null);
+                step.Execute(withDiagnostics ? console : null);
             }
             catch (Exception e) when (e is not MigrationException)
             {
                 throw new MigrationException(e, step.Description, step.Remediation);
             }
 
-            _console.WriteLine($"Migrate: {step.Description}");
+            console.WriteLine($"Migrate: {step.Description}");
         }
-    }
-
-    public void PerformAllMigrationSteps(bool withDiagnostics)
-    {
-        PerformMigrationStepsImpl(withDiagnostics, _migrationSteps);
     }
 
     public void CheckNeededMigrations()
     {
-        var neededMigrationSteps = _migrationSteps.Where(x => x.CheckIfNeeded()).ToList();
+        var neededMigrationSteps = migrationSteps.Where(x => x.CheckIfNeeded()).ToList();
         if (neededMigrationSteps.Count == 0)
         {
             return;
@@ -58,11 +44,11 @@ public class MigrationExecutor : IMigrationExecutor
         foreach (var step in neededMigrationSteps)
         {
             var requiredText = step.Required ? "Required" : "Not Required";
-            _console.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
+            console.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
             wereAnyRequired |= step.Required;
         }
 
-        _console.WriteLine(
+        console.WriteLine(
             "\nRun the `migrate` subcommand to perform the above migration steps automatically\n");
 
         if (wereAnyRequired)
