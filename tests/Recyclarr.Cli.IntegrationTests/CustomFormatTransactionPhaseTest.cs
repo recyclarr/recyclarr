@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Tests.TestLibrary;
@@ -22,7 +22,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var serviceData = Array.Empty<CustomFormatData>();
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
         var config = NewConfig.Radarr();
 
@@ -58,7 +58,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "one"}
         };
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
         var config = NewConfig.Radarr();
 
@@ -97,13 +97,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "different2", Id = 2}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf1", "", 2)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf1", "", 2)
+        ]);
 
         var config = NewConfig.Radarr();
 
@@ -142,7 +138,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "different1", Id = 2}
         };
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
         var config = NewConfig.Radarr() with
         {
@@ -179,7 +175,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "two", Id = 1}
         };
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
         var config = NewConfig.Radarr() with
         {
@@ -213,13 +209,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "two", Id = 1}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf1", "one", 1)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf1", "one", 1)
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -259,13 +251,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "one", Id = 1}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf1", "one", 1)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf1", "one", 1)
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -298,7 +286,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "one", Id = 1}
         };
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
         var config = NewConfig.Radarr() with
         {
@@ -328,13 +316,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "one", Id = 1}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf1", "one", 1)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf1", "one", 1)
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -361,13 +345,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "two", Id = 2}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf2", "two", 2)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf2", "two", 2)
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -397,13 +377,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "two", Id = 2}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf2", "two", 2)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf2", "two", 2)
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -430,13 +406,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             new CustomFormatData {Name = "two", Id = 2}
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf2", "two", 2)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf2", "two", 2)
+        ]);
 
         var config = NewConfig.Radarr();
 
@@ -457,13 +429,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var serviceData = Array.Empty<CustomFormatData>();
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("cf2", "two", 200)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("cf2", "two", 200)
+        ]);
 
         var config = NewConfig.Radarr();
 

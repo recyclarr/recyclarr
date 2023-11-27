@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cli.Cache;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -58,7 +57,6 @@ public static class CompositionRoot
         builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterModule<CommonAutofacModule>();
 
-        builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 

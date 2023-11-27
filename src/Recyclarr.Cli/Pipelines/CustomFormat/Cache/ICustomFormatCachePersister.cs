@@ -1,8 +1,8 @@
 using Recyclarr.Config.Models;
 
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public interface ICachePersister
+public interface ICustomFormatCachePersister
 {
     CustomFormatCache Load(IServiceConfiguration config);
     void Save(IServiceConfiguration config, CustomFormatCache cache);

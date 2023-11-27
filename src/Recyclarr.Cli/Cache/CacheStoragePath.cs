@@ -5,7 +5,7 @@ using System.Text;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
 
-namespace Recyclarr.Cli.Console.Helpers;
+namespace Recyclarr.Cli.Cache;
 
 public class CacheStoragePath(IAppPaths paths) : ICacheStoragePath
 {

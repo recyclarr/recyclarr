@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
@@ -47,7 +47,7 @@ public class CustomFormatTransactionPhase(ILogger log)
 
         if (config.DeleteOldCustomFormats)
         {
-            transactions.DeletedCustomFormats.AddRange(cache.TrashIdMappings
+            transactions.DeletedCustomFormats.AddRange(cache.Mappings
                 // Custom format must be in the cache but NOT in the user's config
                 .Where(map => guideCfs.All(cf => cf.TrashId != map.TrashId))
                 // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)

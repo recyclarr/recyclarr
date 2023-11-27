@@ -1,7 +1,7 @@
-using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Cache;
 using Recyclarr.Config.Models;
 
-namespace Recyclarr.Cli.Tests.Console.Helpers;
+namespace Recyclarr.Cli.Tests.Cache;
 
 [TestFixture]
 public class CacheStoragePathTest

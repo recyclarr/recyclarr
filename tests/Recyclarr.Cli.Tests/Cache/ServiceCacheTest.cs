@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Cache;
-using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Tests.Cache;
@@ -205,7 +205,7 @@ public class ServiceCacheTest
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
         storage.CalculatePath(default!, default!).ReturnsForAnyArgs(fs.FileInfo.New("cacheFile.json"));
 
-        var result = sut.Load<CustomFormatCache>(config);
+        var result = sut.Load<CustomFormatCacheData>(config);
 
         result.Should().BeEquivalentTo(new
         {

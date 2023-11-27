@@ -6,7 +6,7 @@ public class CacheAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        // Clients must register their own implementation of ICacheStoragePath
+        builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
         builder.RegisterType<ServiceCache>().As<IServiceCache>();
     }
 }

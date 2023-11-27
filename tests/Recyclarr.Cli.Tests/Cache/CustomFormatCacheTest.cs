@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Cache;
@@ -27,10 +27,10 @@ public class CustomFormatCacheTest
             }
         };
 
-        var cache = new CustomFormatCache();
-        var result = cache.Update(transactions);
+        var cache = new CustomFormatCache([]);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
@@ -55,18 +55,14 @@ public class CustomFormatCacheTest
             }
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("3", "three", 3),
+            new TrashIdMapping("4", "four", 4)
+        ]);
 
-        var result = cache.Update(transactions);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
@@ -83,20 +79,16 @@ public class CustomFormatCacheTest
             NewCf.Data("two", "2", 2)
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("1", "one", 1),
+            new TrashIdMapping("2", "two", 2),
+            new TrashIdMapping("3", "three", 3),
+            new TrashIdMapping("4", "four", 4)
+        ]);
 
-        var result = cache.RemoveStale(serviceCfs);
+        cache.RemoveStale(serviceCfs);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2)
@@ -119,11 +111,11 @@ public class CustomFormatCacheTest
             }
         };
 
-        var cache = new CustomFormatCache();
+        var cache = new CustomFormatCache([]);
 
-        var result = cache.Update(transactions);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2)
@@ -150,20 +142,16 @@ public class CustomFormatCacheTest
             }
         };
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("1", "one", 1),
+            new TrashIdMapping("2", "two", 2),
+            new TrashIdMapping("3", "three", 3),
+            new TrashIdMapping("4", "four", 4)
+        ]);
 
-        var result = cache.Update(transactions);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one_new", 1),
             new TrashIdMapping("2", "two_new", 2),
@@ -177,21 +165,17 @@ public class CustomFormatCacheTest
     {
         var transactions = new CustomFormatTransactionData();
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("12", "one2", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("1", "one", 1),
+            new TrashIdMapping("12", "one2", 1),
+            new TrashIdMapping("2", "two", 2),
+            new TrashIdMapping("3", "three", 3),
+            new TrashIdMapping("4", "four", 4)
+        ]);
 
-        var result = cache.Update(transactions);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
@@ -205,20 +189,16 @@ public class CustomFormatCacheTest
     {
         var transactions = new CustomFormatTransactionData();
 
-        var cache = new CustomFormatCache
-        {
-            TrashIdMappings = new[]
-            {
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4),
-                new TrashIdMapping("2", "two", 2)
-            }
-        };
+        var cache = new CustomFormatCache([
+            new TrashIdMapping("1", "one", 1),
+            new TrashIdMapping("3", "three", 3),
+            new TrashIdMapping("4", "four", 4),
+            new TrashIdMapping("2", "two", 2)
+        ]);
 
-        var result = cache.Update(transactions);
+        cache.Update(transactions);
 
-        result.TrashIdMappings.Should().BeEquivalentTo(new[]
+        cache.Mappings.Should().BeEquivalentTo(new[]
         {
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),

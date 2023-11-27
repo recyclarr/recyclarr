@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Common.Extensions;
@@ -29,7 +29,7 @@ public record CustomFormatTransactionData
 
 public class CustomFormatSyncPipeline(
     ILogger log,
-    ICachePersister cachePersister,
+    ICustomFormatCachePersister cachePersister,
     ICustomFormatPipelinePhases phases)
     : ISyncPipeline
 {
@@ -46,7 +46,7 @@ public class CustomFormatSyncPipeline(
 
         var serviceData = await phases.ApiFetchPhase.Execute(config);
 
-        cache = cache.RemoveStale(serviceData);
+        cache.RemoveStale(serviceData);
 
         var transactions = phases.TransactionPhase.Execute(config, guideCfs, serviceData, cache);
 
@@ -59,9 +59,7 @@ public class CustomFormatSyncPipeline(
 
         await phases.ApiPersistencePhase.Execute(config, transactions);
 
-        cachePersister.Save(config, cache.Update(transactions) with
-        {
-            InstanceName = config.InstanceName
-        });
+        cache.Update(transactions);
+        cachePersister.Save(config, cache);
     }
 }

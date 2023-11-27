@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Models;
 
-namespace Recyclarr.Cli.Console.Helpers;
+namespace Recyclarr.Cli.Cache;
 
 public interface ICacheStoragePath
 {

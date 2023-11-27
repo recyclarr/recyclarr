@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.Json;
@@ -23,12 +22,10 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
             return null;
         }
 
-        using var stream = path.OpenText();
-        var json = stream.ReadToEnd();
-
         try
         {
-            return JsonSerializer.Deserialize<T>(json, _jsonSettings);
+            using var stream = path.OpenRead();
+            return JsonSerializer.Deserialize<T>(stream, _jsonSettings);
         }
         catch (JsonException e)
         {
