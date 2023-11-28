@@ -24,11 +24,4 @@
   <ItemGroup Condition="!$(ProjectName.EndsWith('.Tests'))">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
-
-  <ItemGroup>
-    <!-- From https://github.com/dotnet/msbuild/pull/6285 -->
-    <AssemblyAttribute Include="System.CLSCompliantAttribute">
-      <_Parameter1>false</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
 </Project>

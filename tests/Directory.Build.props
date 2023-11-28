@@ -44,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- From https://github.com/dotnet/msbuild/pull/6285 -->
     <AssemblyAttribute Include="NUnit.Framework.ParallelizableAttribute">
       <_Parameter1>NUnit.Framework.ParallelScope.All</_Parameter1>
       <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
