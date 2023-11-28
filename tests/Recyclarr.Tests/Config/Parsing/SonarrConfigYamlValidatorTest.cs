@@ -5,7 +5,6 @@ using Recyclarr.Config.Parsing;
 namespace Recyclarr.Tests.Config.Parsing;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class SonarrConfigYamlValidatorTest
 {
     [Test]

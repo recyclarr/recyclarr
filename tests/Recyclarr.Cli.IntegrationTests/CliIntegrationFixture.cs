@@ -3,7 +3,6 @@ using Recyclarr.IntegrationTests;
 
 namespace Recyclarr.Cli.IntegrationTests;
 
-[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 internal abstract class CliIntegrationFixture : IntegrationTestFixture
 {
     protected override void RegisterTypes(ContainerBuilder builder)

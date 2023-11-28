@@ -5,7 +5,6 @@ using Recyclarr.Config.Secrets;
 namespace Recyclarr.Tests.Config.Parsing.PostProcessing;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ImplicitUrlAndKeyPostProcessorTest
 {
     [Test, AutoMockData]

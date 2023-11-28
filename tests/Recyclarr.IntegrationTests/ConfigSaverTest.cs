@@ -5,7 +5,6 @@ using Recyclarr.Config.Parsing;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigSaverTest : IntegrationTestFixture
 {
     [Test]

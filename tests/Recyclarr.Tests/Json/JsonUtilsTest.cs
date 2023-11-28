@@ -5,7 +5,6 @@ using Recyclarr.TestLibrary;
 namespace Recyclarr.Tests.Json;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class JsonUtilsTest
 {
     [Test]

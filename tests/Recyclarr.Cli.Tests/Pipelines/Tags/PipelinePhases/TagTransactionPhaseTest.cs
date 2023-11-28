@@ -4,7 +4,6 @@ using Recyclarr.ServarrApi.Tag;
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class TagTransactionPhaseTest
 {
     [Test, AutoMockData]

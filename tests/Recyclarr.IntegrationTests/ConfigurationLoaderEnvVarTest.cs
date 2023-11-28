@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 {
     [Test]

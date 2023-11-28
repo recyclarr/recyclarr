@@ -6,7 +6,6 @@ using Recyclarr.Config.Parsing.ErrorHandling;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigurationRegistryTest : IntegrationTestFixture
 {
     [Test]

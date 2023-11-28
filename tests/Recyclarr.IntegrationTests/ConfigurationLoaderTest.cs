@@ -13,7 +13,6 @@ using Recyclarr.TestLibrary.Autofac;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigurationLoaderTest : IntegrationTestFixture
 {
     private static Func<TextReader> GetResourceData(string file)

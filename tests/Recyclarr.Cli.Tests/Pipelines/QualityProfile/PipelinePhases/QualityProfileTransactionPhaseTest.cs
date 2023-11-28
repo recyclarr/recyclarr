@@ -6,7 +6,6 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class QualityProfileTransactionPhaseTest
 {
     [Test, AutoMockData]

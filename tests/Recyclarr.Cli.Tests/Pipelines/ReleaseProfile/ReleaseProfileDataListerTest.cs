@@ -5,7 +5,6 @@ using Spectre.Console.Testing;
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ReleaseProfileDataListerTest
 {
     [Test, AutoMockData]

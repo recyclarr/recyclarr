@@ -6,7 +6,6 @@ using Recyclarr.Platform;
 namespace Recyclarr.Tests.Config.Parsing;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigurationFinderTest
 {
     private static IFileInfo[] GetYamlPaths(IAppPaths paths)

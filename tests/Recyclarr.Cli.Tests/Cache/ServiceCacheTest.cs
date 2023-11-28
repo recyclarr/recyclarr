@@ -7,7 +7,6 @@ using Recyclarr.Config.Models;
 namespace Recyclarr.Cli.Tests.Cache;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ServiceCacheTest
 {
     [SuppressMessage("SonarLint", "S2094", Justification =

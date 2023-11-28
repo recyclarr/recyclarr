@@ -8,7 +8,6 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 {
     [Test]

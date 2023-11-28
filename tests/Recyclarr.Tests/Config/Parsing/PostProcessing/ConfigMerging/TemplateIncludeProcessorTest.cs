@@ -6,7 +6,6 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class TemplateIncludeProcessorTest
 {
     [Test, AutoMockData]

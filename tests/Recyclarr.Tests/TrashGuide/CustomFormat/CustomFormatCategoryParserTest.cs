@@ -5,7 +5,6 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Tests.TrashGuide.CustomFormat;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatCategoryParserTest
 {
     [Test, AutoMockData]

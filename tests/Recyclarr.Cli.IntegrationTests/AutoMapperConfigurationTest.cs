@@ -3,7 +3,6 @@ using AutoMapper;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 internal class AutoMapperConfigurationTest : CliIntegrationFixture
 {
     [Test]

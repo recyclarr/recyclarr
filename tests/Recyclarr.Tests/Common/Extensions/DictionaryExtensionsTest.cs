@@ -3,7 +3,6 @@ using Recyclarr.Common.Extensions;
 namespace Recyclarr.Tests.Common.Extensions;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class DictionaryExtensionsTest
 {
     private sealed class MySampleValue;

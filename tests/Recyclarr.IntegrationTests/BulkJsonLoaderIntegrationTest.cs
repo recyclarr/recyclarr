@@ -5,7 +5,6 @@ using Recyclarr.Json.Loading;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class BulkJsonLoaderIntegrationTest : IntegrationTestFixture
 {
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]

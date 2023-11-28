@@ -11,7 +11,6 @@ using Spectre.Console;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CompositionRootTest
 {
     // Warning CA1812 : CompositionRootTest.ConcreteTypeEnumerator is an internal class that is apparently never

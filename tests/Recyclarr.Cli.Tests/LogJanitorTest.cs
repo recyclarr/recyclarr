@@ -5,7 +5,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Cli.Tests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class LogJanitorTest
 {
     [Test, AutoMockData]

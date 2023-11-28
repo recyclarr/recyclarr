@@ -5,7 +5,6 @@ using Recyclarr.Config.Models;
 namespace Recyclarr.Tests.Config;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigExtensionsTest
 {
     [Test]

@@ -7,7 +7,6 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 namespace Recyclarr.Tests.TrashGuide.ReleaseProfile;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ReleaseProfileGuideServiceTest
 {
     [Test, AutoMockData]

@@ -7,7 +7,6 @@ using Recyclarr.Repo;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
 {
     [Test]

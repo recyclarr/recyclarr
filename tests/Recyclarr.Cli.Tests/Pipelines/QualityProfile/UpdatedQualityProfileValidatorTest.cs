@@ -7,7 +7,6 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class UpdatedQualityProfileValidatorTest
 {
     [TestCase(399, true)]

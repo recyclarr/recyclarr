@@ -6,7 +6,6 @@ using Recyclarr.ServarrApi.CustomFormat;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatServiceTest : IntegrationTestFixture
 {
     [Test]

@@ -6,7 +6,6 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 {
     [Test]

@@ -3,7 +3,6 @@ using Recyclarr.TestLibrary;
 namespace Recyclarr.Tests.TestLibrary;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class StringUtilsTest
 {
     [Test]

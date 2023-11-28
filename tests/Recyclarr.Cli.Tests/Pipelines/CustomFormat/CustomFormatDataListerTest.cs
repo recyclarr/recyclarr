@@ -7,7 +7,6 @@ using Spectre.Console.Testing;
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatDataListerTest
 {
     [Test, AutoMockData]

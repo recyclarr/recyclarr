@@ -4,7 +4,6 @@ using Recyclarr.Config.Models;
 namespace Recyclarr.Cli.Tests.Console.Helpers;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CacheStoragePathTest
 {
     [Test, AutoMockData]

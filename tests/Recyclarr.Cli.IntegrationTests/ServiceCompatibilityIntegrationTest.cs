@@ -4,7 +4,6 @@ using Recyclarr.Settings;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 internal class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
 {
     [Test]

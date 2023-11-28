@@ -6,7 +6,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Tests.Compatibility.Sonarr;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class SonarrCapabilityEnforcerTest
 {
     [Test, AutoMockData]

@@ -4,7 +4,6 @@ using Recyclarr.ServarrApi.MediaNaming;
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class MediaNamingTransactionPhaseRadarrTest
 {
     [Test] [AutoMockData]

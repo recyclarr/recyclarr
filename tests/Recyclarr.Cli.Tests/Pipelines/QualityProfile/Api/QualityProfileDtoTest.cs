@@ -3,7 +3,6 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.Api;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class QualityProfileDtoTest
 {
     [TestCase(null, false)]

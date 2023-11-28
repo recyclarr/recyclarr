@@ -4,7 +4,6 @@ using Recyclarr.Platform;
 namespace Recyclarr.Tests.Platform;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class DefaultAppDataSetupTest
 {
     [Test, AutoMockData]

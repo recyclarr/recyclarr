@@ -8,7 +8,6 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
 {
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)

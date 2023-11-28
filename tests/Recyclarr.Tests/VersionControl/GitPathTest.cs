@@ -4,7 +4,6 @@ using Recyclarr.Settings;
 namespace Recyclarr.Tests.VersionControl;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class GitPathTest
 {
     [Test, AutoMockData]

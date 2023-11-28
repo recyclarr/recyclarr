@@ -5,7 +5,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Cli.Tests.Cache;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatCacheTest
 {
     [Test]

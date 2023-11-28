@@ -6,7 +6,6 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class QualitySizeGuidePhaseTest
 {
     [Test, AutoMockData]

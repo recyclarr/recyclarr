@@ -7,7 +7,6 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.Cli.Tests.Processors.Config;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class TemplateConfigCreatorTest
 {
     [Test, AutoMockData]

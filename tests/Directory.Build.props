@@ -42,4 +42,15 @@
   <ItemGroup>
     <EmbeddedResource Include="**\Data\*" />
   </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="NUnit.Framework.ParallelizableAttribute">
+      <_Parameter1>NUnit.Framework.ParallelScope.All</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="NUnit.Framework.FixtureLifeCycleAttribute">
+      <_Parameter1>NUnit.Framework.LifeCycle.InstancePerTestCase</_Parameter1>
+      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

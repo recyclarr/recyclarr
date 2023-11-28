@@ -3,7 +3,6 @@ using Recyclarr.Config.Secrets;
 namespace Recyclarr.Tests.Config.Secrets;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class SecretNotFoundExceptionTest
 {
     [Test]

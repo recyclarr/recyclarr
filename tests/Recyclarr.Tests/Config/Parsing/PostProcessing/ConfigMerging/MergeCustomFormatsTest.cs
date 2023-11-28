@@ -4,7 +4,6 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class MergeCustomFormatsTest
 {
     [Test]

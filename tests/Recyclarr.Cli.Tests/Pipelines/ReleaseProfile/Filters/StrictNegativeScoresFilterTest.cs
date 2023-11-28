@@ -5,7 +5,6 @@ using Recyclarr.TrashGuide.ReleaseProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.ReleaseProfile.Filters;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class StrictNegativeScoresFilterTest
 {
     private static readonly ReleaseProfileData TestProfile = new()

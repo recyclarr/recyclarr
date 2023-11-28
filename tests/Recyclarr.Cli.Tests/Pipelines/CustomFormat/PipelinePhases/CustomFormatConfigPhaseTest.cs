@@ -6,7 +6,6 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class CustomFormatConfigPhaseTest
 {
     [Test, AutoMockData]

@@ -3,7 +3,6 @@ using Recyclarr.Common;
 namespace Recyclarr.Tests.Common;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ResourceDataReaderTest
 {
     [Test]

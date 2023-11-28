@@ -8,7 +8,6 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
 {
     [Test, AutoMockData]

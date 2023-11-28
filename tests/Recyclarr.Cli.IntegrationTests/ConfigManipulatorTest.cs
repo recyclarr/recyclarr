@@ -5,7 +5,6 @@ using Recyclarr.Common.Extensions;
 namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 internal class ConfigManipulatorTest : CliIntegrationFixture
 {
     [Test]

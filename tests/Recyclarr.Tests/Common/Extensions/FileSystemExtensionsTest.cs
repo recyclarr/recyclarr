@@ -7,7 +7,6 @@ using Recyclarr.TestLibrary;
 namespace Recyclarr.Tests.Common.Extensions;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class FileSystemExtensionsTest
 {
     private static IEnumerable<string> ReRootFiles(

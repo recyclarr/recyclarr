@@ -20,7 +20,6 @@ using Spectre.Console.Testing;
 
 namespace Recyclarr.IntegrationTests;
 
-[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public abstract class IntegrationTestFixture : IDisposable
 {
     private readonly Lazy<ILifetimeScope> _container;

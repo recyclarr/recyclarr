@@ -3,7 +3,6 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.Tests.TrashGuide;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigTemplateGuideServiceTest
 {
     [Test, AutoMockData]

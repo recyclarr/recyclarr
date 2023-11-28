@@ -5,7 +5,6 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class FieldsArrayJsonConverterTest
 {
     [Test]

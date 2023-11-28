@@ -5,7 +5,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Cli.Tests.Pipelines.Tags.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class TagConfigPhaseTest
 {
     [Test, AutoMockData]

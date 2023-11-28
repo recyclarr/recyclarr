@@ -6,7 +6,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class QualityProfileConfigPhaseTest
 {
     private static RadarrConfiguration SetupCfs(params CustomFormatConfig[] cfConfigs)

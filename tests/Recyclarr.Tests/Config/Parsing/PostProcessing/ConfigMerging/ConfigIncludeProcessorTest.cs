@@ -5,7 +5,6 @@ using Recyclarr.Platform;
 namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigIncludeProcessorTest
 {
     [Test, AutoMockData]

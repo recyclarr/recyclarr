@@ -8,7 +8,6 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.IntegrationTests;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class QualitySizeGuideServiceTest : IntegrationTestFixture
 {
     [TestCase(SupportedServices.Sonarr, "sonarr")]

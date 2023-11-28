@@ -8,7 +8,6 @@ using Recyclarr.Cli.Processors.Config;
 namespace Recyclarr.Cli.Tests.Processors;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigCreationProcessorTest
 {
     [SuppressMessage("Performance", "CA1812", Justification =

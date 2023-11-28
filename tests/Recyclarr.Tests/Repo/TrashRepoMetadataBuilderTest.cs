@@ -4,7 +4,6 @@ using Recyclarr.Repo;
 namespace Recyclarr.Tests.Repo;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class TrashRepoMetadataBuilderTest
 {
     private const string MetadataJson =

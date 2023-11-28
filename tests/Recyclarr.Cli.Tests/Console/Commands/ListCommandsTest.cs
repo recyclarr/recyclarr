@@ -4,7 +4,6 @@ using Recyclarr.Repo;
 namespace Recyclarr.Cli.Tests.Console.Commands;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ListCommandsTest
 {
     [Test, AutoMockData]

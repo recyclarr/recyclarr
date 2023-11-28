@@ -8,7 +8,6 @@ using Spectre.Console.Testing;
 namespace Recyclarr.Cli.Tests.Processors;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigTemplateListerTest
 {
     [Test, AutoMockData]

@@ -7,7 +7,6 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Tests.Config.Parsing;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class ConfigValidationExecutorTest
 {
     [Test, AutoMockData]

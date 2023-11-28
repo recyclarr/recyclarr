@@ -6,7 +6,6 @@ using Recyclarr.Yaml;
 namespace Recyclarr.Tests.Config.Settings;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class SettingsPersisterTest
 {
     [Test, AutoMockData]

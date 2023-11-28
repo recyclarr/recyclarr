@@ -3,7 +3,6 @@ using Recyclarr.Config.EnvironmentVariables;
 namespace Recyclarr.Tests.Config.EnvironmentVariables;
 
 [TestFixture]
-[Parallelizable(ParallelScope.All)]
 public class EnvironmentVariableNotDefinedExceptionTest
 {
     [Test]
