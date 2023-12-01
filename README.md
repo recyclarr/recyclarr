@@ -9,8 +9,6 @@
 A command-line application that will automatically synchronize recommended settings from the [TRaSH
 guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
 
-Formerly named "Trash Updater".
-
 ## Features
 
 Recyclarr supports Radarr, Sonarr v3, and Sonarr v4. The following information can be synced to
