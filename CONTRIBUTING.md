@@ -33,8 +33,8 @@ The following tools are *highly recommended* but not strictly required:
 - Jetbrains Rider (IDE for editing C# code)
 - Visual Studio Code (install workspace-recommended extensions as well)
 
-Other required tooling can be installed via the `Install-Tooling.ps1` powershell script. It's also a
-good idea to occasionally run this for upgrade purposes, too.
+Other required tooling can be installed via the `scripts/Install-Tooling.ps1` powershell script.
+It's also a good idea to occasionally run this for upgrade purposes, too.
 
 ## Docker Development
 
@@ -115,7 +115,7 @@ committed.
 
 To make a release, follow these steps:
 
-1. Run `Prepare-Release.ps1`. This will do the following:
+1. Run `scripts/Prepare-Release.ps1`. This will do the following:
    1. Update the changelog for the release according to [Keep a Changelog][changelog] rules.
    1. Commit the changelog updates.
    1. Create a tag for the release (using GitVersion).
@@ -142,8 +142,8 @@ The Github Workflows manage the release process after the push by doing the foll
 
 ## Update `.gitignore`
 
-Execute the `Update-Gitignore.ps1` script using Powershell. The working directory *must* be the root
-of the repo. This will pull the latest relevant `.gitignore` patterns from
+Execute the `scripts/Update-Gitignore.ps1` script using Powershell. The working directory *must* be
+the root of the repo. This will pull the latest relevant `.gitignore` patterns from
 [gitignore.io](https://gitignore.io) and commit them automatically to your current branch.
 
 ## Testing Discord Notifier
