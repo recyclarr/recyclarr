@@ -45,6 +45,9 @@
           "description": "If there are more log files than the max allowed here, Log Janitor will remove the oldest log files."
         }
       }
+    },
+    "notifications": {
+      "$ref": "settings/notifications.json"
     }
   }
 }

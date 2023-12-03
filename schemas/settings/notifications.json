@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings/notifications.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "apprise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_url", "key"],
+      "properties": {
+        "base_url": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
