@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace Recyclarr.Cli.Pipelines.Generic;
 
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.Members)]
 public class GenericPipelinePhases<TContext>
     where TContext : IPipelineContext
 {

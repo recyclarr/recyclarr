@@ -70,5 +70,4 @@ public class CustomFormatPreviewPhase(ILogger log) : IPreviewPipelinePhase<Custo
             log.Information("All custom formats are already up to date!");
         }
     }
-
 }
