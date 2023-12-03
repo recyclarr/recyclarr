@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of `~/.config/recyclarr`. Recyclarr will attempt to move this directory when run. If it
   can't, then manual intervention is needed by users (e.g. `recyclarr migrate`).
 
+### Fixed
+
+- Print more useful diagnostics when there's a connectivity problem to a service (e.g. incorrect
+  `base_url`).
+
 ## [6.0.2] - 2023-10-20
 
 ### Fixed

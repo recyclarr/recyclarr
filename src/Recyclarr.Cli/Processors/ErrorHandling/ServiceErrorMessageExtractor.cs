@@ -4,13 +4,23 @@ namespace Recyclarr.Cli.Processors.ErrorHandling;
 
 public class ServiceErrorMessageExtractor(FlurlHttpException e) : IServiceErrorMessageExtractor
 {
+    public HttpRequestError? HttpError
+    {
+        get
+        {
+            if (e.InnerException is not HttpRequestException http)
+            {
+                return null;
+            }
+
+            return http.HttpRequestError;
+        }
+    }
+
     public async Task<string> GetErrorMessage()
     {
         return await e.GetResponseStringAsync();
     }
 
-    public int? GetHttpStatusCode()
-    {
-        return e.StatusCode;
-    }
+    public int? HttpStatusCode => e.StatusCode;
 }

@@ -8,12 +8,14 @@ public class FlurlHttpExceptionHandler(ILogger log) : IFlurlHttpExceptionHandler
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
-        var statusCode = extractor.GetHttpStatusCode();
-
-        switch (statusCode)
+        switch (extractor)
         {
-            case 401:
+            case {HttpStatusCode: 401}:
                 log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
+                break;
+
+            case {HttpStatusCode: null}:
+                log.Error("Reason: Problem connecting to service. Is your `base_url` correct?");
                 break;
 
             default:
@@ -47,6 +49,7 @@ public class FlurlHttpExceptionHandler(ILogger log) : IFlurlHttpExceptionHandler
         }
 
         // Last resort
-        log.Error("Reason: Unable to determine. Please report this as a bug and attach your `verbose.log` file.");
+        log.Error(
+            "Reason: Unable to determine. Please report this as a bug and attach your `debug.log` and `verbose.log` files.");
     }
 }
