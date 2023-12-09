@@ -43,9 +43,7 @@ jobs:
           dotnet-version: ${{ env.dotnetVersion }}
 
       - name: Install Tooling
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
-          dotnet tool install --global GitVersion.Tool
+        run: dotnet tool restore
 
       - name: Perform Scan
         run: pwsh ci/RunSonarScan.ps1 -SonarToken "${{ secrets.SONAR_TOKEN }}"

@@ -1,3 +1,2 @@
-dotnet tool update --global GitVersion.Tool
+dotnet tool restore
 Install-Module -Force -Name ChangelogManagement
-dotnet tool update --global dotnet-sonarscanner

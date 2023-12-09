@@ -6,7 +6,7 @@ param (
     [switch] $Details
 )
 
-$version = $(dotnet-gitversion /showvariable semver)
+$version = $(dotnet gitversion /showvariable semver)
 if ($LASTEXITCODE -ne 0) { throw "Failed: dotnet gitversion" }
 
 $beginArgs = @(
