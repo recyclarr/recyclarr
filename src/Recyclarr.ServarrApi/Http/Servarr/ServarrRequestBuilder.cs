@@ -7,12 +7,13 @@ using Recyclarr.Json;
 using Recyclarr.Settings;
 using Serilog;
 
-namespace Recyclarr.ServarrApi.Http;
+namespace Recyclarr.ServarrApi.Http.Servarr;
 
 public class ServarrRequestBuilder(
     ILogger log,
     IFlurlClientCache clientCache,
-    ISettingsProvider settingsProvider)
+    ISettingsProvider settingsProvider,
+    IEnumerable<FlurlSpecificEventHandler> eventHandlers)
     : IServarrRequestBuilder
 {
     public IFlurlRequest Request(IServiceConfiguration config, params object[] path)
@@ -30,10 +31,14 @@ public class ServarrRequestBuilder(
     [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
     private void Configure(IFlurlClientBuilder builder)
     {
+        foreach (var handler in eventHandlers.Select(x => (x.EventType, x)))
+        {
+            builder.EventHandlers.Add(handler);
+        }
+
         builder.WithSettings(settings =>
         {
             settings.JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services);
-            FlurlLogging.SetupLogging(settings, log);
         });
 
         builder.ConfigureInnerHandler(handler =>

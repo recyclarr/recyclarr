@@ -1,6 +1,6 @@
 using Flurl.Http;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Http;
+using Recyclarr.ServarrApi.Http.Servarr;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 

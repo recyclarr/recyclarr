@@ -11,7 +11,7 @@
     <PackageVersion Include="CliWrap" Version="3.6.4" />
     <PackageVersion Include="FluentValidation" Version="11.8.1" />
     <PackageVersion Include="Flurl" Version="3.0.7" />
-    <PackageVersion Include="Flurl.Http" Version="4.0.0-pre6" />
+    <PackageVersion Include="Flurl.Http" Version="4.0.0" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageVersion Include="MudBlazor" Version="6.11.0" />
