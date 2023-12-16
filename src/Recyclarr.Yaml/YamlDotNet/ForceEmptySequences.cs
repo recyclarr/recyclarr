@@ -1,4 +1,4 @@
-using System.Collections;
+using Recyclarr.Common.Extensions;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -16,7 +16,7 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
     {
         value = null;
 
-        if (!IsEnumerable(expectedType) || !reader.Accept<NodeEvent>(out var evt) || !NodeIsNull(evt))
+        if (!IsList(expectedType) || !reader.Accept<NodeEvent>(out var evt) || !NodeIsNull(evt))
         {
             return false;
         }
@@ -44,8 +44,10 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
         return value is "" or "~" or "null" or "Null" or "NULL";
     }
 
-    private static bool IsEnumerable(Type type)
+    private static bool IsList(Type type)
     {
-        return typeof(IEnumerable).IsAssignableFrom(type);
+        return
+            type.IsImplementationOf(typeof(ICollection<>)) ||
+            type.IsImplementationOf(typeof(IReadOnlyCollection<>));
     }
 }

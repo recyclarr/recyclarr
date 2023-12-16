@@ -4,4 +4,7 @@
     <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
 </Project>
