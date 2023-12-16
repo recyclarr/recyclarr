@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Print more useful diagnostics when there's a connectivity problem to a service (e.g. incorrect
   `base_url`).
+- Regression that prevented basic validation of `base_url` & `api_key`.
 
 ## [6.0.2] - 2023-10-20
 

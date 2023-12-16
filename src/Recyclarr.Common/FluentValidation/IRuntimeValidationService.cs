@@ -4,5 +4,5 @@ namespace Recyclarr.Common.FluentValidation;
 
 public interface IRuntimeValidationService
 {
-    ValidationResult Validate(object instance, params string[] ruleSets);
+    ValidationResult Validate(object instance, params string[] additionalRuleSets);
 }

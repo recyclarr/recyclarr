@@ -22,17 +22,15 @@ public class RuntimeValidationService : IRuntimeValidationService
             .ToDictionary(x => x.Item2!.GetGenericArguments()[0], x => x.Item1);
     }
 
-    public ValidationResult Validate(object instance, params string[] ruleSets)
+    public ValidationResult Validate(object instance, params string[] additionalRuleSets)
     {
         if (!_validators.TryGetValue(instance.GetType(), out var validator))
         {
             throw new ValidationException($"No validator is available for type: {instance.GetType().FullName}");
         }
 
-        IValidatorSelector validatorSelector = ruleSets.Length != 0
-            ? new RulesetValidatorSelector(ruleSets)
-            : new DefaultValidatorSelector();
-
+        var validatorSelector =
+            new RulesetValidatorSelector([RulesetValidatorSelector.DefaultRuleSetName, ..additionalRuleSets]);
         return validator.Validate(new ValidationContext<object>(instance, new PropertyChain(), validatorSelector));
     }
 }

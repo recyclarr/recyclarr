@@ -45,7 +45,7 @@ public class ConfigurationLoader(
             log.Warning("Configuration is empty");
         }
 
-        if (!validator.Validate(config))
+        if (!validator.Validate(config, YamlValidatorRuleSets.RootConfig))
         {
             return Array.Empty<IServiceConfiguration>();
         }
