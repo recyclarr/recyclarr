@@ -14,6 +14,8 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
                 .NotEmpty()
                 .Must(x => x!.StartsWith("http"))
                 .WithMessage("{PropertyName} must start with 'http' or 'https'")
+                .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
+                .WithMessage("{PropertyName} must be a valid URL")
                 .WithName("base_url");
 
             RuleFor(x => x.ApiKey)
