@@ -2,10 +2,10 @@ using FluentValidation.TestHelper;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 
-namespace Recyclarr.IntegrationTests;
+namespace Recyclarr.Tests.Config.Parsing;
 
 [TestFixture]
-public class YamlConfigValidatorTest : IntegrationTestFixture
+public class YamlConfigValidatorTest
 {
     [Test]
     public void Validation_succeeds()
@@ -34,7 +34,7 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config);
 
         result.ShouldNotHaveAnyValidationErrors();
@@ -67,7 +67,7 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.ApiKey);
@@ -100,7 +100,7 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
@@ -134,14 +134,14 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
 
         result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("base_url must start with 'http' or 'https'");
     }
 
-    public static string FirstCf { get; } = $"{nameof(ServiceConfigYaml.CustomFormats)}[0].";
+    private static string FirstCf => $"{nameof(ServiceConfigYaml.CustomFormats)}[0].";
 
     [Test]
     public void Validation_failure_when_quality_definition_type_empty()
@@ -170,7 +170,7 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config);
 
         result.ShouldHaveValidationErrorFor(x => x.QualityDefinition!.Type);
@@ -203,10 +203,25 @@ public class YamlConfigValidatorTest : IntegrationTestFixture
             }
         };
 
-        var validator = Resolve<ServiceConfigYamlValidator>();
+        var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config);
 
         result.ShouldHaveValidationErrorFor(FirstCf +
             $"{nameof(CustomFormatConfig.QualityProfiles)}[0].{nameof(QualityProfileScoreConfig.Name)}");
+    }
+
+    [Test]
+    public void Validation_failure_when_base_url_invalid()
+    {
+        var config = new ServiceConfigYaml
+        {
+            BaseUrl = "http:/invalid"
+        };
+
+        var validator = new ServiceConfigYamlValidator();
+        var result = validator.TestValidate(config, s => s.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
+
+        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+            .WithErrorMessage("base_url must be a valid URL");
     }
 }
