@@ -9,7 +9,16 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
     public IAppPaths CreateAppPaths()
     {
         var appDir = GetAppDataDirectory(AppDataDirectoryOverride);
-        return new AppPaths(fs.DirectoryInfo.New(appDir));
+        var paths = new AppPaths(fs.DirectoryInfo.New(appDir));
+
+        // Initialize other directories used throughout the application
+        // Do not initialize the repo directory here; the GitRepositoryFactory handles that later.
+        paths.CacheDirectory.Create();
+        paths.LogDirectory.Create();
+        paths.ConfigsDirectory.Create();
+        paths.IncludesDirectory.Create();
+
+        return paths;
     }
 
     private string GetAppDataDirectory(string? appDataDirectoryOverride)

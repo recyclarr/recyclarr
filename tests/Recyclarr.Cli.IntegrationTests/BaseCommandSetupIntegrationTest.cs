@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Settings;
-using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Cli.IntegrationTests;
 
@@ -14,8 +13,7 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         var registrations = Resolve<IEnumerable<IGlobalSetupTask>>();
         registrations.Select(x => x.GetType()).Should().BeEquivalentTo(new[]
         {
-            typeof(JanitorCleanupTask),
-            typeof(AppPathSetupTask)
+            typeof(JanitorCleanupTask)
         });
     }
 
@@ -59,27 +57,5 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         maxFiles.Should().BeGreaterThan(0);
         Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName))
             .Should().HaveCount(maxFiles);
-    }
-
-    [Test]
-    public void App_paths_setup_creates_initial_directories()
-    {
-        for (var i = 0; i < 50; ++i)
-        {
-            Fs.AddFile(Paths.LogDirectory.File($"logfile-{i}.log").FullName, new MockFileData(""));
-        }
-
-        var sut = Resolve<AppPathSetupTask>();
-        sut.OnStart();
-
-        var expectedDirs = new[]
-        {
-            Paths.CacheDirectory.FullName,
-            Paths.LogDirectory.FullName,
-            Paths.ConfigsDirectory.FullName,
-            Paths.IncludesDirectory.FullName
-        };
-
-        Fs.LeafDirectories().Should().BeEquivalentTo(expectedDirs);
     }
 }

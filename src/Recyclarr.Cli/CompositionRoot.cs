@@ -98,11 +98,10 @@ public static class CompositionRoot
     private static void CliRegistrations(ContainerBuilder builder)
     {
         builder.RegisterType<BaseCommandSetupInterceptor>().As<ICommandInterceptor>();
-        builder.RegisterType<VersionLogInterceptor>().As<ICommandInterceptor>();
+        builder.RegisterType<ProgramInformationLogInterceptor>().As<ICommandInterceptor>();
         builder.RegisterType<GlobalTaskInterceptor>().As<ICommandInterceptor>();
 
         builder.RegisterTypes(
-                typeof(AppPathSetupTask),
                 typeof(JanitorCleanupTask))
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
