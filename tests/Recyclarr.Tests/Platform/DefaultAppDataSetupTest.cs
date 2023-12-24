@@ -34,7 +34,8 @@ public class DefaultAppDataSetupTest
             .SubDirectory("override")
             .SubDirectory("path");
 
-        var paths = sut.CreateAppPaths(overridePath.FullName);
+        sut.AppDataDirectoryOverride = overridePath.FullName;
+        var paths = sut.CreateAppPaths();
 
         paths.AppDataDirectory.FullName.Should().Be(overridePath.FullName);
     }
@@ -88,7 +89,8 @@ public class DefaultAppDataSetupTest
             .SubDirectory("var")
             .SubDirectory("path").FullName;
 
-        sut.CreateAppPaths(expectedPath);
+        sut.AppDataDirectoryOverride = expectedPath;
+        sut.CreateAppPaths();
 
         env.DidNotReceiveWithAnyArgs().GetEnvironmentVariable(default!);
         fs.AllDirectories.Should().Contain(expectedPath);

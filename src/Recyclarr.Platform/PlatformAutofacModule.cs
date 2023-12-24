@@ -12,16 +12,11 @@ public class PlatformAutofacModule : Module
 
     private static void RegisterAppPaths(ContainerBuilder builder)
     {
-        builder.RegisterType<DefaultAppDataSetup>();
+        builder.RegisterType<DefaultAppDataSetup>().As<IAppDataSetup>().AsSelf().SingleInstance();
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<DefaultRuntimeInformation>().As<IRuntimeInformation>();
 
-        builder.Register(c =>
-            {
-                var appData = c.Resolve<AppDataPathProvider>();
-                var dataSetup = c.Resolve<DefaultAppDataSetup>();
-                return dataSetup.CreateAppPaths(appData.AppDataPath);
-            })
+        builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
             .As<IAppPaths>()
             .SingleInstance();
     }

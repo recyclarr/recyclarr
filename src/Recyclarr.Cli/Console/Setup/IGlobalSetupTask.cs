@@ -1,6 +1,6 @@
 namespace Recyclarr.Cli.Console.Setup;
 
-public interface IBaseCommandSetupTask
+public interface IGlobalSetupTask
 {
     void OnStart();
     void OnFinish();

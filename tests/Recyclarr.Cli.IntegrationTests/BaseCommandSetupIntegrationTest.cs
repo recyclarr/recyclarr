@@ -11,7 +11,7 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
     [Test]
     public void Base_command_startup_tasks_are_registered()
     {
-        var registrations = Resolve<IEnumerable<IBaseCommandSetupTask>>();
+        var registrations = Resolve<IEnumerable<IGlobalSetupTask>>();
         registrations.Select(x => x.GetType()).Should().BeEquivalentTo(new[]
         {
             typeof(JanitorCleanupTask),

@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cli.Cache;
+using Recyclarr.Cli.Console.Interceptors;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -63,7 +64,7 @@ public static class CompositionRoot
 
         builder.RegisterAutoMapper(thisAssembly);
 
-        CommandRegistrations(builder);
+        CliRegistrations(builder);
         PipelineRegistrations(builder);
     }
 
@@ -89,28 +90,24 @@ public static class CompositionRoot
     private static void RegisterLogger(ContainerBuilder builder)
     {
         builder.RegisterType<LogJanitor>().As<ILogJanitor>();
+        builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<LoggerFactory>();
         builder.Register(c => c.Resolve<LoggerFactory>().Create()).As<ILogger>().SingleInstance();
     }
 
-    private static void CommandRegistrations(ContainerBuilder builder)
+    private static void CliRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterType<BaseCommandSetupInterceptor>().As<ICommandInterceptor>();
+        builder.RegisterType<VersionLogInterceptor>().As<ICommandInterceptor>();
+        builder.RegisterType<GlobalTaskInterceptor>().As<ICommandInterceptor>();
+
         builder.RegisterTypes(
                 typeof(AppPathSetupTask),
                 typeof(JanitorCleanupTask))
-            .As<IBaseCommandSetupTask>()
+            .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
         builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<CommandSettings>();
-    }
-
-    public static void RegisterExternal(
-        ContainerBuilder builder,
-        LoggingLevelSwitch logLevelSwitch,
-        AppDataPathProvider appDataPathProvider)
-    {
-        builder.RegisterInstance(logLevelSwitch);
-        builder.RegisterInstance(appDataPathProvider);
     }
 }

@@ -1,22 +1,16 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using Recyclarr.Cli.Console.Commands;
+﻿using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Platform;
 using Serilog.Core;
 using Serilog.Events;
 using Spectre.Console.Cli;
 
-namespace Recyclarr.Cli.Console.Setup;
+namespace Recyclarr.Cli.Console.Interceptors;
 
-public class CliInterceptor(LoggingLevelSwitch loggingLevelSwitch, AppDataPathProvider appDataPathProvider)
+public class BaseCommandSetupInterceptor(LoggingLevelSwitch loggingLevelSwitch, IAppDataSetup appDataSetup)
     : ICommandInterceptor
 {
-    private readonly Subject<Unit> _interceptedSubject = new();
     private readonly ConsoleAppCancellationTokenSource _ct = new();
-
-    public IObservable<Unit> OnIntercepted => _interceptedSubject.AsObservable();
 
     public void Intercept(CommandContext context, CommandSettings settings)
     {
@@ -30,22 +24,17 @@ public class CliInterceptor(LoggingLevelSwitch loggingLevelSwitch, AppDataPathPr
                 HandleBaseCommand(cmd);
                 break;
         }
-
-        _interceptedSubject.OnNext(Unit.Default);
-        _interceptedSubject.OnCompleted();
     }
 
     private void HandleServiceCommand(ServiceCommandSettings cmd)
     {
         HandleBaseCommand(cmd);
-
-        appDataPathProvider.AppDataPath = cmd.AppData;
+        appDataSetup.AppDataDirectoryOverride = cmd.AppData;
     }
 
     private void HandleBaseCommand(BaseCommandSettings cmd)
     {
         cmd.CancellationToken = _ct.Token;
-
         loggingLevelSwitch.MinimumLevel = cmd.Debug switch
         {
             true => LogEventLevel.Debug,

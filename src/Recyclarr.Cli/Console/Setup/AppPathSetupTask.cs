@@ -2,7 +2,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class AppPathSetupTask(ILogger log, IAppPaths paths) : IBaseCommandSetupTask
+public class AppPathSetupTask(ILogger log, IAppPaths paths) : IGlobalSetupTask
 {
     public void OnStart()
     {

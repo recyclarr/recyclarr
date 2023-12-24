@@ -3,7 +3,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
-internal class AutofacTypeRegistrar(ContainerBuilder builder, Action<ILifetimeScope> assignScope)
+internal class AutofacTypeRegistrar(ContainerBuilder builder)
     : ITypeRegistrar
 {
     public void Register(Type service, Type implementation)
@@ -23,8 +23,6 @@ internal class AutofacTypeRegistrar(ContainerBuilder builder, Action<ILifetimeSc
 
     public ITypeResolver Build()
     {
-        var container = builder.Build();
-        assignScope(container);
-        return new AutofacTypeResolver(container);
+        return new AutofacTypeResolver(builder.Build());
     }
 }
