@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
+		GitVersion.yml = GitVersion.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Common", "src\Recyclarr.Common\Recyclarr.Common.csproj", "{18CF1FCA-7983-4423-8B7E-4A830108C624}"
