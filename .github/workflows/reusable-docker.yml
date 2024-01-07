@@ -13,34 +13,42 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # avoid shallow clone for GitVersion
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v2
-        # with:
-        #   buildkitd-flags: --debug
+        uses: docker/setup-buildx-action@v3
 
-      - name: Check Version
-        id: check_version
-        shell: pwsh
-        run: ci/Test-Version.ps1 ${{ github.ref_name }}
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: 5.x
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0
+        id: gitversion
 
       - name: Set Docker Tags
         id: meta
         uses: docker/metadata-action@v5
         env:
-          SEMVER: type=semver,enable=${{ steps.check_version.outputs.match }},value=${{ github.ref_name }}
+          semver: >-
+            type=semver,
+            value=${{ steps.gitversion.outputs.semVer }}
+          prod: >-
+            enable=${{ steps.gitversion.outputs.preReleaseTag == '' }}
         with:
           images: |
             ${{ github.repository }}
             ghcr.io/${{ github.repository }}
           tags: |
             type=edge,branch=master
-            ${{ env.SEMVER }},pattern={{major}}.{{minor}}.{{patch}}
-            ${{ env.SEMVER }},pattern={{major}}.{{minor}}
-            ${{ env.SEMVER }},pattern={{major}}
+            ${{ env.semver }},pattern={{version}}
+            ${{ env.semver }},${{ env.prod }},pattern={{major}}.{{minor}}
+            ${{ env.semver }},${{ env.prod }},pattern={{major}}
 
       - name: Grab Artifacts
         uses: ./.github/actions/download-tar

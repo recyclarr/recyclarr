@@ -5,7 +5,7 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-$version = if ($Version) { $Version } else { dotnet gitversion /showvariable SemVer }
+$version = if ($Version) { $Version } else { dotnet gitversion /showvariable MajorMinorPatch }
 
 Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
     FirstRelease = "https://github.com/recyclarr/recyclarr/releases/tag/v{CUR}"
