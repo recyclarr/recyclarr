@@ -28,6 +28,6 @@ public class CustomFormatLogPhase(ILogger log) : ILogPipelinePhase<CustomFormatP
 
     public void LogPersistenceResults(CustomFormatPipelineContext context)
     {
-        // Logging is done (and shared with) in CustomFormatPreviewPhase
+        context.LogTransactions(log);
     }
 }

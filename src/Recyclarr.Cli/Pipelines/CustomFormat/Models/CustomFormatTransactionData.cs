@@ -11,4 +11,7 @@ public record CustomFormatTransactionData
     public Collection<CustomFormatData> UpdatedCustomFormats { get; } = new();
     public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = new();
     public Collection<CustomFormatData> UnchangedCustomFormats { get; } = new();
+
+    public int TotalCustomFormatChanges =>
+        NewCustomFormats.Count + UpdatedCustomFormats.Count + DeletedCustomFormats.Count;
 }
