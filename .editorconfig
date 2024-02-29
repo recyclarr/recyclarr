@@ -704,7 +704,7 @@ resharper_wrap_arguments_style = wrap_if_long
 resharper_wrap_around_elements = true
 resharper_wrap_array_initializer_style = chop_always
 resharper_wrap_base_clause_style = wrap_if_long
-resharper_wrap_before_arrow_with_expressions = true
+resharper_wrap_before_arrow_with_expressions = false
 resharper_wrap_before_binary_opsign = false
 resharper_wrap_before_binary_pattern_op = true
 resharper_wrap_before_colon = false
@@ -1595,4 +1595,4 @@ ij_javascript_array_initializer_right_brace_on_new_line = false
 dotnet_diagnostic.ca1707.severity = none
 
 # CA1861: Avoid constant arrays as arguments
-dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.ca1861.severity = none
