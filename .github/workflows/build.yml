@@ -9,9 +9,10 @@ on:
       - ".github/workflows/reusable-build.yml"
       - "src/**"
       - "tests/**"
-      - "schemas/**"
       - "docker/**"
       - "ci/**"
+      - "**.props"
+      - "**.targets"
 
   pull_request:
     paths:
@@ -20,9 +21,10 @@ on:
       - ".github/workflows/reusable-build.yml"
       - "src/**"
       - "tests/**"
-      - "schemas/**"
       - "docker/**"
       - "ci/**"
+      - "**.props"
+      - "**.targets"
 
 jobs:
   #############################################
