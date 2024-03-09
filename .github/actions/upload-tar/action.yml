@@ -22,6 +22,7 @@ runs:
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}/artifact.tar
+        overwrite: true
 
     - run: rm artifact.tar
       shell: bash
