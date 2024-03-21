@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v7.0 Upgrade Guide][breaking7] for required
+changes you may need to make.
+
+[breaking7]: https://recyclarr.dev/wiki/upgrade-guide/v7.0/
+
 ### Changed
 
-- The app data directory on OSX has changed. It now lives in `Library/Application Support/recyclarr`
-  instead of `~/.config/recyclarr`. Recyclarr will attempt to move this directory when run. If it
-  can't, then manual intervention is needed by users (e.g. `recyclarr migrate`).
+- **BREAKING**: The app data directory on OSX has changed. It now lives at `~/Library/Application
+  Support/recyclarr` instead of `~/.config/recyclarr`. Users will need to run `recyclarr migrate` to
+  move the directory (or do it manually).
 - Slightly improved display of version number when using `-v` option.
 
 ### Fixed

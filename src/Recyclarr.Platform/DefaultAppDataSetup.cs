@@ -2,10 +2,7 @@ using System.IO.Abstractions;
 
 namespace Recyclarr.Platform;
 
-public class DefaultAppDataSetup(
-    IEnvironment env,
-    IFileSystem fs,
-    IRuntimeInformation runtimeInfo)
+public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs)
 {
     public IAppPaths CreateAppPaths(string? appDataDirectoryOverride = null)
     {
@@ -37,27 +34,6 @@ public class DefaultAppDataSetup(
                 "to place data files. Please use the --app-data option to explicitly set a location for these files.");
         }
 
-        appData = fs.Path.Combine(appData, AppPaths.DefaultAppDataDirectoryName);
-
-        try
-        {
-            if (runtimeInfo.IsPlatformOsx())
-            {
-                var oldAppData = fs.Path.Combine(env.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config",
-                    AppPaths.DefaultAppDataDirectoryName);
-                if (fs.DirectoryInfo.New(oldAppData).Exists)
-                {
-                    // Attempt to move the directory for the user. If this cannot be done, then the MoveOsxAppDataDotnet8
-                    // migration step (which is required) will force the issue to the user and provide remediation steps.
-                    fs.Directory.Move(oldAppData, appData);
-                }
-            }
-        }
-        catch (IOException)
-        {
-            // Ignore failures here because we'll let the migration step take care of it.
-        }
-
-        return appData;
+        return fs.Path.Combine(appData, AppPaths.DefaultAppDataDirectoryName);
     }
 }
