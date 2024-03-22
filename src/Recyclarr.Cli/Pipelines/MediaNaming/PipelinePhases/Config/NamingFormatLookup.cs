@@ -2,7 +2,7 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
 public class NamingFormatLookup
 {
-    private readonly List<InvalidNamingConfig> _errors = new();
+    private readonly List<InvalidNamingConfig> _errors = [];
     public IReadOnlyCollection<InvalidNamingConfig> Errors => _errors;
 
     public string? ObtainFormat(

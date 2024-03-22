@@ -10,12 +10,12 @@ public class ConfigurationFinderTest
 {
     private static IFileInfo[] GetYamlPaths(IAppPaths paths)
     {
-        return new[]
-        {
+        return
+        [
             paths.AppDataDirectory.File("recyclarr.yml"),
             paths.ConfigsDirectory.File("b.yml"),
             paths.ConfigsDirectory.File("c.yaml")
-        };
+        ];
     }
 
     [Test, AutoMockData]

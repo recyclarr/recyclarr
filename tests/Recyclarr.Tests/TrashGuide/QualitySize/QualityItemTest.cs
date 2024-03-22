@@ -6,7 +6,7 @@ namespace Recyclarr.Tests.TrashGuide.QualitySize;
 public class QualityItemTest
 {
     private static readonly object[] MaxTestValues =
-    {
+    [
         new object?[] {100m, 100m, false},
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
@@ -14,14 +14,14 @@ public class QualityItemTest
         new object?[] {QualityItem.MaxUnlimitedThreshold, null, false},
         new object?[] {QualityItem.MaxUnlimitedThreshold - 1, null, true},
         new object?[] {QualityItem.MaxUnlimitedThreshold, QualityItem.MaxUnlimitedThreshold, true}
-    };
+    ];
 
     private static readonly object[] MinTestValues =
-    {
+    [
         new object?[] {0m, 0m, false},
         new object?[] {0m, -1m, true},
         new object?[] {0m, 1m, true}
-    };
+    ];
 
     [TestCaseSource(nameof(MaxTestValues))]
     public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(

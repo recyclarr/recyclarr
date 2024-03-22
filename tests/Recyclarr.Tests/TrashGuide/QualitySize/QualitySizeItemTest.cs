@@ -6,7 +6,7 @@ namespace Recyclarr.Tests.TrashGuide.QualitySize;
 public class QualitySizeItemTest
 {
     private static readonly object[] PreferredTestValues =
-    {
+    [
         new object?[] {100m, 100m, false},
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
@@ -15,7 +15,7 @@ public class QualitySizeItemTest
         new object?[] {QualitySizeItem.PreferredUnlimitedThreshold - 1, null, true},
         new object?[]
             {QualitySizeItem.PreferredUnlimitedThreshold, QualitySizeItem.PreferredUnlimitedThreshold, true}
-    };
+    ];
 
     [TestCaseSource(nameof(PreferredTestValues))]
     public void PreferredDifferent_WithVariousValues_ReturnsExpectedResult(
@@ -29,7 +29,7 @@ public class QualitySizeItemTest
     }
 
     private static readonly object[] InterpolatedPreferredTestParams =
-    {
+    [
         new[]
         {
             400m,
@@ -60,7 +60,7 @@ public class QualitySizeItemTest
             0.5m,
             50m
         }
-    };
+    ];
 
     [TestCaseSource(nameof(InterpolatedPreferredTestParams))]
     public void InterpolatedPreferred_VariousValues_ExpectedResults(

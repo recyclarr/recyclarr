@@ -7,7 +7,7 @@ namespace Recyclarr.Yaml.YamlDotNet;
 
 public sealed class SyntaxErrorHelper : INodeTypeResolver
 {
-    private static readonly string[] CollectionKeywords = {"Collection", "List"};
+    private static readonly string[] CollectionKeywords = ["Collection", "List"];
 
     public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)
     {

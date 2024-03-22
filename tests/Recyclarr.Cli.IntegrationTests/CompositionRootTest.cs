@@ -35,7 +35,7 @@ public class CompositionRootTest
                 .Select(x => x.ServiceType)
                 .Distinct()
                 .Where(x => x.FullName == null || !x.FullName.StartsWith("Autofac."))
-                .Select(x => new TestCaseParameters(new object[] {container, x}) {TestName = x.FullName})
+                .Select(x => new TestCaseParameters([container, x]) {TestName = x.FullName})
                 .GetEnumerator();
         }
     }

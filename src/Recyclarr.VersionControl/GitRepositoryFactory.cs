@@ -7,11 +7,11 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
 {
     // A few hand-picked files that should exist in a .git directory.
     private static readonly string[] ValidGitPaths =
-    {
+    [
         ".git/config",
         ".git/index",
         ".git/HEAD"
-    };
+    ];
 
     public async Task<IGitRepository> CreateAndCloneIfNeeded(
         Uri repoUrl,
