@@ -2,7 +2,6 @@ using Autofac;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.TrashGuide.MediaNaming;
 using Recyclarr.TrashGuide.QualitySize;
-using Recyclarr.TrashGuide.ReleaseProfile;
 
 namespace Recyclarr.TrashGuide;
 
@@ -18,10 +17,6 @@ public class GuideAutofacModule : Module
         builder.RegisterType<CustomFormatGuideService>().As<ICustomFormatGuideService>().SingleInstance();
         builder.RegisterType<CustomFormatLoader>().As<ICustomFormatLoader>();
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
-
-        // Release Profile
-        builder.RegisterType<ReleaseProfileGuideParser>();
-        builder.RegisterType<ReleaseProfileGuideService>().As<IReleaseProfileGuideService>().SingleInstance();
 
         // Quality Size
         builder.RegisterType<QualitySizeGuideService>().As<IQualitySizeGuideService>().SingleInstance();

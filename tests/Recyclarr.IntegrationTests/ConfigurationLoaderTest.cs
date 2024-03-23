@@ -101,26 +101,7 @@ public class ConfigurationLoaderTest : IntegrationTestFixture
                     ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                     BaseUrl = new Uri("http://localhost:8989"),
                     InstanceName = "name",
-                    ReplaceExistingCustomFormats = false,
-                    ReleaseProfiles = new List<ReleaseProfileConfig>
-                    {
-                        new()
-                        {
-                            TrashIds = new[] {"123"},
-                            StrictNegativeScores = true,
-                            Tags = new List<string> {"anime"}
-                        },
-                        new()
-                        {
-                            TrashIds = new[] {"456"},
-                            StrictNegativeScores = false,
-                            Tags = new List<string>
-                            {
-                                "tv",
-                                "series"
-                            }
-                        }
-                    }
+                    ReplaceExistingCustomFormats = false
                 }
             });
     }

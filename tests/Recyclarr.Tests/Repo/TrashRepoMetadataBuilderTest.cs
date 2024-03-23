@@ -17,7 +17,6 @@ public class TrashRepoMetadataBuilderTest
               "naming": ["docs/json/radarr/naming"]
             },
             "sonarr": {
-              "release_profiles": ["docs/json/sonarr/rp"],
               "custom_formats": ["docs/json/sonarr/cf"],
               "qualities": ["docs/json/sonarr/quality-size"],
               "naming": ["docs/json/sonarr/naming"]

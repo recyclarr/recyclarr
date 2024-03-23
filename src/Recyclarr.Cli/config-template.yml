@@ -1,75 +1,41 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 
-# A starter config to use with Recyclarr. Most values are set to "reasonable defaults". Update the
-# values below as needed for your instance. You will be required to update the API Key and URL for
-# each instance you want to use.
+# An empty starter config to use with Recyclarr. Update the values below as needed for your
+# instance. You will be required to update the `api_key` and `base_url` for each instance you want
+# to use.
 #
-# Many optional settings have been omitted to keep this template simple. Note that there's no "one
-# size fits all" configuration. Please refer to the guide to understand how to build the appropriate
-# configuration based on your hardware setup and capabilities.
+# If you'd rather use pre-built configuration instead of building your own from scratch, see these
+# pages:
+# - Config Templates: https://recyclarr.dev/wiki/guide-configs/
+# - CLI Command: http://recyclarr.dev/wiki/cli/config/list/templates/
 #
-# For any lines that mention uncommenting YAML, you simply need to remove the leading hash (`#`).
-# The YAML comments will already be at the appropriate indentation.
+# This file WILL NOT WORK as it currently is. You need to read the documentation and build this
+# configuration from scratch. Note that there's no "one size fits all" configuration. Please refer
+# to the TRaSH Guides to understand how to build the appropriate configuration based on your
+# hardware setup and capabilities.
 #
 # For more details on the configuration, see the Configuration Reference on the wiki here:
 # https://recyclarr.dev/wiki/yaml/config-reference/
+#
+# Want a more flexible file layout?
+# See: https://recyclarr.dev/wiki/file-structure/
 
-# Configuration specific to Sonarr
+# Configuration specific to Sonarr. For Radarr, the layout is the same.
+# See: http://recyclarr.dev/wiki/yaml/config-reference/basic/
 sonarr:
   series:
     # Set the URL/API Key to your actual instance
     base_url: http://localhost:8989
     api_key: YOUR_KEY_HERE
 
-    # Quality definitions from the guide to sync to Sonarr. Choices: series, anime
+    # See: https://recyclarr.dev/wiki/yaml/config-reference/quality-definition/
     quality_definition:
-      type: series
 
-    # Release profiles from the guide to sync to Sonarr v3 (Sonarr v4 does not use this!)
-    # Use `recyclarr list release-profiles` for values you can put here.
-    # https://trash-guides.info/Sonarr/Sonarr-Release-Profile-RegEx/
-    release_profiles:
-      # Series
-      - trash_ids:
-          - EBC725268D687D588A20CBC5F97E538B # Low Quality Groups
-          - 1B018E0C53EC825085DD911102E2CA36 # Release Sources (Streaming Service)
-          - 71899E6C303A07AF0E4746EFF9873532 # P2P Groups + Repack/Proper
-      # Anime (Uncomment below if you want it)
-      #- trash_ids:
-      #    - d428eda85af1df8904b4bbe4fc2f537c # Anime - First release profile
-      #    - 6cd9e10bb5bb4c63d2d7cd3279924c7b # Anime - Second release profile
+    # See: http://localhost:3000/wiki/yaml/config-reference/quality-profiles/
+    quality_profiles:
 
-# Configuration specific to Radarr.
-radarr:
-  movies:
-    # Set the URL/API Key to your actual instance
-    base_url: http://localhost:7878
-    api_key: YOUR_KEY_HERE
-
-    # Which quality definition in the guide to sync to Radarr. Only choice right now is 'movie'
-    quality_definition:
-      type: movie
-
-    # Set to 'true' to automatically remove custom formats from Radarr when they are removed from
-    # the guide or your configuration. This will NEVER delete custom formats you manually created!
-    delete_old_custom_formats: false
-
+    # See: http://localhost:3000/wiki/yaml/config-reference/custom-formats/
     custom_formats:
-      # A list of custom formats to sync to Radarr.
-      # Use `recyclarr list custom-formats radarr` for values you can put here.
-      # https://trash-guides.info/Radarr/Radarr-collection-of-custom-formats/
-      - trash_ids:
-          - ed38b889b31be83fda192888e2286d83 # BR-DISK
-          - 90cedc1fea7ea5d11298bebd3d1d3223 # EVO (no WEBDL)
-          - 90a6f9a284dff5103f6346090e6280c8 # LQ
-          - dc98083864ea246d05a42df0d05f81cc # x265 (720/1080p)
-          - b8cd450cbfa689c0259a01d9e29ba3d6 # 3D
 
-        # Uncomment the below properties to specify one or more quality profiles that should be
-        # updated with scores from the guide for each custom format. Without this, custom formats
-        # are synced to Radarr but no scores are set in any quality profiles.
-        #quality_profiles:
-        #  - name: Quality Profile 1
-        #  - name: Quality Profile 2
-        #    #score: -9999 # Optional score to assign to all CFs. Overrides scores in the guide.
-        #    #reset_unmatched_scores: true # Optionally set other scores to 0 if they are not listed in 'names' above.
+    # See: http://localhost:3000/wiki/yaml/config-reference/media-naming/
+    media_naming:

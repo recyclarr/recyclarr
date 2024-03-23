@@ -10,15 +10,6 @@ public class NamingFormatLookup
         string? configFormatKey,
         string errorDescription)
     {
-        return ObtainFormat(guideFormats, configFormatKey, null, errorDescription);
-    }
-
-    public string? ObtainFormat(
-        IReadOnlyDictionary<string, string> guideFormats,
-        string? configFormatKey,
-        string? keySuffix,
-        string errorDescription)
-    {
         if (configFormatKey is null)
         {
             return null;
@@ -29,11 +20,6 @@ public class NamingFormatLookup
         var lowerKey = configFormatKey.ToLowerInvariant();
 
         var keys = new List<string> {lowerKey};
-        if (keySuffix is not null)
-        {
-            // Put the more specific key first
-            keys.Insert(0, lowerKey + keySuffix);
-        }
 
         foreach (var k in keys)
         {

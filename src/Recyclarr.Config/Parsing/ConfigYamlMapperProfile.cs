@@ -12,8 +12,6 @@ public class ConfigYamlMapperProfile : Profile
         CreateMap<QualityScoreConfigYaml, QualityProfileScoreConfig>();
         CreateMap<CustomFormatConfigYaml, CustomFormatConfig>();
         CreateMap<QualitySizeConfigYaml, QualityDefinitionConfig>();
-        CreateMap<ReleaseProfileConfigYaml, ReleaseProfileConfig>();
-        CreateMap<ReleaseProfileFilterConfigYaml, SonarrProfileFilterConfig>();
         CreateMap<ResetUnmatchedScoresConfigYaml, ResetUnmatchedScoresConfig>();
 
         CreateMap<RadarrMediaNamingConfigYaml, RadarrMediaNamingConfig>();

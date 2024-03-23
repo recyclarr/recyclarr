@@ -7,7 +7,6 @@ using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
-using Recyclarr.ServarrApi.Tag;
 
 namespace Recyclarr.ServarrApi;
 
@@ -26,7 +25,6 @@ public class ApiServicesAutofacModule : Module
         builder.RegisterType<CustomFormatApiService>().As<ICustomFormatApiService>();
         builder.RegisterType<QualityDefinitionApiService>().As<IQualityDefinitionApiService>();
         builder.RegisterType<MediaNamingApiService>().As<IMediaNamingApiService>();
-        builder.RegisterType<SonarrTagApiService>().As<ISonarrTagApiService>();
 
         builder.RegisterTypes(
                 typeof(FlurlAfterCallHandler),

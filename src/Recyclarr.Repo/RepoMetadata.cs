@@ -9,7 +9,6 @@ public record RadarrMetadata
 
 public record SonarrMetadata
 {
-    public IReadOnlyCollection<string> ReleaseProfiles { get; init; } = Array.Empty<string>();
     public IReadOnlyCollection<string> Qualities { get; init; } = Array.Empty<string>();
     public IReadOnlyCollection<string> CustomFormats { get; init; } = Array.Empty<string>();
     public IReadOnlyCollection<string> Naming { get; init; } = Array.Empty<string>();

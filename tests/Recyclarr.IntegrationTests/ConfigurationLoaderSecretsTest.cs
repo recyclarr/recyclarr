@@ -19,7 +19,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
               instance1:
                 api_key: !secret api_key
                 base_url: !secret 123GARBAGE_
-                release_profiles:
+                custom_formats:
                   - trash_ids:
                       - !secret secret_rp
             """;
@@ -39,7 +39,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
                 InstanceName = "instance1",
                 ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                 BaseUrl = new Uri("https://radarr:7878"),
-                ReleaseProfiles = new[]
+                CustomFormats = new[]
                 {
                     new
                     {
@@ -123,10 +123,10 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
               instance5:
                 api_key: fake_key
                 base_url: fake_url
-                release_profiles: !secret bogus_profile
+                custom_formats: !secret bogus_profile
             """;
 
-        const string secretsYml = @"bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
+        const string secretsYml = "bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
         Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
         configLoader.Load(() => new StringReader(testYml))

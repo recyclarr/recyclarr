@@ -25,7 +25,7 @@ public static class ConfigExtensions
         this IEnumerable<IServiceConfiguration> configs,
         ConfigFilterCriteria criteria)
     {
-        // later, if we filter by "operation type" (e.g. release profiles, CFs, quality sizes) it's just another
+        // later, if we filter by "operation type" (e.g. CFs, quality sizes) it's just another
         // ".Where()" in the LINQ expression below.
         return configs.GetConfigsOfType(criteria.Service)
             .Where(x => criteria.Instances.IsEmpty() ||

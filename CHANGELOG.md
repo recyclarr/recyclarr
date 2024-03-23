@@ -18,7 +18,11 @@ changes you may need to make.
 - **BREAKING**: The app data directory on OSX has changed. It now lives at `~/Library/Application
   Support/recyclarr` instead of `~/.config/recyclarr`. Users will need to run `recyclarr migrate` to
   move the directory (or do it manually).
+- **BREAKING**: Removed support for Release Profiles and Sonarr version 3. The new minimum required
+  version for Sonarr is v4.0.0.
 - CLI: Slightly improved display of version number when using `-v` option.
+- CLI: Greatly improved the layout of and information in the local starter YAML configuration that
+  Recyclarr generates with the `recyclarr config create` command.
 
 ### Fixed
 

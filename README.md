@@ -11,12 +11,11 @@ guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
 
 ## Features
 
-Recyclarr supports Radarr, Sonarr v3, and Sonarr v4. The following information can be synced to
-these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
+Recyclarr supports Radarr and Sonarr (v4 and higher only). The following information can be synced
+to these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
 
 [Features]: https://recyclarr.dev/wiki/features/
 
-- Release Profiles, including tags
 - Quality Profiles, including qualities and quality groups
 - Custom Formats, including scores (from guide or manual)
 - Quality Definitions (file sizes)

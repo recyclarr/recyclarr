@@ -13,8 +13,6 @@ using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.Cli.Pipelines.ReleaseProfile;
-using Recyclarr.Cli.Pipelines.Tags;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
 using Recyclarr.Compatibility;
@@ -69,22 +67,18 @@ public static class CompositionRoot
 
     private static void PipelineRegistrations(ContainerBuilder builder)
     {
-        builder.RegisterModule<TagsAutofacModule>();
         builder.RegisterModule<CustomFormatAutofacModule>();
         builder.RegisterModule<QualityProfileAutofacModule>();
         builder.RegisterModule<QualitySizeAutofacModule>();
-        builder.RegisterModule<ReleaseProfileAutofacModule>();
         builder.RegisterModule<MediaNamingAutofacModule>();
 
         builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
         builder.RegisterTypes(
                 // ORDER HERE IS IMPORTANT!
                 // There are indirect dependencies between pipelines.
-                typeof(GenericSyncPipeline<TagPipelineContext>),
                 typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<ReleaseProfilePipelineContext>),
                 typeof(GenericSyncPipeline<MediaNamingPipelineContext>))
             .As<ISyncPipeline>()
             .OrderByRegistration();

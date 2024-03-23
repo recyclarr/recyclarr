@@ -206,45 +206,6 @@ public class SonarrConfigYamlValidator : CustomValidator<SonarrConfigYaml>
     public SonarrConfigYamlValidator()
     {
         Include(new ServiceConfigYamlValidator());
-
-        RuleFor(x => x)
-            .Must(x => OnlyOneHasElements(x.ReleaseProfiles, x.CustomFormats))
-            .WithMessage("`custom_formats` and `release_profiles` may not be used together");
-
-        RuleForEach(x => x.ReleaseProfiles).SetValidator(new ReleaseProfileConfigYamlValidator());
-    }
-}
-
-public class ReleaseProfileConfigYamlValidator : CustomValidator<ReleaseProfileConfigYaml>
-{
-    public ReleaseProfileConfigYamlValidator()
-    {
-        RuleFor(x => x.TrashIds).NotEmpty()
-            .WithMessage("'trash_ids' is required for 'release_profiles' elements");
-
-        RuleFor(x => x.Filter)
-            .SetNonNullableValidator(new ReleaseProfileFilterConfigYamlValidator());
-    }
-}
-
-public class ReleaseProfileFilterConfigYamlValidator : CustomValidator<ReleaseProfileFilterConfigYaml>
-{
-    public ReleaseProfileFilterConfigYamlValidator()
-    {
-        // Include & Exclude may not be used together
-        RuleFor(x => x)
-            .Must(x => OnlyOneHasElements(x.Include, x.Exclude))
-            .WithMessage("'include' and 'exclude' may not be used together")
-            .DependentRules(() =>
-            {
-                RuleFor(x => x.Include).NotEmpty()
-                    .When(x => x.Include is not null)
-                    .WithMessage("'include' under 'filter' must have at least 1 Trash ID");
-
-                RuleFor(x => x.Exclude).NotEmpty()
-                    .When(x => x.Exclude is not null)
-                    .WithMessage("'exclude' under 'filter' must have at least 1 Trash ID");
-            });
     }
 }
 

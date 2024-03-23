@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Compatibility;
-using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.CustomFormat;
@@ -15,15 +13,12 @@ public class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
     ICustomFormatApiService api,
-    IConfigurationRegistry configRegistry,
-    ISonarrCapabilityFetcher sonarCapabilities)
+    IConfigurationRegistry configRegistry)
     : IDeleteCustomFormatsProcessor
 {
     public async Task Process(IDeleteCustomFormatSettings settings)
     {
         var config = GetTargetConfig(settings);
-
-        await CheckCustomFormatSupport(config);
 
         var cfs = await ObtainCustomFormats(config);
 
@@ -59,18 +54,6 @@ public class DeleteCustomFormatsProcessor(
         }
 
         await DeleteCustomFormats(cfs, config);
-    }
-
-    private async Task CheckCustomFormatSupport(IServiceConfiguration config)
-    {
-        if (config is SonarrConfiguration)
-        {
-            var capabilities = await sonarCapabilities.GetCapabilities(config);
-            if (!capabilities.SupportsCustomFormats)
-            {
-                throw new ServiceIncompatibilityException("Custom formats are not supported in Sonarr v3");
-            }
-        }
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]

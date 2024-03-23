@@ -7,10 +7,7 @@ public class SonarrCapabilityFetcher(IServiceInformation info)
     {
         return new SonarrCapabilities
         {
-            Version = version,
-
-            SupportsCustomFormats =
-                version >= new Version(4, 0)
+            Version = version
         };
     }
 }

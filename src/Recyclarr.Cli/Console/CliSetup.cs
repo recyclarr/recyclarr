@@ -18,7 +18,6 @@ public static class CliSetup
         {
             list.SetDescription("List information from the guide");
             list.AddCommand<ListCustomFormatsCommand>("custom-formats");
-            list.AddCommand<ListReleaseProfilesCommand>("release-profiles");
             list.AddCommand<ListQualitiesCommand>("qualities");
             list.AddCommand<ListMediaNamingCommand>("naming");
         });

@@ -25,14 +25,4 @@ public class ListCommandsTest
 
         await updater.ReceivedWithAnyArgs().UpdateAllRepositories(default);
     }
-
-    [Test, AutoMockData]
-    public async Task Repo_update_is_called_on_list_release_profiles(
-        [Frozen] IMultiRepoUpdater updater,
-        ListReleaseProfilesCommand sut)
-    {
-        await sut.ExecuteAsync(default!, new ListReleaseProfilesCommand.CliSettings());
-
-        await updater.ReceivedWithAnyArgs().UpdateAllRepositories(default);
-    }
 }

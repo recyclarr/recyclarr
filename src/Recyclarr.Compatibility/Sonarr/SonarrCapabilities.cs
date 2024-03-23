@@ -2,9 +2,16 @@ namespace Recyclarr.Compatibility.Sonarr;
 
 public record SonarrCapabilities
 {
-    public static Version MinimumVersion { get; } = new("3.0.9.1549");
+    public SonarrCapabilities()
+    {
+    }
+
+    public SonarrCapabilities(Version version)
+    {
+        Version = version;
+    }
+
+    public static Version MinimumVersion { get; } = new("4.0.0.0");
 
     public Version Version { get; init; } = new();
-
-    public bool SupportsCustomFormats { get; init; }
 }

@@ -8,9 +8,6 @@ public class SonarrConfigMerger : ServiceConfigMerger<SonarrConfigYaml>
     {
         return base.Merge(a, b) with
         {
-            ReleaseProfiles = Combine(a.ReleaseProfiles, b.ReleaseProfiles,
-                (x, y) => x.Concat(y).ToList()),
-
             MediaNaming = Combine(a.MediaNaming, b.MediaNaming, MergeMediaNaming)
         };
     }

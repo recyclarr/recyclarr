@@ -34,6 +34,14 @@ public static class ConfigContextualMessages
                 "See: https://recyclarr.dev/wiki/upgrade-guide/v6.0/#reset-scores";
         }
 
+        if (msg.Contains("Property 'release_profiles' not found on type"))
+        {
+            return
+                "Release profiles and Sonarr v3 in general are no longer supported. All instances of " +
+                "`release_profiles` in your configuration YAML must be removed. " +
+                "https://recyclarr.dev/wiki/upgrade-guide/v7.0/#sonarr-v3-removal";
+        }
+
         return null;
     }
 }
