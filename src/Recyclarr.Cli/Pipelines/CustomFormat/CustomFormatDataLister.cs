@@ -53,6 +53,7 @@ public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideServ
         }
 
         var categories = guide.GetCustomFormatData(serviceType)
+            .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
             .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key);

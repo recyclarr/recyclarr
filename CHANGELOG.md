@@ -18,13 +18,15 @@ changes you may need to make.
 - **BREAKING**: The app data directory on OSX has changed. It now lives at `~/Library/Application
   Support/recyclarr` instead of `~/.config/recyclarr`. Users will need to run `recyclarr migrate` to
   move the directory (or do it manually).
-- Slightly improved display of version number when using `-v` option.
+- CLI: Slightly improved display of version number when using `-v` option.
 
 ### Fixed
 
-- Print more useful diagnostics when there's a connectivity problem to a service (e.g. incorrect
-  `base_url`).
-- Regression that prevented basic validation of `base_url` & `api_key`.
+- YAML: Print more useful diagnostics when there's a connectivity problem to a service (e.g.
+  incorrect `base_url`).
+- YAML: Regression that prevented basic validation of `base_url` & `api_key`.
+- CLI: CFs with no Trash ID will no longer be displayed when running the `list custom-formats`
+  command.
 
 ## [6.0.2] - 2023-10-20
 
