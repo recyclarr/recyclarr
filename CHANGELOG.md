@@ -26,7 +26,7 @@ changes you may need to make.
   incorrect `base_url`).
 - YAML: Regression that prevented basic validation of `base_url` & `api_key`.
 - CLI: CFs with no Trash ID will no longer be displayed when running the `list custom-formats`
-  command.
+  command (#229).
 
 ## [6.0.2] - 2023-10-20
 
