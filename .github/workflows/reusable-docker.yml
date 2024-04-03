@@ -51,11 +51,6 @@ jobs:
             ${{ env.semver }},${{ env.prod }},pattern={{major}}.{{minor}}
             ${{ env.semver }},${{ env.prod }},pattern={{major}}
 
-      - name: Grab Artifacts
-        uses: ./.github/actions/download-tar
-        with:
-          path: docker/artifacts
-
       - name: Login to Docker Hub
         if: env.SHOULD_PUBLISH == 'true'
         uses: docker/login-action@v3
@@ -74,7 +69,7 @@ jobs:
       - name: Build & Push Image
         uses: docker/build-push-action@v5
         with:
-          context: ./docker
+          context: .
           push: ${{ env.SHOULD_PUBLISH == 'true' }}
           no-cache: true
           platforms: linux/arm/v7,linux/arm64,linux/amd64

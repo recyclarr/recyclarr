@@ -64,20 +64,6 @@ jobs:
       runtime: ${{ matrix.runtime }}
 
   #############################################
-  build-musl:
-    name: Build MUSL
-    secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
-    strategy:
-      matrix:
-        runtime: [linux-musl-x64, linux-musl-arm, linux-musl-arm64]
-    with:
-      platform: ubuntu-latest
-      runtime: ${{ matrix.runtime }}
-      publish-args: -NoSingleFile
-      skip-test: true
-
-  #############################################
   codesign:
     name: Apple Signing
     runs-on: macos-latest
@@ -139,7 +125,7 @@ jobs:
   #############################################
   docker:
     name: Docker
-    needs: [build-musl]
+    needs: [build-win, build-linux, build-osx]
     uses: ./.github/workflows/reusable-docker.yml
     secrets: inherit
 
@@ -211,7 +197,6 @@ jobs:
       - build-win
       - build-linux
       - build-osx
-      - build-musl
       - codesign
       - docker
       - release
