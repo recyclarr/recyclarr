@@ -22,8 +22,8 @@ RUN set -ex; \
     apk add --no-cache bash tzdata supercronic git tini; \
     mkdir -p /config && chown 1000:1000 /config;
 
-COPY ./artifacts/$RUNTIME /app/recyclarr/
-COPY --chmod=555 ./scripts/prod/*.sh /
+COPY ./docker/artifacts/$RUNTIME /app/recyclarr/
+COPY --chmod=555 ./docker/scripts/prod/*.sh /
 
 USER 1000:1000
 VOLUME /config

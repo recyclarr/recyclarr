@@ -1,10 +1,12 @@
+name: recyclarr
+
 networks:
   recyclarr:
     name: recyclarr_dev
     external: true
 
 services:
-  recyclarr:
+  app:
     image: ghcr.io/recyclarr/recyclarr:edge
     user: $DOCKER_UID:$DOCKER_GID
     container_name: recyclarr
@@ -14,7 +16,7 @@ services:
         - TARGETARCH=amd64
     networks: [recyclarr]
     volumes:
-      - ./config:/config
+      - ./docker/config:/config
     environment:
       CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
