@@ -31,6 +31,7 @@ changes you may need to make.
 - YAML: Regression that prevented basic validation of `base_url` & `api_key`.
 - CLI: CFs with no Trash ID will no longer be displayed when running the `list custom-formats`
   command (#229).
+- Docker: Support running the container in read-only mode (#231).
 
 ## [6.0.2] - 2023-10-20
 
