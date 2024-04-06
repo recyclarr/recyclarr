@@ -15,7 +15,8 @@ FROM base-$TARGETARCH AS final
 ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_APP_DATA=/config \
     CRON_SCHEDULE="@daily" \
-    RECYCLARR_CREATE_CONFIG=false
+    RECYCLARR_CREATE_CONFIG=false \
+    COMPlus_EnableDiagnostics=0
 
 RUN set -ex; \
     apk add --no-cache bash tzdata supercronic git tini; \
