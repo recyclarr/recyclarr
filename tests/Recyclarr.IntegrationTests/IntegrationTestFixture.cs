@@ -5,6 +5,7 @@ using Autofac.Features.ResolveAnything;
 using Recyclarr.Common;
 using Recyclarr.Compatibility;
 using Recyclarr.Config;
+using Recyclarr.Http;
 using Recyclarr.Json;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
@@ -63,7 +64,8 @@ public abstract class IntegrationTestFixture : IDisposable
         builder.RegisterModule<GuideAutofacModule>();
         builder.RegisterModule<YamlAutofacModule>();
         builder.RegisterModule<SettingsAutofacModule>();
-        builder.RegisterModule<ApiServicesAutofacModule>();
+        builder.RegisterModule<HttpAutofacModule>();
+        builder.RegisterModule<ServarrApiAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
         builder.RegisterModule<CompatibilityAutofacModule>();

@@ -3,7 +3,7 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.ServarrApi.Http;
+using Recyclarr.Http;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;

@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Cli.IntegrationTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Cli.Tests", "tests\Recyclarr.Cli.Tests\Recyclarr.Cli.Tests.csproj", "{59886A2A-338F-4864-9735-1633433B1F8F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Http", "src\Recyclarr.Http\Recyclarr.Http.csproj", "{9B90CD1F-5D31-42A4-B0DD-A12BB7DC68CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,10 @@ Global
 		{59886A2A-338F-4864-9735-1633433B1F8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59886A2A-338F-4864-9735-1633433B1F8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59886A2A-338F-4864-9735-1633433B1F8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B90CD1F-5D31-42A4-B0DD-A12BB7DC68CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B90CD1F-5D31-42A4-B0DD-A12BB7DC68CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B90CD1F-5D31-42A4-B0DD-A12BB7DC68CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B90CD1F-5D31-42A4-B0DD-A12BB7DC68CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

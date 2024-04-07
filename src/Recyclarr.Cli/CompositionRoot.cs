@@ -17,6 +17,7 @@ using Recyclarr.Cli.Processors;
 using Recyclarr.Common;
 using Recyclarr.Compatibility;
 using Recyclarr.Config;
+using Recyclarr.Http;
 using Recyclarr.Json;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
@@ -48,7 +49,8 @@ public static class CompositionRoot
         builder.RegisterModule<ServiceProcessorsAutofacModule>();
         builder.RegisterModule<CacheAutofacModule>();
         builder.RegisterModule<SettingsAutofacModule>();
-        builder.RegisterModule<ApiServicesAutofacModule>();
+        builder.RegisterModule<HttpAutofacModule>();
+        builder.RegisterModule<ServarrApiAutofacModule>();
         builder.RegisterModule<VersionControlAutofacModule>();
         builder.RegisterModule<RepoAutofacModule>();
         builder.RegisterModule<CompatibilityAutofacModule>();

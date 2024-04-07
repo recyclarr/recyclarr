@@ -1,6 +1,5 @@
 using Flurl.Http;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.Http.Servarr;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ServarrApi.CustomFormat;

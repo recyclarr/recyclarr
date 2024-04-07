@@ -3,11 +3,12 @@ using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Config.Models;
+using Recyclarr.Http;
 using Recyclarr.Json;
 using Recyclarr.Settings;
 using Serilog;
 
-namespace Recyclarr.ServarrApi.Http.Servarr;
+namespace Recyclarr.ServarrApi;
 
 public class ServarrRequestBuilder(
     ILogger log,

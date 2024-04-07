@@ -2,10 +2,10 @@ using Flurl.Http;
 using JetBrains.Annotations;
 using Serilog;
 
-namespace Recyclarr.ServarrApi.Http.Servarr;
+namespace Recyclarr.Http;
 
 [UsedImplicitly]
-public class FlurlBeforeCallHandler(ILogger log) : FlurlSpecificEventHandler
+public class FlurlBeforeCallLogRedactor(ILogger log) : FlurlSpecificEventHandler
 {
     public override FlurlEventType EventType => FlurlEventType.BeforeCall;
 
@@ -18,7 +18,7 @@ public class FlurlBeforeCallHandler(ILogger log) : FlurlSpecificEventHandler
 }
 
 [UsedImplicitly]
-public class FlurlAfterCallHandler(ILogger log) : FlurlSpecificEventHandler
+public class FlurlAfterCallLogRedactor(ILogger log) : FlurlSpecificEventHandler
 {
     public override FlurlEventType EventType => FlurlEventType.AfterCall;
 
@@ -38,7 +38,7 @@ public class FlurlAfterCallHandler(ILogger log) : FlurlSpecificEventHandler
 }
 
 [UsedImplicitly]
-public class FlurlRedirectHandler(ILogger log) : FlurlSpecificEventHandler
+public class FlurlRedirectPreventer(ILogger log) : FlurlSpecificEventHandler
 {
     public override FlurlEventType EventType => FlurlEventType.OnRedirect;
 

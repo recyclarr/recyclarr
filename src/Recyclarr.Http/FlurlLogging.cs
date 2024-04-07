@@ -2,7 +2,7 @@ using System.Text.Json;
 using Flurl;
 using Serilog;
 
-namespace Recyclarr.ServarrApi.Http;
+namespace Recyclarr.Http;
 
 public static class FlurlLogging
 {
