@@ -1,9 +1,11 @@
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Notifications;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingLogPhase(ILogger log) : ILogPipelinePhase<MediaNamingPipelineContext>
+public class MediaNamingLogPhase(ILogger log, NotificationEmitter notificationEmitter)
+    : ILogPipelinePhase<MediaNamingPipelineContext>
 {
     // Returning 'true' means to exit. 'false' means to proceed.
     public bool LogConfigPhaseAndExitIfNeeded(MediaNamingPipelineContext context)
@@ -53,6 +55,7 @@ public class MediaNamingLogPhase(ILogger log) : ILogPipelinePhase<MediaNamingPip
         {
             log.Information("Media naming has been updated");
             log.Debug("Naming differences: {Diff}", differences);
+            notificationEmitter.SendStatistic("Media Naming Synced");
         }
         else
         {

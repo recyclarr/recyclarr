@@ -41,7 +41,7 @@ public class ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler htt
                     e.InstanceNames);
                 log.Error(
                     "Consolidate the config files manually to fix. " +
-                    "See: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance");
+                    "See: <https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance>");
                 break;
 
             case InvalidConfigurationFilesException e:

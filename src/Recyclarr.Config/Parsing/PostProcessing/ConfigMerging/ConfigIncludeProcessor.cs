@@ -46,7 +46,7 @@ public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log
             log.Warning(
                 "DEPRECATED: Include templates inside the `configs` directory are no longer supported. " +
                 "These files should be relocated to the new sibling `includes` directory instead. " +
-                "See: https://recyclarr.dev/wiki/upgrade-guide/v8.0/#include-dir");
+                "See: <https://recyclarr.dev/wiki/upgrade-guide/v8.0/#include-dir>");
 
             return fsPath;
         }

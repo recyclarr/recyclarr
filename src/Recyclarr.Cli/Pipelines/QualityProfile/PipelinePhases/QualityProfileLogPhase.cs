@@ -1,10 +1,12 @@
 using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProfilePipelineContext>
+public class QualityProfileLogPhase(ILogger log, NotificationEmitter notificationEmitter)
+    : ILogPipelinePhase<QualityProfilePipelineContext>
 {
     public bool LogConfigPhaseAndExitIfNeeded(QualityProfilePipelineContext context)
     {
@@ -118,6 +120,8 @@ public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProf
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and " +
                 "{NumScores} contain updated scores",
                 numProfiles, numQuality, numScores);
+
+            notificationEmitter.SendStatistic("Quality Profiles Synced", numProfiles);
         }
         else
         {
