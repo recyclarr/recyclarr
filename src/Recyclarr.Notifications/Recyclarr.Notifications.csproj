@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Flurl.Http" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Http\Recyclarr.Http.csproj" />
+    <ProjectReference Include="..\Recyclarr.Settings\Recyclarr.Settings.csproj" />
+  </ItemGroup>
+</Project>

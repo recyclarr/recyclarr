@@ -16,6 +16,7 @@ public class CustomFormatAutofacModule : Module
 
         builder.RegisterType<CustomFormatCachePersister>().As<ICustomFormatCachePersister>();
         builder.RegisterType<CustomFormatDataLister>();
+        builder.RegisterType<CustomFormatTransactionLogger>();
 
         builder.RegisterTypes(
                 typeof(CustomFormatConfigPhase),

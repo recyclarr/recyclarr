@@ -4,5 +4,5 @@ namespace Recyclarr.Cli.Processors.Sync;
 
 public interface ISyncProcessor
 {
-    Task<ExitStatus> ProcessConfigs(ISyncSettings settings);
+    Task<ExitStatus> Process(ISyncSettings settings);
 }

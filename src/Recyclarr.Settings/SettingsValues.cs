@@ -33,4 +33,17 @@ public record SettingsValues
     public bool EnableSslCertificateValidation { get; [UsedImplicitly] init; } = true;
     public LogJanitorSettings LogJanitor { get; [UsedImplicitly] init; } = new();
     public string? GitPath { get; [UsedImplicitly] init; }
+    public NotificationSettings? Notifications { get; init; }
+}
+
+public record NotificationSettings
+{
+    public AppriseNotificationSettings? Apprise { get; init; }
+}
+
+public record AppriseNotificationSettings
+{
+    public Uri? BaseUrl { get; init; }
+    public string? Key { get; init; }
+    public string? Tags { get; init; }
 }

@@ -1,8 +1,10 @@
 using System.IO.Abstractions;
 using System.Reflection;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Console.Interceptors;
 using Recyclarr.Cli.Console.Setup;
@@ -20,6 +22,7 @@ using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Http;
 using Recyclarr.Json;
+using Recyclarr.Notifications;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.ServarrApi;
@@ -43,6 +46,8 @@ public static class CompositionRoot
 
         RegisterLogger(builder);
 
+        builder.Populate(BuildServiceCollection());
+
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
         builder.RegisterModule<GuideAutofacModule>();
@@ -58,6 +63,7 @@ public static class CompositionRoot
         builder.RegisterModule<JsonAutofacModule>();
         builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterModule<CommonAutofacModule>();
+        builder.RegisterModule<NotificationsAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
@@ -66,6 +72,14 @@ public static class CompositionRoot
 
         CliRegistrations(builder);
         PipelineRegistrations(builder);
+    }
+
+    // To support DI integration with third party libraries that utilize Microsoft's built-in DI library.
+    private static ServiceCollection BuildServiceCollection()
+    {
+        var sc = new ServiceCollection();
+        sc.AddMetrics();
+        return sc;
     }
 
     private static void PipelineRegistrations(ContainerBuilder builder)

@@ -7,6 +7,7 @@ volumes:
   radarr_develop:
   sonarr_stable:
   sonarr_develop:
+  apprise:
 
 services:
   radarr_stable:
@@ -54,3 +55,16 @@ services:
     environment:
       - TZ=America/Chicago
       - SONARR__API_KEY=testkey
+
+  # http://localhost:8000
+  apprise:
+    image: caronc/apprise
+    container_name: apprise
+    networks: [recyclarr]
+    ports: [8000:8000]
+    volumes:
+      - apprise:/config
+    environment:
+      - TZ=America/Chicago
+      - APPRISE_DEFAULT_THEM=dark
+      - DEBUG=yes

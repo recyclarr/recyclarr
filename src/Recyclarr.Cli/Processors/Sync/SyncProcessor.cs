@@ -4,6 +4,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
@@ -16,10 +17,18 @@ public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationSc
 public class SyncProcessor(
     IConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
-    ConsoleExceptionHandler exceptionHandler)
+    ConsoleExceptionHandler exceptionHandler,
+    NotificationService notify)
     : ISyncProcessor
 {
-    public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
+    public async Task<ExitStatus> Process(ISyncSettings settings)
+    {
+        var result = await ProcessConfigs(settings);
+        await notify.SendNotification(result != ExitStatus.Failed);
+        return result;
+    }
+
+    private async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
     {
         bool failureDetected;
         try
@@ -55,6 +64,9 @@ public class SyncProcessor(
         {
             try
             {
+                // todo: Create new NotificationScope here; but how do we collect messages for each config instance we
+                // process? Should NotificationService be scoped as well?
+                notify.BeginCollecting(config.InstanceName);
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
                 await scope.Pipelines.Process(settings);
             }

@@ -7,7 +7,7 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
+public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch, IEnumerable<ILogEventSink> sinks)
 {
     private static string GetBaseTemplateString()
     {
@@ -39,7 +39,7 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
         var logDir = paths.LogDirectory;
 
-        return new LoggerConfiguration()
+        var config = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.FromLogContext()
             .Enrich.With<FlurlExceptionSanitizingEnricher>()
@@ -49,8 +49,14 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
                 .WriteTo.File(GetFileTemplate(), LogFilePath("debug")))
             .WriteTo.Logger(c => c
                 .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
-                .WriteTo.File(GetFileTemplate(), LogFilePath("verbose")))
-            .CreateLogger();
+                .WriteTo.File(GetFileTemplate(), LogFilePath("verbose")));
+
+        foreach (var sink in sinks)
+        {
+            config.WriteTo.Sink(sink, levelSwitch: levelSwitch);
+        }
+
+        return config.CreateLogger();
 
         string LogFilePath(string type)
         {

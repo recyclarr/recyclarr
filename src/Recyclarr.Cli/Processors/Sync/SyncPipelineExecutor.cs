@@ -2,7 +2,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
@@ -12,14 +11,16 @@ public class SyncPipelineExecutor(
     IOrderedEnumerable<ISyncPipeline> pipelines,
     IEnumerable<IPipelineCache> caches,
     ServiceAgnosticCapabilityEnforcer enforcer,
-    IServiceConfiguration config)
+    IServiceConfiguration config,
+    NotificationEmitter emitter)
 {
     public async Task Process(ISyncSettings settings)
     {
         PrintProcessingHeader();
-
+        // TODO this is temporary for testing ONLY!!!!!!!
         await enforcer.Check(config);
-
+        emitter.NotifyStatistic("Stat 1", 100);
+        emitter.NotifyStatistic("Stat 2", 200);
         foreach (var cache in caches)
         {
             cache.Clear();

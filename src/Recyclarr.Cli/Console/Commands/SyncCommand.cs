@@ -53,6 +53,6 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
 
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
 
-        return (int) await syncProcessor.ProcessConfigs(settings);
+        return (int) await syncProcessor.Process(settings);
     }
 }
