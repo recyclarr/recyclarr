@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
-using Serilog.Events;
 
 namespace Recyclarr.Common.FluentValidation;
 
@@ -56,36 +55,5 @@ public static class FluentValidationExtensions
                 handleInvalid?.Invoke(result.Errors, s);
             }
         }
-    }
-
-    public static LogEventLevel ToLogLevel(this Severity severity)
-    {
-        return severity switch
-        {
-            Severity.Error => LogEventLevel.Error,
-            Severity.Warning => LogEventLevel.Warning,
-            Severity.Info => LogEventLevel.Information,
-            _ => LogEventLevel.Debug
-        };
-    }
-
-    public static int LogValidationErrors(
-        this IReadOnlyCollection<ValidationFailure> errors,
-        ILogger log,
-        string errorPrefix)
-    {
-        var numErrors = 0;
-
-        foreach (var (error, level) in errors.Select(x => (x, x.Severity.ToLogLevel())))
-        {
-            if (level == LogEventLevel.Error)
-            {
-                ++numErrors;
-            }
-
-            log.Write(level, "{ErrorPrefix}: {Msg}", errorPrefix, error.ErrorMessage);
-        }
-
-        return numErrors;
     }
 }

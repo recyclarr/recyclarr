@@ -3,7 +3,7 @@ using Recyclarr.Common.FluentValidation;
 namespace Recyclarr.Config.Parsing;
 
 [UsedImplicitly]
-public class ConfigValidationExecutor(ILogger log, IRuntimeValidationService validationService)
+public class ConfigValidationExecutor(ValidationLogger validationLogger, IRuntimeValidationService validationService)
 {
     public bool Validate(object config, params string[] ruleSets)
     {
@@ -13,13 +13,6 @@ public class ConfigValidationExecutor(ILogger log, IRuntimeValidationService val
             return true;
         }
 
-        var numErrors = result.Errors.LogValidationErrors(log, "Config Validation");
-        if (numErrors == 0)
-        {
-            return true;
-        }
-
-        log.Error("Config validation failed with {Count} errors", numErrors);
-        return false;
+        return !validationLogger.LogValidationErrors(result.Errors, "Config Validation");
     }
 }

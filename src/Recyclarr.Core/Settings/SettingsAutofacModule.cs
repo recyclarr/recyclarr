@@ -14,5 +14,6 @@ public class SettingsAutofacModule : Module
         builder.RegisterSettings(x => x.LogJanitor);
         builder.RegisterSettings(x => x.Repositories.ConfigTemplates);
         builder.RegisterSettings(x => x.Repositories.TrashGuides);
+        builder.RegisterSettings(x => x.Notifications);
     }
 }

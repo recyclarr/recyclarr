@@ -13,6 +13,7 @@
       <PackageReference Include="Flurl" />
       <PackageReference Include="Flurl.Http" />
       <PackageReference Include="Serilog" />
+      <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="Spectre.Console" />
       <PackageReference Include="SuperLinq" />
       <PackageReference Include="System.Data.HashFunction.FNV" />

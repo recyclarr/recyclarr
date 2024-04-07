@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace Recyclarr.Settings;
 
 public record TrashRepository : IRepositorySettings
@@ -31,4 +33,25 @@ public record RecyclarrSettings
     public bool EnableSslCertificateValidation { get; [UsedImplicitly] init; } = true;
     public LogJanitorSettings LogJanitor { get; [UsedImplicitly] init; } = new();
     public string? GitPath { get; [UsedImplicitly] init; }
+    public NotificationSettings? Notifications { get; [UsedImplicitly] init; }
+}
+
+public record NotificationSettings
+{
+    public AppriseNotificationSettings? Apprise { get; [UsedImplicitly] init; }
+}
+
+public record AppriseNotificationSettings
+{
+    public AppriseMode? Mode { get; [UsedImplicitly] init; }
+    public Uri? BaseUrl { get; [UsedImplicitly] init; }
+    public string? Key { get; [UsedImplicitly] init; }
+    public string? Tags { get; [UsedImplicitly] init; }
+    public Collection<string> Urls { get; [UsedImplicitly] init; } = [];
+}
+
+public enum AppriseMode
+{
+    Stateful,
+    Stateless
 }

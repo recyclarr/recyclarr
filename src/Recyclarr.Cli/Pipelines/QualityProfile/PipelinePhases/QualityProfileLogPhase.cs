@@ -1,10 +1,15 @@
 using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProfilePipelineContext>
+public class QualityProfileLogPhase(
+    ILogger log,
+    ValidationLogger validationLogger,
+    NotificationEmitter notificationEmitter)
+    : ILogPipelinePhase<QualityProfilePipelineContext>
 {
     public bool LogConfigPhaseAndExitIfNeeded(QualityProfilePipelineContext context)
     {
@@ -36,17 +41,12 @@ public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProf
                 "The following validation errors occurred for one or more quality profiles. " +
                 "These profiles will *not* be synced");
 
-            var numErrors = 0;
-
             foreach (var (profile, errors) in transactions.InvalidProfiles)
             {
-                numErrors += errors.LogValidationErrors(log, $"Profile '{profile.ProfileName}'");
+                validationLogger.LogValidationErrors(errors, $"Profile '{profile.ProfileName}'");
             }
 
-            if (numErrors > 0)
-            {
-                log.Error("Profile validation failed with {Count} errors", numErrors);
-            }
+            validationLogger.LogTotalErrorCount("Profile validation");
         }
 
         foreach (var profile in transactions.ChangedProfiles.Select(x => x.Profile))
@@ -118,6 +118,8 @@ public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProf
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and " +
                 "{NumScores} contain updated scores",
                 numProfiles, numQuality, numScores);
+
+            notificationEmitter.SendStatistic("Quality Profiles Synced", numProfiles);
         }
         else
         {

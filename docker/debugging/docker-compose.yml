@@ -65,3 +65,21 @@ services:
       - sonarr_stable:/sonarr/stable
       - radarr_develop:/radarr/develop
       - radarr_stable:/radarr/stable
+
+  # http://localhost:8000
+  apprise:
+    image: caronc/apprise
+    container_name: apprise
+    networks: [recyclarr]
+    ports: [8000:8000]
+    init: true
+    tmpfs:
+      - /attach
+      - /plugin
+    volumes:
+      - ./apprise:/config
+    environment:
+      - TZ=America/Chicago
+      - APPRISE_DEFAULT_THEM=dark
+      - APPRISE_STATEFUL_MODE=simple
+      - DEBUG=yes

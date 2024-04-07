@@ -1,8 +1,10 @@
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeLogPhase(ILogger log) : ILogPipelinePhase<QualitySizePipelineContext>
+public class QualitySizeLogPhase(ILogger log, NotificationEmitter notificationEmitter)
+    : ILogPipelinePhase<QualitySizePipelineContext>
 {
     public bool LogConfigPhaseAndExitIfNeeded(QualitySizePipelineContext context)
     {
@@ -35,6 +37,7 @@ public class QualitySizeLogPhase(ILogger log) : ILogPipelinePhase<QualitySizePip
         {
             log.Information("Total of {Count} sizes were synced for quality definition {Name}", totalCount,
                 qualityDefinitionName);
+            notificationEmitter.SendStatistic("Quality Sizes Synced", totalCount);
         }
         else
         {

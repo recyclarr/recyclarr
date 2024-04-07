@@ -5,6 +5,7 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.Notifications;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -20,10 +21,19 @@ public class SyncProcessor(
     IAnsiConsole console,
     IConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
-    ConsoleExceptionHandler exceptionHandler)
+    ConsoleExceptionHandler exceptionHandler,
+    NotificationService notify)
     : ISyncProcessor
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
+    {
+        notify.BeginWatchEvents();
+        var result = await ProcessConfigs(settings, ct);
+        await notify.SendNotification(result != ExitStatus.Failed);
+        return result;
+    }
+
+    private async Task<ExitStatus> ProcessConfigs(ISyncSettings settings, CancellationToken ct)
     {
         bool failureDetected;
         try
@@ -63,6 +73,7 @@ public class SyncProcessor(
             try
             {
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
+                notify.SetInstanceName(config.InstanceName);
 
                 console.WriteLine(
                     $"""

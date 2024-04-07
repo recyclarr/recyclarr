@@ -25,6 +25,5 @@ public class LoggerSetupTask(
 
     public void OnFinish()
     {
-        throw new NotImplementedException();
     }
 }

@@ -1,6 +1,8 @@
+using Recyclarr.Notifications;
+
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log)
+internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter notify)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
@@ -62,6 +64,7 @@ internal class CustomFormatTransactionLogger(ILogger log)
         if (totalCount > 0)
         {
             log.Information("Total of {Count} custom formats were synced", totalCount);
+            notify.SendStatistic("Custom Formats Synced", totalCount);
         }
         else
         {

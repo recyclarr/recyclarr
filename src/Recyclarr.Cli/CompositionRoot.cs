@@ -22,6 +22,7 @@ using Recyclarr.Config;
 using Recyclarr.Http;
 using Recyclarr.Json;
 using Recyclarr.Logging;
+using Recyclarr.Notifications;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.ServarrApi;
@@ -60,6 +61,7 @@ public static class CompositionRoot
         builder.RegisterModule<JsonAutofacModule>();
         builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterModule<CommonAutofacModule>();
+        builder.RegisterModule<NotificationsAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
@@ -93,9 +95,7 @@ public static class CompositionRoot
     private static void RegisterLogger(ContainerBuilder builder)
     {
         // Log Configurators
-        builder.RegisterTypes(
-                typeof(FileLogSinkConfigurator))
-            .As<ILogConfigurator>();
+        builder.RegisterType<FileLogSinkConfigurator>().As<ILogConfigurator>();
 
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<LoggerFactory>().SingleInstance();

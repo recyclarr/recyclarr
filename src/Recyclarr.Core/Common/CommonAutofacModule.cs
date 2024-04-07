@@ -9,5 +9,6 @@ public class CommonAutofacModule : Module
     {
         base.Load(builder);
         builder.RegisterType<RuntimeValidationService>().As<IRuntimeValidationService>();
+        builder.RegisterType<ValidationLogger>();
     }
 }

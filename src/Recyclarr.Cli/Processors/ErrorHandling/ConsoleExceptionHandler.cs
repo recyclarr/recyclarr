@@ -1,5 +1,7 @@
+using Autofac.Core;
 using Flurl.Http;
 using Recyclarr.Cli.Console;
+using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
@@ -42,7 +44,7 @@ public class ConsoleExceptionHandler(ILogger log)
                     e.InstanceNames);
                 log.Error(
                     "Consolidate the config files manually to fix. " +
-                    "See: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance");
+                    "See: <https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance>");
                 break;
 
             case InvalidConfigurationFilesException e:
@@ -69,6 +71,13 @@ public class ConsoleExceptionHandler(ILogger log)
                 }
 
                 break;
+
+            case ContextualValidationException e:
+                e.LogErrors(new ValidationLogger(log));
+                break;
+
+            case DependencyResolutionException {InnerException: not null} e:
+                return await HandleException(e.InnerException!);
 
             default:
                 return false;

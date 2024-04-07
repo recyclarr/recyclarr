@@ -23,7 +23,7 @@ public static class SettingsContextualMessages
             return
                 "Usage of 'repository' setting is no " +
                 "longer supported. Use 'trash_guides' under 'repositories' instead." +
-                "See: https://recyclarr.dev/wiki/upgrade-guide/v5.0/#settings-repository-changes";
+                "See: <https://recyclarr.dev/wiki/upgrade-guide/v5.0/#settings-repository-changes>";
         }
 
         return null;

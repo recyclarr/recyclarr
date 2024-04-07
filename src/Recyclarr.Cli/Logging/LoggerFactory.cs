@@ -25,8 +25,6 @@ public class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
         var config = LogSetup.BaseConfiguration()
             .WriteTo.Logger(Logger);
 
-        // throw new InvalidOperationException("testing only"); // testing only
-
         foreach (var configurator in configurators)
         {
             configurator.Configure(config);
