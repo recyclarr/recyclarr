@@ -1,6 +1,6 @@
 # Contributing
 
-First, thank you for your interest in contributing to my project. Below is a list of requirements
+First, thank you for your interest in contributing to Recyclarr! Below is a list of requirements
 that everyone should follow.
 
 1. To avoid wasting your time and effort, please ensure all ideas get discussed first. Visit [the
@@ -13,8 +13,8 @@ that everyone should follow.
 1. **For C# changes,** code must conform to the project's style. My day to day coding is done in
    Jetbrains Rider. If using that IDE, doing a simple [Code Cleanup] on modified source files should
    be enough. Make sure to select the "Recyclarr Cleanup" profile when you do the code cleanup. If
-   you're using Visual Studio or some other editor, you are on your own. Formatting rules are stored
-   in `src/.editorconfig` and `src/Recyclarr.sln.DotSettings`.
+   you're using Visual Studio, I recommend the Resharper extension. For other editors, you are on
+   your own. Formatting rules are stored in `src/.editorconfig` and `src/Recyclarr.sln.DotSettings`.
 
 [ideas]: https://github.com/recyclarr/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
@@ -24,7 +24,7 @@ that everyone should follow.
 
 The following tools are required:
 
-- .NET SDK 8.0 and tooling (e.g. `dotnet`)
+- .NET SDK 8.0 and tooling (e.g. dotnet CLI, which comes with the SDK)
 - Powershell v5.1 or greater
 - Docker CLI (Docker Desktop on Windows)
 
@@ -38,52 +38,26 @@ It's also a good idea to occasionally run this for upgrade purposes, too.
 
 ## Docker Development
 
-The project's `Dockerfile` build requires the Recyclarr build output to be placed in a specific
-location in order to succeed. The location is below, relative to the repository root:
+For more convenient building & testing Docker locally, run the `docker/DockerRun.ps1` script, which
+does the following:
 
-```txt
-docker/artifacts/${{runtime}}
-```
+1. Starts the `docker/debugging/docker-compose.yml` stack, which includes instances of Sonarr,
+   Radarr, and other services that Recyclarr can connect to for testing purposes.
+1. Builds the official Recyclarr image using changes in your working copy, if any.
+1. Runs the locally built Recyclarr docker image as a container in its own compose stack that can
+   talk to the application services started earlier.
 
-Where `${{runtime}}` is one of the runtimes compatible with `dotnet publish`, such as
-`linux-musl-x64`.
+The `Dockerfile` is configured to build Recyclarr as part of the image build process. By default, it
+uses the `linux-musl-x64` runtime but you can configure additional architectures if needed, through
+`docker buildx`.
 
-There is a convenience script named `docker/BuildAndRun.ps1` that will perform the following steps:
-
-1. Delete the `docker/artifacts` directory, if it exists.
-1. Recompile Recyclarr and publish it to `docker/artifacts`.
-1. Pull and start the Sonarr & Radarr containers in the `debugging` directory.
-1. Build & run the `recyclarr` docker image.
-
-You may also provide runtime arguments to the `BuildAndRun.ps1` script to run it in manual mode
+You may also provide runtime arguments to the `docker/DockerRun.ps1` script to run it in manual mode
 instead of cron mode. Example:
 
 ```sh
 # Run `recyclarr radarr -h`:
-.\BuildAndRun.ps1 -RunArgs radarr,-h
+.\BuildAndRun.ps1 radarr -h
 ```
-
-If you want to run any part of this process manually, open up the `BuildAndRun.ps1` script to see
-what commands you need to run manually.
-
-> ⚠️ **Note** ⚠️<br/>
-> The runtime defaults to `linux-musl-x64` but you can pass in an override via the `-Runtime`
-> option.
-
-### Build Arguments
-
-- `TARGETPLATFORM` (Default: empty)<br>
-  Required. Specifies the runtime architecture of the image and is used to pull the correct prebuilt
-  binary from the specified Github Release. See the table in the Platform Support section for a list
-  of valid values.
-
-### Platform Support
-
-| Docker Platform | Recyclarr Runtime  |
-| --------------- | ------------------ |
-| `linux/arm/v7`  | `linux-musl-arm`   |
-| `linux/arm64`   | `linux-musl-arm64` |
-| `linux/amd64`   | `linux-musl-x64`   |
 
 ## Conventional Commits
 
