@@ -5,7 +5,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.TrashGuide.MediaNaming;
 
-namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.PipelinePhases.Config;
+namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
@@ -46,60 +46,11 @@ public class SonarrMediaNamingConfigPhaseTest
     };
 
     [Test, AutoMockData]
-    public async Task Sonarr_v3_naming(
-        [Frozen] ISonarrCapabilityFetcher capabilities,
-        [Frozen] IMediaNamingGuideService guide,
-        SonarrMediaNamingConfigPhase sut)
-    {
-        capabilities.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
-        {
-            SupportsCustomFormats = false
-        });
-
-        guide.GetSonarrNamingData().Returns(SonarrNamingData);
-
-        var config = new SonarrConfiguration
-        {
-            InstanceName = "sonarr",
-            MediaNaming = new SonarrMediaNamingConfig
-            {
-                Season = "default",
-                Series = "plex",
-                Episodes = new SonarrEpisodeNamingConfig
-                {
-                    Rename = true,
-                    Standard = "default",
-                    Daily = "default",
-                    Anime = "default"
-                }
-            }
-        };
-
-        var result = await sut.ProcessNaming(config, guide, new NamingFormatLookup());
-
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(new SonarrMediaNamingDto
-        {
-            RenameEpisodes = true,
-            SeasonFolderFormat = "season_default",
-            SeriesFolderFormat = "series_plex",
-            StandardEpisodeFormat = "episodes_standard_default_3",
-            DailyEpisodeFormat = "episodes_daily_default_3",
-            AnimeEpisodeFormat = "episodes_anime_default_3"
-        });
-    }
-
-    [Test, AutoMockData]
     public async Task Sonarr_v4_naming(
         [Frozen] ISonarrCapabilityFetcher capabilities,
         [Frozen] IMediaNamingGuideService guide,
         SonarrMediaNamingConfigPhase sut)
     {
-        capabilities.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
-        {
-            SupportsCustomFormats = true
-        });
-
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
         var config = new SonarrConfiguration
@@ -139,11 +90,6 @@ public class SonarrMediaNamingConfigPhaseTest
         [Frozen] IMediaNamingGuideService guide,
         SonarrMediaNamingConfigPhase sut)
     {
-        capabilities.GetCapabilities(default!).ReturnsForAnyArgs(new SonarrCapabilities
-        {
-            SupportsCustomFormats = true
-        });
-
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
         var config = new SonarrConfiguration

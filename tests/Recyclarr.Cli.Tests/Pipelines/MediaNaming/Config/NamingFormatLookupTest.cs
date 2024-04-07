@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.PipelinePhases.Config;
+namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

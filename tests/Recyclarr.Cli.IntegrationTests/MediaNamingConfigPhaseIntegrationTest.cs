@@ -4,7 +4,7 @@ using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Common;
 using Recyclarr.Config.Models;
 
-namespace Recyclarr.Cli.IntegrationTests.Pipelines;
+namespace Recyclarr.Cli.IntegrationTests;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]

@@ -13,6 +13,7 @@ public class SonarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<S
     {
         var guideData = guide.GetSonarrNamingData();
         var configData = config.MediaNaming;
+        var keySuffix = ":4";
 
         return Task.FromResult<MediaNamingDto>(new SonarrMediaNamingDto
         {
@@ -21,14 +22,17 @@ public class SonarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<S
             StandardEpisodeFormat = lookup.ObtainFormat(
                 guideData.Episodes.Standard,
                 configData.Episodes?.Standard,
+                keySuffix,
                 "Standard Episode Format"),
             DailyEpisodeFormat = lookup.ObtainFormat(
                 guideData.Episodes.Daily,
                 configData.Episodes?.Daily,
+                keySuffix,
                 "Daily Episode Format"),
             AnimeEpisodeFormat = lookup.ObtainFormat(
                 guideData.Episodes.Anime,
                 configData.Episodes?.Anime,
+                keySuffix,
                 "Anime Episode Format"),
             RenameEpisodes = configData.Episodes?.Rename
         });

@@ -3,7 +3,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.TrashGuide.MediaNaming;
 
-namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.PipelinePhases.Config;
+namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
 [TestFixture]
 [Parallelizable(ParallelScope.All)]
