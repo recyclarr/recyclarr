@@ -12,7 +12,7 @@
     <PackageReference Include="AutofacContrib.NSubstitute" PrivateAssets="all" />
     <PackageReference Include="AutoFixture" PrivateAssets="all" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" PrivateAssets="all" />
-    <PackageReference Include="AutoFixture.NUnit3" PrivateAssets="all" />
+    <PackageReference Include="AutoFixture.NUnit4" PrivateAssets="all" />
     <PackageReference Include="coverlet.collector" PrivateAssets="all" />
     <PackageReference Include="FluentAssertions" PrivateAssets="all" />
     <PackageReference Include="FluentAssertions.Analyzers" PrivateAssets="all" />
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="AutoFixture.NUnit3" />
+    <Using Include="AutoFixture.NUnit4" />
     <Using Include="FluentAssertions" />
     <Using Include="NSubstitute" />
     <Using Include="NUnit.Framework" />
