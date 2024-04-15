@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.MediaNaming;
 using Spectre.Console;
 

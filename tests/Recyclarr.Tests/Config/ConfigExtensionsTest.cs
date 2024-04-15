@@ -1,6 +1,6 @@
-using Recyclarr.Common;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Tests.Config;
 

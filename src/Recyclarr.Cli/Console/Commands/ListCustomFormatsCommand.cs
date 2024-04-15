@@ -4,8 +4,8 @@ using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Common;
 using Recyclarr.Repo;
+using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
 #pragma warning disable CS8765

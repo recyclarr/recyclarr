@@ -1,8 +1,8 @@
 using Autofac.Core.Registration;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
-using Recyclarr.Common;
 using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.IntegrationTests;
 

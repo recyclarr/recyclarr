@@ -3,8 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Common;
 using Recyclarr.Repo;
+using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

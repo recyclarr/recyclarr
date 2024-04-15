@@ -9,6 +9,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.TestLibrary.Autofac;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.IntegrationTests;
 

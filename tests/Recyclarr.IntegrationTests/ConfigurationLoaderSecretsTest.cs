@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
-using Recyclarr.Common;
 using Recyclarr.Config;
 using Recyclarr.Config.Parsing;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.IntegrationTests;
 

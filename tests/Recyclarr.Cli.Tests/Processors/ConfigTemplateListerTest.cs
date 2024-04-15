@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Common;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Testing;
 

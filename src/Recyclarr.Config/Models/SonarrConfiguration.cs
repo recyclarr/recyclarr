@@ -1,4 +1,4 @@
-using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Models;
 

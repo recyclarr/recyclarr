@@ -1,4 +1,3 @@
-using Recyclarr.Common;
 using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.QualitySize;

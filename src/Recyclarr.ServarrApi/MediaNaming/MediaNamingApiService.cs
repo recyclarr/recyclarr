@@ -1,6 +1,6 @@
 using Flurl.Http;
-using Recyclarr.Common;
 using Recyclarr.Config.Models;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 

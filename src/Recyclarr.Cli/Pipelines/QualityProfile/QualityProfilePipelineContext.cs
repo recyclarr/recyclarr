@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
-using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 

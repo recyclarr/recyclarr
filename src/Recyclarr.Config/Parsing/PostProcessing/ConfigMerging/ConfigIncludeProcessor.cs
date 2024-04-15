@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using Recyclarr.Common;
 using Recyclarr.Platform;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 

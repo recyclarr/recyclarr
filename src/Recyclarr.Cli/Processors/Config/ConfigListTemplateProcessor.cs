@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Console.Commands;
-using Recyclarr.Common;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
 

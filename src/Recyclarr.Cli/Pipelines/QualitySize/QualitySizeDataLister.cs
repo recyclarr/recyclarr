@@ -1,4 +1,4 @@
-using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 using Spectre.Console;
 

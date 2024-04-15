@@ -1,7 +1,7 @@
-using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config;
 

@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
-using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.IntegrationTests;

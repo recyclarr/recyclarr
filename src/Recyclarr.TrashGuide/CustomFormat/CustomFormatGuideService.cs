@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common;
 using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.CustomFormat;

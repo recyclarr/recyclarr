@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.Common;
 using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;

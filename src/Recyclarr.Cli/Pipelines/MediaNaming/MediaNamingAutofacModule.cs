@@ -1,7 +1,7 @@
 using Autofac;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
-using Recyclarr.Common;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 

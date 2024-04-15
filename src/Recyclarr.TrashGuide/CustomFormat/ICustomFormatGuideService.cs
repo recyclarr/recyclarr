@@ -1,5 +1,3 @@
-using Recyclarr.Common;
-
 namespace Recyclarr.TrashGuide.CustomFormat;
 
 public interface ICustomFormatGuideService

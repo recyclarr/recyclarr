@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
-using Recyclarr.Common;
 using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
