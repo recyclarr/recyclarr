@@ -21,7 +21,7 @@ public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
         _mappings = _mappings
             .DistinctBy(x => x.CustomFormatId)
             .Where(x => transactions.DeletedCustomFormats.All(y => y.CustomFormatId != x.CustomFormatId))
-            .FullOuterJoin(existingCfs, JoinType.Hash,
+            .FullOuterHashJoin(existingCfs,
                 l => l.CustomFormatId,
                 r => r.Id,
                 // Keep existing service CFs, even if they aren't in user config

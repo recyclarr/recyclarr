@@ -30,7 +30,7 @@ public sealed class CustomFormatDataEqualityComparer : IEqualityComparer<CustomF
         }
 
         return first
-            .FullOuterJoin(second, JoinType.Hash, x => x.Name, x => x.Name, _ => false, _ => false, SpecificationEqual)
+            .FullOuterHashJoin(second, x => x.Name, x => x.Name, _ => false, _ => false, SpecificationEqual)
             .All(x => x);
     }
 
@@ -53,7 +53,7 @@ public sealed class CustomFormatDataEqualityComparer : IEqualityComparer<CustomF
         }
 
         return first
-            .FullOuterJoin(second, JoinType.Hash, x => x.Name, x => x.Name, _ => false, _ => false, FieldEqual)
+            .FullOuterHashJoin(second, x => x.Name, x => x.Name, _ => false, _ => false, FieldEqual)
             .All(x => x);
     }
 

@@ -91,7 +91,7 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
         return Combine(a, b, (a1, b1) =>
         {
             return a1
-                .FullOuterJoin(b1, JoinType.Hash,
+                .FullOuterHashJoin(b1,
                     x => x.Name,
                     x => x.Name,
                     l => l,

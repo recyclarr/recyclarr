@@ -121,7 +121,7 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
         QualityProfileDto profileDto)
     {
         var scoreMap = profileData.CfScores
-            .FullOuterJoin(profileDto.FormatItems, JoinType.Hash,
+            .FullOuterHashJoin(profileDto.FormatItems,
                 x => x.FormatId,
                 x => x.Format,
                 // Exists in config, but not in service (these are unusual and should be errors)
