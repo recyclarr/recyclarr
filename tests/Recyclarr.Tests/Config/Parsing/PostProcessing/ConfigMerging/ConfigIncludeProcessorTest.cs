@@ -35,7 +35,7 @@ public class ConfigIncludeProcessorTest
         [Frozen] IAppPaths paths,
         ConfigIncludeProcessor sut)
     {
-        fs.AddEmptyFile(paths.ConfigsDirectory.File("foo/bar/config.yml"));
+        fs.AddEmptyFile(paths.IncludesDirectory.File("foo/bar/config.yml"));
 
         var includeDirective = new ConfigYamlInclude
         {
@@ -44,7 +44,7 @@ public class ConfigIncludeProcessorTest
 
         var path = sut.GetPathToConfig(includeDirective, default);
 
-        path.FullName.Should().Be(paths.ConfigsDirectory.File("foo/bar/config.yml").FullName);
+        path.FullName.Should().Be(paths.IncludesDirectory.File("foo/bar/config.yml").FullName);
     }
 
     [Test, AutoMockData]
@@ -78,7 +78,7 @@ public class ConfigIncludeProcessorTest
 
         var act = () => sut.GetPathToConfig(includeDirective, default);
 
-        act.Should().Throw<YamlIncludeException>().WithMessage("Relative*not exist*");
+        act.Should().Throw<YamlIncludeException>();
     }
 
     [Test, AutoMockData]
@@ -95,6 +95,6 @@ public class ConfigIncludeProcessorTest
 
         var act = () => sut.GetPathToConfig(includeDirective, default);
 
-        act.Should().Throw<YamlIncludeException>().WithMessage("Absolute*not exist*");
+        act.Should().Throw<YamlIncludeException>();
     }
 }

@@ -13,6 +13,7 @@ public class AppPathSetupTask(ILogger log, IAppPaths paths) : IBaseCommandSetupT
         paths.CacheDirectory.Create();
         paths.LogDirectory.Create();
         paths.ConfigsDirectory.Create();
+        paths.IncludesDirectory.Create();
     }
 
     public void OnFinish()

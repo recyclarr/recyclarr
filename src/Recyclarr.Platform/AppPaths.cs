@@ -11,4 +11,5 @@ public class AppPaths(IDirectoryInfo appDataPath) : IAppPaths
     public IDirectoryInfo ReposDirectory => AppDataDirectory.SubDirectory("repositories");
     public IDirectoryInfo CacheDirectory => AppDataDirectory.SubDirectory("cache");
     public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDirectory("configs");
+    public IDirectoryInfo IncludesDirectory => AppDataDirectory.SubDirectory("includes");
 }

@@ -13,6 +13,13 @@ changes you may need to make.
 
 [breaking7]: https://recyclarr.dev/wiki/upgrade-guide/v7.0/
 
+### Added
+
+- YAML: New `includes` subdirectory intended to hold only include templates. Relative paths
+  specified in the `config` include directive are resolved starting at this new directory. Relative
+  paths to include templates located under the `configs` directory is now **DEPRECATED**. See the
+  "File Structure" page on the wiki for more details.
+
 ### Changed
 
 - **BREAKING**: The app data directory on OSX has changed. It now lives at `~/Library/Application

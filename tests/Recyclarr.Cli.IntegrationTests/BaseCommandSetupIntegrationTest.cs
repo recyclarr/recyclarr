@@ -76,7 +76,8 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         {
             Paths.CacheDirectory.FullName,
             Paths.LogDirectory.FullName,
-            Paths.ConfigsDirectory.FullName
+            Paths.ConfigsDirectory.FullName,
+            Paths.IncludesDirectory.FullName
         };
 
         Fs.LeafDirectories().Should().BeEquivalentTo(expectedDirs);
