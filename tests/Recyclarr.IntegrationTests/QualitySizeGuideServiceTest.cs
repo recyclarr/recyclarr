@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashGuide;
@@ -32,7 +31,7 @@ public class QualitySizeGuideServiceTest : IntegrationTestFixture
         Fs.AddFile(repo.Path.File("metadata.json"), new MockFileData(metadataJson));
 
         Fs.AddFileFromEmbeddedResource(
-            repo.Path.SubDir("docs", "json", serviceDir, "quality-size").File("some-quality-size.json"),
+            repo.Path.SubDirectory("docs", "json", serviceDir, "quality-size").File("some-quality-size.json"),
             GetType(),
             "Data.quality_size.json");
 

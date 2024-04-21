@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -11,7 +10,7 @@ public class QualitySizeGuideParserTest : IntegrationTestFixture
     [Test]
     public void Get_valid_data()
     {
-        var qualityDir = Fs.CurrentDirectory().SubDir("json");
+        var qualityDir = Fs.CurrentDirectory().SubDirectory("json");
         Fs.AddSameFileFromEmbeddedResource(qualityDir.File("quality_size.json"), GetType());
         qualityDir.Refresh();
 
@@ -36,7 +35,7 @@ public class QualitySizeGuideParserTest : IntegrationTestFixture
     [Test]
     public void Invalid_data_gets_skipped()
     {
-        var qualityDir = Fs.CurrentDirectory().SubDir("json");
+        var qualityDir = Fs.CurrentDirectory().SubDirectory("json");
         Fs.AddSameFileFromEmbeddedResource(qualityDir.File("invalid_quality_size.json"), GetType());
         qualityDir.Refresh();
 

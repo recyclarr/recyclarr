@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using Recyclarr.Settings;
 using Serilog.Context;
@@ -9,7 +8,7 @@ namespace Recyclarr.Repo;
 public class ConfigTemplatesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
     : IConfigTemplatesRepo, IUpdateableRepo
 {
-    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDir("config-templates");
+    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDirectory("config-templates");
 
     public Task Update(CancellationToken token)
     {

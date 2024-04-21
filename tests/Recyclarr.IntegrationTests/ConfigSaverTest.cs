@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.IntegrationTests;
@@ -51,7 +50,7 @@ public class ConfigSaverTest : IntegrationTestFixture
             }
         };
 
-        var destFile = Fs.CurrentDirectory().SubDir("one", "two", "three").File("config.yml");
+        var destFile = Fs.CurrentDirectory().SubDirectory("one", "two", "three").File("config.yml");
 
         sut.Save(config, destFile);
 

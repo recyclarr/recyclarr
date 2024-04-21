@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using Spectre.Console;
 
@@ -25,7 +24,7 @@ public class MoveOsxAppDataDotnet8(
 
     private IDirectoryInfo OldAppDataDir => fs.DirectoryInfo
         .New(env.GetFolderPath(Environment.SpecialFolder.UserProfile))
-        .SubDir(".config", AppPaths.DefaultAppDataDirectoryName);
+        .SubDirectory(".config", AppPaths.DefaultAppDataDirectoryName);
 
     private IDirectoryInfo NewAppDataDir => paths.AppDataDirectory;
 

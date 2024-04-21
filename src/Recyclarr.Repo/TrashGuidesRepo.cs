@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using Recyclarr.Settings;
 using Serilog.Context;
@@ -9,7 +8,7 @@ namespace Recyclarr.Repo;
 public class TrashGuidesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettingsProvider settings)
     : ITrashGuidesRepo, IUpdateableRepo
 {
-    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDir("trash-guides");
+    public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDirectory("trash-guides");
 
     public Task Update(CancellationToken token)
     {

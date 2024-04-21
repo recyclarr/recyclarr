@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.IntegrationTests;
 
@@ -12,7 +11,7 @@ internal class ConfigManipulatorTest : CliIntegrationFixture
     {
         var sut = Resolve<ConfigManipulator>();
         var src = Fs.CurrentDirectory().File("template.yml");
-        var dst = Fs.CurrentDirectory().SubDir("one", "two", "three").File("config.yml");
+        var dst = Fs.CurrentDirectory().SubDirectory("one", "two", "three").File("config.yml");
 
         const string yamlData =
             """

@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashGuide.MediaNaming;
@@ -35,9 +34,9 @@ public class MediaNamingGuideServiceTest : IntegrationTestFixture
         SetupMetadata();
 
         var repo = Resolve<ITrashGuidesRepo>();
-        var jsonPath = repo.Path.SubDir("radarr");
-        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDir("naming1").File("radarr_naming1.json"), GetType());
-        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDir("naming2").File("radarr_naming2.json"), GetType());
+        var jsonPath = repo.Path.SubDirectory("radarr");
+        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDirectory("naming1").File("radarr_naming1.json"), GetType());
+        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDirectory("naming2").File("radarr_naming2.json"), GetType());
 
         var sut = Resolve<MediaNamingGuideService>();
 
@@ -65,9 +64,9 @@ public class MediaNamingGuideServiceTest : IntegrationTestFixture
         SetupMetadata();
 
         var repo = Resolve<ITrashGuidesRepo>();
-        var jsonPath = repo.Path.SubDir("sonarr");
-        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDir("naming1").File("sonarr_naming1.json"), GetType());
-        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDir("naming2").File("sonarr_naming2.json"), GetType());
+        var jsonPath = repo.Path.SubDirectory("sonarr");
+        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDirectory("naming1").File("sonarr_naming1.json"), GetType());
+        Fs.AddSameFileFromEmbeddedResource(jsonPath.SubDirectory("naming2").File("sonarr_naming2.json"), GetType());
 
         var sut = Resolve<MediaNamingGuideService>();
 
