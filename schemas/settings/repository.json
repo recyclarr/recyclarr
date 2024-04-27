@@ -18,11 +18,6 @@
       "type": "string",
       "title": "A SHA1 (commit hash) in Git to use",
       "description": "If specified, it overrides the `branch` setting. This SHA1 is passed to `git reset --hard` to force your local clone to this specific revision in the repository. If not specified, only the `branch` controls what revision is used in the repo."
-    },
-    "git_path": {
-      "type": "string",
-      "title": "Provide an explicit path to your git executable",
-      "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
     }
   }
 }

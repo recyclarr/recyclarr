@@ -6,6 +6,11 @@
   "description": "Optional settings to control the behavior of Recyclarr",
   "additionalProperties": false,
   "properties": {
+    "git_path": {
+      "type": "string",
+      "title": "Provide an explicit path to your git executable",
+      "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
+    },
     "repositories": {
       "type": "object",
       "additionalProperties": false,
