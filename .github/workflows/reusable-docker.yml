@@ -26,7 +26,6 @@ jobs:
         uses: gittools/actions/gitversion/setup@v0
         with:
           versionSpec: 6.x
-          includePrerelease: true
 
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0
@@ -47,7 +46,7 @@ jobs:
             ghcr.io/${{ github.repository }}
           tags: |
             type=edge,branch=master
-            ${{ env.semver }},pattern={{version}}
+            ${{ env.semver }},${{ env.prod }},pattern={{version}}
             ${{ env.semver }},${{ env.prod }},pattern={{major}}.{{minor}}
             ${{ env.semver }},${{ env.prod }},pattern={{major}}
 
