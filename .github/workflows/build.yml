@@ -151,7 +151,7 @@ jobs:
         uses: gittools/actions/gitversion/setup@v0
         with:
           versionSpec: 6.x
-          includePrerelease: true
+          includePrerelease: true # Remove this once v6 goes stable
 
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0
