@@ -26,6 +26,11 @@ RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app
 # final stage/image
 FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
 
+LABEL name="recyclarr" \
+  org.opencontainers.image.source="https://github.com/recyclarr/recyclarr" \
+  org.opencontainers.image.url="https://recyclarr.dev" \
+  org.opencontainers.image.licenses="MIT"
+
 # Read below for the reasons why COMPlus_EnableDiagnostics is set:
 # https://github.com/dotnet/docs/issues/10217
 # https://github.com/dotnet/runtime/issues/96227
