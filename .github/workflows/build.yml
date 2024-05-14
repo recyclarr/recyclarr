@@ -3,28 +3,7 @@ name: Build & Test
 
 on:
   push:
-    paths:
-      - ".github/workflows/build.yml"
-      - ".github/workflows/reusable-docker.yml"
-      - ".github/workflows/reusable-build.yml"
-      - "src/**"
-      - "tests/**"
-      - "docker/**"
-      - "ci/**"
-      - "**.props"
-      - "**.targets"
-
   pull_request:
-    paths:
-      - ".github/workflows/build.yml"
-      - ".github/workflows/reusable-docker.yml"
-      - ".github/workflows/reusable-build.yml"
-      - "src/**"
-      - "tests/**"
-      - "docker/**"
-      - "ci/**"
-      - "**.props"
-      - "**.targets"
 
 jobs:
   #############################################
