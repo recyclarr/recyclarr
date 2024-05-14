@@ -4,12 +4,12 @@
   "minimumReleaseAge": "5 days",
   "packageRules": [
     {
-      "matchManagers": ["nuget"],
-      "commitMessagePrefix": "build:"
+      "matchFileNames": ["*.props", "*.csproj"],
+      "commitMessagePrefix": "build(deps):"
     },
     {
       "matchManagers": ["github-actions"],
-      "commitMessagePrefix": "ci:"
+      "commitMessagePrefix": "ci(deps):"
     }
   ]
 }
