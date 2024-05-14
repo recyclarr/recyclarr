@@ -1,5 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":disableRateLimiting"],
-  "minimumReleaseAge": "5 days"
+  "minimumReleaseAge": "5 days",
+  "packageRules": [
+    {
+      "matchManagers": ["nuget"],
+      "commitMessagePrefix": "build"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "commitMessagePrefix": "ci"
+    }
+  ]
 }
