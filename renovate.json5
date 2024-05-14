@@ -5,11 +5,11 @@
   "packageRules": [
     {
       "matchManagers": ["nuget"],
-      "commitMessagePrefix": "build"
+      "commitMessagePrefix": "build:"
     },
     {
       "matchManagers": ["github-actions"],
-      "commitMessagePrefix": "ci"
+      "commitMessagePrefix": "ci:"
     }
   ]
 }
