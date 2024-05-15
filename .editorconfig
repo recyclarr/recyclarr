@@ -1588,7 +1588,7 @@ resharper_zero_index_from_end_highlighting = warning
 [*.{cs,ps1}]
 indent_size = 4
 
-[*.json]
+[*.{json,json5,jsonc}]
 ij_javascript_array_initializer_right_brace_on_new_line = false
 
 [tests/**.cs]
