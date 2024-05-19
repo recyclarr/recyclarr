@@ -1,13 +1,12 @@
 using Flurl.Http;
-using Recyclarr.Config.Models;
 
 namespace Recyclarr.ServarrApi.System;
 
 public class SystemApiService(IServarrRequestBuilder service) : ISystemApiService
 {
-    public async Task<SystemStatus> GetStatus(IServiceConfiguration config)
+    public async Task<SystemStatus> GetStatus()
     {
-        return await service.Request(config, "system", "status")
+        return await service.Request("system", "status")
             .GetJsonAsync<SystemStatus>();
     }
 }

@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+using Recyclarr.Config;
 using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;
 
@@ -13,9 +14,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Add_new_cf()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
-
-        var config = NewConfig.Radarr();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -24,7 +25,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
 
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -38,7 +39,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Update_cf_by_matching_name()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -56,9 +59,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ]
         };
 
-        var config = NewConfig.Radarr();
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -75,7 +76,9 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Update_cf_by_matching_id_different_names()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -93,9 +96,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ]
         };
 
-        var config = NewConfig.Radarr();
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -112,7 +113,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Update_cf_by_matching_id_same_names()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = true
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -130,12 +137,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = true
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -152,7 +154,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Conflicting_cf_when_new_cf_has_name_of_existing()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = false
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -165,12 +173,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = false
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -184,7 +187,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Conflicting_cf_when_cached_cf_has_name_of_existing()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = false
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -197,12 +206,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = false
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -216,7 +220,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Updated_cf_with_matching_name_and_id()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = false
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -238,12 +248,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = false
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -257,7 +262,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Unchanged_cfs_with_replace_enabled()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = true
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -266,12 +277,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = true
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -282,7 +288,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Unchanged_cfs_without_replace()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            ReplaceExistingCustomFormats = false
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -291,12 +303,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            ReplaceExistingCustomFormats = false
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -307,7 +314,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Deleted_cfs_when_enabled()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            DeleteOldCustomFormats = true
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -316,12 +329,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = []
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            DeleteOldCustomFormats = true
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {
@@ -335,7 +343,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void No_deleted_cfs_when_disabled()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr() with
+        {
+            DeleteOldCustomFormats = false
+        });
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -344,12 +358,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = []
         };
 
-        var config = NewConfig.Radarr() with
-        {
-            DeleteOldCustomFormats = false
-        };
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData());
     }
@@ -357,7 +366,10 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Do_not_delete_cfs_in_config()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -366,9 +378,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("two", "cf2", 2)]
         };
 
-        var config = NewConfig.Radarr();
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.DeletedCustomFormats.Should().BeEmpty();
     }
@@ -376,7 +386,10 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public void Add_new_cf_when_in_cache_but_not_in_service()
     {
-        var sut = Resolve<CustomFormatTransactionPhase>();
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -385,9 +398,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("two", "cf2", 2)]
         };
 
-        var config = NewConfig.Radarr();
-
-        sut.Execute(context, config);
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData
         {

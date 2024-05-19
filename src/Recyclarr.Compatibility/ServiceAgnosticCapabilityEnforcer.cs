@@ -12,12 +12,12 @@ public class ServiceAgnosticCapabilityEnforcer(
     {
         switch (config)
         {
-            case SonarrConfiguration c:
-                await sonarrEnforcer.Check(c);
+            case SonarrConfiguration:
+                await sonarrEnforcer.Check();
                 break;
 
-            case RadarrConfiguration c:
-                await radarrEnforcer.Check(c);
+            case RadarrConfiguration:
+                await radarrEnforcer.Check();
                 break;
         }
     }

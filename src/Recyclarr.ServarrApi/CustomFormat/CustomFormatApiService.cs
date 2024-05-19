@@ -1,36 +1,32 @@
 using Flurl.Http;
-using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
 public class CustomFormatApiService(IServarrRequestBuilder service) : ICustomFormatApiService
 {
-    public async Task<IList<CustomFormatData>> GetCustomFormats(IServiceConfiguration config)
+    public async Task<IList<CustomFormatData>> GetCustomFormats()
     {
-        return await service.Request(config, "customformat")
+        return await service.Request("customformat")
             .GetJsonAsync<IList<CustomFormatData>>();
     }
 
-    public async Task<CustomFormatData?> CreateCustomFormat(IServiceConfiguration config, CustomFormatData cf)
+    public async Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf)
     {
-        return await service.Request(config, "customformat")
+        return await service.Request("customformat")
             .PostJsonAsync(cf)
             .ReceiveJson<CustomFormatData>();
     }
 
-    public async Task UpdateCustomFormat(IServiceConfiguration config, CustomFormatData cf)
+    public async Task UpdateCustomFormat(CustomFormatData cf)
     {
-        await service.Request(config, "customformat", cf.Id)
+        await service.Request("customformat", cf.Id)
             .PutJsonAsync(cf);
     }
 
-    public async Task DeleteCustomFormat(
-        IServiceConfiguration config,
-        int customFormatId,
-        CancellationToken cancellationToken = default)
+    public async Task DeleteCustomFormat(int customFormatId, CancellationToken cancellationToken = default)
     {
-        await service.Request(config, "customformat", customFormatId)
+        await service.Request("customformat", customFormatId)
             .DeleteAsync(cancellationToken: cancellationToken);
     }
 }

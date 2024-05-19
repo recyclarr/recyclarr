@@ -1,13 +1,11 @@
-using Recyclarr.Config.Models;
-
 namespace Recyclarr.Compatibility;
 
 public abstract class ServiceCapabilityFetcher<T>(IServiceInformation info)
     where T : class
 {
-    public async Task<T> GetCapabilities(IServiceConfiguration config)
+    public async Task<T> GetCapabilities()
     {
-        var version = await info.GetVersion(config);
+        var version = await info.GetVersion();
         return BuildCapabilitiesObject(version);
     }
 

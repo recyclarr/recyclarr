@@ -29,6 +29,7 @@ public class ConfigAutofacModule : Module
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
         builder.RegisterType<ConfigSaver>();
+        builder.RegisterType<ConfigurationScopeFactory>();
 
         // Config Post Processors
         builder.RegisterType<ImplicitUrlAndKeyPostProcessor>().As<IConfigPostProcessor>();

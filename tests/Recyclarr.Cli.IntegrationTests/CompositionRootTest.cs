@@ -1,8 +1,8 @@
 using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Core;
 using NUnit.Framework.Internal;
+using Recyclarr.Config.Models;
 using Recyclarr.TestLibrary.Autofac;
 using Spectre.Console;
 
@@ -11,9 +11,6 @@ namespace Recyclarr.Cli.IntegrationTests;
 [TestFixture]
 public class CompositionRootTest
 {
-    // Warning CA1812 : CompositionRootTest.ConcreteTypeEnumerator is an internal class that is apparently never
-    // instantiated.
-    [SuppressMessage("Performance", "CA1812", Justification = "Created via reflection by TestCaseSource attribute")]
     private sealed class ConcreteTypeEnumerator : IEnumerable
     {
         public IEnumerator GetEnumerator()
@@ -24,6 +21,11 @@ public class CompositionRootTest
             // These are things that Spectre.Console normally registers for us, so they won't explicitly be
             // in the CompositionRoot. Register mocks/stubs here.
             builder.RegisterMockFor<IAnsiConsole>();
+
+            // Normally in per-instance syncing, a child lifetime scope is created to register IServiceConfiguration.
+            // However, in the test for checking whether all necessary dependencies are registered, we provide a mock
+            // registration here for the purposes of getting the test to pass.
+            builder.RegisterMockFor<IServiceConfiguration>();
 
             var container = builder.Build();
             return container.ComponentRegistry.Registrations

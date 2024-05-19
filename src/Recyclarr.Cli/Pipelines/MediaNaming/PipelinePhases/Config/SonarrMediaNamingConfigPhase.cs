@@ -4,16 +4,13 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-public class SonarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<SonarrConfiguration>
+public class SonarrMediaNamingConfigPhase(SonarrConfiguration config) : IServiceBasedMediaNamingConfigPhase
 {
-    protected override Task<MediaNamingDto> ProcessNaming(
-        SonarrConfiguration config,
-        IMediaNamingGuideService guide,
-        NamingFormatLookup lookup)
+    public Task<MediaNamingDto> ProcessNaming(IMediaNamingGuideService guide, NamingFormatLookup lookup)
     {
         var guideData = guide.GetSonarrNamingData();
         var configData = config.MediaNaming;
-        var keySuffix = ":4";
+        const string keySuffix = ":4";
 
         return Task.FromResult<MediaNamingDto>(new SonarrMediaNamingDto
         {

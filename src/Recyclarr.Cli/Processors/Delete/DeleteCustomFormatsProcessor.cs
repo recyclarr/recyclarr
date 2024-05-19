@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using Autofac;
+using JetBrains.Annotations;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config;
@@ -9,18 +11,24 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;
 
+[UsedImplicitly]
+internal class CustomFormatConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+{
+    public ICustomFormatApiService CustomFormatApi { get; } = scope.Resolve<ICustomFormatApiService>();
+}
+
 public class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
-    ICustomFormatApiService api,
-    IConfigurationRegistry configRegistry)
+    IConfigurationRegistry configRegistry,
+    ConfigurationScopeFactory scopeFactory)
     : IDeleteCustomFormatsProcessor
 {
     public async Task Process(IDeleteCustomFormatSettings settings)
     {
-        var config = GetTargetConfig(settings);
+        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(GetTargetConfig(settings));
 
-        var cfs = await ObtainCustomFormats(config);
+        var cfs = await ObtainCustomFormats(scope.CustomFormatApi);
 
         if (!settings.All)
         {
@@ -53,11 +61,11 @@ public class DeleteCustomFormatsProcessor(
             return;
         }
 
-        await DeleteCustomFormats(cfs, config);
+        await DeleteCustomFormats(scope.CustomFormatApi, cfs);
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private async Task DeleteCustomFormats(ICollection<CustomFormatData> cfs, IServiceConfiguration config)
+    private async Task DeleteCustomFormats(ICustomFormatApiService api, ICollection<CustomFormatData> cfs)
     {
         await console.Progress().StartAsync(async ctx =>
         {
@@ -68,7 +76,7 @@ public class DeleteCustomFormatsProcessor(
             {
                 try
                 {
-                    await api.DeleteCustomFormat(config, cf.Id, token);
+                    await api.DeleteCustomFormat(cf.Id, token);
                     log.Debug("Deleted {Name}", cf.Name);
                 }
                 catch (Exception e)
@@ -82,13 +90,13 @@ public class DeleteCustomFormatsProcessor(
         });
     }
 
-    private async Task<IList<CustomFormatData>> ObtainCustomFormats(IServiceConfiguration config)
+    private async Task<IList<CustomFormatData>> ObtainCustomFormats(ICustomFormatApiService api)
     {
         IList<CustomFormatData> cfs = new List<CustomFormatData>();
 
         await console.Status().StartAsync("Obtaining custom formats...", async _ =>
         {
-            cfs = await api.GetCustomFormats(config);
+            cfs = await api.GetCustomFormats();
         });
 
         return cfs;

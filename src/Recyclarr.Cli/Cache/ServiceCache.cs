@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Config.Models;
 using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Cache;
@@ -12,9 +11,9 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
 {
     private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
 
-    public T? Load<T>(IServiceConfiguration config) where T : class
+    public T? Load<T>() where T : class
     {
-        var path = PathFromAttribute<T>(config);
+        var path = PathFromAttribute<T>();
         log.Debug("Loading cache from path: {Path}", path.FullName);
         if (!path.Exists)
         {
@@ -35,9 +34,9 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
         return null;
     }
 
-    public void Save<T>(T obj, IServiceConfiguration config) where T : class
+    public void Save<T>(T obj) where T : class
     {
-        var path = PathFromAttribute<T>(config);
+        var path = PathFromAttribute<T>();
         log.Debug("Saving cache to path: {Path}", path.FullName);
         path.CreateParentDirectory();
 
@@ -56,7 +55,7 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
         return attribute.Name;
     }
 
-    private IFileInfo PathFromAttribute<T>(IServiceConfiguration config)
+    private IFileInfo PathFromAttribute<T>()
     {
         var objectName = GetCacheObjectNameAttribute<T>();
         if (!AllowedObjectNameCharactersRegex().IsMatch(objectName))
@@ -64,7 +63,7 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
             throw new ArgumentException($"Object name '{objectName}' has unacceptable characters");
         }
 
-        return storagePath.CalculatePath(config, objectName);
+        return storagePath.CalculatePath(objectName);
     }
 
     [GeneratedRegex(@"^[\w-]+$", RegexOptions.None, 1000)]

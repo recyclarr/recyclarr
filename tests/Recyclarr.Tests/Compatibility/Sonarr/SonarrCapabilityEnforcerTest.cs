@@ -1,6 +1,5 @@
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Sonarr;
-using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Tests.Compatibility.Sonarr;
 
@@ -12,13 +11,12 @@ public class SonarrCapabilityEnforcerTest
         [Frozen] ISonarrCapabilityFetcher fetcher,
         SonarrCapabilityEnforcer sut)
     {
-        var config = NewConfig.Sonarr();
         var min = SonarrCapabilities.MinimumVersion;
 
-        fetcher.GetCapabilities(default!).ReturnsForAnyArgs(
+        fetcher.GetCapabilities().ReturnsForAnyArgs(
             new SonarrCapabilities(new Version(min.Major - 1, min.Minor, min.Build, min.Revision)));
 
-        var act = () => sut.Check(config);
+        var act = sut.Check;
 
         act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*minimum*");
     }

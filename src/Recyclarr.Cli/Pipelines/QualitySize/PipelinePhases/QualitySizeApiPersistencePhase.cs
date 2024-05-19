@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityDefinition;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
@@ -7,8 +6,8 @@ namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 public class QualitySizeApiPersistencePhase(IQualityDefinitionApiService api)
     : IApiPersistencePipelinePhase<QualitySizePipelineContext>
 {
-    public async Task Execute(QualitySizePipelineContext context, IServiceConfiguration config)
+    public async Task Execute(QualitySizePipelineContext context)
     {
-        await api.UpdateQualityDefinition(config, context.TransactionOutput);
+        await api.UpdateQualityDefinition(context.TransactionOutput);
     }
 }

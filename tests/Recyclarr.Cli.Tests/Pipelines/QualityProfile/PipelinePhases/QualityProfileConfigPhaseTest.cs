@@ -1,3 +1,4 @@
+using AutoFixture;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
@@ -17,18 +18,19 @@ public class QualityProfileConfigPhaseTest
         };
     }
 
-    [Test, AutoMockData]
-    public void All_cfs_use_score_override(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void All_cfs_use_score_override()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2)
         });
 
-        var config = SetupCfs(new CustomFormatConfig
+        fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
             QualityProfiles = new List<QualityProfileScoreConfig>
@@ -39,10 +41,12 @@ public class QualityProfileConfigPhaseTest
                     Score = 100
                 }
             }
-        });
+        }));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
@@ -51,18 +55,19 @@ public class QualityProfileConfigPhaseTest
             o => o.Excluding(x => x.ShouldCreate));
     }
 
-    [Test, AutoMockData]
-    public void All_cfs_use_guide_scores_with_no_override(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void All_cfs_use_guide_scores_with_no_override()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.DataWithScore("", "id1", 100, 1),
             NewCf.DataWithScore("", "id2", 200, 2)
         });
 
-        var config = SetupCfs(new CustomFormatConfig
+        fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
             QualityProfiles = new List<QualityProfileScoreConfig>
@@ -72,10 +77,11 @@ public class QualityProfileConfigPhaseTest
                     Name = "test_profile"
                 }
             }
-        });
+        }));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
@@ -84,18 +90,19 @@ public class QualityProfileConfigPhaseTest
             o => o.Excluding(x => x.ShouldCreate));
     }
 
-    [Test, AutoMockData]
-    public void No_cfs_returned_when_no_score_in_guide_or_config(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void No_cfs_returned_when_no_score_in_guide_or_config()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.Data("", "id1", 1),
             NewCf.Data("", "id2", 2)
         });
 
-        var config = SetupCfs(new CustomFormatConfig
+        fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
             QualityProfiles = new List<QualityProfileScoreConfig>
@@ -105,10 +112,11 @@ public class QualityProfileConfigPhaseTest
                     Name = "test_profile"
                 }
             }
-        });
+        }));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
@@ -117,17 +125,18 @@ public class QualityProfileConfigPhaseTest
             o => o.Excluding(x => x.ShouldCreate).Excluding(x => x.ScorelessCfs));
     }
 
-    [Test, AutoMockData]
-    public void Skip_duplicate_cfs_with_same_and_different_scores(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void Skip_duplicate_cfs_with_same_and_different_scores()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.DataWithScore("", "id1", 100, 1)
         });
 
-        var config = SetupCfs(
+        fixture.Inject<IServiceConfiguration>(SetupCfs(
             new CustomFormatConfig
             {
                 TrashIds = new[] {"id1"}
@@ -164,10 +173,11 @@ public class QualityProfileConfigPhaseTest
                     new() {Name = "test_profile2", Score = 100}
                 }
             }
-        );
+        ));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
@@ -177,11 +187,12 @@ public class QualityProfileConfigPhaseTest
             o => o.Excluding(x => x.ShouldCreate));
     }
 
-    [Test, AutoMockData]
-    public void All_cfs_use_score_set(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void All_cfs_use_score_set()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
@@ -210,9 +221,11 @@ public class QualityProfileConfigPhaseTest
                 }
             }
         };
+        fixture.Inject<IServiceConfiguration>(config);
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
             {
@@ -224,12 +237,12 @@ public class QualityProfileConfigPhaseTest
             o => o.Excluding(x => x.ShouldCreate));
     }
 
-    [Test, AutoMockData]
-    public void Empty_trash_ids_list_is_ignored(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void Empty_trash_ids_list_is_ignored()
     {
-        var config = SetupCfs(new CustomFormatConfig
+        var fixture = NSubstituteFixture.Create();
+
+        fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = Array.Empty<string>(),
             QualityProfiles = new List<QualityProfileScoreConfig>
@@ -240,33 +253,36 @@ public class QualityProfileConfigPhaseTest
                     Score = 100
                 }
             }
-        });
+        }));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEmpty();
     }
 
-    [Test, AutoMockData]
-    public void Empty_quality_profiles_is_ignored(
-        [Frozen] ProcessedCustomFormatCache cache,
-        QualityProfileConfigPhase sut)
+    [Test]
+    public void Empty_quality_profiles_is_ignored()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
         cache.AddCustomFormats(new[]
         {
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2)
         });
 
-        var config = SetupCfs(new CustomFormatConfig
+        fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
             QualityProfiles = Array.Empty<QualityProfileScoreConfig>()
-        });
+        }));
 
         var context = new QualityProfilePipelineContext();
-        sut.Execute(context, config);
+        var sut = fixture.Create<QualityProfileConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEmpty();
     }

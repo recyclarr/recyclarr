@@ -5,10 +5,10 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide)
+public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide, IServiceConfiguration config)
     : IConfigPipelinePhase<QualitySizePipelineContext>
 {
-    public Task Execute(QualitySizePipelineContext context, IServiceConfiguration config)
+    public Task Execute(QualitySizePipelineContext context)
     {
         var qualityDef = config.QualityDefinition;
         if (qualityDef is null)
@@ -32,9 +32,9 @@ public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide)
         return Task.CompletedTask;
     }
 
-    private void AdjustPreferredRatio(QualityDefinitionConfig config, QualitySizeData selectedQuality)
+    private void AdjustPreferredRatio(QualityDefinitionConfig qualityDefConfig, QualitySizeData selectedQuality)
     {
-        if (config.PreferredRatio is null)
+        if (qualityDefConfig.PreferredRatio is null)
         {
             return;
         }
@@ -42,20 +42,20 @@ public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide)
         log.Information("Using an explicit preferred ratio which will override values from the guide");
 
         // Fix an out of range ratio and warn the user
-        if (config.PreferredRatio is < 0 or > 1)
+        if (qualityDefConfig.PreferredRatio is < 0 or > 1)
         {
-            var clampedRatio = Math.Clamp(config.PreferredRatio.Value, 0, 1);
+            var clampedRatio = Math.Clamp(qualityDefConfig.PreferredRatio.Value, 0, 1);
             log.Warning("Your `preferred_ratio` of {CurrentRatio} is out of range. " +
                 "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
-                config.PreferredRatio, clampedRatio);
+                qualityDefConfig.PreferredRatio, clampedRatio);
 
-            config.PreferredRatio = clampedRatio;
+            qualityDefConfig.PreferredRatio = clampedRatio;
         }
 
         // Apply a calculated preferred size
         foreach (var quality in selectedQuality.Qualities)
         {
-            quality.Preferred = quality.InterpolatedPreferred(config.PreferredRatio.Value);
+            quality.Preferred = quality.InterpolatedPreferred(qualityDefConfig.PreferredRatio.Value);
         }
     }
 }

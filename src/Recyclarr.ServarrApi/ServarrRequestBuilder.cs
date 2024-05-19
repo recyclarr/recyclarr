@@ -14,10 +14,11 @@ public class ServarrRequestBuilder(
     ILogger log,
     IFlurlClientCache clientCache,
     ISettingsProvider settingsProvider,
-    IEnumerable<FlurlSpecificEventHandler> eventHandlers)
+    IEnumerable<FlurlSpecificEventHandler> eventHandlers,
+    IServiceConfiguration config)
     : IServarrRequestBuilder
 {
-    public IFlurlRequest Request(IServiceConfiguration config, params object[] path)
+    public IFlurlRequest Request(params object[] path)
     {
         var client = clientCache.GetOrAdd(
             config.InstanceName,
@@ -42,16 +43,16 @@ public class ServarrRequestBuilder(
             settings.JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services);
         });
 
-        builder.ConfigureInnerHandler(handler =>
+        if (!settingsProvider.Settings.EnableSslCertificateValidation)
         {
-            if (!settingsProvider.Settings.EnableSslCertificateValidation)
+            builder.ConfigureInnerHandler(handler =>
             {
                 log.Warning(
                     "Security Risk: Certificate validation is being DISABLED because setting " +
                     "`enable_ssl_certificate_validation` is set to `false`");
 
                 handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
-            }
-        });
+            });
+        }
     }
 }

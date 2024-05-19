@@ -4,12 +4,9 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-public class RadarrMediaNamingConfigPhase : ServiceBasedMediaNamingConfigPhase<RadarrConfiguration>
+public class RadarrMediaNamingConfigPhase(RadarrConfiguration config) : IServiceBasedMediaNamingConfigPhase
 {
-    protected override Task<MediaNamingDto> ProcessNaming(
-        RadarrConfiguration config,
-        IMediaNamingGuideService guide,
-        NamingFormatLookup lookup)
+    public Task<MediaNamingDto> ProcessNaming(IMediaNamingGuideService guide, NamingFormatLookup lookup)
     {
         var guideData = guide.GetRadarrNamingData();
         var configData = config.MediaNaming;

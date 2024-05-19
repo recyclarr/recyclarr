@@ -1,16 +1,11 @@
-using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
 public interface ICustomFormatApiService
 {
-    Task<IList<CustomFormatData>> GetCustomFormats(IServiceConfiguration config);
-    Task<CustomFormatData?> CreateCustomFormat(IServiceConfiguration config, CustomFormatData cf);
-    Task UpdateCustomFormat(IServiceConfiguration config, CustomFormatData cf);
-
-    Task DeleteCustomFormat(
-        IServiceConfiguration config,
-        int customFormatId,
-        CancellationToken cancellationToken = default);
+    Task<IList<CustomFormatData>> GetCustomFormats();
+    Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf);
+    Task UpdateCustomFormat(CustomFormatData cf);
+    Task DeleteCustomFormat(int customFormatId, CancellationToken cancellationToken = default);
 }

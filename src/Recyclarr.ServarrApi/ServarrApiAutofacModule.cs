@@ -12,11 +12,20 @@ public class ServarrApiAutofacModule : Module
     protected override void Load(ContainerBuilder builder)
     {
         base.Load(builder);
-        builder.RegisterType<SystemApiService>().As<ISystemApiService>();
+
+        // This is used by all specific API service classes registered below.
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
-        builder.RegisterType<QualityProfileApiService>().As<IQualityProfileApiService>();
-        builder.RegisterType<CustomFormatApiService>().As<ICustomFormatApiService>();
-        builder.RegisterType<QualityDefinitionApiService>().As<IQualityDefinitionApiService>();
-        builder.RegisterType<MediaNamingApiService>().As<IMediaNamingApiService>();
+
+        builder.RegisterType<SystemApiService>().As<ISystemApiService>()
+            .InstancePerLifetimeScope();
+
+        builder.RegisterType<QualityProfileApiService>().As<IQualityProfileApiService>()
+            .InstancePerLifetimeScope();
+        builder.RegisterType<CustomFormatApiService>().As<ICustomFormatApiService>()
+            .InstancePerLifetimeScope();
+        builder.RegisterType<QualityDefinitionApiService>().As<IQualityDefinitionApiService>()
+            .InstancePerLifetimeScope();
+        builder.RegisterType<MediaNamingApiService>().As<IMediaNamingApiService>()
+            .InstancePerLifetimeScope();
     }
 }

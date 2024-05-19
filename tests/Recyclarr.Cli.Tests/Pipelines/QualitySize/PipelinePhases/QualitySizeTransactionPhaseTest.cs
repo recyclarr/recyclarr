@@ -1,6 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -32,7 +31,7 @@ public class QualitySizeTransactionPhaseTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEmpty();
     }
@@ -70,7 +69,7 @@ public class QualitySizeTransactionPhaseTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEmpty();
     }
@@ -108,7 +107,7 @@ public class QualitySizeTransactionPhaseTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new List<ServiceQualityDefinitionItem>
         {

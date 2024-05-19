@@ -91,7 +91,7 @@ public abstract class IntegrationTestFixture : IDisposable
         builder.RegisterMockFor<IServiceInformation>(m =>
         {
             // By default, choose some extremely high number so that all the newest features are enabled.
-            m.GetVersion(default!).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
+            m.GetVersion().ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
         });
     }
 

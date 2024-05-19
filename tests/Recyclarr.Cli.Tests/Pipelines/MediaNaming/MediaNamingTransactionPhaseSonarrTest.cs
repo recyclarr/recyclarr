@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
-using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
@@ -31,7 +30,7 @@ public class MediaNamingTransactionPhaseSonarrTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
     }
@@ -57,7 +56,7 @@ public class MediaNamingTransactionPhaseSonarrTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(context.ApiFetchOutput, o => o.RespectingRuntimeTypes());
     }
@@ -91,7 +90,7 @@ public class MediaNamingTransactionPhaseSonarrTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
     }
@@ -125,7 +124,7 @@ public class MediaNamingTransactionPhaseSonarrTest
             }
         };
 
-        sut.Execute(context, Substitute.For<IServiceConfiguration>());
+        sut.Execute(context);
 
         context.TransactionOutput.Should().BeEquivalentTo(new SonarrMediaNamingDto
             {

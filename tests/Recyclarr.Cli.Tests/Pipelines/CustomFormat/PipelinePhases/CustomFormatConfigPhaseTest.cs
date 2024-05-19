@@ -1,3 +1,4 @@
+using AutoFixture;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Config.Models;
@@ -9,18 +10,19 @@ namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.PipelinePhases;
 [TestFixture]
 public class CustomFormatConfigPhaseTest
 {
-    [Test, AutoMockData]
-    public void Return_configs_that_exist_in_guide(
-        [Frozen] ICustomFormatGuideService guide,
-        CustomFormatConfigPhase sut)
+    [Test]
+    public void Return_configs_that_exist_in_guide()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var guide = fixture.Freeze<ICustomFormatGuideService>();
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new[]
         {
             NewCf.Data("one", "cf1"),
             NewCf.Data("two", "cf2")
         });
 
-        var config = NewConfig.Radarr() with
+        fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
         {
             CustomFormats = new List<CustomFormatConfig>
             {
@@ -33,11 +35,11 @@ public class CustomFormatConfigPhaseTest
                     }
                 }
             }
-        };
+        });
 
         var context = new CustomFormatPipelineContext();
-
-        sut.Execute(context, config);
+        var sut = fixture.Create<CustomFormatConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEquivalentTo(new[]
         {
@@ -46,17 +48,18 @@ public class CustomFormatConfigPhaseTest
         });
     }
 
-    [Test, AutoMockData]
-    public void Skip_configs_that_do_not_exist_in_guide(
-        [Frozen] ICustomFormatGuideService guide,
-        CustomFormatConfigPhase sut)
+    [Test]
+    public void Skip_configs_that_do_not_exist_in_guide()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var guide = fixture.Freeze<ICustomFormatGuideService>();
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new[]
         {
             NewCf.Data("", "cf4")
         });
 
-        var config = NewConfig.Radarr() with
+        fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
         {
             CustomFormats = new List<CustomFormatConfig>
             {
@@ -70,11 +73,11 @@ public class CustomFormatConfigPhaseTest
                     }
                 }
             }
-        };
+        });
 
         var context = new CustomFormatPipelineContext();
-
-        sut.Execute(context, config);
+        var sut = fixture.Create<CustomFormatConfigPhase>();
+        sut.Execute(context);
 
         context.ConfigOutput.Should().BeEmpty();
     }

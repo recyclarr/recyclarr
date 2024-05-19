@@ -3,10 +3,14 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.Generic;
 
-public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TContext> phases) : ISyncPipeline
+public class GenericSyncPipeline<TContext>(
+    ILogger log,
+    GenericPipelinePhases<TContext> phases,
+    IServiceConfiguration config
+) : ISyncPipeline
     where TContext : IPipelineContext, new()
 {
-    public async Task Execute(ISyncSettings settings, IServiceConfiguration config)
+    public async Task Execute(ISyncSettings settings)
     {
         var context = new TContext();
         if (!context.SupportedServiceTypes.Contains(config.ServiceType))
@@ -16,14 +20,14 @@ public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TC
             return;
         }
 
-        await phases.ConfigPhase.Execute(context, config);
+        await phases.ConfigPhase.Execute(context);
         if (phases.LogPhase.LogConfigPhaseAndExitIfNeeded(context))
         {
             return;
         }
 
-        await phases.ApiFetchPhase.Execute(context, config);
-        phases.TransactionPhase.Execute(context, config);
+        await phases.ApiFetchPhase.Execute(context);
+        phases.TransactionPhase.Execute(context);
 
         phases.LogPhase.LogTransactionNotices(context);
 
@@ -33,7 +37,7 @@ public class GenericSyncPipeline<TContext>(ILogger log, GenericPipelinePhases<TC
             return;
         }
 
-        await phases.ApiPersistencePhase.Execute(context, config);
+        await phases.ApiPersistencePhase.Execute(context);
         phases.LogPhase.LogPersistenceResults(context);
     }
 }

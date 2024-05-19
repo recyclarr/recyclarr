@@ -4,13 +4,12 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-public class MediaNamingApiService(IServarrRequestBuilder service) : IMediaNamingApiService
+public class MediaNamingApiService(IServarrRequestBuilder service, IServiceConfiguration config)
+    : IMediaNamingApiService
 {
-    public async Task<MediaNamingDto> GetNaming(IServiceConfiguration config)
+    public async Task<MediaNamingDto> GetNaming()
     {
-        var response = await service.Request(config, "config", "naming")
-            .GetAsync();
-
+        var response = await service.Request("config", "naming").GetAsync();
         return config.ServiceType switch
         {
             SupportedServices.Radarr => await response.GetJsonAsync<RadarrMediaNamingDto>(),
@@ -19,9 +18,9 @@ public class MediaNamingApiService(IServarrRequestBuilder service) : IMediaNamin
         };
     }
 
-    public async Task UpdateNaming(IServiceConfiguration config, MediaNamingDto dto)
+    public async Task UpdateNaming(MediaNamingDto dto)
     {
-        await service.Request(config, "config", "naming")
+        await service.Request("config", "naming")
             .PutJsonAsync(dto);
     }
 }

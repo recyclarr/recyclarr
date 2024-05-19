@@ -1,3 +1,4 @@
+using AutoFixture;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Compatibility.Sonarr;
@@ -45,15 +46,16 @@ public class SonarrMediaNamingConfigPhaseTest
         }
     };
 
-    [Test, AutoMockData]
-    public async Task Sonarr_v4_naming(
-        [Frozen] ISonarrCapabilityFetcher capabilities,
-        [Frozen] IMediaNamingGuideService guide,
-        SonarrMediaNamingConfigPhase sut)
+    [Test]
+    public async Task Sonarr_v4_naming()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        fixture.Freeze<ISonarrCapabilityFetcher>(); // Frozen for instance sharing
+        var guide = fixture.Freeze<IMediaNamingGuideService>();
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
-        var config = new SonarrConfiguration
+        fixture.Inject(new SonarrConfiguration
         {
             InstanceName = "sonarr",
             MediaNaming = new SonarrMediaNamingConfig
@@ -68,9 +70,10 @@ public class SonarrMediaNamingConfigPhaseTest
                     Anime = "default"
                 }
             }
-        };
+        });
 
-        var result = await sut.ProcessNaming(config, guide, new NamingFormatLookup());
+        var sut = fixture.Create<SonarrMediaNamingConfigPhase>();
+        var result = await sut.ProcessNaming(guide, new NamingFormatLookup());
 
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(new SonarrMediaNamingDto
@@ -84,15 +87,16 @@ public class SonarrMediaNamingConfigPhaseTest
         });
     }
 
-    [Test, AutoMockData]
-    public async Task Sonarr_invalid_names(
-        [Frozen] ISonarrCapabilityFetcher capabilities,
-        [Frozen] IMediaNamingGuideService guide,
-        SonarrMediaNamingConfigPhase sut)
+    [Test]
+    public async Task Sonarr_invalid_names()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        fixture.Freeze<ISonarrCapabilityFetcher>(); // Frozen for instance sharing
+        var guide = fixture.Freeze<IMediaNamingGuideService>();
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
-        var config = new SonarrConfiguration
+        fixture.Inject(new SonarrConfiguration
         {
             InstanceName = "sonarr",
             MediaNaming = new SonarrMediaNamingConfig
@@ -107,10 +111,11 @@ public class SonarrMediaNamingConfigPhaseTest
                     Anime = "bad5"
                 }
             }
-        };
+        });
 
+        var sut = fixture.Create<SonarrMediaNamingConfigPhase>();
         var lookup = new NamingFormatLookup();
-        var result = await sut.ProcessNaming(config, guide, lookup);
+        var result = await sut.ProcessNaming(guide, lookup);
 
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(new SonarrMediaNamingDto

@@ -10,10 +10,11 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 public class CustomFormatConfigPhase(
     ICustomFormatGuideService guide,
     ProcessedCustomFormatCache cache,
-    ICustomFormatCachePersister cachePersister)
+    ICustomFormatCachePersister cachePersister,
+    IServiceConfiguration config)
     : IConfigPipelinePhase<CustomFormatPipelineContext>
 {
-    public Task Execute(CustomFormatPipelineContext context, IServiceConfiguration config)
+    public Task Execute(CustomFormatPipelineContext context)
     {
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //
@@ -33,7 +34,7 @@ public class CustomFormatConfigPhase(
 
         context.InvalidFormats = processedCfs[false].Select(x => x.Id).ToList();
         context.ConfigOutput.AddRange(processedCfs[true].SelectMany(x => x.CustomFormats));
-        context.Cache = cachePersister.Load(config);
+        context.Cache = cachePersister.Load();
 
         cache.AddCustomFormats(context.ConfigOutput);
         return Task.CompletedTask;

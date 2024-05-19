@@ -1,7 +1,6 @@
 using AutoFixture;
 using Recyclarr.Cli.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
-using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Cache;
 
@@ -16,16 +15,14 @@ public class CustomFormatCachePersisterTest
         var serviceCache = fixture.Freeze<IServiceCache>();
         var sut = fixture.Create<CustomFormatCachePersister>();
 
-        var config = Substitute.For<IServiceConfiguration>();
-
         var testCfObj = new CustomFormatCacheData(versionToTest, "",
         [
             new TrashIdMapping("", "", 5)
         ]);
 
-        serviceCache.Load<CustomFormatCacheData>(config).Returns(testCfObj);
+        serviceCache.Load<CustomFormatCacheData>().Returns(testCfObj);
 
-        var act = () => sut.Load(config);
+        var act = () => sut.Load();
 
         act.Should().Throw<CacheException>();
     }
@@ -37,16 +34,14 @@ public class CustomFormatCachePersisterTest
         var serviceCache = fixture.Freeze<IServiceCache>();
         var sut = fixture.Create<CustomFormatCachePersister>();
 
-        var config = Substitute.For<IServiceConfiguration>();
-
         var testCfObj = new CustomFormatCacheData(CustomFormatCachePersister.LatestVersion, "",
         [
             new TrashIdMapping("", "", 5)
         ]);
 
-        serviceCache.Load<CustomFormatCacheData>(config).Returns(testCfObj);
+        serviceCache.Load<CustomFormatCacheData>().Returns(testCfObj);
 
-        var result = sut.Load(config);
+        var result = sut.Load();
 
         result.Should().NotBeNull();
     }
@@ -59,11 +54,10 @@ public class CustomFormatCachePersisterTest
         var sut = fixture.Create<CustomFormatCachePersister>();
 
         TrashIdMapping[] mappings = [new TrashIdMapping("abc", "name", 123)];
-        var config = Substitute.For<IServiceConfiguration>();
 
-        serviceCache.Load<CustomFormatCacheData>(config).Returns(new CustomFormatCacheData(1, "", mappings));
+        serviceCache.Load<CustomFormatCacheData>().Returns(new CustomFormatCacheData(1, "", mappings));
 
-        var result = sut.Load(config);
+        var result = sut.Load();
 
         result.Mappings.Should().BeEquivalentTo(mappings);
     }

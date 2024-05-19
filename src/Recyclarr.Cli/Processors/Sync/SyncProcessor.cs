@@ -1,21 +1,21 @@
 using System.Diagnostics.CodeAnalysis;
+using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.ErrorHandling;
-using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
+public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+{
+    public SyncPipelineExecutor Pipelines { get; } = scope.Resolve<SyncPipelineExecutor>();
+}
+
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor(
-    IAnsiConsole console,
-    ILogger log,
     IConfigurationRegistry configRegistry,
-    SyncPipelineExecutor pipelines,
-    ServiceAgnosticCapabilityEnforcer capabilityEnforcer,
+    ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler)
     : ISyncProcessor
 {
@@ -55,10 +55,8 @@ public class SyncProcessor(
         {
             try
             {
-                PrintProcessingHeader(config.ServiceType, config);
-                await capabilityEnforcer.Check(config);
-                await pipelines.Process(settings, config);
-                log.Information("Completed at {Date}", DateTime.Now);
+                using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
+                await scope.Pipelines.Process(settings);
             }
             catch (Exception e)
             {
@@ -73,21 +71,5 @@ public class SyncProcessor(
         }
 
         return failureDetected;
-    }
-
-    private void PrintProcessingHeader(SupportedServices serviceType, IServiceConfiguration config)
-    {
-        var instanceName = config.InstanceName;
-
-        console.WriteLine(
-            $"""
-
-             ===========================================
-             Processing {serviceType} Server: [{instanceName}]
-             ===========================================
-
-             """);
-
-        log.Debug("Processing {Server} server {Name}", serviceType, instanceName);
     }
 }

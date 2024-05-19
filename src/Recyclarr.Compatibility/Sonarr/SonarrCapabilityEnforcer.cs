@@ -1,12 +1,10 @@
-using Recyclarr.Config.Models;
-
 namespace Recyclarr.Compatibility.Sonarr;
 
 public class SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
 {
-    public async Task Check(SonarrConfiguration config)
+    public async Task Check()
     {
-        var capabilities = await capabilityFetcher.GetCapabilities(config);
+        var capabilities = await capabilityFetcher.GetCapabilities();
 
         if (capabilities.Version < SonarrCapabilities.MinimumVersion)
         {

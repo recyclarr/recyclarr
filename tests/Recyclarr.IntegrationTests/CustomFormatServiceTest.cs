@@ -1,7 +1,9 @@
 using Flurl.Http.Testing;
 using Recyclarr.Common;
+using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 
@@ -13,13 +15,18 @@ public class CustomFormatServiceTest : IntegrationTestFixture
     {
         var resourceData = new ResourceDataReader(typeof(CustomFormatServiceTest), "Data");
         var jsonBody = resourceData.ReadData("issue_178.json");
-        var config = new RadarrConfiguration {InstanceName = "instance"};
 
         using var http = new HttpTest();
         http.RespondWith(jsonBody);
 
-        var sut = Resolve<CustomFormatApiService>();
-        var result = await sut.GetCustomFormats(config);
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(new RadarrConfiguration
+        {
+            InstanceName = "instance"
+        });
+
+        var sut = scope.Resolve<CustomFormatApiService>();
+        var result = await sut.GetCustomFormats();
 
         result.Should().HaveCountGreaterThan(5);
     }

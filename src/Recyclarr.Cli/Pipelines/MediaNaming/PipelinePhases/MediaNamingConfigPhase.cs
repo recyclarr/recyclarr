@@ -18,14 +18,15 @@ public record ProcessedNamingConfig
 
 public class MediaNamingConfigPhase(
     IMediaNamingGuideService guide,
-    IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory)
+    IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
+    IServiceConfiguration config)
     : IConfigPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task Execute(MediaNamingPipelineContext context, IServiceConfiguration config)
+    public async Task Execute(MediaNamingPipelineContext context)
     {
         var lookup = new NamingFormatLookup();
         var strategy = configPhaseStrategyFactory[config.ServiceType];
-        var dto = await strategy.ProcessNaming(config, guide, lookup);
+        var dto = await strategy.ProcessNaming(guide, lookup);
 
         context.ConfigOutput = new ProcessedNamingConfig {Dto = dto, InvalidNaming = lookup.Errors};
     }

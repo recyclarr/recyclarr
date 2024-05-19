@@ -4,13 +4,16 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public class CustomFormatCachePersister(ILogger log, IServiceCache serviceCache) : ICustomFormatCachePersister
+public class CustomFormatCachePersister(
+    ILogger log,
+    IServiceCache serviceCache,
+    IServiceConfiguration config) : ICustomFormatCachePersister
 {
     public const int LatestVersion = 1;
 
-    public CustomFormatCache Load(IServiceConfiguration config)
+    public CustomFormatCache Load()
     {
-        var cacheData = serviceCache.Load<CustomFormatCacheData>(config);
+        var cacheData = serviceCache.Load<CustomFormatCacheData>();
         if (cacheData == null)
         {
             log.Debug("Custom format cache does not exist; proceeding without it");
@@ -29,10 +32,10 @@ public class CustomFormatCachePersister(ILogger log, IServiceCache serviceCache)
         return new CustomFormatCache(cacheData.TrashIdMappings);
     }
 
-    public void Save(IServiceConfiguration config, CustomFormatCache cache)
+    public void Save(CustomFormatCache cache)
     {
         var data = new CustomFormatCacheData(LatestVersion, config.InstanceName, cache.Mappings);
         log.Debug("Saving Custom Format Cache with {Mappings}", JsonSerializer.Serialize(data.TrashIdMappings));
-        serviceCache.Save(data, config);
+        serviceCache.Save(data);
     }
 }

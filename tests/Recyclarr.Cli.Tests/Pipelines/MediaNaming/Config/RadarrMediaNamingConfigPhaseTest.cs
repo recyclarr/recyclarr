@@ -1,3 +1,4 @@
+using AutoFixture;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -25,14 +26,15 @@ public class RadarrMediaNamingConfigPhaseTest
         }
     };
 
-    [Test, AutoMockData]
-    public async Task Radarr_naming(
-        [Frozen] IMediaNamingGuideService guide,
-        RadarrMediaNamingConfigPhase sut)
+    [Test]
+    public async Task Radarr_naming()
     {
+        var fixture = NSubstituteFixture.Create();
+
+        var guide = fixture.Freeze<IMediaNamingGuideService>();
         guide.GetRadarrNamingData().Returns(RadarrNamingData);
 
-        var config = new RadarrConfiguration
+        fixture.Inject(new RadarrConfiguration
         {
             InstanceName = "radarr",
             MediaNaming = new RadarrMediaNamingConfig
@@ -44,9 +46,10 @@ public class RadarrMediaNamingConfigPhaseTest
                     Standard = "emby"
                 }
             }
-        };
+        });
 
-        var result = await sut.ProcessNaming(config, guide, new NamingFormatLookup());
+        var sut = fixture.Create<RadarrMediaNamingConfigPhase>();
+        var result = await sut.ProcessNaming(guide, new NamingFormatLookup());
 
         result.Should().NotBeNull();
         result.Should().BeEquivalentTo(new RadarrMediaNamingDto

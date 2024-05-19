@@ -6,9 +6,10 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatTransactionPhase(ILogger log) : ITransactionPipelinePhase<CustomFormatPipelineContext>
+public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration config)
+    : ITransactionPipelinePhase<CustomFormatPipelineContext>
 {
-    public void Execute(CustomFormatPipelineContext context, IServiceConfiguration config)
+    public void Execute(CustomFormatPipelineContext context)
     {
         var transactions = new CustomFormatTransactionData();
 
@@ -21,7 +22,7 @@ public class CustomFormatTransactionPhase(ILogger log) : ITransactionPipelinePha
             var serviceCf = FindServiceCfByName(context.ApiFetchOutput, guideCf.Name);
             if (serviceCf is not null)
             {
-                ProcessExistingCf(config, guideCf, serviceCf, transactions);
+                ProcessExistingCf(guideCf, serviceCf, transactions);
                 continue;
             }
 
@@ -52,7 +53,6 @@ public class CustomFormatTransactionPhase(ILogger log) : ITransactionPipelinePha
     }
 
     private void ProcessExistingCf(
-        IServiceConfiguration config,
         CustomFormatData guideCf,
         CustomFormatData serviceCf,
         CustomFormatTransactionData transactions)
