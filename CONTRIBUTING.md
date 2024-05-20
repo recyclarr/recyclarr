@@ -14,7 +14,7 @@ that everyone should follow.
    Jetbrains Rider. If using that IDE, doing a simple [Code Cleanup] on modified source files should
    be enough. Make sure to select the "Recyclarr Cleanup" profile when you do the code cleanup. If
    you're using Visual Studio, I recommend the Resharper extension. For other editors, you are on
-   your own. Formatting rules are stored in `src/.editorconfig` and `src/Recyclarr.sln.DotSettings`.
+   your own. Formatting rules are stored in `.editorconfig` and `Recyclarr.sln.DotSettings`.
 
 [ideas]: https://github.com/recyclarr/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
