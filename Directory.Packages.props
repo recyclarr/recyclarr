@@ -18,7 +18,7 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="6.0.0-beta.7" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageVersion Include="MudBlazor" Version="6.19.1" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="20.0.1" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="20.1.1" />
     <PackageVersion Include="Serilog" Version="3.1.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageVersion Include="Serilog.Expressions" Version="4.0.0" />
