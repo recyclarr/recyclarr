@@ -3,7 +3,7 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class JanitorCleanupTask(ILogJanitor janitor, ILogger log, ISettingsProvider settingsProvider)
+public class JanitorCleanupTask(LogJanitor janitor, ILogger log, ISettingsProvider settingsProvider)
     : IGlobalSetupTask
 {
     public void OnStart()

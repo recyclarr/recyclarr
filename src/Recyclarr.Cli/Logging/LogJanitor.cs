@@ -2,7 +2,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LogJanitor(IAppPaths paths) : ILogJanitor
+public class LogJanitor(IAppPaths paths)
 {
     public void DeleteOldestLogFiles(int numberOfNewestToKeep)
     {
