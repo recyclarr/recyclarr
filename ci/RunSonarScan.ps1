@@ -6,8 +6,9 @@ param (
     [switch] $Details
 )
 
-$version = $(dotnet gitversion /showvariable semver)
-if ($LASTEXITCODE -ne 0) { throw "Failed: dotnet gitversion" }
+# We use the current released version because we want to treat all code written since that version
+# as 'new' for analysis purposes.
+$version = (git describe --tags --abbrev=0) -replace '^v'
 
 $beginArgs = @(
     "-o:recyclarr"

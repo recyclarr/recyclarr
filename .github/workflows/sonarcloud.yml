@@ -20,14 +20,11 @@ jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
-    env:
-      DOTNET_ROLL_FORWARD: LatestMajor
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Get Source Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
+          fetch-depth: 0 # avoid shallow clone for GitVersion and Sonar analysis
 
       # GH Runners come with Java 11, which is deprecated by Sonarcloud
       - name: Setup Java
