@@ -10,6 +10,12 @@
     {
       "matchManagers": ["github-actions"],
       "commitMessagePrefix": "ci(deps):"
+    },
+    {
+      "groupName": "All GitVersion Packages",
+      "matchManagers": ["nuget"],
+      "matchPackagePatterns": ["(?i)gitversion"],
+      "commitMessagePrefix": "build(deps):"
     }
   ]
 }
