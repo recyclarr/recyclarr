@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Serilog;
 using Recyclarr.Platform;
 using Serilog.Core;
 using Serilog.Events;

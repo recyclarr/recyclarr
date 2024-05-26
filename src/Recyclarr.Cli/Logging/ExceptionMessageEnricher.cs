@@ -1,7 +1,7 @@
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Recyclarr.Common.Serilog;
+namespace Recyclarr.Cli.Logging;
 
 public class ExceptionMessageEnricher : ILogEventEnricher
 {
