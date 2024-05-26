@@ -6,7 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DebugType>embedded</DebugType>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-    <GitVersionBaseDirectory>$(MSBuildThisFileDirectory)</GitVersionBaseDirectory>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <TestDirectory>$(RepositoryRoot)tests\</TestDirectory>
+    <GitVersionBaseDirectory>$(RepositoryRoot)</GitVersionBaseDirectory>
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>
 
@@ -23,4 +25,24 @@
   <ItemGroup Condition="!$(ProjectName.EndsWith('.Tests'))">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
+
+  <!-- ReferenceTrimmer - run build with /p:EnableReferenceTrimmer=true to enable -->
+  <PropertyGroup Label="ReferenceTrimmer">
+    <EnableReferenceTrimmer Condition=" '$(EnableReferenceTrimmer)' == '' ">false</EnableReferenceTrimmer>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(EnableReferenceTrimmer)' == 'true' and '$(GenerateDocumentationFile)' != 'true' " Label="ReferenceTrimmer">
+    <!-- Documentation file generation is required for more accurate C# detection. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Suppress XML doc comment issues to avoid errors during ReferenceTrimmer:
+         - CS0419: Ambiguous reference in cref attribute
+         - CS1570: XML comment has badly formed XML
+         - CS1573: Parameter has no matching param tag in the XML comment
+         - CS1574: XML comment has cref attribute that could not be resolved
+         - CS1584: XML comment has syntactically incorrect cref attribute
+         - CS1591: Missing XML comment for publicly visible type or member
+         - SA1602: Enumeration items should be documented
+    -->
+    <NoWarn>$(NoWarn);419;1570;1573;1574;1584;1591;SA1602</NoWarn>
+  </PropertyGroup>
 </Project>

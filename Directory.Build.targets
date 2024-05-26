@@ -2,8 +2,4 @@
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <None Remove="TestResults/**/*" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="JetBrains.Annotations" PrivateAssets="All" />
-  </ItemGroup>
 </Project>

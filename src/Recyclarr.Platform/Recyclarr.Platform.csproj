@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="Autofac" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
   </ItemGroup>
 </Project>

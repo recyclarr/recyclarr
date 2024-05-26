@@ -2,7 +2,6 @@
   <ItemGroup>
     <PackageReference Include="Autofac" />
     <PackageReference Include="Flurl.Http" />
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Serilog" />
   </ItemGroup>
 </Project>

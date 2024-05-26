@@ -4,7 +4,6 @@
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
     <PackageReference Include="FluentValidation" />
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="SuperLinq" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>

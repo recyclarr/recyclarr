@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Autofac" />
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />

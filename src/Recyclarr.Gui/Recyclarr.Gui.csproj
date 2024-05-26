@@ -6,8 +6,7 @@
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
     <PackageReference Include="AutofacSerilogIntegration" />
-    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="All" />
-    <PackageReference Include="JetBrains.Annotations" />
+    <PackageReference Include="GitVersion.MsBuild" />
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="ReactiveUI.Blazor" />
     <PackageReference Include="Serilog" />

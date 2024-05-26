@@ -3,7 +3,6 @@
     <ProjectReference Include="..\..\src\Recyclarr.Common\Recyclarr.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Serilog.Sinks.Console" />
   </ItemGroup>
 </Project>

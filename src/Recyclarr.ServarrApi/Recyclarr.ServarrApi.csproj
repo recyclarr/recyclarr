@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Flurl.Http" />
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="Serilog" />
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,6 @@
     <ProjectReference Include="..\Recyclarr.Repo\Recyclarr.Repo.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="SuperLinq" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
   </ItemGroup>
