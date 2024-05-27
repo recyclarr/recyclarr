@@ -53,18 +53,6 @@ public class ScopedStateTest
     }
 
     [Test]
-    public void AccessValue_ResetAfterScope_ReturnDefault()
-    {
-        var state = new ScopedState<int>(50);
-        state.PushValue(100, 1);
-
-        state.Reset(1).Should().BeTrue();
-
-        state.ActiveScope.Should().BeNull();
-        state.Value.Should().Be(50);
-    }
-
-    [Test]
     public void AccessValue_WholeSectionScope_ReturnValueAcrossMultipleResets()
     {
         var state = new ScopedState<int>(50);

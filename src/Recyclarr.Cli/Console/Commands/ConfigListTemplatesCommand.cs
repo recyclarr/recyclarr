@@ -34,9 +34,9 @@ public class ConfigListTemplatesCommand(
             processor.Process(settings);
             return 0;
         }
-        catch (NoConfigurationFilesException)
+        catch (NoConfigurationFilesException e)
         {
-            log.Error("No configuration files found");
+            log.Error(e, "Unable to list template files");
         }
 
         return 1;

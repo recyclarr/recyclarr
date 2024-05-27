@@ -21,7 +21,6 @@ internal static class Program
             config.ValidateExamples();
         #endif
 
-            // config.Settings.PropagateExceptions = true;
             config.Settings.StrictParsing = true;
 
             config.SetApplicationName("recyclarr");

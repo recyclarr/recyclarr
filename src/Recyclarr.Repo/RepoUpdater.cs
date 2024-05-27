@@ -25,7 +25,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         }
         catch (GitCmdException e)
         {
-            log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command: {Error}", e.ExitCode, e.Error);
+            log.Debug(e, "Non-zero exit code {ExitCode} while executing Git command", e.ExitCode);
         }
         catch (InvalidGitRepoException e)
         {
@@ -63,7 +63,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         }
         catch (GitCmdException e)
         {
-            log.Debug(e, "Non-zero exit code {ExitCode} while running git fetch: {Error}", e.ExitCode, e.Error);
+            log.Debug(e, "Non-zero exit code {ExitCode} while running git fetch", e.ExitCode);
             log.Error(
                 "Updating the repo '{RepoDir}' (git fetch) failed. Proceeding with existing files. " +
                 "Check clone URL is correct and that github is not down",

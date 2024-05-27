@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using JetBrains.Annotations;
 using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.Settings;
 using Recyclarr.Yaml;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -37,28 +38,23 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
         }
         catch (YamlException e)
         {
-            log.Debug(e, "Exception while parsing config file");
-
             var line = e.Start.Line;
 
-            var contextualMsg = ConfigContextualMessages.GetContextualErrorFromException(e);
-            if (contextualMsg is not null)
+            switch (e.InnerException)
             {
-                log.Error("Exception at line {Line}: {Msg}", line, contextualMsg);
-            }
-            else
-            {
-                switch (e.InnerException)
-                {
-                    case InvalidCastException:
-                        log.Error("Incompatible value assigned/used at line {Line}: {Msg}", line,
-                            e.InnerException.Message);
-                        break;
+                case InvalidCastException:
+                    log.Error(e, "Incompatible value assigned/used at line {Line}", line);
+                    break;
 
-                    default:
-                        log.Error("Exception at line {Line}: {Msg}", line, e.InnerException?.Message ?? e.Message);
-                        break;
-                }
+                default:
+                    log.Error(e, "Exception at line {Line}", line);
+                    break;
+            }
+
+            var context = SettingsContextualMessages.GetContextualErrorFromException(e);
+            if (context is not null)
+            {
+                log.Error(context);
             }
         }
 

@@ -11,6 +11,6 @@ public static class TypeExtensions
     {
         return
             type is {IsInterface: true} && type.IsGenericTypeOf(collectionType) ||
-            type.GetInterfaces().Any(i => i.IsGenericTypeOf(typeof(ICollection<>)));
+            Array.Exists(type.GetInterfaces(), i => i.IsGenericTypeOf(typeof(ICollection<>)));
     }
 }

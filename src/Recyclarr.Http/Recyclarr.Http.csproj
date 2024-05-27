@@ -4,4 +4,7 @@
     <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Serilog" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+  </ItemGroup>
 </Project>

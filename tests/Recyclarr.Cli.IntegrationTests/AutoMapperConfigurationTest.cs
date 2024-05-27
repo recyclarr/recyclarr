@@ -10,7 +10,7 @@ internal class AutoMapperConfigurationTest : CliIntegrationFixture
     {
         var mapper = Resolve<MapperConfiguration>();
         // Build an execution plan like:
-        // var plan = mapper.BuildExecutionPlan(typeof(QualityProfileConfigYaml), typeof(QualityProfileConfig));
+        // var plan = mapper.BuildExecutionPlan(typeof(QualityProfileConfigYaml), typeof(QualityProfileConfig))
         // And do `plan.ToReadableString()` in the Debug Expressions/Watch
         mapper.AssertConfigurationIsValid();
     }

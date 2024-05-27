@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Tests.Common.Extensions;
@@ -5,6 +6,8 @@ namespace Recyclarr.Tests.Common.Extensions;
 [TestFixture]
 public class DictionaryExtensionsTest
 {
+    [SuppressMessage("SonarLint", "S2094:Classes should not be empty",
+        Justification = "This is for test code only")]
     private sealed class MySampleValue;
 
     [Test]

@@ -4,9 +4,14 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 
 internal class QualityProfileApiService(IServarrRequestBuilder service) : IQualityProfileApiService
 {
+    private IFlurlRequest Request(params object[] path)
+    {
+        return service.Request(["qualityprofile", ..path]);
+    }
+
     public async Task<IList<QualityProfileDto>> GetQualityProfiles()
     {
-        var response = await service.Request("qualityprofile")
+        var response = await Request()
             .GetJsonAsync<IList<QualityProfileDto>>();
 
         return response.Select(x => x.ReverseItems()).ToList();
@@ -14,7 +19,7 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
 
     public async Task<QualityProfileDto> GetSchema()
     {
-        var response = await service.Request("qualityprofile", "schema")
+        var response = await Request("schema")
             .GetJsonAsync<QualityProfileDto>();
 
         return response.ReverseItems();
@@ -27,13 +32,13 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
             throw new ArgumentException($"Profile's ID property must not be null: {profile.Name}");
         }
 
-        await service.Request("qualityprofile", profile.Id)
+        await Request(profile.Id)
             .PutJsonAsync(profile.ReverseItems());
     }
 
     public async Task CreateQualityProfile(QualityProfileDto profile)
     {
-        var response = await service.Request("qualityprofile")
+        var response = await Request()
             .PostJsonAsync(profile.ReverseItems())
             .ReceiveJson<QualityProfileDto>();
 

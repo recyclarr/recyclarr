@@ -7,9 +7,14 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Interceptors;
 
-public class BaseCommandSetupInterceptor(LoggingLevelSwitch loggingLevelSwitch, IAppDataSetup appDataSetup)
-    : ICommandInterceptor
+internal sealed class BaseCommandSetupInterceptor(LoggingLevelSwitch loggingLevelSwitch, IAppDataSetup appDataSetup)
+    : ICommandInterceptor, IDisposable
 {
+    public void Dispose()
+    {
+        _ct.Dispose();
+    }
+
     private readonly ConsoleAppCancellationTokenSource _ct = new();
 
     public void Intercept(CommandContext context, CommandSettings settings)

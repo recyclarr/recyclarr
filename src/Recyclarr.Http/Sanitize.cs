@@ -1,23 +1,36 @@
 using System.Text.RegularExpressions;
-using Flurl.Http;
+using Flurl;
+using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Http;
 
-public static partial class FlurlExtensions
+public static partial class Sanitize
 {
-    public static string SanitizedExceptionMessage(this FlurlHttpException exception)
+    public static string Message(string message)
     {
         // Replace full URLs
-        var result = UrlRegex().Replace(exception.Message, Sanitize);
+        var result = UrlRegex().Replace(message, SanitizeMatch);
 
         // There are sometimes parenthetical parts of the message that contain the host but are not
         // detected as true URLs. Just strip those out completely.
         return HostRegex().Replace(result, "");
     }
 
-    private static string Sanitize(Match match)
+    public static string ExceptionMessage(Exception exception)
     {
-        return FlurlLogging.SanitizeUrl(match.Value).ToString() ?? match.Value;
+        return Message(exception.FullMessage());
+    }
+
+    public static Url Url(Url url)
+    {
+        // Replace hostname for user privacy
+        url.Host = "REDACTED";
+        return url;
+    }
+
+    private static string SanitizeMatch(Match match)
+    {
+        return Url(match.Value).ToString() ?? match.Value;
     }
 
     [GeneratedRegex(@"\([-a-zA-Z0-9@:%._+~#=]{1,256}(?::[0-9]+)?\)")]

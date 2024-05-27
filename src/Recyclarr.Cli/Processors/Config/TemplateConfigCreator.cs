@@ -33,7 +33,7 @@ public class TemplateConfigCreator(
             }
             catch (FileExistsException e)
             {
-                log.Error("Template configuration file could not be saved: {Reason}", e.AttemptedPath);
+                log.Error(e, "Template configuration file could not be saved");
             }
             catch (FileLoadException)
             {
@@ -54,7 +54,7 @@ public class TemplateConfigCreator(
 
         if (destinationFile.Exists && !settings.Force)
         {
-            throw new FileExistsException($"{destinationFile} already exists");
+            throw new FileExistsException(destinationFile.FullName);
         }
 
         destinationFile.CreateParentDirectory();

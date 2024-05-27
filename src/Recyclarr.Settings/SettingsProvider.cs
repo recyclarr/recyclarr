@@ -9,11 +9,11 @@ namespace Recyclarr.Settings;
 
 public class SettingsProvider : ISettingsProvider
 {
-    public SettingsValues Settings => _settings.Value;
-
     private readonly ILogger _log;
     private readonly IAppPaths _paths;
     private readonly Lazy<SettingsValues> _settings;
+
+    public SettingsValues Settings => _settings.Value;
 
     public SettingsProvider(ILogger log, IAppPaths paths, IYamlSerializerFactory serializerFactory)
     {
@@ -24,11 +24,7 @@ public class SettingsProvider : ISettingsProvider
 
     private SettingsValues LoadOrCreateSettingsFile(IYamlSerializerFactory serializerFactory)
     {
-        var yamlPath = _paths.AppDataDirectory.YamlFile("settings");
-        if (yamlPath is null)
-        {
-            yamlPath = CreateDefaultSettingsFile();
-        }
+        var yamlPath = _paths.AppDataDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
 
         try
         {
@@ -38,11 +34,13 @@ public class SettingsProvider : ISettingsProvider
         }
         catch (YamlException e)
         {
-            _log.Debug(e, "Exception while parsing settings file");
+            _log.Error(e, "Exception while parsing settings.yml at line {Line}", e.Start.Line);
 
-            var line = e.Start.Line;
-            var msg = SettingsContextualMessages.GetContextualErrorFromException(e) ?? e.Message;
-            _log.Error("Exception while parsing settings.yml at line {Line}: {Msg}", line, msg);
+            var context = SettingsContextualMessages.GetContextualErrorFromException(e);
+            if (context is not null)
+            {
+                _log.Error(context);
+            }
 
             throw;
         }

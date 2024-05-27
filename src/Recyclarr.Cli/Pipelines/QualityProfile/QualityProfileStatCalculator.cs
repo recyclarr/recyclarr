@@ -72,7 +72,7 @@ public class QualityProfileStatCalculator(ILogger log)
 
         foreach (var (dto, newScore, reason) in scores)
         {
-            log.Debug("  - {Format} ({Id}): {OldScore} -> {NewScore} ({Reason})",
+            log.Debug("  - {Name} ({Id}): {OldScore} -> {NewScore} ({Reason})",
                 dto.Name, dto.Format, dto.Score, newScore, reason);
         }
 

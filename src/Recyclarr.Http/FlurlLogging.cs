@@ -24,11 +24,4 @@ public static class FlurlLogging
 
         log.Verbose("HTTP {Direction} Body: {Method} {Url} {Body}", direction, method, url, body);
     }
-
-    public static Url SanitizeUrl(Url url)
-    {
-        // Replace hostname for user privacy
-        url.Host = "REDACTED";
-        return url;
-    }
 }

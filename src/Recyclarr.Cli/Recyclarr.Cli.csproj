@@ -19,7 +19,6 @@
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
-    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <!-- Following found during vulerabilities Code Scan  -->

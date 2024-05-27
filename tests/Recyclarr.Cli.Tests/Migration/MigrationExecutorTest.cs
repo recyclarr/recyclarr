@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Autofac.Extras.Ordering;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
@@ -78,6 +79,9 @@ public class MigrationExecutorTest
     }
 
     [Test]
+    [SuppressMessage("SonarLint",
+        "S3928:Parameter names used into ArgumentException constructors should match an existing one",
+        Justification = "Used in unit test only")]
     public void Migration_exceptions_are_not_converted()
     {
         using var console = new TestConsole();

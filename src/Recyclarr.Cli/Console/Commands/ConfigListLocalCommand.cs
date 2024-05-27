@@ -24,9 +24,9 @@ public class ConfigListLocalCommand(ILogger log, ConfigListLocalProcessor proces
             processor.Process();
             return 0;
         }
-        catch (NoConfigurationFilesException)
+        catch (NoConfigurationFilesException e)
         {
-            log.Error("No configuration files found");
+            log.Error(e, "Unable to list local config files");
         }
 
         return 1;

@@ -26,8 +26,8 @@ public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProf
             log.Warning(
                 "The following quality profile names have no definition in the top-level `quality_profiles` " +
                 "list *and* do not exist in the remote service. Either create them manually in the service *or* add " +
-                "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for you");
-            log.Warning("{QualityProfileNames}", transactions.NonExistentProfiles);
+                "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for " +
+                "you: {QualityProfileNames}", transactions.NonExistentProfiles);
         }
 
         if (transactions.InvalidProfiles.Count > 0)

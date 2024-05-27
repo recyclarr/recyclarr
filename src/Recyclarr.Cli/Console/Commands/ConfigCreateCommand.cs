@@ -47,7 +47,7 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
         }
         catch (FileExistsException e)
         {
-            log.Error(
+            log.Error(e,
                 "The file {ConfigFile} already exists. Please choose another path or " +
                 "delete/move the existing file and run this command again", e.AttemptedPath);
 

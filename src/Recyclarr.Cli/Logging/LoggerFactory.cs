@@ -20,14 +20,16 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
 
     private static ExpressionTemplate GetConsoleTemplate()
     {
-        var template = "[{@l:u3}] " + GetBaseTemplateString() + "\n{@x}";
+        var template = "[{@l:u3}] " + GetBaseTemplateString() +
+            "{#if SanitizedExceptionMessage is not null}: {SanitizedExceptionMessage}{#end}\n";
 
         return new ExpressionTemplate(template, theme: TemplateTheme.Code);
     }
 
     private static ExpressionTemplate GetFileTemplate()
     {
-        var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString() + "\n{@x}";
+        var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString() +
+            "{#if SanitizedExceptionFull is not null}: {SanitizedExceptionFull}{#end}\n";
 
         return new ExpressionTemplate(template);
     }
@@ -39,7 +41,8 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
 
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
-            .Enrich.With<ExceptionMessageEnricher>()
+            .Enrich.FromLogContext()
+            .Enrich.With<FlurlExceptionSanitizingEnricher>()
             .WriteTo.Console(GetConsoleTemplate(), levelSwitch: levelSwitch)
             .WriteTo.Logger(c => c
                 .MinimumLevel.Debug()
@@ -47,7 +50,6 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
             .WriteTo.Logger(c => c
                 .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
                 .WriteTo.File(GetFileTemplate(), LogFilePath("verbose")))
-            .Enrich.FromLogContext()
             .CreateLogger();
 
         string LogFilePath(string type)

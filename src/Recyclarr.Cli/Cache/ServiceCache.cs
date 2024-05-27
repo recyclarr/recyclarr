@@ -28,7 +28,7 @@ public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : 
         }
         catch (JsonException e)
         {
-            log.Error("Failed to read cache data, will proceed without cache. Reason: {Msg}", e.Message);
+            log.Error(e, "Failed to read cache data, will proceed without cache");
         }
 
         return null;
