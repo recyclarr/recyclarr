@@ -8,17 +8,17 @@ using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
     public SyncPipelineExecutor Pipelines { get; } = scope.Resolve<SyncPipelineExecutor>();
+    public Func<NotificationScope> NotificationScopeFactory { get; } = scope.Resolve<Func<NotificationScope>>();
 }
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor(
     IConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
-    ConsoleExceptionHandler exceptionHandler,
-    NotificationService notify)
+    ConsoleExceptionHandler exceptionHandler)
     : ISyncProcessor
 {
     public async Task<ExitStatus> Process(ISyncSettings settings)
@@ -68,6 +68,7 @@ public class SyncProcessor(
                 // process? Should NotificationService be scoped as well?
                 notify.BeginCollecting(config.InstanceName);
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
+                var notifications = scope.NotificationScopeFactory();
                 await scope.Pipelines.Process(settings);
             }
             catch (Exception e)

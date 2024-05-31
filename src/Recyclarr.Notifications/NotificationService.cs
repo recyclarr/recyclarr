@@ -14,13 +14,10 @@ public sealed class NotificationService(
     ILogger log,
     IAppriseNotificationApiService apprise,
     ISettingsProvider settingsProvider,
-    IReadOnlyCollection<IPresentableNotification> presentableNotifications,
-    MeterListener meterListener)
+    IReadOnlyCollection<IPresentableNotification> presentableNotifications)
 {
     public void BeginCollecting(string instanceName)
     {
-        var meter = meterFactory.Create(instanceName);
-        meter.
         if (_activeInstanceName is not null)
         {
             RenderInstanceEvents(_activeInstanceName, presentableNotifications);
@@ -81,5 +78,24 @@ public sealed class NotificationService(
         }
 
         return body.ToString();
+    }
+}
+
+public sealed class NotificationScope : IDisposable
+{
+    public NotificationScope(MeterListener meterListener)
+    {
+        // var meter = meterFactory.Create(instanceName);
+    }
+
+    public void ObtainCapturedMetrics()
+    {
+        // TODO implement
+        throw new NotImplementedException();
+    }
+
+    public void Dispose()
+    {
+        // TODO
     }
 }

@@ -2,6 +2,8 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
+using Recyclarr.Notifications;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
