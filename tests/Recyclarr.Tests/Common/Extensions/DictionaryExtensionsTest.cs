@@ -27,7 +27,7 @@ public class DictionaryExtensionsTest
 
         var theValue = dict.GetValueOrDefault(200);
 
-        dict.Should().HaveCount(1).And.Contain(100, sample);
+        dict.Should().ContainSingle().And.Contain(100, sample);
         theValue.Should().BeNull();
     }
 

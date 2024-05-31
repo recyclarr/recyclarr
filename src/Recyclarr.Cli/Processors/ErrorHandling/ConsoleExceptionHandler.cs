@@ -4,6 +4,7 @@ using Recyclarr.Compatibility;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.VersionControl;
+using YamlDotNet.Core;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
@@ -57,6 +58,15 @@ public class ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler htt
 
             case CommandException e:
                 log.Error(e.Message);
+                break;
+
+            case YamlException e:
+                log.Error(e, "Exception while parsing settings.yml at line {Line}", e.Start.Line);
+                if (e.Data["ContextualMessage"] is string context)
+                {
+                    log.Error(context);
+                }
+
                 break;
 
             default:

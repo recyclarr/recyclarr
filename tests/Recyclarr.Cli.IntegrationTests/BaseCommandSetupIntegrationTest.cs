@@ -54,7 +54,7 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         var sut = Resolve<JanitorCleanupTask>();
         sut.OnFinish();
 
-        maxFiles.Should().BeGreaterThan(0);
+        maxFiles.Should().BePositive();
         Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName))
             .Should().HaveCount(maxFiles);
     }

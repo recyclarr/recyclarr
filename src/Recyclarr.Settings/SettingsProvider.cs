@@ -2,22 +2,19 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using Recyclarr.Yaml;
-using Serilog;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Settings;
 
 public class SettingsProvider : ISettingsProvider
 {
-    private readonly ILogger _log;
     private readonly IAppPaths _paths;
     private readonly Lazy<SettingsValues> _settings;
 
     public SettingsValues Settings => _settings.Value;
 
-    public SettingsProvider(ILogger log, IAppPaths paths, IYamlSerializerFactory serializerFactory)
+    public SettingsProvider(IAppPaths paths, IYamlSerializerFactory serializerFactory)
     {
-        _log = log;
         _paths = paths;
         _settings = new Lazy<SettingsValues>(() => LoadOrCreateSettingsFile(serializerFactory));
     }
@@ -34,14 +31,7 @@ public class SettingsProvider : ISettingsProvider
         }
         catch (YamlException e)
         {
-            _log.Error(e, "Exception while parsing settings.yml at line {Line}", e.Start.Line);
-
-            var context = SettingsContextualMessages.GetContextualErrorFromException(e);
-            if (context is not null)
-            {
-                _log.Error(context);
-            }
-
+            e.Data["ContextualMessage"] = SettingsContextualMessages.GetContextualErrorFromException(e);
             throw;
         }
     }

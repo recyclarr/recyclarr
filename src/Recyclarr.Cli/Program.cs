@@ -8,7 +8,7 @@ namespace Recyclarr.Cli;
 
 internal static class Program
 {
-    public static int Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         var builder = new ContainerBuilder();
         CompositionRoot.Setup(builder);
@@ -43,6 +43,6 @@ internal static class Program
             CliSetup.Commands(config);
         });
 
-        return app.Run(args);
+        return await app.RunAsync(args);
     }
 }

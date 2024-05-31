@@ -31,19 +31,14 @@ public class TemplateConfigCreator(
             {
                 CopyTemplate(templateFile, settings);
             }
-            catch (FileExistsException e)
-            {
-                log.Error(e, "Template configuration file could not be saved");
-            }
             catch (FileLoadException)
             {
                 // Do not log here since the origin of this exception is ConfigParser.Load(), which already has
                 // sufficient logging.
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                log.Error(e, "Unable to save configuration template file");
-                throw;
+                log.Error(e, "Unable to save configuration template file; skipping");
             }
         }
     }
