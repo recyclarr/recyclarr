@@ -1,6 +1,7 @@
 using System.Diagnostics.Metrics;
 using System.Text;
 using Flurl.Http;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Http;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
@@ -83,9 +84,28 @@ public sealed class NotificationService(
 
 public sealed class NotificationScope : IDisposable
 {
-    public NotificationScope(MeterListener meterListener)
+    private readonly MeterListener _meterListener = new();
+
+    public NotificationScope()
     {
-        // var meter = meterFactory.Create(instanceName);
+        _meterListener.InstrumentPublished = (instrument, listener) =>
+        {
+            if (instrument.Meter.Name.StartsWithIgnoreCase("recyclarr."))
+            {
+                listener.EnableMeasurementEvents(instrument);
+            }
+        };
+
+        _meterListener.SetMeasurementEventCallback<int>(OnMeasurementRecorded);
+    }
+
+    private void OnMeasurementRecorded(
+        Instrument instrument,
+        int measurement,
+        ReadOnlySpan<KeyValuePair<string, object?>> tags,
+        object? state)
+    {
+        throw new NotImplementedException();
     }
 
     public void ObtainCapturedMetrics()
@@ -96,6 +116,6 @@ public sealed class NotificationScope : IDisposable
 
     public void Dispose()
     {
-        // TODO
+        _meterListener.Dispose();
     }
 }
