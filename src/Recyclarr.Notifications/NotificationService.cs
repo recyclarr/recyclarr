@@ -58,7 +58,7 @@ public sealed class NotificationService(
         }
         catch (FlurlHttpException e)
         {
-            log.Error("Failed to send notification: {Msg}", e.SanitizedExceptionMessage());
+            log.Error(e, "Failed to send notification");
         }
     }
 
@@ -84,10 +84,12 @@ public sealed class NotificationService(
 
 public sealed class NotificationScope : IDisposable
 {
+    private readonly ILogger _log;
     private readonly MeterListener _meterListener = new();
 
-    public NotificationScope()
+    public NotificationScope(ILogger log)
     {
+        _log = log;
         _meterListener.InstrumentPublished = (instrument, listener) =>
         {
             if (instrument.Meter.Name.StartsWithIgnoreCase("recyclarr."))
@@ -105,7 +107,7 @@ public sealed class NotificationScope : IDisposable
         ReadOnlySpan<KeyValuePair<string, object?>> tags,
         object? state)
     {
-        throw new NotImplementedException();
+        _log.Debug("Measurement for {Instrument} with value {value}", instrument.Name, measurement);
     }
 
     public void ObtainCapturedMetrics()

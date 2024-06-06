@@ -1,19 +1,19 @@
-using System.Diagnostics.CodeAnalysis;
-using Autofac;
-
 namespace Recyclarr.Config;
 
-[SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor", Justification =
-    "Base types are required to instruct Autofac which types we want to resolve")]
-public abstract class ConfigurationScope(ILifetimeScope scope) : IDisposable
+public abstract class ConfigurationScope : IDisposable
 {
-    protected ILifetimeScope Scope { get; } = scope;
+    private IDisposable? _scope;
+
+    public void SetScope(IDisposable scope)
+    {
+        _scope = scope;
+    }
 
     protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {
-            Scope.Dispose();
+            _scope?.Dispose();
         }
     }
 

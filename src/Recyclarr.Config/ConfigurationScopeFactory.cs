@@ -7,7 +7,7 @@ namespace Recyclarr.Config;
 [UsedImplicitly]
 public class ConfigurationScopeFactory(ILifetimeScope scope)
 {
-    public T Start<T>(IServiceConfiguration config) where T : ConfigurationScope
+    public T Start<T>(IServiceConfiguration config) where T : ConfigurationScope, new()
     {
         var childScope = scope.BeginLifetimeScope(c =>
         {
@@ -15,6 +15,8 @@ public class ConfigurationScopeFactory(ILifetimeScope scope)
             c.RegisterType<T>();
         });
 
-        return childScope.Resolve<T>();
+        var newScope = childScope.Resolve<T>();
+        newScope.SetScope(childScope);
+        return newScope;
     }
 }

@@ -8,10 +8,10 @@ using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+internal class SyncBasedConfigurationScope : ConfigurationScope
 {
-    public SyncPipelineExecutor Pipelines { get; } = scope.Resolve<SyncPipelineExecutor>();
-    public Func<NotificationScope> NotificationScopeFactory { get; } = scope.Resolve<Func<NotificationScope>>();
+    public required SyncPipelineExecutor Pipelines { get; init; }
+    public required Func<NotificationScope> NotificationScopeFactory { get; init; }
 }
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
