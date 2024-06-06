@@ -18,7 +18,7 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="6.0.0-rc.1" PrivateAssets="All" />
     <PackageVersion Include="MudBlazor" Version="6.19.1" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="20.1.1" />
-    <PackageVersion Include="Serilog" Version="3.1.1" />
+    <PackageVersion Include="Serilog" Version="4.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
     <PackageVersion Include="Serilog.Expressions" Version="4.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.1" />
