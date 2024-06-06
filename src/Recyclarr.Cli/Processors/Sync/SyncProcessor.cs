@@ -70,6 +70,7 @@ public class SyncProcessor(
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
                 var notifications = scope.NotificationScopeFactory();
                 await scope.Pipelines.Process(settings);
+                notifications.ObtainCapturedMetrics();
             }
             catch (Exception e)
             {

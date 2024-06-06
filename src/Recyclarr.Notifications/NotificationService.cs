@@ -17,7 +17,7 @@ public sealed class NotificationService(
     ISettingsProvider settingsProvider,
     IReadOnlyCollection<IPresentableNotification> presentableNotifications)
 {
-    public void BeginCollecting(string instanceName)
+    public void AddInstanceMetrics(string instanceName, IReadOnlyCollection<IPresentableNotification> metrics)
     {
         if (_activeInstanceName is not null)
         {
