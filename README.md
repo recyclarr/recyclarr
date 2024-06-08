@@ -1,10 +1,10 @@
 # Recyclarr
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/recyclarr/recyclarr/blob/master/LICENSE)
-[![Build & Test](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml/badge.svg)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=recyclarr_recyclarr&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=recyclarr_recyclarr)
-[![GitHub release](https://img.shields.io/github/release/recyclarr/recyclarr.svg)](https://github.com/recyclarr/recyclarr/releases/)
-[![Support Server](https://img.shields.io/discord/492590071455940612.svg?color=7289da&label=TRaSH-Guides&logo=discord&style=flat-square)](https://discord.com/invite/Vau8dZ3)
+[![GitHub License](https://img.shields.io/github/license/recyclarr/recyclarr)](https://github.com/recyclarr/recyclarr/blob/master/LICENSE)
+[![Build Workflow Status](https://img.shields.io/github/actions/workflow/status/recyclarr/recyclarr/build.yml?branch=master&logo=githubactions)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml?query=branch%3Amaster)
+[![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/recyclarr_recyclarr?server=https%3A%2F%2Fsonarcloud.io&logo=sonarcloud)](https://sonarcloud.io/summary/new_code?id=recyclarr_recyclarr)
+[![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
+[![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)](https://discord.com/invite/Vau8dZ3)
 
 A command-line application that will automatically synchronize recommended settings from the [TRaSH
 guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
@@ -22,6 +22,8 @@ to these services from the TRaSH Guides. For a more detailed features list, see 
 - Media Naming Formats
 
 ## Read the Documentation
+
+[![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://recyclarr.dev/)
 
 Main documentation is located in [the wiki](https://recyclarr.dev/wiki). Links provided below for
 some main topics.
