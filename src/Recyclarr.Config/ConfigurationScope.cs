@@ -4,7 +4,7 @@ public abstract class ConfigurationScope : IDisposable
 {
     private IDisposable? _scope;
 
-    public void SetScope(IDisposable scope)
+    public virtual void SetScope(IDisposable scope)
     {
         _scope = scope;
     }

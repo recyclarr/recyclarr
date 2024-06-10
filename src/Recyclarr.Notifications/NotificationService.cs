@@ -19,16 +19,12 @@ public sealed class NotificationService(
 {
     public void AddInstanceMetrics(string instanceName, IReadOnlyCollection<IPresentableNotification> metrics)
     {
-        if (_activeInstanceName is not null)
-        {
-            RenderInstanceEvents(_activeInstanceName, presentableNotifications);
-        }
-
-        _activeInstanceName = instanceName;
+        throw new NotImplementedException();
     }
 
     public async Task SendNotification(bool succeeded)
     {
+        /*
         // If the user didn't configure notifications, exit early and do nothing.
         if (settingsProvider.Settings.Notifications is null)
         {
@@ -60,6 +56,7 @@ public sealed class NotificationService(
         {
             log.Error(e, "Failed to send notification");
         }
+        */
     }
 
     private static string RenderInstanceEvents(
