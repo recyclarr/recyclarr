@@ -13,7 +13,7 @@
     <PackageVersion Include="AutoMapper" Version="13.0.1" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="8.0.0" />
     <PackageVersion Include="CliWrap" Version="3.6.6" />
-    <PackageVersion Include="FluentValidation" Version="11.9.1" />
+    <PackageVersion Include="FluentValidation" Version="11.9.2" />
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.0.0-rc.1" PrivateAssets="All" />
     <PackageVersion Include="MudBlazor" Version="6.19.1" />
