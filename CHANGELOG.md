@@ -19,6 +19,9 @@ changes you may need to make.
   specified in the `config` include directive are resolved starting at this new directory. Relative
   paths to include templates located under the `configs` directory is now **DEPRECATED**. See the
   "File Structure" page on the wiki for more details.
+- Support the [NO_COLOR] environment variable for all Recyclarr commands (#223).
+
+[NO_COLOR]: https://no-color.org/
 
 ### Changed
 

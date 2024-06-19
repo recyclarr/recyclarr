@@ -7,7 +7,7 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
+public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch, IEnvironment env)
 {
     private static string GetBaseTemplateString()
     {
@@ -18,12 +18,13 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
             "{@m}";
     }
 
-    private static ExpressionTemplate GetConsoleTemplate()
+    private ExpressionTemplate GetConsoleTemplate()
     {
         var template = "[{@l:u3}] " + GetBaseTemplateString() +
             "{#if SanitizedExceptionMessage is not null}: {SanitizedExceptionMessage}{#end}\n";
 
-        return new ExpressionTemplate(template, theme: TemplateTheme.Code);
+        var raw = !string.IsNullOrEmpty(env.GetEnvironmentVariable("NO_COLOR"));
+        return new ExpressionTemplate(template, theme: raw ? null : TemplateTheme.Code);
     }
 
     private static ExpressionTemplate GetFileTemplate()
