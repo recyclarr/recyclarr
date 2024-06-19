@@ -29,7 +29,8 @@ public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch)
     private static ExpressionTemplate GetFileTemplate()
     {
         var template = "[{@t:HH:mm:ss} {@l:u3}] " + GetBaseTemplateString() +
-            "{#if SanitizedExceptionFull is not null}: {SanitizedExceptionFull}{#end}\n";
+            "{#if SanitizedExceptionMessage is not null}: {SanitizedExceptionMessage}{#end}\n" +
+            "{Inspect(@x).StackTrace}";
 
         return new ExpressionTemplate(template);
     }
