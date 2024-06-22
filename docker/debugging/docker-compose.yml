@@ -19,7 +19,7 @@ services:
       - ./certs:/certs:ro
     environment:
       - TZ=America/Chicago
-      - RADARR__API_KEY=testkey
+      - RADARR__AUTH__APIKEY=testkey
 
   radarr_develop:
     image: ghcr.io/onedr0p/radarr-develop:rolling
@@ -31,7 +31,7 @@ services:
       - ./certs:/certs:ro
     environment:
       - TZ=America/Chicago
-      - RADARR__API_KEY=testkey
+      - RADARR__AUTH__APIKEY=testkey
 
   sonarr_stable:
     image: ghcr.io/onedr0p/sonarr:rolling
@@ -42,7 +42,7 @@ services:
       - sonarr_stable:/config
     environment:
       - TZ=America/Chicago
-      - SONARR__API_KEY=testkey
+      - SONARR__AUTH__APIKEY=testkey
 
   sonarr_develop:
     image: ghcr.io/onedr0p/sonarr-develop:rolling
@@ -53,4 +53,4 @@ services:
       - sonarr_develop:/config
     environment:
       - TZ=America/Chicago
-      - SONARR__API_KEY=testkey
+      - SONARR__AUTH__APIKEY=testkey
