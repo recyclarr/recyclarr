@@ -1,4 +1,4 @@
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cache;
 
 public interface IServiceCache
 {

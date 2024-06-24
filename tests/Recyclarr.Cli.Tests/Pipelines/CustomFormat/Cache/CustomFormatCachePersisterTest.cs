@@ -1,5 +1,5 @@
 using AutoFixture;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Cache;
@@ -17,7 +17,7 @@ public class CustomFormatCachePersisterTest
 
         var testCfObj = new CustomFormatCacheData(versionToTest, "",
         [
-            new TrashIdMapping("", "", 5)
+            new CfTrashIdMapping("", "", 5)
         ]);
 
         serviceCache.Load<CustomFormatCacheData>().Returns(testCfObj);
@@ -36,7 +36,7 @@ public class CustomFormatCachePersisterTest
 
         var testCfObj = new CustomFormatCacheData(CustomFormatCachePersister.LatestVersion, "",
         [
-            new TrashIdMapping("", "", 5)
+            new CfTrashIdMapping("", "", 5)
         ]);
 
         serviceCache.Load<CustomFormatCacheData>().Returns(testCfObj);
@@ -53,7 +53,7 @@ public class CustomFormatCachePersisterTest
         var serviceCache = fixture.Freeze<IServiceCache>();
         var sut = fixture.Create<CustomFormatCachePersister>();
 
-        TrashIdMapping[] mappings = [new TrashIdMapping("abc", "name", 123)];
+        CfTrashIdMapping[] mappings = [new CfTrashIdMapping("abc", "name", 123)];
 
         serviceCache.Load<CustomFormatCacheData>().Returns(new CustomFormatCacheData(1, "", mappings));
 

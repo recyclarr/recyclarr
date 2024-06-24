@@ -1,12 +1,16 @@
 using JetBrains.Annotations;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public record TrashIdMapping(string TrashId, string CustomFormatName, int CustomFormatId);
+public record CacheData
+{
+    public int Version { get; init; }
+    public string InstanceName { get; init; } = "";
+}
 
 [CacheObjectName("custom-format-cache")]
-public record CustomFormatCacheData(
-    int Version,
-    [UsedImplicitly] string InstanceName,
-    IReadOnlyCollection<TrashIdMapping> TrashIdMappings);
+public record CustomFormatCacheData : CacheData
+{
+    public IReadOnlyCollection<CfTrashIdMapping> TrashIdMappings { get; init; } = Array.Empty<CfTrashIdMapping>();
+}

@@ -3,11 +3,11 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
+public class CustomFormatCache(IEnumerable<CfTrashIdMapping> mappings)
 {
-    private List<TrashIdMapping> _mappings = mappings.ToList(); // Deep clone with ToList()
+    private List<CfTrashIdMapping> _mappings = mappings.ToList(); // Deep clone with ToList()
 
-    public IReadOnlyList<TrashIdMapping> Mappings => _mappings;
+    public IReadOnlyList<CfTrashIdMapping> Mappings => _mappings;
 
     public void Update(CustomFormatTransactionData transactions)
     {
@@ -27,7 +27,7 @@ public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
                 // Keep existing service CFs, even if they aren't in user config
                 l => l,
                 // Add a new mapping for CFs in user's config
-                r => new TrashIdMapping(r.TrashId, r.Name, r.Id),
+                r => new CfTrashIdMapping(r.TrashId, r.Name, r.Id),
                 // Update existing mappings for CFs in user's config
                 (l, r) => l with {TrashId = r.TrashId, CustomFormatName = r.Name})
             .Where(x => x.CustomFormatId != 0)

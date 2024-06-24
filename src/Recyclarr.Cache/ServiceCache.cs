@@ -4,8 +4,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Json;
+using Serilog;
 
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cache;
 
 public partial class ServiceCache(ICacheStoragePath storagePath, ILogger log) : IServiceCache
 {

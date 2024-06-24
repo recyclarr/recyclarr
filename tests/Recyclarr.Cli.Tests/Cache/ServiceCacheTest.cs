@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
 namespace Recyclarr.Cli.Tests.Cache;
@@ -197,7 +197,7 @@ public class ServiceCacheTest
 
         result.Should().BeEquivalentTo(new
         {
-            TrashIdMappings = new Collection<TrashIdMapping>
+            TrashIdMappings = new Collection<CfTrashIdMapping>
             {
                 new("eca37840c13c6ef2dd0262b141a5482f", "4K Remaster", 4)
             }

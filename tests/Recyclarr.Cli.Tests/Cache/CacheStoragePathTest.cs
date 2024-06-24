@@ -1,5 +1,5 @@
 using AutoFixture;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Tests.Cache;

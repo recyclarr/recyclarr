@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cache;
 
 public interface ICacheStoragePath
 {

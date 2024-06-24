@@ -1,6 +1,6 @@
 using Autofac;
 
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cache;
 
 public class CacheAutofacModule : Module
 {
