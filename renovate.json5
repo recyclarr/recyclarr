@@ -16,6 +16,11 @@
       "matchManagers": ["nuget"],
       "matchPackagePatterns": ["(?i)gitversion"],
       "commitMessagePrefix": "build(deps):"
+    },
+    {
+      "groupName": "System.IO.Abstractions Packages",
+      "matchManagers": ["nuget"],
+      "matchPackagePrefixes": ["TestableIO.System.IO.Abstractions"]
     }
   ]
 }
