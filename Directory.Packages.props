@@ -45,7 +45,7 @@
     See: https://github.com/NuGet/docs.microsoft.com-nuget/issues/3108
   -->
   <ItemGroup>
-    <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.1" />
+    <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.2" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
     <PackageVersion Include="AutoFixture" Version="5.0.0-preview0011" />
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0011" />
