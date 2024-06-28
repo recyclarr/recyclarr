@@ -42,6 +42,7 @@ changes you may need to make.
 - CLI: CFs with no Trash ID will no longer be displayed when running the `list custom-formats`
   command (#229).
 - Docker: Support running the container in read-only mode (#231).
+- Sync: Sometimes CFs weren't deleted even with `delete_old_custom_formats` enabled (#237).
 
 ## [6.0.2] - 2023-10-20
 

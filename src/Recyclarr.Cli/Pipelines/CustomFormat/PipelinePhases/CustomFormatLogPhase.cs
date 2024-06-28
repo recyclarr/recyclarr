@@ -13,12 +13,7 @@ public class CustomFormatLogPhase(ILogger log) : ILogPipelinePhase<CustomFormatP
                 context.InvalidFormats);
         }
 
-        if (context.ConfigOutput.Count == 0)
-        {
-            log.Debug("No custom formats to process");
-            return true;
-        }
-
+        // Do not exit when the config has zero custom formats. We still may need to delete old custom formats.
         return false;
     }
 
