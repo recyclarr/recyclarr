@@ -18,6 +18,7 @@ public record UpdatedQualityProfile
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = Array.Empty<UpdatedFormatScore>();
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> MissingQualities { get; set; } = Array.Empty<string>();
 
     public string ProfileName
     {

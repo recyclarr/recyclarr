@@ -51,7 +51,7 @@ public class QualityProfileStatCalculator(ILogger log)
     {
         using var oldJson = JsonSerializer.SerializeToDocument(oldDto.Items);
         using var newJson = JsonSerializer.SerializeToDocument(newDto.Items);
-        stats.QualitiesChanged = !oldJson.DeepEquals(newJson);
+        stats.QualitiesChanged = stats.Profile.MissingQualities.Count > 0 || !oldJson.DeepEquals(newJson);
     }
 
     private void ScoreUpdates(

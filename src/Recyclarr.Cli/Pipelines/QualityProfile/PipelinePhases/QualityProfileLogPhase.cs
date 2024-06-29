@@ -49,26 +49,30 @@ public class QualityProfileLogPhase(ILogger log) : ILogPipelinePhase<QualityProf
             }
         }
 
-        var invalidQualityNames = transactions.ChangedProfiles
-            .Select(x => (x.Profile.ProfileName, x.Profile.UpdatedQualities.InvalidQualityNames))
-            .Where(x => x.InvalidQualityNames.Count != 0)
-            .ToList();
-
-        foreach (var (profileName, invalidNames) in invalidQualityNames)
+        foreach (var profile in transactions.ChangedProfiles.Select(x => x.Profile))
         {
-            log.Warning("Quality profile '{ProfileName}' references invalid quality names: {InvalidNames}",
-                profileName, invalidNames);
-        }
+            var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
+            if (invalidQualityNames.Count != 0)
+            {
+                log.Warning("Quality profile '{ProfileName}' references invalid quality names: {InvalidNames}",
+                    profile.ProfileName, invalidQualityNames);
+            }
 
-        var invalidCfExceptNames = transactions.ChangedProfiles
-            .Where(x => x.Profile.InvalidExceptCfNames.Count != 0)
-            .Select(x => (x.Profile.ProfileName, x.Profile.InvalidExceptCfNames));
+            var invalidCfExceptNames = profile.InvalidExceptCfNames;
+            if (invalidCfExceptNames.Count != 0)
+            {
+                log.Warning(
+                    "`except` under `reset_unmatched_scores` in quality profile '{ProfileName}' has invalid " +
+                    "CF names: {CfNames}", profile.ProfileName, invalidCfExceptNames);
+            }
 
-        foreach (var (profileName, invalidNames) in invalidCfExceptNames)
-        {
-            log.Warning(
-                "`except` under `reset_unmatched_scores` in quality profile '{ProfileName}' has invalid " +
-                "CF names: {CfNames}", profileName, invalidNames);
+            var missingQualities = profile.MissingQualities;
+            if (missingQualities.Count != 0)
+            {
+                log.Information(
+                    "Recyclarr detected that the following required qualities are missing from profile " +
+                    "'{ProfileName}' and will re-add them: {QualityNames}", profile.ProfileName, missingQualities);
+            }
         }
     }
 

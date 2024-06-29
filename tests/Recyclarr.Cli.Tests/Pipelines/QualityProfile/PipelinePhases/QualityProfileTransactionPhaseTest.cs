@@ -471,4 +471,65 @@ public class QualityProfileTransactionPhaseTest
             .ContainSingle().Which.Profile.InvalidExceptCfNames.Should()
             .BeEquivalentTo("cf50");
     }
+
+    [Test, AutoMockData]
+    public void Missing_required_qualities_are_readded(QualityProfileTransactionPhase sut)
+    {
+        var dtos = new[]
+        {
+            new QualityProfileDto
+            {
+                Name = "profile1",
+                Items = new[]
+                {
+                    new ProfileItemDto
+                    {
+                        Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}
+                    },
+                    new ProfileItemDto
+                    {
+                        Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}
+                    }
+                }
+            }
+        };
+
+        var context = new QualityProfilePipelineContext
+        {
+            ConfigOutput = new[]
+            {
+                new ProcessedQualityProfileData
+                {
+                    Profile = new QualityProfileConfig
+                    {
+                        Name = "profile1"
+                    }
+                }
+            },
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            {
+                Schema = new QualityProfileDto
+                {
+                    Items = new[]
+                    {
+                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}},
+                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}},
+                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 3, Name = "Three"}}
+                    }
+                }
+            }
+        };
+
+        sut.Execute(context);
+
+        var profiles = context.TransactionOutput.ChangedProfiles;
+        profiles.Should().ContainSingle();
+        profiles.First().Profile.MissingQualities.Should().BeEquivalentTo("Three");
+        profiles.First().Profile.ProfileDto.Items.Should().BeEquivalentTo(
+        [
+            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}},
+            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}},
+            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 3, Name = "Three"}}
+        ]);
+    }
 }

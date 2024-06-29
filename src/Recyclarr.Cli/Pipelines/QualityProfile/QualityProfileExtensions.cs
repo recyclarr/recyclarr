@@ -10,6 +10,12 @@ public static class QualityProfileExtensions
         return items.Flatten(x => x.Items);
     }
 
+    public static IEnumerable<ProfileItemDto> FlattenQualities(this IEnumerable<ProfileItemDto> items)
+    {
+        return FlattenItems(items)
+            .Where(x => x.Quality is not null);
+    }
+
     public static ProfileItemDto? FindGroupById(this IEnumerable<ProfileItemDto> items, int? id)
     {
         if (id is null)

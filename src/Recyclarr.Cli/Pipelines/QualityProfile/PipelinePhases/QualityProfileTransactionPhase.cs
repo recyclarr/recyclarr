@@ -49,14 +49,14 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private static List<UpdatedQualityProfile> BuildUpdatedProfiles(
         QualityProfileTransactionData transactions,
-        IEnumerable<ProcessedQualityProfileData> guideData,
+        IEnumerable<ProcessedQualityProfileData> processedConfig,
         QualityProfileServiceData serviceData)
     {
         // Match quality profiles in the user's config to profiles in the service.
         // For each match, we return a tuple including the list of custom format scores ("formatItems").
         // Using GroupJoin() because we want a LEFT OUTER JOIN so we can list which quality profiles in config
         // do not match profiles in Radarr.
-        var matchedProfiles = guideData
+        var matchedProfiles = processedConfig
             .GroupJoin(serviceData.Profiles,
                 x => x.Profile.Name,
                 x => x.Name,
@@ -74,18 +74,56 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
             }
 
             var organizer = new QualityItemOrganizer();
-            var newDto = dto ?? serviceData.Schema;
 
-            updatedProfiles.Add(new UpdatedQualityProfile
+            if (dto is null)
             {
-                ProfileConfig = config,
-                ProfileDto = newDto,
-                UpdateReason = dto is null ? QualityProfileUpdateReason.New : QualityProfileUpdateReason.Changed,
-                UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile)
-            });
+                AddDto(serviceData.Schema, QualityProfileUpdateReason.New);
+            }
+            else
+            {
+                var missingQualities = FixupMissingQualities(dto, serviceData.Schema);
+                AddDto(dto, QualityProfileUpdateReason.Changed);
+                updatedProfiles[^1].MissingQualities = missingQualities;
+            }
+
+            continue;
+
+            void AddDto(QualityProfileDto newDto, QualityProfileUpdateReason reason)
+            {
+                updatedProfiles.Add(new UpdatedQualityProfile
+                {
+                    ProfileConfig = config,
+                    ProfileDto = newDto,
+                    UpdateReason = reason,
+                    UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile)
+                });
+            }
         }
 
         return updatedProfiles;
+    }
+
+    private static List<string> FixupMissingQualities(
+        QualityProfileDto dto,
+        QualityProfileDto schema)
+    {
+        // There's a very rare bug in Sonarr & Radarr that results in core qualities being lost in an existing profile.
+        // It's unclear how this happens; but what ends up happening is that you get an error "Must contain all
+        // qualities" in the Sonarr frontend when you open a QP and simply click save. In Recyclarr, you also see this
+        // error when attempting to sync changes to that profile. While this bug is not caused by recyclarr, we do not
+        // want this to prevent users from having to sync. The workaround to fix this (linked below) is very cumbersome,
+        // so there's value in having Recyclarr transparently fix this for users.
+        //
+        // See: https://github.com/Radarr/Radarr/issues/9738
+        var missingQualities = schema.Items.FlattenQualities().LeftOuterHashJoin(dto.Items.FlattenQualities(),
+                l => l.Quality!.Id,
+                r => r.Quality!.Id)
+            .Where(x => x.Right is null)
+            .Select(x => x.Left)
+            .ToList();
+
+        dto.Items = dto.Items.Concat(missingQualities).ToList();
+        return missingQualities.Select(x => x.Quality!.Name ?? $"(id: {x.Quality.Id})").ToList();
     }
 
     private static void UpdateProfileScores(IEnumerable<UpdatedQualityProfile> updatedProfiles)
