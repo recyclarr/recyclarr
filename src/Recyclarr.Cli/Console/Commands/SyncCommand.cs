@@ -5,7 +5,6 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -13,7 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
 [UsedImplicitly]
-public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
+public class SyncCommand(IMigrationExecutor migration, CliMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
     : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -51,7 +50,7 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories();
 
         return (int) await syncProcessor.ProcessConfigs(settings);
     }

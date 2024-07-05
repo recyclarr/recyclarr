@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cli.Cache;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Interceptors;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
@@ -42,7 +43,21 @@ public static class CompositionRoot
         builder.RegisterSource<OrderedRegistrationSource>();
 
         RegisterLogger(builder);
+        RegisterModules(builder);
 
+        builder.RegisterType<FileSystem>().As<IFileSystem>();
+        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
+
+        builder.RegisterType<CliMultiRepoUpdater>();
+
+        builder.RegisterAutoMapper(thisAssembly);
+
+        CliRegistrations(builder);
+        PipelineRegistrations(builder);
+    }
+
+    private static void RegisterModules(ContainerBuilder builder)
+    {
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
         builder.RegisterModule<GuideAutofacModule>();
@@ -58,14 +73,6 @@ public static class CompositionRoot
         builder.RegisterModule<JsonAutofacModule>();
         builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterModule<CommonAutofacModule>();
-
-        builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
-
-        builder.RegisterAutoMapper(thisAssembly);
-
-        CliRegistrations(builder);
-        PipelineRegistrations(builder);
     }
 
     private static void PipelineRegistrations(ContainerBuilder builder)
@@ -100,6 +107,12 @@ public static class CompositionRoot
         builder.RegisterType<BaseCommandSetupInterceptor>().As<ICommandInterceptor>();
         builder.RegisterType<ProgramInformationLogInterceptor>().As<ICommandInterceptor>();
         builder.RegisterType<GlobalTaskInterceptor>().As<ICommandInterceptor>();
+        builder.RegisterType<SignalInterruptInterceptor>().As<ICommandInterceptor>();
+
+        builder.RegisterType<ConsoleAppCancellationTokenProvider>()
+            .As<IApplicationCancellationTokenProvider>()
+            .AsSelf()
+            .SingleInstance();
 
         builder.RegisterTypes(
                 typeof(JanitorCleanupTask))

@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -13,7 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 public class ConfigListTemplatesCommand(
     ILogger log,
     ConfigListTemplateProcessor processor,
-    IMultiRepoUpdater repoUpdater)
+    CliMultiRepoUpdater repoUpdater)
     : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -28,18 +28,19 @@ public class ConfigListTemplatesCommand(
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
+        await repoUpdater.UpdateAllRepositories();
+
         try
         {
-            await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
             processor.Process(settings);
-            return 0;
         }
         catch (NoConfigurationFilesException e)
         {
             log.Error(e, "Unable to list template files");
+            return 1;
         }
 
-        return 1;
+        return 0;
     }
 }
 

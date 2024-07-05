@@ -1,5 +1,4 @@
 ﻿using Recyclarr.Cli.Console.Commands;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Platform;
 using Serilog.Core;
 using Serilog.Events;
@@ -8,15 +7,8 @@ using Spectre.Console.Cli;
 namespace Recyclarr.Cli.Console.Interceptors;
 
 internal sealed class BaseCommandSetupInterceptor(LoggingLevelSwitch loggingLevelSwitch, IAppDataSetup appDataSetup)
-    : ICommandInterceptor, IDisposable
+    : ICommandInterceptor
 {
-    public void Dispose()
-    {
-        _ct.Dispose();
-    }
-
-    private readonly ConsoleAppCancellationTokenSource _ct = new();
-
     public void Intercept(CommandContext context, CommandSettings settings)
     {
         switch (settings)
@@ -39,7 +31,6 @@ internal sealed class BaseCommandSetupInterceptor(LoggingLevelSwitch loggingLeve
 
     private void HandleBaseCommand(BaseCommandSettings cmd)
     {
-        cmd.CancellationToken = _ct.Token;
         loggingLevelSwitch.MinimumLevel = cmd.Debug switch
         {
             true => LogEventLevel.Debug,

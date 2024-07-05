@@ -1,16 +1,19 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Create a starter configuration file.")]
-public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor, IMultiRepoUpdater repoUpdater)
+public class ConfigCreateCommand(
+    ILogger log,
+    IConfigCreationProcessor processor,
+    CliMultiRepoUpdater repoUpdater)
     : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -29,7 +32,7 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
             "One or more template configuration files to create. Use `config list templates` to get a list of " +
             "names accepted here.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] TemplatesOption { get; init; } = Array.Empty<string>();
+        public string[] TemplatesOption { get; init; } = [];
         public IReadOnlyCollection<string> Templates => TemplatesOption;
 
         [CommandOption("-f|--force")]
@@ -40,9 +43,10 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
+        await repoUpdater.UpdateAllRepositories();
+
         try
         {
-            await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
             processor.Process(settings);
         }
         catch (FileExistsException e)

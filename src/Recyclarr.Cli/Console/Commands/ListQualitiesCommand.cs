@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -12,7 +11,7 @@ namespace Recyclarr.Cli.Console.Commands;
 #pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
-public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
+public class ListQualitiesCommand(QualitySizeDataLister lister, CliMultiRepoUpdater repoUpdater)
     : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -27,7 +26,7 @@ public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdate
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories();
         lister.ListQualities(settings.Service);
         return 0;
     }

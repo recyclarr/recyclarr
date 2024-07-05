@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -11,7 +10,7 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List media naming formats in the guide for a particular service.")]
-public class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpdater repoUpdater)
+public class ListMediaNamingCommand(MediaNamingDataLister lister, CliMultiRepoUpdater repoUpdater)
     : AsyncCommand<ListMediaNamingCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -26,7 +25,7 @@ public class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpda
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories();
         lister.ListNaming(settings.Service);
         return 0;
     }
