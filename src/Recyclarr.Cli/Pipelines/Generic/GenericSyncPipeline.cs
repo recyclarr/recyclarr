@@ -10,7 +10,7 @@ public class GenericSyncPipeline<TContext>(
 ) : ISyncPipeline
     where TContext : IPipelineContext, new()
 {
-    public async Task Execute(ISyncSettings settings)
+    public async Task Execute(ISyncSettings settings, CancellationToken ct)
     {
         var context = new TContext();
         if (!context.SupportedServiceTypes.Contains(config.ServiceType))
@@ -26,7 +26,7 @@ public class GenericSyncPipeline<TContext>(
             return;
         }
 
-        await phases.ApiFetchPhase.Execute(context);
+        await phases.ApiFetchPhase.Execute(context, ct);
         phases.TransactionPhase.Execute(context);
 
         phases.LogPhase.LogTransactionNotices(context);
@@ -37,7 +37,7 @@ public class GenericSyncPipeline<TContext>(
             return;
         }
 
-        await phases.ApiPersistencePhase.Execute(context);
+        await phases.ApiPersistencePhase.Execute(context, ct);
         phases.LogPhase.LogPersistenceResults(context);
     }
 }

@@ -5,4 +5,5 @@ public interface IServiceErrorMessageExtractor
     Task<string> GetErrorMessage();
     int? HttpStatusCode { get; }
     HttpRequestError? HttpError { get; }
+    string ErrorMessage { get; }
 }

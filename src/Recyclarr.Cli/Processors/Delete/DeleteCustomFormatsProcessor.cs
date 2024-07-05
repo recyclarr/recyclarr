@@ -24,11 +24,11 @@ public class DeleteCustomFormatsProcessor(
     ConfigurationScopeFactory scopeFactory)
     : IDeleteCustomFormatsProcessor
 {
-    public async Task Process(IDeleteCustomFormatSettings settings)
+    public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
         using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(GetTargetConfig(settings));
 
-        var cfs = await ObtainCustomFormats(scope.CustomFormatApi);
+        var cfs = await ObtainCustomFormats(scope.CustomFormatApi, ct);
 
         if (!settings.All)
         {
@@ -90,13 +90,13 @@ public class DeleteCustomFormatsProcessor(
         });
     }
 
-    private async Task<IList<CustomFormatData>> ObtainCustomFormats(ICustomFormatApiService api)
+    private async Task<IList<CustomFormatData>> ObtainCustomFormats(ICustomFormatApiService api, CancellationToken ct)
     {
         IList<CustomFormatData> cfs = new List<CustomFormatData>();
 
         await console.Status().StartAsync("Obtaining custom formats...", async _ =>
         {
-            cfs = await api.GetCustomFormats();
+            cfs = await api.GetCustomFormats(ct);
         });
 
         return cfs;

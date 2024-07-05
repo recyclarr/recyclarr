@@ -10,28 +10,28 @@ public class CustomFormatApiService(IServarrRequestBuilder service) : ICustomFor
         return service.Request(["customformat", ..path]);
     }
 
-    public async Task<IList<CustomFormatData>> GetCustomFormats()
+    public async Task<IList<CustomFormatData>> GetCustomFormats(CancellationToken ct)
     {
         return await Request()
-            .GetJsonAsync<IList<CustomFormatData>>();
+            .GetJsonAsync<IList<CustomFormatData>>(cancellationToken: ct);
     }
 
-    public async Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf)
+    public async Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf, CancellationToken ct)
     {
         return await Request()
-            .PostJsonAsync(cf)
+            .PostJsonAsync(cf, cancellationToken: ct)
             .ReceiveJson<CustomFormatData>();
     }
 
-    public async Task UpdateCustomFormat(CustomFormatData cf)
+    public async Task UpdateCustomFormat(CustomFormatData cf, CancellationToken ct)
     {
         await Request(cf.Id)
-            .PutJsonAsync(cf);
+            .PutJsonAsync(cf, cancellationToken: ct);
     }
 
-    public async Task DeleteCustomFormat(int customFormatId, CancellationToken cancellationToken = default)
+    public async Task DeleteCustomFormat(int customFormatId, CancellationToken ct)
     {
         await Request(customFormatId)
-            .DeleteAsync(cancellationToken: cancellationToken);
+            .DeleteAsync(cancellationToken: ct);
     }
 }

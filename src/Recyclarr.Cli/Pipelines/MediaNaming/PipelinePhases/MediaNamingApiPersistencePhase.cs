@@ -6,8 +6,8 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 public class MediaNamingApiPersistencePhase(IMediaNamingApiService api)
     : IApiPersistencePipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task Execute(MediaNamingPipelineContext context)
+    public async Task Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
-        await api.UpdateNaming(context.TransactionOutput);
+        await api.UpdateNaming(context.TransactionOutput, ct);
     }
 }

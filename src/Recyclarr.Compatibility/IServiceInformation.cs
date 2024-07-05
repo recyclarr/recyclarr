@@ -2,5 +2,5 @@ namespace Recyclarr.Compatibility;
 
 public interface IServiceInformation
 {
-    public Task<Version> GetVersion();
+    public Task<Version> GetVersion(CancellationToken ct);
 }

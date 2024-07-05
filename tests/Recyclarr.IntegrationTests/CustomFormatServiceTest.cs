@@ -26,7 +26,7 @@ public class CustomFormatServiceTest : IntegrationTestFixture
         });
 
         var sut = scope.Resolve<CustomFormatApiService>();
-        var result = await sut.GetCustomFormats();
+        var result = await sut.GetCustomFormats(CancellationToken.None);
 
         result.Should().HaveCountGreaterThan(5);
     }

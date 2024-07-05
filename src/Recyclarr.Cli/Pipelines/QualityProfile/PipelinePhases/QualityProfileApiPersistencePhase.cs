@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 public class QualityProfileApiPersistencePhase(IQualityProfileApiService api)
     : IApiPersistencePipelinePhase<QualityProfilePipelineContext>
 {
-    public async Task Execute(QualityProfilePipelineContext context)
+    public async Task Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         var changedProfiles = context.TransactionOutput.ChangedProfiles;
         foreach (var profile in changedProfiles.Select(x => x.Profile))
@@ -17,11 +17,11 @@ public class QualityProfileApiPersistencePhase(IQualityProfileApiService api)
             switch (profile.UpdateReason)
             {
                 case QualityProfileUpdateReason.New:
-                    await api.CreateQualityProfile(dto);
+                    await api.CreateQualityProfile(dto, ct);
                     break;
 
                 case QualityProfileUpdateReason.Changed:
-                    await api.UpdateQualityProfile(dto);
+                    await api.UpdateQualityProfile(dto, ct);
                     break;
 
                 default:

@@ -8,10 +8,10 @@ public record QualityProfileServiceData(IReadOnlyList<QualityProfileDto> Profile
 public class QualityProfileApiFetchPhase(IQualityProfileApiService api)
     : IApiFetchPipelinePhase<QualityProfilePipelineContext>
 {
-    public async Task Execute(QualityProfilePipelineContext context)
+    public async Task Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
-        var profiles = await api.GetQualityProfiles();
-        var schema = await api.GetSchema();
+        var profiles = await api.GetQualityProfiles(ct);
+        var schema = await api.GetSchema(ct);
         context.ApiFetchOutput = new QualityProfileServiceData(profiles.AsReadOnly(), schema);
     }
 }

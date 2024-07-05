@@ -6,8 +6,8 @@ namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 public class QualitySizeApiPersistencePhase(IQualityDefinitionApiService api)
     : IApiPersistencePipelinePhase<QualitySizePipelineContext>
 {
-    public async Task Execute(QualitySizePipelineContext context)
+    public async Task Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
-        await api.UpdateQualityDefinition(context.TransactionOutput);
+        await api.UpdateQualityDefinition(context.TransactionOutput, ct);
     }
 }

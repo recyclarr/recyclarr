@@ -49,7 +49,7 @@ public class DeleteCustomFormatsCommand(
     {
         try
         {
-            await processor.Process(settings);
+            await processor.Process(settings, settings.CancellationToken);
         }
         catch (Exception e)
         {

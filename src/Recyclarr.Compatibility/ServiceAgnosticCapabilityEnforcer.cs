@@ -8,16 +8,16 @@ public class ServiceAgnosticCapabilityEnforcer(
     SonarrCapabilityEnforcer sonarrEnforcer,
     RadarrCapabilityEnforcer radarrEnforcer)
 {
-    public async Task Check(IServiceConfiguration config)
+    public async Task Check(IServiceConfiguration config, CancellationToken ct)
     {
         switch (config)
         {
             case SonarrConfiguration:
-                await sonarrEnforcer.Check();
+                await sonarrEnforcer.Check(ct);
                 break;
 
             case RadarrConfiguration:
-                await radarrEnforcer.Check();
+                await radarrEnforcer.Check(ct);
                 break;
         }
     }

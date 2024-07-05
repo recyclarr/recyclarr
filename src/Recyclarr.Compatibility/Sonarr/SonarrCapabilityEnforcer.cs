@@ -2,9 +2,9 @@ namespace Recyclarr.Compatibility.Sonarr;
 
 public class SonarrCapabilityEnforcer(ISonarrCapabilityFetcher capabilityFetcher)
 {
-    public async Task Check()
+    public async Task Check(CancellationToken ct)
     {
-        var capabilities = await capabilityFetcher.GetCapabilities();
+        var capabilities = await capabilityFetcher.GetCapabilities(ct);
 
         if (capabilities.Version < SonarrCapabilities.MinimumVersion)
         {

@@ -9,23 +9,23 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
         return service.Request(["qualityprofile", ..path]);
     }
 
-    public async Task<IList<QualityProfileDto>> GetQualityProfiles()
+    public async Task<IList<QualityProfileDto>> GetQualityProfiles(CancellationToken ct)
     {
         var response = await Request()
-            .GetJsonAsync<IList<QualityProfileDto>>();
+            .GetJsonAsync<IList<QualityProfileDto>>(cancellationToken: ct);
 
         return response.Select(x => x.ReverseItems()).ToList();
     }
 
-    public async Task<QualityProfileDto> GetSchema()
+    public async Task<QualityProfileDto> GetSchema(CancellationToken ct)
     {
         var response = await Request("schema")
-            .GetJsonAsync<QualityProfileDto>();
+            .GetJsonAsync<QualityProfileDto>(cancellationToken: ct);
 
         return response.ReverseItems();
     }
 
-    public async Task UpdateQualityProfile(QualityProfileDto profile)
+    public async Task UpdateQualityProfile(QualityProfileDto profile, CancellationToken ct)
     {
         if (profile.Id is null)
         {
@@ -33,13 +33,13 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
         }
 
         await Request(profile.Id)
-            .PutJsonAsync(profile.ReverseItems());
+            .PutJsonAsync(profile.ReverseItems(), cancellationToken: ct);
     }
 
-    public async Task CreateQualityProfile(QualityProfileDto profile)
+    public async Task CreateQualityProfile(QualityProfileDto profile, CancellationToken ct)
     {
         var response = await Request()
-            .PostJsonAsync(profile.ReverseItems())
+            .PostJsonAsync(profile.ReverseItems(), cancellationToken: ct)
             .ReceiveJson<QualityProfileDto>();
 
         profile.Id = response.Id;

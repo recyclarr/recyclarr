@@ -2,8 +2,8 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 
 public interface IQualityProfileApiService
 {
-    Task<IList<QualityProfileDto>> GetQualityProfiles();
-    Task UpdateQualityProfile(QualityProfileDto profile);
-    Task<QualityProfileDto> GetSchema();
-    Task CreateQualityProfile(QualityProfileDto profile);
+    Task<IList<QualityProfileDto>> GetQualityProfiles(CancellationToken ct);
+    Task UpdateQualityProfile(QualityProfileDto profile, CancellationToken ct);
+    Task<QualityProfileDto> GetSchema(CancellationToken ct);
+    Task CreateQualityProfile(QualityProfileDto profile, CancellationToken ct);
 }

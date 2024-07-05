@@ -4,8 +4,8 @@ namespace Recyclarr.ServarrApi.CustomFormat;
 
 public interface ICustomFormatApiService
 {
-    Task<IList<CustomFormatData>> GetCustomFormats();
-    Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf);
-    Task UpdateCustomFormat(CustomFormatData cf);
-    Task DeleteCustomFormat(int customFormatId, CancellationToken cancellationToken = default);
+    Task<IList<CustomFormatData>> GetCustomFormats(CancellationToken ct);
+    Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf, CancellationToken ct);
+    Task UpdateCustomFormat(CustomFormatData cf, CancellationToken ct);
+    Task DeleteCustomFormat(int customFormatId, CancellationToken ct);
 }

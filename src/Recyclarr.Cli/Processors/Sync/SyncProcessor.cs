@@ -19,7 +19,7 @@ public class SyncProcessor(
     ConsoleExceptionHandler exceptionHandler)
     : ISyncProcessor
 {
-    public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings)
+    public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings, CancellationToken ct)
     {
         bool failureDetected;
         try
@@ -31,7 +31,7 @@ public class SyncProcessor(
                 Service = settings.Service
             });
 
-            failureDetected = await ProcessService(settings, configs);
+            failureDetected = await ProcessService(settings, configs, ct);
         }
         catch (Exception e)
         {
@@ -47,7 +47,10 @@ public class SyncProcessor(
         return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 
-    private async Task<bool> ProcessService(ISyncSettings settings, IEnumerable<IServiceConfiguration> configs)
+    private async Task<bool> ProcessService(
+        ISyncSettings settings,
+        IEnumerable<IServiceConfiguration> configs,
+        CancellationToken ct)
     {
         var failureDetected = false;
 
@@ -56,7 +59,7 @@ public class SyncProcessor(
             try
             {
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
-                await scope.Pipelines.Process(settings);
+                await scope.Pipelines.Process(settings, ct);
             }
             catch (Exception e)
             {

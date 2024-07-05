@@ -14,11 +14,11 @@ public class SyncPipelineExecutor(
     ServiceAgnosticCapabilityEnforcer enforcer,
     IServiceConfiguration config)
 {
-    public async Task Process(ISyncSettings settings)
+    public async Task Process(ISyncSettings settings, CancellationToken ct)
     {
         PrintProcessingHeader();
 
-        await enforcer.Check(config);
+        await enforcer.Check(config, ct);
 
         foreach (var cache in caches)
         {
@@ -28,7 +28,7 @@ public class SyncPipelineExecutor(
         foreach (var pipeline in pipelines)
         {
             log.Debug("Executing Pipeline: {Pipeline}", pipeline.GetType().Name);
-            await pipeline.Execute(settings);
+            await pipeline.Execute(settings, ct);
         }
 
         log.Information("Completed at {Date}", DateTime.Now);

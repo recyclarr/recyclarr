@@ -23,4 +23,6 @@ public class ServiceErrorMessageExtractor(FlurlHttpException e) : IServiceErrorM
     }
 
     public int? HttpStatusCode => e.StatusCode;
+
+    public string ErrorMessage => e.Message;
 }

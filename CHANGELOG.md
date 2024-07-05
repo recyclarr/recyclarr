@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Sonarr or Radarr UI. Recyclarr now detects this situation and automatically repairs the quality
   profile by re-adding these missing qualities for users. See [this issue][9738].
 
+### Fixed
+
+- Signal interrupt support for all API calls. Now when you press CTRL+C to gracefully exit/cancel
+  Recyclarr, it will bail out of any ongoing API calls.
+
 [9738]: https://github.com/Radarr/Radarr/issues/9738
 
 ## [7.0.0] - 2024-06-27

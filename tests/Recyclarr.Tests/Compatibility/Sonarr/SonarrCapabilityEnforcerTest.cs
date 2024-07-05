@@ -13,10 +13,10 @@ public class SonarrCapabilityEnforcerTest
     {
         var min = SonarrCapabilities.MinimumVersion;
 
-        fetcher.GetCapabilities().ReturnsForAnyArgs(
+        fetcher.GetCapabilities(CancellationToken.None).ReturnsForAnyArgs(
             new SonarrCapabilities(new Version(min.Major - 1, min.Minor, min.Build, min.Revision)));
 
-        var act = sut.Check;
+        var act = () => sut.Check(CancellationToken.None);
 
         act.Should().ThrowAsync<ServiceIncompatibilityException>().WithMessage("*minimum*");
     }

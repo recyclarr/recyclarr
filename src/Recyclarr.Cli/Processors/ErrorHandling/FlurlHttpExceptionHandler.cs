@@ -8,20 +8,24 @@ public class FlurlHttpExceptionHandler(ILogger log) : IFlurlHttpExceptionHandler
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
-        switch (extractor)
+        if (extractor.ErrorMessage.Contains("task was canceled"))
         {
-            case {HttpStatusCode: 401}:
-                log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
-                break;
-
-            case {HttpStatusCode: null}:
-                log.Error("Reason: Problem connecting to service. Is your `base_url` correct?");
-                break;
-
-            default:
-                ProcessBody(await extractor.GetErrorMessage());
-                break;
+            log.Error("Reason: User canceled the operation");
+            return;
         }
+
+        switch (extractor.HttpStatusCode)
+        {
+            case 401:
+                log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
+                return;
+
+            case null:
+                log.Error("Reason: Problem connecting to the service. Is your `base_url` correct?");
+                return;
+        }
+
+        ProcessBody(await extractor.GetErrorMessage());
     }
 
     private void ProcessBody(string responseBody)

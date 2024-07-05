@@ -4,5 +4,5 @@ namespace Recyclarr.Cli.Processors.Delete;
 
 public interface IDeleteCustomFormatsProcessor
 {
-    Task Process(IDeleteCustomFormatSettings settings);
+    Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct);
 }
