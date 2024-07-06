@@ -8,7 +8,7 @@ public class FlurlHttpExceptionHandler(ILogger log) : IFlurlHttpExceptionHandler
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
-        if (extractor.ErrorMessage.Contains("task was canceled"))
+        if (extractor.ExceptionMessage.Contains("task was canceled"))
         {
             log.Error("Reason: User canceled the operation");
             return;
