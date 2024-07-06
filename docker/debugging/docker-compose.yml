@@ -54,3 +54,13 @@ services:
     environment:
       - TZ=America/Chicago
       - SONARR__AUTH__APIKEY=testkey
+
+  sqlite:
+    image: keinos/sqlite3
+    network_mode: none
+    entrypoint: [sqlite3]
+    volumes:
+      - sonarr_develop:/sonarr/develop
+      - sonarr_stable:/sonarr/stable
+      - radarr_develop:/radarr/develop
+      - radarr_stable:/radarr/stable
