@@ -131,6 +131,7 @@ jobs:
   test-artifact-download:
     name: Test Artifact Download
     runs-on: ubuntu-latest
+    if: "!startsWith(github.ref, 'refs/tags/v')"
     needs:
       - build-win
       - build-linux
