@@ -13,7 +13,8 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         var registrations = Resolve<IEnumerable<IGlobalSetupTask>>();
         registrations.Select(x => x.GetType()).Should().BeEquivalentTo(new[]
         {
-            typeof(JanitorCleanupTask)
+            typeof(JanitorCleanupTask),
+            typeof(ProgramInformationDisplayTask)
         });
     }
 

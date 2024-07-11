@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Core;
 using NUnit.Framework.Internal;
 using Recyclarr.Config.Models;
+using Recyclarr.Platform;
 using Recyclarr.TestLibrary.Autofac;
 using Spectre.Console;
 
@@ -42,6 +43,9 @@ public class CompositionRootTest
     [TestCaseSource(typeof(ConcreteTypeEnumerator))]
     public void Service_should_be_instantiable(ILifetimeScope scope, Type service)
     {
+        // Required to bypass exception due to the directory override being null
+        scope.Resolve<IAppDataSetup>().SetAppDataDirectoryOverride("");
+
         scope.Resolve(service).Should().NotBeNull();
     }
 }

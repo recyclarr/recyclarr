@@ -19,6 +19,7 @@ public class DefaultAppDataSetupTest
             .SubDirectory("path");
 
         env.GetFolderPath(default, default).ReturnsForAnyArgs(basePath.FullName);
+        sut.SetAppDataDirectoryOverride("");
 
         var paths = sut.CreateAppPaths();
 
@@ -34,7 +35,7 @@ public class DefaultAppDataSetupTest
             .SubDirectory("override")
             .SubDirectory("path");
 
-        sut.AppDataDirectoryOverride = overridePath.FullName;
+        sut.SetAppDataDirectoryOverride(overridePath.FullName);
         var paths = sut.CreateAppPaths();
 
         paths.AppDataDirectory.FullName.Should().Be(overridePath.FullName);
@@ -46,17 +47,18 @@ public class DefaultAppDataSetupTest
         [Frozen] IEnvironment env,
         DefaultAppDataSetup sut)
     {
-        var overridePath = fs.CurrentDirectory()
+        var appDataPath = fs.CurrentDirectory()
             .SubDirectory("override")
             .SubDirectory("path");
 
         env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
-        env.GetFolderPath(default).ReturnsForAnyArgs(overridePath.FullName);
+        env.GetFolderPath(default).ReturnsForAnyArgs(appDataPath.FullName);
+        sut.SetAppDataDirectoryOverride("");
 
         sut.CreateAppPaths();
 
         env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
-        fs.AllDirectories.Should().NotContain(overridePath.FullName);
+        fs.AllDirectories.Should().NotContain(appDataPath.FullName);
     }
 
     [Test, AutoMockData]
@@ -71,6 +73,7 @@ public class DefaultAppDataSetupTest
             .SubDirectory("path").FullName;
 
         env.GetEnvironmentVariable(default!).ReturnsForAnyArgs(expectedPath);
+        sut.SetAppDataDirectoryOverride("");
 
         sut.CreateAppPaths();
 
@@ -89,7 +92,8 @@ public class DefaultAppDataSetupTest
             .SubDirectory("var")
             .SubDirectory("path").FullName;
 
-        sut.AppDataDirectoryOverride = expectedPath;
+        sut.SetAppDataDirectoryOverride(expectedPath);
+
         sut.CreateAppPaths();
 
         env.DidNotReceiveWithAnyArgs().GetEnvironmentVariable(default!);

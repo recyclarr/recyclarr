@@ -4,7 +4,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cli.Cache;
-using Recyclarr.Cli.Console.Interceptors;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -97,11 +97,11 @@ public static class CompositionRoot
 
     private static void CliRegistrations(ContainerBuilder builder)
     {
-        builder.RegisterType<BaseCommandSetupInterceptor>().As<ICommandInterceptor>();
-        builder.RegisterType<ProgramInformationLogInterceptor>().As<ICommandInterceptor>();
-        builder.RegisterType<GlobalTaskInterceptor>().As<ICommandInterceptor>();
+        builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();
 
+        builder.RegisterType<GlobalSetupTaskExecutor>();
         builder.RegisterTypes(
+                typeof(ProgramInformationDisplayTask),
                 typeof(JanitorCleanupTask))
             .As<IGlobalSetupTask>()
             .OrderByRegistration();

@@ -10,15 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- In rare circumstances outside of Recyclarr, quality profiles become invalid due to missing
+- Sync: In rare circumstances outside of Recyclarr, quality profiles become invalid due to missing
   required qualities. When this happens, users are not even able to save the profile using the
   Sonarr or Radarr UI. Recyclarr now detects this situation and automatically repairs the quality
   profile by re-adding these missing qualities for users. See [this issue][9738].
 
 ### Fixed
 
-- Signal interrupt support for all API calls. Now when you press CTRL+C to gracefully exit/cancel
-  Recyclarr, it will bail out of any ongoing API calls.
+- CLI: Signal interrupt support for all API calls. Now when you press CTRL+C to gracefully
+  exit/cancel Recyclarr, it will bail out of any ongoing API calls.
+- CLI: The `--app-data` option works again (#284).
 
 [9738]: https://github.com/Radarr/Radarr/issues/9738
 

@@ -1,17 +1,20 @@
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+
 namespace Recyclarr.Cli.Console.Helpers;
 
 // Taken from: https://github.com/spectreconsole/spectre.console/issues/701#issuecomment-1081834778
 internal sealed class ConsoleAppCancellationTokenSource : IDisposable
 {
-    private readonly ILogger _log;
     private readonly CancellationTokenSource _cts = new();
+    private readonly Subject<Unit> _cancellationSubject = new();
 
     public CancellationToken Token => _cts.Token;
+    public IObservable<Unit> CancelPressed => _cancellationSubject.AsObservable();
 
-    public ConsoleAppCancellationTokenSource(ILogger log)
+    public ConsoleAppCancellationTokenSource()
     {
-        _log = log;
-
         System.Console.CancelKeyPress += OnCancelKeyPress;
         AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
@@ -24,7 +27,7 @@ internal sealed class ConsoleAppCancellationTokenSource : IDisposable
 
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
-        _log.Information("Exiting due to signal interrupt");
+        _cancellationSubject.OnNext(Unit.Default);
 
         // NOTE: cancel event, don't terminate the process
         e.Cancel = true;
@@ -46,6 +49,7 @@ internal sealed class ConsoleAppCancellationTokenSource : IDisposable
 
     public void Dispose()
     {
+        _cancellationSubject.Dispose();
         _cts.Dispose();
     }
 }

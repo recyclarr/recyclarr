@@ -6,11 +6,6 @@ namespace Recyclarr.Cli.Console.Setup;
 public class JanitorCleanupTask(LogJanitor janitor, ILogger log, ISettingsProvider settingsProvider)
     : IGlobalSetupTask
 {
-    public void OnStart()
-    {
-        // No work to do for this event
-    }
-
     public void OnFinish()
     {
         var maxFiles = settingsProvider.Settings.LogJanitor.MaxFiles;
