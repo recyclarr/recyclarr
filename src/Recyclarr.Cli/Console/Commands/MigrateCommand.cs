@@ -18,7 +18,7 @@ public class MigrateCommand(
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : ServiceCommandSettings;
+    public class CliSettings : BaseCommandSettings;
 
     public override int Execute(CommandContext context, CliSettings settings)
     {

@@ -31,10 +31,6 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
     {
         switch (settings)
         {
-            case ServiceCommandSettings cmd:
-                HandleServiceCommand(cmd);
-                break;
-
             case BaseCommandSettings cmd:
                 HandleBaseCommand(cmd);
                 break;
@@ -48,15 +44,12 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
         _taskExecutor.Value.OnFinish();
     }
 
-    private void HandleServiceCommand(ServiceCommandSettings cmd)
-    {
-        HandleBaseCommand(cmd);
-        _appDataSetup.SetAppDataDirectoryOverride(cmd.AppData ?? "");
-    }
-
     private void HandleBaseCommand(BaseCommandSettings cmd)
     {
+        _appDataSetup.SetAppDataDirectoryOverride(cmd.AppData ?? "");
+
         cmd.CancellationToken = _ct.Token;
+
         _loggingLevelSwitch.MinimumLevel = cmd.Debug switch
         {
             true => LogEventLevel.Debug,

@@ -20,7 +20,7 @@ public class DeleteCustomFormatsCommand(
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it")]
-    public class CliSettings : ServiceCommandSettings, IDeleteCustomFormatSettings
+    public class CliSettings : BaseCommandSettings, IDeleteCustomFormatSettings
     {
         [CommandArgument(0, "<instance_name>")]
         [Description("The name of the instance to delete CFs from.")]

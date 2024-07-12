@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The `--app-data` option is now common to all commands.
+
+### Fixed
+
+- CLI: Commands no longer crash due to a null app data directory variable (#288).
+
 ## [7.1.0] - 2024-07-10
 
 ### Added

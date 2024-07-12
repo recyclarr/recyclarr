@@ -20,7 +20,7 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it")]
-    public class CliSettings : ServiceCommandSettings, ISyncSettings
+    public class CliSettings : BaseCommandSettings, ISyncSettings
     {
         [CommandArgument(0, "[service]")]
         [EnumDescription<SupportedServices>("The service to sync. If not specified, all services are synced.")]
