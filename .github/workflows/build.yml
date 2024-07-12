@@ -220,6 +220,7 @@ jobs:
       - codesign
       - docker
       - release
+      - test-artifact-download
     runs-on: ubuntu-latest
     steps:
       - name: Check if all jobs succeeded
