@@ -226,5 +226,5 @@ jobs:
       - name: Check if all jobs succeeded
         uses: re-actors/alls-green@release/v1
         with:
-          allowed-skips: codesign, release
+          allowed-skips: codesign, release, test-artifact-download
           jobs: ${{ toJSON(needs) }}
