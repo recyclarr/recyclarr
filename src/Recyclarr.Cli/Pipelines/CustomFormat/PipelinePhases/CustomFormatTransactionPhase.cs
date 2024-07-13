@@ -42,7 +42,7 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
 
         if (config.DeleteOldCustomFormats)
         {
-            transactions.DeletedCustomFormats.AddRange(context.Cache.Mappings
+            transactions.DeletedCustomFormats.AddRange(context.Cache.TrashIdMappings
                 // Custom format must be in the cache but NOT in the user's config
                 .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
                 // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)

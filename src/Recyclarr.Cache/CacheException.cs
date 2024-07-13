@@ -1,3 +1,3 @@
-namespace Recyclarr.Cli.Cache;
+namespace Recyclarr.Cache;
 
 public class CacheException(string? message) : Exception(message);

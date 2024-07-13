@@ -1,4 +1,5 @@
 using Autofac;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
@@ -14,8 +15,8 @@ public class CustomFormatAutofacModule : Module
             .AsSelf()
             .InstancePerLifetimeScope();
 
-        builder.RegisterType<CustomFormatCachePersister>().As<ICustomFormatCachePersister>();
         builder.RegisterType<CustomFormatDataLister>();
+        builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
 
         builder.RegisterTypes(
                 typeof(CustomFormatConfigPhase),

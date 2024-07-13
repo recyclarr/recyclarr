@@ -3,7 +3,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;

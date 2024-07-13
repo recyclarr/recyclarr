@@ -1,13 +1,23 @@
+using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
-{
-    private List<TrashIdMapping> _mappings = mappings.ToList(); // Deep clone with ToList()
+public record TrashIdMapping(string TrashId, string CustomFormatName, int CustomFormatId);
 
-    public IReadOnlyList<TrashIdMapping> Mappings => _mappings;
+[CacheObjectName("custom-format-cache")]
+[SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "POCO")]
+[SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "POCO")]
+public record CustomFormatCacheObject() : CacheObject(1)
+{
+    public List<TrashIdMapping> TrashIdMappings { get; set; } = [];
+}
+
+public class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(cacheObject)
+{
+    public IReadOnlyList<TrashIdMapping> TrashIdMappings => cacheObject.TrashIdMappings;
 
     public void Update(CustomFormatTransactionData transactions)
     {
@@ -18,7 +28,7 @@ public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
             .Concat(transactions.UnchangedCustomFormats)
             .Concat(transactions.NewCustomFormats);
 
-        _mappings = _mappings
+        cacheObject.TrashIdMappings = cacheObject.TrashIdMappings
             .DistinctBy(x => x.CustomFormatId)
             .Where(x => transactions.DeletedCustomFormats.All(y => y.CustomFormatId != x.CustomFormatId))
             .FullOuterHashJoin(existingCfs,
@@ -37,11 +47,12 @@ public class CustomFormatCache(IEnumerable<TrashIdMapping> mappings)
 
     public void RemoveStale(IEnumerable<CustomFormatData> serviceCfs)
     {
-        _mappings.RemoveAll(x => x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId));
+        cacheObject.TrashIdMappings.RemoveAll(x =>
+            x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId));
     }
 
     public int? FindId(CustomFormatData cf)
     {
-        return _mappings.Find(c => c.TrashId == cf.TrashId)?.CustomFormatId;
+        return cacheObject.TrashIdMappings.Find(c => c.TrashId == cf.TrashId)?.CustomFormatId;
     }
 }

@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Recyclarr.Cli\Recyclarr.Cli.csproj" />
+  </ItemGroup>
+</Project>

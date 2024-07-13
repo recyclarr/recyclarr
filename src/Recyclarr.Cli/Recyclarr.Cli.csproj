@@ -15,7 +15,6 @@
     <PackageReference Include="Spectre.Console.Analyzer" PrivateAssets="All" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="SuperLinq" />
-    <PackageReference Include="System.Data.HashFunction.FNV" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
@@ -27,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Recyclarr.Cache\Recyclarr.Cache.csproj" />
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
     <ProjectReference Include="..\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj" />
     <ProjectReference Include="..\Recyclarr.Config\Recyclarr.Config.csproj" />

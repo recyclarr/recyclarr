@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Config;
 using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -20,7 +21,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([]),
+            Cache = CfCache.New(),
             ApiFetchOutput = [],
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
@@ -45,7 +46,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([]),
+            Cache = CfCache.New(),
             ApiFetchOutput = [new CustomFormatData {Name = "one"}],
             ConfigOutput =
             [
@@ -82,7 +83,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf1", "", 2)]),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "", 2)),
             ApiFetchOutput = [new CustomFormatData {Name = "different2", Id = 2}],
             ConfigOutput =
             [
@@ -123,7 +124,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([]),
+            Cache = CfCache.New(),
             ApiFetchOutput = [new CustomFormatData {Name = "different1", Id = 2}],
             ConfigOutput =
             [
@@ -164,7 +165,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([]),
+            Cache = CfCache.New(),
             ApiFetchOutput =
             [
                 new CustomFormatData {Name = "one", Id = 2},
@@ -197,7 +198,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf1", "one", 1)]),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput =
             [
                 new CustomFormatData {Name = "one", Id = 2},
@@ -230,7 +231,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf1", "one", 1)]),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput =
             [
                 new CustomFormatData {Name = "two", Id = 2},
@@ -272,7 +273,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([]),
+            Cache = CfCache.New(),
             ApiFetchOutput = [new CustomFormatData {Name = "one", Id = 1}],
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
@@ -298,7 +299,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf1", "one", 1)]),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput = [new CustomFormatData {Name = "one", Id = 1}],
             ConfigOutput = [NewCf.Data("one", "cf1")]
         };
@@ -324,7 +325,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf2", "two", 2)]),
+            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatData {Name = "two", Id = 2}],
             ConfigOutput = []
         };
@@ -353,7 +354,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf2", "two", 2)]),
+            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatData {Name = "two", Id = 2}],
             ConfigOutput = []
         };
@@ -373,7 +374,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf2", "two", 2)]),
+            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatData {Name = "two", Id = 2}],
             ConfigOutput = [NewCf.Data("two", "cf2", 2)]
         };
@@ -393,7 +394,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = new CustomFormatCache([new TrashIdMapping("cf2", "two", 200)]),
+            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 200)),
             ApiFetchOutput = [],
             ConfigOutput = [NewCf.Data("two", "cf2", 2)]
         };

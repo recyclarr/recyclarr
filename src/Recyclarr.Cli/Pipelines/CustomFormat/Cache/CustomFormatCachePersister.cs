@@ -1,41 +1,18 @@
-using System.Text.Json;
-using Recyclarr.Cli.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
 public class CustomFormatCachePersister(
     ILogger log,
-    IServiceCache serviceCache,
-    IServiceConfiguration config) : ICustomFormatCachePersister
+    ICacheStoragePath storagePath,
+    IServiceConfiguration config)
+    : CachePersister<CustomFormatCacheObject, CustomFormatCache>(log, storagePath, config)
 {
-    public const int LatestVersion = 1;
+    protected override string CacheName => "Custom Format Cache";
 
-    public CustomFormatCache Load()
+    protected override CustomFormatCache CreateCache(CustomFormatCacheObject cacheObject)
     {
-        var cacheData = serviceCache.Load<CustomFormatCacheData>();
-        if (cacheData == null)
-        {
-            log.Debug("Custom format cache does not exist; proceeding without it");
-            cacheData = new CustomFormatCacheData(LatestVersion, config.InstanceName, []);
-        }
-
-        // If the version is higher OR lower, we invalidate the cache. It means there's an
-        // incompatibility that we do not support.
-        if (cacheData.Version != LatestVersion)
-        {
-            log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
-                cacheData.Version, LatestVersion);
-            throw new CacheException("Version mismatch");
-        }
-
-        return new CustomFormatCache(cacheData.TrashIdMappings);
-    }
-
-    public void Save(CustomFormatCache cache)
-    {
-        var data = new CustomFormatCacheData(LatestVersion, config.InstanceName, cache.Mappings);
-        log.Debug("Saving Custom Format Cache with {Mappings}", JsonSerializer.Serialize(data.TrashIdMappings));
-        serviceCache.Save(data);
+        return new CustomFormatCache(cacheObject);
     }
 }
