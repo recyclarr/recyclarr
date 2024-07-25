@@ -26,14 +26,6 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion and Sonar analysis
 
-      # GH Runners come with Java 11, which is deprecated by Sonarcloud
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 20
-          java-package: jre
-          distribution: temurin
-
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
