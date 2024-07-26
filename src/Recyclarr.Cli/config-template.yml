@@ -7,7 +7,7 @@
 # If you'd rather use pre-built configuration instead of building your own from scratch, see these
 # pages:
 # - Config Templates: https://recyclarr.dev/wiki/guide-configs/
-# - CLI Command: http://recyclarr.dev/wiki/cli/config/list/templates/
+# - CLI Command: https://recyclarr.dev/wiki/cli/config/list/templates/
 #
 # This file WILL NOT WORK as it currently is. You need to read the documentation and build this
 # configuration from scratch. Note that there's no "one size fits all" configuration. Please refer
@@ -21,7 +21,7 @@
 # See: https://recyclarr.dev/wiki/file-structure/
 
 # Configuration specific to Sonarr. For Radarr, the layout is the same.
-# See: http://recyclarr.dev/wiki/yaml/config-reference/basic/
+# See: https://recyclarr.dev/wiki/yaml/config-reference/basic/
 sonarr:
   series:
     # Set the URL/API Key to your actual instance
@@ -31,11 +31,11 @@ sonarr:
     # See: https://recyclarr.dev/wiki/yaml/config-reference/quality-definition/
     quality_definition:
 
-    # See: http://localhost:3000/wiki/yaml/config-reference/quality-profiles/
+    # See: https://recyclarr.dev/wiki/yaml/config-reference/quality-profiles/
     quality_profiles:
 
-    # See: http://localhost:3000/wiki/yaml/config-reference/custom-formats/
+    # See: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
     custom_formats:
 
-    # See: http://localhost:3000/wiki/yaml/config-reference/media-naming/
+    # See: https://recyclarr.dev/wiki/yaml/config-reference/media-naming/
     media_naming:

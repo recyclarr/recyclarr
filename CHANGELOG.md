@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Incorrect URLs were fixed in the local starter config template.
+
 ## [7.1.1] - 2024-07-12
 
 ### Changed
