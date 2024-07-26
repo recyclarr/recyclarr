@@ -16,7 +16,7 @@ public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache c
         // 2. For each quality profile score config in that CF group
         // 3. For each CF in the group above, match it to a Guide CF object and pair it with the quality profile config
         var profileAndCfs = config.CustomFormats
-            .SelectMany(x => x.QualityProfiles
+            .SelectMany(x => x.AssignScoresTo
                 .Select(y => (Profile: y, x.TrashIds)))
             .SelectMany(x => x.TrashIds
                 .Select(cache.LookupByTrashId)
@@ -74,7 +74,7 @@ public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache c
 
     private void AddCustomFormatScoreData(
         ProcessedQualityProfileData profile,
-        QualityProfileScoreConfig scoreConfig,
+        AssignScoresToConfig scoreConfig,
         CustomFormatData cf)
     {
         var existingScoreData = profile.CfScores;
@@ -109,7 +109,7 @@ public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache c
 
     private int? DetermineScore(
         QualityProfileConfig profile,
-        QualityProfileScoreConfig scoreConfig,
+        AssignScoresToConfig scoreConfig,
         CustomFormatData cf)
     {
         if (scoreConfig.Score is not null)

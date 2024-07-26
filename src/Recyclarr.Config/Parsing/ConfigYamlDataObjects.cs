@@ -17,6 +17,7 @@ public record QualityScoreConfigYaml
 public record CustomFormatConfigYaml
 {
     public IReadOnlyCollection<string>? TrashIds { get; init; }
+    public IReadOnlyCollection<QualityScoreConfigYaml>? AssignScoresTo { get; init; }
     public IReadOnlyCollection<QualityScoreConfigYaml>? QualityProfiles { get; init; }
 }
 

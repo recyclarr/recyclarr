@@ -42,7 +42,7 @@ public class CustomFormatConfigYamlValidator : AbstractValidator<CustomFormatCon
 {
     public CustomFormatConfigYamlValidator()
     {
-        RuleForEach(x => x.QualityProfiles)
+        RuleForEach(x => x.AssignScoresTo)
             .SetValidator(new QualityScoreConfigYamlValidator());
     }
 }

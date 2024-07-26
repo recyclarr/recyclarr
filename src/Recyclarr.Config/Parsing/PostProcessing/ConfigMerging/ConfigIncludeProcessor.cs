@@ -6,9 +6,22 @@ namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log) : IIncludeProcessor
 {
-    public bool CanProcess(IYamlInclude includeDirective)
+    public IFileInfo GetPathToConfig(IYamlInclude includeDirective, SupportedServices serviceType)
     {
-        return includeDirective is ConfigYamlInclude;
+        var include = (ConfigYamlInclude) includeDirective;
+
+        if (include.Config is null)
+        {
+            throw new YamlIncludeException("`config` property is required.");
+        }
+
+        var configFile = ConvertToAbsolute(include.Config);
+        if (configFile?.Exists != true)
+        {
+            throw new YamlIncludeException($"Include path could not be resolved: {include.Config}");
+        }
+
+        return configFile;
     }
 
     private IFileInfo? ConvertToAbsolute(string path)
@@ -39,23 +52,5 @@ public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log
         }
 
         return null;
-    }
-
-    public IFileInfo GetPathToConfig(IYamlInclude includeDirective, SupportedServices serviceType)
-    {
-        var include = (ConfigYamlInclude) includeDirective;
-
-        if (include.Config is null)
-        {
-            throw new YamlIncludeException("`config` property is required.");
-        }
-
-        var configFile = ConvertToAbsolute(include.Config);
-        if (configFile?.Exists != true)
-        {
-            throw new YamlIncludeException($"Include path could not be resolved: {include.Config}");
-        }
-
-        return configFile;
     }
 }

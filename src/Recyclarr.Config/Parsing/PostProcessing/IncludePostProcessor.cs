@@ -1,24 +1,42 @@
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
+using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
 using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing.PostProcessing;
 
-public class IncludePostProcessor(
+public sealed class IncludePostProcessor(
     ILogger log,
     ConfigParser parser,
     ConfigValidationExecutor validator,
-    IYamlIncludeResolver includeResolver)
-    : IConfigPostProcessor
+    IYamlIncludeResolver includeResolver,
+    ConfigDeprecations deprecations)
+    : IConfigPostProcessor, IDisposable
 {
+    private IDisposable? _logScope;
+
+    public void Dispose()
+    {
+        _logScope?.Dispose();
+    }
+
     public RootConfigYaml Process(RootConfigYaml config)
     {
-        return new RootConfigYaml
+        try
         {
-            Radarr = ProcessIncludes(config.Radarr, new RadarrConfigMerger(), SupportedServices.Radarr),
-            Sonarr = ProcessIncludes(config.Sonarr, new SonarrConfigMerger(), SupportedServices.Sonarr)
-        };
+            config = config with
+            {
+                Radarr = ProcessIncludes(config.Radarr, new RadarrConfigMerger(), SupportedServices.Radarr),
+                Sonarr = ProcessIncludes(config.Sonarr, new SonarrConfigMerger(), SupportedServices.Sonarr)
+            };
+        }
+        finally
+        {
+            _logScope?.Dispose();
+        }
+
+        return config;
     }
 
     private Dictionary<string, T>? ProcessIncludes<T>(
@@ -44,7 +62,11 @@ public class IncludePostProcessor(
 
             // Combine all includes together first
             var aggregateInclude = config.Include
-                .Select(x => LoadYamlInclude<T>(x, serviceType))
+                .Select(x =>
+                {
+                    var include = LoadYamlInclude<T>(x, serviceType);
+                    return deprecations.CheckAndTransform(include);
+                })
                 .Aggregate(new T(), merger.Merge);
 
             // Merge the config into the aggregated includes so that root config values overwrite included values.
@@ -61,11 +83,11 @@ public class IncludePostProcessor(
         return mergedConfigs;
     }
 
-    private T LoadYamlInclude<T>(IYamlInclude includeType, SupportedServices serviceType)
+    private T LoadYamlInclude<T>(IYamlInclude includeDirective, SupportedServices serviceType)
         where T : ServiceConfigYaml
     {
-        var yamlFile = includeResolver.GetIncludePath(includeType, serviceType);
-        using var logScope = LogContext.PushProperty(LogProperty.Scope, $"Include {yamlFile.Name}");
+        var yamlFile = includeResolver.GetIncludePath(includeDirective, serviceType);
+        _logScope = LogContext.PushProperty(LogProperty.Scope, $"Include {yamlFile.Name}");
 
         var configToMerge = parser.Load<T>(yamlFile);
         if (configToMerge is null)

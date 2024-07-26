@@ -19,7 +19,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new List<string> {"01234567890123456789012345678901"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -52,7 +52,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new[] {"valid"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -85,7 +85,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new[] {"valid"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -119,7 +119,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new[] {"valid"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -155,7 +155,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new List<string> {"valid"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -188,7 +188,7 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new List<string> {"valid"},
-                    QualityProfiles = new List<QualityScoreConfigYaml>
+                    AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
                         {
@@ -207,7 +207,7 @@ public class YamlConfigValidatorTest
         var result = validator.TestValidate(config);
 
         result.ShouldHaveValidationErrorFor(FirstCf +
-            $"{nameof(CustomFormatConfig.QualityProfiles)}[0].{nameof(QualityProfileScoreConfig.Name)}");
+            $"{nameof(CustomFormatConfig.AssignScoresTo)}[0].{nameof(AssignScoresToConfig.Name)}");
     }
 
     [Test]

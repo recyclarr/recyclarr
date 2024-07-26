@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The node `quality_profiles` under `custom_formats` was renamed to `assign_scores_to` to
+  disambiguate it from the top-level `quality_profiles`. The old name is deprecated until the next
+  major release. See [here][qp_rename] for details.
+
+[qp_rename]: https://recyclarr.dev/wiki/upgrade-guide/v8.0/#assign-scores-to
+
 ### Fixed
 
 - Incorrect URLs were fixed in the local starter config template.

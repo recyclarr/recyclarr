@@ -9,7 +9,7 @@ public class ConfigYamlMapperProfile : Profile
 {
     public ConfigYamlMapperProfile()
     {
-        CreateMap<QualityScoreConfigYaml, QualityProfileScoreConfig>();
+        CreateMap<QualityScoreConfigYaml, AssignScoresToConfig>();
         CreateMap<CustomFormatConfigYaml, CustomFormatConfig>();
         CreateMap<QualitySizeConfigYaml, QualityDefinitionConfig>();
         CreateMap<ResetUnmatchedScoresConfigYaml, ResetUnmatchedScoresConfig>();

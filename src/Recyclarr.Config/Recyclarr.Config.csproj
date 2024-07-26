@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Autofac" />
+    <PackageReference Include="Autofac.Extras.Ordering" />
     <PackageReference Include="AutoMapper" />
     <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
     <PackageReference Include="FluentValidation" />

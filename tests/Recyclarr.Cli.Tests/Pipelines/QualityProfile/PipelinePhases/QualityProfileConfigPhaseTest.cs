@@ -33,7 +33,7 @@ public class QualityProfileConfigPhaseTest
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
-            QualityProfiles = new List<QualityProfileScoreConfig>
+            AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
                 {
@@ -70,7 +70,7 @@ public class QualityProfileConfigPhaseTest
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
-            QualityProfiles = new List<QualityProfileScoreConfig>
+            AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
                 {
@@ -105,7 +105,7 @@ public class QualityProfileConfigPhaseTest
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
-            QualityProfiles = new List<QualityProfileScoreConfig>
+            AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
                 {
@@ -144,7 +144,7 @@ public class QualityProfileConfigPhaseTest
             new CustomFormatConfig
             {
                 TrashIds = new[] {"id1"},
-                QualityProfiles = new List<QualityProfileScoreConfig>
+                AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile1", Score = 100}
                 }
@@ -152,7 +152,7 @@ public class QualityProfileConfigPhaseTest
             new CustomFormatConfig
             {
                 TrashIds = new[] {"id1"},
-                QualityProfiles = new List<QualityProfileScoreConfig>
+                AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile1", Score = 200}
                 }
@@ -160,7 +160,7 @@ public class QualityProfileConfigPhaseTest
             new CustomFormatConfig
             {
                 TrashIds = new[] {"id1"},
-                QualityProfiles = new List<QualityProfileScoreConfig>
+                AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile2", Score = 200}
                 }
@@ -168,7 +168,7 @@ public class QualityProfileConfigPhaseTest
             new CustomFormatConfig
             {
                 TrashIds = new[] {"id1"},
-                QualityProfiles = new List<QualityProfileScoreConfig>
+                AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile2", Score = 100}
                 }
@@ -206,9 +206,9 @@ public class QualityProfileConfigPhaseTest
                 new CustomFormatConfig
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
-                        new QualityProfileScoreConfig {Name = "test_profile"}
+                        new AssignScoresToConfig {Name = "test_profile"}
                     }
                 }
             },
@@ -245,7 +245,7 @@ public class QualityProfileConfigPhaseTest
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = Array.Empty<string>(),
-            QualityProfiles = new List<QualityProfileScoreConfig>
+            AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
                 {
@@ -277,7 +277,7 @@ public class QualityProfileConfigPhaseTest
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
             TrashIds = new[] {"id1", "id2"},
-            QualityProfiles = Array.Empty<QualityProfileScoreConfig>()
+            AssignScoresTo = Array.Empty<AssignScoresToConfig>()
         }));
 
         var context = new QualityProfilePipelineContext();

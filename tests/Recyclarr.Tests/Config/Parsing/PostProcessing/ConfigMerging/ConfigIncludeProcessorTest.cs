@@ -8,14 +8,6 @@ namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 public class ConfigIncludeProcessorTest
 {
     [Test, AutoMockData]
-    public void Can_process_expected_type(
-        ConfigIncludeProcessor sut)
-    {
-        var result = sut.CanProcess(new ConfigYamlInclude());
-        result.Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
     public void Throw_when_null_include_path(
         ConfigIncludeProcessor sut)
     {

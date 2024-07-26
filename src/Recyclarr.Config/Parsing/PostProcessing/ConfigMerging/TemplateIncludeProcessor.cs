@@ -6,11 +6,6 @@ namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 public class TemplateIncludeProcessor(IConfigTemplateGuideService templates) : IIncludeProcessor
 {
-    public bool CanProcess(IYamlInclude includeDirective)
-    {
-        return includeDirective is TemplateYamlInclude;
-    }
-
     public IFileInfo GetPathToConfig(IYamlInclude includeDirective, SupportedServices serviceType)
     {
         var include = (TemplateYamlInclude) includeDirective;

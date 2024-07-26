@@ -17,7 +17,7 @@
           "type": "string"
         }
       },
-      "quality_profiles": {
+      "assign_scores_to": {
         "type": ["null", "array"],
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",
         "items": {

@@ -28,12 +28,12 @@ public record CustomFormatConfig
 {
     public ICollection<string> TrashIds { get; init; } = new List<string>();
 
-    public ICollection<QualityProfileScoreConfig> QualityProfiles { get; init; } =
-        new List<QualityProfileScoreConfig>();
+    public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } =
+        new List<AssignScoresToConfig>();
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public record QualityProfileScoreConfig
+public record AssignScoresToConfig
 {
     public string Name { get; init; } = "";
     public int? Score { get; init; }

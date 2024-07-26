@@ -16,7 +16,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
                     }
@@ -45,7 +45,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
                     }
@@ -70,7 +70,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 100},
                         new QualityScoreConfigYaml {Name = "d", Score = 101},
@@ -80,7 +80,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "f", Score = 100}
                     }
@@ -95,7 +95,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id3", "id4"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "d", Score = 200}
                     }
@@ -103,7 +103,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id5", "id6"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "e", Score = 300}
                     }
@@ -111,7 +111,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 50}
                     }
@@ -130,7 +130,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
                     }
@@ -138,7 +138,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "d", Score = 101}
                     }
@@ -146,7 +146,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1", "id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "e", Score = 102}
                     }
@@ -154,7 +154,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id2"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "f", Score = 100}
                     }
@@ -162,7 +162,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id3", "id4"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "d", Score = 200}
                     }
@@ -170,7 +170,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id5", "id6"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "e", Score = 300}
                     }
@@ -178,7 +178,7 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = new[] {"id1"},
-                    QualityProfiles = new[]
+                    AssignScoresTo = new[]
                     {
                         new QualityScoreConfigYaml {Name = "c", Score = 50}
                     }

@@ -12,7 +12,7 @@ public class ConfigurationLoader(
     ConfigParser parser,
     IMapper mapper,
     ConfigValidationExecutor validator,
-    IEnumerable<IConfigPostProcessor> postProcessors)
+    IOrderedEnumerable<IConfigPostProcessor> postProcessors)
     : IConfigurationLoader
 {
     public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)

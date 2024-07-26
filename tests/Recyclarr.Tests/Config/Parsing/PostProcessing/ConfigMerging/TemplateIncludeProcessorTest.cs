@@ -8,14 +8,6 @@ namespace Recyclarr.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 public class TemplateIncludeProcessorTest
 {
     [Test, AutoMockData]
-    public void Can_process_expected_type(
-        TemplateIncludeProcessor sut)
-    {
-        var result = sut.CanProcess(new TemplateYamlInclude());
-        result.Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
     public void Obtain_path_from_template(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IConfigTemplateGuideService templates,

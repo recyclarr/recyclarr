@@ -64,7 +64,7 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
                 TrashIds = x.A.TrashIds
                     .Except(x.B, StringComparer.InvariantCultureIgnoreCase)
                     .ToList(),
-                QualityProfiles = x.A.ProfileName is not null
+                AssignScoresTo = x.A.ProfileName is not null
                     ? new[] {new QualityScoreConfigYaml {Name = x.A.ProfileName, Score = x.A.Score}}
                     : null
             })
@@ -75,8 +75,8 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
         {
             return cfs
                 .Where(x => x.TrashIds is not null)
-                .SelectMany(x => x is {QualityProfiles.Count: > 0}
-                    ? x.QualityProfiles.Select(y => new FlattenedCfs(y.Name, y.Score, x.TrashIds!))
+                .SelectMany(x => x is {AssignScoresTo.Count: > 0}
+                    ? x.AssignScoresTo.Select(y => new FlattenedCfs(y.Name, y.Score, x.TrashIds!))
                     : new[] {new FlattenedCfs(null, null, x.TrashIds!)})
                 .GroupBy(x => (Name: x.ProfileName, x.Score))
                 .Select(x => new FlattenedCfs(x.Key.Name, x.Key.Score, x.SelectMany(y => y.TrashIds).ToList()))
