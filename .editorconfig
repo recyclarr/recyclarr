@@ -1581,7 +1581,7 @@ resharper_web_config_wrong_module_highlighting = warning
 resharper_web_ignored_path_highlighting = none
 resharper_web_mapped_path_highlighting = hint
 resharper_with_expression_instead_of_initializer_highlighting = suggestion
-resharper_with_expression_modifies_all_members_highlighting = warning
+resharper_with_expression_modifies_all_members_highlighting = suggestion
 resharper_wrong_indent_size_highlighting = none
 resharper_zero_index_from_end_highlighting = warning
 
