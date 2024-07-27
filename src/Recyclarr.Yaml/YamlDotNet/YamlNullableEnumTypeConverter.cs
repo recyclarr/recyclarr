@@ -13,7 +13,7 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
         return Nullable.GetUnderlyingType(type)?.IsEnum ?? false;
     }
 
-    public object? ReadYaml(IParser parser, Type type)
+    public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
     {
         type = Nullable.GetUnderlyingType(type) ??
             throw new ArgumentException("Expected nullable enum type for ReadYaml");
@@ -35,7 +35,7 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
         }
     }
 
-    public void WriteYaml(IEmitter emitter, object? value, Type type)
+    public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
     {
         type = Nullable.GetUnderlyingType(type) ??
             throw new ArgumentException("Expected nullable enum type for WriteYaml");

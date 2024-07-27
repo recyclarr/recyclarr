@@ -12,7 +12,8 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
         IParser reader,
         Type expectedType,
         Func<IParser, Type, object?> nestedObjectDeserializer,
-        out object? value)
+        out object? value,
+        ObjectDeserializer rootDeserializer)
     {
         value = null;
 
