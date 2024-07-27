@@ -35,7 +35,7 @@
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="21.0.26" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="2.2.5" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.0.26" />
-    <PackageVersion Include="YamlDotNet" Version="15.3.0" />
+    <PackageVersion Include="YamlDotNet" Version="16.0.0" />
   </ItemGroup>
   <!-- Unit Test Packages -->
   <!--
