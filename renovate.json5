@@ -2,7 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":disableRateLimiting"],
   "minimumReleaseAge": "5 days",
+  "ignorePresets": ["mergeConfidence:all-badges"],
   "packageRules": [
+    {
+      "matchDatasources": ["nuget"],
+      "matchUpdateTypes": ["patch", "minor", "major"],
+      "prBodyColumns": ["Package", "Update", "Change", "Age", "Confidence", "Pending"]
+    },
     {
       "matchFileNames": ["*.props", "*.csproj"],
       "commitMessagePrefix": "build(deps):"
