@@ -10,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.QualitySize;
     "Context objects are similar to DTOs; for usability we want to assign not append")]
 public class QualitySizePipelineContext : IPipelineContext
 {
-    public string PipelineDescription => "Quality Definition Pipeline";
+    public string PipelineDescription => "Quality Definition";
     public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
     {
         SupportedServices.Sonarr,

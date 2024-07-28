@@ -13,10 +13,12 @@ public class GenericSyncPipeline<TContext>(
     public async Task Execute(ISyncSettings settings, CancellationToken ct)
     {
         var context = new TContext();
+
+        log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
+
         if (!context.SupportedServiceTypes.Contains(config.ServiceType))
         {
-            log.Debug("Skipping {Description} because it does not support service type {Service}",
-                context.PipelineDescription, config.ServiceType);
+            log.Debug("Skipping this pipeline because it does not support service type {Service}", config.ServiceType);
             return;
         }
 

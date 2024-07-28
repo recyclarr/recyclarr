@@ -8,7 +8,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
 public class CustomFormatPipelineContext : IPipelineContext
 {
-    public string PipelineDescription => "Custom Format Pipeline";
+    public string PipelineDescription => "Custom Format";
     public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
     {
         SupportedServices.Sonarr,

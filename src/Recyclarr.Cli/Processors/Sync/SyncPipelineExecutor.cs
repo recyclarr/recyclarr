@@ -27,7 +27,6 @@ public class SyncPipelineExecutor(
 
         foreach (var pipeline in pipelines)
         {
-            log.Debug("Executing Pipeline: {Pipeline}", pipeline.GetType().Name);
             await pipeline.Execute(settings, ct);
         }
 

@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
 public class MediaNamingPipelineContext : IPipelineContext
 {
-    public string PipelineDescription => "Media Naming Pipeline";
+    public string PipelineDescription => "Media Naming";
     public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
     {
         SupportedServices.Sonarr,
