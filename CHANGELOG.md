@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The node `quality_profiles` under `custom_formats` was renamed to `assign_scores_to` to
   disambiguate it from the top-level `quality_profiles`. The old name is deprecated until the next
   major release. See [here][qp_rename] for details.
+- Quality Definition: Improved information about sync result in console output.
 
 [qp_rename]: https://recyclarr.dev/wiki/upgrade-guide/v8.0/#assign-scores-to
 
