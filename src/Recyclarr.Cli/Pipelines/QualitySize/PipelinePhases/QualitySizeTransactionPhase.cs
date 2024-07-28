@@ -23,7 +23,20 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
                 continue;
             }
 
-            if (!QualityIsDifferent(serverEntry, qualityData))
+            var isDifferent = QualityIsDifferent(serverEntry, qualityData);
+
+            log.Debug("Processed Quality {Name}: " +
+                "[IsDifferent: {IsDifferent}] " +
+                "[Min: {Min1},{Min2}] " +
+                "[Max: {Max1},{Max2}] " +
+                "[Preferred: {Preferred1},{Preferred2}]",
+                serverEntry.Quality?.Name,
+                isDifferent,
+                serverEntry.MinSize, qualityData.Min,
+                serverEntry.MaxSize, qualityData.Max,
+                serverEntry.PreferredSize, qualityData.Preferred);
+
+            if (!isDifferent)
             {
                 continue;
             }
@@ -33,19 +46,13 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
             serverEntry.MaxSize = qualityData.MaxForApi;
             serverEntry.PreferredSize = qualityData.PreferredForApi;
             newQuality.Add(serverEntry);
-
-            log.Debug("Setting Quality " +
-                "[Name: {Name}] [Source: {Source}] [Min: {Min}] [Max: {Max}] [Preferred: {Preferred}]",
-                serverEntry.Quality?.Name, serverEntry.Quality?.Source, serverEntry.MinSize, serverEntry.MaxSize,
-                serverEntry.PreferredSize);
         }
 
         context.TransactionOutput = newQuality;
     }
 
-    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualitySizeItem b)
+    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItemWithPreferred b)
     {
-        return b.IsMinDifferent(a.MinSize) || b.IsMaxDifferent(a.MaxSize) ||
-            a.PreferredSize is not null && b.IsPreferredDifferent(a.PreferredSize);
+        return b.IsMinDifferent(a.MinSize) || b.IsMaxDifferent(a.MaxSize) || b.IsPreferredDifferent(a.PreferredSize);
     }
 }

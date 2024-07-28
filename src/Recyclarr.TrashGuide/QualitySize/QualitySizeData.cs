@@ -3,5 +3,6 @@ namespace Recyclarr.TrashGuide.QualitySize;
 public record QualitySizeData
 {
     public string Type { get; init; } = "";
-    public IReadOnlyCollection<QualitySizeItem> Qualities { get; init; } = Array.Empty<QualitySizeItem>();
+    public IReadOnlyCollection<QualityItemWithPreferred> Qualities { get; init; } =
+        Array.Empty<QualityItemWithPreferred>();
 }

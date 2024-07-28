@@ -33,10 +33,18 @@ public class QualityItem(string quality, decimal min, decimal max)
         return serviceValue != Min;
     }
 
-    public bool IsMaxDifferent(decimal? serviceValue)
+    protected static bool ValueWithThresholdIsDifferent(decimal? serviceValue, decimal guideValue, decimal threshold)
     {
         return serviceValue == null
-            ? MaxUnlimitedThreshold != Max
-            : serviceValue != Max || MaxUnlimitedThreshold == Max;
+            // If the service uses null, it's the same if the guide value == the max that null represents
+            ? guideValue != threshold
+            // If the service value is not null, it's the same only if it isn't the max value or the same as the guide
+            // If it's at max, that means we need to switch it to 'null' on the API so it gets treated as unlimited.
+            : guideValue != serviceValue || guideValue == threshold;
+    }
+
+    public bool IsMaxDifferent(decimal? serviceValue)
+    {
+        return ValueWithThresholdIsDifferent(serviceValue, Max, MaxUnlimitedThreshold);
     }
 }

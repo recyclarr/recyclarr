@@ -12,7 +12,7 @@ public class QualitySizeLogPhase(ILogger log) : ILogPipelinePhase<QualitySizePip
             return true;
         }
 
-        if (context.ConfigOutput is null)
+        if (context.ConfigOutput is not {Qualities.Count: > 0})
         {
             log.Debug("No Quality Definitions to process");
             return true;

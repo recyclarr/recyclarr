@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Incorrect URLs were fixed in the local starter config template.
+- Quality Definition: Preferred quality setting would not sync in certain situations (#301).
 
 ## [7.1.1] - 2024-07-12
 

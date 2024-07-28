@@ -1,6 +1,6 @@
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualitySizeItem(string quality, decimal min, decimal max, decimal preferred)
+public class QualityItemWithPreferred(string quality, decimal min, decimal max, decimal preferred)
     : QualityItem(quality, min, max)
 {
     public const decimal PreferredUnlimitedThreshold = 395;
@@ -17,8 +17,6 @@ public class QualitySizeItem(string quality, decimal min, decimal max, decimal p
 
     public bool IsPreferredDifferent(decimal? serviceValue)
     {
-        return serviceValue == null
-            ? PreferredUnlimitedThreshold != Preferred
-            : serviceValue != Preferred || PreferredUnlimitedThreshold == Preferred;
+        return ValueWithThresholdIsDifferent(serviceValue, Preferred, PreferredUnlimitedThreshold);
     }
 }
