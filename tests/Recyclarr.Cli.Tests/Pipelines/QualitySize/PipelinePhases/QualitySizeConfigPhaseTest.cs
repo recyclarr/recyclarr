@@ -90,7 +90,7 @@ public class QualitySizeConfigPhaseTest
                 Type = "real",
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("quality1", 0, 100, 90)
+                    new QualityItem("quality1", 0, 100, 90)
                 }
             }
         });
@@ -102,7 +102,7 @@ public class QualitySizeConfigPhaseTest
         context.ConfigOutput.Should().NotBeNull();
         context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
             {
-                new QualityItemWithPreferred("quality1", 0, 100, 50)
+                new QualityItem("quality1", 0, 100, 50)
             },
             o => o
                 .Including(x => x.Quality)
@@ -129,7 +129,7 @@ public class QualitySizeConfigPhaseTest
                 Type = "real",
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("quality1", 0, 100, 90)
+                    new QualityItem("quality1", 0, 100, 90)
                 }
             }
         });
@@ -141,7 +141,7 @@ public class QualitySizeConfigPhaseTest
         context.ConfigOutput.Should().NotBeNull();
         context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
             {
-                new QualityItemWithPreferred("quality1", 0, 100, 90)
+                new QualityItem("quality1", 0, 100, 90)
             },
             o => o
                 .Including(x => x.Quality)

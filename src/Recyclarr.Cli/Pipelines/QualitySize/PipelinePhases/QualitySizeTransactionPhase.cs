@@ -51,7 +51,7 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
         context.TransactionOutput = newQuality;
     }
 
-    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItemWithPreferred b)
+    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItem b)
     {
         return b.IsMinDifferent(a.MinSize) || b.IsMaxDifferent(a.MaxSize) || b.IsPreferredDifferent(a.PreferredSize);
     }

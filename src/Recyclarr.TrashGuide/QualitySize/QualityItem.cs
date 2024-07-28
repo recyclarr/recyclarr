@@ -3,21 +3,25 @@ using System.Text;
 
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualityItem(string quality, decimal min, decimal max)
+public class QualityItem(string quality, decimal min, decimal max, decimal preferred)
 {
     public const decimal MaxUnlimitedThreshold = 400;
+    public const decimal PreferredUnlimitedThreshold = 395;
 
     public string Quality { get; } = quality;
     public decimal Min { get; } = min;
+    public decimal Preferred { get; set; } = preferred;
     public decimal Max { get; } = max;
 
-    public decimal? MaxForApi => Max < MaxUnlimitedThreshold ? Max : null;
     public decimal MinForApi => Min;
+    public decimal? PreferredForApi => Preferred < PreferredUnlimitedThreshold ? Preferred : null;
+    public decimal? MaxForApi => Max < MaxUnlimitedThreshold ? Max : null;
 
     public string AnnotatedMin => Min.ToString(CultureInfo.InvariantCulture);
+    public string AnnotatedPreferred => AnnotatedValue(Preferred, PreferredUnlimitedThreshold);
     public string AnnotatedMax => AnnotatedValue(Max, MaxUnlimitedThreshold);
 
-    protected static string AnnotatedValue(decimal value, decimal threshold)
+    private static string AnnotatedValue(decimal value, decimal threshold)
     {
         var builder = new StringBuilder(value.ToString(CultureInfo.InvariantCulture));
         if (value >= threshold)
@@ -33,7 +37,17 @@ public class QualityItem(string quality, decimal min, decimal max)
         return serviceValue != Min;
     }
 
-    protected static bool ValueWithThresholdIsDifferent(decimal? serviceValue, decimal guideValue, decimal threshold)
+    public bool IsPreferredDifferent(decimal? serviceValue)
+    {
+        return ValueWithThresholdIsDifferent(serviceValue, Preferred, PreferredUnlimitedThreshold);
+    }
+
+    public bool IsMaxDifferent(decimal? serviceValue)
+    {
+        return ValueWithThresholdIsDifferent(serviceValue, Max, MaxUnlimitedThreshold);
+    }
+
+    private static bool ValueWithThresholdIsDifferent(decimal? serviceValue, decimal guideValue, decimal threshold)
     {
         return serviceValue == null
             // If the service uses null, it's the same if the guide value == the max that null represents
@@ -43,8 +57,9 @@ public class QualityItem(string quality, decimal min, decimal max)
             : guideValue != serviceValue || guideValue == threshold;
     }
 
-    public bool IsMaxDifferent(decimal? serviceValue)
+    public decimal InterpolatedPreferred(decimal ratio)
     {
-        return ValueWithThresholdIsDifferent(serviceValue, Max, MaxUnlimitedThreshold);
+        var cappedMax = Math.Min(Max, PreferredUnlimitedThreshold);
+        return Math.Round(Min + (cappedMax - Min) * ratio, 1);
     }
 }

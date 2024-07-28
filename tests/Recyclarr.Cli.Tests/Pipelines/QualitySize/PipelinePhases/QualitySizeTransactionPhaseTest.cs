@@ -18,8 +18,8 @@ public class QualitySizeTransactionPhaseTest
             {
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("non_existent1", 0, 2, 1),
-                    new QualityItemWithPreferred("non_existent2", 0, 2, 1)
+                    new QualityItem("non_existent1", 0, 2, 1),
+                    new QualityItem("non_existent2", 0, 2, 1)
                 }
             },
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
@@ -46,8 +46,8 @@ public class QualitySizeTransactionPhaseTest
             {
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("same1", 0, 2, 1),
-                    new QualityItemWithPreferred("same2", 0, 2, 1)
+                    new QualityItem("same1", 0, 2, 1),
+                    new QualityItem("same2", 0, 2, 1)
                 }
             },
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
@@ -84,8 +84,8 @@ public class QualitySizeTransactionPhaseTest
             {
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("same1", 0, 2, 1),
-                    new QualityItemWithPreferred("different1", 0, 3, 1)
+                    new QualityItem("same1", 0, 2, 1),
+                    new QualityItem("different1", 0, 3, 1)
                 }
             },
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>

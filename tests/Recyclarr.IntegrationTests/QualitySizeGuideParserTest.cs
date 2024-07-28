@@ -25,8 +25,8 @@ public class QualitySizeGuideParserTest : IntegrationTestFixture
                 Type = "series",
                 Qualities = new[]
                 {
-                    new QualityItemWithPreferred("quality1", 1, 2, 3),
-                    new QualityItemWithPreferred("quality2", 4.1m, 5.1m, 6.1m)
+                    new QualityItem("quality1", 1, 2, 3),
+                    new QualityItem("quality2", 4.1m, 5.1m, 6.1m)
                 }
             }
         });
