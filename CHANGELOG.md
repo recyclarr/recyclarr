@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.0] - 2024-07-28
+
 ### Changed
 
 - The node `quality_profiles` under `custom_formats` was renamed to `assign_scores_to` to
@@ -1004,7 +1006,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.1.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.2.0...HEAD
+[7.2.0]: https://github.com/recyclarr/recyclarr/compare/v7.1.1...v7.2.0
 [7.1.1]: https://github.com/recyclarr/recyclarr/compare/v7.1.0...v7.1.1
 [7.1.0]: https://github.com/recyclarr/recyclarr/compare/v7.0.0...v7.1.0
 [7.0.0]: https://github.com/recyclarr/recyclarr/compare/v6.0.2...v7.0.0
