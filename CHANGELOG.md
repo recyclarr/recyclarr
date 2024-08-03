@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Quality Definition: Eliminated continuous syncing when no changes are present due to Radarr's
+  adjustment of the upper limit for "Preferred" from 395 to 399.
+
 ## [7.2.0] - 2024-07-28
 
 ### Changed
