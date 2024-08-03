@@ -1,0 +1,12 @@
+using Recyclarr.TrashGuide.QualitySize;
+
+namespace Recyclarr.Tests.TestLibrary;
+
+public static class NewQualitySize
+{
+    public static QualityItemWithLimits WithLimits(string quality, decimal min, decimal max, decimal preferred)
+    {
+        var item = new QualityItem(quality, min, max, preferred);
+        return new QualityItemWithLimits(item, new TestQualityItemLimits());
+    }
+}

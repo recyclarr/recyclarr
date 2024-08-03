@@ -1,7 +1,8 @@
 using Recyclarr.Cli.Pipelines.QualitySize;
+using Recyclarr.Cli.Pipelines.QualitySize.Models;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.ServarrApi.QualityDefinition;
-using Recyclarr.TrashGuide.QualitySize;
+using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
@@ -14,14 +15,10 @@ public class QualitySizeTransactionPhaseTest
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new QualitySizeData
-            {
-                Qualities = new[]
-                {
-                    new QualityItem("non_existent1", 0, 2, 1),
-                    new QualityItem("non_existent2", 0, 2, 1)
-                }
-            },
+            ConfigOutput = new ProcessedQualitySizeData("", [
+                NewQualitySize.WithLimits("non_existent1", 0, 2, 1),
+                NewQualitySize.WithLimits("non_existent2", 0, 2, 1)
+            ]),
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new()
@@ -42,14 +39,10 @@ public class QualitySizeTransactionPhaseTest
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new QualitySizeData
-            {
-                Qualities = new[]
-                {
-                    new QualityItem("same1", 0, 2, 1),
-                    new QualityItem("same2", 0, 2, 1)
-                }
-            },
+            ConfigOutput = new ProcessedQualitySizeData("", [
+                NewQualitySize.WithLimits("same1", 0, 2, 1),
+                NewQualitySize.WithLimits("same2", 0, 2, 1)
+            ]),
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new()
@@ -80,14 +73,10 @@ public class QualitySizeTransactionPhaseTest
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new QualitySizeData
-            {
-                Qualities = new[]
-                {
-                    new QualityItem("same1", 0, 2, 1),
-                    new QualityItem("different1", 0, 3, 1)
-                }
-            },
+            ConfigOutput = new ProcessedQualitySizeData("", [
+                NewQualitySize.WithLimits("same1", 0, 2, 1),
+                NewQualitySize.WithLimits("different1", 0, 3, 1)
+            ]),
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new()

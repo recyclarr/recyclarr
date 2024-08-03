@@ -1,9 +1,9 @@
-using Recyclarr.TrashGuide.QualitySize;
+using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Tests.TrashGuide.QualitySize;
 
 [TestFixture]
-public class QualityItemTest
+public class QualityItemWithLimitsTest
 {
     private static readonly object[] MaxTestValues =
     [
@@ -11,9 +11,10 @@ public class QualityItemTest
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
         new object?[] {100m, null, true},
-        new object?[] {QualityItem.MaxUnlimitedThreshold, null, false},
-        new object?[] {QualityItem.MaxUnlimitedThreshold - 1, null, true},
-        new object?[] {QualityItem.MaxUnlimitedThreshold, QualityItem.MaxUnlimitedThreshold, true}
+        new object?[] {TestQualityItemLimits.MaxUnlimitedThreshold, null, false},
+        new object?[] {TestQualityItemLimits.MaxUnlimitedThreshold - 1, null, true},
+        new object?[] {TestQualityItemLimits.MaxUnlimitedThreshold, TestQualityItemLimits.MaxUnlimitedThreshold, true},
+        new object?[] {399m, null, true}
     ];
 
     private static readonly object[] MinTestValues =
@@ -26,38 +27,38 @@ public class QualityItemTest
     [TestCaseSource(nameof(MaxTestValues))]
     public void MaxDifferent_WithVariousValues_ReturnsExpectedResult(
         decimal guideValue,
-        decimal? radarrValue,
+        decimal? serviceValue,
         bool isDifferent)
     {
-        var data = new QualityItem("", 0, guideValue, 0);
-        data.IsMaxDifferent(radarrValue)
+        var data = NewQualitySize.WithLimits("", 0, guideValue, 0);
+        data.IsMaxDifferent(serviceValue)
             .Should().Be(isDifferent);
     }
 
     [TestCaseSource(nameof(MinTestValues))]
     public void MinDifferent_WithVariousValues_ReturnsExpectedResult(
         decimal guideValue,
-        decimal radarrValue,
+        decimal serviceValue,
         bool isDifferent)
     {
-        var data = new QualityItem("", guideValue, 0, 0);
-        data.IsMinDifferent(radarrValue)
+        var data = NewQualitySize.WithLimits("", guideValue, 0, 0);
+        data.IsMinDifferent(serviceValue)
             .Should().Be(isDifferent);
     }
 
     [Test]
     public void AnnotatedMax_OutsideThreshold_EqualsSameValueWithUnlimited()
     {
-        const decimal testVal = QualityItem.MaxUnlimitedThreshold;
-        var data = new QualityItem("", 0, testVal, 0);
+        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold;
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
         data.AnnotatedMax.Should().Be($"{testVal} (Unlimited)");
     }
 
     [Test]
     public void AnnotatedMax_WithinThreshold_EqualsSameStringValue()
     {
-        const decimal testVal = QualityItem.MaxUnlimitedThreshold - 1;
-        var data = new QualityItem("", 0, testVal, 0);
+        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold - 1;
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
         data.AnnotatedMax.Should().Be($"{testVal}");
     }
 
@@ -65,38 +66,38 @@ public class QualityItemTest
     public void AnnotatedMin_NoThreshold_EqualsSameValue()
     {
         const decimal testVal = 10m;
-        var data = new QualityItem("", 0, testVal, 0);
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
         data.AnnotatedMax.Should().Be($"{testVal}");
     }
 
     [Test]
     public void Max_AboveThreshold_EqualsSameValue()
     {
-        const decimal testVal = QualityItem.MaxUnlimitedThreshold + 1;
-        var data = new QualityItem("", 0, testVal, 0);
-        data.Max.Should().Be(testVal);
+        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold + 1;
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
+        data.Item.Max.Should().Be(testVal);
     }
 
     [Test]
     public void MaxForApi_AboveThreshold_EqualsNull()
     {
-        const decimal testVal = QualityItem.MaxUnlimitedThreshold + 1;
-        var data = new QualityItem("", 0, testVal, 0);
+        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold + 1;
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
         data.MaxForApi.Should().Be(null);
     }
 
     [Test]
     public void MaxForApi_HighestWithinThreshold_EqualsSameValue()
     {
-        const decimal testVal = QualityItem.MaxUnlimitedThreshold - 0.1m;
-        var data = new QualityItem("", 0, testVal, 0);
-        data.MaxForApi.Should().Be(testVal).And.Be(data.Max);
+        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold - 0.1m;
+        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
+        data.MaxForApi.Should().Be(testVal).And.Be(data.Item.Max);
     }
 
     [Test]
     public void MaxForApi_LowestWithinThreshold_EqualsSameValue()
     {
-        var data = new QualityItem("", 0, 0, 0);
+        var data = NewQualitySize.WithLimits("", 0, 0, 0);
         data.MaxForApi.Should().Be(0);
     }
 
@@ -106,11 +107,11 @@ public class QualityItemTest
         new object?[] {100m, 101m, true},
         new object?[] {100m, 98m, true},
         new object?[] {100m, null, true},
-        new object?[] {QualityItem.PreferredUnlimitedThreshold, null, false},
-        new object?[] {QualityItem.PreferredUnlimitedThreshold - 1, null, true},
+        new object?[] {TestQualityItemLimits.PreferredUnlimitedThreshold, null, false},
+        new object?[] {TestQualityItemLimits.PreferredUnlimitedThreshold - 1, null, true},
         new object?[]
         {
-            QualityItem.PreferredUnlimitedThreshold, QualityItem.PreferredUnlimitedThreshold,
+            TestQualityItemLimits.PreferredUnlimitedThreshold, TestQualityItemLimits.PreferredUnlimitedThreshold,
             true
         }
     ];
@@ -118,11 +119,11 @@ public class QualityItemTest
     [TestCaseSource(nameof(PreferredTestValues))]
     public void PreferredDifferent_WithVariousValues_ReturnsExpectedResult(
         decimal guideValue,
-        decimal? radarrValue,
+        decimal? serviceValue,
         bool isDifferent)
     {
-        var data = new QualityItem("", 0, 0, guideValue);
-        data.IsPreferredDifferent(radarrValue)
+        var data = NewQualitySize.WithLimits("", 0, 0, guideValue);
+        data.IsPreferredDifferent(serviceValue)
             .Should().Be(isDifferent);
     }
 
@@ -132,19 +133,19 @@ public class QualityItemTest
         {
             400m,
             1.0m,
-            QualityItem.PreferredUnlimitedThreshold
+            TestQualityItemLimits.PreferredUnlimitedThreshold
         },
         new[]
         {
-            QualityItem.PreferredUnlimitedThreshold,
+            TestQualityItemLimits.PreferredUnlimitedThreshold,
             1.0m,
-            QualityItem.PreferredUnlimitedThreshold
+            TestQualityItemLimits.PreferredUnlimitedThreshold
         },
         new[]
         {
-            QualityItem.PreferredUnlimitedThreshold - 1m,
+            TestQualityItemLimits.PreferredUnlimitedThreshold - 1m,
             1.0m,
-            QualityItem.PreferredUnlimitedThreshold - 1m
+            TestQualityItemLimits.PreferredUnlimitedThreshold - 1m
         },
         new[]
         {
@@ -166,54 +167,54 @@ public class QualityItemTest
         decimal ratio,
         decimal expectedResult)
     {
-        var data = new QualityItem("", 0, max, 0);
+        var data = NewQualitySize.WithLimits("", 0, max, 0);
         data.InterpolatedPreferred(ratio).Should().Be(expectedResult);
     }
 
     [Test]
     public void AnnotatedPreferred_OutsideThreshold_EqualsSameValueWithUnlimited()
     {
-        const decimal testVal = QualityItem.PreferredUnlimitedThreshold;
-        var data = new QualityItem("", 0, 0, testVal);
+        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold;
+        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
         data.AnnotatedPreferred.Should().Be($"{testVal} (Unlimited)");
     }
 
     [Test]
     public void AnnotatedPreferred_WithinThreshold_EqualsSameStringValue()
     {
-        const decimal testVal = QualityItem.PreferredUnlimitedThreshold - 1;
-        var data = new QualityItem("", 0, 0, testVal);
+        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold - 1;
+        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
         data.AnnotatedPreferred.Should().Be($"{testVal}");
     }
 
     [Test]
     public void Preferred_AboveThreshold_EqualsSameValue()
     {
-        const decimal testVal = QualityItem.PreferredUnlimitedThreshold + 1;
-        var data = new QualityItem("", 0, 0, testVal);
-        data.Preferred.Should().Be(testVal);
+        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold + 1;
+        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
+        data.Item.Preferred.Should().Be(testVal);
     }
 
     [Test]
     public void PreferredForApi_AboveThreshold_EqualsNull()
     {
-        const decimal testVal = QualityItem.PreferredUnlimitedThreshold + 1;
-        var data = new QualityItem("", 0, 0, testVal);
+        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold + 1;
+        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
         data.PreferredForApi.Should().Be(null);
     }
 
     [Test]
     public void PreferredForApi_HighestWithinThreshold_EqualsSameValue()
     {
-        const decimal testVal = QualityItem.PreferredUnlimitedThreshold - 0.1m;
-        var data = new QualityItem("", 0, 0, testVal);
-        data.PreferredForApi.Should().Be(testVal).And.Be(data.Preferred);
+        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold - 0.1m;
+        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
+        data.PreferredForApi.Should().Be(testVal).And.Be(data.Item.Preferred);
     }
 
     [Test]
     public void PreferredForApi_LowestWithinThreshold_EqualsSameValue()
     {
-        var data = new QualityItem("", 0, 0, 0);
+        var data = NewQualitySize.WithLimits("", 0, 0, 0);
         data.PreferredForApi.Should().Be(0);
     }
 }

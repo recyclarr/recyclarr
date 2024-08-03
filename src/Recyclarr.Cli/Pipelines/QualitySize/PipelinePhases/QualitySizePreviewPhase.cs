@@ -18,7 +18,7 @@ public class QualitySizePreviewPhase(IAnsiConsole console) : IPreviewPipelinePha
         // Do not check ConfigOutput for null here since the LogPhase checks that for us
         foreach (var q in context.ConfigOutput!.Qualities)
         {
-            var quality = $"[dodgerblue1]{q.Quality}[/]";
+            var quality = $"[dodgerblue1]{q.Item.Quality}[/]";
             table.AddRow(quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
         }
 

@@ -1,11 +1,17 @@
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Cli.Pipelines.QualitySize.Models;
+using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide, IServiceConfiguration config)
+public class QualitySizeConfigPhase(
+    ILogger log,
+    IQualitySizeGuideService guide,
+    IServiceConfiguration config,
+    QualityItemLimitFactory itemFactory)
     : IConfigPipelinePhase<QualitySizePipelineContext>
 {
     public Task Execute(QualitySizePipelineContext context)
@@ -26,12 +32,16 @@ public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide,
             return Task.CompletedTask;
         }
 
-        AdjustPreferredRatio(configSizeData, guideSizeData);
-        context.ConfigOutput = guideSizeData;
+        var sizeDataWithThresholds = guideSizeData.Qualities
+            .Select(x => itemFactory.Create(x, config.ServiceType))
+            .ToList();
+
+        AdjustPreferredRatio(configSizeData, sizeDataWithThresholds);
+        context.ConfigOutput = new ProcessedQualitySizeData(configSizeData.Type, sizeDataWithThresholds);
         return Task.CompletedTask;
     }
 
-    private void AdjustPreferredRatio(QualityDefinitionConfig configSizeData, QualitySizeData guideSizeData)
+    private void AdjustPreferredRatio(QualityDefinitionConfig configSizeData, List<QualityItemWithLimits> guideSizeData)
     {
         if (configSizeData.PreferredRatio is null)
         {
@@ -52,9 +62,9 @@ public class QualitySizeConfigPhase(ILogger log, IQualitySizeGuideService guide,
         }
 
         // Apply a calculated preferred size
-        foreach (var quality in guideSizeData.Qualities)
+        foreach (var quality in guideSizeData)
         {
-            quality.Preferred = quality.InterpolatedPreferred(configSizeData.PreferredRatio.Value);
+            quality.Item.Preferred = quality.InterpolatedPreferred(configSizeData.PreferredRatio.Value);
         }
     }
 }

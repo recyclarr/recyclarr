@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.Generic;
+using Recyclarr.Cli.Pipelines.QualitySize.Models;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
 
@@ -17,7 +17,7 @@ public class QualitySizePipelineContext : IPipelineContext
         SupportedServices.Radarr
     };
 
-    public QualitySizeData? ConfigOutput { get; set; }
+    public ProcessedQualitySizeData? ConfigOutput { get; set; }
     public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = default!;
     public IList<ServiceQualityDefinitionItem> TransactionOutput { get; set; } = default!;
     public string? ConfigError { get; set; }

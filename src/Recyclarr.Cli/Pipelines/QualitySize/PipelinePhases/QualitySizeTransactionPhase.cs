@@ -16,10 +16,11 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
         var newQuality = new Collection<ServiceQualityDefinitionItem>();
         foreach (var qualityData in guideQuality)
         {
-            var serverEntry = serverQuality.FirstOrDefault(q => q.Quality?.Name == qualityData.Quality);
+            var serverEntry = serverQuality.FirstOrDefault(q => q.Quality?.Name == qualityData.Item.Quality);
             if (serverEntry == null)
             {
-                log.Warning("Server lacks quality definition for {Quality}; it will be skipped", qualityData.Quality);
+                log.Warning("Server lacks quality definition for {Quality}; it will be skipped",
+                    qualityData.Item.Quality);
                 continue;
             }
 
@@ -27,14 +28,14 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
 
             log.Debug("Processed Quality {Name}: " +
                 "[IsDifferent: {IsDifferent}] " +
-                "[Min: {Min1},{Min2}] " +
-                "[Max: {Max1},{Max2}] " +
-                "[Preferred: {Preferred1},{Preferred2}]",
+                "[Min: {Min1}, {Min2}] " +
+                "[Max: {Max1}, {Max2} ({MaxLimit})] " +
+                "[Preferred: {Preferred1}, {Preferred2} ({PreferredLimit})]",
                 serverEntry.Quality?.Name,
                 isDifferent,
-                serverEntry.MinSize, qualityData.Min,
-                serverEntry.MaxSize, qualityData.Max,
-                serverEntry.PreferredSize, qualityData.Preferred);
+                serverEntry.MinSize, qualityData.Item.Min,
+                serverEntry.MaxSize, qualityData.Item.Max, qualityData.Limits.MaxLimit,
+                serverEntry.PreferredSize, qualityData.Item.Preferred, qualityData.Limits.PreferredLimit);
 
             if (!isDifferent)
             {
@@ -51,7 +52,7 @@ public class QualitySizeTransactionPhase(ILogger log) : ITransactionPipelinePhas
         context.TransactionOutput = newQuality;
     }
 
-    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItem b)
+    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItemWithLimits b)
     {
         return b.IsMinDifferent(a.MinSize) || b.IsMaxDifferent(a.MaxSize) || b.IsPreferredDifferent(a.PreferredSize);
     }

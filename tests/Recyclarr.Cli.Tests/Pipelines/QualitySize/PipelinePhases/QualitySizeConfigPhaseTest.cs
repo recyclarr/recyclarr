@@ -100,15 +100,10 @@ public class QualitySizeConfigPhaseTest
         sut.Execute(context);
 
         context.ConfigOutput.Should().NotBeNull();
-        context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
-            {
-                new QualityItem("quality1", 0, 100, 50)
-            },
-            o => o
-                .Including(x => x.Quality)
-                .Including(x => x.Min)
-                .Including(x => x.Max)
-                .Including(x => x.Preferred));
+        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo(new[]
+        {
+            new QualityItem("quality1", 0, 100, 50)
+        });
     }
 
     [Test, AutoMockData]
@@ -139,14 +134,9 @@ public class QualitySizeConfigPhaseTest
         sut.Execute(context);
 
         context.ConfigOutput.Should().NotBeNull();
-        context.ConfigOutput!.Qualities.Should().BeEquivalentTo(new[]
-            {
-                new QualityItem("quality1", 0, 100, 90)
-            },
-            o => o
-                .Including(x => x.Quality)
-                .Including(x => x.Min)
-                .Including(x => x.Max)
-                .Including(x => x.Preferred));
+        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo(new[]
+        {
+            new QualityItem("quality1", 0, 100, 90)
+        });
     }
 }
