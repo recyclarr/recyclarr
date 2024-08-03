@@ -2,6 +2,7 @@ using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Config.Models;
+using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
@@ -75,6 +76,7 @@ public class QualitySizeConfigPhaseTest
     public void Preferred_is_set_via_ratio(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimits limits,
         QualitySizeConfigPhase sut)
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig
