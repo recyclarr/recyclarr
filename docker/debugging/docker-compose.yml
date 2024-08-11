@@ -57,6 +57,7 @@ services:
 
   sqlite:
     image: keinos/sqlite3
+    profiles: [manual]
     network_mode: none
     entrypoint: [sqlite3]
     volumes:
