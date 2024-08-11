@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Models;

@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
-using JetBrains.Annotations;
 using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;

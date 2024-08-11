@@ -1,5 +1,4 @@
 using Autofac;
-using JetBrains.Annotations;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Config;

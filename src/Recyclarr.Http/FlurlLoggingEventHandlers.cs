@@ -1,5 +1,4 @@
 using Flurl.Http;
-using JetBrains.Annotations;
 using Serilog;
 
 namespace Recyclarr.Http;

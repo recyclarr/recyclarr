@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat;

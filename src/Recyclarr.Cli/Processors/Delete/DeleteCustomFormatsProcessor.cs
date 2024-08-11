@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
-using JetBrains.Annotations;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config;

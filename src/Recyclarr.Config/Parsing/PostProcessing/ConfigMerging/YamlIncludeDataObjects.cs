@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 

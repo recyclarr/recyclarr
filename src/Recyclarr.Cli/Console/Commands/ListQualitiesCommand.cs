@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Repo;

@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using JetBrains.Annotations;
 using Recyclarr.Platform;
 using Spectre.Console;
 

@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Recyclarr.Settings;
 
 public record TrashRepository : IRepositorySettings

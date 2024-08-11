@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Recyclarr.Common.FluentValidation;
 
 namespace Recyclarr.Config.Parsing;

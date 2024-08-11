@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using JetBrains.Annotations;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 

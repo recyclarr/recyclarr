@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 

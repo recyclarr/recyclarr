@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using JetBrains.Annotations;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

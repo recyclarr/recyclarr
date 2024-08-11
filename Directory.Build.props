@@ -12,6 +12,10 @@
     <!--<DisableGitVersionTask>true</DisableGitVersionTask>-->
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Include="JetBrains.Annotations" />
+  </ItemGroup>
+
   <!--
     To prevent System.Reactive.xml (and other XML docs) from being in the publish dir.
     See: https://github.com/dotnet/reactive/issues/1066#issuecomment-548941146

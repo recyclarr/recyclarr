@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Recyclarr.Config.Parsing;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

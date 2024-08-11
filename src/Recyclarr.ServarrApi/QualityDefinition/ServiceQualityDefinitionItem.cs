@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

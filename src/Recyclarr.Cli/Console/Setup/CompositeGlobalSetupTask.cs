@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Recyclarr.Cli.Console.Setup;
 
 [UsedImplicitly]

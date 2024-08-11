@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using YamlDotNet.Serialization;

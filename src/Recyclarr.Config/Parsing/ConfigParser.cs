@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using JetBrains.Annotations;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Settings;
 using Recyclarr.Yaml;
