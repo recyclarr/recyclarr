@@ -99,7 +99,7 @@ public static class CompositionRoot
     {
         builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();
 
-        builder.RegisterType<GlobalSetupTaskExecutor>();
+        builder.RegisterComposite<CompositeGlobalSetupTask, IGlobalSetupTask>();
         builder.RegisterTypes(
                 typeof(ProgramInformationDisplayTask),
                 typeof(JanitorCleanupTask))

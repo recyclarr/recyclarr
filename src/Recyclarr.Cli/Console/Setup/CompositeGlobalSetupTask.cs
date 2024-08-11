@@ -1,6 +1,9 @@
+using JetBrains.Annotations;
+
 namespace Recyclarr.Cli.Console.Setup;
 
-public class GlobalSetupTaskExecutor(IOrderedEnumerable<IGlobalSetupTask> tasks)
+[UsedImplicitly]
+public class CompositeGlobalSetupTask(IOrderedEnumerable<IGlobalSetupTask> tasks) : IGlobalSetupTask
 {
     public void OnStart()
     {

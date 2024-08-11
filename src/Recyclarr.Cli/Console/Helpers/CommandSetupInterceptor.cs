@@ -12,21 +12,22 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
     private readonly ConsoleAppCancellationTokenSource _ct = new();
     private readonly LoggingLevelSwitch _loggingLevelSwitch;
     private readonly IAppDataSetup _appDataSetup;
-    private readonly Lazy<GlobalSetupTaskExecutor> _taskExecutor;
+    private readonly Lazy<IGlobalSetupTask> _globalTaskSetup;
 
     public CommandSetupInterceptor(
         Lazy<ILogger> log,
         LoggingLevelSwitch loggingLevelSwitch,
         IAppDataSetup appDataSetup,
-        Lazy<GlobalSetupTaskExecutor> taskExecutor)
+        Lazy<IGlobalSetupTask> globalTaskSetup)
     {
         _loggingLevelSwitch = loggingLevelSwitch;
         _appDataSetup = appDataSetup;
-        _taskExecutor = taskExecutor;
+        _globalTaskSetup = globalTaskSetup;
 
         _ct.CancelPressed.Subscribe(_ => log.Value.Information("Exiting due to signal interrupt"));
     }
 
+    // Executed on CLI startup
     public void Intercept(CommandContext context, CommandSettings settings)
     {
         switch (settings)
@@ -36,12 +37,13 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
                 break;
         }
 
-        _taskExecutor.Value.OnStart();
+        _globalTaskSetup.Value.OnStart();
     }
 
+    // Executed on CLI exit
     public void InterceptResult(CommandContext context, CommandSettings settings, ref int result)
     {
-        _taskExecutor.Value.OnFinish();
+        _globalTaskSetup.Value.OnFinish();
     }
 
     private void HandleBaseCommand(BaseCommandSettings cmd)
