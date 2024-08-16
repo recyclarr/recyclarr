@@ -15,6 +15,7 @@ using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Processors;
+using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Common;
 using Recyclarr.Compatibility;
 using Recyclarr.Config;
@@ -76,6 +77,7 @@ public static class CompositionRoot
         builder.RegisterModule<MediaNamingAutofacModule>();
 
         builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
+        builder.RegisterComposite<CompositeSyncPipeline, ISyncPipeline>();
         builder.RegisterTypes(
                 // ORDER HERE IS IMPORTANT!
                 // There are indirect dependencies between pipelines.

@@ -18,7 +18,6 @@ public class ServiceProcessorsAutofacModule : Module
 
         // Sync
         builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
-        builder.RegisterType<SyncPipelineExecutor>();
 
         // Configuration
         builder.RegisterType<ConfigManipulator>().As<IConfigManipulator>();

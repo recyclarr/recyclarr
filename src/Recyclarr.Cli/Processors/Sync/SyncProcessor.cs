@@ -1,19 +1,23 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
+[UsedImplicitly]
 public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
-    public SyncPipelineExecutor Pipelines { get; } = scope.Resolve<SyncPipelineExecutor>();
+    public ISyncPipeline Pipelines { get; } = scope.Resolve<ISyncPipeline>();
 }
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor(
+    IAnsiConsole console,
     IConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler)
@@ -59,7 +63,17 @@ public class SyncProcessor(
             try
             {
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
-                await scope.Pipelines.Process(settings, ct);
+
+                console.WriteLine(
+                    $"""
+
+                     ===========================================
+                     Processing {config.ServiceType} Server: [{config.InstanceName}]
+                     ===========================================
+
+                     """);
+
+                await scope.Pipelines.Execute(settings, ct);
             }
             catch (Exception e)
             {
