@@ -15,7 +15,7 @@ public class JsonUtilsTest
 
         var path = fs.CurrentDirectory().SubDirectory("doesnt_exist");
 
-        var result = JsonUtils.GetJsonFilesInDirectories(new[] {path}, log);
+        var result = JsonUtils.GetJsonFilesInDirectories([path], log);
 
         result.Should().BeEmpty();
         log.Messages.Should().ContainSingle()
@@ -31,7 +31,7 @@ public class JsonUtilsTest
         var path = fs.CurrentDirectory().SubDirectory("exists").File("test.json");
         fs.AddFile(path.FullName, new MockFileData(""));
 
-        var result = JsonUtils.GetJsonFilesInDirectories(new[] {path.Directory}, log);
+        var result = JsonUtils.GetJsonFilesInDirectories([path.Directory], log);
 
         result.Should().ContainSingle()
             .Which.FullName
@@ -70,7 +70,7 @@ public class JsonUtilsTest
     public void Null_paths_are_ignored()
     {
         var result = JsonUtils.GetJsonFilesInDirectories(
-            new IDirectoryInfo?[] {null, null},
+            [null, null],
             Substitute.For<ILogger>());
 
         result.Should().BeEmpty();

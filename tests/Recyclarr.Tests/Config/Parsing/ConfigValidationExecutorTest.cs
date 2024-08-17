@@ -14,10 +14,9 @@ public class ConfigValidationExecutorTest
         [Frozen] IRuntimeValidationService validationService,
         ConfigValidationExecutor sut)
     {
-        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult(new[]
-        {
+        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult([
             new ValidationFailure("property", "message")
-        }));
+        ]));
 
         var result = sut.Validate(NewConfig.Radarr());
 
@@ -29,10 +28,9 @@ public class ConfigValidationExecutorTest
         [Frozen] IRuntimeValidationService validationService,
         ConfigValidationExecutor sut)
     {
-        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult(new[]
-        {
+        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult([
             new ValidationFailure("property", "message") {Severity = Severity.Warning}
-        }));
+        ]));
 
         var result = sut.Validate(NewConfig.Radarr());
 

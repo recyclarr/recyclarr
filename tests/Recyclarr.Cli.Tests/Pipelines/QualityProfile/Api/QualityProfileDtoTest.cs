@@ -66,11 +66,11 @@ public class QualityProfileDtoTest
     {
         var dto = new QualityProfileDto
         {
-            Items = new[]
-            {
+            Items =
+            [
                 NewQp.QualityDto(1, "one", true),
                 NewQp.QualityDto(2, "two", true)
-            }
+            ]
         };
 
         var result = dto with {Items = Array.Empty<ProfileItemDto>()};

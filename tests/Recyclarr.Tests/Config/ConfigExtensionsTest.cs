@@ -20,7 +20,7 @@ public class ConfigExtensionsTest
 
         var invalidInstanceNames = configs.GetInvalidInstanceNames(new ConfigFilterCriteria
         {
-            Instances = new[] {"valid_name", "invalid_name"}
+            Instances = ["valid_name", "invalid_name"]
         });
 
         invalidInstanceNames.Should().BeEquivalentTo("invalid_name");
@@ -63,7 +63,7 @@ public class ConfigExtensionsTest
         var result = configs.GetConfigsBasedOnSettings(new ConfigFilterCriteria
         {
             Service = SupportedServices.Radarr,
-            Instances = new[] {"radarr2", "radarr4", "radarr5", "sonarr2"}
+            Instances = ["radarr2", "radarr4", "radarr5", "sonarr2"]
         });
 
         result.Select(x => x.InstanceName).Should().BeEquivalentTo("radarr2", "radarr4");

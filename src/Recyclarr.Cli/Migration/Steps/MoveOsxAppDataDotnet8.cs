@@ -13,11 +13,11 @@ public class MoveOsxAppDataDotnet8(
     : IMigrationStep
 {
     public string Description => "Migrate OSX app data to 'Library/Application Support'";
-    public IReadOnlyCollection<string> Remediation => new[]
-    {
+    public IReadOnlyCollection<string> Remediation =>
+    [
         $"Ensure Recyclarr has permission to move {OldAppDataDir} to {NewAppDataDir} and try again",
         $"Move {OldAppDataDir} to {NewAppDataDir} manually if Recyclarr can't do it"
-    };
+    ];
 
     public bool Required => true;
 

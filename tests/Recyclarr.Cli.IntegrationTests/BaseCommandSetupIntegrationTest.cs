@@ -11,11 +11,10 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
     public void Base_command_startup_tasks_are_registered()
     {
         var registrations = Resolve<IEnumerable<IGlobalSetupTask>>();
-        registrations.Select(x => x.GetType()).Should().BeEquivalentTo(new[]
-        {
+        registrations.Select(x => x.GetType()).Should().BeEquivalentTo([
             typeof(JanitorCleanupTask),
             typeof(ProgramInformationDisplayTask)
-        });
+        ]);
     }
 
     [Test]

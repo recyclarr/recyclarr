@@ -18,13 +18,13 @@ public class UpdatedQualityProfileValidatorTest
 
         var updatedProfile = new UpdatedQualityProfile
         {
-            UpdatedScores = new[]
-            {
+            UpdatedScores =
+            [
                 NewQp.UpdatedScore("foo1", 0, 100, FormatScoreUpdateReason.New),
                 NewQp.UpdatedScore("foo2", 0, -100, FormatScoreUpdateReason.Updated),
                 NewQp.UpdatedScore("foo3", 0, 200, FormatScoreUpdateReason.NoChange),
                 NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset)
-            },
+            ],
             ProfileDto = new QualityProfileDto {Name = "ProfileName"},
             ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.Changed
@@ -60,7 +60,7 @@ public class UpdatedQualityProfileValidatorTest
         {
             UpdatedQualities = new UpdatedQualities
             {
-                InvalidQualityNames = new[] {"foo1"}
+                InvalidQualityNames = ["foo1"]
             },
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewQp.Processed(profileConfig),
@@ -105,10 +105,10 @@ public class UpdatedQualityProfileValidatorTest
         {
             ProfileDto = new QualityProfileDto
             {
-                Items = new[]
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "disabled_quality", false)
-                }
+                ]
             },
             ProfileConfig = NewQp.Processed(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New

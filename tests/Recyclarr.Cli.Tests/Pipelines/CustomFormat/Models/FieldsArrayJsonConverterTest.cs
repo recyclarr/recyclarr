@@ -41,11 +41,10 @@ public class FieldsArrayJsonConverterTest
         var result =
             JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
 
-        result!.Fields.Should().BeEquivalentTo(new[]
-        {
+        result!.Fields.Should().BeEquivalentTo([
             new CustomFormatFieldData {Value = 25},
             new CustomFormatFieldData {Value = 40}
-        });
+        ]);
     }
 
     [Test]
@@ -69,10 +68,9 @@ public class FieldsArrayJsonConverterTest
         var result =
             JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
 
-        result!.Fields.Should().BeEquivalentTo(new[]
-        {
+        result!.Fields.Should().BeEquivalentTo([
             new CustomFormatFieldData {Value = "25"}
-        });
+        ]);
     }
 
     [Test]

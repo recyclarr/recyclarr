@@ -77,15 +77,15 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         var args = new List<string> {"clone"};
         if (branch is not null)
         {
-            args.AddRange(new[] {"-b", branch});
+            args.AddRange(["-b", branch]);
         }
 
         if (depth != 0)
         {
-            args.AddRange(new[] {"--depth", depth.ToString()});
+            args.AddRange(["--depth", depth.ToString()]);
         }
 
-        args.AddRange(new[] {cloneUrl.ToString(), "."});
+        args.AddRange([cloneUrl.ToString(), "."]);
         await RunGitCmd(token, args);
     }
 }

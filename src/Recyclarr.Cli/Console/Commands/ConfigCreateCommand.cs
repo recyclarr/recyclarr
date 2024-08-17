@@ -28,7 +28,7 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
             "One or more template configuration files to create. Use `config list templates` to get a list of " +
             "names accepted here.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] TemplatesOption { get; init; } = Array.Empty<string>();
+        public string[] TemplatesOption { get; init; } = [];
         public IReadOnlyCollection<string> Templates => TemplatesOption;
 
         [CommandOption("-f|--force")]

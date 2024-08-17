@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 public class QualityItemOrganizer
 {
-    private readonly List<string> _invalidItemNames = new();
+    private readonly List<string> _invalidItemNames = [];
 
     public UpdatedQualities OrganizeItems(QualityProfileDto dto, QualityProfileConfig config)
     {
@@ -88,7 +88,7 @@ public class QualityItemOrganizer
             if (wantedItems.FindQualityByName(dto.Quality.Name) is null)
             {
                 // Not in wanted list, so we keep
-                return new[] {dto};
+                return [dto];
             }
         }
         // Group
@@ -106,15 +106,15 @@ public class QualityItemOrganizer
             }
 
             // If the group is NOT in the wanted list, keep the group and add its children (if they are not wanted)
-            return new[]
-            {
+            return
+            [
                 dto with
                 {
                     Items = unwantedQualities
                         .Select(y => y with {Allowed = false})
                         .ToList()
                 }
-            };
+            ];
         }
 
         return Array.Empty<ProfileItemDto>();

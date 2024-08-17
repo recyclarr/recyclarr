@@ -31,13 +31,12 @@ public class CustomFormatCacheTest
         var cache = CfCache.New();
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
             new TrashIdMapping("3", "three", 3),
             new TrashIdMapping("4", "four", 4)
-        });
+        ]);
     }
 
     [Test]
@@ -63,12 +62,11 @@ public class CustomFormatCacheTest
 
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
             new TrashIdMapping("4", "four", 4)
-        });
+        ]);
     }
 
     [Test]
@@ -89,11 +87,10 @@ public class CustomFormatCacheTest
 
         cache.RemoveStale(serviceCfs);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2)
-        });
+        ]);
     }
 
     [Test]
@@ -116,11 +113,10 @@ public class CustomFormatCacheTest
 
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2)
-        });
+        ]);
     }
 
     [Test]
@@ -152,13 +148,12 @@ public class CustomFormatCacheTest
 
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one_new", 1),
             new TrashIdMapping("2", "two_new", 2),
             new TrashIdMapping("3", "three_new", 3),
             new TrashIdMapping("4", "four_new", 4)
-        });
+        ]);
     }
 
     [Test]
@@ -176,13 +171,12 @@ public class CustomFormatCacheTest
 
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
             new TrashIdMapping("3", "three", 3),
             new TrashIdMapping("4", "four", 4)
-        });
+        ]);
     }
 
     [Test]
@@ -199,12 +193,11 @@ public class CustomFormatCacheTest
 
         cache.Update(transactions);
 
-        cache.TrashIdMappings.Should().BeEquivalentTo(new[]
-        {
+        cache.TrashIdMappings.Should().BeEquivalentTo([
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
             new TrashIdMapping("3", "three", 3),
             new TrashIdMapping("4", "four", 4)
-        }, o => o.WithStrictOrdering());
+        ], o => o.WithStrictOrdering());
     }
 }

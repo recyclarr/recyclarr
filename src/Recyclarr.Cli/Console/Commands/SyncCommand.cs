@@ -29,7 +29,7 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
         [CommandOption("-c|--config")]
         [Description("One or more YAML configuration files to load & use.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] ConfigsOption { get; init; } = Array.Empty<string>();
+        public string[] ConfigsOption { get; init; } = [];
         public IReadOnlyCollection<string> Configs => ConfigsOption;
 
         [CommandOption("-p|--preview")]
@@ -40,7 +40,7 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
         [CommandOption("-i|--instance")]
         [Description("One or more instance names to sync. If not specified, all instances will be synced.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] InstancesOption { get; init; } = Array.Empty<string>();
+        public string[] InstancesOption { get; init; } = [];
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 

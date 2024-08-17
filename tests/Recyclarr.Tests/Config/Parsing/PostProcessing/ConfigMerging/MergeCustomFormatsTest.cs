@@ -11,17 +11,17 @@ public class MergeCustomFormatsTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -40,17 +40,17 @@ public class MergeCustomFormatsTest
 
         var rightConfig = new SonarrConfigYaml
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var sut = new SonarrConfigMerger();
@@ -65,58 +65,58 @@ public class MergeCustomFormatsTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 100},
                         new QualityScoreConfigYaml {Name = "d", Score = 101},
                         new QualityScoreConfigYaml {Name = "e", Score = 102}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "f", Score = 100}
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var rightConfig = new SonarrConfigYaml
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id3", "id4"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id3", "id4"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "d", Score = 200}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id5", "id6"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id5", "id6"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "e", Score = 300}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 50}
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var sut = new SonarrConfigMerger();
@@ -125,65 +125,65 @@ public class MergeCustomFormatsTest
 
         result.Should().BeEquivalentTo(new SonarrConfigYaml
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "d", Score = 101}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "e", Score = 102}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id2"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "f", Score = 100}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id3", "id4"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id3", "id4"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "d", Score = 200}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id5", "id6"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id5", "id6"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "e", Score = 300}
-                    }
+                    ]
                 },
                 new CustomFormatConfigYaml
                 {
-                    TrashIds = new[] {"id1"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1"],
+                    AssignScoresTo =
+                    [
                         new QualityScoreConfigYaml {Name = "c", Score = 50}
-                    }
+                    ]
                 }
-            }
+            ]
         });
     }
 }

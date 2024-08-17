@@ -39,21 +39,19 @@ public class FileSystemExtensionsTest
     [Test]
     public void Merge_directories_works()
     {
-        var files = FileUtils.NormalizePaths(new[]
-        {
+        var files = FileUtils.NormalizePaths([
             @"path1\1\file1.txt",
             @"path1\1\file2.txt",
             @"path1\1\2\3\4\file3.txt",
             @"path1\file4.txt"
-        });
+        ]);
 
-        var dirs = FileUtils.NormalizePaths(new[]
-        {
+        var dirs = FileUtils.NormalizePaths([
             @"path1\empty1",
             @"path1\empty2",
             @"path1\1\2\empty3",
             @"path1\1\2\3\4\empty4"
-        });
+        ]);
 
         var fs = NewMockFileSystem(files, dirs, @"C:\root\path");
 
@@ -70,12 +68,11 @@ public class FileSystemExtensionsTest
     [Test]
     public void Fail_if_file_already_exists()
     {
-        var files = FileUtils.NormalizePaths(new[]
-        {
+        var files = FileUtils.NormalizePaths([
             @"path1\1\file1.txt",
             @"path1\1\file2.txt",
             @"path2\1\file1.txt"
-        });
+        ]);
 
         var fs = NewMockFileSystem(files, @"C:\root\path");
 
@@ -89,15 +86,13 @@ public class FileSystemExtensionsTest
     [Test]
     public void Fail_if_directory_exists_where_file_goes()
     {
-        var files = FileUtils.NormalizePaths(new[]
-        {
+        var files = FileUtils.NormalizePaths([
             @"path1\1\file1"
-        });
+        ]);
 
-        var dirs = FileUtils.NormalizePaths(new[]
-        {
+        var dirs = FileUtils.NormalizePaths([
             @"path2\1\file1"
-        });
+        ]);
 
         var fs = NewMockFileSystem(files, dirs, @"C:\root\path");
 

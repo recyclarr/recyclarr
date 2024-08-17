@@ -16,13 +16,12 @@ public class ConfigTemplateListerTest
         [Frozen] IConfigTemplateGuideService guideService,
         ConfigListTemplateProcessor sut)
     {
-        guideService.GetTemplateData().Returns(new[]
-        {
+        guideService.GetTemplateData().Returns([
             new TemplatePath {Id = "r1", TemplateFile = stubFile, Service = SupportedServices.Radarr, Hidden = false},
             new TemplatePath {Id = "r2", TemplateFile = stubFile, Service = SupportedServices.Radarr, Hidden = false},
             new TemplatePath {Id = "s1", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = false},
             new TemplatePath {Id = "s2", TemplateFile = stubFile, Service = SupportedServices.Sonarr, Hidden = true}
-        });
+        ]);
 
         var settings = Substitute.For<IConfigListTemplatesSettings>();
         settings.Includes.Returns(false);

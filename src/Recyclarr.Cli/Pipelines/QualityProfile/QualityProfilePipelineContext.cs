@@ -11,11 +11,11 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 public class QualityProfilePipelineContext : IPipelineContext
 {
     public string PipelineDescription => "Quality Definition";
-    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
-    {
+    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
+    [
         SupportedServices.Sonarr,
         SupportedServices.Radarr
-    };
+    ];
 
     public IList<ProcessedQualityProfileData> ConfigOutput { get; set; } = default!;
     public QualityProfileServiceData ApiFetchOutput { get; set; } = default!;

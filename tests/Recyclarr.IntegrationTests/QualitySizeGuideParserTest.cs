@@ -16,20 +16,19 @@ public class QualitySizeGuideParserTest : IntegrationTestFixture
 
         var sut = Resolve<QualitySizeGuideParser>();
 
-        var result = sut.GetQualities(new[] {qualityDir});
+        var result = sut.GetQualities([qualityDir]);
 
-        result.Should().BeEquivalentTo(new[]
-        {
+        result.Should().BeEquivalentTo([
             new QualitySizeData
             {
                 Type = "series",
-                Qualities = new[]
-                {
+                Qualities =
+                [
                     new QualityItem("quality1", 1, 2, 3),
                     new QualityItem("quality2", 4.1m, 5.1m, 6.1m)
-                }
+                ]
             }
-        });
+        ]);
     }
 
     [Test]
@@ -41,7 +40,7 @@ public class QualitySizeGuideParserTest : IntegrationTestFixture
 
         var sut = Resolve<QualitySizeGuideParser>();
 
-        var result = sut.GetQualities(new[] {qualityDir});
+        var result = sut.GetQualities([qualityDir]);
 
         result.Should().BeEmpty();
     }

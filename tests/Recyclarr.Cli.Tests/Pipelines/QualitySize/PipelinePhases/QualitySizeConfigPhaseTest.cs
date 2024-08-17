@@ -31,10 +31,9 @@ public class QualitySizeConfigPhaseTest
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig {Type = "not_real"});
 
-        guide.GetQualitySizeData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetQualitySizeData(default!).ReturnsForAnyArgs([
             new QualitySizeData {Type = "real"}
-        });
+        ]);
 
         var context = new QualitySizePipelineContext();
 
@@ -59,10 +58,9 @@ public class QualitySizeConfigPhaseTest
             PreferredRatio = decimal.Parse(testPreferred)
         });
 
-        guide.GetQualitySizeData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetQualitySizeData(default!).ReturnsForAnyArgs([
             new QualitySizeData {Type = "real"}
-        });
+        ]);
 
         var context = new QualitySizePipelineContext();
 
@@ -85,27 +83,25 @@ public class QualitySizeConfigPhaseTest
             PreferredRatio = 0.5m
         });
 
-        guide.GetQualitySizeData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetQualitySizeData(default!).ReturnsForAnyArgs([
             new QualitySizeData
             {
                 Type = "real",
-                Qualities = new[]
-                {
+                Qualities =
+                [
                     new QualityItem("quality1", 0, 100, 90)
-                }
+                ]
             }
-        });
+        ]);
 
         var context = new QualitySizePipelineContext();
 
         sut.Execute(context);
 
         context.ConfigOutput.Should().NotBeNull();
-        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo(new[]
-        {
+        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo([
             new QualityItem("quality1", 0, 100, 50)
-        });
+        ]);
     }
 
     [Test, AutoMockData]
@@ -119,26 +115,24 @@ public class QualitySizeConfigPhaseTest
             Type = "real"
         });
 
-        guide.GetQualitySizeData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetQualitySizeData(default!).ReturnsForAnyArgs([
             new QualitySizeData
             {
                 Type = "real",
-                Qualities = new[]
-                {
+                Qualities =
+                [
                     new QualityItem("quality1", 0, 100, 90)
-                }
+                ]
             }
-        });
+        ]);
 
         var context = new QualitySizePipelineContext();
 
         sut.Execute(context);
 
         context.ConfigOutput.Should().NotBeNull();
-        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo(new[]
-        {
+        context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo([
             new QualityItem("quality1", 0, 100, 90)
-        });
+        ]);
     }
 }

@@ -24,15 +24,14 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2)
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
-            TrashIds = new[] {"id1", "id2"},
+            TrashIds = ["id1", "id2"],
             AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
@@ -48,10 +47,9 @@ public class QualityProfileConfigPhaseTest
 
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-            {
+        context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
-            },
+            ],
             o => o.Excluding(x => x.ShouldCreate));
     }
 
@@ -61,15 +59,14 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 100, 1),
             NewCf.DataWithScore("", "id2", 200, 2)
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
-            TrashIds = new[] {"id1", "id2"},
+            TrashIds = ["id1", "id2"],
             AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
@@ -83,10 +80,9 @@ public class QualityProfileConfigPhaseTest
         var sut = fixture.Create<QualityProfileConfigPhase>();
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-            {
+        context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
-            },
+            ],
             o => o.Excluding(x => x.ShouldCreate));
     }
 
@@ -96,15 +92,14 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.Data("", "id1", 1),
             NewCf.Data("", "id2", 2)
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
-            TrashIds = new[] {"id1", "id2"},
+            TrashIds = ["id1", "id2"],
             AssignScoresTo = new List<AssignScoresToConfig>
             {
                 new()
@@ -118,10 +113,9 @@ public class QualityProfileConfigPhaseTest
         var sut = fixture.Create<QualityProfileConfigPhase>();
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-            {
+        context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile")
-            },
+            ],
             o => o.Excluding(x => x.ShouldCreate).Excluding(x => x.ScorelessCfs));
     }
 
@@ -131,19 +125,18 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 100, 1)
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(SetupCfs(
             new CustomFormatConfig
             {
-                TrashIds = new[] {"id1"}
+                TrashIds = ["id1"]
             },
             new CustomFormatConfig
             {
-                TrashIds = new[] {"id1"},
+                TrashIds = ["id1"],
                 AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile1", Score = 100}
@@ -151,7 +144,7 @@ public class QualityProfileConfigPhaseTest
             },
             new CustomFormatConfig
             {
-                TrashIds = new[] {"id1"},
+                TrashIds = ["id1"],
                 AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile1", Score = 200}
@@ -159,7 +152,7 @@ public class QualityProfileConfigPhaseTest
             },
             new CustomFormatConfig
             {
-                TrashIds = new[] {"id1"},
+                TrashIds = ["id1"],
                 AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile2", Score = 200}
@@ -167,7 +160,7 @@ public class QualityProfileConfigPhaseTest
             },
             new CustomFormatConfig
             {
-                TrashIds = new[] {"id1"},
+                TrashIds = ["id1"],
                 AssignScoresTo = new List<AssignScoresToConfig>
                 {
                     new() {Name = "test_profile2", Score = 100}
@@ -179,11 +172,10 @@ public class QualityProfileConfigPhaseTest
         var sut = fixture.Create<QualityProfileConfigPhase>();
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-            {
+        context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile1", ("id1", 1, 100)),
                 NewQp.Processed("test_profile2", ("id1", 1, 200))
-            },
+            ],
             o => o.Excluding(x => x.ShouldCreate));
     }
 
@@ -193,33 +185,32 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
             NewCf.DataWithScores("", "id2", 2, ("default", 201), ("set2", 202))
-        });
+        ]);
 
         var config = NewConfig.Radarr() with
         {
-            CustomFormats = new[]
-            {
+            CustomFormats =
+            [
                 new CustomFormatConfig
                 {
-                    TrashIds = new[] {"id1", "id2"},
-                    AssignScoresTo = new[]
-                    {
+                    TrashIds = ["id1", "id2"],
+                    AssignScoresTo =
+                    [
                         new AssignScoresToConfig {Name = "test_profile"}
-                    }
+                    ]
                 }
-            },
-            QualityProfiles = new[]
-            {
+            ],
+            QualityProfiles =
+            [
                 new QualityProfileConfig
                 {
                     Name = "test_profile",
                     ScoreSet = "set1"
                 }
-            }
+            ]
         };
         fixture.Inject<IServiceConfiguration>(config);
 
@@ -227,13 +218,12 @@ public class QualityProfileConfigPhaseTest
         var sut = fixture.Create<QualityProfileConfigPhase>();
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-            {
+        context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 102), ("id2", 2, 201)) with
                 {
                     Profile = config.QualityProfiles.First()
                 }
-            },
+            ],
             o => o.Excluding(x => x.ShouldCreate));
     }
 
@@ -268,15 +258,14 @@ public class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(new[]
-        {
+        cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2)
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(SetupCfs(new CustomFormatConfig
         {
-            TrashIds = new[] {"id1", "id2"},
+            TrashIds = ["id1", "id2"],
             AssignScoresTo = Array.Empty<AssignScoresToConfig>()
         }));
 

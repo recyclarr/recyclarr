@@ -48,10 +48,10 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
             {
                 ["service1"] = new()
                 {
-                    Include = new[]
-                    {
+                    Include =
+                    [
                         new ConfigYamlInclude {Config = configPath.FullName}
-                    }
+                    ]
                 }
             }
         };
@@ -79,10 +79,10 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
             {
                 ["service1"] = new()
                 {
-                    Include = new[]
-                    {
+                    Include =
+                    [
                         new ConfigYamlInclude {Config = configPath.FullName}
-                    }
+                    ]
                 }
             }
         };
@@ -129,22 +129,22 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
                 {
                     BaseUrl = "the_base_url",
                     ApiKey = "the_api_key",
-                    CustomFormats = new[]
-                    {
+                    CustomFormats =
+                    [
                         new CustomFormatConfigYaml
                         {
-                            TrashIds = new[] {"2f22d89048b01681dde8afe203bf2e95"}
+                            TrashIds = ["2f22d89048b01681dde8afe203bf2e95"]
                         }
-                    },
+                    ],
                     QualityDefinition = new QualitySizeConfigYaml
                     {
                         Type = "series"
                     },
-                    Include = new[]
-                    {
+                    Include =
+                    [
                         new ConfigYamlInclude {Config = configPath1.FullName},
                         new ConfigYamlInclude {Config = configPath2.FullName}
-                    }
+                    ]
                 }
             }
         };
@@ -160,24 +160,24 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
                     BaseUrl = "the_base_url",
                     ApiKey = "the_api_key",
                     Include = null,
-                    CustomFormats = new[]
-                    {
+                    CustomFormats =
+                    [
                         new CustomFormatConfigYaml
                         {
-                            TrashIds = new[]
-                            {
+                            TrashIds =
+                            [
                                 "496f355514737f7d83bf7aa4d24f8169",
                                 "240770601cc226190c367ef59aba7463"
-                            }
+                            ]
                         },
                         new CustomFormatConfigYaml
                         {
-                            TrashIds = new[]
-                            {
+                            TrashIds =
+                            [
                                 "2f22d89048b01681dde8afe203bf2e95"
-                            }
+                            ]
                         }
-                    },
+                    ],
                     QualityDefinition = new QualitySizeConfigYaml
                     {
                         Type = "series",

@@ -127,10 +127,10 @@ public class UpdatedQualityProfileTest
             ProfileConfig = NewQp.Processed("config_name"),
             UpdatedQualities = new UpdatedQualities
             {
-                Items = new[]
-                {
+                Items =
+                [
                     new ProfileItemDto()
-                }
+                ]
             },
             UpdateReason = QualityProfileUpdateReason.New
         };

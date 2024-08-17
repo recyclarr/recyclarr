@@ -77,7 +77,7 @@ public abstract class ServiceConfigMerger<T> where T : ServiceConfigYaml
                 .Where(x => x.TrashIds is not null)
                 .SelectMany(x => x is {AssignScoresTo.Count: > 0}
                     ? x.AssignScoresTo.Select(y => new FlattenedCfs(y.Name, y.Score, x.TrashIds!))
-                    : new[] {new FlattenedCfs(null, null, x.TrashIds!)})
+                    : [new FlattenedCfs(null, null, x.TrashIds!)])
                 .GroupBy(x => (Name: x.ProfileName, x.Score))
                 .Select(x => new FlattenedCfs(x.Key.Name, x.Key.Score, x.SelectMany(y => y.TrashIds).ToList()))
                 .ToList();

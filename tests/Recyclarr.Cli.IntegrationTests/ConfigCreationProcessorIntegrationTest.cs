@@ -98,22 +98,20 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
         Fs.AddEmptyFile(repo.Path.File("template-file3.yml"));
 
         var settings = Substitute.For<ICreateConfigSettings>();
-        settings.Templates.Returns(new[]
-        {
+        settings.Templates.Returns([
             "template1",
             "template2",
             // This one shouldn't show up in the results because:
             // User specified it, but no template file exists for it.
             "template4"
-        });
+        ]);
 
         var sut = Resolve<ConfigCreationProcessor>();
         sut.Process(settings);
 
-        Fs.AllFiles.Should().Contain(new[]
-        {
+        Fs.AllFiles.Should().Contain([
             Paths.ConfigsDirectory.File("template-file1.yml").FullName,
             Paths.ConfigsDirectory.File("template-file2.yml").FullName
-        });
+        ]);
     }
 }

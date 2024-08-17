@@ -23,18 +23,17 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         var result = sut.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            ManualConfigFiles = new[] {"manual.yml"}
+            ManualConfigFiles = ["manual.yml"]
         });
 
-        result.Should().BeEquivalentTo(new[]
-        {
+        result.Should().BeEquivalentTo([
             new RadarrConfiguration
             {
                 BaseUrl = new Uri("http://localhost:7878"),
                 ApiKey = "asdf",
                 InstanceName = "instance1"
             }
-        });
+        ]);
     }
 
     [Test]
@@ -44,7 +43,7 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            ManualConfigFiles = new[] {"manual.yml"}
+            ManualConfigFiles = ["manual.yml"]
         });
 
         act.Should().ThrowExactly<InvalidConfigurationFilesException>();
@@ -65,8 +64,8 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            ManualConfigFiles = new[] {"manual.yml"},
-            Instances = new[] {"instance1", "instance2"}
+            ManualConfigFiles = ["manual.yml"],
+            Instances = ["instance1", "instance2"]
         });
 
         act.Should().ThrowExactly<InvalidInstancesException>()
@@ -91,7 +90,7 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            ManualConfigFiles = new[] {"manual.yml"}
+            ManualConfigFiles = ["manual.yml"]
         });
 
         act.Should().ThrowExactly<SplitInstancesException>()
@@ -127,7 +126,7 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            ManualConfigFiles = new[] {"config1.yml", "config2.yml"}
+            ManualConfigFiles = ["config1.yml", "config2.yml"]
         });
 
         act.Should().ThrowExactly<DuplicateInstancesException>()

@@ -9,8 +9,8 @@ public class QualityItemOrganizerTest
 {
     private readonly QualityProfileConfig _config = new()
     {
-        Qualities = new[]
-        {
+        Qualities =
+        [
             NewQp.QualityConfig("one"),
             NewQp.QualityConfig("three"),
             NewQp.QualityConfig("six", false),
@@ -19,13 +19,13 @@ public class QualityItemOrganizerTest
             NewQp.GroupConfig("group3", "eight"),
             NewQp.GroupConfig("group4", false, "nine", "ten"),
             NewQp.GroupConfig("group5", "eleven")
-        }
+        ]
     };
 
     private readonly QualityProfileDto _dto = new()
     {
-        Items = new[]
-        {
+        Items =
+        [
             NewQp.QualityDto(1, "one", true),
             NewQp.QualityDto(2, "two", true),
             NewQp.QualityDto(3, "three", true),
@@ -40,7 +40,7 @@ public class QualityItemOrganizerTest
             NewQp.GroupDto(1002, "group2", true,
                 NewQp.QualityDto(7, "seven", true)),
             NewQp.QualityDto(8, "eight", true)
-        }
+        ]
     };
 
     [Test]
@@ -54,10 +54,10 @@ public class QualityItemOrganizerTest
 
         result.Should().BeEquivalentTo(new UpdatedQualities
         {
-            InvalidQualityNames = new[] {"nonexistent1"},
+            InvalidQualityNames = ["nonexistent1"],
             NumWantedItems = 7,
-            Items = new[]
-            {
+            Items =
+            [
                 // ------ IN CONFIG ------
                 NewQp.QualityDto(1, "one", true),
                 NewQp.QualityDto(3, "three", true),
@@ -74,7 +74,7 @@ public class QualityItemOrganizerTest
                 NewQp.QualityDto(2, "two", false),
                 NewQp.QualityDto(4, "four", false),
                 NewQp.QualityDto(5, "five", false)
-            }
+            ]
         });
     }
 
@@ -89,10 +89,10 @@ public class QualityItemOrganizerTest
 
         result.Should().BeEquivalentTo(new UpdatedQualities
         {
-            InvalidQualityNames = new[] {"nonexistent1"},
+            InvalidQualityNames = ["nonexistent1"],
             NumWantedItems = 7,
-            Items = new[]
-            {
+            Items =
+            [
                 // ------ NOT IN CONFIG ------
                 NewQp.QualityDto(2, "two", false),
                 NewQp.QualityDto(4, "four", false),
@@ -109,7 +109,7 @@ public class QualityItemOrganizerTest
                     NewQp.QualityDto(10, "ten", false)),
                 NewQp.GroupDto(50, "group5", true,
                     NewQp.QualityDto(11, "eleven", true))
-            }
+            ]
         });
     }
 
@@ -118,28 +118,27 @@ public class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig
         {
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 NewQp.QualityConfig("one")
-            }
+            ]
         };
 
         var dto = new QualityProfileDto
         {
-            Items = new[]
-            {
+            Items =
+            [
                 NewQp.GroupDto(1001, "group1", true,
                     NewQp.QualityDto(1, "one", true))
-            }
+            ]
         };
 
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(dto, config);
 
-        result.Items.Should().BeEquivalentTo(new[]
-        {
+        result.Items.Should().BeEquivalentTo([
             NewQp.QualityDto(1, "one", true)
-        });
+        ]);
     }
 
     [Test]
@@ -147,30 +146,29 @@ public class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig
         {
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 NewQp.QualityConfig("one")
-            }
+            ]
         };
 
         var dto = new QualityProfileDto
         {
-            Items = new[]
-            {
+            Items =
+            [
                 NewQp.GroupDto(1001, "group1", true,
                     NewQp.QualityDto(1, "one", true),
                     NewQp.QualityDto(2, "two", true))
-            }
+            ]
         };
 
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(dto, config);
 
-        result.Items.Should().BeEquivalentTo(new[]
-        {
+        result.Items.Should().BeEquivalentTo([
             NewQp.QualityDto(1, "one", true),
             NewQp.QualityDto(2, "two", false)
-        });
+        ]);
     }
 
     [Test]
@@ -178,33 +176,32 @@ public class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig
         {
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 NewQp.QualityConfig("one")
-            }
+            ]
         };
 
         var dto = new QualityProfileDto
         {
-            Items = new[]
-            {
+            Items =
+            [
                 NewQp.GroupDto(1001, "group1", true,
                     NewQp.QualityDto(1, "one", true),
                     NewQp.QualityDto(2, "two", true),
                     NewQp.QualityDto(3, "three", true))
-            }
+            ]
         };
 
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(dto, config);
 
-        result.Items.Should().BeEquivalentTo(new[]
-        {
+        result.Items.Should().BeEquivalentTo([
             NewQp.QualityDto(1, "one", true),
             NewQp.GroupDto(1001, "group1", false,
                 NewQp.QualityDto(2, "two", false),
                 NewQp.QualityDto(3, "three", false))
-        });
+        ]);
     }
 
     [Test]
@@ -212,34 +209,33 @@ public class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig
         {
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 NewQp.GroupConfig("group1", "one", "two", "three")
-            }
+            ]
         };
 
         var dto = new QualityProfileDto
         {
-            Items = new[]
-            {
+            Items =
+            [
                 NewQp.GroupDto(1001, "group1", true,
                     NewQp.QualityDto(1, "one", true),
                     NewQp.QualityDto(2, "two", true),
                     NewQp.QualityDto(3, "three", true),
                     NewQp.QualityDto(4, "four", true))
-            }
+            ]
         };
 
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(dto, config);
 
-        result.Items.Should().BeEquivalentTo(new[]
-        {
+        result.Items.Should().BeEquivalentTo([
             NewQp.GroupDto(1001, "group1", true,
                 NewQp.QualityDto(1, "one", true),
                 NewQp.QualityDto(2, "two", true),
                 NewQp.QualityDto(3, "three", true)),
             NewQp.QualityDto(4, "four", false)
-        });
+        ]);
     }
 }

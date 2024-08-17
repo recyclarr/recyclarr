@@ -12,21 +12,21 @@ public class CustomFormatDataComparerTest
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -34,13 +34,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 7
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -48,36 +48,36 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var b = new CustomFormatData
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -85,13 +85,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 7
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -99,15 +99,15 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         a.Should().BeEquivalentTo(b, o => o.Using(CustomFormatData.Comparer));
@@ -120,21 +120,21 @@ public class CustomFormatDataComparerTest
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -142,13 +142,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 7
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -156,36 +156,36 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var b = new CustomFormatData
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -193,13 +193,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 10 // this is different
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -207,15 +207,15 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var result = CustomFormatData.Comparer.Equals(a, b);
@@ -284,23 +284,23 @@ public class CustomFormatDataComparerTest
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData(),
                 new CustomFormatSpecificationData()
-            }
+            ]
         };
 
         var b = new CustomFormatData
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData(),
                 new CustomFormatSpecificationData(),
                 new CustomFormatSpecificationData()
-            }
+            ]
         };
 
         var result = CustomFormatData.Comparer.Equals(a, b);
@@ -315,21 +315,21 @@ public class CustomFormatDataComparerTest
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -337,13 +337,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 7
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -351,36 +351,36 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var b = new CustomFormatData
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new[]
-            {
+            Specifications =
+            [
                 new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = "\\bEVO(TGX)?\\b"
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -388,13 +388,13 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 7
                         }
-                    }
+                    ]
                 },
                 new CustomFormatSpecificationData
                 {
@@ -402,15 +402,15 @@ public class CustomFormatDataComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new[]
-                    {
+                    Fields =
+                    [
                         new CustomFormatFieldData
                         {
                             Value = 8
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var result = CustomFormatData.Comparer.Equals(a, b);

@@ -9,11 +9,11 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat;
 public class CustomFormatPipelineContext : IPipelineContext
 {
     public string PipelineDescription => "Custom Format";
-    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
-    {
+    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
+    [
         SupportedServices.Sonarr,
         SupportedServices.Radarr
-    };
+    ];
 
     public IList<CustomFormatData> ConfigOutput { get; init; } = [];
     public IList<CustomFormatData> ApiFetchOutput { get; init; } = [];

@@ -16,11 +16,10 @@ public class CustomFormatConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var guide = fixture.Freeze<ICustomFormatGuideService>();
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetCustomFormatData(default!).ReturnsForAnyArgs([
             NewCf.Data("one", "cf1"),
             NewCf.Data("two", "cf2")
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
         {
@@ -41,11 +40,10 @@ public class CustomFormatConfigPhaseTest
         var sut = fixture.Create<CustomFormatConfigPhase>();
         sut.Execute(context);
 
-        context.ConfigOutput.Should().BeEquivalentTo(new[]
-        {
+        context.ConfigOutput.Should().BeEquivalentTo([
             NewCf.Data("one", "cf1"),
             NewCf.Data("two", "cf2")
-        });
+        ]);
     }
 
     [Test]
@@ -54,10 +52,9 @@ public class CustomFormatConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var guide = fixture.Freeze<ICustomFormatGuideService>();
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new[]
-        {
+        guide.GetCustomFormatData(default!).ReturnsForAnyArgs([
             NewCf.Data("", "cf4")
-        });
+        ]);
 
         fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
         {

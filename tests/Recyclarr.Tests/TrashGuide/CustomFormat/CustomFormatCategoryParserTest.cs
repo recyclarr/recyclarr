@@ -67,8 +67,7 @@ public class CustomFormatCategoryParserTest
             );
 
         result.Where(x => x.CategoryName == "Audio Advanced #1").Select(x => (x.CfName, x.CfAnchor))
-            .Should().BeEquivalentTo(new[]
-            {
+            .Should().BeEquivalentTo([
                 ("TrueHD ATMOS", "truehd-atmos"),
                 ("DTS X", "dts-x"),
                 ("ATMOS (undefined)", "atmos-undefined"),
@@ -78,11 +77,10 @@ public class CustomFormatCategoryParserTest
                 ("DD+", "ddplus"),
                 ("DTS-ES", "dts-es"),
                 ("DTS", "dts")
-            });
+            ]);
 
         result.Where(x => x.CategoryName == "Anime").Select(x => (x.CfName, x.CfAnchor))
-            .Should().BeEquivalentTo(new[]
-            {
+            .Should().BeEquivalentTo([
                 ("Anime Web Tier 01 (Muxers)", "anime-web-tier-01-muxers"),
                 ("Anime Web Tier 02 (Top FanSubs)", "anime-web-tier-02-top-fansubs"),
                 ("Anime Web Tier 03 (Official Subs)", "anime-web-tier-03-official-subs"),
@@ -97,6 +95,6 @@ public class CustomFormatCategoryParserTest
                 ("v3", "v3"),
                 ("v4", "v4"),
                 ("VRV", "vrv")
-            });
+            ]);
     }
 }

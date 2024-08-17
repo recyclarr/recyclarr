@@ -158,7 +158,7 @@ public class DeleteCustomFormatsProcessor(
     {
         var configs = configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
         {
-            Instances = new[] {settings.InstanceName}
+            Instances = [settings.InstanceName]
         });
 
         switch (configs.Count)

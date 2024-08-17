@@ -51,7 +51,7 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new[] {"valid"},
+                    TrashIds = ["valid"],
                     AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
@@ -84,7 +84,7 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new[] {"valid"},
+                    TrashIds = ["valid"],
                     AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()
@@ -118,7 +118,7 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new[] {"valid"},
+                    TrashIds = ["valid"],
                     AssignScoresTo = new List<QualityScoreConfigYaml>
                     {
                         new()

@@ -13,8 +13,8 @@ public class MergeQualityProfilesTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            QualityProfiles = new[]
-            {
+            QualityProfiles =
+            [
                 new QualityProfileConfigYaml
                 {
                     Name = "e",
@@ -24,7 +24,7 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = new[] {"except1"}
+                        Except = ["except1"]
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
@@ -32,17 +32,17 @@ public class MergeQualityProfilesTest
                         UntilQuality = "quality1",
                         UntilScore = 200
                     },
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = new[] {"quality"}
+                            Qualities = ["quality"]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -61,8 +61,8 @@ public class MergeQualityProfilesTest
 
         var rightConfig = new SonarrConfigYaml
         {
-            QualityProfiles = new[]
-            {
+            QualityProfiles =
+            [
                 new QualityProfileConfigYaml
                 {
                     Name = "e",
@@ -72,7 +72,7 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = new[] {"except1"}
+                        Except = ["except1"]
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
@@ -80,17 +80,17 @@ public class MergeQualityProfilesTest
                         UntilQuality = "quality1",
                         UntilScore = 200
                     },
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = new[] {"quality"}
+                            Qualities = ["quality"]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var sut = new SonarrConfigMerger();
@@ -106,8 +106,8 @@ public class MergeQualityProfilesTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            QualityProfiles = new[]
-            {
+            QualityProfiles =
+            [
                 new QualityProfileConfigYaml
                 {
                     Name = "e",
@@ -117,7 +117,7 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = new[] {"except1"}
+                        Except = ["except1"]
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
@@ -125,52 +125,52 @@ public class MergeQualityProfilesTest
                         UntilQuality = "quality1",
                         UntilScore = 200
                     },
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = new[] {"quality"}
+                            Qualities = ["quality"]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var rightConfig = new SonarrConfigYaml
         {
-            QualityProfiles = new[]
-            {
+            QualityProfiles =
+            [
                 new QualityProfileConfigYaml
                 {
                     Name = "e",
                     ScoreSet = "set2",
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
-                        Except = new[] {"except2", "except3"}
+                        Except = ["except2", "except3"]
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
                         UntilQuality = "quality2"
                     },
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = false,
                             Name = "quality2",
-                            Qualities = new[] {"quality3"}
+                            Qualities = ["quality3"]
                         },
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality4",
-                            Qualities = new[] {"quality5", "quality6"}
+                            Qualities = ["quality5", "quality6"]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var sut = new SonarrConfigMerger();
@@ -179,8 +179,8 @@ public class MergeQualityProfilesTest
 
         result.Should().BeEquivalentTo(new SonarrConfigYaml
         {
-            QualityProfiles = new[]
-            {
+            QualityProfiles =
+            [
                 new QualityProfileConfigYaml
                 {
                     Name = "e",
@@ -190,7 +190,7 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = new[] {"except1", "except2", "except3"}
+                        Except = ["except1", "except2", "except3"]
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
@@ -198,23 +198,23 @@ public class MergeQualityProfilesTest
                         UntilQuality = "quality2",
                         UntilScore = 200
                     },
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = false,
                             Name = "quality2",
-                            Qualities = new[] {"quality3"}
+                            Qualities = ["quality3"]
                         },
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality4",
-                            Qualities = new[] {"quality5", "quality6"}
+                            Qualities = ["quality5", "quality6"]
                         }
-                    }
+                    ]
                 }
-            }
+            ]
         });
     }
 }

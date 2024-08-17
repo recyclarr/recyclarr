@@ -123,13 +123,12 @@ public class SonarrMediaNamingConfigPhaseTest
             RenameEpisodes = true
         });
 
-        lookup.Errors.Should().BeEquivalentTo(new[]
-        {
+        lookup.Errors.Should().BeEquivalentTo([
             new InvalidNamingConfig("Season Folder Format", "bad1"),
             new InvalidNamingConfig("Series Folder Format", "bad2"),
             new InvalidNamingConfig("Standard Episode Format", "bad3"),
             new InvalidNamingConfig("Daily Episode Format", "bad4"),
             new InvalidNamingConfig("Anime Episode Format", "bad5")
-        });
+        ]);
     }
 }

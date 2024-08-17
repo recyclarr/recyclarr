@@ -29,12 +29,11 @@ public class BulkJsonLoaderIntegrationTest : IntegrationTestFixture
 
         Fs.AddFile(Fs.CurrentDirectory().File("file.json"), new MockFileData(jsonData));
 
-        var result = sut.LoadAllFilesAtPaths<TestGuideObject>(new[] {Fs.CurrentDirectory()});
+        var result = sut.LoadAllFilesAtPaths<TestGuideObject>([Fs.CurrentDirectory()]);
 
-        result.Should().BeEquivalentTo(new[]
-        {
+        result.Should().BeEquivalentTo([
             new TestGuideObject("90cedc1fea7ea5d11298bebd3d1d3223", -10000, "TheName")
-        });
+        ]);
     }
 
     [Test]
@@ -53,11 +52,10 @@ public class BulkJsonLoaderIntegrationTest : IntegrationTestFixture
 
         Fs.AddFile(Fs.CurrentDirectory().File("file.json"), new MockFileData(jsonData));
 
-        var result = sut.LoadAllFilesAtPaths<TestServiceObject>(new[] {Fs.CurrentDirectory()});
+        var result = sut.LoadAllFilesAtPaths<TestServiceObject>([Fs.CurrentDirectory()]);
 
-        result.Should().BeEquivalentTo(new[]
-        {
+        result.Should().BeEquivalentTo([
             new TestServiceObject(22, "FUNi", true)
-        });
+        ]);
     }
 }

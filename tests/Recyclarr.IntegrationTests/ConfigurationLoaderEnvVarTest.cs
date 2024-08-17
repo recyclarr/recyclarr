@@ -25,14 +25,13 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         var config = sut.Load(testYml);
 
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://the_url"),
                 ApiKey = "the_api_key"
             }
-        });
+        ]);
     }
 
     [Test]
@@ -49,13 +48,12 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://sonarr:1233")
             }
-        });
+        ]);
     }
 
     [Test]
@@ -75,13 +73,12 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://somevalue")
             }
-        });
+        ]);
     }
 
     [Test]
@@ -101,14 +98,13 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://theurl"),
                 ApiKey = "the key"
             }
-        });
+        ]);
     }
 
     [Test]
@@ -125,13 +121,12 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://somevalue")
             }
-        });
+        ]);
     }
 
     [Test]
@@ -148,13 +143,12 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
              """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo(new[]
-        {
+        config.Should().BeEquivalentTo([
             new
             {
                 BaseUrl = new Uri("http://somevalue")
             }
-        });
+        ]);
     }
 
     [Test]

@@ -11,11 +11,11 @@ namespace Recyclarr.Cli.Pipelines.QualitySize;
 public class QualitySizePipelineContext : IPipelineContext
 {
     public string PipelineDescription => "Quality Definition";
-    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } = new[]
-    {
+    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
+    [
         SupportedServices.Sonarr,
         SupportedServices.Radarr
-    };
+    ];
 
     public ProcessedQualitySizeData? ConfigOutput { get; set; }
     public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = default!;

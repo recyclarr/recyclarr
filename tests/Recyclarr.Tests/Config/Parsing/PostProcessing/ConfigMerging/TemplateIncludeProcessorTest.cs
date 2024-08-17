@@ -14,15 +14,14 @@ public class TemplateIncludeProcessorTest
         TemplateIncludeProcessor sut)
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns(new[]
-        {
+        templates.GetIncludeData().Returns([
             new TemplatePath
             {
                 Id = "my-template",
                 Service = SupportedServices.Radarr,
                 TemplateFile = templatePath
             }
-        });
+        ]);
 
         var includeDirective = new TemplateYamlInclude {Template = "my-template"};
 
@@ -49,15 +48,14 @@ public class TemplateIncludeProcessorTest
         TemplateIncludeProcessor sut)
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns(new[]
-        {
+        templates.GetIncludeData().Returns([
             new TemplatePath
             {
                 Id = "my-template",
                 Service = SupportedServices.Radarr,
                 TemplateFile = templatePath
             }
-        });
+        ]);
 
         var includeDirective = new TemplateYamlInclude {Template = "my-template"};
 
@@ -73,15 +71,14 @@ public class TemplateIncludeProcessorTest
         TemplateIncludeProcessor sut)
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns(new[]
-        {
+        templates.GetIncludeData().Returns([
             new TemplatePath
             {
                 Id = "my-template",
                 Service = SupportedServices.Radarr,
                 TemplateFile = templatePath
             }
-        });
+        ]);
 
         var includeDirective = new TemplateYamlInclude {Template = "template-does-not-exist"};
 

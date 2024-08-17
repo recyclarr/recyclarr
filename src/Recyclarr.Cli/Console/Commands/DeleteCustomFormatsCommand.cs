@@ -27,7 +27,7 @@ public class DeleteCustomFormatsCommand(
 
         [CommandArgument(0, "[cf_names]")]
         [Description("One or more custom format names to delete. Optional only if `--all` is used.")]
-        public string[] CustomFormatNamesOption { get; init; } = Array.Empty<string>();
+        public string[] CustomFormatNamesOption { get; init; } = [];
         public IReadOnlyCollection<string> CustomFormatNames => CustomFormatNamesOption;
 
         [CommandOption("-a|--all")]

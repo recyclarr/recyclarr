@@ -14,7 +14,7 @@ public class TemplateConfigCreatorTest
         ICreateConfigSettings settings,
         TemplateConfigCreator sut)
     {
-        settings.Templates.Returns(new[] {"template1"});
+        settings.Templates.Returns(["template1"]);
         var result = sut.CanHandle(settings);
         result.Should().Be(true);
     }

@@ -66,10 +66,10 @@ public class ConfigYamlDataObjectsValidationTest
                 Allowed = true,
                 UntilQuality = "Test Quality"
             },
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml {Name = "Another Quality"}
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -88,8 +88,8 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
                 new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
@@ -98,19 +98,19 @@ public class ConfigYamlDataObjectsValidationTest
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 2",
-                    Qualities = new[] {"Dupe Quality 3"}
+                    Qualities = ["Dupe Quality 3"]
                 },
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 4",
-                    Qualities = new[] {"Dupe Quality 5"}
+                    Qualities = ["Dupe Quality 5"]
                 },
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 4",
-                    Qualities = new[] {"Dupe Quality 5"}
+                    Qualities = ["Dupe Quality 5"]
                 }
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -131,11 +131,11 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml {Name = "Quality 1", Enabled = false},
                 new QualityProfileQualityConfigYaml {Name = "Quality 2", Enabled = false}
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -158,11 +158,11 @@ public class ConfigYamlDataObjectsValidationTest
                 Allowed = true,
                 UntilQuality = "Disabled Quality"
             },
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml {Name = "Enabled Quality"},
                 new QualityProfileQualityConfigYaml {Name = "Disabled Quality", Enabled = false}
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -180,14 +180,14 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "Profile",
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Group",
                     Qualities = Array.Empty<string>()
                 }
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -205,17 +205,17 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "Profile",
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Group",
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         "One Quality"
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -233,18 +233,18 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "Profile",
-            Qualities = new[]
-            {
+            Qualities =
+            [
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Group",
-                    Qualities = new[]
-                    {
+                    Qualities =
+                    [
                         "One Quality",
                         "Two Quality"
-                    }
+                    ]
                 }
-            }
+            ]
         };
 
         var validator = new QualityProfileConfigYamlValidator();
