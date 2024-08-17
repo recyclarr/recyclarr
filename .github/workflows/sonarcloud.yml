@@ -10,8 +10,19 @@ on:
     paths:
       - .github/workflows/sonarcloud.yml
       - sonar-project.properties
-      - "src/**"
-      - "tests/**"
+      - '**.props'
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+
+  pull_request:
+    paths:
+      - .github/workflows/sonarcloud.yml
+      - sonar-project.properties
+      - '**.props'
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
 
 env:
   dotnetVersion: 8.0.x
