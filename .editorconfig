@@ -1584,6 +1584,7 @@ resharper_with_expression_instead_of_initializer_highlighting = suggestion
 resharper_with_expression_modifies_all_members_highlighting = suggestion
 resharper_wrong_indent_size_highlighting = none
 resharper_zero_index_from_end_highlighting = warning
+resharper_use_collection_expression_highlighting = warning
 
 [*.{cs,ps1}]
 indent_size = 4
