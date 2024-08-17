@@ -15,7 +15,7 @@ public class CustomFormatConfigPhase(
     IServiceConfiguration config)
     : IConfigPipelinePhase<CustomFormatPipelineContext>
 {
-    public Task Execute(CustomFormatPipelineContext context)
+    public Task Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //

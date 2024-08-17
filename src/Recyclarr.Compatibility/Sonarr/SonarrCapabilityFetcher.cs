@@ -5,9 +5,6 @@ public class SonarrCapabilityFetcher(IServiceInformation info)
 {
     protected override SonarrCapabilities BuildCapabilitiesObject(Version version)
     {
-        return new SonarrCapabilities
-        {
-            Version = version
-        };
+        return new SonarrCapabilities(version);
     }
 }

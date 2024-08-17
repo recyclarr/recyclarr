@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Quality Definition: Support new quality upper limits for Sonarr (1000) and Radarr (2000). This is
+  a backward compatible change, so older versions of Sonarr and Radarr will continue to use the
+  correct upper limits.
+
 ## [7.2.1] - 2024-08-03
 
 ### Fixed

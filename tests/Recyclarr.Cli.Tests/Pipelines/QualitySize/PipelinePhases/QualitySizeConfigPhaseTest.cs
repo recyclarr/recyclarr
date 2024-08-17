@@ -2,7 +2,6 @@ using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Config.Models;
-using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
@@ -11,20 +10,20 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 public class QualitySizeConfigPhaseTest
 {
     [Test, AutoMockData]
-    public void Do_nothing_if_no_quality_definition(
+    public async Task Do_nothing_if_no_quality_definition(
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut)
     {
         var context = new QualitySizePipelineContext();
         config.QualityDefinition.ReturnsNull();
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeNull();
     }
 
     [Test, AutoMockData]
-    public void Do_nothing_if_no_matching_quality_definition(
+    public async Task Do_nothing_if_no_matching_quality_definition(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut)
@@ -37,7 +36,7 @@ public class QualitySizeConfigPhaseTest
 
         var context = new QualitySizePipelineContext();
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeNull();
     }
@@ -45,7 +44,7 @@ public class QualitySizeConfigPhaseTest
     [Test]
     [InlineAutoMockData("-0.1", "0")]
     [InlineAutoMockData("1.1", "1")]
-    public void Preferred_ratio_clamping_works(
+    public async Task Preferred_ratio_clamping_works(
         string testPreferred,
         string expectedPreferred,
         [Frozen] IQualitySizeGuideService guide,
@@ -64,17 +63,16 @@ public class QualitySizeConfigPhaseTest
 
         var context = new QualitySizePipelineContext();
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         config.QualityDefinition.Should().NotBeNull();
         config.QualityDefinition!.PreferredRatio.Should().Be(decimal.Parse(expectedPreferred));
     }
 
     [Test, AutoMockData]
-    public void Preferred_is_set_via_ratio(
+    public async Task Preferred_is_set_via_ratio(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
-        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimits limits,
         QualitySizeConfigPhase sut)
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig
@@ -83,7 +81,8 @@ public class QualitySizeConfigPhaseTest
             PreferredRatio = 0.5m
         });
 
-        guide.GetQualitySizeData(default!).ReturnsForAnyArgs([
+        guide.GetQualitySizeData(default!).ReturnsForAnyArgs(
+        [
             new QualitySizeData
             {
                 Type = "real",
@@ -96,7 +95,7 @@ public class QualitySizeConfigPhaseTest
 
         var context = new QualitySizePipelineContext();
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().NotBeNull();
         context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo([
@@ -105,7 +104,7 @@ public class QualitySizeConfigPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Preferred_is_set_via_guide(
+    public async Task Preferred_is_set_via_guide(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut)
@@ -128,7 +127,7 @@ public class QualitySizeConfigPhaseTest
 
         var context = new QualitySizePipelineContext();
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().NotBeNull();
         context.ConfigOutput!.Qualities.Select(x => x.Item).Should().BeEquivalentTo([

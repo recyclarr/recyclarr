@@ -22,7 +22,7 @@ public class MediaNamingConfigPhase(
     IServiceConfiguration config)
     : IConfigPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task Execute(MediaNamingPipelineContext context)
+    public async Task Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
         var lookup = new NamingFormatLookup();
         var strategy = configPhaseStrategyFactory[config.ServiceType];

@@ -3,18 +3,23 @@ using System.Text;
 
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualityItemWithLimits(QualityItem item, IQualityItemLimits limits)
+public class QualityItemWithLimits(QualityItem item, QualityItemLimits limits)
 {
-    public QualityItem Item => item;
-    public IQualityItemLimits Limits => limits;
+    public QualityItem Item { get; } = item with
+    {
+        Max = Math.Min(item.Max, limits.MaxLimit),
+        Preferred = Math.Min(item.Preferred, limits.PreferredLimit)
+    };
 
-    public decimal MinForApi => item.Min;
-    public decimal? PreferredForApi => item.Preferred < limits.PreferredLimit ? item.Preferred : null;
-    public decimal? MaxForApi => item.Max < limits.MaxLimit ? item.Max : null;
+    public QualityItemLimits Limits => limits;
 
-    public string AnnotatedMin => item.Min.ToString(CultureInfo.InvariantCulture);
-    public string AnnotatedPreferred => AnnotatedValue(item.Preferred, limits.PreferredLimit);
-    public string AnnotatedMax => AnnotatedValue(item.Max, limits.MaxLimit);
+    public decimal MinForApi => Item.Min;
+    public decimal? PreferredForApi => Item.Preferred < Limits.PreferredLimit ? Item.Preferred : null;
+    public decimal? MaxForApi => Item.Max < Limits.MaxLimit ? Item.Max : null;
+
+    public string AnnotatedMin => Item.Min.ToString(CultureInfo.InvariantCulture);
+    public string AnnotatedPreferred => AnnotatedValue(Item.Preferred, Limits.PreferredLimit);
+    public string AnnotatedMax => AnnotatedValue(Item.Max, Limits.MaxLimit);
 
     private static string AnnotatedValue(decimal value, decimal threshold)
     {
@@ -29,17 +34,17 @@ public class QualityItemWithLimits(QualityItem item, IQualityItemLimits limits)
 
     public bool IsMinDifferent(decimal serviceValue)
     {
-        return serviceValue != item.Min;
+        return serviceValue != Item.Min;
     }
 
     public bool IsPreferredDifferent(decimal? serviceValue)
     {
-        return ValueWithThresholdIsDifferent(serviceValue, item.Preferred, limits.PreferredLimit);
+        return ValueWithThresholdIsDifferent(serviceValue, Item.Preferred, Limits.PreferredLimit);
     }
 
     public bool IsMaxDifferent(decimal? serviceValue)
     {
-        return ValueWithThresholdIsDifferent(serviceValue, item.Max, limits.MaxLimit);
+        return ValueWithThresholdIsDifferent(serviceValue, Item.Max, Limits.MaxLimit);
     }
 
     private static bool ValueWithThresholdIsDifferent(decimal? serviceValue, decimal guideValue, decimal threshold)
@@ -54,7 +59,7 @@ public class QualityItemWithLimits(QualityItem item, IQualityItemLimits limits)
 
     public decimal InterpolatedPreferred(decimal ratio)
     {
-        var cappedMax = Math.Min(item.Max, limits.PreferredLimit);
-        return Math.Round(item.Min + (cappedMax - item.Min) * ratio, 1);
+        var cappedMax = Math.Min(Item.Max, Limits.PreferredLimit);
+        return Math.Round(Item.Min + (cappedMax - Item.Min) * ratio, 1);
     }
 }

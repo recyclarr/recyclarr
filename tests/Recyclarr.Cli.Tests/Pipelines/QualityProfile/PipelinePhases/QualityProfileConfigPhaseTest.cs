@@ -45,7 +45,7 @@ public class QualityProfileConfigPhaseTest
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
 
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 100))
@@ -78,7 +78,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 100), ("id2", 2, 200))
@@ -111,7 +111,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile")
@@ -170,7 +170,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile1", ("id1", 1, 100)),
@@ -216,7 +216,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
                 NewQp.Processed("test_profile", ("id1", 1, 102), ("id2", 2, 201)) with
@@ -247,7 +247,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEmpty();
     }
@@ -271,7 +271,7 @@ public class QualityProfileConfigPhaseTest
 
         var context = new QualityProfilePipelineContext();
         var sut = fixture.Create<QualityProfileConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEmpty();
     }

@@ -10,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 public class QualityProfileConfigPhase(ILogger log, ProcessedCustomFormatCache cache, IServiceConfiguration config)
     : IConfigPipelinePhase<QualityProfilePipelineContext>
 {
-    public Task Execute(QualityProfilePipelineContext context)
+    public Task Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         // 1. For each group of CFs that has a quality profile specified
         // 2. For each quality profile score config in that CF group

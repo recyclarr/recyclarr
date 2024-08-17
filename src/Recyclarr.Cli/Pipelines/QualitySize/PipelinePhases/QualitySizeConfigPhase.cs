@@ -11,16 +11,16 @@ public class QualitySizeConfigPhase(
     ILogger log,
     IQualitySizeGuideService guide,
     IServiceConfiguration config,
-    QualityItemLimitFactory itemFactory)
+    QualityItemLimitFactory limitFactory)
     : IConfigPipelinePhase<QualitySizePipelineContext>
 {
-    public Task Execute(QualitySizePipelineContext context)
+    public async Task Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
         {
             log.Debug("{Instance} has no quality definition", config.InstanceName);
-            return Task.CompletedTask;
+            return;
         }
 
         var guideSizeData = guide.GetQualitySizeData(config.ServiceType)
@@ -29,16 +29,17 @@ public class QualitySizeConfigPhase(
         if (guideSizeData == null)
         {
             context.ConfigError = $"The specified quality definition type does not exist: {configSizeData.Type}";
-            return Task.CompletedTask;
+            return;
         }
 
+        var itemLimits = await limitFactory.Create(config.ServiceType, ct);
+
         var sizeDataWithThresholds = guideSizeData.Qualities
-            .Select(x => itemFactory.Create(x, config.ServiceType))
+            .Select(x => new QualityItemWithLimits(x, itemLimits))
             .ToList();
 
         AdjustPreferredRatio(configSizeData, sizeDataWithThresholds);
         context.ConfigOutput = new ProcessedQualitySizeData(configSizeData.Type, sizeDataWithThresholds);
-        return Task.CompletedTask;
     }
 
     private void AdjustPreferredRatio(QualityDefinitionConfig configSizeData, List<QualityItemWithLimits> guideSizeData)

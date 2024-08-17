@@ -38,7 +38,7 @@ public class CustomFormatConfigPhaseTest
 
         var context = new CustomFormatPipelineContext();
         var sut = fixture.Create<CustomFormatConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEquivalentTo([
             NewCf.Data("one", "cf1"),
@@ -74,7 +74,7 @@ public class CustomFormatConfigPhaseTest
 
         var context = new CustomFormatPipelineContext();
         var sut = fixture.Create<CustomFormatConfigPhase>();
-        sut.Execute(context);
+        sut.Execute(context, CancellationToken.None);
 
         context.ConfigOutput.Should().BeEmpty();
     }

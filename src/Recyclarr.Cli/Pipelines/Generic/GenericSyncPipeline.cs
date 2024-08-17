@@ -22,7 +22,7 @@ public class GenericSyncPipeline<TContext>(
             return;
         }
 
-        await phases.ConfigPhase.Execute(context);
+        await phases.ConfigPhase.Execute(context, ct);
         if (phases.LogPhase.LogConfigPhaseAndExitIfNeeded(context))
         {
             return;

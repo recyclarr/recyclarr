@@ -4,16 +4,16 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 
-public class QualityItemLimitFactory(IIndex<SupportedServices, IQualityItemLimits> limitFactory)
+public class QualityItemLimitFactory(IIndex<SupportedServices, IQualityItemLimitFetcher> limitFactory)
 {
-    public QualityItemWithLimits Create(QualityItem item, SupportedServices serviceType)
+    public async Task<QualityItemLimits> Create(SupportedServices serviceType, CancellationToken ct)
     {
-        if (!limitFactory.TryGetValue(serviceType, out var limits))
+        if (!limitFactory.TryGetValue(serviceType, out var limitFetcher))
         {
             throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType,
                 "No quality item limits defined for this service type");
         }
 
-        return new QualityItemWithLimits(item, limits);
+        return await limitFetcher.GetLimits(ct);
     }
 }

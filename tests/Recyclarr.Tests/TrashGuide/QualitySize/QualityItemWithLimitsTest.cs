@@ -1,4 +1,5 @@
 using Recyclarr.Tests.TestLibrary;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Tests.TrashGuide.QualitySize;
 
@@ -68,14 +69,6 @@ public class QualityItemWithLimitsTest
         const decimal testVal = 10m;
         var data = NewQualitySize.WithLimits("", 0, testVal, 0);
         data.AnnotatedMax.Should().Be($"{testVal}");
-    }
-
-    [Test]
-    public void Max_AboveThreshold_EqualsSameValue()
-    {
-        const decimal testVal = TestQualityItemLimits.MaxUnlimitedThreshold + 1;
-        var data = NewQualitySize.WithLimits("", 0, testVal, 0);
-        data.Item.Max.Should().Be(testVal);
     }
 
     [Test]
@@ -188,14 +181,6 @@ public class QualityItemWithLimitsTest
     }
 
     [Test]
-    public void Preferred_AboveThreshold_EqualsSameValue()
-    {
-        const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold + 1;
-        var data = NewQualitySize.WithLimits("", 0, 0, testVal);
-        data.Item.Preferred.Should().Be(testVal);
-    }
-
-    [Test]
     public void PreferredForApi_AboveThreshold_EqualsNull()
     {
         const decimal testVal = TestQualityItemLimits.PreferredUnlimitedThreshold + 1;
@@ -216,5 +201,14 @@ public class QualityItemWithLimitsTest
     {
         var data = NewQualitySize.WithLimits("", 0, 0, 0);
         data.PreferredForApi.Should().Be(0);
+    }
+
+    [Test]
+    public void Max_and_preferred_are_capped_when_over_limit()
+    {
+        var sut = new QualityItemWithLimits(new QualityItem("TestQuality", 10m, 100m, 100m),
+            new QualityItemLimits(50m, 70m));
+
+        sut.Item.Should().BeEquivalentTo(new QualityItem("TestQuality", 10m, 50m, 70m));
     }
 }

@@ -1,17 +1,8 @@
 namespace Recyclarr.Compatibility.Sonarr;
 
-public record SonarrCapabilities
+public record SonarrCapabilities(Version Version)
 {
-    public SonarrCapabilities()
-    {
-    }
-
-    public SonarrCapabilities(Version version)
-    {
-        Version = version;
-    }
-
     public static Version MinimumVersion { get; } = new("4.0.0.0");
 
-    public Version Version { get; init; } = new();
+    public bool QualityDefinitionLimitsIncreased => Version >= new Version(4, 0, 8, 2158);
 }
