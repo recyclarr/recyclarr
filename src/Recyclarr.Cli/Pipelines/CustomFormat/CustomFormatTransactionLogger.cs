@@ -1,8 +1,8 @@
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal static class CustomFormatPipelineExtensions
+internal class CustomFormatTransactionLogger(ILogger log)
 {
-    public static void LogTransactions(this CustomFormatPipelineContext context, ILogger log)
+    public void LogTransactions(CustomFormatPipelineContext context)
     {
         var transactions = context.TransactionOutput;
 

@@ -2,10 +2,11 @@ using Recyclarr.Cli.Pipelines.Generic;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatPreviewPhase(ILogger log) : IPreviewPipelinePhase<CustomFormatPipelineContext>
+internal class CustomFormatPreviewPhase(CustomFormatTransactionLogger logger)
+    : IPreviewPipelinePhase<CustomFormatPipelineContext>
 {
     public void Execute(CustomFormatPipelineContext context)
     {
-        context.LogTransactions(log);
+        logger.LogTransactions(context);
     }
 }

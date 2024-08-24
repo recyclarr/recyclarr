@@ -2,7 +2,8 @@ using Recyclarr.Cli.Pipelines.Generic;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatLogPhase(ILogger log) : ILogPipelinePhase<CustomFormatPipelineContext>
+internal class CustomFormatLogPhase(CustomFormatTransactionLogger cfLogger, ILogger log)
+    : ILogPipelinePhase<CustomFormatPipelineContext>
 {
     // Returning 'true' means to exit. 'false' means to proceed.
     public bool LogConfigPhaseAndExitIfNeeded(CustomFormatPipelineContext context)
@@ -23,6 +24,6 @@ public class CustomFormatLogPhase(ILogger log) : ILogPipelinePhase<CustomFormatP
 
     public void LogPersistenceResults(CustomFormatPipelineContext context)
     {
-        context.LogTransactions(log);
+        cfLogger.LogTransactions(context);
     }
 }
