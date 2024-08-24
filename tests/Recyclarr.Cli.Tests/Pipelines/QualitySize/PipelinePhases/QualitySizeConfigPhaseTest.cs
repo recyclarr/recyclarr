@@ -1,6 +1,7 @@
 using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
+using Recyclarr.Cli.TestLibrary;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -73,6 +74,7 @@ public class QualitySizeConfigPhaseTest
     public async Task Preferred_is_set_via_ratio(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut)
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig
@@ -107,6 +109,7 @@ public class QualitySizeConfigPhaseTest
     public async Task Preferred_is_set_via_guide(
         [Frozen] IQualitySizeGuideService guide,
         [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut)
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig

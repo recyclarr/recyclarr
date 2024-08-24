@@ -11,7 +11,7 @@ public class QualitySizeConfigPhase(
     ILogger log,
     IQualitySizeGuideService guide,
     IServiceConfiguration config,
-    QualityItemLimitFactory limitFactory)
+    IQualityItemLimitFactory limitFactory)
     : IConfigPipelinePhase<QualitySizePipelineContext>
 {
     public async Task Execute(QualitySizePipelineContext context, CancellationToken ct)

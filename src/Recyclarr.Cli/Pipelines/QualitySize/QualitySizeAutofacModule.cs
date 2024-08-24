@@ -14,7 +14,7 @@ public class QualitySizeAutofacModule : Module
         builder.RegisterType<QualitySizeDataLister>();
 
         // Setup factory for creation of concrete IQualityItemLimits types
-        builder.RegisterType<QualityItemLimitFactory>();
+        builder.RegisterType<QualityItemLimitFactory>().As<IQualityItemLimitFactory>();
         builder.RegisterType<RadarrQualityItemLimitFetcher>()
             .Keyed<IQualityItemLimitFetcher>(SupportedServices.Radarr)
             .InstancePerLifetimeScope();

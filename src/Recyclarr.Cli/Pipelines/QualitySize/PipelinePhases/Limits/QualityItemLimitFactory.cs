@@ -5,6 +5,7 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 
 public class QualityItemLimitFactory(IIndex<SupportedServices, IQualityItemLimitFetcher> limitFactory)
+    : IQualityItemLimitFactory
 {
     public async Task<QualityItemLimits> Create(SupportedServices serviceType, CancellationToken ct)
     {
