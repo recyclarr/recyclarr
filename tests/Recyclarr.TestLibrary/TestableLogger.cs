@@ -7,7 +7,7 @@ namespace Recyclarr.TestLibrary;
 public sealed class TestableLogger : ILogger
 {
     private readonly Logger _log;
-    private readonly List<string> _messages = new();
+    private readonly List<string> _messages = [];
 
     public TestableLogger()
     {

@@ -6,11 +6,11 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
 public record CustomFormatTransactionData
 {
-    public Collection<TrashIdMapping> DeletedCustomFormats { get; } = new();
-    public Collection<CustomFormatData> NewCustomFormats { get; } = new();
-    public Collection<CustomFormatData> UpdatedCustomFormats { get; } = new();
-    public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = new();
-    public Collection<CustomFormatData> UnchangedCustomFormats { get; } = new();
+    public Collection<TrashIdMapping> DeletedCustomFormats { get; } = [];
+    public Collection<CustomFormatData> NewCustomFormats { get; } = [];
+    public Collection<CustomFormatData> UpdatedCustomFormats { get; } = [];
+    public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = [];
+    public Collection<CustomFormatData> UnchangedCustomFormats { get; } = [];
 
     public int TotalCustomFormatChanges =>
         NewCustomFormats.Count + UpdatedCustomFormats.Count + DeletedCustomFormats.Count;

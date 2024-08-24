@@ -5,7 +5,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
 public class ProcessedCustomFormatCache : IPipelineCache
 {
-    private readonly List<CustomFormatData> _customFormats = new();
+    private readonly List<CustomFormatData> _customFormats = [];
 
     public void AddCustomFormats(IEnumerable<CustomFormatData> customFormats)
     {
