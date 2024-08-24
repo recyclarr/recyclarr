@@ -7,6 +7,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 indent_style = space
 indent_size = 2
+max_line_length = 120
 
 # Microsoft .NET properties
 csharp_indent_braces = false
@@ -332,7 +333,6 @@ resharper_csharp_align_multiline_parameter = false
 resharper_csharp_align_multiple_declaration = false
 resharper_csharp_keep_blank_lines_in_code = 1
 resharper_csharp_keep_blank_lines_in_declarations = 1
-resharper_csharp_max_line_length = 120
 resharper_csharp_naming_rule.constants = AaBb
 resharper_csharp_naming_rule.enum_member = AaBb
 resharper_csharp_naming_rule.local_constants = aaBb
@@ -382,7 +382,6 @@ resharper_generator_mode = false
 resharper_html_attribute_indent = align_by_first_attribute
 resharper_html_linebreak_before_elements = body, div, p, form, h1, h2, h3
 resharper_html_max_blank_lines_between_tags = 2
-resharper_html_max_line_length = 120
 resharper_html_pi_attribute_style = on_single_line
 resharper_html_space_before_self_closing = true
 resharper_html_wrap_lines = true
@@ -664,7 +663,6 @@ resharper_special_else_if_treatment = true
 resharper_static_members_qualify_members = none
 resharper_static_members_qualify_with = declared_type
 resharper_support_vs_event_naming_pattern = true
-resharper_t4_max_line_length = 120
 resharper_t4_wrap_lines = true
 resharper_toplevel_function_declaration_return_type_style = do_not_change
 resharper_toplevel_function_definition_return_type_style = do_not_change
@@ -685,7 +683,6 @@ resharper_vb_align_multiline_parameter = true
 resharper_vb_align_multiple_declaration = true
 resharper_vb_keep_blank_lines_in_code = 2
 resharper_vb_keep_blank_lines_in_declarations = 2
-resharper_vb_max_line_length = 120
 resharper_vb_place_field_attribute_on_same_line = true
 resharper_vb_place_method_attribute_on_same_line = false
 resharper_vb_place_type_attribute_on_same_line = false
@@ -742,21 +739,11 @@ resharper_wrap_verbatim_interpolated_strings = no_wrap
 resharper_xmldoc_attribute_indent = single_indent
 resharper_xmldoc_linebreak_before_elements = summary, remarks, example, returns, param, typeparam, value, para
 resharper_xmldoc_max_blank_lines_between_tags = 0
-resharper_xmldoc_max_line_length = 100
 resharper_xmldoc_pi_attribute_style = do_not_touch
 resharper_xmldoc_space_before_self_closing = true
 resharper_xmldoc_wrap_lines = true
 resharper_xmldoc_wrap_tags_and_pi = true
 resharper_xmldoc_wrap_text = true
-resharper_xml_attribute_indent = align_by_first_attribute
-resharper_xml_linebreak_before_elements =
-resharper_xml_max_blank_lines_between_tags = 2
-resharper_xml_max_line_length = 120
-resharper_xml_pi_attribute_style = do_not_touch
-resharper_xml_space_before_self_closing = true
-resharper_xml_wrap_lines = true
-resharper_xml_wrap_tags_and_pi = true
-resharper_xml_wrap_text = false
 
 # ReSharper inspection severities
 resharper_access_rights_in_text_highlighting = warning
@@ -1585,6 +1572,17 @@ resharper_with_expression_modifies_all_members_highlighting = suggestion
 resharper_wrong_indent_size_highlighting = none
 resharper_zero_index_from_end_highlighting = warning
 resharper_use_collection_expression_highlighting = warning
+
+[*.{xml,props,csproj}]
+xml_attribute_indent = align_by_first_attribute
+xml_linebreak_before_elements =
+xml_max_blank_lines_between_tags = 1
+xml_pi_attribute_style = do_not_touch
+xml_space_before_self_closing = true
+xml_space_inside_empty_tag = true
+xml_wrap_lines = true
+xml_wrap_tags_and_pi = true
+xml_wrap_text = false
 
 [*.{cs,ps1}]
 indent_size = 4
