@@ -3,10 +3,11 @@ using Autofac.Features.Indexed;
 
 namespace Recyclarr.TestLibrary.Autofac;
 
+[UsedImplicitly]
 public class StubAutofacIndex<TKey, TValue> : IIndex<TKey, TValue>
     where TKey : notnull
 {
-    private Dictionary<TKey, TValue> _values = new();
+    private readonly Dictionary<TKey, TValue> _values = new();
 
     public StubAutofacIndex()
     {
@@ -24,7 +25,10 @@ public class StubAutofacIndex<TKey, TValue> : IIndex<TKey, TValue>
 
     public void AddRange(IEnumerable<(TKey, TValue)> pairs)
     {
-        _values = _values.Union(pairs.ToDictionary(x => x.Item1, x => x.Item2)).ToDictionary();
+        foreach (var (key, value) in pairs)
+        {
+            _values[key] = value;
+        }
     }
 
     public bool TryGetValue(TKey key, [UnscopedRef] out TValue value)
