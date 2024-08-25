@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.2] - 2024-08-25
+
 ### Fixed
 
 - Quality Definition: Support new quality upper limits for Sonarr (1000) and Radarr (2000). This is
@@ -1019,7 +1021,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.2.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.2.2...HEAD
+[7.2.2]: https://github.com/recyclarr/recyclarr/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/recyclarr/recyclarr/compare/v7.2.0...v7.2.1
 [7.2.0]: https://github.com/recyclarr/recyclarr/compare/v7.1.1...v7.2.0
 [7.1.1]: https://github.com/recyclarr/recyclarr/compare/v7.1.0...v7.1.1
