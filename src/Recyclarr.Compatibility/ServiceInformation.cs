@@ -6,7 +6,14 @@ namespace Recyclarr.Compatibility;
 
 public class ServiceInformation(ISystemApiService api, ILogger log) : IServiceInformation
 {
+    private Version? _version;
+
     public async Task<Version> GetVersion(CancellationToken ct)
+    {
+        return _version ??= await FetchVersion(ct);
+    }
+
+    private async Task<Version> FetchVersion(CancellationToken ct)
     {
         try
         {
