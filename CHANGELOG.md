@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Performance: Reduced the number of API calls to obtain service version information.
+
 ### Fixed
 
 - Custom Format: The error "CF field of type False is not supported" no longer occurs when syncing
