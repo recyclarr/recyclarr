@@ -6,7 +6,7 @@ namespace Recyclarr.Tests.TrashGuide.CustomFormat;
 [Parallelizable(ParallelScope.All)]
 public class NondeterministicValueConverterTest
 {
-    private JsonSerializerOptions _options;
+    private JsonSerializerOptions _options = default!;
 
     [SetUp]
     public void Setup()
