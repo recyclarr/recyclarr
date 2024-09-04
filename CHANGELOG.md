@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Custom Format: The error "CF field of type False is not supported" no longer occurs when syncing
+  some language-specific custom formats (#318).
+
 ## [7.2.2] - 2024-08-25
 
 ### Fixed

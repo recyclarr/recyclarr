@@ -8,7 +8,7 @@ public record CustomFormatFieldData
 {
     public string Name { get; } = nameof(Value).ToCamelCase();
 
-    [JsonConverter(typeof(FieldValueConverter))]
+    [JsonConverter(typeof(NondeterministicValueConverter))]
     public object? Value { get; init; }
 }
 
