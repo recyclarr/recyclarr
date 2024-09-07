@@ -23,7 +23,7 @@ public class SyncProcessor(
     ConsoleExceptionHandler exceptionHandler)
     : ISyncProcessor
 {
-    public async Task<ExitStatus> ProcessConfigs(ISyncSettings settings, CancellationToken ct)
+    public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
         bool failureDetected;
         try
