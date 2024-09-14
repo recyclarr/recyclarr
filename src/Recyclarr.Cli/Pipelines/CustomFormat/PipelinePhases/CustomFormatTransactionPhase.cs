@@ -94,7 +94,7 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
         CustomFormatData serviceCf,
         CustomFormatTransactionData transactions)
     {
-        if (!CustomFormatData.Comparer.Equals(guideCf, serviceCf))
+        if (guideCf != serviceCf)
         {
             transactions.UpdatedCustomFormats.Add(guideCf);
         }

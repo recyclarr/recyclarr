@@ -8,7 +8,7 @@ namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 public class FieldsArrayJsonConverterTest
 {
     [Test]
-    public void Read_multiple_as_array()
+    public void Read_array_as_is()
     {
         const string json =
             """
@@ -42,26 +42,20 @@ public class FieldsArrayJsonConverterTest
             JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
 
         result!.Fields.Should().BeEquivalentTo([
-            new CustomFormatFieldData {Value = 25},
-            new CustomFormatFieldData {Value = 40}
+            new CustomFormatFieldData {Name = "min", Value = 25},
+            new CustomFormatFieldData {Name = "max", Value = 40}
         ]);
     }
 
     [Test]
-    public void Read_single_as_array()
+    public void Convert_key_value_pairs_to_array()
     {
         const string json =
             """
             {
               "fields": {
-                "order": 0,
-                "name": "min",
-                "label": "Minimum Size",
-                "unit": "GB",
-                "helpText": "Release must be greater than this size",
-                "value": "25",
-                "type": "number",
-                "advanced": false
+                "value": 8,
+                "exceptLanguage": false
               }
             }
             """;
@@ -69,7 +63,8 @@ public class FieldsArrayJsonConverterTest
             JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
 
         result!.Fields.Should().BeEquivalentTo([
-            new CustomFormatFieldData {Value = "25"}
+            new CustomFormatFieldData {Name = "value", Value = 8},
+            new CustomFormatFieldData {Name = "exceptLanguage", Value = false},
         ]);
     }
 

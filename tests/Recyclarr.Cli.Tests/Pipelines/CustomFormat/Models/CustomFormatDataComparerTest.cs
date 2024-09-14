@@ -1,226 +1,35 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 
-[TestFixture]
+[Parallelizable(ParallelScope.All)]
 public class CustomFormatDataComparerTest
 {
     [Test]
     public void Custom_formats_equal()
     {
-        var a = new CustomFormatData
-        {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
-                {
-                    Name = "EVO",
-                    Implementation = "ReleaseTitleSpecification",
-                    Negate = false,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBDL",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 7
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBRIP",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
-                }
-            ]
-        };
+        var a = CreateMockCustomFormatData();
 
-        var b = new CustomFormatData
-        {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
-                {
-                    Name = "EVO",
-                    Implementation = "ReleaseTitleSpecification",
-                    Negate = false,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBDL",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 7
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBRIP",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
-                }
-            ]
-        };
+        var b = CreateMockCustomFormatData();
 
-        a.Should().BeEquivalentTo(b, o => o.Using(CustomFormatData.Comparer));
+        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
     public void Custom_formats_not_equal_when_field_value_different()
     {
-        var a = new CustomFormatData
+        var a = CreateMockCustomFormatData();
+
+        var b = CreateMockCustomFormatData() with
         {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
-                {
-                    Name = "EVO",
-                    Implementation = "ReleaseTitleSpecification",
-                    Negate = false,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBDL",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 7
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBRIP",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
-                }
-            ]
+            Specifications = a.Specifications.Select(spec => spec with
+            {
+                Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name
+            }).ToList()
         };
 
-        var b = new CustomFormatData
-        {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
-                {
-                    Name = "EVO",
-                    Implementation = "ReleaseTitleSpecification",
-                    Negate = false,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBDL",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 10 // this is different
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBRIP",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
-                }
-            ]
-        };
-
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeFalse();
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
@@ -240,31 +49,25 @@ public class CustomFormatDataComparerTest
             Category = "two"
         };
 
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeTrue();
+        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
     public void Not_equal_when_right_is_null()
     {
         var a = new CustomFormatData();
-        var b = (CustomFormatData?) null;
+        CustomFormatData? b = null;
 
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeFalse();
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
     public void Not_equal_when_left_is_null()
     {
-        var a = (CustomFormatData?) null;
+        CustomFormatData? a = null;
         var b = new CustomFormatData();
 
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeFalse();
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
@@ -272,149 +75,167 @@ public class CustomFormatDataComparerTest
     {
         var a = new CustomFormatData();
 
-        var result = CustomFormatData.Comparer.Equals(a, a);
-
-        result.Should().BeTrue();
+        a.Should().BeEquivalentTo(a, o => o.ComparingRecordsByValue());
     }
 
     [Test]
     public void Not_equal_when_different_spec_count()
     {
-        var a = new CustomFormatData
+        var a = CreateMockCustomFormatData();
+
+        var b = a with
         {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData(),
-                new CustomFormatSpecificationData()
-            ]
+            Specifications = a.Specifications.Concat([new CustomFormatSpecificationData()]).ToList()
         };
 
-        var b = new CustomFormatData
-        {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData(),
-                new CustomFormatSpecificationData(),
-                new CustomFormatSpecificationData()
-            ]
-        };
-
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeFalse();
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
     [Test]
     public void Not_equal_when_non_matching_spec_names()
     {
-        var a = new CustomFormatData
+        var a = CreateMockCustomFormatData();
+
+        var b = a with
+        {
+            Specifications = a.Specifications.Select(spec => spec with
+            {
+                Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name
+            }).ToList()
+        };
+
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
+    }
+
+    [Test]
+    public void Not_equal_when_different_spec_names_and_values()
+    {
+        var a = CreateMockCustomFormatData();
+        var b = a with
+        {
+            Specifications = a.Specifications.Select(spec => spec with
+            {
+                Name = spec.Name == "WEBRIP" ? "UNIQUE_NAME" : spec.Name,
+                Fields = spec.Fields.Select(field => field with
+                {
+                    Value = field.Value is int ? 99 : "NEW_VALUE"
+                }).ToList()
+            }).ToList()
+        };
+
+        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
+    }
+
+    [Test]
+    public void Equal_when_different_field_counts_but_same_names_and_values()
+    {
+        var a = CreateMockCustomFormatData();
+        var b = a with
+        {
+            Specifications = a.Specifications.Select(spec => spec with
+            {
+                Fields = spec.Fields
+                    .Concat([new CustomFormatFieldData {Name = "AdditionalField", Value = "ExtraValue"}])
+                    .ToList()
+            }).ToList()
+        };
+
+        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+    }
+
+    [Test]
+    public void Equal_when_specifications_order_different()
+    {
+        var a = CreateMockCustomFormatData();
+
+        var b = a with
+        {
+            Specifications = a.Specifications.Reverse().ToList()
+        };
+
+        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+    }
+
+    [Test]
+    public void Equal_when_fields_order_different_for_each_specification()
+    {
+        var a = CreateMockCustomFormatData();
+
+        var b = a with
+        {
+            Specifications = a.Specifications.Select(spec => spec with
+            {
+                Fields = spec.Fields.Reverse().ToList()
+            }).ToList()
+        };
+
+        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+    }
+
+    [TestCase(typeof(CustomFormatData))]
+    [TestCase(typeof(CustomFormatSpecificationData))]
+    public void Throws_exception_when_used_as_key_in_dictionary(Type type)
+    {
+        var act = () => new Dictionary<object, object?>().Add(Activator.CreateInstance(type)!, null);
+
+        act.Should().Throw<NotImplementedException>();
+    }
+
+    [TestCase(typeof(CustomFormatData))]
+    [TestCase(typeof(CustomFormatSpecificationData))]
+    public void Throws_exception_when_used_as_key_in_hash_set(Type type)
+    {
+        var act = () => new HashSet<object>().Add(Activator.CreateInstance(type)!);
+
+        act.Should().Throw<NotImplementedException>();
+    }
+
+    private static CustomFormatData CreateMockCustomFormatData()
+    {
+        return new CustomFormatData
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
+            Specifications = new List<CustomFormatSpecificationData>
+            {
+                new()
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
+                    Fields = new List<CustomFormatFieldData>
+                    {
+                        new() {Name = "value", Value = @"\bEVO(TGX)?\b"},
+                        new() {Name = "foo1", Value = "foo1"}
+                    }
                 },
-                new CustomFormatSpecificationData
+                new()
                 {
                     Name = "WEBDL",
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 7
-                        }
-                    ]
+                    Fields = new List<CustomFormatFieldData>
+                    {
+                        new() {Name = "value", Value = 7},
+                        new() {Name = "foo2", Value = "foo2"}
+                    }
                 },
-                new CustomFormatSpecificationData
+                new()
                 {
                     Name = "WEBRIP",
-                    Implementation = "SourceSpecification",
+                    Implementation = "LanguageSpecification",
                     Negate = true,
                     Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
+                    Fields = new List<CustomFormatFieldData>
+                    {
+                        new() {Name = "value", Value = 8},
+                        new() {Name = "exceptLanguage", Value = false},
+                        new() {Name = "foo3", Value = "foo3"}
+                    }
                 }
-            ]
+            }
         };
-
-        var b = new CustomFormatData
-        {
-            Name = "EVO (no WEBDL)",
-            IncludeCustomFormatWhenRenaming = false,
-            Specifications =
-            [
-                new CustomFormatSpecificationData
-                {
-                    Name = "EVO",
-                    Implementation = "ReleaseTitleSpecification",
-                    Negate = false,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = "\\bEVO(TGX)?\\b"
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBDL",
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 7
-                        }
-                    ]
-                },
-                new CustomFormatSpecificationData
-                {
-                    Name = "WEBRIP2", // This name is different
-                    Implementation = "SourceSpecification",
-                    Negate = true,
-                    Required = true,
-                    Fields =
-                    [
-                        new CustomFormatFieldData
-                        {
-                            Value = 8
-                        }
-                    ]
-                }
-            ]
-        };
-
-        var result = CustomFormatData.Comparer.Equals(a, b);
-
-        result.Should().BeFalse();
     }
 }

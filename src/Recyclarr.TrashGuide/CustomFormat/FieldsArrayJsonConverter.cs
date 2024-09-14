@@ -14,12 +14,27 @@ public class FieldsArrayJsonConverter : JsonConverter<object>
 
     public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType is JsonTokenType.StartObject)
+        return reader.TokenType switch
         {
-            return new[] {JsonSerializer.Deserialize<CustomFormatFieldData>(ref reader, options)!};
-        }
+            JsonTokenType.StartObject => ConvertObjectToArray(ref reader, options),
+            JsonTokenType.StartArray => JsonSerializer.Deserialize<CustomFormatFieldData[]>(ref reader, options)!,
+            _ => throw new JsonException("Unexpected token type for CF fields")
+        };
+    }
 
-        return JsonSerializer.Deserialize<CustomFormatFieldData[]>(ref reader, options)!;
+    private static CustomFormatFieldData[] ConvertObjectToArray(
+        ref Utf8JsonReader reader,
+        JsonSerializerOptions options)
+    {
+        var valueOptions = new JsonSerializerOptions(options);
+        valueOptions.Converters.Add(new NondeterministicValueConverter());
+        return JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(ref reader, options)!
+            .Select(x => new CustomFormatFieldData
+            {
+                Name = x.Key,
+                Value = x.Value.Deserialize<object>(valueOptions)
+            })
+            .ToArray();
     }
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)

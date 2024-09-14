@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Custom Formats: Smarter change detection logic for custom formats with language specifications,
+  which addresses the issue of some CFs constantly showing as updated during sync even if they
+  didn't change.
+
 ## [7.2.3] - 2024-09-03
 
 ### Changed
