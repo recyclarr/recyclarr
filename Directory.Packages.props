@@ -52,7 +52,7 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0011" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0011" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.1" />
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.33.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
