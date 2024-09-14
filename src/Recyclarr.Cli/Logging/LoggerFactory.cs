@@ -7,7 +7,11 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LoggerFactory(IAppPaths paths, LoggingLevelSwitch levelSwitch, IEnvironment env, IEnumerable<ILogEventSink> sinks)
+public class LoggerFactory(
+    IAppPaths paths,
+    LoggingLevelSwitch levelSwitch,
+    IEnvironment env,
+    IEnumerable<ILogEventSink> sinks)
 {
     private static string GetBaseTemplateString()
     {

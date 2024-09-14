@@ -64,7 +64,7 @@ public class FieldsArrayJsonConverterTest
 
         result!.Fields.Should().BeEquivalentTo([
             new CustomFormatFieldData {Name = "value", Value = 8},
-            new CustomFormatFieldData {Name = "exceptLanguage", Value = false},
+            new CustomFormatFieldData {Name = "exceptLanguage", Value = false}
         ]);
     }
 

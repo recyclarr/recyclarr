@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
