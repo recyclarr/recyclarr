@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.2.4] - 2024-09-14
+
 ### Fixed
 
 - Custom Formats: Smarter change detection logic for custom formats with language specifications,
@@ -1038,7 +1040,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.2.3...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.2.4...HEAD
+[7.2.4]: https://github.com/recyclarr/recyclarr/compare/v7.2.3...v7.2.4
 [7.2.3]: https://github.com/recyclarr/recyclarr/compare/v7.2.2...v7.2.3
 [7.2.2]: https://github.com/recyclarr/recyclarr/compare/v7.2.1...v7.2.2
 [7.2.1]: https://github.com/recyclarr/recyclarr/compare/v7.2.0...v7.2.1
