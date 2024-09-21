@@ -17,7 +17,7 @@
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.0.2" PrivateAssets="All" />
     <PackageVersion Include="MudBlazor" Version="7.8.0" />
-    <PackageVersion Include="ReactiveUI.Blazor" Version="20.1.1" />
+    <PackageVersion Include="ReactiveUI.Blazor" Version="20.1.52" />
     <PackageVersion Include="Serilog" Version="4.0.1" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
