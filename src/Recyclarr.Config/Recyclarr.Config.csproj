@@ -10,6 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
+    <ProjectReference Include="..\Recyclarr.Logging\Recyclarr.Logging.csproj" />
     <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
     <ProjectReference Include="..\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj" />
     <ProjectReference Include="..\Recyclarr.Yaml\Recyclarr.Yaml.csproj" />

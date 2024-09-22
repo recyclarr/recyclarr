@@ -2,7 +2,7 @@
 using AutoMapper;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.PostProcessing;
-using Recyclarr.Platform;
+using Recyclarr.Logging;
 using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing;

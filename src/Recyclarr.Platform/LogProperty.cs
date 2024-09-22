@@ -1,6 +1,0 @@
-namespace Recyclarr.Platform;
-
-public static class LogProperty
-{
-    public static string Scope => nameof(Scope);
-}

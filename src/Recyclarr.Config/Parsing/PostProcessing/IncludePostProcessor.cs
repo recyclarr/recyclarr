@@ -1,6 +1,6 @@
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
-using Recyclarr.Platform;
+using Recyclarr.Logging;
 using Recyclarr.TrashGuide;
 using Serilog.Context;
 
