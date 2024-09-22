@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace Recyclarr.Settings;
 
 public record TrashRepository : IRepositorySettings
@@ -41,7 +43,15 @@ public record NotificationSettings
 
 public record AppriseNotificationSettings
 {
+    public AppriseMode? Mode { get; init; }
     public Uri? BaseUrl { get; init; }
     public string? Key { get; init; }
     public string? Tags { get; init; }
+    public Collection<string> Urls { get; init; } = [];
+}
+
+public enum AppriseMode
+{
+    Stateful,
+    Stateless
 }

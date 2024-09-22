@@ -1,5 +1,6 @@
 using System.Reactive.Disposables;
 using System.Text;
+using Autofac.Features.Indexed;
 using Flurl.Http;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Notifications.Apprise;
@@ -12,15 +13,32 @@ namespace Recyclarr.Notifications;
 
 public sealed class NotificationService(
     ILogger log,
-    IAppriseNotificationApiService apprise,
+    IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettingsProvider settingsProvider,
-    NotificationEmitter notificationEmitter) : IDisposable
+    NotificationEmitter notificationEmitter)
+    : IDisposable
 {
     private const string NoInstance = "[no instance]";
 
     private readonly Dictionary<string, List<IPresentableNotification>> _events = new();
     private readonly CompositeDisposable _eventConnection = new();
+
+    private readonly Lazy<AppriseNotificationSettings?>
+        _settings = new(() => LoadAndValidateSettings(settingsProvider));
+
     private string? _activeInstanceName;
+
+    private static AppriseNotificationSettings? LoadAndValidateSettings(ISettingsProvider settingsProvider)
+    {
+        var settings = settingsProvider.Settings.Notifications?.Apprise;
+        if (settings != null)
+        {
+            var validator = new AppriseNotificationSettingsValidator();
+            validator.Validate(settings);
+        }
+
+        return settings;
+    }
 
     public void Dispose()
     {
@@ -49,7 +67,7 @@ public sealed class NotificationService(
         _eventConnection.Clear();
 
         // If the user didn't configure notifications, exit early and do nothing.
-        if (settingsProvider.Settings.Notifications is null)
+        if (_settings.Value is null)
         {
             log.Debug("Notification settings are not present, so this notification will not be sent");
             return;
@@ -64,7 +82,9 @@ public sealed class NotificationService(
     {
         try
         {
-            await apprise.Notify("apprise", new AppriseNotification
+            var api = apiFactory[_settings.Value!.Mode!.Value];
+
+            await api.Notify(_settings.Value!, payload => payload with
             {
                 Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
                 Body = body,

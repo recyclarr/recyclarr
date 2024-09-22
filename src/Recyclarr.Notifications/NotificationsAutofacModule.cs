@@ -1,6 +1,7 @@
 using Autofac;
 using Recyclarr.Logging;
 using Recyclarr.Notifications.Apprise;
+using Recyclarr.Settings;
 
 namespace Recyclarr.Notifications;
 
@@ -15,7 +16,12 @@ public class NotificationsAutofacModule : Module
         builder.RegisterType<NotificationEmitter>().SingleInstance();
 
         // Apprise
-        builder.RegisterType<AppriseNotificationApiService>().As<IAppriseNotificationApiService>();
+        builder.RegisterType<AppriseStatefulNotificationApiService>()
+            .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateful);
+
+        builder.RegisterType<AppriseStatelessNotificationApiService>()
+            .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateless);
+
         builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
     }
 }
