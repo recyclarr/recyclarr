@@ -21,6 +21,7 @@ using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Http;
 using Recyclarr.Json;
+using Recyclarr.Logging;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.ServarrApi;
@@ -28,7 +29,6 @@ using Recyclarr.Settings;
 using Recyclarr.TrashGuide;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
-using Serilog.Core;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
@@ -42,7 +42,7 @@ public static class CompositionRoot
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
-        RegisterLogger(builder);
+        RegisterLogger(builder, thisAssembly);
 
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
@@ -89,12 +89,14 @@ public static class CompositionRoot
             .OrderByRegistration();
     }
 
-    private static void RegisterLogger(ContainerBuilder builder)
+    private static void RegisterLogger(ContainerBuilder builder, Assembly thisAssembly)
     {
+        builder.RegisterAssemblyTypes(thisAssembly)
+            .AssignableTo<ILogConfigurator>()
+            .As<ILogConfigurator>();
+
+        builder.RegisterModule<LoggingAutofacModule>();
         builder.RegisterType<LogJanitor>();
-        builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
-        builder.RegisterType<LoggerFactory>();
-        builder.Register(c => c.Resolve<LoggerFactory>().Create()).As<ILogger>().SingleInstance();
     }
 
     private static void CliRegistrations(ContainerBuilder builder)

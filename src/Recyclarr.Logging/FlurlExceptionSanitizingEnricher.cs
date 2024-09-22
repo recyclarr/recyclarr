@@ -1,8 +1,7 @@
-using Recyclarr.Http;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Recyclarr.Cli.Logging;
+namespace Recyclarr.Logging;
 
 internal class FlurlExceptionSanitizingEnricher : ILogEventEnricher
 {

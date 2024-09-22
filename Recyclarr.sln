@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Cache", "src\Recy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Cli.TestLibrary", "tests\Recyclarr.Cli.TestLibrary\Recyclarr.Cli.TestLibrary.csproj", "{7B730BDB-1519-4847-BA23-998AB3750E31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Logging", "src\Recyclarr.Logging\Recyclarr.Logging.csproj", "{0CE6D5F2-A7DC-4C03-B367-ECF8D06FC51E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -155,6 +157,10 @@ Global
 		{7B730BDB-1519-4847-BA23-998AB3750E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B730BDB-1519-4847-BA23-998AB3750E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B730BDB-1519-4847-BA23-998AB3750E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CE6D5F2-A7DC-4C03-B367-ECF8D06FC51E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CE6D5F2-A7DC-4C03-B367-ECF8D06FC51E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CE6D5F2-A7DC-4C03-B367-ECF8D06FC51E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CE6D5F2-A7DC-4C03-B367-ECF8D06FC51E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
