@@ -33,21 +33,21 @@ public record SettingsValues
     public bool EnableSslCertificateValidation { get; [UsedImplicitly] init; } = true;
     public LogJanitorSettings LogJanitor { get; [UsedImplicitly] init; } = new();
     public string? GitPath { get; [UsedImplicitly] init; }
-    public NotificationSettings? Notifications { get; init; }
+    public NotificationSettings? Notifications { get; [UsedImplicitly] init; }
 }
 
 public record NotificationSettings
 {
-    public AppriseNotificationSettings? Apprise { get; init; }
+    public AppriseNotificationSettings? Apprise { get; [UsedImplicitly] init; }
 }
 
 public record AppriseNotificationSettings
 {
-    public AppriseMode? Mode { get; init; }
-    public Uri? BaseUrl { get; init; }
-    public string? Key { get; init; }
-    public string? Tags { get; init; }
-    public Collection<string> Urls { get; init; } = [];
+    public AppriseMode? Mode { get; [UsedImplicitly] init; }
+    public Uri? BaseUrl { get; [UsedImplicitly] init; }
+    public string? Key { get; [UsedImplicitly] init; }
+    public string? Tags { get; [UsedImplicitly] init; }
+    public Collection<string> Urls { get; [UsedImplicitly] init; } = [];
 }
 
 public enum AppriseMode

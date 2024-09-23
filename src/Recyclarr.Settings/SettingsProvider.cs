@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 using Recyclarr.Yaml;
@@ -27,13 +28,21 @@ public class SettingsProvider : ISettingsProvider
         {
             using var stream = yamlPath.OpenText();
             var deserializer = serializerFactory.CreateDeserializer();
-            return deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
+            var settings = deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
+            ValidateSettings(settings);
+            return settings;
         }
         catch (YamlException e)
         {
             e.Data["ContextualMessage"] = SettingsContextualMessages.GetContextualErrorFromException(e);
             throw;
         }
+    }
+
+    private static void ValidateSettings(SettingsValues settings)
+    {
+        var validator = new SettingsValuesValidator();
+        validator.ValidateAndThrow(settings);
     }
 
     private IFileInfo CreateDefaultSettingsFile()

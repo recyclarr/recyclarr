@@ -22,23 +22,9 @@ public sealed class NotificationService(
 
     private readonly Dictionary<string, List<IPresentableNotification>> _events = new();
     private readonly CompositeDisposable _eventConnection = new();
-
-    private readonly Lazy<AppriseNotificationSettings?>
-        _settings = new(() => LoadAndValidateSettings(settingsProvider));
+    private readonly AppriseNotificationSettings? _settings = settingsProvider.Settings.Notifications?.Apprise;
 
     private string? _activeInstanceName;
-
-    private static AppriseNotificationSettings? LoadAndValidateSettings(ISettingsProvider settingsProvider)
-    {
-        var settings = settingsProvider.Settings.Notifications?.Apprise;
-        if (settings != null)
-        {
-            var validator = new AppriseNotificationSettingsValidator();
-            validator.Validate(settings);
-        }
-
-        return settings;
-    }
 
     public void Dispose()
     {
@@ -67,7 +53,7 @@ public sealed class NotificationService(
         _eventConnection.Clear();
 
         // If the user didn't configure notifications, exit early and do nothing.
-        if (_settings.Value is null)
+        if (_settings is null)
         {
             log.Debug("Notification settings are not present, so this notification will not be sent");
             return;
@@ -82,12 +68,12 @@ public sealed class NotificationService(
     {
         try
         {
-            var api = apiFactory[_settings.Value!.Mode!.Value];
+            var api = apiFactory[_settings!.Mode!.Value];
 
-            await api.Notify(_settings.Value!, payload => payload with
+            await api.Notify(_settings!, payload => payload with
             {
                 Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
-                Body = body,
+                Body = body.Trim(),
                 Type = messageType,
                 Format = AppriseMessageFormat.Markdown
             });
@@ -123,8 +109,10 @@ public sealed class NotificationService(
         }
         else
         {
-            body.AppendLine($"### Instance: `{instanceName}`\n");
+            body.AppendLine($"### Instance: `{instanceName}`");
         }
+
+        body.AppendLine();
 
         var groupedEvents = notifications
             .GroupBy(x => x.Category)
