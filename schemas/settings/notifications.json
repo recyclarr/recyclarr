@@ -5,18 +5,36 @@
   "additionalProperties": false,
   "properties": {
     "apprise": {
+      "description": "Apprise-specific notification settings",
       "type": "object",
       "additionalProperties": false,
-      "required": ["base_url", "key"],
+      "required": ["base_url", "mode"],
       "properties": {
+        "mode": {
+          "description": "The operating mode for Apprise itself. In 'stateful' mode, 'key' is required, 'tags' is optional, and 'urls' is ignored. In 'stateless' mode, 'urls' is optional, while 'key' and 'tags' are ignored.",
+          "type": "string",
+          "enum": ["stateless", "stateful"]
+        },
         "base_url": {
-          "type": "string"
+          "description": "The base URL for the Apprise API",
+          "type": "string",
+          "format": "uri"
         },
         "key": {
+          "description": "A key identifying the configuration (urls) to use in your Apprise instance. Required in 'stateful' mode, ignored in 'stateless' mode.",
           "type": "string"
         },
         "tags": {
+          "description": "Filtering tags. Use the format documented here: https://github.com/caronc/apprise-api#tagging. Used in 'stateful' mode, ignored in 'stateless' mode.",
           "type": "string"
+        },
+        "urls": {
+          "description": "List of notification service URLs. Used in 'stateless' mode, ignored in 'stateful' mode.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
         }
       }
     }
