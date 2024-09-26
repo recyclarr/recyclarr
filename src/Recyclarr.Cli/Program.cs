@@ -17,7 +17,6 @@ internal static class Program
         app.Configure(config =>
         {
         #if DEBUG
-            config.PropagateExceptions();
             config.ValidateExamples();
         #endif
 
@@ -27,22 +26,24 @@ internal static class Program
             config.SetApplicationVersion(
                 $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
 
-            config.SetExceptionHandler((ex, resolver) =>
-            {
-                var log = (ILogger?) resolver?.Resolve(typeof(ILogger));
-                if (log is null)
-                {
-                    AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-                }
-                else
-                {
-                    log.Error(ex, "Non-recoverable Exception");
-                }
-            });
+            config.SetExceptionHandler(ExceptionHandler);
 
             CliSetup.Commands(config);
         });
 
         return await app.RunAsync(args);
+    }
+
+    private static void ExceptionHandler(Exception ex, ITypeResolver? resolver = null)
+    {
+        var log = (ILogger?) resolver?.Resolve(typeof(ILogger));
+        if (log is null)
+        {
+            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+        }
+        else
+        {
+            log.Error(ex, "Non-recoverable Exception");
+        }
     }
 }
