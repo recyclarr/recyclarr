@@ -43,8 +43,7 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
     [Test]
     public void Log_janitor_cleans_up_default_max_files()
     {
-        var settingsProvider = Resolve<ISettingsProvider>();
-        var maxFiles = settingsProvider.Settings.LogJanitor.MaxFiles;
+        var maxFiles = Resolve<RecyclarrSettings>().LogJanitor.MaxFiles;
 
         for (var i = 0; i < maxFiles + 20; ++i)
         {

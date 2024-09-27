@@ -25,7 +25,7 @@ public record Repositories
     public ConfigTemplateRepository ConfigTemplates { get; [UsedImplicitly] init; } = new();
 }
 
-public record SettingsValues
+public record RecyclarrSettings
 {
     public Repositories Repositories { get; [UsedImplicitly] init; } = new();
     public bool EnableSslCertificateValidation { get; [UsedImplicitly] init; } = true;

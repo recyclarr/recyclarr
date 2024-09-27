@@ -6,28 +6,17 @@ using YamlDotNet.Core;
 
 namespace Recyclarr.Settings;
 
-public class SettingsProvider : ISettingsProvider
+public class SettingsLoader(IAppPaths paths, IYamlSerializerFactory serializerFactory)
 {
-    private readonly IAppPaths _paths;
-    private readonly Lazy<SettingsValues> _settings;
-
-    public SettingsValues Settings => _settings.Value;
-
-    public SettingsProvider(IAppPaths paths, IYamlSerializerFactory serializerFactory)
+    public RecyclarrSettings LoadAndOptionallyCreate()
     {
-        _paths = paths;
-        _settings = new Lazy<SettingsValues>(() => LoadOrCreateSettingsFile(serializerFactory));
-    }
-
-    private SettingsValues LoadOrCreateSettingsFile(IYamlSerializerFactory serializerFactory)
-    {
-        var yamlPath = _paths.AppDataDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
+        var yamlPath = paths.AppDataDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
 
         try
         {
             using var stream = yamlPath.OpenText();
             var deserializer = serializerFactory.CreateDeserializer();
-            return deserializer.Deserialize<SettingsValues?>(stream.ReadToEnd()) ?? new SettingsValues();
+            return deserializer.Deserialize<RecyclarrSettings?>(stream.ReadToEnd()) ?? new RecyclarrSettings();
         }
         catch (YamlException e)
         {
@@ -47,7 +36,7 @@ public class SettingsProvider : ISettingsProvider
             # https://recyclarr.dev/wiki/yaml/settings-reference/
             """;
 
-        var settingsFile = _paths.AppDataDirectory.File("settings.yml");
+        var settingsFile = paths.AppDataDirectory.File("settings.yml");
         settingsFile.CreateParentDirectory();
         using var stream = settingsFile.CreateText();
         stream.Write(fileData);
