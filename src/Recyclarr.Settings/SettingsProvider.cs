@@ -1,9 +1,9 @@
 using System.IO.Abstractions;
+using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Platform;
 using Recyclarr.Yaml;
-using Serilog;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Settings;
@@ -11,15 +11,13 @@ namespace Recyclarr.Settings;
 // Do NOT inject ILogger here since LoggerFactory depends on settings
 public class SettingsProvider : ISettingsProvider
 {
-    private readonly ILogger _log;
     private readonly IAppPaths _paths;
     private readonly Lazy<SettingsValues> _settings;
 
     public SettingsValues Settings => _settings.Value;
 
-    public SettingsProvider(ILogger log, IAppPaths paths, IYamlSerializerFactory serializerFactory)
+    public SettingsProvider(IAppPaths paths, IYamlSerializerFactory serializerFactory)
     {
-        _log = log;
         _paths = paths;
         _settings = new Lazy<SettingsValues>(() => LoadOrCreateSettingsFile(serializerFactory));
     }
@@ -43,16 +41,10 @@ public class SettingsProvider : ISettingsProvider
         }
     }
 
-    private void ValidateSettings(SettingsValues settings)
+    private static void ValidateSettings(SettingsValues settings)
     {
         var validator = new SettingsValuesValidator();
-        var result = validator.Validate(settings);
-
-        var numErrors = result.Errors.LogValidationErrors(_log, "Config Validation");
-        if (numErrors != 0)
-        {
-            _log.Error("Config validation failed with {Count} errors", numErrors);
-        }
+        validator.ValidateAndThrow(settings);
     }
 
     private IFileInfo CreateDefaultSettingsFile()

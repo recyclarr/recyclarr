@@ -1,4 +1,7 @@
+using FluentValidation;
+using FluentValidation.Results;
 using Recyclarr.Common.FluentValidation;
+using Serilog.Events;
 
 namespace Recyclarr.Config.Parsing;
 
@@ -21,5 +24,37 @@ public class ConfigValidationExecutor(ILogger log, IRuntimeValidationService val
 
         log.Error("Config validation failed with {Count} errors", numErrors);
         return false;
+    }
+}
+
+public class ValidationLogger
+{
+    public int LogValidationErrors(IReadOnlyCollection<ValidationFailure> errors, string errorPrefix)
+    {
+        var numErrors = 0;
+
+        foreach (var error in errors)
+        {
+            var level = ToLogLevel(error.Severity);
+            if (level == LogEventLevel.Error)
+            {
+                ++numErrors;
+            }
+
+            log.Write(level, "{ErrorPrefix}: {Msg}", errorPrefix, error.ErrorMessage);
+        }
+
+        return numErrors;
+    }
+
+    public static LogEventLevel ToLogLevel(Severity severity)
+    {
+        return severity switch
+        {
+            Severity.Error => LogEventLevel.Error,
+            Severity.Warning => LogEventLevel.Warning,
+            Severity.Info => LogEventLevel.Information,
+            _ => LogEventLevel.Debug
+        };
     }
 }
