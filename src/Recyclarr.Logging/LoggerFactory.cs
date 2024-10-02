@@ -3,10 +3,12 @@ using Serilog.Events;
 
 namespace Recyclarr.Logging;
 
-public class LoggerFactory(IEnumerable<ILogConfigurator> configurators)
+public class LoggerFactory(Lazy<IEnumerable<ILogConfigurator>> lazyConfigurators)
 {
     public ILogger Create()
     {
+        var configurators = lazyConfigurators.Value;
+
         var config = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.FromLogContext()

@@ -1,6 +1,7 @@
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Processors;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -13,26 +14,42 @@ internal static class Program
         var builder = new ContainerBuilder();
         CompositionRoot.Setup(builder);
 
-        var app = new CommandApp(new AutofacTypeRegistrar(builder));
-        app.Configure(config =>
+        var container = builder.Build();
+
+        var childScope = container.BeginLifetimeScope(builder2 =>
         {
-        #if DEBUG
-            config.PropagateExceptions();
-            config.ValidateExamples();
-        #endif
+            var app = new CommandApp(new AutofacTypeRegistrar(builder));
+            app.Configure(config =>
+            {
+            #if DEBUG
+                config.PropagateExceptions();
+                config.ValidateExamples();
+            #endif
 
-            config.Settings.StrictParsing = true;
+                config.Settings.StrictParsing = true;
 
-            config.SetApplicationName("recyclarr");
-            config.SetApplicationVersion(
-                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
+                config.SetApplicationName("recyclarr");
+                config.SetApplicationVersion(
+                    $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
 
-            config.SetExceptionHandler(ExceptionHandler);
+                config.SetExceptionHandler(ExceptionHandler);
 
-            CliSetup.Commands(config);
+                CliSetup.Commands(config);
+            });
+
+            builder2.RegisterInstance(app);
         });
 
-        return await app.RunAsync(args);
+
+        try
+        {
+            return await app.RunAsync(args);
+        }
+        catch (Exception e)
+        {
+            ExceptionHandler(e, null);
+            return (int) ExitStatus.Failed;
+        }
     }
 
     private static void ExceptionHandler(Exception ex, ITypeResolver? resolver)

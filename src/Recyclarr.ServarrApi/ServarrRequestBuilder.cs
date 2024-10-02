@@ -13,7 +13,7 @@ namespace Recyclarr.ServarrApi;
 public class ServarrRequestBuilder(
     ILogger log,
     IFlurlClientCache clientCache,
-    ISettingsProvider settingsProvider,
+    ISettings<RecyclarrSettings> settings,
     IEnumerable<FlurlSpecificEventHandler> eventHandlers,
     IServiceConfiguration config)
     : IServarrRequestBuilder
@@ -38,12 +38,12 @@ public class ServarrRequestBuilder(
             builder.EventHandlers.Add(handler);
         }
 
-        builder.WithSettings(settings =>
+        builder.WithSettings(httpSettings =>
         {
-            settings.JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services);
+            httpSettings.JsonSerializer = new DefaultJsonSerializer(GlobalJsonSerializerSettings.Services);
         });
 
-        if (!settingsProvider.Settings.EnableSslCertificateValidation)
+        if (!settings.Value.EnableSslCertificateValidation)
         {
             builder.ConfigureInnerHandler(handler =>
             {
