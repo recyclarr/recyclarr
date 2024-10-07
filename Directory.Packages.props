@@ -74,7 +74,7 @@
   </ItemGroup>
   <!-- Global Package References -->
   <ItemGroup>
-    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.3.6" />
+    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.3.10" />
     <!-- Cannot use the official Jetbrains.Annotations package because it doesn't work with GlobalPackageReference -->
     <GlobalPackageReference Include="Rocket.Surgery.MSBuild.JetBrains.Annotations" Version="1.2.1" />
   </ItemGroup>
