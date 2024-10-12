@@ -18,7 +18,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.path }}
 
-    - uses: actions/upload-artifact@v4.4.0
+    - uses: actions/upload-artifact@v4.4.1
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}/artifact.tar
