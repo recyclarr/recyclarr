@@ -8,7 +8,7 @@ using YamlDotNet.Core;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler httpExceptionHandler)
+public class ConsoleExceptionHandler(ILogger log)
 {
     public async Task<bool> HandleException(Exception sourceException)
     {
@@ -20,6 +20,7 @@ public class ConsoleExceptionHandler(ILogger log, IFlurlHttpExceptionHandler htt
 
             case FlurlHttpException e:
                 log.Error(e, "HTTP error");
+                var httpExceptionHandler = new FlurlHttpExceptionHandler(log);
                 await httpExceptionHandler.ProcessServiceErrorMessages(new ServiceErrorMessageExtractor(e));
                 break;
 

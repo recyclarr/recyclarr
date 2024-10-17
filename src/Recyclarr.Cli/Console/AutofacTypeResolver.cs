@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Spectre.Console.Cli;
 
-namespace Recyclarr.Cli.Console.Helpers;
+namespace Recyclarr.Cli.Console;
 
 internal class AutofacTypeResolver(ILifetimeScope scope) : ITypeResolver
 {

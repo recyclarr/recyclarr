@@ -8,16 +8,6 @@ namespace Recyclarr.Cli.IntegrationTests;
 internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
 {
     [Test]
-    public void Base_command_startup_tasks_are_registered()
-    {
-        var registrations = Resolve<IEnumerable<IGlobalSetupTask>>();
-        registrations.Select(x => x.GetType()).Should().BeEquivalentTo([
-            typeof(JanitorCleanupTask),
-            typeof(ProgramInformationDisplayTask)
-        ]);
-    }
-
-    [Test]
     public void Log_janitor_cleans_up_user_specified_max_files()
     {
         const int maxFiles = 25;

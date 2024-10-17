@@ -14,7 +14,7 @@ public class ServiceProcessorsAutofacModule : Module
         base.Load(builder);
 
         builder.RegisterType<ConsoleExceptionHandler>();
-        builder.RegisterType<FlurlHttpExceptionHandler>().As<IFlurlHttpExceptionHandler>();
+        builder.RegisterType<FlurlHttpExceptionHandler>();
 
         // Sync
         builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();

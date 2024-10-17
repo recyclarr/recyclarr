@@ -2,7 +2,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace Recyclarr.Cli.Console.Helpers;
+namespace Recyclarr.Cli.Console;
 
 // Taken from: https://github.com/spectreconsole/spectre.console/issues/701#issuecomment-1081834778
 internal sealed class ConsoleAppCancellationTokenSource : IDisposable

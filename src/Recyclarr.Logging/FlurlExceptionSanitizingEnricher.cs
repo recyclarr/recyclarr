@@ -3,7 +3,7 @@ using Serilog.Events;
 
 namespace Recyclarr.Logging;
 
-internal class FlurlExceptionSanitizingEnricher : ILogEventEnricher
+public class FlurlExceptionSanitizingEnricher : ILogEventEnricher
 {
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {

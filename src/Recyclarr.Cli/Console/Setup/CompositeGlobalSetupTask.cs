@@ -1,15 +1,23 @@
+using Recyclarr.Cli.Console.Commands;
+
 namespace Recyclarr.Cli.Console.Setup;
 
 [UsedImplicitly]
-public class CompositeGlobalSetupTask(IOrderedEnumerable<IGlobalSetupTask> tasks) : IGlobalSetupTask
+public class CompositeGlobalSetupTask(IOrderedEnumerable<Lazy<IGlobalSetupTask>> tasks) : IGlobalSetupTask
 {
-    public void OnStart()
+    public void OnStart(BaseCommandSettings cmd)
     {
-        tasks.ForEach(x => x.OnStart());
+        foreach (var task in tasks)
+        {
+            task.Value.OnStart(cmd);
+        }
     }
 
     public void OnFinish()
     {
-        tasks.Reverse().ForEach(x => x.OnFinish());
+        foreach (var task in tasks.Reverse())
+        {
+            task.Value.OnFinish();
+        }
     }
 }

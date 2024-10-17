@@ -32,7 +32,7 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
 
     private static ExpressionTemplate BuildExpressionTemplate()
     {
-        var template = "[{@t:HH:mm:ss} {@l:u3}] " + LogTemplates.Base +
+        var template = "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate +
             "{Inspect(@x).StackTrace}";
 
         return new ExpressionTemplate(template);

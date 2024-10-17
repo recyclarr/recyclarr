@@ -4,7 +4,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cache;
-using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -29,6 +29,7 @@ using Recyclarr.Settings;
 using Recyclarr.TrashGuide;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
+using Serilog.Core;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
@@ -42,7 +43,7 @@ public static class CompositionRoot
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
-        RegisterLogger(builder, thisAssembly);
+        RegisterLogger(builder);
 
         builder.RegisterModule<MigrationAutofacModule>();
         builder.RegisterModule<ConfigAutofacModule>();
@@ -89,22 +90,30 @@ public static class CompositionRoot
             .OrderByRegistration();
     }
 
-    private static void RegisterLogger(ContainerBuilder builder, Assembly thisAssembly)
+    private static void RegisterLogger(ContainerBuilder builder)
     {
-        builder.RegisterAssemblyTypes(thisAssembly)
-            .AssignableTo<ILogConfigurator>()
+        // Log Configurators
+        builder.RegisterTypes(
+                typeof(FileLogSinkConfigurator))
             .As<ILogConfigurator>();
 
-        builder.RegisterModule<LoggingAutofacModule>();
+        builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
+        builder.RegisterType<LoggerFactory>().SingleInstance();
+        builder.RegisterType<IndirectLoggerDecorator>().As<ILogger>();
+
         builder.RegisterType<LogJanitor>();
     }
 
     private static void CliRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterType<AutofacTypeRegistrar>().As<ITypeRegistrar>();
+        builder.RegisterType<CommandApp>();
         builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();
 
         builder.RegisterComposite<CompositeGlobalSetupTask, IGlobalSetupTask>();
         builder.RegisterTypes(
+                typeof(AppDataDirSetupTask), // This must be first; ILogger creation depends on IAppPaths
+                typeof(LoggerSetupTask),
                 typeof(ProgramInformationDisplayTask),
                 typeof(JanitorCleanupTask))
             .As<IGlobalSetupTask>()
