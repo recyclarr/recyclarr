@@ -3,16 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
-using Recyclarr.Cli.Processors.ErrorHandling;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-[Description("Delete things from services like Radarr & Sonarr")]
+[Description("Delete things from services like Radarr and Sonarr")]
 [UsedImplicitly]
-public class DeleteCustomFormatsCommand(
-    IDeleteCustomFormatsProcessor processor,
-    ConsoleExceptionHandler exceptionHandler)
+public class DeleteCustomFormatsCommand(IDeleteCustomFormatsProcessor processor)
     : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -46,21 +43,7 @@ public class DeleteCustomFormatsCommand(
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        try
-        {
-            await processor.Process(settings, settings.CancellationToken);
-        }
-        catch (Exception e)
-        {
-            if (!await exceptionHandler.HandleException(e))
-            {
-                // This means we didn't handle the exception; rethrow it.
-                throw;
-            }
-
-            return (int) ExitStatus.Failed;
-        }
-
+        await processor.Process(settings, settings.CancellationToken);
         return (int) ExitStatus.Succeeded;
     }
 }

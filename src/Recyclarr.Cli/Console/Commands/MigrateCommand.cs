@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Recyclarr.Cli.Migration;
+using Recyclarr.Cli.Processors;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -25,6 +26,7 @@ public class MigrateCommand(
         {
             migration.PerformAllMigrationSteps(settings.Debug);
             console.WriteLine("All migration steps completed");
+            return (int) ExitStatus.Succeeded;
         }
         catch (MigrationException e)
         {
@@ -44,14 +46,12 @@ public class MigrateCommand(
             }
 
             console.Write(msg.ToString());
-            return 1;
         }
         catch (RequiredMigrationException ex)
         {
             console.WriteLine($"ERROR: {ex.Message}");
-            return 1;
         }
 
-        return 0;
+        return (int) ExitStatus.Failed;
     }
 }

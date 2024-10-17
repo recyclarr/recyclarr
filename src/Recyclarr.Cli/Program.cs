@@ -42,7 +42,11 @@ internal static class Program
         {
             var log = scope.Resolve<ILogger>();
             var exceptionHandler = new ConsoleExceptionHandler(log);
-            await exceptionHandler.HandleException(e);
+            if (!await exceptionHandler.HandleException(e))
+            {
+                log.Error(e, "Exiting due to fatal error");
+            }
+
             return (int) ExitStatus.Failed;
         }
     }

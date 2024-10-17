@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
@@ -38,6 +39,6 @@ public class ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoU
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
         lister.List(settings);
-        return 0;
+        return (int) ExitStatus.Succeeded;
     }
 }

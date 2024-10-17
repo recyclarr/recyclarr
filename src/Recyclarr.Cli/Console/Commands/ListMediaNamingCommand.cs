@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.MediaNaming;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
@@ -27,6 +28,6 @@ public class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpda
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         lister.ListNaming(settings.Service);
-        return 0;
+        return (int) ExitStatus.Succeeded;
     }
 }

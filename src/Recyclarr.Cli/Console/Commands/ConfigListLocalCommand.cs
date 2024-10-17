@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
@@ -9,7 +9,7 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List local configuration files.")]
-public class ConfigListLocalCommand(ILogger log, ConfigListLocalProcessor processor, IMultiRepoUpdater repoUpdater)
+public class ConfigListLocalCommand(ConfigListLocalProcessor processor, IMultiRepoUpdater repoUpdater)
     : AsyncCommand<ConfigListLocalCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -17,17 +17,8 @@ public class ConfigListLocalCommand(ILogger log, ConfigListLocalProcessor proces
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        try
-        {
-            await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
-            processor.Process();
-            return 0;
-        }
-        catch (NoConfigurationFilesException e)
-        {
-            log.Error(e, "Unable to list local config files");
-        }
-
-        return 1;
+        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        processor.Process();
+        return (int) ExitStatus.Succeeded;
     }
 }

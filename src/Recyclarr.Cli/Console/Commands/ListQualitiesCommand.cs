@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualitySize;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
@@ -28,6 +29,6 @@ public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdate
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         lister.ListQualities(settings.Service);
-        return 0;
+        return (int) ExitStatus.Succeeded;
     }
 }
