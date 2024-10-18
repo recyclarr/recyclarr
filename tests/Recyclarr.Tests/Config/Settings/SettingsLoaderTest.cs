@@ -6,15 +6,15 @@ using Recyclarr.Yaml;
 namespace Recyclarr.Tests.Config.Settings;
 
 [TestFixture]
-public class SettingsPersisterTest
+public class SettingsLoaderTest
 {
     [Test, AutoMockData]
     public void Load_should_create_settings_file_if_not_exists(
         [Frozen] MockFileSystem fileSystem,
         [Frozen] IAppPaths paths,
-        SettingsProvider sut)
+        SettingsLoader sut)
     {
-        _ = sut.Settings;
+        sut.LoadAndOptionallyCreate();
 
         fileSystem.AllFiles.Should().ContainSingle(paths.AppDataDirectory.File("settings.yml").FullName);
     }
@@ -23,11 +23,10 @@ public class SettingsPersisterTest
     public void Load_defaults_when_file_does_not_exist(
         [Frozen(Matching.ImplementedInterfaces)] YamlSerializerFactory serializerFactory,
         [Frozen] IAppPaths paths,
-        SettingsProvider sut)
+        SettingsLoader sut)
     {
-        var expectedSettings = new SettingsValues();
-
-        var settings = sut.Settings;
+        var expectedSettings = new RecyclarrSettings();
+        var settings = sut.LoadAndOptionallyCreate();
 
         settings.Should().BeEquivalentTo(expectedSettings);
     }

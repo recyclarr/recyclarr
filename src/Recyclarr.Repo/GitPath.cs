@@ -3,8 +3,8 @@ using Recyclarr.VersionControl;
 
 namespace Recyclarr.Repo;
 
-public class GitPath(ISettingsProvider settings) : IGitPath
+public class GitPath(ISettings<RecyclarrSettings> settings) : IGitPath
 {
     public static string Default => "git";
-    public string Path => settings.Settings.GitPath ?? Default;
+    public string Path => settings.Value.GitPath ?? Default;
 }

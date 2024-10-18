@@ -9,9 +9,6 @@ internal class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
     [Test]
     public void Load_settings_yml_correctly_when_file_exists()
     {
-        var sut = Resolve<SettingsProvider>();
-        // For this test, it doesn't really matter if the YAML data matches what SettingsValue expects.
-        // This test only ensures that the data deserialized is from the actual correct file.
         const string yamlData =
             """
             repositories:
@@ -21,8 +18,8 @@ internal class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
 
         Fs.AddFile(Paths.AppDataDirectory.File("settings.yml"), new MockFileData(yamlData));
 
-        var settings = sut.Settings;
+        var settings = Resolve<ISettings<TrashRepository>>();
 
-        settings.Repositories.TrashGuides.CloneUrl.Should().Be("http://the_url.com");
+        settings.Value.CloneUrl.Should().Be("http://the_url.com");
     }
 }

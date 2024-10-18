@@ -8,10 +8,10 @@ public class GitPathTest
 {
     [Test, AutoMockData]
     public void Default_path_used_when_setting_is_null(
-        [Frozen] ISettingsProvider settings,
+        [Frozen] ISettings<RecyclarrSettings> settings,
         GitPath sut)
     {
-        settings.Settings.Returns(new SettingsValues
+        settings.Value.Returns(new RecyclarrSettings
         {
             GitPath = null
         });
@@ -23,11 +23,11 @@ public class GitPathTest
 
     [Test, AutoMockData]
     public void User_specified_path_used_instead_of_default(
-        [Frozen] ISettingsProvider settings,
+        [Frozen] ISettings<RecyclarrSettings> settings,
         GitPath sut)
     {
         var expectedPath = "/usr/local/bin/git";
-        settings.Settings.Returns(new SettingsValues
+        settings.Value.Returns(new RecyclarrSettings
         {
             GitPath = expectedPath
         });

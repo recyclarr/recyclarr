@@ -18,7 +18,7 @@ public static class SettingsContextualMessages
 
         if (msg.Contains(
             "Property 'repository' not found on type " +
-            $"'{typeof(SettingsValues).FullName}'"))
+            $"'{typeof(RecyclarrSettings).FullName}'"))
         {
             return
                 "Usage of 'repository' setting is no " +
