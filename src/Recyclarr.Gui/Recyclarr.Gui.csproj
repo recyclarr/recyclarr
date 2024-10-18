@@ -16,6 +16,6 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
+    <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
 </Project>

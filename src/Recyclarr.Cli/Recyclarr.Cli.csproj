@@ -26,12 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Cache\Recyclarr.Cache.csproj" />
-    <ProjectReference Include="..\Recyclarr.Common\Recyclarr.Common.csproj" />
-    <ProjectReference Include="..\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj" />
-    <ProjectReference Include="..\Recyclarr.Config\Recyclarr.Config.csproj" />
-    <ProjectReference Include="..\Recyclarr.Logging\Recyclarr.Logging.csproj" />
-    <ProjectReference Include="..\Recyclarr.TrashGuide\Recyclarr.TrashGuide.csproj" />
+    <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

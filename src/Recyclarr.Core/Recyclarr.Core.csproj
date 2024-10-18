@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <RootNamespace>Recyclarr</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
+      <PackageReference Include="Autofac" />
+      <PackageReference Include="Autofac.Extras.Ordering" />
+      <PackageReference Include="CliWrap" />
+      <PackageReference Include="FluentValidation" />
+      <PackageReference Include="Flurl" />
+      <PackageReference Include="Flurl.Http" />
+      <PackageReference Include="Serilog" />
+      <PackageReference Include="Spectre.Console" />
+      <PackageReference Include="SuperLinq" />
+      <PackageReference Include="System.Data.HashFunction.FNV" />
+      <PackageReference Include="System.Reactive" />
+      <PackageReference Include="TestableIO.System.IO.Abstractions" />
+      <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
+      <PackageReference Include="YamlDotNet" />
+    </ItemGroup>
+
+</Project>

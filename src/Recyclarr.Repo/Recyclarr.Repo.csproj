@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Json\Recyclarr.Json.csproj" />
-    <ProjectReference Include="..\Recyclarr.Logging\Recyclarr.Logging.csproj" />
-    <ProjectReference Include="..\Recyclarr.Settings\Recyclarr.Settings.csproj" />
-    <ProjectReference Include="..\Recyclarr.VersionControl\Recyclarr.VersionControl.csproj" />
-  </ItemGroup>
-</Project>

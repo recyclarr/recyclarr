@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Recyclarr.Cache\Recyclarr.Cache.csproj" />
-    <ProjectReference Include="..\..\src\Recyclarr.Compatibility\Recyclarr.Compatibility.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Core\Recyclarr.Core.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.Tests.TestLibrary\Recyclarr.Tests.TestLibrary.csproj" />
   </ItemGroup>
