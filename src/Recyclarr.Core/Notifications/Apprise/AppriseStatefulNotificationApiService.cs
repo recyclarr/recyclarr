@@ -10,11 +10,6 @@ public class AppriseStatefulNotificationApiService(IAppriseRequestBuilder api) :
         AppriseNotificationSettings settings,
         Func<AppriseNotification, AppriseNotification> notificationBuilder)
     {
-        if (settings.Key is null)
-        {
-            throw new ArgumentException("Stateful apprise notifications require the 'key' node");
-        }
-
         var notification = notificationBuilder(new AppriseStatefulNotification
         {
             Tag = settings.Tags

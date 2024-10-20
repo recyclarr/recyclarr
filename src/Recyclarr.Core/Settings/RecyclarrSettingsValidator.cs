@@ -23,10 +23,12 @@ public class AppriseNotificationSettingsValidator : AbstractValidator<AppriseNot
 {
     public AppriseNotificationSettingsValidator()
     {
-        RuleFor(x => x.Mode).NotNull()
+        RuleFor(x => x.Mode)
+            .NotNull()
             .WithMessage("`mode` is required for apprise notifications");
 
-        RuleFor(x => x.BaseUrl).NotEmpty()
+        RuleFor(x => x.BaseUrl)
+            .NotEmpty()
             .WithMessage("`base_url` is required for apprise notifications");
 
         RuleFor(x => x.Urls)

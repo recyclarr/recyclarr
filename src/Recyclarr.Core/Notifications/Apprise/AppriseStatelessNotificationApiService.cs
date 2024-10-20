@@ -10,11 +10,6 @@ public class AppriseStatelessNotificationApiService(IAppriseRequestBuilder api) 
         AppriseNotificationSettings settings,
         Func<AppriseNotification, AppriseNotification> notificationBuilder)
     {
-        if (settings.Urls is null)
-        {
-            throw new ArgumentException("Stateless apprise notifications require the 'urls' array");
-        }
-
         var notification = notificationBuilder(new AppriseStatelessNotification
         {
             Urls = settings.Urls

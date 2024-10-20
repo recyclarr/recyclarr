@@ -9,29 +9,19 @@ namespace Recyclarr.Notifications.Apprise;
 
 public sealed class AppriseRequestBuilder(
     IFlurlClientCache clientCache,
-    ISettings<NotificationSettings> settings,
+    ISettings<NotificationSettings> notificationSettings,
     IEnumerable<FlurlSpecificEventHandler> eventHandlers)
     : IAppriseRequestBuilder
 {
-    private readonly Lazy<Uri> _baseUrl = new(() =>
+    public IFlurlRequest Request(params object[] path)
     {
-        var apprise = settings.Value.Apprise;
+        var apprise = notificationSettings.Value.Apprise;
         if (apprise is null)
         {
             throw new ArgumentException("No apprise notification settings have been defined");
         }
 
-        if (apprise.BaseUrl is null)
-        {
-            throw new ArgumentException("Apprise `base_url` setting is not present or empty");
-        }
-
-        return apprise.BaseUrl;
-    });
-
-    public IFlurlRequest Request(params object[] path)
-    {
-        var client = clientCache.GetOrAdd("apprise", _baseUrl.Value.ToString(), Configure);
+        var client = clientCache.GetOrAdd("apprise", apprise.BaseUrl.ToString(), Configure);
         return client.Request(path);
     }
 
