@@ -2,20 +2,11 @@
 using Autofac;
 using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
-using Recyclarr.Common;
 using Recyclarr.Compatibility;
-using Recyclarr.Config;
-using Recyclarr.Http;
-using Recyclarr.Json;
 using Recyclarr.Platform;
-using Recyclarr.Repo;
-using Recyclarr.ServarrApi;
-using Recyclarr.Settings;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
-using Recyclarr.TrashGuide;
 using Recyclarr.VersionControl;
-using Recyclarr.Yaml;
 using Spectre.Console;
 using Spectre.Console.Testing;
 
@@ -59,19 +50,7 @@ public abstract class IntegrationTestFixture : IDisposable
     {
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
-
-        builder.RegisterModule<ConfigAutofacModule>();
-        builder.RegisterModule<GuideAutofacModule>();
-        builder.RegisterModule<YamlAutofacModule>();
-        builder.RegisterModule<SettingsAutofacModule>();
-        builder.RegisterModule<HttpAutofacModule>();
-        builder.RegisterModule<ServarrApiAutofacModule>();
-        builder.RegisterModule<VersionControlAutofacModule>();
-        builder.RegisterModule<RepoAutofacModule>();
-        builder.RegisterModule<CompatibilityAutofacModule>();
-        builder.RegisterModule<JsonAutofacModule>();
-        builder.RegisterModule<PlatformAutofacModule>();
-        builder.RegisterModule<CommonAutofacModule>();
+        builder.RegisterModule<CoreAutofacModule>();
     }
 
     /// <summary>

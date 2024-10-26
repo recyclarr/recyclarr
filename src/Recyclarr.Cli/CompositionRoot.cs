@@ -3,33 +3,18 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
-using Recyclarr.Cache;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
+using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.Cli.Processors;
+using Recyclarr.Cli.Processors.Config;
+using Recyclarr.Cli.Processors.Delete;
+using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Common;
-using Recyclarr.Compatibility;
-using Recyclarr.Config;
-using Recyclarr.Http;
-using Recyclarr.Json;
 using Recyclarr.Logging;
-using Recyclarr.Notifications;
-using Recyclarr.Platform;
-using Recyclarr.Repo;
-using Recyclarr.ServarrApi;
-using Recyclarr.Settings;
-using Recyclarr.TrashGuide;
-using Recyclarr.VersionControl;
-using Recyclarr.Yaml;
 using Serilog.Core;
 using Spectre.Console.Cli;
 
@@ -46,22 +31,8 @@ public static class CompositionRoot
 
         RegisterLogger(builder);
 
-        builder.RegisterModule<MigrationAutofacModule>();
-        builder.RegisterModule<ConfigAutofacModule>();
-        builder.RegisterModule<GuideAutofacModule>();
-        builder.RegisterModule<YamlAutofacModule>();
-        builder.RegisterModule<ServiceProcessorsAutofacModule>();
-        builder.RegisterModule<CacheAutofacModule>();
-        builder.RegisterModule<SettingsAutofacModule>();
-        builder.RegisterModule<HttpAutofacModule>();
-        builder.RegisterModule<ServarrApiAutofacModule>();
-        builder.RegisterModule<VersionControlAutofacModule>();
-        builder.RegisterModule<RepoAutofacModule>();
-        builder.RegisterModule<CompatibilityAutofacModule>();
-        builder.RegisterModule<JsonAutofacModule>();
-        builder.RegisterModule<PlatformAutofacModule>();
-        builder.RegisterModule<CommonAutofacModule>();
-        builder.RegisterModule<NotificationsAutofacModule>();
+        builder.RegisterModule<CoreAutofacModule>();
+        builder.RegisterModule<PipelineAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
@@ -69,26 +40,43 @@ public static class CompositionRoot
         builder.RegisterAutoMapper(thisAssembly);
 
         CliRegistrations(builder);
-        PipelineRegistrations(builder);
+        RegisterMigrations(builder);
+        RegisterServiceProcessors(builder);
     }
 
-    private static void PipelineRegistrations(ContainerBuilder builder)
+    private static void RegisterServiceProcessors(ContainerBuilder builder)
     {
-        builder.RegisterModule<CustomFormatAutofacModule>();
-        builder.RegisterModule<QualityProfileAutofacModule>();
-        builder.RegisterModule<QualitySizeAutofacModule>();
-        builder.RegisterModule<MediaNamingAutofacModule>();
+        builder.RegisterType<ConsoleExceptionHandler>();
+        builder.RegisterType<FlurlHttpExceptionHandler>();
 
-        builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
-        builder.RegisterComposite<CompositeSyncPipeline, ISyncPipeline>();
+        // Sync
+        builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
+
+        // Configuration
+        builder.RegisterType<ConfigManipulator>().As<IConfigManipulator>();
+        builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
+        builder.RegisterType<ConfigListLocalProcessor>();
+        builder.RegisterType<ConfigListTemplateProcessor>();
+
+        // Delete
+        builder.RegisterType<DeleteCustomFormatsProcessor>().As<IDeleteCustomFormatsProcessor>();
+
         builder.RegisterTypes(
-                // ORDER HERE IS IMPORTANT!
-                // There are indirect dependencies between pipelines.
-                typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
-                typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
-                typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<MediaNamingPipelineContext>))
-            .As<ISyncPipeline>()
+                typeof(TemplateConfigCreator),
+                typeof(LocalConfigCreator))
+            .As<IConfigCreator>()
+            .OrderByRegistration();
+    }
+
+    private static void RegisterMigrations(ContainerBuilder builder)
+    {
+        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
+
+        // Migration Steps
+        builder.RegisterTypes(
+                typeof(MoveOsxAppDataDotnet8),
+                typeof(DeleteRepoDirMigrationStep))
+            .As<IMigrationStep>()
             .OrderByRegistration();
     }
 
