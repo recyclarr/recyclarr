@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Common;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide.CustomFormat;
 
@@ -13,45 +14,14 @@ public class CustomFormatCategoryParserTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         CustomFormatCategoryParser sut)
     {
-        const string markdown = @"
-## INDEX
-
-------
-
-| Audio Advanced #1                         | Audio Advanced #2               | Anime                                                                 | Anime       |
-| ----------------------------------------- | ------------------------------- | --------------------------------------------------------------------- | ----------- |
-| [TrueHD ATMOS](#truehd-atmos)             | [FLAC](#flac)                   | [Anime Web Tier 01 (Muxers)](#anime-web-tier-01-muxers)               | [v0](#v0)   |
-| [DTS X](#dts-x)                           | [PCM](#pcm)                     | [Anime Web Tier 02 (Top FanSubs)](#anime-web-tier-02-top-fansubs)     | [v1](#v1)   |
-| [ATMOS (undefined)](#atmos-undefined)     | [DTS-HD HRA](#dts-hd-hra)       | [Anime Web Tier 03 (Official Subs)](#anime-web-tier-03-official-subs) | [v2](#v2)   |
-| [DD+ ATMOS](#dd-atmos)                    | [AAC](#aac)                     | [Anime Web Tier 04 (Official Subs)](#anime-web-tier-04-official-subs) | [v3](#v3)   |
-| [TrueHD](#truehd)                         | [DD](#dd)                       | [Anime Web Tier 05 (FanSubs)](#anime-web-tier-05-fansubs)             | [v4](#v4)   |
-| [DTS-HD MA](#dts-hd-ma)                   | [MP3](#mp3)                     | [Anime Web Tier 06 (FanSubs)](#anime-web-tier-06-fansubs)             | [VRV](#vrv) |
-| [DD+](#ddplus)                            | [Opus](#opus)                   | [Anime Raws](#anime-raws)                                             |             |
-| [DTS-ES](#dts-es)                         |                                 | [Anime LQ Groups](#anime-lq-groups)                                   |             |
-| [DTS](#dts)                               |                                 |                                                                       |             |
-|                                           |                                 |                                                                       |             |
-
-------
-
-| Movie Versions                                | Unwanted                           |
-| --------------------------------------------- | ---------------------------------- |
-| [Hybrid](#hybrid)                             | [BR-DISK](#br-disk)                |
-| [Remaster](#remaster)                         | [EVO (no WEBDL)](#evo-no-webdl)    |
-| [4K Remaster](#4k-remaster)                   | [LQ](#lq)                          |
-| [Special Editions](#special-edition)          | [x265 (720/1080p)](#x265-7201080p) |
-| [Criterion Collection](#criterion-collection) | [3D](#3d)                          |
-| [Theatrical Cut](#theatrical-cut)             | [No-RlsGroup](#no-rlsgroup)        |
-| [IMAX](#imax)                                 | [Obfuscated](#obfuscated)          |
-| [IMAX Enhanced](#imax-enhanced)               | [DV (WEBDL)](#dv-webdl)            |
-|                                               |                                    |
-
-------
-";
+        const string markdownFilename = "Radarr-collection-of-custom-formats.md";
+        var resourceReader = new ResourceDataReader(typeof(CustomFormatCategoryParserTest), "Data");
+        var markdown = resourceReader.ReadData(markdownFilename);
 
         var file = fs.CurrentDirectory()
             .SubDirectory("docs")
             .SubDirectory("Radarr")
-            .File("Radarr-collection-of-custom-formats.md");
+            .File(markdownFilename);
 
         fs.AddFile(file.FullName, new MockFileData(markdown));
 
@@ -59,11 +29,24 @@ public class CustomFormatCategoryParserTest
 
         result.Select(x => x.CategoryName).Distinct()
             .Should().BeEquivalentTo(
-                "Anime",
                 "Audio Advanced #1",
                 "Audio Advanced #2",
+                "Audio Channels",
+                "HDR Formats",
                 "Movie Versions",
-                "Unwanted"
+                "Unwanted",
+                "HQ Release Groups",
+                "General Streaming Services",
+                "Asian Streaming Services",
+                "Dutch Streaming Services",
+                "UK Streaming Services",
+                "Misc Streaming Services",
+                "Anime Streaming Services",
+                "Miscellaneous",
+                "French Audio Version",
+                "French Source Groups",
+                "Anime",
+                "Anime Optional"
             );
 
         result.Where(x => x.CategoryName == "Audio Advanced #1").Select(x => (x.CfName, x.CfAnchor))
@@ -71,7 +54,7 @@ public class CustomFormatCategoryParserTest
                 ("TrueHD ATMOS", "truehd-atmos"),
                 ("DTS X", "dts-x"),
                 ("ATMOS (undefined)", "atmos-undefined"),
-                ("DD+ ATMOS", "dd-atmos"),
+                ("DD+ ATMOS", "ddplus-atmos"),
                 ("TrueHD", "truehd"),
                 ("DTS-HD MA", "dts-hd-ma"),
                 ("DD+", "ddplus"),
@@ -81,6 +64,14 @@ public class CustomFormatCategoryParserTest
 
         result.Where(x => x.CategoryName == "Anime").Select(x => (x.CfName, x.CfAnchor))
             .Should().BeEquivalentTo([
+                ("Anime BD Tier 01 (Top SeaDex Muxers)", "anime-bd-tier-01-top-seadex-muxers"),
+                ("Anime BD Tier 02 (SeaDex Muxers)", "anime-bd-tier-02-seadex-muxers"),
+                ("Anime BD Tier 03 (SeaDex Muxers)", "anime-bd-tier-03-seadex-muxers"),
+                ("Anime BD Tier 04 (SeaDex Muxers)", "anime-bd-tier-04-seadex-muxers"),
+                ("Anime BD Tier 05 (Remuxes)", "anime-bd-tier-05-remuxes"),
+                ("Anime BD Tier 06 (FanSubs)", "anime-bd-tier-06-fansubs"),
+                ("Anime BD Tier 07 (P2P/Scene)", "anime-bd-tier-07-p2pscene"),
+                ("Anime BD Tier 08 (Mini Encodes)", "anime-bd-tier-08-mini-encodes"),
                 ("Anime Web Tier 01 (Muxers)", "anime-web-tier-01-muxers"),
                 ("Anime Web Tier 02 (Top FanSubs)", "anime-web-tier-02-top-fansubs"),
                 ("Anime Web Tier 03 (Official Subs)", "anime-web-tier-03-official-subs"),
@@ -93,8 +84,15 @@ public class CustomFormatCategoryParserTest
                 ("v1", "v1"),
                 ("v2", "v2"),
                 ("v3", "v3"),
-                ("v4", "v4"),
-                ("VRV", "vrv")
+                ("v4", "v4")
+            ]);
+
+        result.Where(x => x.CategoryName == "Anime Optional").Select(x => (x.CfName, x.CfAnchor))
+            .Should().BeEquivalentTo([
+                ("Uncensored", "uncensored"),
+                ("10bit", "10bit"),
+                ("Anime Dual Audio", "anime-dual-audio"),
+                ("Dubs Only", "dubs-only")
             ]);
     }
 }
