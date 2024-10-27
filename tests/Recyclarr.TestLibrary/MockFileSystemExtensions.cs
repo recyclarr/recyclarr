@@ -1,19 +1,9 @@
 using System.IO.Abstractions;
-using System.Reflection;
 
 namespace Recyclarr.TestLibrary;
 
 public static class MockFileSystemExtensions
 {
-    public static void AddFileFromEmbeddedResource(
-        this MockFileSystem fs,
-        IFileInfo path,
-        Assembly resourceAssembly,
-        string embeddedResourcePath)
-    {
-        fs.AddFileFromEmbeddedResource(path.FullName, resourceAssembly, embeddedResourcePath);
-    }
-
     public static void AddFileFromEmbeddedResource(
         this MockFileSystem fs,
         IFileInfo path,
@@ -43,17 +33,13 @@ public static class MockFileSystemExtensions
         fs.AddFileFromEmbeddedResource(path, typeInAssembly, $"{resourceSubPath}.{path.Name}");
     }
 
-    public static void AddSameFileFromEmbeddedResource(
+    public static void AddFilesFromEmbeddedNamespace(
         this MockFileSystem fs,
-        string path,
+        IDirectoryInfo path,
         Type typeInAssembly,
-        string resourceSubPath = "Data")
+        string embeddedResourcePath)
     {
-        fs.AddFileFromEmbeddedResource(fs.FileInfo.New(path), typeInAssembly, resourceSubPath);
-    }
-
-    public static IEnumerable<string> LeafDirectories(this MockFileSystem fs)
-    {
-        return fs.AllDirectories.Where(x => !fs.AllDirectories.Any(y => y.StartsWith(x) && y != x));
+        embeddedResourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath.Replace("/", ".")}";
+        fs.AddFilesFromEmbeddedNamespace(path.FullName, typeInAssembly.Assembly, embeddedResourcePath);
     }
 }

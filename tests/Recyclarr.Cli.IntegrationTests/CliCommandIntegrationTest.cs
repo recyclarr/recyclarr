@@ -16,7 +16,8 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
     {
         await Mapper.DownloadFiles(
             "metadata.json",
-            "docs/Radarr/Radarr-collection-of-custom-formats.md");
+            "docs/Radarr/Radarr-collection-of-custom-formats.md",
+            "docs/Sonarr/sonarr-collection-of-custom-formats.md");
     }
 
     [SetUp]
@@ -29,16 +30,10 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
     public async Task List_custom_format_radarr_score_sets()
     {
         var repo = Resolve<ITrashGuidesRepo>();
-        var cfPath = repo.Path.SubDirectory("docs/json/radarr/cf");
-        string[] cfs = ["4k-remaster.json", "10bit.json"];
-
-        foreach (var cf in cfs)
-        {
-            Fs.AddFileFromEmbeddedResource(
-                cfPath.File(cf),
-                typeof(CliCommandIntegrationTest),
-                $"Data/RadarrCustomFormats/{cf}");
-        }
+        Fs.AddFilesFromEmbeddedNamespace(
+            repo.Path.SubDirectory("docs/json/radarr/cf"),
+            typeof(CliCommandIntegrationTest),
+            "Data/radarr/cfs");
 
         var exitCode = await CliSetup.Run(Container, ["list", "custom-formats", "radarr", "--score-sets"]);
 
@@ -47,9 +42,39 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
+    public async Task List_custom_format_sonarr_score_sets()
+    {
+        var repo = Resolve<ITrashGuidesRepo>();
+        Fs.AddFilesFromEmbeddedNamespace(
+            repo.Path.SubDirectory("docs/json/sonarr/cf"),
+            typeof(CliCommandIntegrationTest),
+            "Data/sonarr/cfs");
+
+        var exitCode = await CliSetup.Run(Container, ["list", "custom-formats", "sonarr", "--score-sets"]);
+
+        exitCode.Should().Be(0);
+        Console.Output.Should().ContainAll("default", "anime-sonarr", "french-multi");
+    }
+
+    [Test]
     public async Task List_custom_format_score_sets_fails_without_service_type()
     {
         var act = () => CliSetup.Run(Container, ["list", "custom-formats", "--score-sets"]);
         await act.Should().ThrowAsync<CommandRuntimeException>();
+    }
+
+    [Test]
+    public async Task List_naming_sonarr()
+    {
+        var repo = Resolve<ITrashGuidesRepo>();
+        Fs.AddFilesFromEmbeddedNamespace(
+            repo.Path.SubDirectory("docs/json/sonarr/naming"),
+            typeof(CliCommandIntegrationTest),
+            "Data/sonarr/naming");
+
+        var exitCode = await CliSetup.Run(Container, ["list", "naming", "sonarr"]);
+
+        exitCode.Should().Be(0);
+        Console.Output.Should().ContainAll("default", "plex-imdb", "original");
     }
 }
