@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Notifications support through Apprise
 
+### Fixed
+
+- A `DependencyResolutionException` is no longer raised in some commands (e.g. `list`) (#352).
+
 ## [7.2.4] - 2024-09-14
 
 ### Fixed
