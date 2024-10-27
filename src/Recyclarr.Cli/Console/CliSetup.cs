@@ -1,11 +1,13 @@
+using Autofac;
 using Recyclarr.Cli.Console.Commands;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console;
 
 public static class CliSetup
 {
-    public static void Commands(IConfigurator cli)
+    private static void AddCommands(IConfigurator cli)
     {
         cli.AddCommand<SyncCommand>("sync")
             .WithExample("sync", "radarr", "--instance", "movies")
@@ -39,5 +41,28 @@ public static class CliSetup
             delete.SetDescription("Delete operations for remote services (e.g. Radarr, Sonarr)");
             delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
         });
+    }
+
+    public static async Task<int> Run(ILifetimeScope scope, IEnumerable<string> args)
+    {
+        var app = scope.Resolve<CommandApp>();
+        app.Configure(config =>
+        {
+        #if DEBUG
+            config.ValidateExamples();
+        #endif
+
+            config.ConfigureConsole(scope.Resolve<IAnsiConsole>());
+            config.PropagateExceptions();
+            config.UseStrictParsing();
+
+            config.SetApplicationName("recyclarr");
+            config.SetApplicationVersion(
+                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
+
+            AddCommands(config);
+        });
+
+        return await app.RunAsync(args);
     }
 }

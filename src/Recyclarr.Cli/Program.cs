@@ -3,7 +3,6 @@ using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.ErrorHandling;
-using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
 
@@ -19,24 +18,7 @@ internal static class Program
 
         try
         {
-            var app = scope.Resolve<CommandApp>();
-            app.Configure(config =>
-            {
-            #if DEBUG
-                config.ValidateExamples();
-            #endif
-
-                config.PropagateExceptions();
-                config.UseStrictParsing();
-
-                config.SetApplicationName("recyclarr");
-                config.SetApplicationVersion(
-                    $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
-
-                CliSetup.Commands(config);
-            });
-
-            return await app.RunAsync(args);
+            return await CliSetup.Run(scope, args);
         }
         catch (Exception e)
         {

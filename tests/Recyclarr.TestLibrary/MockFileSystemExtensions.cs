@@ -29,6 +29,7 @@ public static class MockFileSystemExtensions
         Type typeInAssembly,
         string embeddedResourcePath)
     {
+        embeddedResourcePath = embeddedResourcePath.Replace("/", ".");
         var resourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath}";
         fs.AddFileFromEmbeddedResource(path, typeInAssembly.Assembly, resourcePath);
     }

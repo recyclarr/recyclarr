@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="**\Data\*" />
+    <EmbeddedResource Include="**\Data\**" />
   </ItemGroup>
 
   <ItemGroup>

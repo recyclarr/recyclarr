@@ -16,6 +16,7 @@ using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Common;
 using Recyclarr.Logging;
 using Serilog.Core;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
@@ -94,6 +95,7 @@ public static class CompositionRoot
 
     private static void CliRegistrations(ContainerBuilder builder)
     {
+        builder.RegisterInstance(AnsiConsole.Console);
         builder.RegisterType<AutofacTypeRegistrar>().As<ITypeRegistrar>();
         builder.RegisterType<CommandApp>();
         builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();

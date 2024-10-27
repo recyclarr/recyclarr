@@ -19,7 +19,7 @@ public abstract class IntegrationTestFixture : IDisposable
     protected MockFileSystem Fs { get; }
     protected TestConsole Console { get; } = new();
     protected TestableLogger Logger { get; } = new();
-    protected IAppPaths Paths { get; }
+    protected IAppPaths Paths => Resolve<IAppPaths>();
 
     protected IntegrationTestFixture()
     {
@@ -27,8 +27,6 @@ public abstract class IntegrationTestFixture : IDisposable
         {
             CreateDefaultTempDir = false
         });
-
-        Paths = new AppPaths(Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr"));
 
         // Use Lazy because we shouldn't invoke virtual methods at construction time
         _container = new Lazy<ILifetimeScope>(() =>
@@ -62,7 +60,6 @@ public abstract class IntegrationTestFixture : IDisposable
         builder.RegisterInstance(Fs).As<IFileSystem>();
         builder.RegisterInstance(Console).As<IAnsiConsole>();
         builder.RegisterInstance(Logger).As<ILogger>();
-        builder.RegisterInstance(Paths).As<IAppPaths>();
 
         builder.RegisterMockFor<IEnvironment>();
         builder.RegisterMockFor<IGitRepository>();
@@ -72,6 +69,20 @@ public abstract class IntegrationTestFixture : IDisposable
             // By default, choose some extremely high number so that all the newest features are enabled.
             m.GetVersion(CancellationToken.None).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
         });
+    }
+
+    [SetUp]
+    public void Setup()
+    {
+        var appDataSetup = Resolve<DefaultAppDataSetup>();
+        appDataSetup.SetAppDataDirectoryOverride(
+            Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName);
+    }
+
+    [TearDown]
+    public void Teardown()
+    {
+        System.Console.Write(Console.Output);
     }
 
     protected T Resolve<T>() where T : notnull
