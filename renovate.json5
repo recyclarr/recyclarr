@@ -35,6 +35,11 @@
       "groupName": "System.IO.Abstractions Packages",
       "matchManagers": ["nuget"],
       "matchPackageNames": ["TestableIO.System.IO.Abstractions*"]
+    },
+    {
+      "matchManagers": ["nuget"],
+      "matchPackageNames": ["MudBlazor"],
+      "minimumReleaseAge": "10 days",
     }
   ]
 }
