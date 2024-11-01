@@ -28,13 +28,13 @@
     {
       "groupName": "All GitVersion Packages",
       "matchManagers": ["nuget"],
-      "matchPackagePatterns": ["(?i)gitversion"],
+      "matchPackageNames": ["gitversion*"],
       "commitMessagePrefix": "build(deps):"
     },
     {
       "groupName": "System.IO.Abstractions Packages",
       "matchManagers": ["nuget"],
-      "matchPackagePrefixes": ["TestableIO.System.IO.Abstractions"]
+      "matchPackageNames": ["TestableIO.System.IO.Abstractions*"]
     }
   ]
 }

@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{305C2AC5
 		Directory.Build.targets = Directory.Build.targets
 		Directory.Packages.props = Directory.Packages.props
 		GitVersion.yml = GitVersion.yml
+		renovate.json5 = renovate.json5
+		.config\dotnet-tools.json = .config\dotnet-tools.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recyclarr.Tests", "tests\Recyclarr.Tests\Recyclarr.Tests.csproj", "{A4EC7E0D-C591-4874-B9AC-EB12A96F3E83}"
