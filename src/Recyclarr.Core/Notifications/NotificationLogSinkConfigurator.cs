@@ -5,13 +5,13 @@ using Serilog.Templates;
 
 namespace Recyclarr.Notifications;
 
-public class NotificationLogSinkConfigurator(NotificationEmitter emitter, ISettings<RecyclarrSettings> settings)
+public class NotificationLogSinkConfigurator(NotificationEmitter emitter, ISettings<NotificationSettings> settings)
     : ILogConfigurator
 {
     public void Configure(LoggerConfiguration config)
     {
         // If the user has disabled notifications, don't bother with adding the notification sink.
-        if (settings.Value.Notifications is null)
+        if (!settings.Value.IsConfigured())
         {
             return;
         }

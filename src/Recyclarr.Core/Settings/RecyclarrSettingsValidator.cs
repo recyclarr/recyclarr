@@ -7,7 +7,7 @@ public class RecyclarrSettingsValidator : AbstractValidator<RecyclarrSettings>
 {
     public RecyclarrSettingsValidator()
     {
-        RuleFor(x => x.Notifications).SetNonNullableValidator(new NotificationSettingsValidator());
+        RuleFor(x => x.Notifications).SetValidator(new NotificationSettingsValidator());
     }
 }
 

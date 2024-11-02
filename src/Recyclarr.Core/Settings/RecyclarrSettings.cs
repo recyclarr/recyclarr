@@ -33,13 +33,15 @@ public record RecyclarrSettings
     public bool EnableSslCertificateValidation { get; [UsedImplicitly] init; } = true;
     public LogJanitorSettings LogJanitor { get; [UsedImplicitly] init; } = new();
     public string? GitPath { get; [UsedImplicitly] init; }
-    public NotificationSettings? Notifications { get; [UsedImplicitly] init; }
+    public NotificationSettings Notifications { get; [UsedImplicitly] init; } = new();
 }
 
 public record NotificationSettings
 {
     public NotificationVerbosity Verbosity { get; [UsedImplicitly] init; } = NotificationVerbosity.Normal;
     public AppriseNotificationSettings? Apprise { get; [UsedImplicitly] init; }
+
+    public bool IsConfigured() => Apprise is not null;
 }
 
 public enum NotificationVerbosity

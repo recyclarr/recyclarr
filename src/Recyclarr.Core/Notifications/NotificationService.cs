@@ -22,7 +22,7 @@ public sealed class NotificationService(
 
     private readonly Dictionary<string, List<IPresentableNotification>> _events = new();
     private readonly CompositeDisposable _eventConnection = new();
-    private readonly AppriseNotificationSettings? _settings = settings.OptionalValue?.Apprise;
+    private readonly AppriseNotificationSettings? _settings = settings.Value.Apprise;
 
     private string? _activeInstanceName;
 
