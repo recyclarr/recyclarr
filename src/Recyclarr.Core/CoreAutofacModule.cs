@@ -173,6 +173,16 @@ public class CoreAutofacModule : Module
             .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateless);
 
         builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
+
+        // Verbosity Strategies
+        builder.RegisterType<MinimalVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Minimal);
+        builder.RegisterType<NormalVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Normal);
+        builder.RegisterType<DetailedVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Detailed);
+        builder.Register(c =>
+        {
+            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
+            return c.ResolveKeyed<IVerbosityStrategy>(settings.Verbosity);
+        });
     }
 
     private static void RegisterPlatform(ContainerBuilder builder)

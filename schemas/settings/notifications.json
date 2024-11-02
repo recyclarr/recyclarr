@@ -37,6 +37,25 @@
           }
         }
       }
+    },
+    "verbosity": {
+      "description": "The verbosity level for notifications",
+      "type": "string",
+      "default": "normal",
+      "oneOf": [
+        {
+          "const": "normal",
+          "description": "Includes errors, warnings, and informational (changes). This is the default."
+        },
+        {
+          "const": "detailed",
+          "description": "Everything in normal, plus empty messages (no changes)."
+        },
+        {
+          "const": "minimal",
+          "description": "Only errors and warnings."
+        }
+      ]
     }
   }
 }

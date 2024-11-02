@@ -38,7 +38,15 @@ public record RecyclarrSettings
 
 public record NotificationSettings
 {
+    public NotificationVerbosity Verbosity { get; [UsedImplicitly] init; } = NotificationVerbosity.Normal;
     public AppriseNotificationSettings? Apprise { get; [UsedImplicitly] init; }
+}
+
+public enum NotificationVerbosity
+{
+    Minimal,
+    Normal,
+    Detailed
 }
 
 public record AppriseNotificationSettings

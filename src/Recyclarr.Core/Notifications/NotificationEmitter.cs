@@ -4,7 +4,7 @@ using Recyclarr.Notifications.Events;
 
 namespace Recyclarr.Notifications;
 
-public class NotificationEmitter
+public class NotificationEmitter(IVerbosityStrategy verbosity)
 {
     private readonly Subject<IPresentableNotification> _notifications = new();
 
@@ -12,24 +12,36 @@ public class NotificationEmitter
 
     public void SendStatistic(string description)
     {
-        _notifications.OnNext(new InformationEvent(description));
+        if (verbosity.ShouldSendInformation())
+        {
+            _notifications.OnNext(new InformationEvent(description));
+        }
     }
 
     public void SendStatistic<T>(string description, T stat) where T : notnull
     {
-        _notifications.OnNext(new InformationEvent(description)
+        if (verbosity.ShouldSendInformation())
         {
-            Statistic = stat.ToString() ?? "!STAT ERROR!"
-        });
+            _notifications.OnNext(new InformationEvent(description)
+            {
+                Statistic = stat.ToString() ?? "!STAT ERROR!"
+            });
+        }
     }
 
     public void SendError(string message)
     {
-        _notifications.OnNext(new ErrorEvent(message));
+        if (verbosity.ShouldSendError())
+        {
+            _notifications.OnNext(new ErrorEvent(message));
+        }
     }
 
     public void SendWarning(string message)
     {
-        _notifications.OnNext(new WarningEvent(message));
+        if (verbosity.ShouldSendWarning())
+        {
+            _notifications.OnNext(new WarningEvent(message));
+        }
     }
 }

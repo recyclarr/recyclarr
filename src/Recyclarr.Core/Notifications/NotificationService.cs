@@ -14,7 +14,8 @@ public sealed class NotificationService(
     ILogger log,
     IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettings<NotificationSettings> settings,
-    NotificationEmitter notificationEmitter)
+    NotificationEmitter notificationEmitter,
+    IVerbosityStrategy verbosity)
     : IDisposable
 {
     private const string NoInstance = "[no instance]";
@@ -65,6 +66,16 @@ public sealed class NotificationService(
 
     private async Task SendAppriseNotification(bool succeeded, string body, AppriseMessageType messageType)
     {
+        if (string.IsNullOrEmpty(body) && !verbosity.ShouldSendEmpty())
+        {
+            log.Debug("Skipping notification because the body is empty");
+            return;
+        }
+
+        // Apprise doesn't like empty bodies, so the hyphens are there in case there are no notifications to render.
+        // This also doesn't look too bad because it creates some separation between the title and the content.
+        body = "---\n" + body.Trim();
+
         try
         {
             var api = apiFactory[_settings!.Mode!.Value];
@@ -72,7 +83,7 @@ public sealed class NotificationService(
             await api.Notify(_settings!, payload => payload with
             {
                 Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
-                Body = body.Trim(),
+                Body = body,
                 Type = messageType,
                 Format = AppriseMessageFormat.Markdown
             });
@@ -85,9 +96,7 @@ public sealed class NotificationService(
 
     private string BuildNotificationBody()
     {
-        // Apprise doesn't like empty bodies, so the hyphens are there in case there are no notifications to render.
-        // This also doesn't look too bad because it creates some separation between the title and the content.
-        var body = new StringBuilder("---\n");
+        var body = new StringBuilder();
 
         foreach (var (instanceName, notifications) in _events)
         {

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Notifications: New `verbosity` setting for Notifications to control the frequency and content of
+  notifications sent after sync operations.
+
 ## [7.3.0] - 2024-10-28
 
 ### Added
