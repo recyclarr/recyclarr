@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notifications: New `verbosity` setting for Notifications to control the frequency and content of
   notifications sent after sync operations.
 
+### Fixed
+
+- Repositories: Show a warning when there's a `git fetch` failure (#355).
+
 ## [7.3.0] - 2024-10-28
 
 ### Added
