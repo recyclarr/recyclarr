@@ -16,7 +16,7 @@
     <PackageVersion Include="FluentValidation" Version="11.10.0" />
     <PackageVersion Include="Flurl" Version="4.0.0" />
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
-    <PackageVersion Include="GitVersion.MsBuild" Version="6.0.3" PrivateAssets="All" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="6.0.4" PrivateAssets="All" />
     <PackageVersion Include="MudBlazor" Version="7.8.0" />
     <PackageVersion Include="ReactiveUI.Blazor" Version="20.1.63" />
     <PackageVersion Include="Serilog" Version="4.1.0" />
