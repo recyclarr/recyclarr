@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.4.0] - 2024-11-11
+
 ### Added
 
 - Notifications: New `verbosity` setting for Notifications to control the frequency and content of
@@ -1059,7 +1061,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.3.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.4.0...HEAD
+[7.4.0]: https://github.com/recyclarr/recyclarr/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/recyclarr/recyclarr/compare/v7.2.4...v7.3.0
 [7.2.4]: https://github.com/recyclarr/recyclarr/compare/v7.2.3...v7.2.4
 [7.2.3]: https://github.com/recyclarr/recyclarr/compare/v7.2.2...v7.2.3
