@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Notifications: New `verbosity` setting for Notifications to control the frequency and content of
-  notifications sent after sync operations.
+  notifications sent after sync operations (#354).
 
 ### Fixed
 
