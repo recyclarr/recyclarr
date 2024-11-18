@@ -16,7 +16,7 @@ on:
 env:
   baseRef: ${{ github.ref == 'refs/heads/master' && github.event.before ||
               (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
-  dotnetVersion: 8.0.x
+  dotnetVersion: 9.0.x
 
 jobs:
   inspect:

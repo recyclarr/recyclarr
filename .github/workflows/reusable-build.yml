@@ -14,7 +14,7 @@ on:
         type: boolean
 
 env:
-  dotnetVersion: 8.0.x
+  dotnetVersion: 9.0.x
 
 jobs:
   build:

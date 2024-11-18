@@ -3,8 +3,10 @@
 # Following Microsoft's pattern shown here:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/dotnetapp/Dockerfile.alpine
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
-#
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+
+ARG DOTNET_VERSION=9.0
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine AS build
 
 ARG TARGETARCH
 WORKDIR /source
@@ -24,7 +26,7 @@ RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
 # final stage/image
-FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime:${DOTNET_VERSION}-alpine
 
 LABEL name="recyclarr" \
   org.opencontainers.image.source="https://github.com/recyclarr/recyclarr" \

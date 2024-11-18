@@ -1,7 +1,10 @@
 [*.cs]
 
-# CA1707: Identifiers should not contain underscores
+# Identifiers should not contain underscores
 dotnet_diagnostic.ca1707.severity = none
 
-# CA1861: Avoid constant arrays as arguments
+# Avoid constant arrays as arguments
 dotnet_diagnostic.ca1861.severity = none
+
+# Consider making public types internal
+dotnet_diagnostic.CA1515.severity = none

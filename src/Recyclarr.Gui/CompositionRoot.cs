@@ -4,7 +4,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Gui;
 
-public static class CompositionRoot
+internal static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {

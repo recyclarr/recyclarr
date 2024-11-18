@@ -56,7 +56,8 @@ public class ServarrRequestBuilder(
                         + "`enable_ssl_certificate_validation` is set to `false`"
                 );
 
-                handler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+                handler.ServerCertificateCustomValidationCallback =
+                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             });
         }
     }
