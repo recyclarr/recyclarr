@@ -10,13 +10,19 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Create a starter configuration file.")]
-public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor, IMultiRepoUpdater repoUpdater)
-    : AsyncCommand<ConfigCreateCommand.CliSettings>
+public class ConfigCreateCommand(
+    ILogger log,
+    IConfigCreationProcessor processor,
+    IMultiRepoUpdater repoUpdater
+) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
-        Justification = "Spectre.Console requires it")]
+    [SuppressMessage(
+        "Performance",
+        "CA1819:Properties should not return arrays",
+        Justification = "Spectre.Console requires it"
+    )]
     public class CliSettings : BaseCommandSettings, ICreateConfigSettings
     {
         [CommandOption("-p|--path")]
@@ -26,8 +32,9 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
 
         [CommandOption("-t|--template")]
         [Description(
-            "One or more template configuration files to create. Use `config list templates` to get a list of " +
-            "names accepted here.")]
+            "One or more template configuration files to create. Use `config list templates` to get a list of "
+                + "names accepted here."
+        )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string[] TemplatesOption { get; init; } = [];
         public IReadOnlyCollection<string> Templates => TemplatesOption;
@@ -44,15 +51,18 @@ public class ConfigCreateCommand(ILogger log, IConfigCreationProcessor processor
         {
             await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
             processor.Process(settings);
-            return (int) ExitStatus.Succeeded;
+            return (int)ExitStatus.Succeeded;
         }
         catch (FileExistsException e)
         {
-            log.Error(e,
-                "The file {ConfigFile} already exists. Please choose another path or " +
-                "delete/move the existing file and run this command again", e.AttemptedPath);
+            log.Error(
+                e,
+                "The file {ConfigFile} already exists. Please choose another path or "
+                    + "delete/move the existing file and run this command again",
+                e.AttemptedPath
+            );
         }
 
-        return (int) ExitStatus.Failed;
+        return (int)ExitStatus.Failed;
     }
 }

@@ -20,7 +20,7 @@ public class QualityProfileStatCalculator(ILogger log)
     {
         log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
 
-        var stats = new ProfileWithStats {Profile = profile};
+        var stats = new ProfileWithStats { Profile = profile };
         var oldDto = profile.ProfileDto;
         var newDto = profile.BuildUpdatedDto();
 
@@ -31,10 +31,18 @@ public class QualityProfileStatCalculator(ILogger log)
         return stats;
     }
 
-    private void ProfileUpdates(ProfileWithStats stats, QualityProfileDto oldDto, QualityProfileDto newDto)
+    private void ProfileUpdates(
+        ProfileWithStats stats,
+        QualityProfileDto oldDto,
+        QualityProfileDto newDto
+    )
     {
         Log("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
-        Log("Cutoff", oldDto.Items.FindCutoff(oldDto.Cutoff), newDto.Items.FindCutoff(newDto.Cutoff));
+        Log(
+            "Cutoff",
+            oldDto.Items.FindCutoff(oldDto.Cutoff),
+            newDto.Items.FindCutoff(newDto.Cutoff)
+        );
         Log("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
         Log("Minimum Score", oldDto.MinFormatScore, newDto.MinFormatScore);
 
@@ -47,21 +55,25 @@ public class QualityProfileStatCalculator(ILogger log)
         }
     }
 
-    private static void QualityUpdates(ProfileWithStats stats, QualityProfileDto oldDto, QualityProfileDto newDto)
+    private static void QualityUpdates(
+        ProfileWithStats stats,
+        QualityProfileDto oldDto,
+        QualityProfileDto newDto
+    )
     {
         using var oldJson = JsonSerializer.SerializeToDocument(oldDto.Items);
         using var newJson = JsonSerializer.SerializeToDocument(newDto.Items);
-        stats.QualitiesChanged = stats.Profile.MissingQualities.Count > 0 || !oldJson.DeepEquals(newJson);
+        stats.QualitiesChanged =
+            stats.Profile.MissingQualities.Count > 0 || !oldJson.DeepEquals(newJson);
     }
 
     private void ScoreUpdates(
         ProfileWithStats stats,
         QualityProfileDto profileDto,
-        IReadOnlyCollection<UpdatedFormatScore> updatedScores)
+        IReadOnlyCollection<UpdatedFormatScore> updatedScores
+    )
     {
-        var scores = updatedScores
-            .Where(y => y.Dto.Score != y.NewScore)
-            .ToList();
+        var scores = updatedScores.Where(y => y.Dto.Score != y.NewScore).ToList();
 
         if (scores.Count == 0)
         {
@@ -72,8 +84,14 @@ public class QualityProfileStatCalculator(ILogger log)
 
         foreach (var (dto, newScore, reason) in scores)
         {
-            log.Debug("  - {Name} ({Id}): {OldScore} -> {NewScore} ({Reason})",
-                dto.Name, dto.Format, dto.Score, newScore, reason);
+            log.Debug(
+                "  - {Name} ({Id}): {OldScore} -> {NewScore} ({Reason})",
+                dto.Name,
+                dto.Format,
+                dto.Score,
+                newScore,
+                reason
+            );
         }
 
         stats.ScoresChanged = true;

@@ -2,7 +2,10 @@ namespace Recyclarr.ServarrApi.MediaNaming;
 
 public static class MediaNamingDtoExtensions
 {
-    public static IReadOnlyCollection<string> GetDifferences(this RadarrMediaNamingDto left, MediaNamingDto other)
+    public static IReadOnlyCollection<string> GetDifferences(
+        this RadarrMediaNamingDto left,
+        MediaNamingDto other
+    )
     {
         var diff = new List<string>();
 
@@ -29,7 +32,10 @@ public static class MediaNamingDtoExtensions
         return diff;
     }
 
-    public static IReadOnlyCollection<string> GetDifferences(this SonarrMediaNamingDto left, MediaNamingDto other)
+    public static IReadOnlyCollection<string> GetDifferences(
+        this SonarrMediaNamingDto left,
+        MediaNamingDto other
+    )
     {
         var diff = new List<string>();
 

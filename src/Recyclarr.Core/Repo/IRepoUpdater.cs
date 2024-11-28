@@ -5,5 +5,9 @@ namespace Recyclarr.Repo;
 
 public interface IRepoUpdater
 {
-    Task UpdateRepo(IDirectoryInfo repoPath, IRepositorySettings repoSettings, CancellationToken token);
+    Task UpdateRepo(
+        IDirectoryInfo repoPath,
+        IRepositorySettings repoSettings,
+        CancellationToken token
+    );
 }

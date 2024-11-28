@@ -26,22 +26,24 @@ internal class AutofacTypeRegistrar(ILifetimeScope scope) : ITypeRegistrar
 
     public ITypeResolver Build()
     {
-        return new AutofacTypeResolver(scope.BeginLifetimeScope(builder =>
-        {
-            foreach (var (service, impl) in _typeRegistrations)
+        return new AutofacTypeResolver(
+            scope.BeginLifetimeScope(builder =>
             {
-                builder.RegisterType(impl).As(service).SingleInstance();
-            }
+                foreach (var (service, impl) in _typeRegistrations)
+                {
+                    builder.RegisterType(impl).As(service).SingleInstance();
+                }
 
-            foreach (var (service, implementation) in _instanceRegistrations)
-            {
-                builder.RegisterInstance(implementation).As(service);
-            }
+                foreach (var (service, implementation) in _instanceRegistrations)
+                {
+                    builder.RegisterInstance(implementation).As(service);
+                }
 
-            foreach (var (service, factory) in _lazyRegistrations)
-            {
-                builder.Register(_ => factory()).As(service).SingleInstance();
-            }
-        }));
+                foreach (var (service, factory) in _lazyRegistrations)
+                {
+                    builder.Register(_ => factory()).As(service).SingleInstance();
+                }
+            })
+        );
     }
 }

@@ -8,8 +8,8 @@ namespace Recyclarr.Cache;
 public abstract class CachePersister<TCacheObject, TCache>(
     ILogger log,
     ICacheStoragePath storagePath,
-    IServiceConfiguration config)
-    : ICachePersister<TCache>
+    IServiceConfiguration config
+) : ICachePersister<TCache>
     where TCacheObject : CacheObject, new()
     where TCache : BaseCache
 {
@@ -74,8 +74,11 @@ public abstract class CachePersister<TCacheObject, TCache>(
     // Default method to handle version mismatches
     protected virtual TCacheObject HandleVersionMismatch(TCacheObject cacheData)
     {
-        log.Information("Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
-            cacheData.Version, cacheData.LatestVersion);
+        log.Information(
+            "Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
+            cacheData.Version,
+            cacheData.LatestVersion
+        );
         throw new CacheException("Version mismatch");
     }
 }

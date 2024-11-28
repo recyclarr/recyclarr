@@ -27,19 +27,23 @@ public class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
         var dir = Fs.CurrentDirectory();
         var results = sut.LoadAllCustomFormatsAtPaths([dir], dir.File("collection_of_cfs.md"));
 
-        results.Should().BeEquivalentTo([
-            NewCf.Data("first", "1"),
-            NewCf.Data("second", "2")
-        ], o => o.Excluding(x => x.Type == typeof(JsonElement)));
+        results
+            .Should()
+            .BeEquivalentTo(
+                [NewCf.Data("first", "1"), NewCf.Data("second", "2")],
+                o => o.Excluding(x => x.Type == typeof(JsonElement))
+            );
     }
 
     [Test]
     public void Categorize_by_file_name()
     {
         var categoryParser = Resolve<ICustomFormatCategoryParser>();
-        categoryParser.Parse(default!).ReturnsForAnyArgs([
-            new CustomFormatCategoryItem("Streaming Services", "iTunes", "iT")
-        ]);
+        categoryParser
+            .Parse(default!)
+            .ReturnsForAnyArgs(
+                [new CustomFormatCategoryItem("Streaming Services", "iTunes", "iT")]
+            );
 
         Fs.AddFile("it.json", new MockFileData("""{"name":"iT"}"""));
         Fs.AddEmptyFile("collection_of_cfs.md");

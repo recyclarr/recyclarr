@@ -10,8 +10,14 @@ public class ConfigDeprecationPostProcessor(ConfigDeprecations deprecations) : I
     {
         return config with
         {
-            Radarr = config.Radarr?.ToDictionary(x => x.Key, x => deprecations.CheckAndTransform(x.Value)),
-            Sonarr = config.Sonarr?.ToDictionary(x => x.Key, x => deprecations.CheckAndTransform(x.Value))
+            Radarr = config.Radarr?.ToDictionary(
+                x => x.Key,
+                x => deprecations.CheckAndTransform(x.Value)
+            ),
+            Sonarr = config.Sonarr?.ToDictionary(
+                x => x.Key,
+                x => deprecations.CheckAndTransform(x.Value)
+            ),
         };
     }
 }

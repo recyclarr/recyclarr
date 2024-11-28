@@ -15,16 +15,16 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddAutofac();
 
-builder.Host
-    .UseServiceProviderFactory(new AutofacServiceProviderFactory(CompositionRoot.Setup))
-    .UseSerilog((_, provider, config) =>
-    {
-        var paths = provider.GetRequiredService<IAppPaths>();
-        var logFile = paths.LogDirectory.SubDirectory("gui").File("gui.log");
-        config
-            .MinimumLevel.Debug()
-            .WriteTo.File(logFile.FullName);
-    });
+builder
+    .Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(CompositionRoot.Setup))
+    .UseSerilog(
+        (_, provider, config) =>
+        {
+            var paths = provider.GetRequiredService<IAppPaths>();
+            var logFile = paths.LogDirectory.SubDirectory("gui").File("gui.log");
+            config.MinimumLevel.Debug().WriteTo.File(logFile.FullName);
+        }
+    );
 
 var app = builder.Build();
 

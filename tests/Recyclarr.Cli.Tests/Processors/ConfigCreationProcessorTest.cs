@@ -10,8 +10,11 @@ namespace Recyclarr.Cli.Tests.Processors;
 [TestFixture]
 public class ConfigCreationProcessorTest
 {
-    [SuppressMessage("Performance", "CA1812", Justification =
-        "Used implicitly by test methods in this class")]
+    [SuppressMessage(
+        "Performance",
+        "CA1812",
+        Justification = "Used implicitly by test methods in this class"
+    )]
     private sealed class EmptyOrderedEnumerable : ICustomization
     {
         public void Customize(IFixture fixture)
@@ -22,7 +25,8 @@ public class ConfigCreationProcessorTest
 
     [Test, AutoMockData]
     public void Throw_when_no_config_creators_can_handle(
-        [CustomizeWith(typeof(EmptyOrderedEnumerable))] ConfigCreationProcessor sut)
+        [CustomizeWith(typeof(EmptyOrderedEnumerable))] ConfigCreationProcessor sut
+    )
     {
         var settings = new ConfigCreateCommand.CliSettings();
 

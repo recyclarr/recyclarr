@@ -5,7 +5,8 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<QualityProfilePipelineContext>
+public class QualityProfilePreviewPhase(IAnsiConsole console)
+    : IPreviewPipelinePhase<QualityProfilePipelineContext>
 {
     public void Execute(QualityProfilePipelineContext context)
     {
@@ -13,21 +14,24 @@ public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipeline
 
         foreach (var profile in context.TransactionOutput.ChangedProfiles.Select(x => x.Profile))
         {
-            var profileTree = new Tree(Markup.FromInterpolated(
-                $"[yellow]{profile.ProfileName}[/] (Change Reason: [green]{profile.UpdateReason}[/])"));
+            var profileTree = new Tree(
+                Markup.FromInterpolated(
+                    $"[yellow]{profile.ProfileName}[/] (Change Reason: [green]{profile.UpdateReason}[/])"
+                )
+            );
 
-            profileTree.AddNode(new Rows(
-                new Markup("[b]Profile Updates[/]"),
-                SetupProfileTable(profile)));
+            profileTree.AddNode(
+                new Rows(new Markup("[b]Profile Updates[/]"), SetupProfileTable(profile))
+            );
 
             if (profile.ProfileConfig.Profile.Qualities.Count != 0)
             {
                 profileTree.AddNode(SetupQualityItemTable(profile));
             }
 
-            profileTree.AddNode(new Rows(
-                new Markup("[b]Score Updates[/]"),
-                SetupScoreTable(profile)));
+            profileTree.AddNode(
+                new Rows(new Markup("[b]Score Updates[/]"), SetupScoreTable(profile))
+            );
 
             tree.AddNode(profileTree);
         }
@@ -48,19 +52,31 @@ public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipeline
         var newDto = profile.BuildUpdatedDto();
 
         table.AddRow("Name", oldDto.Name, newDto.Name);
-        table.AddRow("Upgrades Allowed?", YesNo(oldDto.UpgradeAllowed), YesNo(newDto.UpgradeAllowed));
-        table.AddRow("Minimum Format Score", Null(oldDto.MinFormatScore), Null(newDto.MinFormatScore));
+        table.AddRow(
+            "Upgrades Allowed?",
+            YesNo(oldDto.UpgradeAllowed),
+            YesNo(newDto.UpgradeAllowed)
+        );
+        table.AddRow(
+            "Minimum Format Score",
+            Null(oldDto.MinFormatScore),
+            Null(newDto.MinFormatScore)
+        );
 
         // ReSharper disable once InvertIf
         if (newDto.UpgradeAllowed is true)
         {
-            table.AddRow("Upgrade Until Quality",
+            table.AddRow(
+                "Upgrade Until Quality",
                 Null(oldDto.Items.FindCutoff(oldDto.Cutoff)),
-                Null(newDto.Items.FindCutoff(newDto.Cutoff)));
+                Null(newDto.Items.FindCutoff(newDto.Cutoff))
+            );
 
-            table.AddRow("Upgrade Until Score",
+            table.AddRow(
+                "Upgrade Until Score",
                 Null(oldDto.CutoffFormatScore),
-                Null(newDto.CutoffFormatScore));
+                Null(newDto.CutoffFormatScore)
+            );
         }
 
         return table;
@@ -97,7 +113,7 @@ public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipeline
         static IRenderable MakeTree(IEnumerable<ProfileItemDto> items, string header)
         {
             var headerMarkup = Markup.FromInterpolated($"[bold][underline]{header}[/][/]");
-            var rows = new Rows(new[] {headerMarkup}.Concat(items.Select(MakeNode)));
+            var rows = new Rows(new[] { headerMarkup }.Concat(items.Select(MakeNode)));
             var panel = new Panel(rows).NoBorder();
             panel.Width = 23;
             return panel;
@@ -113,13 +129,16 @@ public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipeline
         var sortMode = profile.ProfileConfig.Profile.QualitySort;
         return new Rows(
             Markup.FromInterpolated($"[b]Quality Updates (Sort Mode: [green]{sortMode}[/])[/]"),
-            table);
+            table
+        );
     }
 
     private static IRenderable SetupScoreTable(UpdatedQualityProfile profile)
     {
-        var updatedScores = profile.UpdatedScores
-            .Where(x => x.Reason != FormatScoreUpdateReason.NoChange && x.Dto.Score != x.NewScore)
+        var updatedScores = profile
+            .UpdatedScores.Where(x =>
+                x.Reason != FormatScoreUpdateReason.NoChange && x.Dto.Score != x.NewScore
+            )
             .ToList();
 
         if (updatedScores.Count == 0)
@@ -139,7 +158,8 @@ public class QualityProfilePreviewPhase(IAnsiConsole console) : IPreviewPipeline
                 score.Dto.Name,
                 score.Dto.Score.ToString(),
                 score.NewScore.ToString(),
-                score.Reason.ToString());
+                score.Reason.ToString()
+            );
         }
 
         return table;

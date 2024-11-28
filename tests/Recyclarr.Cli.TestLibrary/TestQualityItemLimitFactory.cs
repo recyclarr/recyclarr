@@ -9,8 +9,11 @@ public class TestQualityItemLimitFactory : IQualityItemLimitFactory
 {
     public Task<QualityItemLimits> Create(SupportedServices serviceType, CancellationToken ct)
     {
-        return Task.FromResult(new QualityItemLimits(
-            TestQualityItemLimits.MaxUnlimitedThreshold,
-            TestQualityItemLimits.PreferredUnlimitedThreshold));
+        return Task.FromResult(
+            new QualityItemLimits(
+                TestQualityItemLimits.MaxUnlimitedThreshold,
+                TestQualityItemLimits.PreferredUnlimitedThreshold
+            )
+        );
     }
 }

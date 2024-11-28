@@ -20,22 +20,25 @@ public class YamlIncludeResolverTest
     [Test, AutoMockData]
     public void Find_and_return_processor(
         [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut)
+        YamlIncludeResolver sut
+    )
     {
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
-            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>())
+            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>()),
         };
 
         index.AddRange(processors.Select(x => (x.Directive.GetType(), x.Value)));
-        processors[1].Value.GetPathToConfig(default!, default!).ReturnsForAnyArgs(_ =>
-        {
-            var fileInfo = Substitute.For<IFileInfo>();
-            fileInfo.Exists.Returns(true);
-            fileInfo.FullName.Returns("the_path");
-            return fileInfo;
-        });
+        processors[1]
+            .Value.GetPathToConfig(default!, default!)
+            .ReturnsForAnyArgs(_ =>
+            {
+                var fileInfo = Substitute.For<IFileInfo>();
+                fileInfo.Exists.Returns(true);
+                fileInfo.FullName.Returns("the_path");
+                return fileInfo;
+            });
 
         var result = sut.GetIncludePath(processors[1].Directive, SupportedServices.Radarr);
 
@@ -45,17 +48,19 @@ public class YamlIncludeResolverTest
     [Test, AutoMockData]
     public void Throw_when_no_matching_processor(
         [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut)
+        YamlIncludeResolver sut
+    )
     {
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
-            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>())
+            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>()),
         };
 
         index.AddRange(processors.Select(x => (x.Directive.GetType(), x.Value)));
 
-        var act = () => sut.GetIncludePath(Substitute.ForPartsOf<TestYamlInclude3>(), SupportedServices.Radarr);
+        var act = () =>
+            sut.GetIncludePath(Substitute.ForPartsOf<TestYamlInclude3>(), SupportedServices.Radarr);
 
         act.Should().Throw<YamlIncludeException>().WithMessage("*type is not supported*");
     }
@@ -63,22 +68,25 @@ public class YamlIncludeResolverTest
     [Test, AutoMockData]
     public void Throw_when_path_does_not_exist(
         [Frozen(Matching.ImplementedInterfaces)] StubAutofacIndex<Type, IIncludeProcessor> index,
-        YamlIncludeResolver sut)
+        YamlIncludeResolver sut
+    )
     {
         var processors = new List<(IYamlInclude Directive, IIncludeProcessor Value)>
         {
             (Substitute.ForPartsOf<TestYamlInclude1>(), Substitute.For<IIncludeProcessor>()),
-            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>())
+            (Substitute.ForPartsOf<TestYamlInclude2>(), Substitute.For<IIncludeProcessor>()),
         };
 
         index.AddRange(processors.Select(x => (x.Directive.GetType(), x.Value)));
 
-        processors[1].Value.GetPathToConfig(default!, default!).ReturnsForAnyArgs(_ =>
-        {
-            var fileInfo = Substitute.For<IFileInfo>();
-            fileInfo.Exists.Returns(false);
-            return fileInfo;
-        });
+        processors[1]
+            .Value.GetPathToConfig(default!, default!)
+            .ReturnsForAnyArgs(_ =>
+            {
+                var fileInfo = Substitute.For<IFileInfo>();
+                fileInfo.Exists.Returns(false);
+                return fileInfo;
+            });
 
         var act = () => sut.GetIncludePath(processors[1].Directive, SupportedServices.Radarr);
 

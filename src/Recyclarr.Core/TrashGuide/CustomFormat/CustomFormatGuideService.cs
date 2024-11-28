@@ -5,8 +5,8 @@ namespace Recyclarr.TrashGuide.CustomFormat;
 
 public class CustomFormatGuideService(
     IRepoMetadataBuilder metadataBuilder,
-    ICustomFormatLoader cfLoader)
-    : ICustomFormatGuideService
+    ICustomFormatLoader cfLoader
+) : ICustomFormatGuideService
 {
     private readonly Dictionary<SupportedServices, ICollection<CustomFormatData>> _cache = new();
 
@@ -17,13 +17,17 @@ public class CustomFormatGuideService(
         {
             SupportedServices.Radarr => new CustomFormatPaths(
                 metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.CustomFormats),
-                metadataBuilder.DocsDirectory.SubDirectory("Radarr").File("Radarr-collection-of-custom-formats.md")
+                metadataBuilder
+                    .DocsDirectory.SubDirectory("Radarr")
+                    .File("Radarr-collection-of-custom-formats.md")
             ),
             SupportedServices.Sonarr => new CustomFormatPaths(
                 metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.CustomFormats),
-                metadataBuilder.DocsDirectory.SubDirectory("Sonarr").File("sonarr-collection-of-custom-formats.md")
+                metadataBuilder
+                    .DocsDirectory.SubDirectory("Sonarr")
+                    .File("sonarr-collection-of-custom-formats.md")
             ),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
         };
     }
 
@@ -38,6 +42,7 @@ public class CustomFormatGuideService(
 
         return _cache[serviceType] = cfLoader.LoadAllCustomFormatsAtPaths(
             paths.CustomFormatDirectories,
-            paths.CollectionOfCustomFormatsMarkdown);
+            paths.CollectionOfCustomFormatsMarkdown
+        );
     }
 }

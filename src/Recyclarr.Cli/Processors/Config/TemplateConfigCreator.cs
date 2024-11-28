@@ -9,8 +9,8 @@ namespace Recyclarr.Cli.Processors.Config;
 public class TemplateConfigCreator(
     ILogger log,
     IConfigTemplateGuideService templates,
-    IAppPaths paths)
-    : IConfigCreator
+    IAppPaths paths
+) : IConfigCreator
 {
     public bool CanHandle(ICreateConfigSettings settings)
     {
@@ -21,8 +21,13 @@ public class TemplateConfigCreator(
     {
         log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
-        var matchingTemplateData = templates.GetTemplateData()
-            .IntersectBy(settings.Templates, path => path.Id, StringComparer.CurrentCultureIgnoreCase)
+        var matchingTemplateData = templates
+            .GetTemplateData()
+            .IntersectBy(
+                settings.Templates,
+                path => path.Id,
+                StringComparer.CurrentCultureIgnoreCase
+            )
             .Select(x => x.TemplateFile);
 
         foreach (var templateFile in matchingTemplateData)

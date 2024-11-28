@@ -4,8 +4,8 @@ namespace Recyclarr.TrashGuide.QualitySize;
 
 public class QualitySizeGuideService(
     IRepoMetadataBuilder metadataBuilder,
-    QualitySizeGuideParser parser)
-    : IQualitySizeGuideService
+    QualitySizeGuideParser parser
+) : IQualitySizeGuideService
 {
     private readonly Dictionary<SupportedServices, IReadOnlyList<QualitySizeData>> _cache = new();
 
@@ -20,7 +20,7 @@ public class QualitySizeGuideService(
             SupportedServices.Sonarr => new QualitySizePaths(
                 metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Qualities)
             ),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
         };
     }
 

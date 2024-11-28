@@ -9,12 +9,18 @@ public class SonarrCapabilityEnforcerTest
     [Test, AutoMockData]
     public void Minimum_version_not_met(
         [Frozen] ISonarrCapabilityFetcher fetcher,
-        SonarrCapabilityEnforcer sut)
+        SonarrCapabilityEnforcer sut
+    )
     {
         var min = SonarrCapabilities.MinimumVersion;
 
-        fetcher.GetCapabilities(CancellationToken.None).ReturnsForAnyArgs(
-            new SonarrCapabilities(new Version(min.Major - 1, min.Minor, min.Build, min.Revision)));
+        fetcher
+            .GetCapabilities(CancellationToken.None)
+            .ReturnsForAnyArgs(
+                new SonarrCapabilities(
+                    new Version(min.Major - 1, min.Minor, min.Build, min.Revision)
+                )
+            );
 
         var act = () => sut.Check(CancellationToken.None);
 

@@ -14,8 +14,11 @@ public class DeleteCustomFormatsCommand(IDeleteCustomFormatsProcessor processor)
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
-        Justification = "Spectre.Console requires it")]
+    [SuppressMessage(
+        "Performance",
+        "CA1819:Properties should not return arrays",
+        Justification = "Spectre.Console requires it"
+    )]
     public class CliSettings : BaseCommandSettings, IDeleteCustomFormatSettings
     {
         [CommandArgument(0, "<instance_name>")]
@@ -23,7 +26,9 @@ public class DeleteCustomFormatsCommand(IDeleteCustomFormatsProcessor processor)
         public string InstanceName { get; init; } = "";
 
         [CommandArgument(0, "[cf_names]")]
-        [Description("One or more custom format names to delete. Optional only if `--all` is used.")]
+        [Description(
+            "One or more custom format names to delete. Optional only if `--all` is used."
+        )]
         public string[] CustomFormatNamesOption { get; init; } = [];
         public IReadOnlyCollection<string> CustomFormatNames => CustomFormatNamesOption;
 
@@ -44,6 +49,6 @@ public class DeleteCustomFormatsCommand(IDeleteCustomFormatsProcessor processor)
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         await processor.Process(settings, settings.CancellationToken);
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }

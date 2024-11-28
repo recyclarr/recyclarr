@@ -11,12 +11,10 @@ public class QualityProfileTransactionPhaseTest
 {
     [Test, AutoMockData]
     public void Non_existent_profile_names_mixed_with_valid_profiles(
-        QualityProfileTransactionPhase sut)
+        QualityProfileTransactionPhase sut
+    )
     {
-        var dtos = new[]
-        {
-            new QualityProfileDto {Name = "profile1"}
-        };
+        var dtos = new[] { new QualityProfileDto { Name = "profile1" } };
 
         var context = new QualityProfilePipelineContext
         {
@@ -24,41 +22,41 @@ public class QualityProfileTransactionPhaseTest
             [
                 NewQp.Processed("invalid_profile_name") with
                 {
-                    ShouldCreate = false
+                    ShouldCreate = false,
                 },
-                NewQp.Processed("profile1")
+                NewQp.Processed("profile1"),
             ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData
-        {
-            NonExistentProfiles = ["invalid_profile_name"],
-            UnchangedProfiles = new List<ProfileWithStats>
-            {
-                new()
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(
+                new QualityProfileTransactionData
                 {
-                    Profile = new UpdatedQualityProfile
+                    NonExistentProfiles = ["invalid_profile_name"],
+                    UnchangedProfiles = new List<ProfileWithStats>
                     {
-                        ProfileConfig = context.ConfigOutput[1],
-                        ProfileDto = dtos[0],
-                        UpdateReason = QualityProfileUpdateReason.Changed
-                    }
+                        new()
+                        {
+                            Profile = new UpdatedQualityProfile
+                            {
+                                ProfileConfig = context.ConfigOutput[1],
+                                ProfileDto = dtos[0],
+                                UpdateReason = QualityProfileUpdateReason.Changed,
+                            },
+                        },
+                    },
                 }
-            }
-        });
+            );
     }
 
     [Test, AutoMockData]
-    public void New_profiles(
-        QualityProfileTransactionPhase sut)
+    public void New_profiles(QualityProfileTransactionPhase sut)
     {
-        var dtos = new[]
-        {
-            new QualityProfileDto {Name = "irrelevant_profile"}
-        };
+        var dtos = new[] { new QualityProfileDto { Name = "irrelevant_profile" } };
 
         var context = new QualityProfilePipelineContext
         {
@@ -71,10 +69,10 @@ public class QualityProfileTransactionPhaseTest
                         Name = "profile1",
                         Qualities =
                         [
-                            new QualityProfileQualityConfig {Name = "quality1", Enabled = true}
-                        ]
-                    }
-                }
+                            new QualityProfileQualityConfig { Name = "quality1", Enabled = true },
+                        ],
+                    },
+                },
             ],
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
             {
@@ -82,50 +80,56 @@ public class QualityProfileTransactionPhaseTest
                 {
                     Items =
                     [
-                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Name = "quality1"}}
-                    ]
-                }
-            }
+                        new ProfileItemDto
+                        {
+                            Quality = new ProfileItemQualityDto { Name = "quality1" },
+                        },
+                    ],
+                },
+            },
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData
-        {
-            ChangedProfiles = new List<ProfileWithStats>
-            {
-                new()
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(
+                new QualityProfileTransactionData
                 {
-                    QualitiesChanged = true,
-                    Profile = new UpdatedQualityProfile
+                    ChangedProfiles = new List<ProfileWithStats>
                     {
-                        ProfileConfig = context.ConfigOutput[0],
-                        ProfileDto = context.ApiFetchOutput.Schema,
-                        UpdateReason = QualityProfileUpdateReason.New,
-                        UpdatedQualities = new UpdatedQualities
+                        new()
                         {
-                            NumWantedItems = 1,
-                            Items =
-                            [
-                                new ProfileItemDto
+                            QualitiesChanged = true,
+                            Profile = new UpdatedQualityProfile
+                            {
+                                ProfileConfig = context.ConfigOutput[0],
+                                ProfileDto = context.ApiFetchOutput.Schema,
+                                UpdateReason = QualityProfileUpdateReason.New,
+                                UpdatedQualities = new UpdatedQualities
                                 {
-                                    Allowed = true,
-                                    Quality = new ProfileItemQualityDto
-                                    {
-                                        Name = "quality1"
-                                    }
-                                }
-                            ]
-                        }
-                    }
+                                    NumWantedItems = 1,
+                                    Items =
+                                    [
+                                        new ProfileItemDto
+                                        {
+                                            Allowed = true,
+                                            Quality = new ProfileItemQualityDto
+                                            {
+                                                Name = "quality1",
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    },
                 }
-            }
-        });
+            );
     }
 
     [Test, AutoMockData]
-    public void Updated_scores(
-        QualityProfileTransactionPhase sut)
+    public void Updated_scores(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -138,40 +142,41 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "quality1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "quality2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))
-            ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ConfigOutput = [NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))],
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle().Which.Profile.UpdatedScores.Should()
-            .BeEquivalentTo([
-                NewQp.UpdatedScore("quality1", 200, 100, FormatScoreUpdateReason.Updated),
-                NewQp.UpdatedScore("quality2", 300, 500, FormatScoreUpdateReason.Updated)
-            ], o => o.Excluding(x => x.Dto.Format));
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore("quality1", 200, 100, FormatScoreUpdateReason.Updated),
+                    NewQp.UpdatedScore("quality2", 300, 500, FormatScoreUpdateReason.Updated),
+                ],
+                o => o.Excluding(x => x.Dto.Format)
+            );
     }
 
     [Test, AutoMockData]
-    public void No_updated_profiles_when_no_custom_formats(
-        QualityProfileTransactionPhase sut)
+    public void No_updated_profiles_when_no_custom_formats(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -184,22 +189,22 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "quality1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "quality2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             ConfigOutput = Array.Empty<ProcessedQualityProfileData>(),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
@@ -208,8 +213,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Unchanged_scores(
-        QualityProfileTransactionPhase sut)
+    public void Unchanged_scores(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -222,42 +226,43 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "quality1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "quality2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             // Must simulate at least 1 custom format coming from configuration otherwise processing doesn't happen.
             // Profile name must match but the format IDs for each quality should not
-            ConfigOutput =
-            [
-                NewQp.Processed("profile1", ("id1", 1, 200), ("id2", 2, 300))
-            ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ConfigOutput = [NewQp.Processed("profile1", ("id1", 1, 200), ("id2", 2, 300))],
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.UnchangedProfiles.Should()
-            .ContainSingle().Which.Profile.UpdatedScores.Should()
-            .BeEquivalentTo([
-                NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.NoChange),
-                NewQp.UpdatedScore("quality2", 300, 300, FormatScoreUpdateReason.NoChange)
-            ], o => o.Excluding(x => x.Dto.Format));
+        context
+            .TransactionOutput.UnchangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.NoChange),
+                    NewQp.UpdatedScore("quality2", 300, 300, FormatScoreUpdateReason.NoChange),
+                ],
+                o => o.Excluding(x => x.Dto.Format)
+            );
     }
 
     [Test, AutoMockData]
-    public void Reset_scores_with_reset_unmatched_true(
-        QualityProfileTransactionPhase sut)
+    public void Reset_scores_with_reset_unmatched_true(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -270,37 +275,47 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "quality1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "quality2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             ConfigOutput =
             [
-                NewQp.Processed("profile1", true, ("quality3", "id3", 3, 100), ("quality4", "id4", 4, 500))
+                NewQp.Processed(
+                    "profile1",
+                    true,
+                    ("quality3", "id3", 3, 100),
+                    ("quality4", "id4", 4, 500)
+                ),
             ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle().Which.Profile.UpdatedScores.Should()
-            .BeEquivalentTo([
-                NewQp.UpdatedScore("quality1", 200, 0, FormatScoreUpdateReason.Reset),
-                NewQp.UpdatedScore("quality2", 300, 0, FormatScoreUpdateReason.Reset),
-                NewQp.UpdatedScore("quality3", 0, 100, FormatScoreUpdateReason.New),
-                NewQp.UpdatedScore("quality4", 0, 500, FormatScoreUpdateReason.New)
-            ], o => o.Excluding(x => x.Dto.Format));
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore("quality1", 200, 0, FormatScoreUpdateReason.Reset),
+                    NewQp.UpdatedScore("quality2", 300, 0, FormatScoreUpdateReason.Reset),
+                    NewQp.UpdatedScore("quality3", 0, 100, FormatScoreUpdateReason.New),
+                    NewQp.UpdatedScore("quality4", 0, 500, FormatScoreUpdateReason.New),
+                ],
+                o => o.Excluding(x => x.Dto.Format)
+            );
     }
 
     [Test, AutoMockData]
@@ -317,23 +332,24 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "cf1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "cf2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             ConfigOutput =
             [
-                NewQp.Processed(new QualityProfileConfig
+                NewQp.Processed(
+                    new QualityProfileConfig
                     {
                         Name = "profile1",
                         ResetUnmatchedScores = new ResetUnmatchedScoresConfig
@@ -341,24 +357,31 @@ public class QualityProfileTransactionPhaseTest
                             Enabled = false,
                             // Throw in some exceptions here, just to test whether or not these somehow affect the
                             // result despite Enable being set to false.
-                            Except = ["cf1"]
-                        }
+                            Except = ["cf1"],
+                        },
                     },
-                    ("cf3", "id3", 3, 100), ("cf4", "id4", 4, 500))
+                    ("cf3", "id3", 3, 100),
+                    ("cf4", "id4", 4, 500)
+                ),
             ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle().Which.Profile.UpdatedScores.Should()
-            .BeEquivalentTo([
-                NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
-                NewQp.UpdatedScore("cf2", 300, 300, FormatScoreUpdateReason.NoChange),
-                NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
-                NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New)
-            ], o => o.Excluding(x => x.Dto.Format));
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
+                    NewQp.UpdatedScore("cf2", 300, 300, FormatScoreUpdateReason.NoChange),
+                    NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
+                    NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New),
+                ],
+                o => o.Excluding(x => x.Dto.Format)
+            );
     }
 
     [Test, AutoMockData]
@@ -375,46 +398,54 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "cf1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "cf2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             ConfigOutput =
             [
-                NewQp.Processed(new QualityProfileConfig
+                NewQp.Processed(
+                    new QualityProfileConfig
                     {
                         Name = "profile1",
                         ResetUnmatchedScores = new ResetUnmatchedScoresConfig
                         {
                             Enabled = true,
-                            Except = ["cf1"]
-                        }
+                            Except = ["cf1"],
+                        },
                     },
-                    ("cf3", "id3", 3, 100), ("cf4", "id4", 4, 500))
+                    ("cf3", "id3", 3, 100),
+                    ("cf4", "id4", 4, 500)
+                ),
             ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle().Which.Profile.UpdatedScores.Should()
-            .BeEquivalentTo([
-                NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
-                NewQp.UpdatedScore("cf2", 300, 0, FormatScoreUpdateReason.Reset),
-                NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
-                NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New)
-            ], o => o.Excluding(x => x.Dto.Format));
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore("cf1", 200, 200, FormatScoreUpdateReason.NoChange),
+                    NewQp.UpdatedScore("cf2", 300, 0, FormatScoreUpdateReason.Reset),
+                    NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
+                    NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New),
+                ],
+                o => o.Excluding(x => x.Dto.Format)
+            );
     }
 
     [Test, AutoMockData]
@@ -431,39 +462,43 @@ public class QualityProfileTransactionPhaseTest
                     {
                         Name = "cf1",
                         Format = 1,
-                        Score = 200
+                        Score = 200,
                     },
                     new ProfileFormatItemDto
                     {
                         Name = "cf2",
                         Format = 2,
-                        Score = 300
-                    }
-                ]
-            }
+                        Score = 300,
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
         {
             ConfigOutput =
             [
-                NewQp.Processed(new QualityProfileConfig
-                {
-                    Name = "profile1",
-                    ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                NewQp.Processed(
+                    new QualityProfileConfig
                     {
-                        Enabled = true,
-                        Except = ["cf50"]
+                        Name = "profile1",
+                        ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                        {
+                            Enabled = true,
+                            Except = ["cf50"],
+                        },
                     }
-                })
+                ),
             ],
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
+            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
         sut.Execute(context);
 
-        context.TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle().Which.Profile.InvalidExceptCfNames.Should()
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.InvalidExceptCfNames.Should()
             .BeEquivalentTo("cf50");
     }
 
@@ -479,14 +514,14 @@ public class QualityProfileTransactionPhaseTest
                 [
                     new ProfileItemDto
                     {
-                        Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}
+                        Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
                     },
                     new ProfileItemDto
                     {
-                        Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}
-                    }
-                ]
-            }
+                        Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                    },
+                ],
+            },
         };
 
         var context = new QualityProfilePipelineContext
@@ -495,11 +530,8 @@ public class QualityProfileTransactionPhaseTest
             [
                 new ProcessedQualityProfileData
                 {
-                    Profile = new QualityProfileConfig
-                    {
-                        Name = "profile1"
-                    }
-                }
+                    Profile = new QualityProfileConfig { Name = "profile1" },
+                },
             ],
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
             {
@@ -507,12 +539,21 @@ public class QualityProfileTransactionPhaseTest
                 {
                     Items =
                     [
-                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}},
-                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}},
-                        new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 3, Name = "Three"}}
-                    ]
-                }
-            }
+                        new ProfileItemDto
+                        {
+                            Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                        },
+                        new ProfileItemDto
+                        {
+                            Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                        },
+                        new ProfileItemDto
+                        {
+                            Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
+                        },
+                    ],
+                },
+            },
         };
 
         sut.Execute(context);
@@ -520,11 +561,24 @@ public class QualityProfileTransactionPhaseTest
         var profiles = context.TransactionOutput.ChangedProfiles;
         profiles.Should().ContainSingle();
         profiles.First().Profile.MissingQualities.Should().BeEquivalentTo("Three");
-        profiles.First().Profile.ProfileDto.Items.Should().BeEquivalentTo(
-        [
-            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 1, Name = "One"}},
-            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 2, Name = "Two"}},
-            new ProfileItemDto {Quality = new ProfileItemQualityDto {Id = 3, Name = "Three"}}
-        ]);
+        profiles
+            .First()
+            .Profile.ProfileDto.Items.Should()
+            .BeEquivalentTo(
+                [
+                    new ProfileItemDto
+                    {
+                        Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                    },
+                    new ProfileItemDto
+                    {
+                        Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                    },
+                    new ProfileItemDto
+                    {
+                        Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
+                    },
+                ]
+            );
     }
 }

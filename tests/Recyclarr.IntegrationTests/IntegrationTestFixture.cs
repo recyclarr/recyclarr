@@ -23,10 +23,7 @@ public abstract class IntegrationTestFixture : IDisposable
 
     protected IntegrationTestFixture()
     {
-        Fs = new MockFileSystem(new MockFileSystemOptions
-        {
-            CreateDefaultTempDir = false
-        });
+        Fs = new MockFileSystem(new MockFileSystemOptions { CreateDefaultTempDir = false });
 
         // Use Lazy because we shouldn't invoke virtual methods at construction time
         _container = new Lazy<ILifetimeScope>(() =>
@@ -76,7 +73,8 @@ public abstract class IntegrationTestFixture : IDisposable
     {
         var appDataSetup = Resolve<DefaultAppDataSetup>();
         appDataSetup.SetAppDataDirectoryOverride(
-            Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName);
+            Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName
+        );
     }
 
     [TearDown]
@@ -85,7 +83,8 @@ public abstract class IntegrationTestFixture : IDisposable
         System.Console.Write(Console.Output);
     }
 
-    protected T Resolve<T>() where T : notnull
+    protected T Resolve<T>()
+        where T : notnull
     {
         return Container.Resolve<T>();
     }

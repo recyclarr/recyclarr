@@ -4,7 +4,10 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGuideService guideService)
+public class ConfigListTemplateProcessor(
+    IAnsiConsole console,
+    IConfigTemplateGuideService guideService
+)
 {
     public void Process(IConfigListTemplatesSettings settings)
     {
@@ -24,8 +27,7 @@ public class ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGu
 
         var sonarrRowItems = RenderTemplates(table, data, SupportedServices.Sonarr);
         var radarrRowItems = RenderTemplates(table, data, SupportedServices.Radarr);
-        var items = sonarrRowItems
-            .ZipLongest(radarrRowItems, (s, r) => (s ?? empty, r ?? empty));
+        var items = sonarrRowItems.ZipLongest(radarrRowItems, (s, r) => (s ?? empty, r ?? empty));
 
         foreach (var (s, r) in items)
         {
@@ -38,7 +40,8 @@ public class ConfigListTemplateProcessor(IAnsiConsole console, IConfigTemplateGu
     private static List<Markup> RenderTemplates(
         Table table,
         IEnumerable<TemplatePath> templatePaths,
-        SupportedServices service)
+        SupportedServices service
+    )
     {
         var paths = templatePaths
             .Where(x => x.Service == service && !x.Hidden)

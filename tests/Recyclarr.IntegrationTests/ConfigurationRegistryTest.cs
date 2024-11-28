@@ -13,27 +13,34 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        Fs.AddFile("manual.yml", new MockFileData(
-            """
-            radarr:
-              instance1:
-                base_url: http://localhost:7878
-                api_key: asdf
-            """));
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
 
-        var result = sut.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            ManualConfigFiles = ["manual.yml"]
-        });
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
+        );
 
-        result.Should().BeEquivalentTo([
-            new RadarrConfiguration
-            {
-                BaseUrl = new Uri("http://localhost:7878"),
-                ApiKey = "asdf",
-                InstanceName = "instance1"
-            }
-        ]);
+        result
+            .Should()
+            .BeEquivalentTo(
+                [
+                    new RadarrConfiguration
+                    {
+                        BaseUrl = new Uri("http://localhost:7878"),
+                        ApiKey = "asdf",
+                        InstanceName = "instance1",
+                    },
+                ]
+            );
     }
 
     [Test]
@@ -41,10 +48,8 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            ManualConfigFiles = ["manual.yml"]
-        });
+        var act = () =>
+            sut.FindAndLoadConfigs(new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] });
 
         act.Should().ThrowExactly<InvalidConfigurationFilesException>();
     }
@@ -54,22 +59,31 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        Fs.AddFile("manual.yml", new MockFileData(
-            """
-            radarr:
-              instance1:
-                base_url: http://localhost:7878
-                api_key: asdf
-            """));
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
 
-        var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            ManualConfigFiles = ["manual.yml"],
-            Instances = ["instance1", "instance2"]
-        });
+        var act = () =>
+            sut.FindAndLoadConfigs(
+                new ConfigFilterCriteria
+                {
+                    ManualConfigFiles = ["manual.yml"],
+                    Instances = ["instance1", "instance2"],
+                }
+            );
 
-        act.Should().ThrowExactly<InvalidInstancesException>()
-            .Which.InstanceNames.Should().BeEquivalentTo("instance2");
+        act.Should()
+            .ThrowExactly<InvalidInstancesException>()
+            .Which.InstanceNames.Should()
+            .BeEquivalentTo("instance2");
     }
 
     [Test]
@@ -77,24 +91,28 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        Fs.AddFile("manual.yml", new MockFileData(
-            """
-            radarr:
-              instance1:
-                base_url: http://localhost:7878
-                api_key: asdf
-              instance2:
-                base_url: http://localhost:7878
-                api_key: asdf
-            """));
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                  instance2:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
 
-        var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            ManualConfigFiles = ["manual.yml"]
-        });
+        var act = () =>
+            sut.FindAndLoadConfigs(new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] });
 
-        act.Should().ThrowExactly<SplitInstancesException>()
-            .Which.InstanceNames.Should().BeEquivalentTo("instance1", "instance2");
+        act.Should()
+            .ThrowExactly<SplitInstancesException>()
+            .Which.InstanceNames.Should()
+            .BeEquivalentTo("instance1", "instance2");
     }
 
     [Test]
@@ -102,34 +120,44 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        Fs.AddFile("config1.yml", new MockFileData(
-            """
-            radarr:
-              unique_name1:
-                base_url: http://localhost:7879
-                api_key: fdsa
-              same_instance_name:
-                base_url: http://localhost:7878
-                api_key: asdf
-            """));
+        Fs.AddFile(
+            "config1.yml",
+            new MockFileData(
+                """
+                radarr:
+                  unique_name1:
+                    base_url: http://localhost:7879
+                    api_key: fdsa
+                  same_instance_name:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
 
-        Fs.AddFile("config2.yml", new MockFileData(
-            """
-            radarr:
-              same_instance_name:
-                base_url: http://localhost:7879
-                api_key: fdsa
-              unique_name2:
-                base_url: http://localhost:7879
-                api_key: fdsa
-            """));
+        Fs.AddFile(
+            "config2.yml",
+            new MockFileData(
+                """
+                radarr:
+                  same_instance_name:
+                    base_url: http://localhost:7879
+                    api_key: fdsa
+                  unique_name2:
+                    base_url: http://localhost:7879
+                    api_key: fdsa
+                """
+            )
+        );
 
-        var act = () => sut.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            ManualConfigFiles = ["config1.yml", "config2.yml"]
-        });
+        var act = () =>
+            sut.FindAndLoadConfigs(
+                new ConfigFilterCriteria { ManualConfigFiles = ["config1.yml", "config2.yml"] }
+            );
 
-        act.Should().ThrowExactly<DuplicateInstancesException>()
-            .Which.InstanceNames.Should().BeEquivalentTo("same_instance_name");
+        act.Should()
+            .ThrowExactly<DuplicateInstancesException>()
+            .Which.InstanceNames.Should()
+            .BeEquivalentTo("same_instance_name");
     }
 }

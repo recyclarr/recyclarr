@@ -10,7 +10,5 @@ public class AppDataDirSetupTask(IAppDataSetup appDataSetup) : IGlobalSetupTask
         appDataSetup.SetAppDataDirectoryOverride(cmd.AppData ?? "");
     }
 
-    public void OnFinish()
-    {
-    }
+    public void OnFinish() { }
 }

@@ -27,11 +27,15 @@ public class ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoU
         public SupportedServices Service { get; init; }
 
         [CommandOption("--score-sets")]
-        [Description("Instead of listing custom formats, list the score sets all custom formats are part of.")]
+        [Description(
+            "Instead of listing custom formats, list the score sets all custom formats are part of."
+        )]
         public bool ScoreSets { get; init; } = false;
 
         [CommandOption("--raw")]
-        [Description("Omit any boilerplate text or colored formatting. This option primarily exists for scripts.")]
+        [Description(
+            "Omit any boilerplate text or colored formatting. This option primarily exists for scripts."
+        )]
         public bool Raw { get; init; } = false;
     }
 
@@ -39,6 +43,6 @@ public class ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoU
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
         lister.List(settings);
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }

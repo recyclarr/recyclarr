@@ -19,7 +19,8 @@ public record CustomFormatData
 
     [JsonPropertyName("trash_scores")]
     [JsonNoSerialize]
-    public Dictionary<string, int> TrashScores { get; init; } = new(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, int> TrashScores { get; init; } =
+        new(StringComparer.InvariantCultureIgnoreCase);
 
     [JsonIgnore]
     public int? DefaultScore => TrashScores.TryGetValue("default", out var score) ? score : null;
@@ -43,14 +44,20 @@ public record CustomFormatData
         }
 
         var specsEqual = Specifications
-            .FullOuterHashJoin(other.Specifications, x => x.Name, x => x.Name, _ => false, _ => false, (x, y) => x == y)
+            .FullOuterHashJoin(
+                other.Specifications,
+                x => x.Name,
+                x => x.Name,
+                _ => false,
+                _ => false,
+                (x, y) => x == y
+            )
             .All(x => x);
 
-        return
-            Id == other.Id &&
-            Name == other.Name &&
-            IncludeCustomFormatWhenRenaming == other.IncludeCustomFormatWhenRenaming &&
-            specsEqual;
+        return Id == other.Id
+            && Name == other.Name
+            && IncludeCustomFormatWhenRenaming == other.IncludeCustomFormatWhenRenaming
+            && specsEqual;
     }
 
     public override int GetHashCode() => throw new NotImplementedException();
@@ -64,7 +71,8 @@ public record CustomFormatSpecificationData
     public bool Required { get; init; }
 
     [JsonConverter(typeof(FieldsArrayJsonConverter))]
-    public IReadOnlyCollection<CustomFormatFieldData> Fields { get; init; } = Array.Empty<CustomFormatFieldData>();
+    public IReadOnlyCollection<CustomFormatFieldData> Fields { get; init; } =
+        Array.Empty<CustomFormatFieldData>();
 
     public virtual bool Equals(CustomFormatSpecificationData? other)
     {
@@ -82,12 +90,11 @@ public record CustomFormatSpecificationData
             .InnerHashJoin(other.Fields, x => x.Name, x => x.Name, (x, y) => x == y)
             .All(x => x);
 
-        return
-            Name == other.Name &&
-            Implementation == other.Implementation &&
-            Negate == other.Negate &&
-            Required == other.Required &&
-            fieldsEqual;
+        return Name == other.Name
+            && Implementation == other.Implementation
+            && Negate == other.Negate
+            && Required == other.Required
+            && fieldsEqual;
     }
 
     public override int GetHashCode() => throw new NotImplementedException();

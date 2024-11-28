@@ -9,6 +9,6 @@ public record ProcessedQualityProfileData
 {
     public required QualityProfileConfig Profile { get; init; }
     public bool ShouldCreate { get; init; } = true;
-    public IList<ProcessedQualityProfileScore> CfScores { get; init; } = new List<ProcessedQualityProfileScore>();
-    public IList<CustomFormatData> ScorelessCfs { get; } = new List<CustomFormatData>();
+    public IList<ProcessedQualityProfileScore> CfScores { get; init; } = [];
+    public IList<CustomFormatData> ScorelessCfs { get; } = [];
 }

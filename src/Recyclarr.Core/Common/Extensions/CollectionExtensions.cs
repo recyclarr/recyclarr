@@ -12,7 +12,8 @@ public static class CollectionExtensions
     }
 
     // From: https://stackoverflow.com/a/34362585/157971
-    private sealed class ReadOnlyCollectionAdapter<T>(ICollection<T> source) : IReadOnlyCollection<T>
+    private sealed class ReadOnlyCollectionAdapter<T>(ICollection<T> source)
+        : IReadOnlyCollection<T>
     {
         public int Count => source.Count;
 
@@ -55,12 +56,12 @@ public static class CollectionExtensions
 
     public static bool IsEmpty<T>(this ICollection<T>? collection)
     {
-        return collection is null or {Count: 0};
+        return collection is null or { Count: 0 };
     }
 
     public static bool IsEmpty<T>(this IReadOnlyCollection<T>? collection)
     {
-        return collection is null or {Count: 0};
+        return collection is null or { Count: 0 };
     }
 
     public static bool IsNotEmpty<T>(this IEnumerable<T>? collection)
@@ -74,14 +75,18 @@ public static class CollectionExtensions
         return list.Count != 0 ? list : null;
     }
 
-    public static IEnumerable<T> Flatten<T>(this IEnumerable<T> items, Func<T, IEnumerable<T>> flattenWhich)
+    public static IEnumerable<T> Flatten<T>(
+        this IEnumerable<T> items,
+        Func<T, IEnumerable<T>> flattenWhich
+    )
     {
         return items.SelectMany(x => flattenWhich(x).Flatten(flattenWhich).Append(x));
     }
 
     public static async Task<IEnumerable<TResult>> SelectAsync<TSource, TResult>(
         this IEnumerable<TSource> source,
-        Func<TSource, Task<TResult>> method)
+        Func<TSource, Task<TResult>> method
+    )
     {
         return await Task.WhenAll(source.Select(async s => await method(s)));
     }

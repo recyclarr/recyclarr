@@ -16,12 +16,9 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id1", "id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    ]
-                }
-            ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "c", Score = 100 }],
+                },
+            ],
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -45,12 +42,9 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id1", "id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    ]
-                }
-            ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "c", Score = 100 }],
+                },
+            ],
         };
 
         var sut = new SonarrConfigMerger();
@@ -72,20 +66,17 @@ public class MergeCustomFormatsTest
                     TrashIds = ["id1", "id2"],
                     AssignScoresTo =
                     [
-                        new QualityScoreConfigYaml {Name = "c", Score = 100},
-                        new QualityScoreConfigYaml {Name = "d", Score = 101},
-                        new QualityScoreConfigYaml {Name = "e", Score = 102}
-                    ]
+                        new QualityScoreConfigYaml { Name = "c", Score = 100 },
+                        new QualityScoreConfigYaml { Name = "d", Score = 101 },
+                        new QualityScoreConfigYaml { Name = "e", Score = 102 },
+                    ],
                 },
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "f", Score = 100}
-                    ]
-                }
-            ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "f", Score = 100 }],
+                },
+            ],
         };
 
         var rightConfig = new SonarrConfigYaml
@@ -95,95 +86,90 @@ public class MergeCustomFormatsTest
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id3", "id4"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "d", Score = 200}
-                    ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "d", Score = 200 }],
                 },
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id5", "id6"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "e", Score = 300}
-                    ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "e", Score = 300 }],
                 },
                 new CustomFormatConfigYaml
                 {
                     TrashIds = ["id1"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "c", Score = 50}
-                    ]
-                }
-            ]
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "c", Score = 50 }],
+                },
+            ],
         };
 
         var sut = new SonarrConfigMerger();
 
         var result = sut.Merge(leftConfig, rightConfig);
 
-        result.Should().BeEquivalentTo(new SonarrConfigYaml
-        {
-            CustomFormats =
-            [
-                new CustomFormatConfigYaml
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
                 {
-                    TrashIds = ["id2"],
-                    AssignScoresTo =
+                    CustomFormats =
                     [
-                        new QualityScoreConfigYaml {Name = "c", Score = 100}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id1", "id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "d", Score = 101}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id1", "id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "e", Score = 102}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id2"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "f", Score = 100}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id3", "id4"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "d", Score = 200}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id5", "id6"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "e", Score = 300}
-                    ]
-                },
-                new CustomFormatConfigYaml
-                {
-                    TrashIds = ["id1"],
-                    AssignScoresTo =
-                    [
-                        new QualityScoreConfigYaml {Name = "c", Score = 50}
-                    ]
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "c", Score = 100 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id1", "id2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "d", Score = 101 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id1", "id2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "e", Score = 102 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "f", Score = 100 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id3", "id4"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "d", Score = 200 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id5", "id6"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "e", Score = 300 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["id1"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "c", Score = 50 },
+                            ],
+                        },
+                    ],
                 }
-            ]
-        });
+            );
     }
 }

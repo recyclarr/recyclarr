@@ -4,12 +4,14 @@ using System.Text.Json.Serialization;
 namespace Recyclarr.Json;
 
 [UsedImplicitly]
-public sealed class ReadOnlyCollectionJsonConverter<TElement> : JsonConverter<IReadOnlyCollection<TElement>>
+public sealed class ReadOnlyCollectionJsonConverter<TElement>
+    : JsonConverter<IReadOnlyCollection<TElement>>
 {
     public override IReadOnlyCollection<TElement> Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
-        JsonSerializerOptions options)
+        JsonSerializerOptions options
+    )
     {
         if (reader.TokenType != JsonTokenType.StartArray)
         {
@@ -38,7 +40,8 @@ public sealed class ReadOnlyCollectionJsonConverter<TElement> : JsonConverter<IR
     public override void Write(
         Utf8JsonWriter writer,
         IReadOnlyCollection<TElement> value,
-        JsonSerializerOptions options)
+        JsonSerializerOptions options
+    )
     {
         writer.WriteStartArray();
         foreach (var element in value)

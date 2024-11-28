@@ -12,9 +12,8 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Perform migration steps that may be needed between versions")]
-public class MigrateCommand(
-    IAnsiConsole console,
-    IMigrationExecutor migration) : Command<MigrateCommand.CliSettings>
+public class MigrateCommand(IAnsiConsole console, IMigrationExecutor migration)
+    : Command<MigrateCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -26,7 +25,7 @@ public class MigrateCommand(
         {
             migration.PerformAllMigrationSteps(settings.Debug);
             console.WriteLine("All migration steps completed");
-            return (int) ExitStatus.Succeeded;
+            return (int)ExitStatus.Succeeded;
         }
         catch (MigrationException e)
         {
@@ -52,6 +51,6 @@ public class MigrateCommand(
             console.WriteLine($"ERROR: {ex.Message}");
         }
 
-        return (int) ExitStatus.Failed;
+        return (int)ExitStatus.Failed;
     }
 }

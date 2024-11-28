@@ -9,8 +9,10 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List local configuration files.")]
-public class ConfigListLocalCommand(ConfigListLocalProcessor processor, IMultiRepoUpdater repoUpdater)
-    : AsyncCommand<ConfigListLocalCommand.CliSettings>
+public class ConfigListLocalCommand(
+    ConfigListLocalProcessor processor,
+    IMultiRepoUpdater repoUpdater
+) : AsyncCommand<ConfigListLocalCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings;
@@ -19,6 +21,6 @@ public class ConfigListLocalCommand(ConfigListLocalProcessor processor, IMultiRe
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         processor.Process();
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }

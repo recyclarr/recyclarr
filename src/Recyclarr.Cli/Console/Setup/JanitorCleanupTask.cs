@@ -4,12 +4,13 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class JanitorCleanupTask(LogJanitor janitor, ILogger log, ISettings<LogJanitorSettings> settings)
-    : IGlobalSetupTask
+public class JanitorCleanupTask(
+    LogJanitor janitor,
+    ILogger log,
+    ISettings<LogJanitorSettings> settings
+) : IGlobalSetupTask
 {
-    public void OnStart(BaseCommandSettings cmd)
-    {
-    }
+    public void OnStart(BaseCommandSettings cmd) { }
 
     public void OnFinish()
     {

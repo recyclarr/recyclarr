@@ -8,9 +8,7 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
     private readonly ConsoleAppCancellationTokenSource _ct = new();
     private readonly Lazy<IGlobalSetupTask> _globalTaskSetup;
 
-    public CommandSetupInterceptor(
-        Lazy<ILogger> log,
-        Lazy<IGlobalSetupTask> globalTaskSetup)
+    public CommandSetupInterceptor(Lazy<ILogger> log, Lazy<IGlobalSetupTask> globalTaskSetup)
     {
         _globalTaskSetup = globalTaskSetup;
         _ct.CancelPressed.Subscribe(_ => log.Value.Information("Exiting due to signal interrupt"));
@@ -21,7 +19,9 @@ internal sealed class CommandSetupInterceptor : ICommandInterceptor, IDisposable
     {
         if (settings is not BaseCommandSettings cmd)
         {
-            throw new InvalidOperationException("Command settings must be of type BaseCommandSettings");
+            throw new InvalidOperationException(
+                "Command settings must be of type BaseCommandSettings"
+            );
         }
 
         cmd.CancellationToken = _ct.Token;

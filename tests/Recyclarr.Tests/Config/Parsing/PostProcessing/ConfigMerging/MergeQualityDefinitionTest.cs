@@ -11,11 +11,7 @@ public class MergeQualityDefinitionTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "type1",
-                PreferredRatio = 0.5m
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "type1", PreferredRatio = 0.5m },
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -34,11 +30,7 @@ public class MergeQualityDefinitionTest
 
         var rightConfig = new SonarrConfigYaml
         {
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "type1",
-                PreferredRatio = 0.5m
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "type1", PreferredRatio = 0.5m },
         };
 
         var sut = new SonarrConfigMerger();
@@ -53,20 +45,12 @@ public class MergeQualityDefinitionTest
     {
         var leftConfig = new SonarrConfigYaml
         {
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "type1",
-                PreferredRatio = 0.5m
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "type1", PreferredRatio = 0.5m },
         };
 
         var rightConfig = new SonarrConfigYaml
         {
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "type2",
-                PreferredRatio = 1.0m
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "type2", PreferredRatio = 1.0m },
         };
 
         var sut = new SonarrConfigMerger();

@@ -12,17 +12,25 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
 [UsedImplicitly]
-public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpdater, ISyncProcessor syncProcessor)
-    : AsyncCommand<SyncCommand.CliSettings>
+public class SyncCommand(
+    IMigrationExecutor migration,
+    IMultiRepoUpdater repoUpdater,
+    ISyncProcessor syncProcessor
+) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    [SuppressMessage("Performance", "CA1819:Properties should not return arrays",
-        Justification = "Spectre.Console requires it")]
+    [SuppressMessage(
+        "Performance",
+        "CA1819:Properties should not return arrays",
+        Justification = "Spectre.Console requires it"
+    )]
     public class CliSettings : BaseCommandSettings, ISyncSettings
     {
         [CommandArgument(0, "[service]")]
-        [EnumDescription<SupportedServices>("The service to sync. If not specified, all services are synced.")]
+        [EnumDescription<SupportedServices>(
+            "The service to sync. If not specified, all services are synced."
+        )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices? Service { get; init; }
 
@@ -38,7 +46,9 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
         public bool Preview { get; init; }
 
         [CommandOption("-i|--instance")]
-        [Description("One or more instance names to sync. If not specified, all instances will be synced.")]
+        [Description(
+            "One or more instance names to sync. If not specified, all instances will be synced."
+        )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public string[] InstancesOption { get; init; } = [];
         public IReadOnlyCollection<string> Instances => InstancesOption;
@@ -52,6 +62,6 @@ public class SyncCommand(IMigrationExecutor migration, IMultiRepoUpdater repoUpd
 
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
 
-        return (int) await syncProcessor.Process(settings, settings.CancellationToken);
+        return (int)await syncProcessor.Process(settings, settings.CancellationToken);
     }
 }

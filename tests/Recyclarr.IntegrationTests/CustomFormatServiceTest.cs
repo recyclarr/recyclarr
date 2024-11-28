@@ -20,10 +20,9 @@ public class CustomFormatServiceTest : IntegrationTestFixture
         http.RespondWith(jsonBody);
 
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(new RadarrConfiguration
-        {
-            InstanceName = "instance"
-        });
+        using var scope = scopeFactory.Start<TestConfigurationScope>(
+            new RadarrConfiguration { InstanceName = "instance" }
+        );
 
         var sut = scope.Resolve<CustomFormatApiService>();
         var result = await sut.GetCustomFormats(CancellationToken.None);

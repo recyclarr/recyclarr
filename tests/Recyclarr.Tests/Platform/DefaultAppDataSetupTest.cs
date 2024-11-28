@@ -11,13 +11,12 @@ public class DefaultAppDataSetupTest
     public void Initialize_using_default_path(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut)
+        DefaultAppDataSetup sut
+    )
     {
-        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
 
-        var basePath = fs.CurrentDirectory()
-            .SubDirectory("base")
-            .SubDirectory("path");
+        var basePath = fs.CurrentDirectory().SubDirectory("base").SubDirectory("path");
 
         env.GetFolderPath(default, default).ReturnsForAnyArgs(basePath.FullName);
         sut.SetAppDataDirectoryOverride("");
@@ -30,11 +29,10 @@ public class DefaultAppDataSetupTest
     [Test, AutoMockData]
     public void Initialize_using_path_override(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        DefaultAppDataSetup sut)
+        DefaultAppDataSetup sut
+    )
     {
-        var overridePath = fs.CurrentDirectory()
-            .SubDirectory("override")
-            .SubDirectory("path");
+        var overridePath = fs.CurrentDirectory().SubDirectory("override").SubDirectory("path");
 
         sut.SetAppDataDirectoryOverride(overridePath.FullName);
         var paths = sut.CreateAppPaths();
@@ -46,19 +44,22 @@ public class DefaultAppDataSetupTest
     public void Creation_uses_correct_behavior(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut)
+        DefaultAppDataSetup sut
+    )
     {
-        var appDataPath = fs.CurrentDirectory()
-            .SubDirectory("override")
-            .SubDirectory("path");
+        var appDataPath = fs.CurrentDirectory().SubDirectory("override").SubDirectory("path");
 
-        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?) null);
+        env.GetEnvironmentVariable(default!).ReturnsForAnyArgs((string?)null);
         env.GetFolderPath(default).ReturnsForAnyArgs(appDataPath.FullName);
         sut.SetAppDataDirectoryOverride("");
 
         sut.CreateAppPaths();
 
-        env.Received().GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create);
+        env.Received()
+            .GetFolderPath(
+                Environment.SpecialFolder.ApplicationData,
+                Environment.SpecialFolderOption.Create
+            );
         fs.AllDirectories.Should().NotContain(appDataPath.FullName);
     }
 
@@ -66,12 +67,14 @@ public class DefaultAppDataSetupTest
     public void Use_environment_variable_if_override_not_specified(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut)
+        DefaultAppDataSetup sut
+    )
     {
         var expectedPath = fs.CurrentDirectory()
             .SubDirectory("env")
             .SubDirectory("var")
-            .SubDirectory("path").FullName;
+            .SubDirectory("path")
+            .FullName;
 
         env.GetEnvironmentVariable(default!).ReturnsForAnyArgs(expectedPath);
         sut.SetAppDataDirectoryOverride("");
@@ -86,12 +89,14 @@ public class DefaultAppDataSetupTest
     public void Explicit_override_takes_precedence_over_environment_variable(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut)
+        DefaultAppDataSetup sut
+    )
     {
         var expectedPath = fs.CurrentDirectory()
             .SubDirectory("env")
             .SubDirectory("var")
-            .SubDirectory("path").FullName;
+            .SubDirectory("path")
+            .FullName;
 
         sut.SetAppDataDirectoryOverride(expectedPath);
 

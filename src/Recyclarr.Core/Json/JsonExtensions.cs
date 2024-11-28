@@ -10,7 +10,9 @@ public static class JsonExtensions
     {
         var jsonSerializerOptions = new JsonSerializerOptions(options);
 
-        var jsonConverter = jsonSerializerOptions.Converters.FirstOrDefault(x => x.GetType() == typeof(T));
+        var jsonConverter = jsonSerializerOptions.Converters.FirstOrDefault(x =>
+            x.GetType() == typeof(T)
+        );
         if (jsonConverter is not null)
         {
             jsonSerializerOptions.Converters.Remove(jsonConverter);

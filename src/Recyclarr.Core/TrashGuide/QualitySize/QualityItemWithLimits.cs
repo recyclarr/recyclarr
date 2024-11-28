@@ -5,16 +5,18 @@ namespace Recyclarr.TrashGuide.QualitySize;
 
 public class QualityItemWithLimits(QualityItem item, QualityItemLimits limits)
 {
-    public QualityItem Item { get; } = item with
-    {
-        Max = Math.Min(item.Max, limits.MaxLimit),
-        Preferred = Math.Min(item.Preferred, limits.PreferredLimit)
-    };
+    public QualityItem Item { get; } =
+        item with
+        {
+            Max = Math.Min(item.Max, limits.MaxLimit),
+            Preferred = Math.Min(item.Preferred, limits.PreferredLimit),
+        };
 
     public QualityItemLimits Limits => limits;
 
     public decimal MinForApi => Item.Min;
-    public decimal? PreferredForApi => Item.Preferred < Limits.PreferredLimit ? Item.Preferred : null;
+    public decimal? PreferredForApi =>
+        Item.Preferred < Limits.PreferredLimit ? Item.Preferred : null;
     public decimal? MaxForApi => Item.Max < Limits.MaxLimit ? Item.Max : null;
 
     public string AnnotatedMin => Item.Min.ToString(CultureInfo.InvariantCulture);
@@ -47,7 +49,11 @@ public class QualityItemWithLimits(QualityItem item, QualityItemLimits limits)
         return ValueWithThresholdIsDifferent(serviceValue, Item.Max, Limits.MaxLimit);
     }
 
-    private static bool ValueWithThresholdIsDifferent(decimal? serviceValue, decimal guideValue, decimal threshold)
+    private static bool ValueWithThresholdIsDifferent(
+        decimal? serviceValue,
+        decimal guideValue,
+        decimal threshold
+    )
     {
         return serviceValue == null
             // If the service uses null, it's the same if the guide value == the max that null represents

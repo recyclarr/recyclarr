@@ -9,7 +9,8 @@ public class ConfigCommandsTest
     [Test, AutoMockData]
     public async Task Repo_update_is_called_on_config_list(
         [Frozen] IMultiRepoUpdater updater,
-        ConfigListLocalCommand sut)
+        ConfigListLocalCommand sut
+    )
     {
         await sut.ExecuteAsync(default!, new ConfigListLocalCommand.CliSettings());
 
@@ -19,7 +20,8 @@ public class ConfigCommandsTest
     [Test, AutoMockData]
     public async Task Repo_update_is_called_on_config_create(
         [Frozen] IMultiRepoUpdater updater,
-        ConfigCreateCommand sut)
+        ConfigCreateCommand sut
+    )
     {
         await sut.ExecuteAsync(default!, new ConfigCreateCommand.CliSettings());
 

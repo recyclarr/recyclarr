@@ -13,7 +13,8 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
         Type expectedType,
         Func<IParser, Type, object?> nestedObjectDeserializer,
         out object? value,
-        ObjectDeserializer rootDeserializer)
+        ObjectDeserializer rootDeserializer
+    )
     {
         value = null;
 
@@ -36,7 +37,7 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
             return true;
         }
 
-        if (nodeEvent is not Scalar {Style: ScalarStyle.Plain} scalar)
+        if (nodeEvent is not Scalar { Style: ScalarStyle.Plain } scalar)
         {
             return false;
         }
@@ -47,8 +48,7 @@ public sealed class ForceEmptySequences(IObjectFactory objectFactory) : INodeDes
 
     private static bool IsList(Type type)
     {
-        return
-            type.IsImplementationOf(typeof(ICollection<>)) ||
-            type.IsImplementationOf(typeof(IReadOnlyCollection<>));
+        return type.IsImplementationOf(typeof(ICollection<>))
+            || type.IsImplementationOf(typeof(IReadOnlyCollection<>));
     }
 }

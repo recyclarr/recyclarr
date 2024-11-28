@@ -4,16 +4,17 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Notifications.Apprise;
 
-public class AppriseStatelessNotificationApiService(IAppriseRequestBuilder api) : IAppriseNotificationApiService
+public class AppriseStatelessNotificationApiService(IAppriseRequestBuilder api)
+    : IAppriseNotificationApiService
 {
     public async Task Notify(
         AppriseNotificationSettings settings,
-        Func<AppriseNotification, AppriseNotification> notificationBuilder)
+        Func<AppriseNotification, AppriseNotification> notificationBuilder
+    )
     {
-        var notification = notificationBuilder(new AppriseStatelessNotification
-        {
-            Urls = settings.Urls
-        });
+        var notification = notificationBuilder(
+            new AppriseStatelessNotification { Urls = settings.Urls }
+        );
 
         await api.Request("notify").PostJsonAsync(notification);
     }

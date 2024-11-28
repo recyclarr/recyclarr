@@ -15,8 +15,8 @@ public sealed class NotificationService(
     IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettings<NotificationSettings> settings,
     NotificationEmitter notificationEmitter,
-    IVerbosityStrategy verbosity)
-    : IDisposable
+    IVerbosityStrategy verbosity
+) : IDisposable
 {
     private const string NoInstance = "[no instance]";
 
@@ -40,11 +40,13 @@ public sealed class NotificationService(
     {
         _events.Clear();
         _eventConnection.Clear();
-        _eventConnection.Add(notificationEmitter.OnNotification.Subscribe(x =>
-        {
-            var key = _activeInstanceName ?? NoInstance;
-            _events.GetOrCreate(key).Add(x);
-        }));
+        _eventConnection.Add(
+            notificationEmitter.OnNotification.Subscribe(x =>
+            {
+                var key = _activeInstanceName ?? NoInstance;
+                _events.GetOrCreate(key).Add(x);
+            })
+        );
     }
 
     public async Task SendNotification(bool succeeded)
@@ -55,7 +57,9 @@ public sealed class NotificationService(
         // If the user didn't configure notifications, exit early and do nothing.
         if (_settings is null)
         {
-            log.Debug("Notification settings are not present, so this notification will not be sent");
+            log.Debug(
+                "Notification settings are not present, so this notification will not be sent"
+            );
             return;
         }
 
@@ -64,7 +68,11 @@ public sealed class NotificationService(
         await SendAppriseNotification(succeeded, body, messageType);
     }
 
-    private async Task SendAppriseNotification(bool succeeded, string body, AppriseMessageType messageType)
+    private async Task SendAppriseNotification(
+        bool succeeded,
+        string body,
+        AppriseMessageType messageType
+    )
     {
         if (string.IsNullOrEmpty(body) && !verbosity.ShouldSendEmpty())
         {
@@ -80,13 +88,17 @@ public sealed class NotificationService(
         {
             var api = apiFactory[_settings!.Mode!.Value];
 
-            await api.Notify(_settings!, payload => payload with
-            {
-                Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
-                Body = body,
-                Type = messageType,
-                Format = AppriseMessageFormat.Markdown
-            });
+            await api.Notify(
+                _settings!,
+                payload =>
+                    payload with
+                    {
+                        Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
+                        Body = body,
+                        Type = messageType,
+                        Format = AppriseMessageFormat.Markdown,
+                    }
+            );
         }
         catch (FlurlHttpException e)
         {
@@ -109,7 +121,8 @@ public sealed class NotificationService(
     private static void RenderInstanceEvents(
         StringBuilder body,
         string instanceName,
-        IEnumerable<IPresentableNotification> notifications)
+        IEnumerable<IPresentableNotification> notifications
+    )
     {
         if (instanceName == NoInstance)
         {
@@ -130,11 +143,12 @@ public sealed class NotificationService(
         {
             body.AppendLine(
                 $"""
-                 {category}:
+                {category}:
 
-                 {string.Join('\n', events.Select(x => x.Render()))}
-
-                 """);
+                {string.Join('\n', events.Select(x => x.Render()))}
+                
+                """
+            );
         }
     }
 }

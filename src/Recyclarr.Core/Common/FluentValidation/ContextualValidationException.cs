@@ -5,8 +5,8 @@ namespace Recyclarr.Common.FluentValidation;
 public class ContextualValidationException(
     ValidationException originalException,
     string errorPrefix,
-    string validationContext)
-    : Exception
+    string validationContext
+) : Exception
 {
     public ValidationException OriginalException { get; } = originalException;
     public string ErrorPrefix { get; } = errorPrefix;

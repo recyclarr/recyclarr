@@ -10,10 +10,14 @@ public abstract record ServiceConfiguration : IServiceConfiguration
     public Uri BaseUrl { get; set; } = new("about:empty");
     public string ApiKey { get; init; } = "";
 
-    public ICollection<CustomFormatConfig> CustomFormats { get; init; } =
-        new List<CustomFormatConfig>();
+    public ICollection<CustomFormatConfig> CustomFormats { get; init; } = [];
 
-    public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
+    public bool DeleteOldCustomFormats
+    {
+        get;
+        [UsedImplicitly]
+        init;
+    }
     public bool ReplaceExistingCustomFormats { get; init; }
 
     public QualityDefinitionConfig? QualityDefinition { get; init; }
@@ -25,10 +29,9 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatConfig
 {
-    public ICollection<string> TrashIds { get; init; } = new List<string>();
+    public ICollection<string> TrashIds { get; init; } = [];
 
-    public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } =
-        new List<AssignScoresToConfig>();
+    public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -56,7 +59,7 @@ public record QualityProfileQualityConfig
 public enum QualitySortAlgorithm
 {
     Top,
-    Bottom
+    Bottom,
 }
 
 public record ResetUnmatchedScoresConfig

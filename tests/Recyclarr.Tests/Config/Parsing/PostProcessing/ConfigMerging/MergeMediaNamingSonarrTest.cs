@@ -21,9 +21,9 @@ public class MergeMediaNamingSonarrTest
                     Rename = false,
                     Standard = "standard1",
                     Daily = "daily1",
-                    Anime = "anime1"
-                }
-            }
+                    Anime = "anime1",
+                },
+            },
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -51,9 +51,9 @@ public class MergeMediaNamingSonarrTest
                     Rename = false,
                     Standard = "standard1",
                     Daily = "daily1",
-                    Anime = "anime1"
-                }
-            }
+                    Anime = "anime1",
+                },
+            },
         };
 
         var sut = new SonarrConfigMerger();
@@ -78,9 +78,9 @@ public class MergeMediaNamingSonarrTest
                     Rename = false,
                     Standard = "standard1",
                     Daily = "daily1",
-                    Anime = "anime1"
-                }
-            }
+                    Anime = "anime1",
+                },
+            },
         };
 
         var rightConfig = new SonarrConfigYaml
@@ -94,9 +94,9 @@ public class MergeMediaNamingSonarrTest
                     Rename = false,
                     Standard = "standard2",
                     Daily = "daily2",
-                    Anime = "anime2"
-                }
-            }
+                    Anime = "anime2",
+                },
+            },
         };
 
         var sut = new SonarrConfigMerger();

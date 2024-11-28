@@ -12,12 +12,15 @@ public class RemoteRepoFileMapper
     [SuppressMessage("Design", "CA1054:URI-like parameters should not be strings")]
     public async Task DownloadFiles(string urlPrefix, params string[] repoFilePaths)
     {
-        var dictionary = await repoFilePaths.ToObservable()
-            .Select(x => Observable.FromAsync(async ct =>
-            {
-                var content = await $"{urlPrefix}/{x}".GetStringAsync(cancellationToken: ct);
-                return (file: x, content);
-            }))
+        var dictionary = await repoFilePaths
+            .ToObservable()
+            .Select(x =>
+                Observable.FromAsync(async ct =>
+                {
+                    var content = await $"{urlPrefix}/{x}".GetStringAsync(cancellationToken: ct);
+                    return (file: x, content);
+                })
+            )
             .Merge(8)
             .ToList();
 

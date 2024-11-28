@@ -13,8 +13,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance1:
                 api_key: !secret api_key
@@ -24,14 +23,16 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
                       - !secret secret_rp
             """;
 
-        const string secretsYml =
-            """
+        const string secretsYml = """
             api_key: 95283e6b156c42f3af8a9b16173f876b
             123GARBAGE_: 'https://radarr:7878'
             secret_rp: 1234567
             """;
 
-        Fs.AddFile(Paths.AppDataDirectory.File("secrets.yml").FullName, new MockFileData(secretsYml));
+        Fs.AddFile(
+            Paths.AppDataDirectory.File("secrets.yml").FullName,
+            new MockFileData(secretsYml)
+        );
         var expected = new[]
         {
             new
@@ -39,19 +40,15 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
                 InstanceName = "instance1",
                 ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                 BaseUrl = new Uri("https://radarr:7878"),
-                CustomFormats = new[]
-                {
-                    new
-                    {
-                        TrashIds = new[] {"1234567"}
-                    }
-                }
-            }
+                CustomFormats = new[] { new { TrashIds = new[] { "1234567" } } },
+            },
         };
 
-        configLoader.Load(() => new StringReader(testYml))
+        configLoader
+            .Load(() => new StringReader(testYml))
             .GetConfigsOfType(SupportedServices.Sonarr)
-            .Should().BeEquivalentTo(expected);
+            .Should()
+            .BeEquivalentTo(expected);
     }
 
     [Test]
@@ -59,8 +56,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance2:
                 api_key: !secret api_key
@@ -69,11 +65,16 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         const string secretsYml = "no_api_key: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
+        Fs.AddFile(
+            Paths.AppDataDirectory.File("recyclarr.yml").FullName,
+            new MockFileData(secretsYml)
+        );
 
-        configLoader.Load(() => new StringReader(testYml))
+        configLoader
+            .Load(() => new StringReader(testYml))
             .GetConfigsOfType(SupportedServices.Sonarr)
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
     }
 
     [Test]
@@ -81,17 +82,18 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance3:
                 api_key: !secret api_key
                 base_url: fake_url
             """;
 
-        configLoader.Load(() => new StringReader(testYml))
+        configLoader
+            .Load(() => new StringReader(testYml))
             .GetConfigsOfType(SupportedServices.Sonarr)
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
     }
 
     [Test]
@@ -99,17 +101,18 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance4:
                 api_key: !secret { property: value }
                 base_url: fake_url
             """;
 
-        configLoader.Load(() => new StringReader(testYml))
+        configLoader
+            .Load(() => new StringReader(testYml))
             .GetConfigsOfType(SupportedServices.Sonarr)
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
     }
 
     [Test]
@@ -117,8 +120,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     {
         var configLoader = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance5:
                 api_key: fake_key
@@ -128,9 +130,14 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         const string secretsYml = "bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(Paths.AppDataDirectory.File("recyclarr.yml").FullName, new MockFileData(secretsYml));
-        configLoader.Load(() => new StringReader(testYml))
+        Fs.AddFile(
+            Paths.AppDataDirectory.File("recyclarr.yml").FullName,
+            new MockFileData(secretsYml)
+        );
+        configLoader
+            .Load(() => new StringReader(testYml))
             .GetConfigsOfType(SupportedServices.Sonarr)
-            .Should().BeEmpty();
+            .Should()
+            .BeEmpty();
     }
 }

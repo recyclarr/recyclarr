@@ -4,7 +4,8 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class YamlIncludeResolver(IIndex<Type, IIncludeProcessor> processorFactory) : IYamlIncludeResolver
+public class YamlIncludeResolver(IIndex<Type, IIncludeProcessor> processorFactory)
+    : IYamlIncludeResolver
 {
     public IFileInfo GetIncludePath(IYamlInclude includeDirective, SupportedServices serviceType)
     {
@@ -16,7 +17,9 @@ public class YamlIncludeResolver(IIndex<Type, IIncludeProcessor> processorFactor
         var yamlFile = processor.GetPathToConfig(includeDirective, serviceType);
         if (!yamlFile.Exists)
         {
-            throw new YamlIncludeException($"Included YAML file does not exist: {yamlFile.FullName}");
+            throw new YamlIncludeException(
+                $"Included YAML file does not exist: {yamlFile.FullName}"
+            );
         }
 
         return yamlFile;

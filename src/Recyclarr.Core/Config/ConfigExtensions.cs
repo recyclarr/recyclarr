@@ -9,7 +9,8 @@ public static class ConfigExtensions
 {
     public static IEnumerable<IServiceConfiguration> GetConfigsOfType(
         this IEnumerable<IServiceConfiguration> configs,
-        SupportedServices? serviceType)
+        SupportedServices? serviceType
+    )
     {
         return configs.Where(x => serviceType is null || serviceType.Value == x.ServiceType);
     }
@@ -23,16 +24,22 @@ public static class ConfigExtensions
 
     public static IEnumerable<IServiceConfiguration> GetConfigsBasedOnSettings(
         this IEnumerable<IServiceConfiguration> configs,
-        ConfigFilterCriteria criteria)
+        ConfigFilterCriteria criteria
+    )
     {
         // later, if we filter by "operation type" (e.g. CFs, quality sizes) it's just another
         // ".Where()" in the LINQ expression below.
-        return configs.GetConfigsOfType(criteria.Service)
-            .Where(x => criteria.Instances.IsEmpty() ||
-                criteria.Instances!.Any(y => y.EqualsIgnoreCase(x.InstanceName)));
+        return configs
+            .GetConfigsOfType(criteria.Service)
+            .Where(x =>
+                criteria.Instances.IsEmpty()
+                || criteria.Instances!.Any(y => y.EqualsIgnoreCase(x.InstanceName))
+            );
     }
 
-    public static IEnumerable<string> GetSplitInstances(this IEnumerable<IServiceConfiguration> configs)
+    public static IEnumerable<string> GetSplitInstances(
+        this IEnumerable<IServiceConfiguration> configs
+    )
     {
         return configs
             .GroupBy(x => x.BaseUrl)
@@ -42,7 +49,8 @@ public static class ConfigExtensions
 
     public static IEnumerable<string> GetInvalidInstanceNames(
         this IEnumerable<IServiceConfiguration> configs,
-        ConfigFilterCriteria criteria)
+        ConfigFilterCriteria criteria
+    )
     {
         if (criteria.Instances is null || criteria.Instances.Count == 0)
         {
@@ -50,11 +58,14 @@ public static class ConfigExtensions
         }
 
         var configInstances = configs.Select(x => x.InstanceName).ToList();
-        return criteria.Instances
-            .Where(x => !configInstances.Contains(x, StringComparer.InvariantCultureIgnoreCase));
+        return criteria.Instances.Where(x =>
+            !configInstances.Contains(x, StringComparer.InvariantCultureIgnoreCase)
+        );
     }
 
-    public static IEnumerable<string> GetDuplicateInstanceNames(this IEnumerable<IServiceConfiguration> configs)
+    public static IEnumerable<string> GetDuplicateInstanceNames(
+        this IEnumerable<IServiceConfiguration> configs
+    )
     {
         return configs
             .GroupBy(x => x.InstanceName, StringComparer.InvariantCultureIgnoreCase)

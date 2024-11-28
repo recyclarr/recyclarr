@@ -4,8 +4,10 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Recyclarr.Yaml;
 
-public class YamlSerializerFactory(IObjectFactory objectFactory, IReadOnlyCollection<IYamlBehavior> behaviors)
-    : IYamlSerializerFactory
+public class YamlSerializerFactory(
+    IObjectFactory objectFactory,
+    IReadOnlyCollection<IYamlBehavior> behaviors
+) : IYamlSerializerFactory
 {
     public IDeserializer CreateDeserializer()
     {
@@ -40,9 +42,10 @@ public class YamlSerializerFactory(IObjectFactory objectFactory, IReadOnlyCollec
         builder
             .DisableAliases()
             .ConfigureDefaultValuesHandling(
-                DefaultValuesHandling.OmitEmptyCollections |
-                DefaultValuesHandling.OmitNull |
-                DefaultValuesHandling.OmitDefaults);
+                DefaultValuesHandling.OmitEmptyCollections
+                    | DefaultValuesHandling.OmitNull
+                    | DefaultValuesHandling.OmitDefaults
+            );
 
         return builder.Build();
     }

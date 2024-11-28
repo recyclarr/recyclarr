@@ -15,7 +15,8 @@ public class SecretsDeserializer(ISecretsProvider secrets) : INodeDeserializer
         Type expectedType,
         Func<IParser, Type, object?> nestedObjectDeserializer,
         out object? value,
-        ObjectDeserializer rootDeserializer)
+        ObjectDeserializer rootDeserializer
+    )
     {
         // Only process items flagged as Secrets
         if (expectedType != typeof(SecretTag))

@@ -8,7 +8,8 @@ public class NamingFormatLookup
     public string? ObtainFormat(
         IReadOnlyDictionary<string, string> guideFormats,
         string? configFormatKey,
-        string errorDescription)
+        string errorDescription
+    )
     {
         return ObtainFormat(guideFormats, configFormatKey, null, errorDescription);
     }
@@ -17,7 +18,8 @@ public class NamingFormatLookup
         IReadOnlyDictionary<string, string> guideFormats,
         string? configFormatKey,
         string? keySuffix,
-        string errorDescription)
+        string errorDescription
+    )
     {
         if (configFormatKey is null)
         {
@@ -28,7 +30,7 @@ public class NamingFormatLookup
         // dictionary. The MediaNamingGuideService converts all parsed guide JSON keys to lower case.
         var lowerKey = configFormatKey.ToLowerInvariant();
 
-        var keys = new List<string> {lowerKey};
+        var keys = new List<string> { lowerKey };
         if (keySuffix is not null)
         {
             // Put the more specific key first

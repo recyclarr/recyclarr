@@ -8,7 +8,8 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IFileInfo path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
         fs.AddFileFromEmbeddedResource(path.FullName, typeInAssembly, embeddedResourcePath);
     }
@@ -17,7 +18,8 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         string path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
         embeddedResourcePath = embeddedResourcePath.Replace("/", ".");
         var resourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath}";
@@ -28,7 +30,8 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IFileInfo path,
         Type typeInAssembly,
-        string resourceSubPath = "Data")
+        string resourceSubPath = "Data"
+    )
     {
         fs.AddFileFromEmbeddedResource(path, typeInAssembly, $"{resourceSubPath}.{path.Name}");
     }
@@ -37,9 +40,15 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IDirectoryInfo path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
-        embeddedResourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath.Replace("/", ".")}";
-        fs.AddFilesFromEmbeddedNamespace(path.FullName, typeInAssembly.Assembly, embeddedResourcePath);
+        embeddedResourcePath =
+            $"{typeInAssembly.Namespace}.{embeddedResourcePath.Replace("/", ".")}";
+        fs.AddFilesFromEmbeddedNamespace(
+            path.FullName,
+            typeInAssembly.Assembly,
+            embeddedResourcePath
+        );
     }
 }

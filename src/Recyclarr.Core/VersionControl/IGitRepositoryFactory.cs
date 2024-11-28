@@ -8,5 +8,6 @@ public interface IGitRepositoryFactory
         Uri repoUrl,
         IDirectoryInfo repoPath,
         string branch,
-        CancellationToken token);
+        CancellationToken token
+    );
 }

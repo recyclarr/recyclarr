@@ -87,11 +87,11 @@ public record RootConfigYaml
 
     // This exists for validation purposes only.
     [YamlIgnore]
-    public IEnumerable<RadarrConfigYaml> RadarrValues
-        => Radarr?.Select(x => x.Value) ?? Array.Empty<RadarrConfigYaml>();
+    public IEnumerable<RadarrConfigYaml> RadarrValues =>
+        Radarr?.Select(x => x.Value) ?? Array.Empty<RadarrConfigYaml>();
 
     // This exists for validation purposes only.
     [YamlIgnore]
-    public IEnumerable<SonarrConfigYaml> SonarrValues
-        => Sonarr?.Select(x => x.Value) ?? Array.Empty<SonarrConfigYaml>();
+    public IEnumerable<SonarrConfigYaml> SonarrValues =>
+        Sonarr?.Select(x => x.Value) ?? Array.Empty<SonarrConfigYaml>();
 }

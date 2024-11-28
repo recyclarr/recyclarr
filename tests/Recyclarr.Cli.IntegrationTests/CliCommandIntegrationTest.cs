@@ -17,7 +17,8 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
         await Mapper.DownloadFiles(
             "metadata.json",
             "docs/Radarr/Radarr-collection-of-custom-formats.md",
-            "docs/Sonarr/sonarr-collection-of-custom-formats.md");
+            "docs/Sonarr/sonarr-collection-of-custom-formats.md"
+        );
     }
 
     [SetUp]
@@ -33,9 +34,13 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
         Fs.AddFilesFromEmbeddedNamespace(
             repo.Path.SubDirectory("docs/json/radarr/cf"),
             typeof(CliCommandIntegrationTest),
-            "Data/radarr/cfs");
+            "Data/radarr/cfs"
+        );
 
-        var exitCode = await CliSetup.Run(Container, ["list", "custom-formats", "radarr", "--score-sets"]);
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["list", "custom-formats", "radarr", "--score-sets"]
+        );
 
         exitCode.Should().Be(0);
         Console.Output.Should().ContainAll("default", "sqp-1-1080p", "sqp-1-2160p");
@@ -48,9 +53,13 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
         Fs.AddFilesFromEmbeddedNamespace(
             repo.Path.SubDirectory("docs/json/sonarr/cf"),
             typeof(CliCommandIntegrationTest),
-            "Data/sonarr/cfs");
+            "Data/sonarr/cfs"
+        );
 
-        var exitCode = await CliSetup.Run(Container, ["list", "custom-formats", "sonarr", "--score-sets"]);
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["list", "custom-formats", "sonarr", "--score-sets"]
+        );
 
         exitCode.Should().Be(0);
         Console.Output.Should().ContainAll("default", "anime-sonarr", "french-multi");
@@ -70,7 +79,8 @@ internal class CliCommandIntegrationTest : CliIntegrationFixture
         Fs.AddFilesFromEmbeddedNamespace(
             repo.Path.SubDirectory("docs/json/sonarr/naming"),
             typeof(CliCommandIntegrationTest),
-            "Data/sonarr/naming");
+            "Data/sonarr/naming"
+        );
 
         var exitCode = await CliSetup.Run(Container, ["list", "naming", "sonarr"]);
 

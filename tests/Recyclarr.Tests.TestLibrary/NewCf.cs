@@ -11,7 +11,7 @@ public static class NewCf
             Id = id,
             Name = name,
             TrashId = trashId,
-            TrashScores = {["default"] = score}
+            TrashScores = { ["default"] = score },
         };
     }
 
@@ -19,14 +19,15 @@ public static class NewCf
         string name,
         string trashId,
         int id,
-        params (string ScoreSet, int Score)[] scores)
+        params (string ScoreSet, int Score)[] scores
+    )
     {
         return new CustomFormatData
         {
             Id = id,
             Name = name,
             TrashId = trashId,
-            TrashScores = scores.ToDictionary(x => x.ScoreSet, x => x.Score)
+            TrashScores = scores.ToDictionary(x => x.ScoreSet, x => x.Score),
         };
     }
 
@@ -36,7 +37,7 @@ public static class NewCf
         {
             Id = id,
             Name = name,
-            TrashId = trashId
+            TrashId = trashId,
         };
     }
 }

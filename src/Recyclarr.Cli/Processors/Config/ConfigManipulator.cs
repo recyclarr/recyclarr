@@ -15,12 +15,13 @@ public class ConfigManipulator(
     IAnsiConsole console,
     ConfigParser configParser,
     ConfigSaver configSaver,
-    ConfigValidationExecutor validator)
-    : IConfigManipulator
+    ConfigValidationExecutor validator
+) : IConfigManipulator
 {
     private static Dictionary<string, TConfig> InvokeCallbackForEach<TConfig>(
         Func<string, ServiceConfigYaml, ServiceConfigYaml> editCallback,
-        IReadOnlyDictionary<string, TConfig>? configs)
+        IReadOnlyDictionary<string, TConfig>? configs
+    )
         where TConfig : ServiceConfigYaml
     {
         var newConfigs = new Dictionary<string, TConfig>();
@@ -32,7 +33,7 @@ public class ConfigManipulator(
 
         foreach (var (instanceName, config) in configs)
         {
-            newConfigs[instanceName] = (TConfig) editCallback(instanceName, config);
+            newConfigs[instanceName] = (TConfig)editCallback(instanceName, config);
         }
 
         return newConfigs;
@@ -41,7 +42,8 @@ public class ConfigManipulator(
     public void LoadAndSave(
         IFileInfo source,
         IFileInfo destinationFile,
-        Func<string, ServiceConfigYaml, ServiceConfigYaml> editCallback)
+        Func<string, ServiceConfigYaml, ServiceConfigYaml> editCallback
+    )
     {
         // Parse & save the template file to address the following:
         // - Find & report any syntax errors
@@ -58,14 +60,15 @@ public class ConfigManipulator(
         config = new RootConfigYaml
         {
             Radarr = InvokeCallbackForEach(editCallback, config.Radarr),
-            Sonarr = InvokeCallbackForEach(editCallback, config.Sonarr)
+            Sonarr = InvokeCallbackForEach(editCallback, config.Sonarr),
         };
 
         if (!validator.Validate(config, YamlValidatorRuleSets.RootConfig))
         {
             console.WriteLine(
-                "The configuration file will still be created, despite the previous validation errors. " +
-                "You must open the file and correct the above issues before running a sync command.");
+                "The configuration file will still be created, despite the previous validation errors. "
+                    + "You must open the file and correct the above issues before running a sync command."
+            );
         }
 
         configSaver.Save(config, destinationFile);

@@ -15,12 +15,8 @@ public class MergeMediaNamingRadarrTest
             MediaNaming = new RadarrMediaNamingConfigYaml
             {
                 Folder = "folder1",
-                Movie = new RadarrMovieNamingConfigYaml
-                {
-                    Rename = false,
-                    Standard = "format1"
-                }
-            }
+                Movie = new RadarrMovieNamingConfigYaml { Rename = false, Standard = "format1" },
+            },
         };
 
         var rightConfig = new RadarrConfigYaml();
@@ -42,12 +38,8 @@ public class MergeMediaNamingRadarrTest
             MediaNaming = new RadarrMediaNamingConfigYaml
             {
                 Folder = "folder1",
-                Movie = new RadarrMovieNamingConfigYaml
-                {
-                    Rename = false,
-                    Standard = "format1"
-                }
-            }
+                Movie = new RadarrMovieNamingConfigYaml { Rename = false, Standard = "format1" },
+            },
         };
 
         var sut = new RadarrConfigMerger();
@@ -66,12 +58,8 @@ public class MergeMediaNamingRadarrTest
             MediaNaming = new RadarrMediaNamingConfigYaml
             {
                 Folder = "folder1",
-                Movie = new RadarrMovieNamingConfigYaml
-                {
-                    Rename = false,
-                    Standard = "format1"
-                }
-            }
+                Movie = new RadarrMovieNamingConfigYaml { Rename = false, Standard = "format1" },
+            },
         };
 
         var rightConfig = new RadarrConfigYaml
@@ -79,12 +67,8 @@ public class MergeMediaNamingRadarrTest
             MediaNaming = new RadarrMediaNamingConfigYaml
             {
                 Folder = "folder2",
-                Movie = new RadarrMovieNamingConfigYaml
-                {
-                    Rename = false,
-                    Standard = "format2"
-                }
-            }
+                Movie = new RadarrMovieNamingConfigYaml { Rename = false, Standard = "format2" },
+            },
         };
 
         var sut = new RadarrConfigMerger();

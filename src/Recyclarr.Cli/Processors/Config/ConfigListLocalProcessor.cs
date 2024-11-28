@@ -13,7 +13,8 @@ public class ConfigListLocalProcessor(
     IAnsiConsole console,
     IConfigurationFinder configFinder,
     IConfigurationLoader configLoader,
-    IAppPaths paths)
+    IAppPaths paths
+)
 {
     public void Process()
     {
@@ -55,7 +56,8 @@ public class ConfigListLocalProcessor(
     private static void BuildInstanceTree(
         List<IRenderable> rows,
         IReadOnlyCollection<IServiceConfiguration> registry,
-        SupportedServices service)
+        SupportedServices service
+    )
     {
         var configs = registry.GetConfigsOfType(service).ToList();
         if (configs.Count == 0)
@@ -64,8 +66,7 @@ public class ConfigListLocalProcessor(
         }
 
         var tree = new Tree(Markup.FromInterpolated($"[red]{service}[/]"));
-        tree.AddNodes(configs.Select(c =>
-            Markup.FromInterpolated($"[blue]{c.InstanceName}[/]")));
+        tree.AddNodes(configs.Select(c => Markup.FromInterpolated($"[blue]{c.InstanceName}[/]")));
 
         rows.Add(tree);
     }

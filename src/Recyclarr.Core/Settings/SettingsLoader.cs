@@ -18,13 +18,16 @@ public class SettingsLoader(IAppPaths paths, IYamlSerializerFactory serializerFa
         {
             using var stream = yamlPath.OpenText();
             var deserializer = serializerFactory.CreateDeserializer();
-            var settings = deserializer.Deserialize<RecyclarrSettings?>(stream.ReadToEnd()) ?? new RecyclarrSettings();
+            var settings =
+                deserializer.Deserialize<RecyclarrSettings?>(stream.ReadToEnd())
+                ?? new RecyclarrSettings();
             ValidateSettings(settings);
             return settings;
         }
         catch (YamlException e)
         {
-            e.Data["ContextualMessage"] = SettingsContextualMessages.GetContextualErrorFromException(e);
+            e.Data["ContextualMessage"] =
+                SettingsContextualMessages.GetContextualErrorFromException(e);
             throw;
         }
     }
@@ -44,8 +47,7 @@ public class SettingsLoader(IAppPaths paths, IYamlSerializerFactory serializerFa
 
     private IFileInfo CreateDefaultSettingsFile()
     {
-        const string fileData =
-            """
+        const string fileData = """
             # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
 
             # Edit this file to customize the behavior of Recyclarr beyond its defaults

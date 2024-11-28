@@ -10,8 +10,8 @@ namespace Recyclarr.Notifications.Apprise;
 public sealed class AppriseRequestBuilder(
     IFlurlClientCache clientCache,
     ISettings<NotificationSettings> notificationSettings,
-    IEnumerable<FlurlSpecificEventHandler> eventHandlers)
-    : IAppriseRequestBuilder
+    IEnumerable<FlurlSpecificEventHandler> eventHandlers
+) : IAppriseRequestBuilder
 {
     public IFlurlRequest Request(params object[] path)
     {
@@ -34,16 +34,15 @@ public sealed class AppriseRequestBuilder(
 
         builder.WithSettings(settings =>
         {
-            settings.JsonSerializer = new DefaultJsonSerializer(new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = false,
-                Converters =
+            settings.JsonSerializer = new DefaultJsonSerializer(
+                new JsonSerializerOptions
                 {
-                    new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower)
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = false,
+                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
                 }
-            });
+            );
         });
     }
 }

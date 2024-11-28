@@ -12,8 +12,8 @@ public class ConfigurationLoader(
     ConfigParser parser,
     IMapper mapper,
     ConfigValidationExecutor validator,
-    IOrderedEnumerable<IConfigPostProcessor> postProcessors)
-    : IConfigurationLoader
+    IOrderedEnumerable<IConfigPostProcessor> postProcessors
+) : IConfigurationLoader
 {
     public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
     {
@@ -38,7 +38,10 @@ public class ConfigurationLoader(
             return Array.Empty<IServiceConfiguration>();
         }
 
-        config = postProcessors.Aggregate(config, (current, processor) => processor.Process(current));
+        config = postProcessors.Aggregate(
+            config,
+            (current, processor) => processor.Process(current)
+        );
 
         if (config.IsConfigEmpty())
         {
@@ -57,7 +60,8 @@ public class ConfigurationLoader(
     }
 
     private IEnumerable<IServiceConfiguration> MapConfigs<TConfigYaml, TServiceConfig>(
-        IReadOnlyDictionary<string, TConfigYaml>? configs)
+        IReadOnlyDictionary<string, TConfigYaml>? configs
+    )
         where TServiceConfig : ServiceConfiguration
         where TConfigYaml : ServiceConfigYaml
     {
@@ -66,6 +70,11 @@ public class ConfigurationLoader(
             return Array.Empty<IServiceConfiguration>();
         }
 
-        return configs.Select(x => mapper.Map<TServiceConfig>(x.Value) with {InstanceName = x.Key});
+        return configs.Select(x =>
+            mapper.Map<TServiceConfig>(x.Value) with
+            {
+                InstanceName = x.Key,
+            }
+        );
     }
 }

@@ -16,7 +16,9 @@ public class FlurlExceptionSanitizingEnricher : ILogEventEnricher
 
         if (!string.IsNullOrWhiteSpace(sanitizedMessage))
         {
-            logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty("SanitizedExceptionMessage", sanitizedMessage));
+            logEvent.AddOrUpdateProperty(
+                propertyFactory.CreateProperty("SanitizedExceptionMessage", sanitizedMessage)
+            );
         }
     }
 }

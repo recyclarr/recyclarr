@@ -7,20 +7,20 @@ public class CollectionJsonConverter : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {
-        return !IsExcludedType(typeToConvert) &&
-            typeToConvert.IsGenericType &&
-            IsAssignableToGenericType(typeToConvert, typeof(IEnumerable<>));
+        return !IsExcludedType(typeToConvert)
+            && typeToConvert.IsGenericType
+            && IsAssignableToGenericType(typeToConvert, typeof(IEnumerable<>));
     }
 
     private static bool IsExcludedType(Type type)
     {
-        return type.IsPrimitive ||
-            type == typeof(string);
+        return type.IsPrimitive || type == typeof(string);
     }
 
     private static bool IsAssignableToGenericType(Type givenType, Type genericType)
     {
-        var interfaceTypes = givenType.GetInterfaces()
+        var interfaceTypes = givenType
+            .GetInterfaces()
             .Where(x => x.IsGenericType)
             .Select(x => x.GetGenericTypeDefinition());
 
@@ -48,6 +48,6 @@ public class CollectionJsonConverter : JsonConverterFactory
             throw new JsonException();
         }
 
-        return (JsonConverter) instance;
+        return (JsonConverter)instance;
     }
 }

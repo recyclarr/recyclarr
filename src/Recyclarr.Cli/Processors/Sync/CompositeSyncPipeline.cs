@@ -10,7 +10,8 @@ public class CompositeSyncPipeline(
     IOrderedEnumerable<ISyncPipeline> pipelines,
     IEnumerable<IPipelineCache> caches,
     ServiceAgnosticCapabilityEnforcer enforcer,
-    IServiceConfiguration config) : ISyncPipeline
+    IServiceConfiguration config
+) : ISyncPipeline
 {
     public virtual async Task Execute(ISyncSettings settings, CancellationToken ct)
     {

@@ -6,26 +6,30 @@ using Recyclarr.Config.Parsing.ErrorHandling;
 
 namespace Recyclarr.Config;
 
-public class ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFinder finder, IFileSystem fs)
-    : IConfigurationRegistry
+public class ConfigurationRegistry(
+    IConfigurationLoader loader,
+    IConfigurationFinder finder,
+    IFileSystem fs
+) : IConfigurationRegistry
 {
-    public IReadOnlyCollection<IServiceConfiguration> FindAndLoadConfigs(ConfigFilterCriteria? filterCriteria = null)
+    public IReadOnlyCollection<IServiceConfiguration> FindAndLoadConfigs(
+        ConfigFilterCriteria? filterCriteria = null
+    )
     {
         filterCriteria ??= new ConfigFilterCriteria();
 
         var manualConfigs = filterCriteria.ManualConfigFiles;
-        var configs = manualConfigs is not null && manualConfigs.Count != 0
-            ? PrepareManualConfigs(manualConfigs)
-            : finder.GetConfigFiles();
+        var configs =
+            manualConfigs is not null && manualConfigs.Count != 0
+                ? PrepareManualConfigs(manualConfigs)
+                : finder.GetConfigFiles();
 
         return LoadAndFilterConfigs(configs, filterCriteria).ToList();
     }
 
     private List<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
     {
-        var configFiles = manualConfigs
-            .Select(x => fs.FileInfo.New(x))
-            .ToLookup(x => x.Exists);
+        var configFiles = manualConfigs.Select(x => fs.FileInfo.New(x)).ToLookup(x => x.Exists);
 
         if (configFiles[false].Any())
         {
@@ -37,7 +41,8 @@ public class ConfigurationRegistry(IConfigurationLoader loader, IConfigurationFi
 
     private IEnumerable<IServiceConfiguration> LoadAndFilterConfigs(
         IEnumerable<IFileInfo> configs,
-        ConfigFilterCriteria filterCriteria)
+        ConfigFilterCriteria filterCriteria
+    )
     {
         var loadedConfigs = configs.SelectMany(x => loader.Load(x)).ToList();
 

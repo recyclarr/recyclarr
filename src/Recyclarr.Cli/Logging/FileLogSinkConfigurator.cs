@@ -15,12 +15,13 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
         var template = BuildExpressionTemplate();
 
         config
-            .WriteTo.Logger(c => c
-                .MinimumLevel.Debug()
-                .WriteTo.File(template, LogFilePath("debug")))
-            .WriteTo.Logger(c => c
-                .Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
-                .WriteTo.File(template, LogFilePath("verbose")));
+            .WriteTo.Logger(c =>
+                c.MinimumLevel.Debug().WriteTo.File(template, LogFilePath("debug"))
+            )
+            .WriteTo.Logger(c =>
+                c.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
+                    .WriteTo.File(template, LogFilePath("verbose"))
+            );
 
         return;
 
@@ -32,8 +33,8 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
 
     private static ExpressionTemplate BuildExpressionTemplate()
     {
-        var template = "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate +
-            "{Inspect(@x).StackTrace}";
+        var template =
+            "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate + "{Inspect(@x).StackTrace}";
 
         return new ExpressionTemplate(template);
     }

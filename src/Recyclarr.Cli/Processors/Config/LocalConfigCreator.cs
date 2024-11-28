@@ -6,8 +6,12 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class LocalConfigCreator(ILogger log, IAppPaths paths, IFileSystem fs, IResourceDataReader resources)
-    : IConfigCreator
+public class LocalConfigCreator(
+    ILogger log,
+    IAppPaths paths,
+    IFileSystem fs,
+    IResourceDataReader resources
+) : IConfigCreator
 {
     public bool CanHandle(ICreateConfigSettings settings)
     {

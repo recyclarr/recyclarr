@@ -6,8 +6,11 @@ namespace Recyclarr.Tests.Common.Extensions;
 [TestFixture]
 public class DictionaryExtensionsTest
 {
-    [SuppressMessage("SonarLint", "S2094:Classes should not be empty",
-        Justification = "This is for test code only")]
+    [SuppressMessage(
+        "SonarLint",
+        "S2094:Classes should not be empty",
+        Justification = "This is for test code only"
+    )]
     private sealed class MySampleValue;
 
     [Test]
@@ -23,7 +26,7 @@ public class DictionaryExtensionsTest
     public void Return_default_if_no_item_exists()
     {
         var sample = new MySampleValue();
-        var dict = new Dictionary<int, MySampleValue> {{100, sample}};
+        var dict = new Dictionary<int, MySampleValue> { { 100, sample } };
 
         var theValue = dict.GetValueOrDefault(200);
 
@@ -35,7 +38,7 @@ public class DictionaryExtensionsTest
     public void Return_existing_item_if_exists_not_create()
     {
         var sample = new MySampleValue();
-        var dict = new Dictionary<int, MySampleValue> {{100, sample}};
+        var dict = new Dictionary<int, MySampleValue> { { 100, sample } };
 
         var theValue = dict.GetOrCreate(100);
         dict.Should().ContainSingle();
@@ -48,7 +51,7 @@ public class DictionaryExtensionsTest
     public void Return_existing_item_if_it_exists_not_default()
     {
         var sample = new MySampleValue();
-        var dict = new Dictionary<int, MySampleValue> {{100, sample}};
+        var dict = new Dictionary<int, MySampleValue> { { 100, sample } };
 
         var theValue = dict.GetValueOrDefault(100);
 

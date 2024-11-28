@@ -6,7 +6,8 @@ namespace Recyclarr.Compatibility;
 
 public class ServiceAgnosticCapabilityEnforcer(
     SonarrCapabilityEnforcer sonarrEnforcer,
-    RadarrCapabilityEnforcer radarrEnforcer)
+    RadarrCapabilityEnforcer radarrEnforcer
+)
 {
     public async Task Check(IServiceConfiguration config, CancellationToken ct)
     {

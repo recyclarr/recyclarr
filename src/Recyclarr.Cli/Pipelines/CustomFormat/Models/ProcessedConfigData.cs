@@ -5,9 +5,6 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
 public class ProcessedConfigData
 {
-    public ICollection<CustomFormatData> CustomFormats { get; init; }
-        = new List<CustomFormatData>();
-
-    public ICollection<AssignScoresToConfig> QualityProfiles { get; init; }
-        = new List<AssignScoresToConfig>();
+    public ICollection<CustomFormatData> CustomFormats { get; init; } = [];
+    public ICollection<AssignScoresToConfig> QualityProfiles { get; init; } = [];
 }

@@ -7,7 +7,8 @@ namespace Recyclarr.Cli.Processors.ErrorHandling;
 
 public sealed class ErrorResponseParser(ILogger log, string responseBody)
 {
-    private readonly Func<Stream> _streamFactory = () => new MemoryStream(Encoding.UTF8.GetBytes(responseBody));
+    private readonly Func<Stream> _streamFactory = () =>
+        new MemoryStream(Encoding.UTF8.GetBytes(responseBody));
     private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Services;
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
@@ -74,7 +75,11 @@ public sealed class ErrorResponseParser(ILogger log, string responseBody)
 
             log.Error("Error message from remote service: {Message:l}", value.Title);
 
-            foreach (var (topic, msg) in value.Errors.SelectMany(x => x.Value.Select(y => (x.Key, Msg: y))))
+            foreach (
+                var (topic, msg) in value.Errors.SelectMany(x =>
+                    x.Value.Select(y => (x.Key, Msg: y))
+                )
+            )
             {
                 log.Error("{Topic:l}: {Message:l}", topic, msg);
             }

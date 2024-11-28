@@ -6,9 +6,11 @@ internal static class SettingsExtensions
 {
     public static void RegisterSettings<TSettings>(
         this ContainerBuilder builder,
-        Func<RecyclarrSettings, TSettings> settingsSelector)
+        Func<RecyclarrSettings, TSettings> settingsSelector
+    )
     {
-        builder.Register(c =>
+        builder
+            .Register(c =>
             {
                 var provider = c.Resolve<SettingsProvider>();
                 var settings = settingsSelector(provider.Settings);

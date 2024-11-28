@@ -13,7 +13,7 @@ public class ConfigurationFinder(IAppPaths paths) : IConfigurationFinder
 
         if (paths.ConfigsDirectory.Exists)
         {
-            var extensions = new[] {"*.yml", "*.yaml"};
+            var extensions = new[] { "*.yml", "*.yaml" };
             var files = extensions.SelectMany(x => paths.ConfigsDirectory.EnumerateFiles(x));
             configs.AddRange(files);
         }

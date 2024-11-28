@@ -9,8 +9,7 @@ internal class ServiceCompatibilityIntegrationTest : CliIntegrationFixture
     [Test]
     public void Load_settings_yml_correctly_when_file_exists()
     {
-        const string yamlData =
-            """
+        const string yamlData = """
             repositories:
               trash_guides:
                 clone_url: http://the_url.com

@@ -6,8 +6,7 @@ namespace Recyclarr.Tests.Repo;
 [TestFixture]
 public class TrashRepoMetadataBuilderTest
 {
-    private const string MetadataJson =
-        """
+    private const string MetadataJson = """
         {
           "$schema": "metadata.schema.json",
           "json_paths": {
@@ -32,7 +31,8 @@ public class TrashRepoMetadataBuilderTest
     public void Naming_is_parsed(
         [Frozen] ITrashGuidesRepo repo,
         MockFileSystem fs,
-        TrashRepoMetadataBuilder sut)
+        TrashRepoMetadataBuilder sut
+    )
     {
         fs.AddFile(repo.Path.File("metadata.json"), new MockFileData(MetadataJson));
 

@@ -33,7 +33,8 @@ public static class FileSystemExtensions
         this IFileSystem fs,
         IDirectoryInfo targetDir,
         IDirectoryInfo destDir,
-        IAnsiConsole? console = null)
+        IAnsiConsole? console = null
+    )
     {
         var directories = targetDir
             .EnumerateDirectories("*", SearchOption.AllDirectories)
@@ -76,11 +77,12 @@ public static class FileSystemExtensions
 
     public static IFileInfo? YamlFile(this IDirectoryInfo dir, string yamlFilenameNoExtension)
     {
-        var supportedFiles = new[] {$"{yamlFilenameNoExtension}.yml", $"{yamlFilenameNoExtension}.yaml"};
-        var configs = supportedFiles
-            .Select(dir.File)
-            .Where(x => x.Exists)
-            .ToList();
+        var supportedFiles = new[]
+        {
+            $"{yamlFilenameNoExtension}.yml",
+            $"{yamlFilenameNoExtension}.yaml",
+        };
+        var configs = supportedFiles.Select(dir.File).Where(x => x.Exists).ToList();
 
         if (configs.Count > 1)
         {

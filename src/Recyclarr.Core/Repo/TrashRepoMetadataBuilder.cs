@@ -19,7 +19,10 @@ public class TrashRepoMetadataBuilder : IRepoMetadataBuilder
     {
         using var stream = jsonFile.OpenRead();
 
-        var obj = JsonSerializer.Deserialize<RepoMetadata>(stream, GlobalJsonSerializerSettings.Guide);
+        var obj = JsonSerializer.Deserialize<RepoMetadata>(
+            stream,
+            GlobalJsonSerializerSettings.Guide
+        );
         if (obj is null)
         {
             throw new InvalidDataException($"Unable to deserialize {jsonFile}");

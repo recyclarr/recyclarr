@@ -26,6 +26,7 @@ public record RadarrMediaNamingDto : MediaNamingDto
         init => DtoUtil.SetIfNotNull(ref _renameMovies, value);
     }
 
-    [UsedImplicitly] [JsonExtensionData]
+    [UsedImplicitly]
+    [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
 }

@@ -4,5 +4,5 @@ public enum AppriseMessageFormat
 {
     Text,
     Markdown,
-    Html
+    Html,
 }

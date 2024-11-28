@@ -6,12 +6,17 @@ using Recyclarr.Config.Models;
 namespace Recyclarr.Tests.Cache;
 
 [TestFixture]
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Local",
-    Justification = "POCO objects for testing")]
-[SuppressMessage("Performance", "CA1812: Avoid uninstantiated internal classes",
-    Justification = "For testing only")]
-[SuppressMessage("SonarLint", "S2094", Justification =
-    "Used for unit test scenario")]
+[SuppressMessage(
+    "ReSharper",
+    "ClassNeverInstantiated.Local",
+    Justification = "POCO objects for testing"
+)]
+[SuppressMessage(
+    "Performance",
+    "CA1812: Avoid uninstantiated internal classes",
+    Justification = "For testing only"
+)]
+[SuppressMessage("SonarLint", "S2094", Justification = "Used for unit test scenario")]
 public class CacheStoragePathTest
 {
     private const string ValidObjectName = "azAZ_09";
@@ -29,11 +34,13 @@ public class CacheStoragePathTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        fixture.Inject<IServiceConfiguration>(new SonarrConfiguration
-        {
-            BaseUrl = new Uri("http://something/foo/bar"),
-            InstanceName = "thename"
-        });
+        fixture.Inject<IServiceConfiguration>(
+            new SonarrConfiguration
+            {
+                BaseUrl = new Uri("http://something/foo/bar"),
+                InstanceName = "thename",
+            }
+        );
 
         var sut = fixture.Create<CacheStoragePath>();
         var result = sut.CalculatePath<ObjectWithAttribute>();
@@ -62,8 +69,6 @@ public class CacheStoragePathTest
 
         Action act = () => sut.CalculatePath<ObjectWithoutAttribute>();
 
-        act.Should()
-            .Throw<ArgumentException>()
-            .WithMessage("CacheObjectNameAttribute is missing*");
+        act.Should().Throw<ArgumentException>().WithMessage("CacheObjectNameAttribute is missing*");
     }
 }

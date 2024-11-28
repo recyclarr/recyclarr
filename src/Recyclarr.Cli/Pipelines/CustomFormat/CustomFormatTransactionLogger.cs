@@ -11,10 +11,13 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
             log.Warning(
-                "Custom Format with name {Name} (Trash ID: {TrashId}) will be skipped because another " +
-                "CF already exists with that name (ID: {ConflictId}). To fix the conflict, delete or " +
-                "rename the CF with the mentioned name",
-                guideCf.Name, guideCf.TrashId, conflictingId);
+                "Custom Format with name {Name} (Trash ID: {TrashId}) will be skipped because another "
+                    + "CF already exists with that name (ID: {ConflictId}). To fix the conflict, delete or "
+                    + "rename the CF with the mentioned name",
+                guideCf.Name,
+                guideCf.TrashId,
+                conflictingId
+            );
         }
 
         var created = transactions.NewCustomFormats;
@@ -43,8 +46,10 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
         if (skipped.Count > 0)
         {
             log.Information("Skipped {Count} Custom Formats that did not change", skipped.Count);
-            log.Debug("Custom Formats Skipped: {CustomFormats}",
-                skipped.ToDictionary(k => k.TrashId, v => v.Name));
+            log.Debug(
+                "Custom Formats Skipped: {CustomFormats}",
+                skipped.ToDictionary(k => k.TrashId, v => v.Name)
+            );
 
             // Do not print skipped CFs to console; they are too verbose
         }
@@ -56,7 +61,11 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
 
             foreach (var mapping in deleted)
             {
-                log.Debug("> Deleted: {TrashId} ({CustomFormatName})", mapping.TrashId, mapping.CustomFormatName);
+                log.Debug(
+                    "> Deleted: {TrashId} ({CustomFormatName})",
+                    mapping.TrashId,
+                    mapping.CustomFormatName
+                );
             }
         }
 

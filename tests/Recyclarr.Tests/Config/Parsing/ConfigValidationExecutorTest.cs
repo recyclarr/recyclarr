@@ -12,11 +12,14 @@ public class ConfigValidationExecutorTest
     [Test, AutoMockData]
     public void Return_false_on_validation_failure(
         [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut)
+        ConfigValidationExecutor sut
+    )
     {
-        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult([
-            new ValidationFailure("property", "message")
-        ]));
+        validationService
+            .Validate(default!)
+            .ReturnsForAnyArgs(
+                new ValidationResult([new ValidationFailure("property", "message")])
+            );
 
         var result = sut.Validate(NewConfig.Radarr());
 
@@ -26,11 +29,16 @@ public class ConfigValidationExecutorTest
     [Test, AutoMockData]
     public void Return_true_when_severity_is_warning(
         [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut)
+        ConfigValidationExecutor sut
+    )
     {
-        validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult([
-            new ValidationFailure("property", "message") {Severity = Severity.Warning}
-        ]));
+        validationService
+            .Validate(default!)
+            .ReturnsForAnyArgs(
+                new ValidationResult(
+                    [new ValidationFailure("property", "message") { Severity = Severity.Warning }]
+                )
+            );
 
         var result = sut.Validate(NewConfig.Radarr());
 
@@ -40,7 +48,8 @@ public class ConfigValidationExecutorTest
     [Test, AutoMockData]
     public void Valid_returns_true(
         [Frozen] IRuntimeValidationService validationService,
-        ConfigValidationExecutor sut)
+        ConfigValidationExecutor sut
+    )
     {
         validationService.Validate(default!).ReturnsForAnyArgs(new ValidationResult());
 

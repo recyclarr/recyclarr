@@ -5,13 +5,17 @@ using CliWrap;
 
 namespace Recyclarr.VersionControl;
 
-[SuppressMessage("Design", "CA1068:CancellationToken parameters must come last", Justification =
-    "Doesn't mix well with `params` (which has to be at the end)")]
-public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir) : IGitRepository
+[SuppressMessage(
+    "Design",
+    "CA1068:CancellationToken parameters must come last",
+    Justification = "Doesn't mix well with `params` (which has to be at the end)"
+)]
+public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir)
+    : IGitRepository
 {
     private Task RunGitCmd(CancellationToken token, params string[] args)
     {
-        return RunGitCmd(token, (ICollection<string>) args);
+        return RunGitCmd(token, (ICollection<string>)args);
     }
 
     private async Task RunGitCmd(CancellationToken token, ICollection<string> args)
@@ -71,9 +75,14 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         await RunGitCmd(token, "remote", "set-url", name, newUrl.ToString());
     }
 
-    public async Task Clone(CancellationToken token, Uri cloneUrl, string? branch = null, int depth = 0)
+    public async Task Clone(
+        CancellationToken token,
+        Uri cloneUrl,
+        string? branch = null,
+        int depth = 0
+    )
     {
-        var args = new List<string> {"clone"};
+        var args = new List<string> { "clone" };
         if (branch is not null)
         {
             args.AddRange(["-b", branch]);

@@ -11,8 +11,7 @@ public sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
 
     public EnumDescriptionAttribute(string description)
     {
-        var enumNames = Enum.GetNames(typeof(TEnum))
-            .Select(x => x.ToLowerInvariant());
+        var enumNames = Enum.GetNames(typeof(TEnum)).Select(x => x.ToLowerInvariant());
 
         var str = new StringBuilder(description.Trim());
         str.Append($" (Valid Values: {string.Join(", ", enumNames)})");

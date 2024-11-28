@@ -62,9 +62,8 @@ public static class CompositionRoot
         // Delete
         builder.RegisterType<DeleteCustomFormatsProcessor>().As<IDeleteCustomFormatsProcessor>();
 
-        builder.RegisterTypes(
-                typeof(TemplateConfigCreator),
-                typeof(LocalConfigCreator))
+        builder
+            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
             .As<IConfigCreator>()
             .OrderByRegistration();
     }
@@ -74,9 +73,8 @@ public static class CompositionRoot
         builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
 
         // Migration Steps
-        builder.RegisterTypes(
-                typeof(MoveOsxAppDataDotnet8),
-                typeof(DeleteRepoDirMigrationStep))
+        builder
+            .RegisterTypes(typeof(MoveOsxAppDataDotnet8), typeof(DeleteRepoDirMigrationStep))
             .As<IMigrationStep>()
             .OrderByRegistration();
     }
@@ -101,15 +99,18 @@ public static class CompositionRoot
         builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();
 
         builder.RegisterComposite<CompositeGlobalSetupTask, IGlobalSetupTask>();
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(AppDataDirSetupTask), // This must be first; ILogger creation depends on IAppPaths
                 typeof(LoggerSetupTask),
                 typeof(ProgramInformationDisplayTask),
-                typeof(JanitorCleanupTask))
+                typeof(JanitorCleanupTask)
+            )
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
-        builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+        builder
+            .RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<CommandSettings>();
     }
 }

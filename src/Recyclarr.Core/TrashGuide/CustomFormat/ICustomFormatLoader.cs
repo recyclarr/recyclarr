@@ -6,5 +6,6 @@ public interface ICustomFormatLoader
 {
     ICollection<CustomFormatData> LoadAllCustomFormatsAtPaths(
         IEnumerable<IDirectoryInfo> jsonPaths,
-        IFileInfo collectionOfCustomFormats);
+        IFileInfo collectionOfCustomFormats
+    );
 }

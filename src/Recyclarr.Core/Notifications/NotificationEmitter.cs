@@ -18,14 +18,14 @@ public class NotificationEmitter(IVerbosityStrategy verbosity)
         }
     }
 
-    public void SendStatistic<T>(string description, T stat) where T : notnull
+    public void SendStatistic<T>(string description, T stat)
+        where T : notnull
     {
         if (verbosity.ShouldSendInformation())
         {
-            _notifications.OnNext(new InformationEvent(description)
-            {
-                Statistic = stat.ToString() ?? "!STAT ERROR!"
-            });
+            _notifications.OnNext(
+                new InformationEvent(description) { Statistic = stat.ToString() ?? "!STAT ERROR!" }
+            );
         }
     }
 
