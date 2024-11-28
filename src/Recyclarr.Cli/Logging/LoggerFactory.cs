@@ -8,9 +8,11 @@ namespace Recyclarr.Cli.Logging;
 
 public class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
 {
-    public ILogger Logger { get; private set; } = LogSetup.BaseConfiguration()
-        .WriteTo.Console(BuildExpressionTemplate(env), levelSwitch: levelSwitch)
-        .CreateLogger();
+    public ILogger Logger { get; private set; } =
+        LogSetup
+            .BaseConfiguration()
+            .WriteTo.Console(BuildExpressionTemplate(env), levelSwitch: levelSwitch)
+            .CreateLogger();
 
     private static ExpressionTemplate BuildExpressionTemplate(IEnvironment env)
     {
@@ -22,8 +24,7 @@ public class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
 
     public void AddLogConfiguration(IEnumerable<ILogConfigurator> configurators)
     {
-        var config = LogSetup.BaseConfiguration()
-            .WriteTo.Logger(Logger);
+        var config = LogSetup.BaseConfiguration().WriteTo.Logger(Logger);
 
         foreach (var configurator in configurators)
         {

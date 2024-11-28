@@ -12,15 +12,18 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            Upgrade = new QualityProfileFormatUpgradeYaml()
+            Upgrade = new QualityProfileFormatUpgradeYaml(),
         };
 
         var validator = new QualityProfileFormatUpgradeYamlValidator(data);
         var result = validator.TestValidate(data.Upgrade);
 
-        result.ShouldHaveValidationErrorFor(x => x.Allowed).WithErrorMessage(
-            $"For profile {data.Name}, 'allowed' under 'upgrade' is required. " +
-            $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block.");
+        result
+            .ShouldHaveValidationErrorFor(x => x.Allowed)
+            .WithErrorMessage(
+                $"For profile {data.Name}, 'allowed' under 'upgrade' is required. "
+                    + $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block."
+            );
     }
 
     [Test]
@@ -29,19 +32,19 @@ public class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "My QP",
-            Upgrade = new QualityProfileFormatUpgradeYaml
-            {
-                Allowed = true
-            },
-            Qualities = new List<QualityProfileQualityConfigYaml>()
+            Upgrade = new QualityProfileFormatUpgradeYaml { Allowed = true },
+            Qualities = new List<QualityProfileQualityConfigYaml>(),
         };
 
         var validator = new QualityProfileFormatUpgradeYamlValidator(data);
         var result = validator.TestValidate(data.Upgrade);
 
-        result.ShouldHaveValidationErrorFor(x => x.UntilQuality).WithErrorMessage(
-            $"For profile {data.Name}, 'until_quality' is required when 'allowed' is set to 'true' and " +
-            $"an explicit 'qualities' list is provided.");
+        result
+            .ShouldHaveValidationErrorFor(x => x.UntilQuality)
+            .WithErrorMessage(
+                $"For profile {data.Name}, 'until_quality' is required when 'allowed' is set to 'true' and "
+                    + $"an explicit 'qualities' list is provided."
+            );
     }
 
     [Test]
@@ -64,12 +67,9 @@ public class ConfigYamlDataObjectsValidationTest
             Upgrade = new QualityProfileFormatUpgradeYaml
             {
                 Allowed = true,
-                UntilQuality = "Test Quality"
+                UntilQuality = "Test Quality",
             },
-            Qualities =
-            [
-                new QualityProfileQualityConfigYaml {Name = "Another Quality"}
-            ]
+            Qualities = [new QualityProfileQualityConfigYaml { Name = "Another Quality" }],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -77,9 +77,13 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
-            $"which is '{data.Upgrade!.UntilQuality}'");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, 'qualities' must contain the quality mentioned in 'until_quality', "
+                    + $"which is '{data.Upgrade!.UntilQuality}'"
+            );
     }
 
     [Test]
@@ -90,27 +94,27 @@ public class ConfigYamlDataObjectsValidationTest
             Name = "My QP",
             Qualities =
             [
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality 2"},
-                new QualityProfileQualityConfigYaml {Name = "Dupe Quality 3"},
+                new QualityProfileQualityConfigYaml { Name = "Dupe Quality" },
+                new QualityProfileQualityConfigYaml { Name = "Dupe Quality" },
+                new QualityProfileQualityConfigYaml { Name = "Dupe Quality" },
+                new QualityProfileQualityConfigYaml { Name = "Dupe Quality 2" },
+                new QualityProfileQualityConfigYaml { Name = "Dupe Quality 3" },
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 2",
-                    Qualities = ["Dupe Quality 3"]
+                    Qualities = ["Dupe Quality 3"],
                 },
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 4",
-                    Qualities = ["Dupe Quality 5"]
+                    Qualities = ["Dupe Quality 5"],
                 },
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Dupe Quality 4",
-                    Qualities = ["Dupe Quality 5"]
-                }
-            ]
+                    Qualities = ["Dupe Quality 5"],
+                },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -118,11 +122,15 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality'",
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 3'",
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality group 'Dupe Quality 4'",
-            $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 5'");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality'",
+                $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 3'",
+                $"For profile {data.Name}, 'qualities' contains duplicates for quality group 'Dupe Quality 4'",
+                $"For profile {data.Name}, 'qualities' contains duplicates for quality 'Dupe Quality 5'"
+            );
     }
 
     [Test]
@@ -133,9 +141,9 @@ public class ConfigYamlDataObjectsValidationTest
             Name = "My QP",
             Qualities =
             [
-                new QualityProfileQualityConfigYaml {Name = "Quality 1", Enabled = false},
-                new QualityProfileQualityConfigYaml {Name = "Quality 2", Enabled = false}
-            ]
+                new QualityProfileQualityConfigYaml { Name = "Quality 1", Enabled = false },
+                new QualityProfileQualityConfigYaml { Name = "Quality 2", Enabled = false },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -143,8 +151,12 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, at least one explicitly listed quality under 'qualities' must be enabled.");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, at least one explicitly listed quality under 'qualities' must be enabled."
+            );
     }
 
     [Test]
@@ -156,13 +168,13 @@ public class ConfigYamlDataObjectsValidationTest
             Upgrade = new QualityProfileFormatUpgradeYaml
             {
                 Allowed = true,
-                UntilQuality = "Disabled Quality"
+                UntilQuality = "Disabled Quality",
             },
             Qualities =
             [
-                new QualityProfileQualityConfigYaml {Name = "Enabled Quality"},
-                new QualityProfileQualityConfigYaml {Name = "Disabled Quality", Enabled = false}
-            ]
+                new QualityProfileQualityConfigYaml { Name = "Enabled Quality" },
+                new QualityProfileQualityConfigYaml { Name = "Disabled Quality", Enabled = false },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -170,8 +182,12 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'until_quality' must not refer to explicitly disabled qualities");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, 'until_quality' must not refer to explicitly disabled qualities"
+            );
     }
 
     [Test]
@@ -185,9 +201,9 @@ public class ConfigYamlDataObjectsValidationTest
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Group",
-                    Qualities = Array.Empty<string>()
-                }
-            ]
+                    Qualities = Array.Empty<string>(),
+                },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -195,8 +211,12 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities"
+            );
     }
 
     [Test]
@@ -207,15 +227,8 @@ public class ConfigYamlDataObjectsValidationTest
             Name = "Profile",
             Qualities =
             [
-                new QualityProfileQualityConfigYaml
-                {
-                    Name = "Group",
-                    Qualities =
-                    [
-                        "One Quality"
-                    ]
-                }
-            ]
+                new QualityProfileQualityConfigYaml { Name = "Group", Qualities = ["One Quality"] },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();
@@ -223,8 +236,12 @@ public class ConfigYamlDataObjectsValidationTest
 
         result.ShouldHaveValidationErrorFor(x => x.Qualities);
 
-        result.Errors.Select(x => x.ErrorMessage).Should().BeEquivalentTo(
-            $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities");
+        result
+            .Errors.Select(x => x.ErrorMessage)
+            .Should()
+            .BeEquivalentTo(
+                $"For profile {data.Name}, 'qualities' contains 1 groups with less than 2 qualities"
+            );
     }
 
     [Test]
@@ -238,13 +255,9 @@ public class ConfigYamlDataObjectsValidationTest
                 new QualityProfileQualityConfigYaml
                 {
                     Name = "Group",
-                    Qualities =
-                    [
-                        "One Quality",
-                        "Two Quality"
-                    ]
-                }
-            ]
+                    Qualities = ["One Quality", "Two Quality"],
+                },
+            ],
         };
 
         var validator = new QualityProfileConfigYamlValidator();

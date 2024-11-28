@@ -7,8 +7,8 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 public class CustomFormatApiPersistencePhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCache> cachePersister)
-    : IApiPersistencePipelinePhase<CustomFormatPipelineContext>
+    ICachePersister<CustomFormatCache> cachePersister
+) : IApiPersistencePipelinePhase<CustomFormatPipelineContext>
 {
     public async Task Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {

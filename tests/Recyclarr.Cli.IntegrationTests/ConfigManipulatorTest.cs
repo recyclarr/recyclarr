@@ -13,8 +13,7 @@ internal class ConfigManipulatorTest : CliIntegrationFixture
         var src = Fs.CurrentDirectory().File("template.yml");
         var dst = Fs.CurrentDirectory().SubDirectory("one", "two", "three").File("config.yml");
 
-        const string yamlData =
-            """
+        const string yamlData = """
             sonarr:
               instance1:
                 base_url: http://localhost:80
@@ -35,8 +34,7 @@ internal class ConfigManipulatorTest : CliIntegrationFixture
         var src = Fs.CurrentDirectory().File("template.yml");
         var dst = Fs.CurrentDirectory().File("config.yml");
 
-        const string yamlData =
-            """
+        const string yamlData = """
             sonarr:
               instance1:
                 invalid: yaml

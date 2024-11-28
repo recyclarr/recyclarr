@@ -14,7 +14,7 @@ public class QualitySizeLogPhase(ILogger log, NotificationEmitter notificationEm
             return true;
         }
 
-        if (context.ConfigOutput is not {Qualities.Count: > 0})
+        if (context.ConfigOutput is not { Qualities.Count: > 0 })
         {
             log.Debug("No Quality Definitions to process");
             return true;
@@ -23,9 +23,7 @@ public class QualitySizeLogPhase(ILogger log, NotificationEmitter notificationEm
         return false;
     }
 
-    public void LogTransactionNotices(QualitySizePipelineContext context)
-    {
-    }
+    public void LogTransactionNotices(QualitySizePipelineContext context) { }
 
     public void LogPersistenceResults(QualitySizePipelineContext context)
     {
@@ -35,13 +33,19 @@ public class QualitySizeLogPhase(ILogger log, NotificationEmitter notificationEm
         var totalCount = context.TransactionOutput.Count;
         if (totalCount > 0)
         {
-            log.Information("Total of {Count} sizes were synced for quality definition {Name}", totalCount,
-                qualityDefinitionName);
+            log.Information(
+                "Total of {Count} sizes were synced for quality definition {Name}",
+                totalCount,
+                qualityDefinitionName
+            );
             notificationEmitter.SendStatistic("Quality Sizes Synced", totalCount);
         }
         else
         {
-            log.Information("All sizes for quality definition {Name} are already up to date!", qualityDefinitionName);
+            log.Information(
+                "All sizes for quality definition {Name} are already up to date!",
+                qualityDefinitionName
+            );
         }
     }
 }

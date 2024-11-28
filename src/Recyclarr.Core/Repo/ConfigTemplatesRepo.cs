@@ -9,8 +9,8 @@ namespace Recyclarr.Repo;
 public class ConfigTemplatesRepo(
     IRepoUpdater repoUpdater,
     IAppPaths paths,
-    ISettings<ConfigTemplateRepository> settings)
-    : IConfigTemplatesRepo, IUpdateableRepo
+    ISettings<ConfigTemplateRepository> settings
+) : IConfigTemplatesRepo, IUpdateableRepo
 {
     public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDirectory("config-templates");
 

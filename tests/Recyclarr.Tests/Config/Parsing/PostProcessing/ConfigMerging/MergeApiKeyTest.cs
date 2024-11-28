@@ -9,10 +9,7 @@ public class MergeApiKeyTest
     [Test]
     public void Empty_right_to_non_empty_left()
     {
-        var leftConfig = new SonarrConfigYaml
-        {
-            ApiKey = "a"
-        };
+        var leftConfig = new SonarrConfigYaml { ApiKey = "a" };
 
         var rightConfig = new SonarrConfigYaml();
 
@@ -29,10 +26,7 @@ public class MergeApiKeyTest
         var leftConfig = new SonarrConfigYaml();
 
         // API Key should not be merged!
-        var rightConfig = new SonarrConfigYaml
-        {
-            ApiKey = "b"
-        };
+        var rightConfig = new SonarrConfigYaml { ApiKey = "b" };
 
         var sut = new SonarrConfigMerger();
 
@@ -44,16 +38,10 @@ public class MergeApiKeyTest
     [Test]
     public void Non_empty_right_to_non_empty_left()
     {
-        var leftConfig = new SonarrConfigYaml
-        {
-            ApiKey = "a"
-        };
+        var leftConfig = new SonarrConfigYaml { ApiKey = "a" };
 
         // API Key should not be merged!
-        var rightConfig = new SonarrConfigYaml
-        {
-            ApiKey = "b"
-        };
+        var rightConfig = new SonarrConfigYaml { ApiKey = "b" };
 
         var sut = new SonarrConfigMerger();
 

@@ -8,8 +8,11 @@ namespace Recyclarr.Cli;
 
 internal static class Program
 {
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification =
-        "Top level catch-all to translate exceptions; lack of specificity is intentional")]
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Top level catch-all to translate exceptions; lack of specificity is intentional"
+    )]
     public static async Task<int> Main(string[] args)
     {
         var builder = new ContainerBuilder();
@@ -29,7 +32,7 @@ internal static class Program
                 log.Error(e, "Exiting due to fatal error");
             }
 
-            return (int) ExitStatus.Failed;
+            return (int)ExitStatus.Failed;
         }
     }
 }

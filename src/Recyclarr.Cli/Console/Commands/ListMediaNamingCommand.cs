@@ -28,6 +28,6 @@ public class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpda
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         lister.ListNaming(settings.Service);
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }

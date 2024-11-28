@@ -14,20 +14,16 @@ public class CustomFormatDataListerTest
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         [Frozen] ICustomFormatGuideService guide,
         IListCustomFormatSettings settings,
-        CustomFormatDataLister sut)
+        CustomFormatDataLister sut
+    )
     {
-        var testData = new[]
-        {
-            NewCf.Data("First", "123"),
-            NewCf.Data("Second", "456")
-        };
+        var testData = new[] { NewCf.Data("First", "123"), NewCf.Data("Second", "456") };
 
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
         settings.ScoreSets.Returns(false);
 
         sut.List(settings);
 
-        console.Output.Should().ContainAll(
-            testData.SelectMany(x => new[] {x.Name, x.TrashId}));
+        console.Output.Should().ContainAll(testData.SelectMany(x => new[] { x.Name, x.TrashId }));
     }
 }

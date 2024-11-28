@@ -6,7 +6,7 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
 {
     private IFlurlRequest Request(params object[] path)
     {
-        return service.Request(["qualityprofile", ..path]);
+        return service.Request(["qualityprofile", .. path]);
     }
 
     public async Task<IList<QualityProfileDto>> GetQualityProfiles(CancellationToken ct)
@@ -32,8 +32,7 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
             throw new ArgumentException($"Profile's ID property must not be null: {profile.Name}");
         }
 
-        await Request(profile.Id)
-            .PutJsonAsync(profile.ReverseItems(), cancellationToken: ct);
+        await Request(profile.Id).PutJsonAsync(profile.ReverseItems(), cancellationToken: ct);
     }
 
     public async Task CreateQualityProfile(QualityProfileDto profile, CancellationToken ct)

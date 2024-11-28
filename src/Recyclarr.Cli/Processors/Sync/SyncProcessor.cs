@@ -22,8 +22,8 @@ public class SyncProcessor(
     IConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
-    NotificationService notify)
-    : ISyncProcessor
+    NotificationService notify
+) : ISyncProcessor
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
@@ -38,12 +38,14 @@ public class SyncProcessor(
         bool failureDetected;
         try
         {
-            var configs = configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
-            {
-                ManualConfigFiles = settings.Configs,
-                Instances = settings.Instances,
-                Service = settings.Service
-            });
+            var configs = configRegistry.FindAndLoadConfigs(
+                new ConfigFilterCriteria
+                {
+                    ManualConfigFiles = settings.Configs,
+                    Instances = settings.Instances,
+                    Service = settings.Service,
+                }
+            );
 
             failureDetected = await ProcessService(settings, configs, ct);
         }
@@ -64,7 +66,8 @@ public class SyncProcessor(
     private async Task<bool> ProcessService(
         ISyncSettings settings,
         IEnumerable<IServiceConfiguration> configs,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var failureDetected = false;
 
@@ -78,11 +81,12 @@ public class SyncProcessor(
                 console.WriteLine(
                     $"""
 
-                     ===========================================
-                     Processing {config.ServiceType} Server: [{config.InstanceName}]
-                     ===========================================
-
-                     """);
+                    ===========================================
+                    Processing {config.ServiceType} Server: [{config.InstanceName}]
+                    ===========================================
+                    
+                    """
+                );
 
                 await scope.Pipelines.Execute(settings, ct);
             }

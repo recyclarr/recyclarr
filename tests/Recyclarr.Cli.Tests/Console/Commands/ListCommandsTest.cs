@@ -9,7 +9,8 @@ public class ListCommandsTest
     [Test, AutoMockData]
     public async Task Repo_update_is_called_on_list_custom_formats(
         [Frozen] IMultiRepoUpdater updater,
-        ListCustomFormatsCommand sut)
+        ListCustomFormatsCommand sut
+    )
     {
         await sut.ExecuteAsync(default!, new ListCustomFormatsCommand.CliSettings());
 
@@ -19,7 +20,8 @@ public class ListCommandsTest
     [Test, AutoMockData]
     public async Task Repo_update_is_called_on_list_qualities(
         [Frozen] IMultiRepoUpdater updater,
-        ListQualitiesCommand sut)
+        ListQualitiesCommand sut
+    )
     {
         await sut.ExecuteAsync(default!, new ListQualitiesCommand.CliSettings());
 

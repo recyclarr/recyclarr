@@ -74,7 +74,9 @@ public class CoreAutofacModule : Module
     private static void RegisterCompatibility(ContainerBuilder builder)
     {
         builder.RegisterType<ServiceAgnosticCapabilityEnforcer>();
-        builder.RegisterType<ServiceInformation>().As<IServiceInformation>()
+        builder
+            .RegisterType<ServiceInformation>()
+            .As<IServiceInformation>()
             .InstancePerLifetimeScope();
 
         // Sonarr
@@ -90,7 +92,8 @@ public class CoreAutofacModule : Module
     {
         builder.RegisterAutoMapper(ThisAssembly);
 
-        builder.RegisterAssemblyTypes(ThisAssembly)
+        builder
+            .RegisterAssemblyTypes(ThisAssembly)
             .AssignableTo<IYamlBehavior>()
             .As<IYamlBehavior>();
 
@@ -105,23 +108,31 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigurationScopeFactory>();
 
         // Keyed include processors
-        builder.RegisterType<ConfigIncludeProcessor>().Keyed<IIncludeProcessor>(typeof(ConfigYamlInclude));
-        builder.RegisterType<TemplateIncludeProcessor>().Keyed<IIncludeProcessor>(typeof(TemplateYamlInclude));
+        builder
+            .RegisterType<ConfigIncludeProcessor>()
+            .Keyed<IIncludeProcessor>(typeof(ConfigYamlInclude));
+        builder
+            .RegisterType<TemplateIncludeProcessor>()
+            .Keyed<IIncludeProcessor>(typeof(TemplateYamlInclude));
 
         // Config Post Processors
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 // Order-sensitive!
                 typeof(ConfigDeprecationPostProcessor),
                 typeof(ImplicitUrlAndKeyPostProcessor),
-                typeof(IncludePostProcessor))
+                typeof(IncludePostProcessor)
+            )
             .As<IConfigPostProcessor>()
             .OrderByRegistration();
 
         // Config Deprecations
         builder.RegisterType<ConfigDeprecations>();
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 // Order-sensitive!
-                typeof(CfQualityProfilesDeprecationCheck))
+                typeof(CfQualityProfilesDeprecationCheck)
+            )
             .As<IConfigDeprecationCheck>()
             .OrderByRegistration();
 
@@ -134,14 +145,14 @@ public class CoreAutofacModule : Module
 
     private static void RegisterHttp(ContainerBuilder builder)
     {
-        builder.RegisterType<FlurlClientCache>()
-            .As<IFlurlClientCache>()
-            .SingleInstance();
+        builder.RegisterType<FlurlClientCache>().As<IFlurlClientCache>().SingleInstance();
 
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(FlurlAfterCallLogRedactor),
                 typeof(FlurlBeforeCallLogRedactor),
-                typeof(FlurlRedirectPreventer))
+                typeof(FlurlRedirectPreventer)
+            )
             .As<FlurlSpecificEventHandler>();
     }
 
@@ -166,18 +177,26 @@ public class CoreAutofacModule : Module
         builder.RegisterType<NotificationEmitter>().SingleInstance();
 
         // Apprise
-        builder.RegisterType<AppriseStatefulNotificationApiService>()
+        builder
+            .RegisterType<AppriseStatefulNotificationApiService>()
             .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateful);
 
-        builder.RegisterType<AppriseStatelessNotificationApiService>()
+        builder
+            .RegisterType<AppriseStatelessNotificationApiService>()
             .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateless);
 
         builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
 
         // Verbosity Strategies
-        builder.RegisterType<MinimalVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Minimal);
-        builder.RegisterType<NormalVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Normal);
-        builder.RegisterType<DetailedVerbosityStrategy>().Keyed<IVerbosityStrategy>(NotificationVerbosity.Detailed);
+        builder
+            .RegisterType<MinimalVerbosityStrategy>()
+            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Minimal);
+        builder
+            .RegisterType<NormalVerbosityStrategy>()
+            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Normal);
+        builder
+            .RegisterType<DetailedVerbosityStrategy>()
+            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Detailed);
         builder.Register(c =>
         {
             var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
@@ -191,7 +210,8 @@ public class CoreAutofacModule : Module
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<DefaultRuntimeInformation>().As<IRuntimeInformation>();
 
-        builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
+        builder
+            .Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
             .As<IAppPaths>()
             .SingleInstance();
     }
@@ -199,12 +219,18 @@ public class CoreAutofacModule : Module
     private static void RegisterRepo(ContainerBuilder builder)
     {
         // Unique Repo Registrations
-        builder.RegisterType<ConfigTemplatesRepo>().As<IConfigTemplatesRepo>().As<IUpdateableRepo>();
+        builder
+            .RegisterType<ConfigTemplatesRepo>()
+            .As<IConfigTemplatesRepo>()
+            .As<IUpdateableRepo>();
         builder.RegisterType<TrashGuidesRepo>().As<ITrashGuidesRepo>().As<IUpdateableRepo>();
 
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
         builder.RegisterType<ConsoleMultiRepoUpdater>().As<IMultiRepoUpdater>();
-        builder.RegisterType<TrashRepoMetadataBuilder>().As<IRepoMetadataBuilder>().InstancePerLifetimeScope();
+        builder
+            .RegisterType<TrashRepoMetadataBuilder>()
+            .As<IRepoMetadataBuilder>()
+            .InstancePerLifetimeScope();
         builder.RegisterType<GitPath>().As<IGitPath>();
     }
 
@@ -213,16 +239,23 @@ public class CoreAutofacModule : Module
         // This is used by all specific API service classes registered below.
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
 
-        builder.RegisterType<SystemApiService>().As<ISystemApiService>()
-            .InstancePerLifetimeScope();
+        builder.RegisterType<SystemApiService>().As<ISystemApiService>().InstancePerLifetimeScope();
 
-        builder.RegisterType<QualityProfileApiService>().As<IQualityProfileApiService>()
+        builder
+            .RegisterType<QualityProfileApiService>()
+            .As<IQualityProfileApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterType<CustomFormatApiService>().As<ICustomFormatApiService>()
+        builder
+            .RegisterType<CustomFormatApiService>()
+            .As<ICustomFormatApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterType<QualityDefinitionApiService>().As<IQualityDefinitionApiService>()
+        builder
+            .RegisterType<QualityDefinitionApiService>()
+            .As<IQualityDefinitionApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterType<MediaNamingApiService>().As<IMediaNamingApiService>()
+        builder
+            .RegisterType<MediaNamingApiService>()
+            .As<IMediaNamingApiService>()
             .InstancePerLifetimeScope();
     }
 
@@ -240,15 +273,24 @@ public class CoreAutofacModule : Module
 
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
-        builder.RegisterType<ConfigTemplateGuideService>().As<IConfigTemplateGuideService>().SingleInstance();
+        builder
+            .RegisterType<ConfigTemplateGuideService>()
+            .As<IConfigTemplateGuideService>()
+            .SingleInstance();
 
         // Custom Format
-        builder.RegisterType<CustomFormatGuideService>().As<ICustomFormatGuideService>().SingleInstance();
+        builder
+            .RegisterType<CustomFormatGuideService>()
+            .As<ICustomFormatGuideService>()
+            .SingleInstance();
         builder.RegisterType<CustomFormatLoader>().As<ICustomFormatLoader>();
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
 
         // Quality Size
-        builder.RegisterType<QualitySizeGuideService>().As<IQualitySizeGuideService>().SingleInstance();
+        builder
+            .RegisterType<QualitySizeGuideService>()
+            .As<IQualitySizeGuideService>()
+            .SingleInstance();
         builder.RegisterType<QualitySizeGuideParser>();
 
         // Media Naming

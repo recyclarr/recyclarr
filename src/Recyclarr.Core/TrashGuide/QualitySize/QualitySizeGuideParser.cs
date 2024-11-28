@@ -10,14 +10,18 @@ public class QualitySizeGuideParser(ILogger log)
 {
     public IReadOnlyList<QualitySizeData> GetQualities(IEnumerable<IDirectoryInfo> jsonDirectories)
     {
-        return JsonUtils.GetJsonFilesInDirectories(jsonDirectories, log)
+        return JsonUtils
+            .GetJsonFilesInDirectories(jsonDirectories, log)
             .Select(ParseQuality)
             .NotNull()
             .ToList();
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification =
-        "Exceptions not rethrown so we can continue processing other files")]
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Exceptions not rethrown so we can continue processing other files"
+    )]
     private QualitySizeData? ParseQuality(IFileInfo jsonFile)
     {
         QualitySizeData? quality = null;
@@ -26,7 +30,10 @@ public class QualitySizeGuideParser(ILogger log)
         try
         {
             using var stream = jsonFile.OpenRead();
-            quality = JsonSerializer.Deserialize<QualitySizeData>(stream, GlobalJsonSerializerSettings.Guide);
+            quality = JsonSerializer.Deserialize<QualitySizeData>(
+                stream,
+                GlobalJsonSerializerSettings.Guide
+            );
         }
         catch (Exception e)
         {
@@ -35,7 +42,11 @@ public class QualitySizeGuideParser(ILogger log)
 
         if (exception is not null || quality is null)
         {
-            log.Warning(exception, "Failed to parse quality definition JSON file: {Filename}", jsonFile.FullName);
+            log.Warning(
+                exception,
+                "Failed to parse quality definition JSON file: {Filename}",
+                jsonFile.FullName
+            );
         }
 
         return quality;

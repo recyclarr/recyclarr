@@ -3,7 +3,8 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizePreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<QualitySizePipelineContext>
+public class QualitySizePreviewPhase(IAnsiConsole console)
+    : IPreviewPipelinePhase<QualitySizePipelineContext>
 {
     public void Execute(QualitySizePipelineContext context)
     {

@@ -12,8 +12,8 @@ public static partial class FileUtils
     public static string NormalizePath(string path)
     {
         return MockUnixSupport.IsUnixPlatform()
-            ? WindowsRootRegex().Replace(path, "/").Replace("\\", "/")
-            : LinuxRootRegex().Replace(path, @"C:\").Replace("/", "\\");
+            ? WindowsRootRegex().Replace(path, "/").Replace("\\", "/", StringComparison.Ordinal)
+            : LinuxRootRegex().Replace(path, @"C:\").Replace("/", "\\", StringComparison.Ordinal);
     }
 
     [GeneratedRegex(@"^C:\\", RegexOptions.None, 1000)]

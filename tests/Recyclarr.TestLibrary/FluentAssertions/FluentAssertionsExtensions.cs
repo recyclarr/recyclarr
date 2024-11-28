@@ -5,7 +5,10 @@ namespace Recyclarr.TestLibrary.FluentAssertions;
 
 public static class FluentAssertionsExtensions
 {
-    public static AndWhichConstraint<TAssertions, string> ContainRegexMatch<TCollection, TAssertions>(
+    public static AndWhichConstraint<TAssertions, string> ContainRegexMatch<
+        TCollection,
+        TAssertions
+    >(
         this StringCollectionAssertions<TCollection, TAssertions> assert,
         string regexPattern,
         string because = "",
@@ -24,11 +27,14 @@ public static class FluentAssertionsExtensions
             });
         }
 
-        Execute.Assertion
-            .BecauseOf(because, becauseArgs)
+        Execute
+            .Assertion.BecauseOf(because, becauseArgs)
             .ForCondition(ContainsRegexMatch())
-            .FailWith("Expected {context:collection} {0} to contain a regex match of {1}{reason}.", assert.Subject,
-                regexPattern);
+            .FailWith(
+                "Expected {context:collection} {0} to contain a regex match of {1}{reason}.",
+                assert.Subject,
+                regexPattern
+            );
 
         var matched = assert.Subject.Where(item =>
         {
@@ -37,10 +43,13 @@ public static class FluentAssertionsExtensions
             return scope.Discard().Length == 0;
         });
 
-        return new AndWhichConstraint<TAssertions, string>((TAssertions) assert, matched);
+        return new AndWhichConstraint<TAssertions, string>((TAssertions)assert, matched);
     }
 
-    public static AndWhichConstraint<TAssertions, string> NotContainRegexMatch<TCollection, TAssertions>(
+    public static AndWhichConstraint<TAssertions, string> NotContainRegexMatch<
+        TCollection,
+        TAssertions
+    >(
         this StringCollectionAssertions<TCollection, TAssertions> assert,
         string regexPattern,
         string because = "",
@@ -59,11 +68,14 @@ public static class FluentAssertionsExtensions
             });
         }
 
-        Execute.Assertion
-            .BecauseOf(because, becauseArgs)
+        Execute
+            .Assertion.BecauseOf(because, becauseArgs)
             .ForCondition(NotContainsRegexMatch())
-            .FailWith("Expected {context:collection} {0} to not contain a regex match of {1}{reason}.", assert.Subject,
-                regexPattern);
+            .FailWith(
+                "Expected {context:collection} {0} to not contain a regex match of {1}{reason}.",
+                assert.Subject,
+                regexPattern
+            );
 
         var matched = assert.Subject.Where(item =>
         {
@@ -72,6 +84,6 @@ public static class FluentAssertionsExtensions
             return scope.Discard().Length == 0;
         });
 
-        return new AndWhichConstraint<TAssertions, string>((TAssertions) assert, matched);
+        return new AndWhichConstraint<TAssertions, string>((TAssertions)assert, matched);
     }
 }

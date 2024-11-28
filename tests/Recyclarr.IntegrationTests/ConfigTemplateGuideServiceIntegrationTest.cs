@@ -10,8 +10,7 @@ namespace Recyclarr.IntegrationTests;
 public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
 {
     [Test, AutoMockData]
-    public void Throw_when_templates_dir_does_not_exist(
-        ConfigTemplateGuideService sut)
+    public void Throw_when_templates_dir_does_not_exist(ConfigTemplateGuideService sut)
     {
         var act = () => _ = sut.GetTemplateData();
 
@@ -23,21 +22,33 @@ public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
     {
         var repo = Resolve<IConfigTemplatesRepo>();
         var templateDir = repo.Path;
-        Fs.AddSameFileFromEmbeddedResource(templateDir.File("templates.json"),
-            typeof(ConfigTemplateGuideServiceIntegrationTest));
+        Fs.AddSameFileFromEmbeddedResource(
+            templateDir.File("templates.json"),
+            typeof(ConfigTemplateGuideServiceIntegrationTest)
+        );
 
         TemplatePath MakeTemplatePath(SupportedServices service, string id, string path)
         {
             var fsPath = templateDir.File(path);
             Fs.AddEmptyFile(fsPath);
-            return new TemplatePath {Service = service, Id = id, TemplateFile = fsPath, Hidden = false};
+            return new TemplatePath
+            {
+                Service = service,
+                Id = id,
+                TemplateFile = fsPath,
+                Hidden = false,
+            };
         }
 
         var expectedPaths = new[]
         {
             MakeTemplatePath(SupportedServices.Radarr, "hd-bluray-web", "radarr/hd-bluray-web.yml"),
-            MakeTemplatePath(SupportedServices.Radarr, "uhd-bluray-web", "radarr/uhd-bluray-web.yml"),
-            MakeTemplatePath(SupportedServices.Sonarr, "web-1080p-v4", "sonarr/web-1080p-v4.yml")
+            MakeTemplatePath(
+                SupportedServices.Radarr,
+                "uhd-bluray-web",
+                "radarr/uhd-bluray-web.yml"
+            ),
+            MakeTemplatePath(SupportedServices.Sonarr, "web-1080p-v4", "sonarr/web-1080p-v4.yml"),
         };
 
         var sut = Resolve<ConfigTemplateGuideService>();
@@ -45,6 +56,7 @@ public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
         var data = sut.GetTemplateData();
         data.Should().BeEquivalentTo(expectedPaths, o => o.Excluding(x => x.TemplateFile));
         data.Select(x => x.TemplateFile.FullName)
-            .Should().BeEquivalentTo(expectedPaths.Select(x => x.TemplateFile.FullName));
+            .Should()
+            .BeEquivalentTo(expectedPaths.Select(x => x.TemplateFile.FullName));
     }
 }

@@ -15,8 +15,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 api_key: !env_var SONARR_API_KEY
@@ -25,13 +24,9 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         var config = sut.Load(testYml);
 
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://the_url"),
-                ApiKey = "the_api_key"
-            }
-        ]);
+        config
+            .Should()
+            .BeEquivalentTo([new { BaseUrl = new Uri("http://the_url"), ApiKey = "the_api_key" }]);
     }
 
     [Test]
@@ -39,8 +34,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 base_url: !env_var SONARR_URL http://sonarr:1233
@@ -48,12 +42,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://sonarr:1233")
-            }
-        ]);
+        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://sonarr:1233") }]);
     }
 
     [Test]
@@ -64,8 +53,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 base_url: !env_var SONARR_URL http://somevalue
@@ -73,12 +61,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://somevalue")
-            }
-        ]);
+        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
     }
 
     [Test]
@@ -89,8 +72,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 base_url: !env_var SONARR_URL "http://theurl"
@@ -98,13 +80,9 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://theurl"),
-                ApiKey = "the key"
-            }
-        ]);
+        config
+            .Should()
+            .BeEquivalentTo([new { BaseUrl = new Uri("http://theurl"), ApiKey = "the key" }]);
     }
 
     [Test]
@@ -112,8 +90,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 base_url: !env_var SONARR_URL    http://somevalue
@@ -121,12 +98,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://somevalue")
-            }
-        ]);
+        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
     }
 
     [Test]
@@ -134,21 +106,15 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            $"""
-             sonarr:
-               instance:
-                 base_url: !env_var SONARR_URL {"\t"}http://somevalue
-                 api_key: value
-             """;
+        const string testYml = $"""
+            sonarr:
+              instance:
+                base_url: !env_var SONARR_URL {"\t"}http://somevalue
+                api_key: value
+            """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([
-            new
-            {
-                BaseUrl = new Uri("http://somevalue")
-            }
-        ]);
+        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
     }
 
     [Test]
@@ -156,8 +122,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     {
         var sut = Resolve<ConfigurationLoader>();
 
-        const string testYml =
-            """
+        const string testYml = """
             sonarr:
               instance:
                 base_url: !env_var SONARR_URL

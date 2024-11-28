@@ -29,6 +29,6 @@ public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdate
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         lister.ListQualities(settings.Service);
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }

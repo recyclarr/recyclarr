@@ -1,3 +1,4 @@
+using System.Globalization;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -13,8 +14,10 @@ public sealed class TestableLogger : ILogger
     {
         _log = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
-            .WriteTo.Observers(o => o.Subscribe(x => _messages.Add(x.RenderMessage())))
-            .WriteTo.Console()
+            .WriteTo.Observers(o =>
+                o.Subscribe(x => _messages.Add(x.RenderMessage(CultureInfo.InvariantCulture)))
+            )
+            .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
             .CreateLogger();
     }
 

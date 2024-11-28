@@ -13,14 +13,14 @@ public record InvalidNamingConfig(string Type, string ConfigValue);
 public record ProcessedNamingConfig
 {
     public required MediaNamingDto Dto { get; init; }
-    public IReadOnlyCollection<InvalidNamingConfig> InvalidNaming { get; init; } = new List<InvalidNamingConfig>();
+    public IReadOnlyCollection<InvalidNamingConfig> InvalidNaming { get; init; } = [];
 }
 
 public class MediaNamingConfigPhase(
     IMediaNamingGuideService guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
-    IServiceConfiguration config)
-    : IConfigPipelinePhase<MediaNamingPipelineContext>
+    IServiceConfiguration config
+) : IConfigPipelinePhase<MediaNamingPipelineContext>
 {
     public async Task Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
@@ -28,6 +28,10 @@ public class MediaNamingConfigPhase(
         var strategy = configPhaseStrategyFactory[config.ServiceType];
         var dto = await strategy.ProcessNaming(guide, lookup);
 
-        context.ConfigOutput = new ProcessedNamingConfig {Dto = dto, InvalidNaming = lookup.Errors};
+        context.ConfigOutput = new ProcessedNamingConfig
+        {
+            Dto = dto,
+            InvalidNaming = lookup.Errors,
+        };
     }
 }

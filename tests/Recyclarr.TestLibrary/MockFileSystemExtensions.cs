@@ -8,7 +8,8 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IFileInfo path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
         fs.AddFileFromEmbeddedResource(path.FullName, typeInAssembly, embeddedResourcePath);
     }
@@ -17,9 +18,10 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         string path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
-        embeddedResourcePath = embeddedResourcePath.Replace("/", ".");
+        embeddedResourcePath = embeddedResourcePath.Replace("/", ".", StringComparison.Ordinal);
         var resourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath}";
         fs.AddFileFromEmbeddedResource(path, typeInAssembly.Assembly, resourcePath);
     }
@@ -28,7 +30,8 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IFileInfo path,
         Type typeInAssembly,
-        string resourceSubPath = "Data")
+        string resourceSubPath = "Data"
+    )
     {
         fs.AddFileFromEmbeddedResource(path, typeInAssembly, $"{resourceSubPath}.{path.Name}");
     }
@@ -37,9 +40,15 @@ public static class MockFileSystemExtensions
         this MockFileSystem fs,
         IDirectoryInfo path,
         Type typeInAssembly,
-        string embeddedResourcePath)
+        string embeddedResourcePath
+    )
     {
-        embeddedResourcePath = $"{typeInAssembly.Namespace}.{embeddedResourcePath.Replace("/", ".")}";
-        fs.AddFilesFromEmbeddedNamespace(path.FullName, typeInAssembly.Assembly, embeddedResourcePath);
+        var replace = embeddedResourcePath.Replace("/", ".", StringComparison.Ordinal);
+        embeddedResourcePath = $"{typeInAssembly.Namespace}.{replace}";
+        fs.AddFilesFromEmbeddedNamespace(
+            path.FullName,
+            typeInAssembly.Assembly,
+            embeddedResourcePath
+        );
     }
 }

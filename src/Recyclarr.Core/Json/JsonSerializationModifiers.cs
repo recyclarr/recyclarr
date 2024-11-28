@@ -9,8 +9,10 @@ public static class JsonSerializationModifiers
 {
     public static void IgnoreNoSerializeAttribute(JsonTypeInfo type)
     {
-        var propertiesToRemove = type.Properties
-            .Where(x => x.AttributeProvider?.IsDefined(typeof(JsonNoSerializeAttribute), false) ?? false)
+        var propertiesToRemove = type
+            .Properties.Where(x =>
+                x.AttributeProvider?.IsDefined(typeof(JsonNoSerializeAttribute), false) ?? false
+            )
             .ToList();
 
         foreach (var prop in propertiesToRemove)

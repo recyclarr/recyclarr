@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Abstractions;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
@@ -13,7 +14,8 @@ public class ConfigListLocalProcessor(
     IAnsiConsole console,
     IConfigurationFinder configFinder,
     IConfigurationLoader configLoader,
-    IAppPaths paths)
+    IAppPaths paths
+)
 {
     public void Process()
     {
@@ -32,7 +34,12 @@ public class ConfigListLocalProcessor(
                 rows.Add(new Markup("([red]Empty[/])"));
             }
 
-            var configTree = new Tree(Markup.FromInterpolated($"[b]{MakeRelative(configPath)}[/]"));
+            var configTree = new Tree(
+                Markup.FromInterpolated(
+                    CultureInfo.InvariantCulture,
+                    $"[b]{MakeRelative(configPath)}[/]"
+                )
+            );
             foreach (var r in rows)
             {
                 configTree.AddNode(r);
@@ -55,7 +62,8 @@ public class ConfigListLocalProcessor(
     private static void BuildInstanceTree(
         List<IRenderable> rows,
         IReadOnlyCollection<IServiceConfiguration> registry,
-        SupportedServices service)
+        SupportedServices service
+    )
     {
         var configs = registry.GetConfigsOfType(service).ToList();
         if (configs.Count == 0)
@@ -63,9 +71,14 @@ public class ConfigListLocalProcessor(
             return;
         }
 
-        var tree = new Tree(Markup.FromInterpolated($"[red]{service}[/]"));
-        tree.AddNodes(configs.Select(c =>
-            Markup.FromInterpolated($"[blue]{c.InstanceName}[/]")));
+        var tree = new Tree(
+            Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[red]{service}[/]")
+        );
+        tree.AddNodes(
+            configs.Select(c =>
+                Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{c.InstanceName}[/]")
+            )
+        );
 
         rows.Add(tree);
     }

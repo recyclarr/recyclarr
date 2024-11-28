@@ -10,7 +10,7 @@ public record QualityProfileDto
     private int? _cutoff;
     private readonly int? _cutoffFormatScore;
     private readonly string _name = "";
-    private IReadOnlyCollection<ProfileItemDto> _items = new List<ProfileItemDto>();
+    private IReadOnlyCollection<ProfileItemDto> _items = [];
 
     public int? Id { get; set; }
 
@@ -50,7 +50,7 @@ public record QualityProfileDto
         init => DtoUtil.SetIfNotNull(ref _cutoffFormatScore, value);
     }
 
-    public IReadOnlyCollection<ProfileFormatItemDto> FormatItems { get; init; } = new List<ProfileFormatItemDto>();
+    public IReadOnlyCollection<ProfileFormatItemDto> FormatItems { get; init; } = [];
 
     public IReadOnlyCollection<ProfileItemDto> Items
     {
@@ -94,7 +94,7 @@ public record ProfileItemDto
     }
 
     public ProfileItemQualityDto? Quality { get; init; }
-    public ICollection<ProfileItemDto> Items { get; init; } = new List<ProfileItemDto>();
+    public ICollection<ProfileItemDto> Items { get; init; } = [];
 
     [UsedImplicitly, JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();

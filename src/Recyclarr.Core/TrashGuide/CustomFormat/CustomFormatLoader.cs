@@ -6,24 +6,35 @@ using Recyclarr.Json.Loading;
 namespace Recyclarr.TrashGuide.CustomFormat;
 
 // ReSharper disable once SuggestBaseTypeForParameterInConstructor
-public class CustomFormatLoader(ServiceJsonLoader loader, ICustomFormatCategoryParser categoryParser, IFileSystem fs)
-    : ICustomFormatLoader
+public class CustomFormatLoader(
+    ServiceJsonLoader loader,
+    ICustomFormatCategoryParser categoryParser,
+    IFileSystem fs
+) : ICustomFormatLoader
 {
     public ICollection<CustomFormatData> LoadAllCustomFormatsAtPaths(
         IEnumerable<IDirectoryInfo> jsonPaths,
-        IFileInfo collectionOfCustomFormats)
+        IFileInfo collectionOfCustomFormats
+    )
     {
         var categories = categoryParser.Parse(collectionOfCustomFormats).AsReadOnly();
-        return loader.LoadAllFilesAtPaths<CustomFormatData>(jsonPaths, x => x.Select(cf =>
-        {
-            var matchingCategory = categories.FirstOrDefault(y =>
-                y.CfName.EqualsIgnoreCase(cf.Obj.Name) ||
-                y.CfAnchor.EqualsIgnoreCase(fs.Path.GetFileNameWithoutExtension(cf.File.Name)));
+        return loader.LoadAllFilesAtPaths<CustomFormatData>(
+            jsonPaths,
+            x =>
+                x.Select(cf =>
+                {
+                    var matchingCategory = categories.FirstOrDefault(y =>
+                        y.CfName.EqualsIgnoreCase(cf.Obj.Name)
+                        || y.CfAnchor.EqualsIgnoreCase(
+                            fs.Path.GetFileNameWithoutExtension(cf.File.Name)
+                        )
+                    );
 
-            return cf.Obj with
-            {
-                Category = matchingCategory?.CategoryName
-            };
-        }));
+                    return cf.Obj with
+                    {
+                        Category = matchingCategory?.CategoryName,
+                    };
+                })
+        );
     }
 }

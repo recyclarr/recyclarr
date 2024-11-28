@@ -47,6 +47,7 @@ public record SonarrMediaNamingDto : MediaNamingDto
         init => DtoUtil.SetIfNotNull(ref _renameEpisodes, value);
     }
 
-    [UsedImplicitly] [JsonExtensionData]
+    [UsedImplicitly]
+    [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
 }

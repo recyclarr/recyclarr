@@ -6,5 +6,6 @@ public interface IQualityDefinitionApiService
 
     Task<IList<ServiceQualityDefinitionItem>> UpdateQualityDefinition(
         IList<ServiceQualityDefinitionItem> newQuality,
-        CancellationToken ct);
+        CancellationToken ct
+    );
 }

@@ -17,10 +17,7 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
 
         var sut = Resolve<ConfigCreationProcessor>();
 
-        sut.Process(new ConfigCreateCommand.CliSettings
-        {
-            Path = null
-        });
+        sut.Process(new ConfigCreateCommand.CliSettings { Path = null });
 
         var file = Fs.GetFile(Paths.AppDataDirectory.File("recyclarr.yml"));
         file.Should().NotBeNull();
@@ -38,7 +35,7 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
                 .SubDirectory("user")
                 .SubDirectory("specified")
                 .File("file.yml")
-                .FullName
+                .FullName,
         };
 
         sut.Process(settings);
@@ -55,7 +52,7 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
 
         var settings = new ConfigCreateCommand.CliSettings
         {
-            Path = Fs.CurrentDirectory().File("file.yml").FullName
+            Path = Fs.CurrentDirectory().File("file.yml").FullName,
         };
 
         Fs.AddEmptyFile(settings.Path);
@@ -68,8 +65,7 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
     [Test]
     public void Template_id_matching_works()
     {
-        const string templatesJson =
-            """
+        const string templatesJson = """
             {
               "radarr": [
                 {
@@ -98,20 +94,25 @@ internal class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
         Fs.AddEmptyFile(repo.Path.File("template-file3.yml"));
 
         var settings = Substitute.For<ICreateConfigSettings>();
-        settings.Templates.Returns([
-            "template1",
-            "template2",
-            // This one shouldn't show up in the results because:
-            // User specified it, but no template file exists for it.
-            "template4"
-        ]);
+        settings.Templates.Returns(
+            [
+                "template1",
+                "template2",
+                // This one shouldn't show up in the results because:
+                // User specified it, but no template file exists for it.
+                "template4",
+            ]
+        );
 
         var sut = Resolve<ConfigCreationProcessor>();
         sut.Process(settings);
 
-        Fs.AllFiles.Should().Contain([
-            Paths.ConfigsDirectory.File("template-file1.yml").FullName,
-            Paths.ConfigsDirectory.File("template-file2.yml").FullName
-        ]);
+        Fs.AllFiles.Should()
+            .Contain(
+                [
+                    Paths.ConfigsDirectory.File("template-file1.yml").FullName,
+                    Paths.ConfigsDirectory.File("template-file2.yml").FullName,
+                ]
+            );
     }
 }

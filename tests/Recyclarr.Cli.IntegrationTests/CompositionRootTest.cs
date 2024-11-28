@@ -29,13 +29,16 @@ public class CompositionRootTest
             builder.RegisterMockFor<IServiceConfiguration>();
 
             var container = builder.Build();
-            return container.ComponentRegistry.Registrations
-                .SelectMany(x => x.Services)
+            return container
+                .ComponentRegistry.Registrations.SelectMany(x => x.Services)
                 .OfType<TypedService>()
                 .Select(x => x.ServiceType)
                 .Distinct()
-                .Where(x => x.FullName == null || !x.FullName.StartsWith("Autofac."))
-                .Select(x => new TestCaseParameters([container, x]) {TestName = x.FullName})
+                .Where(x =>
+                    x.FullName == null
+                    || !x.FullName.StartsWith("Autofac.", StringComparison.Ordinal)
+                )
+                .Select(x => new TestCaseParameters([container, x]) { TestName = x.FullName })
                 .GetEnumerator();
         }
     }

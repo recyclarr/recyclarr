@@ -9,9 +9,7 @@ public class StubAutofacIndex<TKey, TValue> : IIndex<TKey, TValue>
 {
     private readonly Dictionary<TKey, TValue> _values = new();
 
-    public StubAutofacIndex()
-    {
-    }
+    public StubAutofacIndex() { }
 
     public StubAutofacIndex(Dictionary<TKey, TValue> values)
     {

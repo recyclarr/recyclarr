@@ -18,9 +18,8 @@ public static class LogSetup
     {
         var scope = LogProperty.Scope;
 
-        return
-            $"{{#if {scope} is not null}}{{{scope}}}: {{#end}}" +
-            "{@m}" +
-            "{#if SanitizedExceptionMessage is not null}: {SanitizedExceptionMessage}{#end}\n";
+        return $"{{#if {scope} is not null}}{{{scope}}}: {{#end}}"
+            + "{@m}"
+            + "{#if SanitizedExceptionMessage is not null}: {SanitizedExceptionMessage}{#end}\n";
     }
 }

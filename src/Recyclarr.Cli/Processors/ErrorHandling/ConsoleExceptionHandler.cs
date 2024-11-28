@@ -17,13 +17,19 @@ public class ConsoleExceptionHandler(ILogger log)
         switch (sourceException)
         {
             case GitCmdException e:
-                log.Error(e, "Non-zero exit code {ExitCode} while executing Git command", e.ExitCode);
+                log.Error(
+                    e,
+                    "Non-zero exit code {ExitCode} while executing Git command",
+                    e.ExitCode
+                );
                 break;
 
             case FlurlHttpException e:
                 log.Error(e, "HTTP error");
                 var httpExceptionHandler = new FlurlHttpExceptionHandler(log);
-                await httpExceptionHandler.ProcessServiceErrorMessages(new ServiceErrorMessageExtractor(e));
+                await httpExceptionHandler.ProcessServiceErrorMessages(
+                    new ServiceErrorMessageExtractor(e)
+                );
                 break;
 
             case NoConfigurationFilesException:
@@ -40,15 +46,21 @@ public class ConsoleExceptionHandler(ILogger log)
                 break;
 
             case SplitInstancesException e:
-                log.Error("The following configs share the same `base_url`, which isn't allowed: {Instances}",
-                    e.InstanceNames);
                 log.Error(
-                    "Consolidate the config files manually to fix. " +
-                    "See: <https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance>");
+                    "The following configs share the same `base_url`, which isn't allowed: {Instances}",
+                    e.InstanceNames
+                );
+                log.Error(
+                    "Consolidate the config files manually to fix. "
+                        + "See: <https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance>"
+                );
                 break;
 
             case InvalidConfigurationFilesException e:
-                log.Error("Manually-specified configuration files do not exist: {Files}", e.InvalidFiles);
+                log.Error(
+                    "Manually-specified configuration files do not exist: {Files}",
+                    e.InvalidFiles
+                );
                 break;
 
             case PostProcessingException e:
@@ -76,7 +88,7 @@ public class ConsoleExceptionHandler(ILogger log)
                 e.LogErrors(new ValidationLogger(log));
                 break;
 
-            case DependencyResolutionException {InnerException: not null} e:
+            case DependencyResolutionException { InnerException: not null } e:
                 return await HandleException(e.InnerException!);
 
             default:

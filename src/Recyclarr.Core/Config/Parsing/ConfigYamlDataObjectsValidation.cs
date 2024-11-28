@@ -8,30 +8,34 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 {
     public ServiceConfigYamlValidator()
     {
-        RuleSet(YamlValidatorRuleSets.RootConfig, () =>
-        {
-            RuleFor(x => x.BaseUrl).Cascade(CascadeMode.Stop)
-                .NotEmpty()
-                .Must(x => x!.StartsWith("http"))
-                .WithMessage("{PropertyName} must start with 'http' or 'https'")
-                .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-                .WithMessage("{PropertyName} must be a valid URL")
-                .WithName("base_url");
+        RuleSet(
+            YamlValidatorRuleSets.RootConfig,
+            () =>
+            {
+                RuleFor(x => x.BaseUrl)
+                    .Cascade(CascadeMode.Stop)
+                    .NotEmpty()
+                    .Must(x => x!.StartsWith("http", StringComparison.Ordinal))
+                    .WithMessage("{PropertyName} must start with 'http' or 'https'")
+                    .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
+                    .WithMessage("{PropertyName} must be a valid URL")
+                    .WithName("base_url");
 
-            RuleFor(x => x.ApiKey)
-                .NotEmpty()
-                .WithName("api_key");
-        });
+                RuleFor(x => x.ApiKey).NotEmpty().WithName("api_key");
+            }
+        );
 
         RuleFor(x => x.CustomFormats)
-            .NotEmpty().When(x => x.CustomFormats is not null)
+            .NotEmpty()
+            .When(x => x.CustomFormats is not null)
             .ForEach(x => x.SetValidator(new CustomFormatConfigYamlValidator()))
             .WithName("custom_formats");
 
         RuleFor(x => x.QualityDefinition)
             .SetNonNullableValidator(new QualitySizeConfigYamlValidator());
 
-        RuleFor(x => x.QualityProfiles).NotEmpty()
+        RuleFor(x => x.QualityProfiles)
+            .NotEmpty()
             .When(x => x.QualityProfiles != null)
             .WithName("quality_profiles")
             .ForEach(x => x.SetValidator(new QualityProfileConfigYamlValidator()));
@@ -42,8 +46,7 @@ public class CustomFormatConfigYamlValidator : AbstractValidator<CustomFormatCon
 {
     public CustomFormatConfigYamlValidator()
     {
-        RuleForEach(x => x.AssignScoresTo)
-            .SetValidator(new QualityScoreConfigYamlValidator());
+        RuleForEach(x => x.AssignScoresTo).SetValidator(new QualityScoreConfigYamlValidator());
     }
 }
 
@@ -51,7 +54,8 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
 {
     public QualityScoreConfigYamlValidator()
     {
-        RuleFor(x => x.Name).NotEmpty()
+        RuleFor(x => x.Name)
+            .NotEmpty()
             .WithMessage("'name' is required for elements under 'quality_profiles'");
     }
 }
@@ -60,35 +64,39 @@ public class QualitySizeConfigYamlValidator : AbstractValidator<QualitySizeConfi
 {
     public QualitySizeConfigYamlValidator()
     {
-        RuleFor(x => x.Type).NotEmpty()
-            .WithMessage("'type' is required for 'quality_definition'");
+        RuleFor(x => x.Type).NotEmpty().WithMessage("'type' is required for 'quality_definition'");
 
-        RuleFor(x => x.PreferredRatio).InclusiveBetween(0, 1)
+        RuleFor(x => x.PreferredRatio)
+            .InclusiveBetween(0, 1)
             .When(x => x.PreferredRatio is not null)
             .WithName("preferred_ratio");
     }
 }
 
-public class QualityProfileFormatUpgradeYamlValidator : AbstractValidator<QualityProfileFormatUpgradeYaml>
+public class QualityProfileFormatUpgradeYamlValidator
+    : AbstractValidator<QualityProfileFormatUpgradeYaml>
 {
     public QualityProfileFormatUpgradeYamlValidator(QualityProfileConfigYaml config)
     {
         RuleFor(x => x.Allowed)
             .NotNull()
             .WithMessage(
-                $"For profile {config.Name}, 'allowed' under 'upgrade' is required. " +
-                $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block.");
+                $"For profile {config.Name}, 'allowed' under 'upgrade' is required. "
+                    + $"If you don't want Recyclarr to manage upgrades, delete the whole 'upgrade' block."
+            );
 
         RuleFor(x => x.UntilQuality)
             .NotNull()
             .When(x => x.Allowed is true && config.Qualities is not null)
             .WithMessage(
-                $"For profile {config.Name}, 'until_quality' is required when 'allowed' is set to 'true' and " +
-                $"an explicit 'qualities' list is provided.");
+                $"For profile {config.Name}, 'until_quality' is required when 'allowed' is set to 'true' and "
+                    + $"an explicit 'qualities' list is provided."
+            );
     }
 }
 
-public class ResetUnmatchedScoresConfigYamlValidator : AbstractValidator<ResetUnmatchedScoresConfigYaml>
+public class ResetUnmatchedScoresConfigYamlValidator
+    : AbstractValidator<ResetUnmatchedScoresConfigYaml>
 {
     public ResetUnmatchedScoresConfigYamlValidator()
     {
@@ -108,7 +116,9 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage(x => $"For profile {x.Name}, 'name' is required for root-level 'quality_profiles' elements");
+            .WithMessage(x =>
+                $"For profile {x.Name}, 'name' is required for root-level 'quality_profiles' elements"
+            );
 
         RuleFor(x => x.Upgrade)
             .SetNonNullableValidator(x => new QualityProfileFormatUpgradeYamlValidator(x));
@@ -121,44 +131,61 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
             .Custom(ValidateGroupQualityCount!)
             .Must(x => x!.Any(y => y.Enabled is true or null))
             .WithMessage(x =>
-                $"For profile {x.Name}, at least one explicitly listed quality under 'qualities' must be enabled.")
-            .When(x => x is {Qualities.Count: > 0});
+                $"For profile {x.Name}, at least one explicitly listed quality under 'qualities' must be enabled."
+            )
+            .When(x => x is { Qualities.Count: > 0 });
 
         RuleFor(x => x.Qualities)
-            .Must((o, x) => !x!
-                .Where(y => y is {Enabled: false, Name: not null})
-                .Select(y => y.Name!)
-                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
+            .Must(
+                (o, x) =>
+                    !x!
+                        .Where(y => y is { Enabled: false, Name: not null })
+                        .Select(y => y.Name!)
+                        .Contains(
+                            o.Upgrade!.UntilQuality,
+                            StringComparer.InvariantCultureIgnoreCase
+                        )
+            )
             .WithMessage(o =>
-                $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities")
-            .Must((o, x) => x!
-                .Select(y => y.Name)
-                .Contains(o.Upgrade!.UntilQuality, StringComparer.InvariantCultureIgnoreCase))
+                $"For profile {o.Name}, 'until_quality' must not refer to explicitly disabled qualities"
+            )
+            .Must(
+                (o, x) =>
+                    x!
+                        .Select(y => y.Name)
+                        .Contains(
+                            o.Upgrade!.UntilQuality,
+                            StringComparer.InvariantCultureIgnoreCase
+                        )
+            )
             .WithMessage(o =>
-                $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', " +
-                $"which is '{o.Upgrade!.UntilQuality}'")
-            .When(x => x is {Upgrade.Allowed: not false, Qualities.Count: > 0});
+                $"For profile {o.Name}, 'qualities' must contain the quality mentioned in 'until_quality', "
+                + $"which is '{o.Upgrade!.UntilQuality}'"
+            )
+            .When(x => x is { Upgrade.Allowed: not false, Qualities.Count: > 0 });
     }
 
     private static void ValidateGroupQualityCount(
         IReadOnlyCollection<QualityProfileQualityConfigYaml> qualities,
-        ValidationContext<QualityProfileConfigYaml> context)
+        ValidationContext<QualityProfileConfigYaml> context
+    )
     {
         // Find groups with less than 2 items
-        var invalidCount = qualities
-            .Count(x => x.Qualities?.Count < 2);
+        var invalidCount = qualities.Count(x => x.Qualities?.Count < 2);
 
         if (invalidCount != 0)
         {
             var profile = context.InstanceToValidate;
             context.AddFailure(
-                $"For profile {profile.Name}, 'qualities' contains {invalidCount} groups with less than 2 qualities");
+                $"For profile {profile.Name}, 'qualities' contains {invalidCount} groups with less than 2 qualities"
+            );
         }
     }
 
     private static void ValidateHaveNoDuplicates(
         IReadOnlyCollection<QualityProfileQualityConfigYaml> qualities,
-        ValidationContext<QualityProfileConfigYaml> context)
+        ValidationContext<QualityProfileConfigYaml> context
+    )
     {
         // Check for quality duplicates between non-groups and groups
         var qualityDupes = qualities
@@ -173,7 +200,8 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         {
             var x = context.InstanceToValidate;
             context.AddFailure(
-                $"For profile {x.Name}, 'qualities' contains duplicates for quality '{dupe}'");
+                $"For profile {x.Name}, 'qualities' contains duplicates for quality '{dupe}'"
+            );
         }
 
         // Check for quality duplicates between non-groups and groups
@@ -188,7 +216,8 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         {
             var x = context.InstanceToValidate;
             context.AddFailure(
-                $"For profile {x.Name}, 'qualities' contains duplicates for quality group '{dupe}'");
+                $"For profile {x.Name}, 'qualities' contains duplicates for quality group '{dupe}'"
+            );
         }
     }
 }

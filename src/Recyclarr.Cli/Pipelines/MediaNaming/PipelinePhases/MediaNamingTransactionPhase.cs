@@ -11,24 +11,32 @@ public class MediaNamingTransactionPhase : ITransactionPipelinePhase<MediaNaming
         {
             RadarrMediaNamingDto dto => UpdateRadarrDto(dto, context.ConfigOutput),
             SonarrMediaNamingDto dto => UpdateSonarrDto(dto, context.ConfigOutput),
-            _ => throw new ArgumentException("Config type not supported in media naming transation phase")
+            _ => throw new ArgumentException(
+                "Config type not supported in media naming transation phase"
+            ),
         };
     }
 
-    private static RadarrMediaNamingDto UpdateRadarrDto(RadarrMediaNamingDto serviceDto, ProcessedNamingConfig config)
+    private static RadarrMediaNamingDto UpdateRadarrDto(
+        RadarrMediaNamingDto serviceDto,
+        ProcessedNamingConfig config
+    )
     {
-        var configDto = (RadarrMediaNamingDto) config.Dto;
+        var configDto = (RadarrMediaNamingDto)config.Dto;
         return serviceDto with
         {
             RenameMovies = configDto.RenameMovies,
             MovieFolderFormat = configDto.MovieFolderFormat,
-            StandardMovieFormat = configDto.StandardMovieFormat
+            StandardMovieFormat = configDto.StandardMovieFormat,
         };
     }
 
-    private static SonarrMediaNamingDto UpdateSonarrDto(SonarrMediaNamingDto serviceDto, ProcessedNamingConfig config)
+    private static SonarrMediaNamingDto UpdateSonarrDto(
+        SonarrMediaNamingDto serviceDto,
+        ProcessedNamingConfig config
+    )
     {
-        var configDto = (SonarrMediaNamingDto) config.Dto;
+        var configDto = (SonarrMediaNamingDto)config.Dto;
         return serviceDto with
         {
             RenameEpisodes = configDto.RenameEpisodes,
@@ -36,7 +44,7 @@ public class MediaNamingTransactionPhase : ITransactionPipelinePhase<MediaNaming
             SeasonFolderFormat = configDto.SeasonFolderFormat,
             StandardEpisodeFormat = configDto.StandardEpisodeFormat,
             DailyEpisodeFormat = configDto.DailyEpisodeFormat,
-            AnimeEpisodeFormat = configDto.AnimeEpisodeFormat
+            AnimeEpisodeFormat = configDto.AnimeEpisodeFormat,
         };
     }
 }

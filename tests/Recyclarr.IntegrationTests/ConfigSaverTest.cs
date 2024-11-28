@@ -15,12 +15,10 @@ public class ConfigSaverTest : IntegrationTestFixture
             Radarr = new Dictionary<string, RadarrConfigYaml>
             {
                 {
-                    "instance1", new RadarrConfigYaml
-                    {
-                        ApiKey = "apikey"
-                    }
-                }
-            }
+                    "instance1",
+                    new RadarrConfigYaml { ApiKey = "apikey" }
+                },
+            },
         };
 
         var destFile = Fs.CurrentDirectory().File("config.yml");
@@ -41,21 +39,17 @@ public class ConfigSaverTest : IntegrationTestFixture
             Radarr = new Dictionary<string, RadarrConfigYaml>
             {
                 {
-                    "instance1", new RadarrConfigYaml
-                    {
-                        ApiKey = "apikey",
-                        BaseUrl = "http://baseurl.com"
-                    }
-                }
-            }
+                    "instance1",
+                    new RadarrConfigYaml { ApiKey = "apikey", BaseUrl = "http://baseurl.com" }
+                },
+            },
         };
 
         var destFile = Fs.CurrentDirectory().SubDirectory("one", "two", "three").File("config.yml");
 
         sut.Save(config, destFile);
 
-        const string expectedYaml =
-            """
+        const string expectedYaml = """
             radarr:
               instance1:
                 api_key: apikey

@@ -6,9 +6,8 @@ public static class CfCache
 {
     public static CustomFormatCache New(params TrashIdMapping[] mappings)
     {
-        return new CustomFormatCache(new CustomFormatCacheObject
-        {
-            TrashIdMappings = mappings.ToList()
-        });
+        return new CustomFormatCache(
+            new CustomFormatCacheObject { TrashIdMappings = mappings.ToList() }
+        );
     }
 }

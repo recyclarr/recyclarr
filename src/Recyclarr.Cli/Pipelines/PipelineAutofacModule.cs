@@ -26,13 +26,15 @@ public class PipelineAutofacModule : Module
     {
         builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
         builder.RegisterComposite<CompositeSyncPipeline, ISyncPipeline>();
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 // ORDER HERE IS IMPORTANT!
                 // There are indirect dependencies between pipelines.
                 typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<MediaNamingPipelineContext>))
+                typeof(GenericSyncPipeline<MediaNamingPipelineContext>)
+            )
             .As<ISyncPipeline>()
             .OrderByRegistration();
 
@@ -46,18 +48,22 @@ public class PipelineAutofacModule : Module
     {
         builder.RegisterType<MediaNamingDataLister>();
 
-        builder.RegisterType<RadarrMediaNamingConfigPhase>()
+        builder
+            .RegisterType<RadarrMediaNamingConfigPhase>()
             .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Radarr);
-        builder.RegisterType<SonarrMediaNamingConfigPhase>()
+        builder
+            .RegisterType<SonarrMediaNamingConfigPhase>()
             .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Sonarr);
 
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(MediaNamingConfigPhase),
                 typeof(MediaNamingApiFetchPhase),
                 typeof(MediaNamingTransactionPhase),
                 typeof(MediaNamingPreviewPhase),
                 typeof(MediaNamingApiPersistencePhase),
-                typeof(MediaNamingLogPhase))
+                typeof(MediaNamingLogPhase)
+            )
             .AsImplementedInterfaces();
     }
 
@@ -65,13 +71,15 @@ public class PipelineAutofacModule : Module
     {
         builder.RegisterType<QualityProfileStatCalculator>();
 
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(QualityProfileConfigPhase),
                 typeof(QualityProfilePreviewPhase),
                 typeof(QualityProfileApiFetchPhase),
                 typeof(QualityProfileTransactionPhase),
                 typeof(QualityProfileApiPersistencePhase),
-                typeof(QualityProfileLogPhase))
+                typeof(QualityProfileLogPhase)
+            )
             .AsImplementedInterfaces();
     }
 
@@ -81,26 +89,31 @@ public class PipelineAutofacModule : Module
 
         // Setup factory for creation of concrete IQualityItemLimits types
         builder.RegisterType<QualityItemLimitFactory>().As<IQualityItemLimitFactory>();
-        builder.RegisterType<RadarrQualityItemLimitFetcher>()
+        builder
+            .RegisterType<RadarrQualityItemLimitFetcher>()
             .Keyed<IQualityItemLimitFetcher>(SupportedServices.Radarr)
             .InstancePerLifetimeScope();
-        builder.RegisterType<SonarrQualityItemLimitFetcher>()
+        builder
+            .RegisterType<SonarrQualityItemLimitFetcher>()
             .Keyed<IQualityItemLimitFetcher>(SupportedServices.Sonarr)
             .InstancePerLifetimeScope();
 
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(QualitySizeConfigPhase),
                 typeof(QualitySizePreviewPhase),
                 typeof(QualitySizeApiFetchPhase),
                 typeof(QualitySizeTransactionPhase),
                 typeof(QualitySizeApiPersistencePhase),
-                typeof(QualitySizeLogPhase))
+                typeof(QualitySizeLogPhase)
+            )
             .AsImplementedInterfaces();
     }
 
     private static void RegisterCustomFormat(ContainerBuilder builder)
     {
-        builder.RegisterType<ProcessedCustomFormatCache>()
+        builder
+            .RegisterType<ProcessedCustomFormatCache>()
             .As<IPipelineCache>()
             .AsSelf()
             .InstancePerLifetimeScope();
@@ -109,13 +122,15 @@ public class PipelineAutofacModule : Module
         builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
         builder.RegisterType<CustomFormatTransactionLogger>();
 
-        builder.RegisterTypes(
+        builder
+            .RegisterTypes(
                 typeof(CustomFormatConfigPhase),
                 typeof(CustomFormatApiFetchPhase),
                 typeof(CustomFormatTransactionPhase),
                 typeof(CustomFormatPreviewPhase),
                 typeof(CustomFormatApiPersistencePhase),
-                typeof(CustomFormatLogPhase))
+                typeof(CustomFormatLogPhase)
+            )
             .AsImplementedInterfaces();
     }
 }

@@ -6,13 +6,29 @@
       "version": "6.0.4",
       "commands": [
         "dotnet-gitversion"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-sonarscanner": {
       "version": "9.0.1",
       "commands": [
         "dotnet-sonarscanner"
-      ]
+      ],
+      "rollForward": false
+    },
+    "csharpier": {
+      "version": "0.30.3",
+      "commands": [
+        "dotnet-csharpier"
+      ],
+      "rollForward": false
+    },
+    "jetbrains.resharper.globaltools": {
+      "version": "2024.3.2",
+      "commands": [
+        "jb"
+      ],
+      "rollForward": false
     }
   }
 }

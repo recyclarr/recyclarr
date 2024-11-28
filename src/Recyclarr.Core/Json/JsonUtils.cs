@@ -5,7 +5,10 @@ namespace Recyclarr.Json;
 
 public static class JsonUtils
 {
-    public static IEnumerable<IFileInfo> GetJsonFilesInDirectories(IEnumerable<IDirectoryInfo?> dirs, ILogger log)
+    public static IEnumerable<IFileInfo> GetJsonFilesInDirectories(
+        IEnumerable<IDirectoryInfo?> dirs,
+        ILogger log
+    )
     {
         var dirsThatExist = dirs.NotNull().ToLookup(x => x.Exists);
 

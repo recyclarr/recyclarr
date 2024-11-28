@@ -6,7 +6,8 @@ public class SystemApiService(IServarrRequestBuilder service) : ISystemApiServic
 {
     public async Task<SystemStatus> GetStatus(CancellationToken ct)
     {
-        return await service.Request("system", "status")
+        return await service
+            .Request("system", "status")
             .GetJsonAsync<SystemStatus>(cancellationToken: ct);
     }
 }

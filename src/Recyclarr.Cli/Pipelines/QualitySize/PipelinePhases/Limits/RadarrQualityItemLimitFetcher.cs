@@ -3,7 +3,8 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 
-public class RadarrQualityItemLimitFetcher(IRadarrCapabilityFetcher capabilityFetcher) : IQualityItemLimitFetcher
+public class RadarrQualityItemLimitFetcher(IRadarrCapabilityFetcher capabilityFetcher)
+    : IQualityItemLimitFetcher
 {
     private QualityItemLimits? _cachedLimits;
 
@@ -15,8 +16,8 @@ public class RadarrQualityItemLimitFetcher(IRadarrCapabilityFetcher capabilityFe
             var capabilities = await capabilityFetcher.GetCapabilities(ct);
             _cachedLimits = capabilities switch
             {
-                {QualityDefinitionLimitsIncreased: true} => new QualityItemLimits(2000m, 1999m),
-                _ => new QualityItemLimits(400m, 399m)
+                { QualityDefinitionLimitsIncreased: true } => new QualityItemLimits(2000m, 1999m),
+                _ => new QualityItemLimits(400m, 399m),
             };
         }
 

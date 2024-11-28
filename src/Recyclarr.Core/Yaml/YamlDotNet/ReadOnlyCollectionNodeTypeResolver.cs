@@ -8,9 +8,14 @@ public sealed class ReadOnlyCollectionNodeTypeResolver : INodeTypeResolver
 {
     public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)
     {
-        if (!currentType.IsInterface || !currentType.IsGenericType ||
-            !CustomGenericInterfaceImplementations.TryGetValue(currentType.GetGenericTypeDefinition(),
-                out var concreteType))
+        if (
+            !currentType.IsInterface
+            || !currentType.IsGenericType
+            || !CustomGenericInterfaceImplementations.TryGetValue(
+                currentType.GetGenericTypeDefinition(),
+                out var concreteType
+            )
+        )
         {
             return false;
         }
@@ -21,8 +26,8 @@ public sealed class ReadOnlyCollectionNodeTypeResolver : INodeTypeResolver
 
     private static readonly Dictionary<Type, Type> CustomGenericInterfaceImplementations = new()
     {
-        {typeof(IReadOnlyCollection<>), typeof(List<>)},
-        {typeof(IReadOnlyList<>), typeof(List<>)},
-        {typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>)}
+        { typeof(IReadOnlyCollection<>), typeof(List<>) },
+        { typeof(IReadOnlyList<>), typeof(List<>) },
+        { typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>) },
     };
 }

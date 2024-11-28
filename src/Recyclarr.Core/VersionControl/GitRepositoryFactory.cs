@@ -5,18 +5,14 @@ namespace Recyclarr.VersionControl;
 public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositoryFactory
 {
     // A few hand-picked files that should exist in a .git directory.
-    private static readonly string[] ValidGitPaths =
-    [
-        ".git/config",
-        ".git/index",
-        ".git/HEAD"
-    ];
+    private static readonly string[] ValidGitPaths = [".git/config", ".git/index", ".git/HEAD"];
 
     public async Task<IGitRepository> CreateAndCloneIfNeeded(
         Uri repoUrl,
         IDirectoryInfo repoPath,
         string branch,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         var repo = new GitRepository(log, gitPath, repoPath);
 

@@ -10,7 +10,8 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
     public async Task UpdateRepo(
         IDirectoryInfo repoPath,
         IRepositorySettings repoSettings,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         // Assume failure until it succeeds, to simplify the catch handlers.
         var succeeded = false;
@@ -42,7 +43,8 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
     private async Task CheckoutAndUpdateRepo(
         IDirectoryInfo repoPath,
         IRepositorySettings repoSettings,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         var cloneUrl = repoSettings.CloneUrl;
         var branch = repoSettings.Branch;
@@ -53,7 +55,12 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
             log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
         }
 
-        using var repo = await repositoryFactory.CreateAndCloneIfNeeded(cloneUrl, repoPath, branch, token);
+        using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
+            cloneUrl,
+            repoPath,
+            branch,
+            token
+        );
         await repo.ForceCheckout(token, branch);
 
         try
@@ -62,8 +69,11 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         }
         catch (GitCmdException e)
         {
-            log.Warning(e, "Non-zero exit code {ExitCode} while running git fetch (will proceed with existing files)",
-                e.ExitCode);
+            log.Warning(
+                e,
+                "Non-zero exit code {ExitCode} while running git fetch (will proceed with existing files)",
+                e.ExitCode
+            );
         }
 
         await repo.ResetHard(token, repoSettings.Sha1 ?? $"origin/{branch}");

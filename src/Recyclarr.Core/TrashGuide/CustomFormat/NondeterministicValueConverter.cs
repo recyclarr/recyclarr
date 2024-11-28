@@ -5,7 +5,11 @@ namespace Recyclarr.TrashGuide.CustomFormat;
 
 public class NondeterministicValueConverter : JsonConverter<object>
 {
-    public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override object? Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
     {
         return reader.TokenType switch
         {
@@ -15,7 +19,7 @@ public class NondeterministicValueConverter : JsonConverter<object>
             JsonTokenType.True => true,
             JsonTokenType.False => false,
             JsonTokenType.Null => null,
-            _ => throw new JsonException($"CF field of type {reader.TokenType} is not supported")
+            _ => throw new JsonException($"CF field of type {reader.TokenType} is not supported"),
         };
     }
 
@@ -46,12 +50,17 @@ public class NondeterministicValueConverter : JsonConverter<object>
                     break;
 
                 default:
-                    throw new JsonException($"Serialization of type {value.GetType()} is not supported");
+                    throw new JsonException(
+                        $"Serialization of type {value.GetType()} is not supported"
+                    );
             }
         }
         catch (Exception ex)
         {
-            throw new JsonException($"Serialization failed for value of type {value?.GetType()}", ex);
+            throw new JsonException(
+                $"Serialization failed for value of type {value?.GetType()}",
+                ex
+            );
         }
     }
 }

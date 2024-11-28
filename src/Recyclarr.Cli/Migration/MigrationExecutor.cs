@@ -3,8 +3,10 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
 
-public class MigrationExecutor(IOrderedEnumerable<IMigrationStep> migrationSteps, IAnsiConsole console)
-    : IMigrationExecutor
+public class MigrationExecutor(
+    IOrderedEnumerable<IMigrationStep> migrationSteps,
+    IAnsiConsole console
+) : IMigrationExecutor
 {
     public void PerformAllMigrationSteps(bool withDiagnostics)
     {
@@ -49,7 +51,8 @@ public class MigrationExecutor(IOrderedEnumerable<IMigrationStep> migrationSteps
         }
 
         console.WriteLine(
-            "\nRun the `migrate` subcommand to perform the above migration steps automatically\n");
+            "\nRun the `migrate` subcommand to perform the above migration steps automatically\n"
+        );
 
         if (wereAnyRequired)
         {

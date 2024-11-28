@@ -11,8 +11,8 @@ public sealed class IncludePostProcessor(
     ConfigParser parser,
     ConfigValidationExecutor validator,
     IYamlIncludeResolver includeResolver,
-    ConfigDeprecations deprecations)
-    : IConfigPostProcessor, IDisposable
+    ConfigDeprecations deprecations
+) : IConfigPostProcessor, IDisposable
 {
     private IDisposable? _logScope;
 
@@ -25,10 +25,18 @@ public sealed class IncludePostProcessor(
     {
         try
         {
-            config = config with
+            config = new RootConfigYaml
             {
-                Radarr = ProcessIncludes(config.Radarr, new RadarrConfigMerger(), SupportedServices.Radarr),
-                Sonarr = ProcessIncludes(config.Sonarr, new SonarrConfigMerger(), SupportedServices.Sonarr)
+                Radarr = ProcessIncludes(
+                    config.Radarr,
+                    new RadarrConfigMerger(),
+                    SupportedServices.Radarr
+                ),
+                Sonarr = ProcessIncludes(
+                    config.Sonarr,
+                    new SonarrConfigMerger(),
+                    SupportedServices.Sonarr
+                ),
             };
         }
         finally
@@ -42,7 +50,8 @@ public sealed class IncludePostProcessor(
     private Dictionary<string, T>? ProcessIncludes<T>(
         IReadOnlyDictionary<string, T>? configs,
         ServiceConfigMerger<T> merger,
-        SupportedServices serviceType)
+        SupportedServices serviceType
+    )
         where T : ServiceConfigYaml, new()
     {
         if (configs is null)
@@ -61,8 +70,8 @@ public sealed class IncludePostProcessor(
             }
 
             // Combine all includes together first
-            var aggregateInclude = config.Include
-                .Select(x =>
+            var aggregateInclude = config
+                .Include.Select(x =>
                 {
                     var include = LoadYamlInclude<T>(x, serviceType);
                     return deprecations.CheckAndTransform(include);
@@ -70,14 +79,17 @@ public sealed class IncludePostProcessor(
                 .Aggregate(new T(), merger.Merge);
 
             // Merge the config into the aggregated includes so that root config values overwrite included values.
-            mergedConfigs.Add(key, merger.Merge(aggregateInclude, config) with
-            {
-                BaseUrl = config.BaseUrl,
-                ApiKey = config.ApiKey,
+            mergedConfigs.Add(
+                key,
+                merger.Merge(aggregateInclude, config) with
+                {
+                    BaseUrl = config.BaseUrl,
+                    ApiKey = config.ApiKey,
 
-                // No reason to keep these around anymore now that they have been merged
-                Include = null
-            });
+                    // No reason to keep these around anymore now that they have been merged
+                    Include = null,
+                }
+            );
         }
 
         return mergedConfigs;
@@ -97,7 +109,9 @@ public sealed class IncludePostProcessor(
 
         if (!validator.Validate(configToMerge))
         {
-            throw new YamlIncludeException($"Validation of included YAML failed: {yamlFile.FullName}");
+            throw new YamlIncludeException(
+                $"Validation of included YAML failed: {yamlFile.FullName}"
+            );
         }
 
         if (configToMerge.BaseUrl is not null)

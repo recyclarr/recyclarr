@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
@@ -13,19 +14,22 @@ namespace Recyclarr.Cli.Processors.Delete;
 [UsedImplicitly]
 internal class CustomFormatConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
-    public ICustomFormatApiService CustomFormatApi { get; } = scope.Resolve<ICustomFormatApiService>();
+    public ICustomFormatApiService CustomFormatApi { get; } =
+        scope.Resolve<ICustomFormatApiService>();
 }
 
 public class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
     IConfigurationRegistry configRegistry,
-    ConfigurationScopeFactory scopeFactory)
-    : IDeleteCustomFormatsProcessor
+    ConfigurationScopeFactory scopeFactory
+) : IDeleteCustomFormatsProcessor
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
-        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(GetTargetConfig(settings));
+        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(
+            GetTargetConfig(settings)
+        );
 
         var cfs = await ObtainCustomFormats(scope.CustomFormatApi, ct);
 
@@ -33,7 +37,9 @@ public class DeleteCustomFormatsProcessor(
         {
             if (settings.CustomFormatNames.Count == 0)
             {
-                throw new CommandException("Custom format names must be specified if the `--all` option is not used.");
+                throw new CommandException(
+                    "Custom format names must be specified if the `--all` option is not used."
+                );
             }
 
             cfs = ProcessManuallySpecifiedFormats(settings, cfs);
@@ -53,8 +59,12 @@ public class DeleteCustomFormatsProcessor(
             return;
         }
 
-        if (!settings.Force &&
-            !console.Confirm("\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?"))
+        if (
+            !settings.Force
+            && !console.Confirm(
+                "\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?"
+            )
+        )
         {
             console.WriteLine("Aborted!");
             return;
@@ -64,53 +74,73 @@ public class DeleteCustomFormatsProcessor(
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private async Task DeleteCustomFormats(ICustomFormatApiService api, ICollection<CustomFormatData> cfs)
+    private async Task DeleteCustomFormats(
+        ICustomFormatApiService api,
+        ICollection<CustomFormatData> cfs
+    )
     {
-        await console.Progress().StartAsync(async ctx =>
-        {
-            var task = ctx.AddTask("Deleting Custom Formats").MaxValue(cfs.Count);
-
-            var options = new ParallelOptions {MaxDegreeOfParallelism = 8};
-            await Parallel.ForEachAsync(cfs, options, async (cf, token) =>
+        await console
+            .Progress()
+            .StartAsync(async ctx =>
             {
-                try
-                {
-                    await api.DeleteCustomFormat(cf.Id, token);
-                    log.Debug("Deleted {Name}", cf.Name);
-                }
-                catch (Exception e)
-                {
-                    log.Debug(e, "Failed to delete CF");
-                    console.WriteLine($"Failed to delete CF: {cf.Name}");
-                }
+                var task = ctx.AddTask("Deleting Custom Formats").MaxValue(cfs.Count);
 
-                task.Increment(1);
+                var options = new ParallelOptions { MaxDegreeOfParallelism = 8 };
+                await Parallel.ForEachAsync(
+                    cfs,
+                    options,
+                    async (cf, token) =>
+                    {
+                        try
+                        {
+                            await api.DeleteCustomFormat(cf.Id, token);
+                            log.Debug("Deleted {Name}", cf.Name);
+                        }
+                        catch (Exception e)
+                        {
+                            log.Debug(e, "Failed to delete CF");
+                            console.WriteLine($"Failed to delete CF: {cf.Name}");
+                        }
+
+                        task.Increment(1);
+                    }
+                );
             });
-        });
     }
 
-    private async Task<IList<CustomFormatData>> ObtainCustomFormats(ICustomFormatApiService api, CancellationToken ct)
+    private async Task<IList<CustomFormatData>> ObtainCustomFormats(
+        ICustomFormatApiService api,
+        CancellationToken ct
+    )
     {
-        IList<CustomFormatData> cfs = new List<CustomFormatData>();
+        IList<CustomFormatData> cfs = [];
 
-        await console.Status().StartAsync("Obtaining custom formats...", async _ =>
-        {
-            cfs = await api.GetCustomFormats(ct);
-        });
+        await console
+            .Status()
+            .StartAsync(
+                "Obtaining custom formats...",
+                async _ =>
+                {
+                    cfs = await api.GetCustomFormats(ct);
+                }
+            );
 
         return cfs;
     }
 
     private IList<CustomFormatData> ProcessManuallySpecifiedFormats(
         IDeleteCustomFormatSettings settings,
-        IList<CustomFormatData> cfs)
+        IList<CustomFormatData> cfs
+    )
     {
-        ILookup<bool, (string Name, IEnumerable<CustomFormatData> Cfs)> result = settings.CustomFormatNames
-            .GroupJoin(cfs,
+        ILookup<bool, (string Name, IEnumerable<CustomFormatData> Cfs)> result = settings
+            .CustomFormatNames.GroupJoin(
+                cfs,
                 x => x,
                 x => x.Name,
                 (x, y) => (Name: x, Cf: y),
-                StringComparer.InvariantCultureIgnoreCase)
+                StringComparer.InvariantCultureIgnoreCase
+            )
             .ToLookup(x => x.Cf.Any());
 
         // 'false' means there were no CFs matched to this CF name
@@ -120,7 +150,9 @@ public class DeleteCustomFormatsProcessor(
             log.Debug("Unmatched CFs: {Names}", cfNames);
             foreach (var name in cfNames)
             {
-                console.MarkupLineInterpolated($"[yellow]Warning[/]: Unmatched CF Name: [teal]{name}[/]");
+                console.MarkupLineInterpolated(
+                    $"[yellow]Warning[/]: Unmatched CF Name: [teal]{name}[/]"
+                );
             }
         }
 
@@ -135,8 +167,7 @@ public class DeleteCustomFormatsProcessor(
         console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");
         console.WriteLine();
 
-        var cfNames = cfs
-            .Select(x => x.Name)
+        var cfNames = cfs.Select(x => x.Name)
             .Order(StringComparer.InvariantCultureIgnoreCase)
             .Chunk(Math.Max(15, cfs.Count / 3)) // Minimum row size is 15 for the table
             .ToList();
@@ -145,9 +176,13 @@ public class DeleteCustomFormatsProcessor(
 
         foreach (var rowItems in cfNames.Transpose())
         {
-            grid.AddRow(rowItems
-                .Select(x => Markup.FromInterpolated($"[bold white]{x}[/]"))
-                .ToArray());
+            var rows = rowItems
+                .Select(x =>
+                    Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[bold white]{x}[/]")
+                )
+                .ToArray();
+
+            grid.AddRow(rows);
         }
 
         console.Write(grid);
@@ -156,18 +191,21 @@ public class DeleteCustomFormatsProcessor(
 
     private IServiceConfiguration GetTargetConfig(IDeleteCustomFormatSettings settings)
     {
-        var configs = configRegistry.FindAndLoadConfigs(new ConfigFilterCriteria
-        {
-            Instances = [settings.InstanceName]
-        });
+        var configs = configRegistry.FindAndLoadConfigs(
+            new ConfigFilterCriteria { Instances = [settings.InstanceName] }
+        );
 
         switch (configs.Count)
         {
             case 0:
-                throw new ArgumentException($"No configuration found with name: {settings.InstanceName}");
+                throw new ArgumentException(
+                    $"No configuration found with name: {settings.InstanceName}"
+                );
 
             case > 1:
-                throw new ArgumentException($"More than one instance found with this name: {settings.InstanceName}");
+                throw new ArgumentException(
+                    $"More than one instance found with this name: {settings.InstanceName}"
+                );
         }
 
         return configs.Single();

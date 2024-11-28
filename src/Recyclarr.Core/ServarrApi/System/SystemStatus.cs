@@ -1,6 +1,3 @@
 namespace Recyclarr.ServarrApi.System;
 
-public record SystemStatus(
-    string AppName,
-    string Version
-);
+public record SystemStatus(string AppName, string Version);

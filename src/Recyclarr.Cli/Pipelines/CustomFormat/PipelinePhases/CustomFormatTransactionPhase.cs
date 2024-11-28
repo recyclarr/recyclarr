@@ -15,7 +15,11 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
 
         foreach (var guideCf in context.ConfigOutput)
         {
-            log.Debug("Process transaction for guide CF {TrashId} ({Name})", guideCf.TrashId, guideCf.Name);
+            log.Debug(
+                "Process transaction for guide CF {TrashId} ({Name})",
+                guideCf.TrashId,
+                guideCf.Name
+            );
 
             guideCf.Id = context.Cache.FindId(guideCf) ?? 0;
 
@@ -42,11 +46,14 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
 
         if (config.DeleteOldCustomFormats)
         {
-            transactions.DeletedCustomFormats.AddRange(context.Cache.TrashIdMappings
-                // Custom format must be in the cache but NOT in the user's config
-                .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
-                // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
-                .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.CustomFormatId)));
+            transactions.DeletedCustomFormats.AddRange(
+                context
+                    .Cache.TrashIdMappings
+                    // Custom format must be in the cache but NOT in the user's config
+                    .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
+                    // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
+                    .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.CustomFormatId))
+            );
         }
 
         context.TransactionOutput = transactions;
@@ -55,7 +62,8 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
     private void ProcessExistingCf(
         CustomFormatData guideCf,
         CustomFormatData serviceCf,
-        CustomFormatTransactionData transactions)
+        CustomFormatTransactionData transactions
+    )
     {
         if (config.ReplaceExistingCustomFormats)
         {
@@ -64,9 +72,12 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
             if (guideCf.Id != serviceCf.Id)
             {
                 log.Debug(
-                    "Format IDs for CF {Name} did not match which indicates a manually-created CF is " +
-                    "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
-                    serviceCf.Name, guideCf.Id, serviceCf.Id);
+                    "Format IDs for CF {Name} did not match which indicates a manually-created CF is "
+                        + "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
+                    serviceCf.Name,
+                    guideCf.Id,
+                    serviceCf.Id
+                );
 
                 guideCf.Id = serviceCf.Id;
             }
@@ -80,7 +91,8 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
             if (guideCf.Id != serviceCf.Id)
             {
                 transactions.ConflictingCustomFormats.Add(
-                    new ConflictingCustomFormat(guideCf, serviceCf.Id));
+                    new ConflictingCustomFormat(guideCf, serviceCf.Id)
+                );
             }
             else
             {
@@ -92,7 +104,8 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
     private static void AddUpdatedCustomFormat(
         CustomFormatData guideCf,
         CustomFormatData serviceCf,
-        CustomFormatTransactionData transactions)
+        CustomFormatTransactionData transactions
+    )
     {
         if (guideCf != serviceCf)
         {
@@ -104,12 +117,18 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
         }
     }
 
-    private static CustomFormatData? FindServiceCfByName(IEnumerable<CustomFormatData> serviceCfs, string cfName)
+    private static CustomFormatData? FindServiceCfByName(
+        IEnumerable<CustomFormatData> serviceCfs,
+        string cfName
+    )
     {
         return serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Name));
     }
 
-    private static CustomFormatData? FindServiceCfById(IEnumerable<CustomFormatData> serviceCfs, int cfId)
+    private static CustomFormatData? FindServiceCfById(
+        IEnumerable<CustomFormatData> serviceCfs,
+        int cfId
+    )
     {
         return serviceCfs.FirstOrDefault(rcf => cfId == rcf.Id);
     }

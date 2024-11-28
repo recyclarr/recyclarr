@@ -22,10 +22,14 @@ public class CustomFormatDataComparerTest
 
         var b = CreateMockCustomFormatData() with
         {
-            Specifications = a.Specifications.Select(spec => spec with
-            {
-                Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name
-            }).ToList()
+            Specifications = a
+                .Specifications.Select(spec =>
+                    spec with
+                    {
+                        Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name,
+                    }
+                )
+                .ToList(),
         };
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -37,15 +41,15 @@ public class CustomFormatDataComparerTest
         var a = new CustomFormatData
         {
             TrashId = "a",
-            TrashScores = {["default"] = 1},
-            Category = "one"
+            TrashScores = { ["default"] = 1 },
+            Category = "one",
         };
 
         var b = new CustomFormatData
         {
             TrashId = "b",
-            TrashScores = {["default"] = 2},
-            Category = "two"
+            TrashScores = { ["default"] = 2 },
+            Category = "two",
         };
 
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -84,7 +88,9 @@ public class CustomFormatDataComparerTest
 
         var b = a with
         {
-            Specifications = a.Specifications.Concat([new CustomFormatSpecificationData()]).ToList()
+            Specifications = a
+                .Specifications.Concat([new CustomFormatSpecificationData()])
+                .ToList(),
         };
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -97,10 +103,14 @@ public class CustomFormatDataComparerTest
 
         var b = a with
         {
-            Specifications = a.Specifications.Select(spec => spec with
-            {
-                Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name
-            }).ToList()
+            Specifications = a
+                .Specifications.Select(spec =>
+                    spec with
+                    {
+                        Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name,
+                    }
+                )
+                .ToList(),
         };
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -112,14 +122,22 @@ public class CustomFormatDataComparerTest
         var a = CreateMockCustomFormatData();
         var b = a with
         {
-            Specifications = a.Specifications.Select(spec => spec with
-            {
-                Name = spec.Name == "WEBRIP" ? "UNIQUE_NAME" : spec.Name,
-                Fields = spec.Fields.Select(field => field with
-                {
-                    Value = field.Value is int ? 99 : "NEW_VALUE"
-                }).ToList()
-            }).ToList()
+            Specifications = a
+                .Specifications.Select(spec =>
+                    spec with
+                    {
+                        Name = spec.Name == "WEBRIP" ? "UNIQUE_NAME" : spec.Name,
+                        Fields = spec
+                            .Fields.Select(field =>
+                                field with
+                                {
+                                    Value = field.Value is int ? 99 : "NEW_VALUE",
+                                }
+                            )
+                            .ToList(),
+                    }
+                )
+                .ToList(),
         };
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -131,12 +149,24 @@ public class CustomFormatDataComparerTest
         var a = CreateMockCustomFormatData();
         var b = a with
         {
-            Specifications = a.Specifications.Select(spec => spec with
-            {
-                Fields = spec.Fields
-                    .Concat([new CustomFormatFieldData {Name = "AdditionalField", Value = "ExtraValue"}])
-                    .ToList()
-            }).ToList()
+            Specifications = a
+                .Specifications.Select(spec =>
+                    spec with
+                    {
+                        Fields = spec
+                            .Fields.Concat(
+                                [
+                                    new CustomFormatFieldData
+                                    {
+                                        Name = "AdditionalField",
+                                        Value = "ExtraValue",
+                                    },
+                                ]
+                            )
+                            .ToList(),
+                    }
+                )
+                .ToList(),
         };
 
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -147,10 +177,7 @@ public class CustomFormatDataComparerTest
     {
         var a = CreateMockCustomFormatData();
 
-        var b = a with
-        {
-            Specifications = a.Specifications.Reverse().ToList()
-        };
+        var b = a with { Specifications = a.Specifications.Reverse().ToList() };
 
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
@@ -162,10 +189,14 @@ public class CustomFormatDataComparerTest
 
         var b = a with
         {
-            Specifications = a.Specifications.Select(spec => spec with
-            {
-                Fields = spec.Fields.Reverse().ToList()
-            }).ToList()
+            Specifications = a
+                .Specifications.Select(spec =>
+                    spec with
+                    {
+                        Fields = spec.Fields.Reverse().ToList(),
+                    }
+                )
+                .ToList(),
         };
 
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
@@ -175,7 +206,8 @@ public class CustomFormatDataComparerTest
     [TestCase(typeof(CustomFormatSpecificationData))]
     public void Throws_exception_when_used_as_key_in_dictionary(Type type)
     {
-        var act = () => new Dictionary<object, object?>().Add(Activator.CreateInstance(type)!, null);
+        var act = () =>
+            new Dictionary<object, object?>().Add(Activator.CreateInstance(type)!, null);
 
         act.Should().Throw<NotImplementedException>();
     }
@@ -195,9 +227,9 @@ public class CustomFormatDataComparerTest
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
-            Specifications = new List<CustomFormatSpecificationData>
-            {
-                new()
+            Specifications =
+            [
+                new CustomFormatSpecificationData
                 {
                     Name = "EVO",
                     Implementation = "ReleaseTitleSpecification",
@@ -205,11 +237,11 @@ public class CustomFormatDataComparerTest
                     Required = true,
                     Fields = new List<CustomFormatFieldData>
                     {
-                        new() {Name = "value", Value = @"\bEVO(TGX)?\b"},
-                        new() {Name = "foo1", Value = "foo1"}
-                    }
+                        new() { Name = "value", Value = @"\bEVO(TGX)?\b" },
+                        new() { Name = "foo1", Value = "foo1" },
+                    },
                 },
-                new()
+                new CustomFormatSpecificationData
                 {
                     Name = "WEBDL",
                     Implementation = "SourceSpecification",
@@ -217,11 +249,11 @@ public class CustomFormatDataComparerTest
                     Required = true,
                     Fields = new List<CustomFormatFieldData>
                     {
-                        new() {Name = "value", Value = 7},
-                        new() {Name = "foo2", Value = "foo2"}
-                    }
+                        new() { Name = "value", Value = 7 },
+                        new() { Name = "foo2", Value = "foo2" },
+                    },
                 },
-                new()
+                new CustomFormatSpecificationData
                 {
                     Name = "WEBRIP",
                     Implementation = "LanguageSpecification",
@@ -229,12 +261,12 @@ public class CustomFormatDataComparerTest
                     Required = true,
                     Fields = new List<CustomFormatFieldData>
                     {
-                        new() {Name = "value", Value = 8},
-                        new() {Name = "exceptLanguage", Value = false},
-                        new() {Name = "foo3", Value = "foo3"}
-                    }
-                }
-            }
+                        new() { Name = "value", Value = 8 },
+                        new() { Name = "exceptLanguage", Value = false },
+                        new() { Name = "foo3", Value = "foo3" },
+                    },
+                },
+            ],
         };
     }
 }

@@ -25,6 +25,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{18E17C53-F600-40AE-82C1-3CD1E547C307}"
 	ProjectSection(SolutionItems) = preProject
 		tests\Directory.Build.props = tests\Directory.Build.props
+		tests\.editorconfig = tests\.editorconfig
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recyclarr.Tests.TestLibrary", "tests\Recyclarr.Tests.TestLibrary\Recyclarr.Tests.TestLibrary.csproj", "{DE198BA1-2906-43BB-9CDB-977B9218A670}"

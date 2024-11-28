@@ -9,24 +9,24 @@ namespace Recyclarr.TestLibrary.AutoFixture;
 public sealed class AutoMockDataAttribute : AutoDataAttribute
 {
     public AutoMockDataAttribute()
-        : base(NSubstituteFixture.Create)
-    {
-    }
+        : base(NSubstituteFixture.Create) { }
 
     public AutoMockDataAttribute(Type testFixtureClass, string methodName)
-        : base(() => CreateWithAutofac(testFixtureClass, methodName))
-    {
-    }
+        : base(() => CreateWithAutofac(testFixtureClass, methodName)) { }
 
     private static Fixture CreateWithAutofac(Type testFixtureClass, string methodName)
     {
-        var method = testFixtureClass.GetMethod(methodName,
-            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+        var method = testFixtureClass.GetMethod(
+            methodName,
+            BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static
+        );
         var getContainer = method?.CreateDelegate<Func<ILifetimeScope>>();
         if (getContainer is null)
         {
-            throw new ArgumentException("Unable to find method on test fixture. Method must be non-public to be found.",
-                nameof(methodName));
+            throw new ArgumentException(
+                "Unable to find method on test fixture. Method must be non-public to be found.",
+                nameof(methodName)
+            );
         }
 
         var fixture = NSubstituteFixture.Create();

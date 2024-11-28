@@ -2,14 +2,15 @@ using Recyclarr.Config.Secrets;
 
 namespace Recyclarr.Config.Parsing.PostProcessing;
 
-public class ImplicitUrlAndKeyPostProcessor(ILogger log, ISecretsProvider secrets) : IConfigPostProcessor
+public class ImplicitUrlAndKeyPostProcessor(ILogger log, ISecretsProvider secrets)
+    : IConfigPostProcessor
 {
     public RootConfigYaml Process(RootConfigYaml config)
     {
         return new RootConfigYaml
         {
             Radarr = ProcessService(config.Radarr),
-            Sonarr = ProcessService(config.Sonarr)
+            Sonarr = ProcessService(config.Sonarr),
         };
     }
 
@@ -25,13 +26,17 @@ public class ImplicitUrlAndKeyPostProcessor(ILogger log, ISecretsProvider secret
         return config with
         {
             ApiKey = config.ApiKey ?? GetSecret(instanceName, "api_key"),
-            BaseUrl = config.BaseUrl ?? GetSecret(instanceName, "base_url")
+            BaseUrl = config.BaseUrl ?? GetSecret(instanceName, "base_url"),
         };
     }
 
     private string? GetSecret(string instanceName, string property)
     {
-        log.Debug("Obtain {Property} implicitly for instance {InstanceName}", property, instanceName);
+        log.Debug(
+            "Obtain {Property} implicitly for instance {InstanceName}",
+            property,
+            instanceName
+        );
         return secrets.Secrets.GetValueOrDefault($"{instanceName}_{property}");
     }
 }

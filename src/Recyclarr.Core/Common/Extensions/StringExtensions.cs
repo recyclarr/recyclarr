@@ -39,7 +39,7 @@ public static class StringExtensions
 
     public static string FormatWith(this string value, params object[] args)
     {
-        return string.Format(value, args);
+        return string.Format(CultureInfo.InvariantCulture, value, args);
     }
 
     public static string TrimNewlines(this string value)

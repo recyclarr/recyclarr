@@ -26,18 +26,25 @@ public enum FormatScoreUpdateReason
     /// `--preview` runs since new custom formats that aren't synced yet won't be available when
     /// processing quality profiles.
     /// </summary>
-    New
+    New,
 }
 
-public record UpdatedFormatScore(ProfileFormatItemDto Dto, int NewScore, FormatScoreUpdateReason Reason)
+public record UpdatedFormatScore(
+    ProfileFormatItemDto Dto,
+    int NewScore,
+    FormatScoreUpdateReason Reason
+)
 {
     public static UpdatedFormatScore New(ProcessedQualityProfileScore score)
     {
-        var dto = new ProfileFormatItemDto {Format = score.FormatId, Name = score.CfName};
+        var dto = new ProfileFormatItemDto { Format = score.FormatId, Name = score.CfName };
         return new UpdatedFormatScore(dto, score.Score, FormatScoreUpdateReason.New);
     }
 
-    public static UpdatedFormatScore Reset(ProfileFormatItemDto dto, ProcessedQualityProfileData profileData)
+    public static UpdatedFormatScore Reset(
+        ProfileFormatItemDto dto,
+        ProcessedQualityProfileData profileData
+    )
     {
         var reset = profileData.Profile.ResetUnmatchedScores;
         var shouldReset = reset.Enabled && reset.Except.All(x => !dto.Name.EqualsIgnoreCase(x));
@@ -47,9 +54,15 @@ public record UpdatedFormatScore(ProfileFormatItemDto Dto, int NewScore, FormatS
         return new UpdatedFormatScore(dto, score, reason);
     }
 
-    public static UpdatedFormatScore Updated(ProfileFormatItemDto dto, ProcessedQualityProfileScore score)
+    public static UpdatedFormatScore Updated(
+        ProfileFormatItemDto dto,
+        ProcessedQualityProfileScore score
+    )
     {
-        var reason = dto.Score == score.Score ? FormatScoreUpdateReason.NoChange : FormatScoreUpdateReason.Updated;
+        var reason =
+            dto.Score == score.Score
+                ? FormatScoreUpdateReason.NoChange
+                : FormatScoreUpdateReason.Updated;
         return new UpdatedFormatScore(dto, score.Score, reason);
     }
 }

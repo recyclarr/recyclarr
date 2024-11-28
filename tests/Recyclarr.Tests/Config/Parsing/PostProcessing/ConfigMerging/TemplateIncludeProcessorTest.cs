@@ -11,19 +11,24 @@ public class TemplateIncludeProcessorTest
     public void Obtain_path_from_template(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IConfigTemplateGuideService templates,
-        TemplateIncludeProcessor sut)
+        TemplateIncludeProcessor sut
+    )
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns([
-            new TemplatePath
-            {
-                Id = "my-template",
-                Service = SupportedServices.Radarr,
-                TemplateFile = templatePath
-            }
-        ]);
+        templates
+            .GetIncludeData()
+            .Returns(
+                [
+                    new TemplatePath
+                    {
+                        Id = "my-template",
+                        Service = SupportedServices.Radarr,
+                        TemplateFile = templatePath,
+                    },
+                ]
+            );
 
-        var includeDirective = new TemplateYamlInclude {Template = "my-template"};
+        var includeDirective = new TemplateYamlInclude { Template = "my-template" };
 
         var path = sut.GetPathToConfig(includeDirective, SupportedServices.Radarr);
 
@@ -31,10 +36,9 @@ public class TemplateIncludeProcessorTest
     }
 
     [Test, AutoMockData]
-    public void Throw_when_template_is_null(
-        TemplateIncludeProcessor sut)
+    public void Throw_when_template_is_null(TemplateIncludeProcessor sut)
     {
-        var includeDirective = new TemplateYamlInclude {Template = null};
+        var includeDirective = new TemplateYamlInclude { Template = null };
 
         var act = () => sut.GetPathToConfig(includeDirective, SupportedServices.Radarr);
 
@@ -45,19 +49,24 @@ public class TemplateIncludeProcessorTest
     public void Throw_when_service_types_are_mixed(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IConfigTemplateGuideService templates,
-        TemplateIncludeProcessor sut)
+        TemplateIncludeProcessor sut
+    )
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns([
-            new TemplatePath
-            {
-                Id = "my-template",
-                Service = SupportedServices.Radarr,
-                TemplateFile = templatePath
-            }
-        ]);
+        templates
+            .GetIncludeData()
+            .Returns(
+                [
+                    new TemplatePath
+                    {
+                        Id = "my-template",
+                        Service = SupportedServices.Radarr,
+                        TemplateFile = templatePath,
+                    },
+                ]
+            );
 
-        var includeDirective = new TemplateYamlInclude {Template = "my-template"};
+        var includeDirective = new TemplateYamlInclude { Template = "my-template" };
 
         var act = () => sut.GetPathToConfig(includeDirective, SupportedServices.Sonarr);
 
@@ -68,19 +77,24 @@ public class TemplateIncludeProcessorTest
     public void Throw_when_no_template_found(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IConfigTemplateGuideService templates,
-        TemplateIncludeProcessor sut)
+        TemplateIncludeProcessor sut
+    )
     {
         var templatePath = fs.CurrentDirectory().File("some/path/template.yml");
-        templates.GetIncludeData().Returns([
-            new TemplatePath
-            {
-                Id = "my-template",
-                Service = SupportedServices.Radarr,
-                TemplateFile = templatePath
-            }
-        ]);
+        templates
+            .GetIncludeData()
+            .Returns(
+                [
+                    new TemplatePath
+                    {
+                        Id = "my-template",
+                        Service = SupportedServices.Radarr,
+                        TemplateFile = templatePath,
+                    },
+                ]
+            );
 
-        var includeDirective = new TemplateYamlInclude {Template = "template-does-not-exist"};
+        var includeDirective = new TemplateYamlInclude { Template = "template-does-not-exist" };
 
         var act = () => sut.GetPathToConfig(includeDirective, SupportedServices.Radarr);
 

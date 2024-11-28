@@ -50,13 +50,15 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         // created.
         var appData = env.GetFolderPath(
             Environment.SpecialFolder.ApplicationData,
-            Environment.SpecialFolderOption.Create);
+            Environment.SpecialFolderOption.Create
+        );
 
         if (string.IsNullOrEmpty(appData))
         {
             throw new NoHomeDirectoryException(
-                "Unable to find or create the default app data directory. The application cannot determine where " +
-                "to place data files. Please use the --app-data option to explicitly set a location for these files.");
+                "Unable to find or create the default app data directory. The application cannot determine where "
+                    + "to place data files. Please use the --app-data option to explicitly set a location for these files."
+            );
         }
 
         return fs.Path.Combine(appData, AppPaths.DefaultAppDataDirectoryName);

@@ -10,10 +10,7 @@ public class CustomFormatPipelineContext : IPipelineContext
 {
     public string PipelineDescription => "Custom Format";
     public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
-    [
-        SupportedServices.Sonarr,
-        SupportedServices.Radarr
-    ];
+        [SupportedServices.Sonarr, SupportedServices.Radarr];
 
     public IList<CustomFormatData> ConfigOutput { get; init; } = [];
     public IList<CustomFormatData> ApiFetchOutput { get; init; } = [];

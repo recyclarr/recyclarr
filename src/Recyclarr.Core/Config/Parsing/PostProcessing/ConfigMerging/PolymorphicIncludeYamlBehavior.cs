@@ -9,11 +9,15 @@ public class PolymorphicIncludeYamlBehavior : IYamlBehavior
 {
     public void Setup(DeserializerBuilder builder)
     {
-        builder.WithTypeDiscriminatingNodeDeserializer(o => o
-            .AddUniqueKeyTypeDiscriminator<IYamlInclude>(new Dictionary<string, Type>
-            {
-                [nameof(ConfigYamlInclude.Config).ToSnakeCase()] = typeof(ConfigYamlInclude),
-                [nameof(TemplateYamlInclude.Template).ToSnakeCase()] = typeof(TemplateYamlInclude)
-            }));
+        builder.WithTypeDiscriminatingNodeDeserializer(o =>
+            o.AddUniqueKeyTypeDiscriminator<IYamlInclude>(
+                new Dictionary<string, Type>
+                {
+                    [nameof(ConfigYamlInclude.Config).ToSnakeCase()] = typeof(ConfigYamlInclude),
+                    [nameof(TemplateYamlInclude.Template).ToSnakeCase()] =
+                        typeof(TemplateYamlInclude),
+                }
+            )
+        );
     }
 }

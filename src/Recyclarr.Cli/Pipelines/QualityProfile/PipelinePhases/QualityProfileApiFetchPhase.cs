@@ -3,7 +3,10 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public record QualityProfileServiceData(IReadOnlyList<QualityProfileDto> Profiles, QualityProfileDto Schema);
+public record QualityProfileServiceData(
+    IReadOnlyList<QualityProfileDto> Profiles,
+    QualityProfileDto Schema
+);
 
 public class QualityProfileApiFetchPhase(IQualityProfileApiService api)
     : IApiFetchPipelinePhase<QualityProfilePipelineContext>

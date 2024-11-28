@@ -16,34 +16,30 @@ public class CustomFormatConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var guide = fixture.Freeze<ICustomFormatGuideService>();
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs([
-            NewCf.Data("one", "cf1"),
-            NewCf.Data("two", "cf2")
-        ]);
+        guide
+            .GetCustomFormatData(default!)
+            .ReturnsForAnyArgs([NewCf.Data("one", "cf1"), NewCf.Data("two", "cf2")]);
 
-        fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
-        {
-            CustomFormats = new List<CustomFormatConfig>
+        fixture.Inject<IServiceConfiguration>(
+            NewConfig.Radarr() with
             {
-                new()
+                CustomFormats = new List<CustomFormatConfig>
                 {
-                    TrashIds = new List<string>
+                    new()
                     {
-                        "cf1",
-                        "cf2"
-                    }
-                }
+                        TrashIds = new List<string> { "cf1", "cf2" },
+                    },
+                },
             }
-        });
+        );
 
         var context = new CustomFormatPipelineContext();
         var sut = fixture.Create<CustomFormatConfigPhase>();
         sut.Execute(context, CancellationToken.None);
 
-        context.ConfigOutput.Should().BeEquivalentTo([
-            NewCf.Data("one", "cf1"),
-            NewCf.Data("two", "cf2")
-        ]);
+        context
+            .ConfigOutput.Should()
+            .BeEquivalentTo([NewCf.Data("one", "cf1"), NewCf.Data("two", "cf2")]);
     }
 
     [Test]
@@ -52,25 +48,20 @@ public class CustomFormatConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var guide = fixture.Freeze<ICustomFormatGuideService>();
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs([
-            NewCf.Data("", "cf4")
-        ]);
+        guide.GetCustomFormatData(default!).ReturnsForAnyArgs([NewCf.Data("", "cf4")]);
 
-        fixture.Inject<IServiceConfiguration>(NewConfig.Radarr() with
-        {
-            CustomFormats = new List<CustomFormatConfig>
+        fixture.Inject<IServiceConfiguration>(
+            NewConfig.Radarr() with
             {
-                new()
+                CustomFormats = new List<CustomFormatConfig>
                 {
-                    TrashIds = new List<string>
+                    new()
                     {
-                        "cf1",
-                        "cf2",
-                        "cf3"
-                    }
-                }
+                        TrashIds = new List<string> { "cf1", "cf2", "cf3" },
+                    },
+                },
             }
-        });
+        );
 
         var context = new CustomFormatPipelineContext();
         var sut = fixture.Create<CustomFormatConfigPhase>();

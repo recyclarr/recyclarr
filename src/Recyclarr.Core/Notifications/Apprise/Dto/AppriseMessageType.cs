@@ -5,5 +5,5 @@ public enum AppriseMessageType
     Info,
     Success,
     Warning,
-    Failure
+    Failure,
 }

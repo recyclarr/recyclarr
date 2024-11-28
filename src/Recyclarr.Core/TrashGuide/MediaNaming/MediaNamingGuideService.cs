@@ -1,25 +1,34 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Recyclarr.Json.Loading;
 using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.MediaNaming;
 
-public class MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, GuideJsonLoader jsonLoader)
-    : IMediaNamingGuideService
+public class MediaNamingGuideService(
+    IRepoMetadataBuilder metadataBuilder,
+    GuideJsonLoader jsonLoader
+) : IMediaNamingGuideService
 {
     private IReadOnlyList<IDirectoryInfo> CreatePaths(SupportedServices serviceType)
     {
         var metadata = metadataBuilder.GetMetadata();
         return serviceType switch
         {
-            SupportedServices.Radarr => metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Radarr.Naming),
-            SupportedServices.Sonarr => metadataBuilder.ToDirectoryInfoList(metadata.JsonPaths.Sonarr.Naming),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null)
+            SupportedServices.Radarr => metadataBuilder.ToDirectoryInfoList(
+                metadata.JsonPaths.Radarr.Naming
+            ),
+            SupportedServices.Sonarr => metadataBuilder.ToDirectoryInfoList(
+                metadata.JsonPaths.Sonarr.Naming
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
         };
     }
 
+    [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
     private static Dictionary<string, string> JoinDictionaries(
-        IEnumerable<IReadOnlyDictionary<string, string>> dictionaries)
+        IEnumerable<IReadOnlyDictionary<string, string>> dictionaries
+    )
     {
         return dictionaries
             .SelectMany(x => x.Select(y => (y.Key, y.Value)))
@@ -33,7 +42,7 @@ public class MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, Guide
         return new RadarrMediaNamingData
         {
             File = JoinDictionaries(data.Select(x => x.File)),
-            Folder = JoinDictionaries(data.Select(x => x.Folder))
+            Folder = JoinDictionaries(data.Select(x => x.Folder)),
         };
     }
 
@@ -49,8 +58,8 @@ public class MediaNamingGuideService(IRepoMetadataBuilder metadataBuilder, Guide
             {
                 Anime = JoinDictionaries(data.Select(x => x.Episodes.Anime)),
                 Daily = JoinDictionaries(data.Select(x => x.Episodes.Daily)),
-                Standard = JoinDictionaries(data.Select(x => x.Episodes.Standard))
-            }
+                Standard = JoinDictionaries(data.Select(x => x.Episodes.Standard)),
+            },
         };
     }
 }

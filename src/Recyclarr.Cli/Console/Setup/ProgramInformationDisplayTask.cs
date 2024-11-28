@@ -11,7 +11,5 @@ public class ProgramInformationDisplayTask(ILogger log, IAppPaths paths) : IGlob
         log.Debug("App Data Dir: {AppData}", paths.AppDataDirectory);
     }
 
-    public void OnFinish()
-    {
-    }
+    public void OnFinish() { }
 }

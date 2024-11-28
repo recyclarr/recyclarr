@@ -3,7 +3,10 @@ using Recyclarr.Common.FluentValidation;
 namespace Recyclarr.Config.Parsing;
 
 [UsedImplicitly]
-public class ConfigValidationExecutor(ValidationLogger validationLogger, IRuntimeValidationService validationService)
+public class ConfigValidationExecutor(
+    ValidationLogger validationLogger,
+    IRuntimeValidationService validationService
+)
 {
     public bool Validate(object config, params string[] ruleSets)
     {

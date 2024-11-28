@@ -9,17 +9,13 @@ public class ConfigYamlMapperProfileTest
 {
     private static IMapper CreateMapper()
     {
-        return new MapperConfiguration(c => c.AddProfile<ConfigYamlMapperProfile>())
-            .CreateMapper();
+        return new MapperConfiguration(c => c.AddProfile<ConfigYamlMapperProfile>()).CreateMapper();
     }
 
     [Test]
     public void Profile_quality_null_substitutions()
     {
-        var yaml = new QualityProfileQualityConfigYaml
-        {
-            Enabled = null
-        };
+        var yaml = new QualityProfileQualityConfigYaml { Enabled = null };
 
         var mapper = CreateMapper();
         var result = mapper.Map<QualityProfileQualityConfig>(yaml);
@@ -30,10 +26,7 @@ public class ConfigYamlMapperProfileTest
     [Test]
     public void Profile_null_substitutions()
     {
-        var yaml = new QualityProfileConfigYaml
-        {
-            QualitySort = null
-        };
+        var yaml = new QualityProfileConfigYaml { QualitySort = null };
 
         var mapper = CreateMapper();
         var result = mapper.Map<QualityProfileConfig>(yaml);

@@ -11,8 +11,8 @@ public class QualitySizeConfigPhase(
     ILogger log,
     IQualitySizeGuideService guide,
     IServiceConfiguration config,
-    IQualityItemLimitFactory limitFactory)
-    : IConfigPipelinePhase<QualitySizePipelineContext>
+    IQualityItemLimitFactory limitFactory
+) : IConfigPipelinePhase<QualitySizePipelineContext>
 {
     public async Task Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
@@ -23,41 +23,54 @@ public class QualitySizeConfigPhase(
             return;
         }
 
-        var guideSizeData = guide.GetQualitySizeData(config.ServiceType)
+        var guideSizeData = guide
+            .GetQualitySizeData(config.ServiceType)
             .FirstOrDefault(x => x.Type.EqualsIgnoreCase(configSizeData.Type));
 
         if (guideSizeData == null)
         {
-            context.ConfigError = $"The specified quality definition type does not exist: {configSizeData.Type}";
+            context.ConfigError =
+                $"The specified quality definition type does not exist: {configSizeData.Type}";
             return;
         }
 
         var itemLimits = await limitFactory.Create(config.ServiceType, ct);
 
-        var sizeDataWithThresholds = guideSizeData.Qualities
-            .Select(x => new QualityItemWithLimits(x, itemLimits))
+        var sizeDataWithThresholds = guideSizeData
+            .Qualities.Select(x => new QualityItemWithLimits(x, itemLimits))
             .ToList();
 
         AdjustPreferredRatio(configSizeData, sizeDataWithThresholds);
-        context.ConfigOutput = new ProcessedQualitySizeData(configSizeData.Type, sizeDataWithThresholds);
+        context.ConfigOutput = new ProcessedQualitySizeData(
+            configSizeData.Type,
+            sizeDataWithThresholds
+        );
     }
 
-    private void AdjustPreferredRatio(QualityDefinitionConfig configSizeData, List<QualityItemWithLimits> guideSizeData)
+    private void AdjustPreferredRatio(
+        QualityDefinitionConfig configSizeData,
+        List<QualityItemWithLimits> guideSizeData
+    )
     {
         if (configSizeData.PreferredRatio is null)
         {
             return;
         }
 
-        log.Information("Using an explicit preferred ratio which will override values from the guide");
+        log.Information(
+            "Using an explicit preferred ratio which will override values from the guide"
+        );
 
         // Fix an out of range ratio and warn the user
         if (configSizeData.PreferredRatio is < 0 or > 1)
         {
             var clampedRatio = Math.Clamp(configSizeData.PreferredRatio.Value, 0, 1);
-            log.Warning("Your `preferred_ratio` of {CurrentRatio} is out of range. " +
-                "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
-                configSizeData.PreferredRatio, clampedRatio);
+            log.Warning(
+                "Your `preferred_ratio` of {CurrentRatio} is out of range. "
+                    + "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
+                configSizeData.PreferredRatio,
+                clampedRatio
+            );
 
             configSizeData.PreferredRatio = clampedRatio;
         }
@@ -65,7 +78,9 @@ public class QualitySizeConfigPhase(
         // Apply a calculated preferred size
         foreach (var quality in guideSizeData)
         {
-            quality.Item.Preferred = quality.InterpolatedPreferred(configSizeData.PreferredRatio.Value);
+            quality.Item.Preferred = quality.InterpolatedPreferred(
+                configSizeData.PreferredRatio.Value
+            );
         }
     }
 }

@@ -5,7 +5,13 @@ namespace Recyclarr.Http;
 
 public static class FlurlLogging
 {
-    public static void LogBody(ILogger log, Url url, string direction, HttpMethod method, string? body)
+    public static void LogBody(
+        ILogger log,
+        Url url,
+        string direction,
+        HttpMethod method,
+        string? body
+    )
     {
         if (string.IsNullOrEmpty(body))
         {

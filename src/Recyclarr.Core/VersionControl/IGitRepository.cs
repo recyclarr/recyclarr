@@ -2,8 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Recyclarr.VersionControl;
 
-[SuppressMessage("Design", "CA1068:CancellationToken parameters must come last", Justification =
-    "Doesn't mix well with `params` (which has to be at the end)")]
+[SuppressMessage(
+    "Design",
+    "CA1068:CancellationToken parameters must come last",
+    Justification = "Doesn't mix well with `params` (which has to be at the end)"
+)]
 public interface IGitRepository : IDisposable
 {
     Task ForceCheckout(CancellationToken token, string branch);

@@ -9,12 +9,9 @@ public class QualityProfileDtoTest
     [TestCase(true, true)]
     public void Upgrade_allowed_set_behavior(bool? value, bool? expected)
     {
-        var dto = new QualityProfileDto
-        {
-            UpgradeAllowed = false
-        };
+        var dto = new QualityProfileDto { UpgradeAllowed = false };
 
-        var result = dto with {UpgradeAllowed = value};
+        var result = dto with { UpgradeAllowed = value };
 
         result.UpgradeAllowed.Should().Be(expected);
     }
@@ -23,12 +20,9 @@ public class QualityProfileDtoTest
     [TestCase(20, 20)]
     public void Min_format_score_set_behavior(int? value, int? expected)
     {
-        var dto = new QualityProfileDto
-        {
-            MinFormatScore = 10
-        };
+        var dto = new QualityProfileDto { MinFormatScore = 10 };
 
-        var result = dto with {MinFormatScore = value};
+        var result = dto with { MinFormatScore = value };
 
         result.MinFormatScore.Should().Be(expected);
     }
@@ -37,12 +31,9 @@ public class QualityProfileDtoTest
     [TestCase(20, 20)]
     public void Cutoff_set_behavior(int? value, int? expected)
     {
-        var dto = new QualityProfileDto
-        {
-            Cutoff = 10
-        };
+        var dto = new QualityProfileDto { Cutoff = 10 };
 
-        var result = dto with {Cutoff = value};
+        var result = dto with { Cutoff = value };
 
         result.Cutoff.Should().Be(expected);
     }
@@ -51,12 +42,9 @@ public class QualityProfileDtoTest
     [TestCase(20, 20)]
     public void Cutoff_format_score_set_behavior(int? value, int? expected)
     {
-        var dto = new QualityProfileDto
-        {
-            CutoffFormatScore = 10
-        };
+        var dto = new QualityProfileDto { CutoffFormatScore = 10 };
 
-        var result = dto with {CutoffFormatScore = value};
+        var result = dto with { CutoffFormatScore = value };
 
         result.CutoffFormatScore.Should().Be(expected);
     }
@@ -66,14 +54,10 @@ public class QualityProfileDtoTest
     {
         var dto = new QualityProfileDto
         {
-            Items =
-            [
-                NewQp.QualityDto(1, "one", true),
-                NewQp.QualityDto(2, "two", true)
-            ]
+            Items = [NewQp.QualityDto(1, "one", true), NewQp.QualityDto(2, "two", true)],
         };
 
-        var result = dto with {Items = Array.Empty<ProfileItemDto>()};
+        var result = dto with { Items = Array.Empty<ProfileItemDto>() };
 
         result.Items.Should().BeEquivalentTo(dto.Items);
     }

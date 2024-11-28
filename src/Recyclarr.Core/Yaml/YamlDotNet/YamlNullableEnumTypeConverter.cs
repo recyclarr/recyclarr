@@ -15,8 +15,9 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
 
     public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
     {
-        type = Nullable.GetUnderlyingType(type) ??
-            throw new ArgumentException("Expected nullable enum type for ReadYaml");
+        type =
+            Nullable.GetUnderlyingType(type)
+            ?? throw new ArgumentException("Expected nullable enum type for ReadYaml");
 
         if (parser.Accept<NodeEvent>(out var @event) && NodeIsNull(@event))
         {
@@ -37,16 +38,18 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
 
     public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
     {
-        type = Nullable.GetUnderlyingType(type) ??
-            throw new ArgumentException("Expected nullable enum type for WriteYaml");
+        type =
+            Nullable.GetUnderlyingType(type)
+            ?? throw new ArgumentException("Expected nullable enum type for WriteYaml");
 
         if (value == null)
         {
             return;
         }
 
-        var toWrite = Enum.GetName(type, value) ??
-            throw new InvalidOperationException($"Invalid value {value} for enum: {type}");
+        var toWrite =
+            Enum.GetName(type, value)
+            ?? throw new InvalidOperationException($"Invalid value {value} for enum: {type}");
         emitter.Emit(new Scalar(null!, null!, toWrite, ScalarStyle.Any, true, false));
     }
 
@@ -59,7 +62,7 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
             return true;
         }
 
-        if (nodeEvent is not Scalar {Style: ScalarStyle.Plain} scalar)
+        if (nodeEvent is not Scalar { Style: ScalarStyle.Plain } scalar)
         {
             return false;
         }

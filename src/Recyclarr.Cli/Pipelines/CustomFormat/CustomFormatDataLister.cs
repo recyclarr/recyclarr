@@ -11,7 +11,7 @@ public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideServ
     {
         switch (settings)
         {
-            case {ScoreSets: true}:
+            case { ScoreSets: true }:
                 ListScoreSets(settings.Service, settings.Raw);
                 break;
 
@@ -26,13 +26,15 @@ public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideServ
         if (!raw)
         {
             console.WriteLine(
-                "\nThe following score sets are available. Use these with the `score_set` property in any " +
-                "quality profile defined under the top-level `quality_profiles` list.");
+                "\nThe following score sets are available. Use these with the `score_set` property in any "
+                    + "quality profile defined under the top-level `quality_profiles` list."
+            );
 
             console.WriteLine();
         }
 
-        var scoreSets = guide.GetCustomFormatData(serviceType)
+        var scoreSets = guide
+            .GetCustomFormatData(serviceType)
             .SelectMany(x => x.TrashScores.Keys)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Order(StringComparer.InvariantCultureIgnoreCase);
@@ -52,7 +54,8 @@ public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideServ
             console.WriteLine();
         }
 
-        var categories = guide.GetCustomFormatData(serviceType)
+        var categories = guide
+            .GetCustomFormatData(serviceType)
             .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
             .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
@@ -75,8 +78,9 @@ public class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideServ
         if (!raw)
         {
             console.WriteLine(
-                "The above Custom Formats are in YAML format and ready to be copied & pasted " +
-                "under the `trash_ids:` property.");
+                "The above Custom Formats are in YAML format and ready to be copied & pasted "
+                    + "under the `trash_ids:` property."
+            );
         }
     }
 }

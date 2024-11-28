@@ -16,14 +16,17 @@ public static class SettingsContextualMessages
             return null;
         }
 
-        if (msg.Contains(
-            "Property 'repository' not found on type " +
-            $"'{typeof(RecyclarrSettings).FullName}'"))
+        if (
+            msg.Contains(
+                "Property 'repository' not found on type "
+                    + $"'{typeof(RecyclarrSettings).FullName}'",
+                StringComparison.Ordinal
+            )
+        )
         {
-            return
-                "Usage of 'repository' setting is no " +
-                "longer supported. Use 'trash_guides' under 'repositories' instead." +
-                "See: <https://recyclarr.dev/wiki/upgrade-guide/v5.0/#settings-repository-changes>";
+            return "Usage of 'repository' setting is no "
+                + "longer supported. Use 'trash_guides' under 'repositories' instead."
+                + "See: <https://recyclarr.dev/wiki/upgrade-guide/v5.0/#settings-repository-changes>";
         }
 
         return null;

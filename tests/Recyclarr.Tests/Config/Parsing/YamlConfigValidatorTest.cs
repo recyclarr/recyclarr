@@ -18,20 +18,11 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new List<string> {"01234567890123456789012345678901"},
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
+                    TrashIds = new List<string> { "01234567890123456789012345678901" },
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
         var validator = new ServiceConfigYamlValidator();
@@ -52,23 +43,17 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
+        var result = validator.TestValidate(
+            config,
+            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        );
 
         result.ShouldHaveValidationErrorFor(x => x.ApiKey);
     }
@@ -85,25 +70,20 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
+        var result = validator.TestValidate(
+            config,
+            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        );
 
-        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+        result
+            .ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("'base_url' must not be empty.");
     }
 
@@ -119,25 +99,20 @@ public class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(config, o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
+        var result = validator.TestValidate(
+            config,
+            o => o.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        );
 
-        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+        result
+            .ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("base_url must start with 'http' or 'https'");
     }
 
@@ -154,20 +129,11 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new List<string> {"valid"},
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = "valid"
-                        }
-                    }
-                }
+                    TrashIds = new List<string> { "valid" },
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = ""
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "" },
         };
 
         var validator = new ServiceConfigYamlValidator();
@@ -187,41 +153,35 @@ public class YamlConfigValidatorTest
             {
                 new()
                 {
-                    TrashIds = new List<string> {"valid"},
-                    AssignScoresTo = new List<QualityScoreConfigYaml>
-                    {
-                        new()
-                        {
-                            Name = ""
-                        }
-                    }
-                }
+                    TrashIds = new List<string> { "valid" },
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "" } },
+                },
             },
-            QualityDefinition = new QualitySizeConfigYaml
-            {
-                Type = "valid"
-            }
+            QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
         var validator = new ServiceConfigYamlValidator();
         var result = validator.TestValidate(config);
 
-        result.ShouldHaveValidationErrorFor(FirstCf +
-            $"{nameof(CustomFormatConfig.AssignScoresTo)}[0].{nameof(AssignScoresToConfig.Name)}");
+        result.ShouldHaveValidationErrorFor(
+            FirstCf
+                + $"{nameof(CustomFormatConfig.AssignScoresTo)}[0].{nameof(AssignScoresToConfig.Name)}"
+        );
     }
 
     [Test]
     public void Validation_failure_when_base_url_invalid()
     {
-        var config = new ServiceConfigYaml
-        {
-            BaseUrl = "http:/invalid"
-        };
+        var config = new ServiceConfigYaml { BaseUrl = "http:/invalid" };
 
         var validator = new ServiceConfigYamlValidator();
-        var result = validator.TestValidate(config, s => s.IncludeRuleSets(YamlValidatorRuleSets.RootConfig));
+        var result = validator.TestValidate(
+            config,
+            s => s.IncludeRuleSets(YamlValidatorRuleSets.RootConfig)
+        );
 
-        result.ShouldHaveValidationErrorFor(x => x.BaseUrl)
+        result
+            .ShouldHaveValidationErrorFor(x => x.BaseUrl)
             .WithErrorMessage("base_url must be a valid URL");
     }
 }

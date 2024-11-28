@@ -46,6 +46,9 @@ jobs:
   cleanup:
     name: Resharper Code Cleanup
     runs-on: ubuntu-latest
+    # Temporarily disable this job until this issue is resolved:
+    # https://youtrack.jetbrains.com/issue/RSRP-499679
+    if: false
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -57,14 +60,13 @@ jobs:
         with:
           dotnet-version: ${{ env.dotnetVersion }}
 
-      - name: Install Resharper Tools
-        run: dotnet tool install -g JetBrains.ReSharper.GlobalTools
-
-      - name: Build
-        run: dotnet build
+      # - name: Build
+      #   run: dotnet build
 
       - name: Run Code Cleanup
-        run: ci/code_cleanup.sh "${{ env.baseRef }}"
+        run: |
+          dotnet tool restore
+          ci/code_cleanup.sh
 
       - name: Check Diff
         run: |
@@ -78,3 +80,20 @@ jobs:
         with:
           name: code-cleanup-patch-files
           path: '*.patch'
+
+  style:
+    name: CSharpier Style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnetVersion }}
+
+      - name: Run CSharpier
+        run: |
+          dotnet tool restore
+          dotnet csharpier --check .

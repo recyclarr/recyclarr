@@ -23,9 +23,7 @@ public class AppriseNotificationSettingsValidator : AbstractValidator<AppriseNot
 {
     public AppriseNotificationSettingsValidator()
     {
-        RuleFor(x => x.Mode)
-            .NotNull()
-            .WithMessage("`mode` is required for apprise notifications");
+        RuleFor(x => x.Mode).NotNull().WithMessage("`mode` is required for apprise notifications");
 
         RuleFor(x => x.BaseUrl)
             .NotEmpty()
@@ -34,11 +32,15 @@ public class AppriseNotificationSettingsValidator : AbstractValidator<AppriseNot
         RuleFor(x => x.Urls)
             .NotEmpty()
             .When(x => x.Mode == AppriseMode.Stateless)
-            .WithMessage("`urls` is required when `mode` is set to `stateless` for apprise notifications");
+            .WithMessage(
+                "`urls` is required when `mode` is set to `stateless` for apprise notifications"
+            );
 
         RuleFor(x => x.Key)
             .NotEmpty()
             .When(x => x.Mode == AppriseMode.Stateful)
-            .WithMessage("`key` is required when `mode` is set to `stateful` for apprise notifications");
+            .WithMessage(
+                "`key` is required when `mode` is set to `stateful` for apprise notifications"
+            );
     }
 }

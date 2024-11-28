@@ -5,8 +5,8 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 public record UpdatedQualities
 {
-    public ICollection<string> InvalidQualityNames { get; init; } = new List<string>();
-    public IReadOnlyCollection<ProfileItemDto> Items { get; init; } = new List<ProfileItemDto>();
+    public ICollection<string> InvalidQualityNames { get; init; } = [];
+    public IReadOnlyCollection<ProfileItemDto> Items { get; init; } = [];
     public int NumWantedItems { get; init; }
 }
 
@@ -15,7 +15,8 @@ public record UpdatedQualityProfile
     public required QualityProfileDto ProfileDto { get; init; }
     public required ProcessedQualityProfileData ProfileConfig { get; init; }
     public required QualityProfileUpdateReason UpdateReason { get; set; }
-    public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = Array.Empty<UpdatedFormatScore>();
+    public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } =
+        Array.Empty<UpdatedFormatScore>();
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = Array.Empty<string>();
     public IReadOnlyCollection<string> MissingQualities { get; set; } = Array.Empty<string>();
@@ -43,7 +44,7 @@ public record UpdatedQualityProfile
             UpgradeAllowed = config.UpgradeAllowed,
             MinFormatScore = config.MinFormatScore,
             CutoffFormatScore = config.UpgradeUntilScore,
-            FormatItems = UpdatedScores.Select(x => x.Dto with {Score = x.NewScore}).ToList()
+            FormatItems = UpdatedScores.Select(x => x.Dto with { Score = x.NewScore }).ToList(),
         };
 
         if (UpdatedQualities.NumWantedItems > 0)
@@ -56,7 +57,8 @@ public record UpdatedQualityProfile
         //
         // Also: It's important that we assign the cutoff *after* we set Items. Because we pull from a different list of
         // items depending on if the `qualities` property is set in config.
-        newDto.Cutoff = newDto.Items.FindCutoff(config.UpgradeUntilQuality) ?? newDto.Items.FirstCutoffId();
+        newDto.Cutoff =
+            newDto.Items.FindCutoff(config.UpgradeUntilQuality) ?? newDto.Items.FirstCutoffId();
 
         return newDto;
     }

@@ -14,7 +14,11 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
     {
         var transactions = new QualityProfileTransactionData();
 
-        var updatedProfiles = BuildUpdatedProfiles(transactions, context.ConfigOutput, context.ApiFetchOutput);
+        var updatedProfiles = BuildUpdatedProfiles(
+            transactions,
+            context.ConfigOutput,
+            context.ApiFetchOutput
+        );
         UpdateProfileScores(updatedProfiles);
 
         updatedProfiles = ValidateProfiles(updatedProfiles, transactions.InvalidProfiles);
@@ -25,7 +29,8 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private void AssignProfiles(
         QualityProfileTransactionData transactions,
-        IEnumerable<UpdatedQualityProfile> updatedProfiles)
+        IEnumerable<UpdatedQualityProfile> updatedProfiles
+    )
     {
         var profilesWithStats = updatedProfiles
             .Select(statCalculator.Calculate)
@@ -37,31 +42,36 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private static List<UpdatedQualityProfile> ValidateProfiles(
         IEnumerable<UpdatedQualityProfile> transactions,
-        ICollection<InvalidProfileData> invalidProfiles)
+        ICollection<InvalidProfileData> invalidProfiles
+    )
     {
         var validator = new UpdatedQualityProfileValidator();
 
         return transactions
-            .IsValid(validator, (errors, profile) =>
-                invalidProfiles.Add(new InvalidProfileData(profile, errors)))
+            .IsValid(
+                validator,
+                (errors, profile) => invalidProfiles.Add(new InvalidProfileData(profile, errors))
+            )
             .ToList();
     }
 
     private static List<UpdatedQualityProfile> BuildUpdatedProfiles(
         QualityProfileTransactionData transactions,
         IEnumerable<ProcessedQualityProfileData> processedConfig,
-        QualityProfileServiceData serviceData)
+        QualityProfileServiceData serviceData
+    )
     {
         // Match quality profiles in the user's config to profiles in the service.
         // For each match, we return a tuple including the list of custom format scores ("formatItems").
         // Using GroupJoin() because we want a LEFT OUTER JOIN so we can list which quality profiles in config
         // do not match profiles in Radarr.
-        var matchedProfiles = processedConfig
-            .GroupJoin(serviceData.Profiles,
-                x => x.Profile.Name,
-                x => x.Name,
-                (x, y) => (x, y.FirstOrDefault()),
-                StringComparer.InvariantCultureIgnoreCase);
+        var matchedProfiles = processedConfig.GroupJoin(
+            serviceData.Profiles,
+            x => x.Profile.Name,
+            x => x.Name,
+            (x, y) => (x, y.FirstOrDefault()),
+            StringComparer.InvariantCultureIgnoreCase
+        );
 
         var updatedProfiles = new List<UpdatedQualityProfile>();
 
@@ -90,13 +100,15 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
             void AddDto(QualityProfileDto newDto, QualityProfileUpdateReason reason)
             {
-                updatedProfiles.Add(new UpdatedQualityProfile
-                {
-                    ProfileConfig = config,
-                    ProfileDto = newDto,
-                    UpdateReason = reason,
-                    UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile)
-                });
+                updatedProfiles.Add(
+                    new UpdatedQualityProfile
+                    {
+                        ProfileConfig = config,
+                        ProfileDto = newDto,
+                        UpdateReason = reason,
+                        UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile),
+                    }
+                );
             }
         }
 
@@ -105,7 +117,8 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private static List<string> FixupMissingQualities(
         QualityProfileDto dto,
-        QualityProfileDto schema)
+        QualityProfileDto schema
+    )
     {
         // There's a very rare bug in Sonarr & Radarr that results in core qualities being lost in an existing profile.
         // It's unclear how this happens; but what ends up happening is that you get an error "Must contain all
@@ -115,9 +128,9 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
         // so there's value in having Recyclarr transparently fix this for users.
         //
         // See: https://github.com/Radarr/Radarr/issues/9738
-        var missingQualities = schema.Items.FlattenQualities().LeftOuterHashJoin(dto.Items.FlattenQualities(),
-                l => l.Quality!.Id,
-                r => r.Quality!.Id)
+        var missingQualities = schema
+            .Items.FlattenQualities()
+            .LeftOuterHashJoin(dto.Items.FlattenQualities(), l => l.Quality!.Id, r => r.Quality!.Id)
             .Where(x => x.Right is null)
             .Select(x => x.Left)
             .ToList();
@@ -131,7 +144,9 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
         foreach (var profile in updatedProfiles)
         {
             profile.InvalidExceptCfNames = GetInvalidExceptCfNames(
-                profile.ProfileConfig.Profile.ResetUnmatchedScores, profile.ProfileDto);
+                profile.ProfileConfig.Profile.ResetUnmatchedScores,
+                profile.ProfileDto
+            );
 
             profile.UpdatedScores = ProcessScoreUpdates(profile.ProfileConfig, profile.ProfileDto);
         }
@@ -139,7 +154,8 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private static IReadOnlyCollection<string> GetInvalidExceptCfNames(
         ResetUnmatchedScoresConfig resetConfig,
-        QualityProfileDto profileDto)
+        QualityProfileDto profileDto
+    )
     {
         var except = resetConfig.Except;
         if (except.Count == 0)
@@ -156,10 +172,12 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
     private static List<UpdatedFormatScore> ProcessScoreUpdates(
         ProcessedQualityProfileData profileData,
-        QualityProfileDto profileDto)
+        QualityProfileDto profileDto
+    )
     {
-        var scoreMap = profileData.CfScores
-            .FullOuterHashJoin(profileDto.FormatItems,
+        var scoreMap = profileData
+            .CfScores.FullOuterHashJoin(
+                profileDto.FormatItems,
                 x => x.FormatId,
                 x => x.Format,
                 // Exists in config, but not in service (these are unusual and should be errors)
@@ -168,7 +186,8 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
                 // Exists in service, but not in config
                 r => UpdatedFormatScore.Reset(r, profileData),
                 // Exists in both service and config
-                (l, r) => UpdatedFormatScore.Updated(r, l))
+                (l, r) => UpdatedFormatScore.Updated(r, l)
+            )
             .ToList();
 
         return scoreMap;

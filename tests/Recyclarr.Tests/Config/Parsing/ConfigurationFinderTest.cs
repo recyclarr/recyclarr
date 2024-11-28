@@ -8,13 +8,13 @@ namespace Recyclarr.Tests.Config.Parsing;
 [TestFixture]
 public class ConfigurationFinderTest
 {
-    private static IFileInfo[] GetYamlPaths(IAppPaths paths)
+    private static IFileInfo[] GetYamlPaths(AppPaths paths)
     {
         return
         [
             paths.AppDataDirectory.File("recyclarr.yml"),
             paths.ConfigsDirectory.File("b.yml"),
-            paths.ConfigsDirectory.File("c.yaml")
+            paths.ConfigsDirectory.File("c.yaml"),
         ];
     }
 
@@ -22,7 +22,8 @@ public class ConfigurationFinderTest
     public void Use_default_configs_if_explicit_list_null(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
+        ConfigurationFinder sut
+    )
     {
         var yamlPaths = GetYamlPaths(paths);
 
@@ -40,7 +41,8 @@ public class ConfigurationFinderTest
     public void Use_default_configs_if_explicit_list_empty(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
+        ConfigurationFinder sut
+    )
     {
         var yamlPaths = GetYamlPaths(paths);
 
@@ -58,7 +60,8 @@ public class ConfigurationFinderTest
     public void No_recyclarr_yml_when_not_exists(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
+        ConfigurationFinder sut
+    )
     {
         var testFile = paths.ConfigsDirectory.File("test.yml");
         fs.AddEmptyFile(testFile);
@@ -72,7 +75,8 @@ public class ConfigurationFinderTest
     public void Only_add_recyclarr_yml_when_exists(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
+        ConfigurationFinder sut
+    )
     {
         var configFile = paths.AppDataDirectory.File("recyclarr.yml");
         fs.AddEmptyFile(configFile);
@@ -86,7 +90,8 @@ public class ConfigurationFinderTest
     public void Throw_when_no_configs_found(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen(Matching.ImplementedInterfaces)] AppPaths paths,
-        ConfigurationFinder sut)
+        ConfigurationFinder sut
+    )
     {
         var act = () => sut.GetConfigFiles();
 

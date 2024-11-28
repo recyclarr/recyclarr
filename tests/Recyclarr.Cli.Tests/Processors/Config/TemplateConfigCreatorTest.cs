@@ -12,7 +12,8 @@ public class TemplateConfigCreatorTest
     [Test, AutoMockData]
     public void Can_handle_returns_true_with_templates(
         ICreateConfigSettings settings,
-        TemplateConfigCreator sut)
+        TemplateConfigCreator sut
+    )
     {
         settings.Templates.Returns(["template1"]);
         var result = sut.CanHandle(settings);
@@ -22,7 +23,8 @@ public class TemplateConfigCreatorTest
     [Test, AutoMockData]
     public void Can_handle_returns_false_with_no_templates(
         ICreateConfigSettings settings,
-        TemplateConfigCreator sut)
+        TemplateConfigCreator sut
+    )
     {
         settings.Templates.Returns(Array.Empty<string>());
         var result = sut.CanHandle(settings);
@@ -35,7 +37,8 @@ public class TemplateConfigCreatorTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths paths,
         ICreateConfigSettings settings,
-        TemplateConfigCreator sut)
+        TemplateConfigCreator sut
+    )
     {
         var templateFile = fs.CurrentDirectory().File("template-file1.yml");
         var destFile = paths.ConfigsDirectory.File(templateFile.Name);
@@ -57,7 +60,8 @@ public class TemplateConfigCreatorTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IAppPaths paths,
         ICreateConfigSettings settings,
-        TemplateConfigCreator sut)
+        TemplateConfigCreator sut
+    )
     {
         var templateFile = fs.CurrentDirectory().File("template-file1.yml");
         fs.AddEmptyFile(templateFile);

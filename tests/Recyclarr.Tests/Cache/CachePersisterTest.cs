@@ -17,10 +17,10 @@ public class CachePersisterTest
     public void Load_returns_default_when_json_has_error(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
-        TestCachePersister sut)
+        TestCachePersister sut
+    )
     {
-        const string cacheJson =
-            """
+        const string cacheJson = """
             {\
               extra_data: Hello
             }/
@@ -41,16 +41,16 @@ public class CachePersisterTest
         int versionToTest,
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
-        TestCachePersister sut)
+        TestCachePersister sut
+    )
     {
-        var cacheJson =
-            $$"""
-              {
-                "version": {{versionToTest}},
-                "instance_name": "The Instance",
-                "extra_data": "Hello"
-              }
-              """;
+        var cacheJson = $$"""
+            {
+              "version": {{versionToTest}},
+              "instance_name": "The Instance",
+              "extra_data": "Hello"
+            }
+            """;
 
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
         storage.CalculatePath<TestCacheObject>().Returns(fs.FileInfo.New("cacheFile.json"));
@@ -64,28 +64,32 @@ public class CachePersisterTest
     public void Accept_loaded_cache_when_versions_match(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
-        TestCachePersister sut)
+        TestCachePersister sut
+    )
     {
-        var cacheJson =
-            $$"""
-              {
-                "version": {{TestCacheObject.LatestVersion}},
-                "instance_name": "The Instance",
-                "extra_data": "Hello"
-              }
-              """;
+        var cacheJson = $$"""
+            {
+              "version": {{TestCacheObject.LatestVersion}},
+              "instance_name": "The Instance",
+              "extra_data": "Hello"
+            }
+            """;
 
         fs.AddFile("cacheFile.json", new MockFileData(cacheJson));
         storage.CalculatePath<TestCacheObject>().Returns(fs.FileInfo.New("cacheFile.json"));
 
         var result = sut.Load();
 
-        result.CacheObject.Should().BeEquivalentTo(new TestCacheObject
-        {
-            Version = TestCacheObject.LatestVersion,
-            InstanceName = "The Instance",
-            ExtraData = "Hello"
-        });
+        result
+            .CacheObject.Should()
+            .BeEquivalentTo(
+                new TestCacheObject
+                {
+                    Version = TestCacheObject.LatestVersion,
+                    InstanceName = "The Instance",
+                    ExtraData = "Hello",
+                }
+            );
     }
 
     [Test, AutoMockData]
@@ -93,26 +97,27 @@ public class CachePersisterTest
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ICacheStoragePath storage,
         [Frozen] IServiceConfiguration config,
-        TestCachePersister sut)
+        TestCachePersister sut
+    )
     {
         var cacheFilePath = fs.FileInfo.New("cacheFile.json");
         storage.CalculatePath<TestCacheObject>().Returns(cacheFilePath);
         config.InstanceName.Returns("InstanceName2");
 
-        var cacheObject = new TestCache(new TestCacheObject
-        {
-            InstanceName = "InstanceName1"
-        });
+        var cacheObject = new TestCache(new TestCacheObject { InstanceName = "InstanceName1" });
 
         sut.Save(cacheObject);
 
-        fs.GetFile(cacheFilePath).TextContents.Should().Be(
-            $$"""
-              {
-                "extra_data": null,
-                "version": {{TestCacheObject.LatestVersion}},
-                "instance_name": "InstanceName2"
-              }
-              """);
+        fs.GetFile(cacheFilePath)
+            .TextContents.Should()
+            .Be(
+                $$"""
+                {
+                  "extra_data": null,
+                  "version": {{TestCacheObject.LatestVersion}},
+                  "instance_name": "InstanceName2"
+                }
+                """
+            );
     }
 }

@@ -9,15 +9,18 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List local configuration files.")]
-public class ConfigListTemplatesCommand(ConfigListTemplateProcessor processor, IMultiRepoUpdater repoUpdater)
-    : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
+public class ConfigListTemplatesCommand(
+    ConfigListTemplateProcessor processor,
+    IMultiRepoUpdater repoUpdater
+) : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     public class CliSettings : BaseCommandSettings, IConfigListTemplatesSettings
     {
         [CommandOption("-i|--includes")]
         [Description(
-            "List templates that may be included in YAML, instead of root templates used with `config create`.")]
+            "List templates that may be included in YAML, instead of root templates used with `config create`."
+        )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool Includes { get; init; }
     }
@@ -26,7 +29,7 @@ public class ConfigListTemplatesCommand(ConfigListTemplateProcessor processor, I
     {
         await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
         processor.Process(settings);
-        return (int) ExitStatus.Succeeded;
+        return (int)ExitStatus.Succeeded;
     }
 }
 

@@ -12,19 +12,22 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
 {
     private readonly IDeserializer _deserializer = yamlFactory.CreateDeserializer();
 
-    public T? Load<T>(IFileInfo file) where T : class
+    public T? Load<T>(IFileInfo file)
+        where T : class
     {
         log.Debug("Loading config file: {File}", file);
         return Load<T>(file.OpenText);
     }
 
-    public T? Load<T>(string yaml) where T : class
+    public T? Load<T>(string yaml)
+        where T : class
     {
         log.Debug("Loading config from string data");
         return Load<T>(() => new StringReader(yaml));
     }
 
-    public T? Load<T>(Func<TextReader> streamFactory) where T : class
+    public T? Load<T>(Func<TextReader> streamFactory)
+        where T : class
     {
         try
         {

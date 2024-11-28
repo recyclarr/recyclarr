@@ -19,9 +19,7 @@ public class ResourceDataReaderTest
         var testData = new ResourceDataReader(GetType());
         Action act = () => testData.ReadData("DataFileWontBeFound.txt");
 
-        act.Should()
-            .Throw<ArgumentException>()
-            .WithMessage("Embedded resource not found*");
+        act.Should().Throw<ArgumentException>().WithMessage("Embedded resource not found*");
     }
 
     [Test]

@@ -25,7 +25,9 @@ public class QualityProfileApiPersistencePhase(IQualityProfileApiService api)
                     break;
 
                 default:
-                    throw new InvalidOperationException($"Unsupported UpdateReason: {profile.UpdateReason}");
+                    throw new InvalidOperationException(
+                        $"Unsupported UpdateReason: {profile.UpdateReason}"
+                    );
             }
         }
     }

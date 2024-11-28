@@ -9,10 +9,7 @@ public class MergeBaseUrlTest
     [Test]
     public void Empty_right_to_non_empty_left()
     {
-        var leftConfig = new SonarrConfigYaml
-        {
-            BaseUrl = "a"
-        };
+        var leftConfig = new SonarrConfigYaml { BaseUrl = "a" };
 
         var rightConfig = new SonarrConfigYaml();
 
@@ -29,10 +26,7 @@ public class MergeBaseUrlTest
         var leftConfig = new SonarrConfigYaml();
 
         // BaseUrl should not be merged!
-        var rightConfig = new SonarrConfigYaml
-        {
-            BaseUrl = "b"
-        };
+        var rightConfig = new SonarrConfigYaml { BaseUrl = "b" };
 
         var sut = new SonarrConfigMerger();
 
@@ -44,16 +38,10 @@ public class MergeBaseUrlTest
     [Test]
     public void Non_empty_right_to_non_empty_left()
     {
-        var leftConfig = new SonarrConfigYaml
-        {
-            BaseUrl = "a"
-        };
+        var leftConfig = new SonarrConfigYaml { BaseUrl = "a" };
 
         // Baseurl should not be merged!
-        var rightConfig = new SonarrConfigYaml
-        {
-            BaseUrl = "b"
-        };
+        var rightConfig = new SonarrConfigYaml { BaseUrl = "b" };
 
         var sut = new SonarrConfigMerger();
 

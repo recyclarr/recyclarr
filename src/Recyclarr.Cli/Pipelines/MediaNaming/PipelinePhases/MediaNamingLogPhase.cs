@@ -16,7 +16,11 @@ public class MediaNamingLogPhase(ILogger log, NotificationEmitter notificationEm
         {
             foreach (var (topic, invalidValue) in config.InvalidNaming)
             {
-                log.Error("An invalid media naming format is specified for {Topic}: {Value}", topic, invalidValue);
+                log.Error(
+                    "An invalid media naming format is specified for {Topic}: {Value}",
+                    topic,
+                    invalidValue
+                );
             }
 
             return true;
@@ -26,7 +30,9 @@ public class MediaNamingLogPhase(ILogger log, NotificationEmitter notificationEm
         {
             RadarrMediaNamingDto x => x.GetDifferences(new RadarrMediaNamingDto()),
             SonarrMediaNamingDto x => x.GetDifferences(new SonarrMediaNamingDto()),
-            _ => throw new ArgumentException("Unsupported configuration type in LogConfigPhase method")
+            _ => throw new ArgumentException(
+                "Unsupported configuration type in LogConfigPhase method"
+            ),
         };
 
         if (differences.Count == 0)
@@ -38,9 +44,7 @@ public class MediaNamingLogPhase(ILogger log, NotificationEmitter notificationEm
         return false;
     }
 
-    public void LogTransactionNotices(MediaNamingPipelineContext context)
-    {
-    }
+    public void LogTransactionNotices(MediaNamingPipelineContext context) { }
 
     public void LogPersistenceResults(MediaNamingPipelineContext context)
     {
@@ -48,7 +52,9 @@ public class MediaNamingLogPhase(ILogger log, NotificationEmitter notificationEm
         {
             RadarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
             SonarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
-            _ => throw new ArgumentException("Unsupported configuration type in LogPersistenceResults method")
+            _ => throw new ArgumentException(
+                "Unsupported configuration type in LogPersistenceResults method"
+            ),
         };
 
         if (differences.Count != 0)

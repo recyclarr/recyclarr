@@ -4,7 +4,8 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingPreviewPhase(IAnsiConsole console) : IPreviewPipelinePhase<MediaNamingPipelineContext>
+public class MediaNamingPreviewPhase(IAnsiConsole console)
+    : IPreviewPipelinePhase<MediaNamingPipelineContext>
 {
     private Table? _table;
 

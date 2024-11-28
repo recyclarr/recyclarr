@@ -16,7 +16,8 @@ public class EnvironmentVariablesDeserializer(IEnvironment environment) : INodeD
         Type expectedType,
         Func<IParser, Type, object?> nestedObjectDeserializer,
         out object? value,
-        ObjectDeserializer rootDeserializer)
+        ObjectDeserializer rootDeserializer
+    )
     {
         // Only process items flagged as Environment Variables
         if (expectedType != typeof(EnvironmentVariableTag))
@@ -34,7 +35,9 @@ public class EnvironmentVariablesDeserializer(IEnvironment environment) : INodeD
             envVarValue = split.ElementAtOrDefault(1)?.Trim().Trim('\'', '"');
         }
 
-        value = envVarValue ?? throw new EnvironmentVariableNotDefinedException(scalar.Start.Line, scalar.Value);
+        value =
+            envVarValue
+            ?? throw new EnvironmentVariableNotDefinedException(scalar.Start.Line, scalar.Value);
         return true;
     }
 }

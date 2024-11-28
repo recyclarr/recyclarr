@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 
@@ -8,9 +9,14 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
     private readonly string? _namespace;
 
     public ResourceDataReader(Type typeWithNamespaceToUse, string subdirectory = "")
-        : this(Assembly.GetAssembly(typeWithNamespaceToUse)
-            ?? throw new ArgumentException("Cannot get assembly from type", nameof(typeWithNamespaceToUse)),
-            subdirectory)
+        : this(
+            Assembly.GetAssembly(typeWithNamespaceToUse)
+                ?? throw new ArgumentException(
+                    "Cannot get assembly from type",
+                    nameof(typeWithNamespaceToUse)
+                ),
+            subdirectory
+        )
     {
         _namespace = typeWithNamespaceToUse.Namespace;
     }
@@ -28,12 +34,12 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
 
         if (!string.IsNullOrEmpty(_namespace))
         {
-            nameBuilder.Append($"{_namespace}.");
+            nameBuilder.Append(CultureInfo.InvariantCulture, $"{_namespace}.");
         }
 
         if (!string.IsNullOrEmpty(subdirectory))
         {
-            nameBuilder.Append($"{subdirectory}.");
+            nameBuilder.Append(CultureInfo.InvariantCulture, $"{subdirectory}.");
         }
 
         nameBuilder.Append(filename);
@@ -42,7 +48,11 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
 
     private string FindResourcePath(string resourcePath)
     {
-        var foundResource = Array.Find(assembly.GetManifestResourceNames(), x => x.EndsWith(resourcePath));
+        var foundResource = Array.Find(
+            assembly.GetManifestResourceNames(),
+            x => x.EndsWith(resourcePath, StringComparison.Ordinal)
+        );
+
         if (foundResource is null)
         {
             throw new ArgumentException($"Embedded resource not found: {resourcePath}");

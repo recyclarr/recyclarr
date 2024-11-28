@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 
 namespace Recyclarr.Cli.Console.Helpers;
@@ -9,13 +11,16 @@ public sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
 {
     public override string Description { get; }
 
+    [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
     public EnumDescriptionAttribute(string description)
     {
-        var enumNames = Enum.GetNames(typeof(TEnum))
-            .Select(x => x.ToLowerInvariant());
+        var enumNames = Enum.GetNames(typeof(TEnum)).Select(x => x.ToLowerInvariant());
 
         var str = new StringBuilder(description.Trim());
-        str.Append($" (Valid Values: {string.Join(", ", enumNames)})");
+        str.Append(
+            CultureInfo.InvariantCulture,
+            $" (Valid Values: {string.Join(", ", enumNames)})"
+        );
         Description = str.ToString();
     }
 }

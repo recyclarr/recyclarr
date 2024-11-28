@@ -24,13 +24,13 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = ["except1"]
+                        Except = ["except1"],
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
                         Allowed = true,
                         UntilQuality = "quality1",
-                        UntilScore = 200
+                        UntilScore = 200,
                     },
                     Qualities =
                     [
@@ -38,11 +38,11 @@ public class MergeQualityProfilesTest
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = ["quality"]
-                        }
-                    ]
-                }
-            ]
+                            Qualities = ["quality"],
+                        },
+                    ],
+                },
+            ],
         };
 
         var rightConfig = new SonarrConfigYaml();
@@ -72,13 +72,13 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = ["except1"]
+                        Except = ["except1"],
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
                         Allowed = true,
                         UntilQuality = "quality1",
-                        UntilScore = 200
+                        UntilScore = 200,
                     },
                     Qualities =
                     [
@@ -86,11 +86,11 @@ public class MergeQualityProfilesTest
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = ["quality"]
-                        }
-                    ]
-                }
-            ]
+                            Qualities = ["quality"],
+                        },
+                    ],
+                },
+            ],
         };
 
         var sut = new SonarrConfigMerger();
@@ -117,13 +117,13 @@ public class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Enabled = true,
-                        Except = ["except1"]
+                        Except = ["except1"],
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
                         Allowed = true,
                         UntilQuality = "quality1",
-                        UntilScore = 200
+                        UntilScore = 200,
                     },
                     Qualities =
                     [
@@ -131,11 +131,11 @@ public class MergeQualityProfilesTest
                         {
                             Enabled = true,
                             Name = "quality1",
-                            Qualities = ["quality"]
-                        }
-                    ]
-                }
-            ]
+                            Qualities = ["quality"],
+                        },
+                    ],
+                },
+            ],
         };
 
         var rightConfig = new SonarrConfigYaml
@@ -148,73 +148,74 @@ public class MergeQualityProfilesTest
                     ScoreSet = "set2",
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
-                        Except = ["except2", "except3"]
+                        Except = ["except2", "except3"],
                     },
-                    Upgrade = new QualityProfileFormatUpgradeYaml
-                    {
-                        UntilQuality = "quality2"
-                    },
+                    Upgrade = new QualityProfileFormatUpgradeYaml { UntilQuality = "quality2" },
                     Qualities =
                     [
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = false,
                             Name = "quality2",
-                            Qualities = ["quality3"]
+                            Qualities = ["quality3"],
                         },
                         new QualityProfileQualityConfigYaml
                         {
                             Enabled = true,
                             Name = "quality4",
-                            Qualities = ["quality5", "quality6"]
-                        }
-                    ]
-                }
-            ]
+                            Qualities = ["quality5", "quality6"],
+                        },
+                    ],
+                },
+            ],
         };
 
         var sut = new SonarrConfigMerger();
 
         var result = sut.Merge(leftConfig, rightConfig);
 
-        result.Should().BeEquivalentTo(new SonarrConfigYaml
-        {
-            QualityProfiles =
-            [
-                new QualityProfileConfigYaml
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
                 {
-                    Name = "e",
-                    QualitySort = QualitySortAlgorithm.Top,
-                    MinFormatScore = 100,
-                    ScoreSet = "set2",
-                    ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
-                    {
-                        Enabled = true,
-                        Except = ["except1", "except2", "except3"]
-                    },
-                    Upgrade = new QualityProfileFormatUpgradeYaml
-                    {
-                        Allowed = true,
-                        UntilQuality = "quality2",
-                        UntilScore = 200
-                    },
-                    Qualities =
+                    QualityProfiles =
                     [
-                        new QualityProfileQualityConfigYaml
+                        new QualityProfileConfigYaml
                         {
-                            Enabled = false,
-                            Name = "quality2",
-                            Qualities = ["quality3"]
+                            Name = "e",
+                            QualitySort = QualitySortAlgorithm.Top,
+                            MinFormatScore = 100,
+                            ScoreSet = "set2",
+                            ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
+                            {
+                                Enabled = true,
+                                Except = ["except1", "except2", "except3"],
+                            },
+                            Upgrade = new QualityProfileFormatUpgradeYaml
+                            {
+                                Allowed = true,
+                                UntilQuality = "quality2",
+                                UntilScore = 200,
+                            },
+                            Qualities =
+                            [
+                                new QualityProfileQualityConfigYaml
+                                {
+                                    Enabled = false,
+                                    Name = "quality2",
+                                    Qualities = ["quality3"],
+                                },
+                                new QualityProfileQualityConfigYaml
+                                {
+                                    Enabled = true,
+                                    Name = "quality4",
+                                    Qualities = ["quality5", "quality6"],
+                                },
+                            ],
                         },
-                        new QualityProfileQualityConfigYaml
-                        {
-                            Enabled = true,
-                            Name = "quality4",
-                            Qualities = ["quality5", "quality6"]
-                        }
-                    ]
+                    ],
                 }
-            ]
-        });
+            );
     }
 }

@@ -14,7 +14,7 @@ public class UpdatedQualityProfileValidatorTest
     [TestCase(401, false)]
     public void Min_score_never_satisfied(int minScore, bool expectSatisfied)
     {
-        var profileConfig = new QualityProfileConfig {MinFormatScore = minScore};
+        var profileConfig = new QualityProfileConfig { MinFormatScore = minScore };
 
         var updatedProfile = new UpdatedQualityProfile
         {
@@ -23,11 +23,11 @@ public class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo1", 0, 100, FormatScoreUpdateReason.New),
                 NewQp.UpdatedScore("foo2", 0, -100, FormatScoreUpdateReason.Updated),
                 NewQp.UpdatedScore("foo3", 0, 200, FormatScoreUpdateReason.NoChange),
-                NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset)
+                NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset),
             ],
-            ProfileDto = new QualityProfileDto {Name = "ProfileName"},
+            ProfileDto = new QualityProfileDto { Name = "ProfileName" },
             ProfileConfig = NewQp.Processed(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.Changed
+            UpdateReason = QualityProfileUpdateReason.Changed,
         };
 
         var validator = new UpdatedQualityProfileValidator();
@@ -41,36 +41,33 @@ public class UpdatedQualityProfileValidatorTest
         {
             const int expectedTotalScore = 400;
 
-            result.ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.MinFormatScore)
+            result
+                .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.MinFormatScore)
                 .WithErrorMessage(
-                    $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all " +
-                    $"positive scores is {expectedTotalScore}");
+                    $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
+                        + $"positive scores is {expectedTotalScore}"
+                );
         }
     }
 
     [Test]
     public void Until_quality_references_invalid_quality()
     {
-        var profileConfig = new QualityProfileConfig
-        {
-            UpgradeUntilQuality = "foo1"
-        };
+        var profileConfig = new QualityProfileConfig { UpgradeUntilQuality = "foo1" };
 
         var updatedProfile = new UpdatedQualityProfile
         {
-            UpdatedQualities = new UpdatedQualities
-            {
-                InvalidQualityNames = ["foo1"]
-            },
+            UpdatedQualities = new UpdatedQualities { InvalidQualityNames = ["foo1"] },
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewQp.Processed(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New
+            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();
         var result = validator.TestValidate(updatedProfile);
 
-        result.ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
+        result
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
             .WithErrorMessage("`until_quality` references invalid quality 'foo1'");
     }
 
@@ -83,41 +80,39 @@ public class UpdatedQualityProfileValidatorTest
         {
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewQp.Processed(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New
+            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();
         var result = validator.TestValidate(updatedProfile);
 
-        result.ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.Qualities)
+        result
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.Qualities)
             .WithErrorMessage("`qualities` is required when creating profiles for the first time");
     }
 
     [Test]
     public void Cutoff_quality_must_be_enabled_without_qualities_list()
     {
-        var profileConfig = new QualityProfileConfig
-        {
-            UpgradeUntilQuality = "disabled_quality"
-        };
+        var profileConfig = new QualityProfileConfig { UpgradeUntilQuality = "disabled_quality" };
 
         var updatedProfile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto
             {
-                Items =
-                [
-                    NewQp.QualityDto(1, "disabled_quality", false)
-                ]
+                Items = [NewQp.QualityDto(1, "disabled_quality", false)],
             },
             ProfileConfig = NewQp.Processed(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New
+            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();
         var result = validator.TestValidate(updatedProfile);
 
-        result.ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
-            .WithErrorMessage("'until_quality' must refer to an existing and enabled quality or group");
+        result
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
+            .WithErrorMessage(
+                "'until_quality' must refer to an existing and enabled quality or group"
+            );
     }
 }

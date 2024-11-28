@@ -13,8 +13,8 @@ public class NondeterministicValueConverterTest
     {
         _options = new JsonSerializerOptions
         {
-            Converters = {new NondeterministicValueConverter()},
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            Converters = { new NondeterministicValueConverter() },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
     }
 
@@ -71,8 +71,10 @@ public class NondeterministicValueConverterTest
     {
         const string json = "{ }";
         Action act = () => JsonSerializer.Deserialize<object>(json, _options);
-        act.Should().Throw<JsonException>()
+        act.Should()
+            .Throw<JsonException>()
             .WithMessage("CF field of type StartObject is not supported*")
-            .And.InnerException.Should().BeNull();
+            .And.InnerException.Should()
+            .BeNull();
     }
 }

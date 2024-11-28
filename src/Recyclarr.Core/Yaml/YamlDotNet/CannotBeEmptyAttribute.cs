@@ -11,8 +11,6 @@ public sealed class CannotBeEmptyAttribute : RequiredAttribute
     [SuppressMessage("ReSharper", "NotDisposedResource")]
     public override bool IsValid(object? value)
     {
-        return base.IsValid(value) &&
-            value is IEnumerable list &&
-            list.GetEnumerator().MoveNext();
+        return base.IsValid(value) && value is IEnumerable list && list.GetEnumerator().MoveNext();
     }
 }

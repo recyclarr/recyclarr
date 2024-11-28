@@ -6,8 +6,8 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 public class CustomFormatCachePersister(
     ILogger log,
     ICacheStoragePath storagePath,
-    IServiceConfiguration config)
-    : CachePersister<CustomFormatCacheObject, CustomFormatCache>(log, storagePath, config)
+    IServiceConfiguration config
+) : CachePersister<CustomFormatCacheObject, CustomFormatCache>(log, storagePath, config)
 {
     protected override string CacheName => "Custom Format Cache";
 

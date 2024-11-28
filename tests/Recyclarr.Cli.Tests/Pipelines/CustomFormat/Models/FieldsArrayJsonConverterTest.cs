@@ -10,8 +10,7 @@ public class FieldsArrayJsonConverterTest
     [Test]
     public void Read_array_as_is()
     {
-        const string json =
-            """
+        const string json = """
             {
               "fields": [
                 {
@@ -38,20 +37,25 @@ public class FieldsArrayJsonConverterTest
             }
             """;
 
-        var result =
-            JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
+        var result = JsonSerializer.Deserialize<CustomFormatSpecificationData>(
+            json,
+            GlobalJsonSerializerSettings.Services
+        );
 
-        result!.Fields.Should().BeEquivalentTo([
-            new CustomFormatFieldData {Name = "min", Value = 25},
-            new CustomFormatFieldData {Name = "max", Value = 40}
-        ]);
+        result!
+            .Fields.Should()
+            .BeEquivalentTo(
+                [
+                    new CustomFormatFieldData { Name = "min", Value = 25 },
+                    new CustomFormatFieldData { Name = "max", Value = 40 },
+                ]
+            );
     }
 
     [Test]
     public void Convert_key_value_pairs_to_array()
     {
-        const string json =
-            """
+        const string json = """
             {
               "fields": {
                 "value": 8,
@@ -59,27 +63,35 @@ public class FieldsArrayJsonConverterTest
               }
             }
             """;
-        var result =
-            JsonSerializer.Deserialize<CustomFormatSpecificationData>(json, GlobalJsonSerializerSettings.Services);
+        var result = JsonSerializer.Deserialize<CustomFormatSpecificationData>(
+            json,
+            GlobalJsonSerializerSettings.Services
+        );
 
-        result!.Fields.Should().BeEquivalentTo([
-            new CustomFormatFieldData {Name = "value", Value = 8},
-            new CustomFormatFieldData {Name = "exceptLanguage", Value = false}
-        ]);
+        result!
+            .Fields.Should()
+            .BeEquivalentTo(
+                [
+                    new CustomFormatFieldData { Name = "value", Value = 8 },
+                    new CustomFormatFieldData { Name = "exceptLanguage", Value = false },
+                ]
+            );
     }
 
     [Test]
     public void Read_throws_on_unsupported_token_type()
     {
-        const string json =
-            """
+        const string json = """
             {
               "fields": 0
             }
             """;
 
-        var act = () => JsonSerializer.Deserialize<CustomFormatSpecificationData>(
-            json, GlobalJsonSerializerSettings.Services);
+        var act = () =>
+            JsonSerializer.Deserialize<CustomFormatSpecificationData>(
+                json,
+                GlobalJsonSerializerSettings.Services
+            );
 
         act.Should().Throw<JsonException>();
     }

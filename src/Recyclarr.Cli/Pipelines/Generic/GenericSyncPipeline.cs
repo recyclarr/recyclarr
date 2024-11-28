@@ -18,7 +18,10 @@ public class GenericSyncPipeline<TContext>(
 
         if (!context.SupportedServiceTypes.Contains(config.ServiceType))
         {
-            log.Debug("Skipping this pipeline because it does not support service type {Service}", config.ServiceType);
+            log.Debug(
+                "Skipping this pipeline because it does not support service type {Service}",
+                config.ServiceType
+            );
             return;
         }
 

@@ -10,8 +10,18 @@ public record TemplateEntry(string Id, string Template, bool Hidden = false);
 
 public record TemplatesData
 {
-    public IReadOnlyCollection<TemplateEntry> Radarr { get; [UsedImplicitly] init; } = Array.Empty<TemplateEntry>();
-    public IReadOnlyCollection<TemplateEntry> Sonarr { get; [UsedImplicitly] init; } = Array.Empty<TemplateEntry>();
+    public IReadOnlyCollection<TemplateEntry> Radarr
+    {
+        get;
+        [UsedImplicitly]
+        init;
+    } = Array.Empty<TemplateEntry>();
+    public IReadOnlyCollection<TemplateEntry> Sonarr
+    {
+        get;
+        [UsedImplicitly]
+        init;
+    } = Array.Empty<TemplateEntry>();
 }
 
 public record TemplatePath
@@ -43,13 +53,14 @@ public class ConfigTemplateGuideService(IConfigTemplatesRepo repo) : IConfigTemp
         if (!templatesPath.Exists)
         {
             throw new InvalidDataException(
-                $"Recyclarr templates.json does not exist: {templatesPath}");
+                $"Recyclarr templates.json does not exist: {templatesPath}"
+            );
         }
 
         var templates = Deserialize(templatesPath);
 
-        return templates.Radarr
-            .Select(x => NewTemplatePath(x, SupportedServices.Radarr))
+        return templates
+            .Radarr.Select(x => NewTemplatePath(x, SupportedServices.Radarr))
             .Concat(templates.Sonarr.Select(x => NewTemplatePath(x, SupportedServices.Sonarr)))
             .ToList();
 
@@ -60,7 +71,7 @@ public class ConfigTemplateGuideService(IConfigTemplatesRepo repo) : IConfigTemp
                 Id = entry.Id,
                 TemplateFile = repo.Path.File(entry.Template),
                 Service = service,
-                Hidden = entry.Hidden
+                Hidden = entry.Hidden,
             };
         }
     }
@@ -68,7 +79,10 @@ public class ConfigTemplateGuideService(IConfigTemplatesRepo repo) : IConfigTemp
     private static TemplatesData Deserialize(IFileInfo jsonFile)
     {
         using var stream = jsonFile.OpenRead();
-        var obj = JsonSerializer.Deserialize<TemplatesData>(stream, GlobalJsonSerializerSettings.Recyclarr);
+        var obj = JsonSerializer.Deserialize<TemplatesData>(
+            stream,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
         if (obj is null)
         {
             throw new InvalidDataException($"Unable to deserialize {jsonFile}");

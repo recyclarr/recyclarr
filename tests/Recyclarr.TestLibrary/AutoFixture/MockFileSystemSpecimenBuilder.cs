@@ -12,18 +12,22 @@ public class MockFileSystemSpecimenBuilder : ICustomization
         var fs = new MockFileSystem();
         fixture.Inject(fs);
 
-        fixture.Customize<IFileInfo>(x => x.FromFactory(() =>
-        {
-            var name = $"MockFile-{_mockPathCounter}";
-            Interlocked.Increment(ref _mockPathCounter);
-            return fs.CurrentDirectory().File(name);
-        }));
+        fixture.Customize<IFileInfo>(x =>
+            x.FromFactory(() =>
+            {
+                var name = $"MockFile-{_mockPathCounter}";
+                Interlocked.Increment(ref _mockPathCounter);
+                return fs.CurrentDirectory().File(name);
+            })
+        );
 
-        fixture.Customize<IDirectoryInfo>(x => x.FromFactory(() =>
-        {
-            var name = $"MockDirectory-{_mockPathCounter}";
-            Interlocked.Increment(ref _mockPathCounter);
-            return fs.CurrentDirectory().SubDirectory(name);
-        }));
+        fixture.Customize<IDirectoryInfo>(x =>
+            x.FromFactory(() =>
+            {
+                var name = $"MockDirectory-{_mockPathCounter}";
+                Interlocked.Increment(ref _mockPathCounter);
+                return fs.CurrentDirectory().SubDirectory(name);
+            })
+        );
     }
 }

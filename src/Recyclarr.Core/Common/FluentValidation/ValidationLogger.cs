@@ -41,7 +41,7 @@ public class ValidationLogger(ILogger log)
             Severity.Error => LogEventLevel.Error,
             Severity.Warning => LogEventLevel.Warning,
             Severity.Info => LogEventLevel.Information,
-            _ => LogEventLevel.Debug
+            _ => LogEventLevel.Debug,
         };
     }
 }

@@ -8,7 +8,7 @@ public class FlurlHttpExceptionHandler(ILogger log)
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)
     {
-        if (extractor.ExceptionMessage.Contains("task was canceled"))
+        if (extractor.ExceptionMessage.Contains("task was canceled", StringComparison.Ordinal))
         {
             log.Error("Reason: User canceled the operation");
             return;
@@ -17,7 +17,9 @@ public class FlurlHttpExceptionHandler(ILogger log)
         switch (extractor.HttpStatusCode)
         {
             case 401:
-                log.Error("Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?");
+                log.Error(
+                    "Reason: Recyclarr is unauthorized to talk to the service. Is your `api_key` correct?"
+                );
                 return;
 
             case null:
@@ -33,9 +35,12 @@ public class FlurlHttpExceptionHandler(ILogger log)
         var parser = new ErrorResponseParser(log, responseBody);
 
         // Try to parse validation errors
-        if (parser.DeserializeList(s => s
-            .Select(x => x.GetProperty("errorMessage").GetString())
-            .NotNull(x => !string.IsNullOrEmpty(x))))
+        if (
+            parser.DeserializeList(s =>
+                s.Select(x => x.GetProperty("errorMessage").GetString())
+                    .NotNull(x => !string.IsNullOrEmpty(x))
+            )
+        )
         {
             return;
         }
@@ -54,6 +59,7 @@ public class FlurlHttpExceptionHandler(ILogger log)
 
         // Last resort
         log.Error(
-            "Reason: Unable to determine. Please report this as a bug and attach your `debug.log` and `verbose.log` files.");
+            "Reason: Unable to determine. Please report this as a bug and attach your `debug.log` and `verbose.log` files."
+        );
     }
 }

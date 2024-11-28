@@ -12,11 +12,15 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
     {
         const int maxFiles = 25;
 
-        Fs.AddFile(Paths.AppDataDirectory.File("settings.yml"), new MockFileData(
-            $"""
-             log_janitor:
-               max_files: {maxFiles}
-             """));
+        Fs.AddFile(
+            Paths.AppDataDirectory.File("settings.yml"),
+            new MockFileData(
+                $"""
+                log_janitor:
+                  max_files: {maxFiles}
+                """
+            )
+        );
 
         for (var i = 0; i < maxFiles + 20; ++i)
         {
@@ -26,8 +30,9 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         var sut = Resolve<JanitorCleanupTask>();
         sut.OnFinish();
 
-        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName))
-            .Should().HaveCount(maxFiles);
+        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName, StringComparison.Ordinal))
+            .Should()
+            .HaveCount(maxFiles);
     }
 
     [Test]
@@ -44,7 +49,8 @@ internal class BaseCommandSetupIntegrationTest : CliIntegrationFixture
         sut.OnFinish();
 
         maxFiles.Should().BePositive();
-        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName))
-            .Should().HaveCount(maxFiles);
+        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName, StringComparison.Ordinal))
+            .Should()
+            .HaveCount(maxFiles);
     }
 }

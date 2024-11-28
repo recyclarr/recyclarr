@@ -17,10 +17,11 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
 
             // Pivot the data so that we have lists of columns instead of lists of rows
             // Taken from: https://stackoverflow.com/a/39485441/157971
-            columns.AddRange(rows
-                .SelectMany(x => x.Select((value, index) => (value, index)))
-                .GroupBy(x => x.index, x => x.value)
-                .Select(x => x.ToList()));
+            columns.AddRange(
+                rows.SelectMany(x => x.Select((value, index) => (value, index)))
+                    .GroupBy(x => x.index, x => x.value)
+                    .Select(x => x.ToList())
+            );
         }
 
         return columns
@@ -34,7 +35,11 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
     {
         var match = LinkRegex().Match(markdownLink);
         return match.Success
-            ? new CustomFormatCategoryItem(categoryName, match.Groups[1].Value, match.Groups[2].Value)
+            ? new CustomFormatCategoryItem(
+                categoryName,
+                match.Groups[1].Value,
+                match.Groups[2].Value
+            )
             : null;
     }
 
@@ -67,8 +72,10 @@ public partial class CustomFormatCategoryParser : ICustomFormatCategoryParser
         }
 
         return tableRows
-            // Filter out the `|---|---|---|` part of the table between the heading & data rows.
-            .Where(x => !Regex.IsMatch(x[0], "^-+$", RegexOptions.None, TimeSpan.FromMilliseconds(1000)));
+        // Filter out the `|---|---|---|` part of the table between the heading & data rows.
+        .Where(x =>
+            !Regex.IsMatch(x[0], "^-+$", RegexOptions.None, TimeSpan.FromMilliseconds(1000))
+        );
     }
 
     private static List<string> GetTableRow(string line)

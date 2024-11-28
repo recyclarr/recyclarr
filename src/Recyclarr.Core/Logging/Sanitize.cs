@@ -35,6 +35,8 @@ public static partial class Sanitize
     [GeneratedRegex(@"\([-a-zA-Z0-9@:%._+~#=]{1,256}(?::[0-9]+)?\)")]
     private static partial Regex HostRegex();
 
-    [GeneratedRegex(@"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(:[0-9]+)?\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")]
+    [GeneratedRegex(
+        @"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}(:[0-9]+)?\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)"
+    )]
     private static partial Regex UrlRegex();
 }

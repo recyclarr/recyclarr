@@ -7,5 +7,6 @@ public interface IAppriseNotificationApiService
 {
     Task Notify(
         AppriseNotificationSettings settings,
-        Func<AppriseNotification, AppriseNotification> notificationBuilder);
+        Func<AppriseNotification, AppriseNotification> notificationBuilder
+    );
 }

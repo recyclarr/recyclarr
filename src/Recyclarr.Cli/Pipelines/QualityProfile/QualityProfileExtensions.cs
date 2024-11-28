@@ -10,10 +10,11 @@ public static class QualityProfileExtensions
         return items.Flatten(x => x.Items);
     }
 
-    public static IEnumerable<ProfileItemDto> FlattenQualities(this IEnumerable<ProfileItemDto> items)
+    public static IEnumerable<ProfileItemDto> FlattenQualities(
+        this IEnumerable<ProfileItemDto> items
+    )
     {
-        return FlattenItems(items)
-            .Where(x => x.Quality is not null);
+        return FlattenItems(items).Where(x => x.Quality is not null);
     }
 
     public static ProfileItemDto? FindGroupById(this IEnumerable<ProfileItemDto> items, int? id)
@@ -23,12 +24,13 @@ public static class QualityProfileExtensions
             return null;
         }
 
-        return FlattenItems(items)
-            .Where(x => x.Quality is null)
-            .FirstOrDefault(x => x.Id == id);
+        return FlattenItems(items).Where(x => x.Quality is null).FirstOrDefault(x => x.Id == id);
     }
 
-    public static ProfileItemDto? FindGroupByName(this IEnumerable<ProfileItemDto> items, string? name)
+    public static ProfileItemDto? FindGroupByName(
+        this IEnumerable<ProfileItemDto> items,
+        string? name
+    )
     {
         if (name is null)
         {
@@ -52,7 +54,10 @@ public static class QualityProfileExtensions
             .FirstOrDefault(x => x.Quality!.Id == id);
     }
 
-    public static ProfileItemDto? FindQualityByName(this IEnumerable<ProfileItemDto> items, string? name)
+    public static ProfileItemDto? FindQualityByName(
+        this IEnumerable<ProfileItemDto> items,
+        string? name
+    )
     {
         if (name is null)
         {
@@ -64,7 +69,9 @@ public static class QualityProfileExtensions
             .FirstOrDefault(x => x.Quality!.Name.EqualsIgnoreCase(name));
     }
 
-    private static IEnumerable<(string? Name, int? Id)> GetEligibleCutoffs(IEnumerable<ProfileItemDto> items)
+    private static IEnumerable<(string? Name, int? Id)> GetEligibleCutoffs(
+        IEnumerable<ProfileItemDto> items
+    )
     {
         return items
             .Where(x => x.Allowed is true)
@@ -79,8 +86,7 @@ public static class QualityProfileExtensions
             return null;
         }
 
-        var result = GetEligibleCutoffs(items)
-            .FirstOrDefault(x => x.Name.EqualsIgnoreCase(name));
+        var result = GetEligibleCutoffs(items).FirstOrDefault(x => x.Name.EqualsIgnoreCase(name));
 
         return result.Id;
     }
@@ -92,8 +98,7 @@ public static class QualityProfileExtensions
             return null;
         }
 
-        var result = GetEligibleCutoffs(items)
-            .FirstOrDefault(x => x.Id == id);
+        var result = GetEligibleCutoffs(items).FirstOrDefault(x => x.Id == id);
 
         return result.Name;
     }
@@ -109,11 +114,7 @@ public static class QualityProfileExtensions
         // This calculation will be applied to new quality item groups.
         // See `getQualityItemGroupId()` here:
         // https://github.com/Radarr/Radarr/blob/c214a6b67bf747e02462066cd1c6db7bc06db1f0/frontend/src/Settings/Profiles/Quality/EditQualityProfileModalContentConnector.js#L11C8-L11C8
-        var maxExisting = FlattenItems(items)
-            .Select(x => x.Id)
-            .NotNull()
-            .DefaultIfEmpty(0)
-            .Max();
+        var maxExisting = FlattenItems(items).Select(x => x.Id).NotNull().DefaultIfEmpty(0).Max();
 
         return Math.Max(1000, maxExisting) + 1;
     }

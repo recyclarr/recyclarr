@@ -5,8 +5,10 @@ using Serilog.Templates;
 
 namespace Recyclarr.Notifications;
 
-public class NotificationLogSinkConfigurator(NotificationEmitter emitter, ISettings<NotificationSettings> settings)
-    : ILogConfigurator
+public class NotificationLogSinkConfigurator(
+    NotificationEmitter emitter,
+    ISettings<NotificationSettings> settings
+) : ILogConfigurator
 {
     public void Configure(LoggerConfiguration config)
     {

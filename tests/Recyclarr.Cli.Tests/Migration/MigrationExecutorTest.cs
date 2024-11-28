@@ -14,7 +14,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(false);
 
@@ -29,7 +29,7 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(true);
 
@@ -48,7 +48,7 @@ public class MigrationExecutorTest
         {
             Substitute.For<IMigrationStep>(),
             Substitute.For<IMigrationStep>(),
-            Substitute.For<IMigrationStep>()
+            Substitute.For<IMigrationStep>(),
         };
 
         var executor = new MigrationExecutor(steps.AsOrdered(), console);
@@ -68,25 +68,30 @@ public class MigrationExecutorTest
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute(null)).Throw(new ArgumentException("test message"));
 
         var act = () => executor.PerformAllMigrationSteps(false);
 
-        act.Should().Throw<MigrationException>().Which.OriginalException.Message.Should().Be("test message");
+        act.Should()
+            .Throw<MigrationException>()
+            .Which.OriginalException.Message.Should()
+            .Be("test message");
     }
 
     [Test]
-    [SuppressMessage("SonarLint",
+    [SuppressMessage(
+        "SonarLint",
         "S3928:Parameter names used into ArgumentException constructors should match an existing one",
-        Justification = "Used in unit test only")]
+        Justification = "Used in unit test only"
+    )]
     public void Migration_exceptions_are_not_converted()
     {
         using var console = new TestConsole();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] {step}.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
         var exception = new MigrationException(new ArgumentException(), "a", ["b"]);
 
         step.CheckIfNeeded().Returns(true);

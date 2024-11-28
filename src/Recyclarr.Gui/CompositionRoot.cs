@@ -12,7 +12,8 @@ public static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.RegisterType<DefaultAppDataSetup>();
-        builder.Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
+        builder
+            .Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
             .As<IAppPaths>()
             .SingleInstance();
     }

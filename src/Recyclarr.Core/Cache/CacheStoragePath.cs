@@ -9,7 +9,8 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cache;
 
-public partial class CacheStoragePath(IAppPaths paths, IServiceConfiguration config) : ICacheStoragePath
+public partial class CacheStoragePath(IAppPaths paths, IServiceConfiguration config)
+    : ICacheStoragePath
 {
     private readonly IFNV1a _hash = FNV1aFactory.Instance.Create(FNVConfig.GetPredefinedConfig(64));
 
@@ -21,8 +22,10 @@ public partial class CacheStoragePath(IAppPaths paths, IServiceConfiguration con
 
     private IFileInfo CalculatePathInternal(string cacheObjectName, string serviceDir)
     {
-        return paths.CacheDirectory
-            .SubDirectory(config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture))
+        return paths
+            .CacheDirectory.SubDirectory(
+                config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture)
+            )
             .SubDirectory(serviceDir)
             .File(cacheObjectName + ".json");
     }
@@ -32,12 +35,16 @@ public partial class CacheStoragePath(IAppPaths paths, IServiceConfiguration con
         var attribute = typeof(T).GetCustomAttribute<CacheObjectNameAttribute>();
         if (attribute == null)
         {
-            throw new ArgumentException($"{nameof(CacheObjectNameAttribute)} is missing on type {nameof(T)}");
+            throw new ArgumentException(
+                $"{nameof(CacheObjectNameAttribute)} is missing on type {nameof(T)}"
+            );
         }
 
         if (!AllowedObjectNameCharactersRegex().IsMatch(attribute.Name))
         {
-            throw new ArgumentException($"Object name '{attribute.Name}' has unacceptable characters");
+            throw new ArgumentException(
+                $"Object name '{attribute.Name}' has unacceptable characters"
+            );
         }
 
         return attribute.Name;

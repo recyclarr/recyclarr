@@ -9,7 +9,11 @@ public record TrashIdMapping(string TrashId, string CustomFormatName, int Custom
 
 [CacheObjectName("custom-format-cache")]
 [SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "POCO")]
-[SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "POCO")]
+[SuppressMessage(
+    "Usage",
+    "CA2227:Collection properties should be read only",
+    Justification = "POCO"
+)]
 public record CustomFormatCacheObject() : CacheObject(1)
 {
     public List<TrashIdMapping> TrashIdMappings { get; set; } = [];
@@ -24,14 +28,17 @@ public class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(
         // Assume that RemoveStale() is called before this method, and that TrashIdMappings contains existing CFs
         // in the remote service that we want to keep and update.
 
-        var existingCfs = transactions.UpdatedCustomFormats
-            .Concat(transactions.UnchangedCustomFormats)
+        var existingCfs = transactions
+            .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
             .Concat(transactions.NewCustomFormats);
 
-        cacheObject.TrashIdMappings = cacheObject.TrashIdMappings
-            .DistinctBy(x => x.CustomFormatId)
-            .Where(x => transactions.DeletedCustomFormats.All(y => y.CustomFormatId != x.CustomFormatId))
-            .FullOuterHashJoin(existingCfs,
+        cacheObject.TrashIdMappings = cacheObject
+            .TrashIdMappings.DistinctBy(x => x.CustomFormatId)
+            .Where(x =>
+                transactions.DeletedCustomFormats.All(y => y.CustomFormatId != x.CustomFormatId)
+            )
+            .FullOuterHashJoin(
+                existingCfs,
                 l => l.CustomFormatId,
                 r => r.Id,
                 // Keep existing service CFs, even if they aren't in user config
@@ -39,7 +46,8 @@ public class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(
                 // Add a new mapping for CFs in user's config
                 r => new TrashIdMapping(r.TrashId, r.Name, r.Id),
                 // Update existing mappings for CFs in user's config
-                (l, r) => l with {TrashId = r.TrashId, CustomFormatName = r.Name})
+                (l, r) => l with { TrashId = r.TrashId, CustomFormatName = r.Name }
+            )
             .Where(x => x.CustomFormatId != 0)
             .OrderBy(x => x.CustomFormatId)
             .ToList();
@@ -48,7 +56,8 @@ public class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(
     public void RemoveStale(IEnumerable<CustomFormatData> serviceCfs)
     {
         cacheObject.TrashIdMappings.RemoveAll(x =>
-            x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId));
+            x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId)
+        );
     }
 
     public int? FindId(CustomFormatData cf)

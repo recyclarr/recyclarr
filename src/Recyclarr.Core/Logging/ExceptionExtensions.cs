@@ -8,12 +8,19 @@ public static class ExceptionExtensions
     {
         if (ex is AggregateException aex)
         {
-            return aex.InnerExceptions.Aggregate("[ ", (total, next) => $"{total}[{next.FullMessage()}] ") + "]";
+            return aex.InnerExceptions.Aggregate(
+                    "[ ",
+                    (total, next) => $"{total}[{next.FullMessage()}] "
+                ) + "]";
         }
 
-        var msg = ex.Message.Replace(", see inner exception.", "").Trim();
+        var msg = ex.Message.Replace(", see inner exception.", "", StringComparison.Ordinal).Trim();
         var innerMsg = ex.InnerException?.FullMessage();
-        if (innerMsg != null && !innerMsg.ContainsIgnoreCase(msg) && !msg.ContainsIgnoreCase(innerMsg))
+        if (
+            innerMsg != null
+            && !innerMsg.ContainsIgnoreCase(msg)
+            && !msg.ContainsIgnoreCase(innerMsg)
+        )
         {
             msg = $"{msg} [ {innerMsg} ]";
         }

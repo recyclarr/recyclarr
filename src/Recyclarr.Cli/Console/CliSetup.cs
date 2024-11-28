@@ -16,31 +16,45 @@ public static class CliSetup
 
         cli.AddCommand<MigrateCommand>("migrate");
 
-        cli.AddBranch("list", list =>
-        {
-            list.SetDescription("List information from the guide");
-            list.AddCommand<ListCustomFormatsCommand>("custom-formats");
-            list.AddCommand<ListQualitiesCommand>("qualities");
-            list.AddCommand<ListMediaNamingCommand>("naming");
-        });
-
-        cli.AddBranch("config", config =>
-        {
-            config.SetDescription("Operations for configuration files");
-            config.AddCommand<ConfigCreateCommand>("create");
-            config.AddBranch("list", list =>
+        cli.AddBranch(
+            "list",
+            list =>
             {
-                list.SetDescription("List configuration files in various ways");
-                list.AddCommand<ConfigListLocalCommand>("local");
-                list.AddCommand<ConfigListTemplatesCommand>("templates");
-            });
-        });
+                list.SetDescription("List information from the guide");
+                list.AddCommand<ListCustomFormatsCommand>("custom-formats");
+                list.AddCommand<ListQualitiesCommand>("qualities");
+                list.AddCommand<ListMediaNamingCommand>("naming");
+            }
+        );
 
-        cli.AddBranch("delete", delete =>
-        {
-            delete.SetDescription("Delete operations for remote services (e.g. Radarr, Sonarr)");
-            delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
-        });
+        cli.AddBranch(
+            "config",
+            config =>
+            {
+                config.SetDescription("Operations for configuration files");
+                config.AddCommand<ConfigCreateCommand>("create");
+                config.AddBranch(
+                    "list",
+                    list =>
+                    {
+                        list.SetDescription("List configuration files in various ways");
+                        list.AddCommand<ConfigListLocalCommand>("local");
+                        list.AddCommand<ConfigListTemplatesCommand>("templates");
+                    }
+                );
+            }
+        );
+
+        cli.AddBranch(
+            "delete",
+            delete =>
+            {
+                delete.SetDescription(
+                    "Delete operations for remote services (e.g. Radarr, Sonarr)"
+                );
+                delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
+            }
+        );
     }
 
     public static async Task<int> Run(ILifetimeScope scope, IEnumerable<string> args)
@@ -48,9 +62,9 @@ public static class CliSetup
         var app = scope.Resolve<CommandApp>();
         app.Configure(config =>
         {
-        #if DEBUG
+#if DEBUG
             config.ValidateExamples();
-        #endif
+#endif
 
             config.ConfigureConsole(scope.Resolve<IAnsiConsole>());
             config.PropagateExceptions();
@@ -58,7 +72,8 @@ public static class CliSetup
 
             config.SetApplicationName("recyclarr");
             config.SetApplicationVersion(
-                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})");
+                $"v{GitVersionInformation.SemVer} ({GitVersionInformation.FullBuildMetaData})"
+            );
 
             AddCommands(config);
         });

@@ -10,8 +10,10 @@ public class RuntimeValidationService : IRuntimeValidationService
 
     private static Type? GetValidatorInterface(Type type)
     {
-        return Array.Find(type.GetInterfaces(),
-            i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
+        return Array.Find(
+            type.GetInterfaces(),
+            i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>)
+        );
     }
 
     public RuntimeValidationService(IEnumerable<IValidator> validators)
@@ -26,11 +28,16 @@ public class RuntimeValidationService : IRuntimeValidationService
     {
         if (!_validators.TryGetValue(instance.GetType(), out var validator))
         {
-            throw new ValidationException($"No validator is available for type: {instance.GetType().FullName}");
+            throw new ValidationException(
+                $"No validator is available for type: {instance.GetType().FullName}"
+            );
         }
 
-        var validatorSelector =
-            new RulesetValidatorSelector([RulesetValidatorSelector.DefaultRuleSetName, ..additionalRuleSets]);
-        return validator.Validate(new ValidationContext<object>(instance, new PropertyChain(), validatorSelector));
+        var validatorSelector = new RulesetValidatorSelector(
+            [RulesetValidatorSelector.DefaultRuleSetName, .. additionalRuleSets]
+        );
+        return validator.Validate(
+            new ValidationContext<object>(instance, new PropertyChain(), validatorSelector)
+        );
     }
 }

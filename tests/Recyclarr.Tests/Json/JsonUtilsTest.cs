@@ -18,8 +18,7 @@ public class JsonUtilsTest
         var result = JsonUtils.GetJsonFilesInDirectories([path], log);
 
         result.Should().BeEmpty();
-        log.Messages.Should().ContainSingle()
-            .Which.Should().Match("*doesnt_exist*");
+        log.Messages.Should().ContainSingle().Which.Should().Match("*doesnt_exist*");
     }
 
     [Test]
@@ -33,9 +32,7 @@ public class JsonUtilsTest
 
         var result = JsonUtils.GetJsonFilesInDirectories([path.Directory], log);
 
-        result.Should().ContainSingle()
-            .Which.FullName
-            .Should().Be(path.FullName);
+        result.Should().ContainSingle().Which.FullName.Should().Be(path.FullName);
 
         log.Messages.Should().BeEmpty();
     }
@@ -48,7 +45,7 @@ public class JsonUtilsTest
         var paths = new[]
         {
             fs.CurrentDirectory().SubDirectory("does_not_exist"),
-            fs.CurrentDirectory().SubDirectory("exists")
+            fs.CurrentDirectory().SubDirectory("exists"),
         };
 
         var existingFile = paths[1].File("test.json").FullName;
@@ -58,20 +55,15 @@ public class JsonUtilsTest
 
         var result = JsonUtils.GetJsonFilesInDirectories(paths, log);
 
-        result.Should().ContainSingle()
-            .Which.FullName
-            .Should().Be(existingFile);
+        result.Should().ContainSingle().Which.FullName.Should().Be(existingFile);
 
-        log.Messages.Should().ContainSingle()
-            .Which.Should().Match("*does_not_exist*");
+        log.Messages.Should().ContainSingle().Which.Should().Match("*does_not_exist*");
     }
 
     [Test]
     public void Null_paths_are_ignored()
     {
-        var result = JsonUtils.GetJsonFilesInDirectories(
-            [null, null],
-            Substitute.For<ILogger>());
+        var result = JsonUtils.GetJsonFilesInDirectories([null, null], Substitute.For<ILogger>());
 
         result.Should().BeEmpty();
     }

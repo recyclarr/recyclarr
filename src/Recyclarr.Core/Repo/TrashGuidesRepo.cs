@@ -6,8 +6,11 @@ using Serilog.Context;
 
 namespace Recyclarr.Repo;
 
-public class TrashGuidesRepo(IRepoUpdater repoUpdater, IAppPaths paths, ISettings<TrashRepository> settings)
-    : ITrashGuidesRepo, IUpdateableRepo
+public class TrashGuidesRepo(
+    IRepoUpdater repoUpdater,
+    IAppPaths paths,
+    ISettings<TrashRepository> settings
+) : ITrashGuidesRepo, IUpdateableRepo
 {
     public IDirectoryInfo Path { get; } = paths.ReposDirectory.SubDirectory("trash-guides");
 

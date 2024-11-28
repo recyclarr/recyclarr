@@ -23,6 +23,6 @@ public sealed class CustomizeWithAttribute : CustomizeAttribute
 
     public override ICustomization? GetCustomization(ParameterInfo parameter)
     {
-        return (ICustomization?) Activator.CreateInstance(CustomizationType);
+        return (ICustomization?)Activator.CreateInstance(CustomizationType);
     }
 }
