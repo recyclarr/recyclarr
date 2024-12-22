@@ -5,6 +5,3 @@ dotnet_diagnostic.ca1707.severity = none
 
 # Avoid constant arrays as arguments
 dotnet_diagnostic.ca1861.severity = none
-
-# Consider making public types internal
-dotnet_diagnostic.CA1515.severity = none
