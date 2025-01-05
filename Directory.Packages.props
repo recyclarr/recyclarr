@@ -52,7 +52,7 @@
     <PackageVersion Include="AutoFixture" Version="5.0.0-preview0011" PrivateAssets="all" />
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0011" PrivateAssets="all" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0011" PrivateAssets="all" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" PrivateAssets="all" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" PrivateAssets="all" />
     <PackageVersion Include="FluentAssertions" Version="7.0.0" PrivateAssets="all" />
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.34.1" PrivateAssets="all" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" PrivateAssets="all" />
