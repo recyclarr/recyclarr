@@ -1,16 +1,24 @@
 using System.IO.Abstractions;
+using AutoMapper;
+using Recyclarr.Common.Extensions;
+using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.Logging;
+using Recyclarr.TrashGuide;
+using Serilog.Context;
 
 namespace Recyclarr.Config;
 
 public class ConfigurationRegistry(
-    IConfigurationLoader loader,
+    ConfigurationLoader loader,
     IConfigurationFinder finder,
-    IFileSystem fs
-) : IConfigurationRegistry
+    IFileSystem fs,
+    ConfigValidationExecutor validator,
+    IMapper mapper
+)
 {
     public IReadOnlyCollection<IServiceConfiguration> FindAndLoadConfigs(
         ConfigFilterCriteria? filterCriteria = null
@@ -20,7 +28,7 @@ public class ConfigurationRegistry(
 
         var manualConfigs = filterCriteria.ManualConfigFiles;
         var configs =
-            manualConfigs is not null && manualConfigs.Count != 0
+            manualConfigs.Count != 0
                 ? PrepareManualConfigs(manualConfigs)
                 : finder.GetConfigFiles();
 
@@ -39,12 +47,15 @@ public class ConfigurationRegistry(
         return configFiles[true].ToList();
     }
 
-    private IEnumerable<IServiceConfiguration> LoadAndFilterConfigs(
+    private List<IServiceConfiguration> LoadAndFilterConfigs(
         IEnumerable<IFileInfo> configs,
         ConfigFilterCriteria filterCriteria
     )
     {
-        var loadedConfigs = configs.SelectMany(x => loader.Load(x)).ToList();
+        var loadedConfigs = configs
+            .SelectMany(loader.Load)
+            .Where(filterCriteria.InstanceMatchesCriteria)
+            .ToList();
 
         var dupeInstances = loadedConfigs.GetDuplicateInstanceNames().ToList();
         if (dupeInstances.Count != 0)
@@ -52,7 +63,7 @@ public class ConfigurationRegistry(
             throw new DuplicateInstancesException(dupeInstances);
         }
 
-        var invalidInstances = loadedConfigs.GetInvalidInstanceNames(filterCriteria).ToList();
+        var invalidInstances = loadedConfigs.GetNonExistentInstanceNames(filterCriteria).ToList();
         if (invalidInstances.Count != 0)
         {
             throw new InvalidInstancesException(invalidInstances);
@@ -64,6 +75,33 @@ public class ConfigurationRegistry(
             throw new SplitInstancesException(splitInstances);
         }
 
-        return loadedConfigs.GetConfigsBasedOnSettings(filterCriteria);
+        List<IServiceConfiguration> validatedConfigs = [];
+
+        foreach (var config in loadedConfigs)
+        {
+            using var logScope = LogContext.PushProperty(LogProperty.Scope, config.Filename);
+
+            if (!validator.Validate(config.Yaml, YamlValidatorRuleSets.RootConfig))
+            {
+                continue;
+            }
+
+            validatedConfigs.Add(
+                config.Yaml switch
+                {
+                    RadarrConfigYaml => MapConfig<RadarrConfiguration>(config),
+                    SonarrConfigYaml => MapConfig<SonarrConfiguration>(config),
+                    _ => throw new InvalidOperationException("Unknown config type"),
+                }
+            );
+        }
+
+        return validatedConfigs;
+    }
+
+    private IServiceConfiguration MapConfig<TServiceConfig>(LoadedConfigYaml config)
+        where TServiceConfig : ServiceConfiguration
+    {
+        return mapper.Map<TServiceConfig>(config.Yaml) with { InstanceName = config.InstanceName };
     }
 }
