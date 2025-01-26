@@ -1,13 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
 using Autofac;
 using FluentValidation;
-using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Config;
-using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashGuide;
@@ -17,12 +13,6 @@ namespace Recyclarr.IntegrationTests;
 [TestFixture]
 public class ConfigurationLoaderTest : IntegrationTestFixture
 {
-    private static Func<TextReader> GetResourceData(string file)
-    {
-        var testData = new ResourceDataReader(typeof(ConfigurationLoaderTest), "Data");
-        return () => new StringReader(testData.ReadData(file));
-    }
-
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
@@ -31,11 +21,6 @@ public class ConfigurationLoaderTest : IntegrationTestFixture
     }
 
     [Test]
-    [SuppressMessage(
-        "SonarLint",
-        "S3626",
-        Justification = "'return' used here is for separating local methods"
-    )]
     public void Load_many_iterations_of_config()
     {
         var baseDir = Fs.CurrentDirectory();
@@ -52,19 +37,27 @@ public class ConfigurationLoaderTest : IntegrationTestFixture
             Fs.AddFile(file.FullName, new MockFileData(data));
         }
 
-        var expectedSonarr = new[]
-        {
-            new { ApiKey = "abc", BaseUrl = new Uri("http://one") },
-            new { ApiKey = "abc", BaseUrl = new Uri("http://two") },
-            new { ApiKey = "abc", BaseUrl = new Uri("http://three") },
-        };
+        var loader = Resolve<ConfigurationLoader>();
 
-        var expectedRadarr = new[] { new { ApiKey = "abc", BaseUrl = new Uri("http://four") } };
+        var result = fileData.SelectMany(x => loader.Load(x.Item1)).ToList();
 
-        var loader = Resolve<IConfigurationLoader>();
+        result
+            .Where(x => x.ServiceType == SupportedServices.Sonarr)
+            .Select(x => x.Yaml)
+            .Should()
+            .BeEquivalentTo(
+                [
+                    new { ApiKey = "abc", BaseUrl = "http://one" },
+                    new { ApiKey = "abc", BaseUrl = "http://two" },
+                    new { ApiKey = "abc", BaseUrl = "http://three" },
+                ]
+            );
 
-        LoadMany(SupportedServices.Sonarr).Should().BeEquivalentTo(expectedSonarr);
-        LoadMany(SupportedServices.Radarr).Should().BeEquivalentTo(expectedRadarr);
+        result
+            .Where(x => x.ServiceType == SupportedServices.Radarr)
+            .Select(x => x.Yaml)
+            .Should()
+            .BeEquivalentTo([new { ApiKey = "abc", BaseUrl = "http://four" }]);
 
         return;
 
@@ -87,30 +80,36 @@ public class ConfigurationLoaderTest : IntegrationTestFixture
 
             return str.ToString();
         }
-
-        IEnumerable<IServiceConfiguration> LoadMany(SupportedServices service) =>
-            fileData.SelectMany(x => loader.Load(x.Item1)).GetConfigsOfType(service);
     }
 
     [Test]
     public void Parse_using_stream()
     {
         var configLoader = Resolve<ConfigurationLoader>();
-        configLoader
-            .Load(GetResourceData("Load_UsingStream_CorrectParsing.yml"))
-            .GetConfigsOfType(SupportedServices.Sonarr)
+        var result = configLoader.Load(
+            """
+            sonarr:
+              name:
+                base_url: http://localhost:8989
+                api_key: 95283e6b156c42f3af8a9b16173f876b
+            """
+        );
+
+        result
+            .Where(x => x.ServiceType == SupportedServices.Sonarr)
             .Should()
+            .ContainSingle()
+            .Which.Should()
             .BeEquivalentTo(
-                new List<SonarrConfiguration>
-                {
-                    new()
+                new LoadedConfigYaml(
+                    "name",
+                    SupportedServices.Sonarr,
+                    new SonarrConfigYaml
                     {
                         ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                        BaseUrl = new Uri("http://localhost:8989"),
-                        InstanceName = "name",
-                        ReplaceExistingCustomFormats = false,
-                    },
-                }
+                        BaseUrl = "http://localhost:8989",
+                    }
+                )
             );
     }
 
@@ -125,7 +124,7 @@ public class ConfigurationLoaderTest : IntegrationTestFixture
                 api_key: xyz
             """;
 
-        sut.Load(testYml).GetConfigsOfType(SupportedServices.Sonarr);
+        sut.Load(testYml);
 
         Logger.Messages.Should().NotContain("Configuration is empty");
     }

@@ -21,7 +21,7 @@ internal class CustomFormatConfigurationScope(ILifetimeScope scope) : Configurat
 public class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
-    IConfigurationRegistry configRegistry,
+    ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory scopeFactory
 ) : IDeleteCustomFormatsProcessor
 {

@@ -1,6 +1,5 @@
 using Recyclarr.Config;
 using Recyclarr.Config.ExceptionTypes;
-using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.ErrorHandling;
 
 namespace Recyclarr.IntegrationTests;
@@ -31,15 +30,15 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
 
         result
             .Should()
+            .ContainSingle()
+            .Which.Should()
             .BeEquivalentTo(
-                [
-                    new RadarrConfiguration
-                    {
-                        BaseUrl = new Uri("http://localhost:7878"),
-                        ApiKey = "asdf",
-                        InstanceName = "instance1",
-                    },
-                ]
+                new
+                {
+                    BaseUrl = new Uri("http://localhost:7878"),
+                    ApiKey = "asdf",
+                    InstanceName = "instance1",
+                }
             );
     }
 
@@ -159,5 +158,60 @@ public class ConfigurationRegistryTest : IntegrationTestFixture
             .ThrowExactly<DuplicateInstancesException>()
             .Which.InstanceNames.Should()
             .BeEquivalentTo("same_instance_name");
+    }
+
+    [Test]
+    public void Ignore_invalid_yaml_configs_when_filtered_out()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "valid.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost1:7878
+                    api_key: valid_key
+                """
+            )
+        );
+
+        Fs.AddFile(
+            "invalid.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance2:
+                    base_url: http://localhost2:7878
+                    api_key: valid_key
+                    quality_definition:
+                    quality_profiles:
+                    custom_formats:
+                    media_naming:
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria
+            {
+                ManualConfigFiles = ["valid.yml", "invalid.yml"],
+                Instances = ["instance1"],
+            }
+        );
+
+        result
+            .Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(
+                new
+                {
+                    BaseUrl = new Uri("http://localhost1:7878"),
+                    ApiKey = "valid_key",
+                    InstanceName = "instance1",
+                }
+            );
     }
 }

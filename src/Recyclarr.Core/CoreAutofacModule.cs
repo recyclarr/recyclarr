@@ -99,8 +99,8 @@ public class CoreAutofacModule : Module
 
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
-        builder.RegisterType<ConfigurationRegistry>().As<IConfigurationRegistry>();
-        builder.RegisterType<ConfigurationLoader>().As<IConfigurationLoader>();
+        builder.RegisterType<ConfigurationRegistry>();
+        builder.RegisterType<ConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
@@ -136,11 +136,12 @@ public class CoreAutofacModule : Module
             .As<IConfigDeprecationCheck>()
             .OrderByRegistration();
 
-        builder.RegisterType<RootConfigYamlValidator>().As<IValidator>();
-
         // These validators are required by IncludePostProcessor
         builder.RegisterType<RadarrConfigYamlValidator>().As<IValidator>();
         builder.RegisterType<SonarrConfigYamlValidator>().As<IValidator>();
+
+        // Required by ConfigurationRegistry
+        builder.RegisterType<ServiceConfigYamlValidator>().As<IValidator<ServiceConfigYaml>>();
     }
 
     private static void RegisterHttp(ContainerBuilder builder)

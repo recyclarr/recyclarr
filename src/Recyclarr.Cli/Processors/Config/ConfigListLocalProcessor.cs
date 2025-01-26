@@ -2,7 +2,6 @@ using System.Globalization;
 using System.IO.Abstractions;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.Config.Parsing;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
@@ -12,18 +11,21 @@ namespace Recyclarr.Cli.Processors.Config;
 
 public class ConfigListLocalProcessor(
     IAnsiConsole console,
-    IConfigurationFinder configFinder,
-    IConfigurationLoader configLoader,
+    ConfigurationRegistry configRegistry,
     IAppPaths paths
 )
 {
     public void Process()
     {
         var tree = new Tree(paths.AppDataDirectory.ToString()!);
+        var allConfigs = configRegistry
+            .FindAndLoadConfigs()
+            .ToLookup(x => MakeRelative(x.YamlPath));
 
-        foreach (var configPath in configFinder.GetConfigFiles())
+        foreach (var pair in allConfigs)
         {
-            var configs = configLoader.Load(configPath);
+            var path = pair.Key;
+            var configs = pair.ToList();
 
             var rows = new List<IRenderable>();
             BuildInstanceTree(rows, configs, SupportedServices.Radarr);
@@ -35,10 +37,7 @@ public class ConfigListLocalProcessor(
             }
 
             var configTree = new Tree(
-                Markup.FromInterpolated(
-                    CultureInfo.InvariantCulture,
-                    $"[b]{MakeRelative(configPath)}[/]"
-                )
+                Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[b]{path}[/]")
             );
             foreach (var r in rows)
             {
@@ -52,8 +51,13 @@ public class ConfigListLocalProcessor(
         console.Write(tree);
     }
 
-    private string MakeRelative(IFileInfo path)
+    private string MakeRelative(IFileInfo? path)
     {
+        if (path is null)
+        {
+            return "<no path>";
+        }
+
         var configPath = new Uri(path.FullName, UriKind.Absolute);
         var configDir = new Uri(paths.ConfigsDirectory.FullName, UriKind.Absolute);
         return configDir.MakeRelativeUri(configPath).ToString();
@@ -65,7 +69,7 @@ public class ConfigListLocalProcessor(
         SupportedServices service
     )
     {
-        var configs = registry.GetConfigsOfType(service).ToList();
+        var configs = registry.Where(x => x.ServiceType == service).ToList();
         if (configs.Count == 0)
         {
             return;
