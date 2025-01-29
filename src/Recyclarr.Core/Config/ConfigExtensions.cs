@@ -37,15 +37,15 @@ public static class ConfigExtensions
         );
     }
 
-    public static IEnumerable<string> GetDuplicateInstanceNames(
-        this IReadOnlyCollection<LoadedConfigYaml> configs
-    )
-    {
-        return configs
-            .Select(x => x.InstanceName)
-            .GroupBy(x => x, StringComparer.InvariantCultureIgnoreCase)
-            .Where(x => x.Count() > 1)
-            .Select(x => x.First())
-            .ToList();
-    }
+    // public static IEnumerable<string> GetDuplicateInstanceNames(
+    //     this IReadOnlyCollection<LoadedConfigYaml> configs
+    // )
+    // {
+    //     return configs
+    //         .Select(x => x.InstanceName)
+    //         .GroupBy(x => x, StringComparer.InvariantCultureIgnoreCase)
+    //         .Where(x => x.Count() > 1)
+    //         .Select(x => x.First())
+    //         .ToList();
+    // }
 }
