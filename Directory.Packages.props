@@ -34,9 +34,9 @@
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
     <PackageVersion Include="System.Text.Json" Version="9.0.1" />
     <PackageVersion Include="SystemTextJson.JsonDiffPatch" Version="2.0.0" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="21.2.1" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="21.2.12" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="2.2.5" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.2.1" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.Wrappers" Version="21.2.12" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
   <!-- Unit Test Packages -->
@@ -65,7 +65,7 @@
     <PackageVersion Include="Serilog.Sinks.Observable" Version="3.0.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" PrivateAssets="all" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.49.1" PrivateAssets="all" />
-    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.2.1" PrivateAssets="all" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="21.2.12" PrivateAssets="all" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
   <ItemGroup>
