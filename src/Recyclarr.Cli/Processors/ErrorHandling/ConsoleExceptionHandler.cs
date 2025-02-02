@@ -10,7 +10,7 @@ using YamlDotNet.Core;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class ConsoleExceptionHandler(ILogger log, ValidationLogger validationLogger)
+public class ConsoleExceptionHandler(ILogger log)
 {
     public async Task<bool> HandleException(Exception sourceException)
     {
@@ -61,14 +61,6 @@ public class ConsoleExceptionHandler(ILogger log, ValidationLogger validationLog
                     "Manually-specified configuration files do not exist: {Files}",
                     e.InvalidFiles
                 );
-                break;
-
-            case ConfigValidationException e:
-                foreach (var (instanceName, errors) in e.InvalidConfigs)
-                {
-                    validationLogger.LogValidationErrors(errors, $"Instance '{instanceName}'");
-                }
-
                 break;
 
             case InvalidConfigurationException:

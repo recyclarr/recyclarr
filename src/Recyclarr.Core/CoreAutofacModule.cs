@@ -112,8 +112,8 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigFilterProcessor>();
         builder
             .RegisterTypes(
-                typeof(DuplicateInstancesFilter),
                 typeof(NonExistentInstancesFilter),
+                typeof(DuplicateInstancesFilter),
                 typeof(SplitInstancesFilter),
                 typeof(InvalidInstancesFilter)
             )

@@ -23,11 +23,14 @@ public class ConfigFilterProcessor(IAnsiConsole console, IEnumerable<IConfigFilt
 
         if (renderables.Count != 0)
         {
-            var main = new Panel(new Padder(new Rows(renderables)).PadBottom(0))
+            var main = new Panel(new Padder(new Rows(renderables).Collapse()).PadBottom(0))
+                .Collapse()
                 .Header("[red]Configuration Errors[/]")
                 .RoundedBorder();
 
-            console.Write(main);
+            var column = new Columns(main);
+
+            console.Write(column);
         }
 
         return filteredConfigs;

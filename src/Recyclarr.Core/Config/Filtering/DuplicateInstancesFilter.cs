@@ -10,12 +10,9 @@ public class DuplicateInstancesFilter : IConfigFilter
     {
         public IRenderable Render()
         {
-            return new Rows(
-                [
-                    new Markup("[orange1]Duplicate Instances[/]"),
-                    .. duplicateInstances.Select(x => new Text($"- {x}")),
-                ]
-            );
+            var tree = new Tree("[orange1]Duplicate Instances[/]");
+            tree.AddNodes(duplicateInstances);
+            return tree;
         }
     }
 

@@ -1,6 +1,5 @@
 using FluentValidation;
 using FluentValidation.Results;
-using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -19,7 +18,31 @@ public class InvalidInstancesFilter(IValidator<ServiceConfigYaml> validator) : I
     {
         public IRenderable Render()
         {
-            return Text.Empty;
+            var tree = new Tree("[orange1]Invalid Instances[/]");
+
+            foreach (var (instanceName, failures) in invalidInstances)
+            {
+                var instanceNode = tree.AddNode($"[cornflowerblue]{instanceName}[/]");
+
+                foreach (var f in failures)
+                {
+                    var prefix = GetSeverityPrefix(f.Severity);
+                    instanceNode.AddNode($"{prefix} {f.ErrorMessage}");
+                }
+            }
+
+            return tree;
+        }
+
+        private static string GetSeverityPrefix(Severity severity)
+        {
+            return severity switch
+            {
+                Severity.Error => "[red]X[/]",
+                Severity.Warning => "[yellow]![/]",
+                Severity.Info => "[blue]i[/]",
+                _ => "[grey]?[/]",
+            };
         }
     }
 

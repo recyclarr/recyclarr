@@ -15,12 +15,21 @@ public class SplitInstancesFilter : IConfigFilter
     {
         public IRenderable Render()
         {
-            return new Rows(
-                [
-                    new Markup("[orange1]Split Instances[/]"),
-                    .. splitInstances.Select(x => new Text($"- {x}")),
-                ]
-            );
+            var tree = new Tree("[orange1]Split Instances[/]");
+
+            foreach (var (baseUrl, instanceNames) in splitInstances)
+            {
+                // tree.AddNode(new Markup($"[cyan]Base URL:[/] {baseUrl}"));
+
+                var instanceTree = new Tree($"[cornflowerblue]Base URL:[/] {baseUrl}");
+                instanceTree.AddNodes(instanceNames);
+                tree.AddNode(instanceTree);
+
+                // rows.Add(new Rule().RuleStyle("grey")); // Separator between split instances
+            }
+
+            return tree;
+            // return new Rows([.. splitInstances.Select(x => new Text($"- {x}"))]);
         }
     }
 
