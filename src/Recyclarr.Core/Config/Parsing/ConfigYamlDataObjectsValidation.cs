@@ -237,12 +237,3 @@ public class SonarrConfigYamlValidator : CustomValidator<SonarrConfigYaml>
         Include(new ServiceConfigYamlValidator());
     }
 }
-
-public class RootConfigYamlValidator : CustomValidator<RootConfigYaml>
-{
-    public RootConfigYamlValidator()
-    {
-        RuleForEach(x => x.RadarrValues).SetValidator(new RadarrConfigYamlValidator());
-        RuleForEach(x => x.SonarrValues).SetValidator(new SonarrConfigYamlValidator());
-    }
-}

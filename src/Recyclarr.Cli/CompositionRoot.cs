@@ -14,6 +14,7 @@ using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Common;
+using Recyclarr.Common.FluentValidation;
 using Recyclarr.Logging;
 using Serilog.Core;
 using Spectre.Console;
@@ -54,7 +55,6 @@ public static class CompositionRoot
         builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
 
         // Configuration
-        builder.RegisterType<ConfigManipulator>().As<IConfigManipulator>();
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<ConfigListLocalProcessor>();
         builder.RegisterType<ConfigListTemplateProcessor>();
@@ -89,6 +89,7 @@ public static class CompositionRoot
         builder.RegisterType<IndirectLoggerDecorator>().As<ILogger>();
 
         builder.RegisterType<LogJanitor>();
+        builder.RegisterType<ValidationLogger>();
     }
 
     private static void CliRegistrations(ContainerBuilder builder)

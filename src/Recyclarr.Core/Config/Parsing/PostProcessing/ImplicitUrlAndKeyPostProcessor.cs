@@ -14,15 +14,20 @@ public class ImplicitUrlAndKeyPostProcessor(ILogger log, ISecretsProvider secret
         };
     }
 
-    private Dictionary<string, T>? ProcessService<T>(IReadOnlyDictionary<string, T>? services)
+    private Dictionary<string, T?>? ProcessService<T>(IReadOnlyDictionary<string, T?>? services)
         where T : ServiceConfigYaml
     {
         return services?.ToDictionary(x => x.Key, x => FillUrlAndKey(x.Key, x.Value));
     }
 
-    private T FillUrlAndKey<T>(string instanceName, T config)
+    private T? FillUrlAndKey<T>(string instanceName, T? config)
         where T : ServiceConfigYaml
     {
+        if (config is null)
+        {
+            return null;
+        }
+
         return config with
         {
             ApiKey = config.ApiKey ?? GetSecret(instanceName, "api_key"),

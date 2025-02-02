@@ -26,14 +26,14 @@ public class ImplicitUrlAndKeyPostProcessorTest
         var result = sut.Process(
             new RootConfigYaml
             {
-                Radarr = new Dictionary<string, RadarrConfigYaml>
+                Radarr = new Dictionary<string, RadarrConfigYaml?>
                 {
                     {
                         "instance1",
                         new RadarrConfigYaml { ApiKey = "explicit_base_url" }
                     },
                 },
-                Sonarr = new Dictionary<string, SonarrConfigYaml>
+                Sonarr = new Dictionary<string, SonarrConfigYaml?>
                 {
                     {
                         "instance2",
@@ -48,7 +48,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
             .BeEquivalentTo(
                 new RootConfigYaml
                 {
-                    Radarr = new Dictionary<string, RadarrConfigYaml>
+                    Radarr = new Dictionary<string, RadarrConfigYaml?>
                     {
                         {
                             "instance1",
@@ -59,7 +59,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
                             }
                         },
                     },
-                    Sonarr = new Dictionary<string, SonarrConfigYaml>
+                    Sonarr = new Dictionary<string, SonarrConfigYaml?>
                     {
                         {
                             "instance2",
@@ -93,14 +93,14 @@ public class ImplicitUrlAndKeyPostProcessorTest
         var result = sut.Process(
             new RootConfigYaml
             {
-                Radarr = new Dictionary<string, RadarrConfigYaml>
+                Radarr = new Dictionary<string, RadarrConfigYaml?>
                 {
                     {
                         "instance1",
                         new RadarrConfigYaml { BaseUrl = "explicit_base_url" }
                     },
                 },
-                Sonarr = new Dictionary<string, SonarrConfigYaml>
+                Sonarr = new Dictionary<string, SonarrConfigYaml?>
                 {
                     {
                         "instance2",
@@ -115,7 +115,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
             .BeEquivalentTo(
                 new RootConfigYaml
                 {
-                    Radarr = new Dictionary<string, RadarrConfigYaml>
+                    Radarr = new Dictionary<string, RadarrConfigYaml?>
                     {
                         {
                             "instance1",
@@ -126,7 +126,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
                             }
                         },
                     },
-                    Sonarr = new Dictionary<string, SonarrConfigYaml>
+                    Sonarr = new Dictionary<string, SonarrConfigYaml?>
                     {
                         {
                             "instance2",
@@ -160,11 +160,11 @@ public class ImplicitUrlAndKeyPostProcessorTest
         var result = sut.Process(
             new RootConfigYaml
             {
-                Radarr = new Dictionary<string, RadarrConfigYaml>
+                Radarr = new Dictionary<string, RadarrConfigYaml?>
                 {
                     { "instance1", new RadarrConfigYaml() },
                 },
-                Sonarr = new Dictionary<string, SonarrConfigYaml>
+                Sonarr = new Dictionary<string, SonarrConfigYaml?>
                 {
                     { "instance2", new SonarrConfigYaml() },
                 },
@@ -176,7 +176,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
             .BeEquivalentTo(
                 new RootConfigYaml
                 {
-                    Radarr = new Dictionary<string, RadarrConfigYaml>
+                    Radarr = new Dictionary<string, RadarrConfigYaml?>
                     {
                         {
                             "instance1",
@@ -187,7 +187,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
                             }
                         },
                     },
-                    Sonarr = new Dictionary<string, SonarrConfigYaml>
+                    Sonarr = new Dictionary<string, SonarrConfigYaml?>
                     {
                         {
                             "instance2",
@@ -221,7 +221,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
         var result = sut.Process(
             new RootConfigYaml
             {
-                Radarr = new Dictionary<string, RadarrConfigYaml>
+                Radarr = new Dictionary<string, RadarrConfigYaml?>
                 {
                     {
                         "instance1",
@@ -232,7 +232,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
                         }
                     },
                 },
-                Sonarr = new Dictionary<string, SonarrConfigYaml>
+                Sonarr = new Dictionary<string, SonarrConfigYaml?>
                 {
                     {
                         "instance2",
@@ -251,7 +251,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
             .BeEquivalentTo(
                 new RootConfigYaml
                 {
-                    Radarr = new Dictionary<string, RadarrConfigYaml>
+                    Radarr = new Dictionary<string, RadarrConfigYaml?>
                     {
                         {
                             "instance1",
@@ -262,7 +262,7 @@ public class ImplicitUrlAndKeyPostProcessorTest
                             }
                         },
                     },
-                    Sonarr = new Dictionary<string, SonarrConfigYaml>
+                    Sonarr = new Dictionary<string, SonarrConfigYaml?>
                     {
                         {
                             "instance2",

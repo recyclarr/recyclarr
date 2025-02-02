@@ -9,9 +9,14 @@ public class ConfigDeprecations(IOrderedEnumerable<IConfigDeprecationCheck> depr
         "S3267: Loops should be simplified with LINQ expressions",
         Justification = "The 'Where' condition must happen after each Transform() call instead of all at once"
     )]
-    public T CheckAndTransform<T>(T include)
+    public T? CheckAndTransform<T>(T? include)
         where T : ServiceConfigYaml
     {
+        if (include is null)
+        {
+            return include;
+        }
+
         foreach (var check in deprecationChecks)
         {
             if (check.CheckIfNeeded(include))

@@ -15,7 +15,7 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 ["service1"] = new() { ApiKey = "asdf", BaseUrl = "fdsa" },
             },
@@ -44,7 +44,7 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 ["service1"] = new()
                 {
@@ -78,7 +78,7 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 ["service1"] = new()
                 {
@@ -133,7 +133,7 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 ["service1"] = new()
                 {
@@ -163,7 +163,7 @@ public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
             .BeEquivalentTo(
                 new RootConfigYaml
                 {
-                    Radarr = new Dictionary<string, RadarrConfigYaml>
+                    Radarr = new Dictionary<string, RadarrConfigYaml?>
                     {
                         ["service1"] = new()
                         {
