@@ -13,7 +13,7 @@ public class DuplicateInstancesFilter : IConfigFilter
             return new Rows(
                 [
                     new Markup("[orange1]Duplicate Instances[/]"),
-                    .. duplicateInstances.Select(x => new Text($"• {x}")),
+                    .. duplicateInstances.Select(x => new Text($"- {x}")),
                 ]
             );
         }

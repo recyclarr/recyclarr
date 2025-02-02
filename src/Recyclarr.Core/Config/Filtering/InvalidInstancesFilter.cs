@@ -1,10 +1,16 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Config.Filtering;
+
+public record ConfigValidationErrorInfo(
+    string InstanceName,
+    IReadOnlyCollection<ValidationFailure> Failures
+);
 
 public class InvalidInstancesFilter(IValidator<ServiceConfigYaml> validator) : IConfigFilter
 {

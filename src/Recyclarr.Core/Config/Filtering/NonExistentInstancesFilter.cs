@@ -10,7 +10,12 @@ public class NonExistentInstancesFilter : IConfigFilter
     {
         public IRenderable Render()
         {
-            return Text.Empty;
+            return new Rows(
+                [
+                    new Markup("[orange1]Non-Existent Instances[/]"),
+                    .. nonExistentInstances.Select(x => new Text($"- {x}")),
+                ]
+            );
         }
     }
 

@@ -17,18 +17,18 @@ public class ConfigFilterProcessor(IAnsiConsole console, IEnumerable<IConfigFilt
             (current, filter) => filter.Filter(criteria, current, context)
         );
 
-        console.WriteLine();
-        console.Write(new Rule("[bold red]Configuration Errors[/]").LeftJustified());
-        console.WriteLine();
+        var renderables = context
+            .Results.Select(x => new Padder(x.Render()).Padding(0, 0, 0, 1))
+            .ToList();
 
-        var renderables = context.Results.Select(x => new Padder(x.Render()).PadBottom(2));
+        if (renderables.Count != 0)
+        {
+            var main = new Panel(new Padder(new Rows(renderables)).PadBottom(0))
+                .Header("[red]Configuration Errors[/]")
+                .RoundedBorder();
 
-        var main = new Panel(new Rows(renderables)) { Width = 40 }
-            .Header("[red]Configuration Errors[/]")
-            .Padding(2, 2)
-            .RoundedBorder();
-
-        console.Write(main);
+            console.Write(main);
+        }
 
         return filteredConfigs;
     }

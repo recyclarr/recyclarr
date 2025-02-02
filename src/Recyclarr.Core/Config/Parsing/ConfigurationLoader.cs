@@ -68,13 +68,9 @@ public class ConfigurationLoader(
         )
             where T : ServiceConfigYaml
         {
-            return config
-                    .Radarr?.Where(x => x.Value is not null)
-                    .Select(kvp => new LoadedConfigYaml(
-                        kvp.Key,
-                        SupportedServices.Radarr,
-                        kvp.Value!
-                    )) ?? [];
+            return configs
+                    ?.Where(x => x.Value is not null)
+                    .Select(kvp => new LoadedConfigYaml(kvp.Key, serviceType, kvp.Value!)) ?? [];
         }
     }
 }
