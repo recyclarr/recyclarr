@@ -30,7 +30,8 @@ public class ConfigYamlMapperProfile : Profile
             .ForMember(x => x.ResetUnmatchedScores, o => o.UseDestinationValue());
 
         CreateMap<ServiceConfigYaml, ServiceConfiguration>()
-            .ForMember(x => x.InstanceName, o => o.Ignore());
+            .ForMember(x => x.InstanceName, o => o.Ignore())
+            .ForMember(x => x.YamlPath, o => o.Ignore());
 
         CreateMap<RadarrConfigYaml, RadarrConfiguration>()
             .IncludeBase<ServiceConfigYaml, ServiceConfiguration>()

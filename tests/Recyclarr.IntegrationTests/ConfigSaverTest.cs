@@ -13,7 +13,7 @@ public class ConfigSaverTest : IntegrationTestFixture
         var sut = Resolve<ConfigSaver>();
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 {
                     "instance1",
@@ -37,7 +37,7 @@ public class ConfigSaverTest : IntegrationTestFixture
 
         var config = new RootConfigYaml
         {
-            Radarr = new Dictionary<string, RadarrConfigYaml>
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
             {
                 {
                     "instance1",

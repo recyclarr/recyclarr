@@ -26,7 +26,7 @@ internal static class Program
         catch (Exception e)
         {
             var log = scope.Resolve<ILogger>();
-            var exceptionHandler = new ConsoleExceptionHandler(log);
+            var exceptionHandler = scope.Resolve<ConsoleExceptionHandler>();
             if (!await exceptionHandler.HandleException(e))
             {
                 log.Error(e, "Exiting due to fatal error");

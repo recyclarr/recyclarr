@@ -36,6 +36,7 @@ public class RuntimeValidationService : IRuntimeValidationService
         var validatorSelector = new RulesetValidatorSelector(
             [RulesetValidatorSelector.DefaultRuleSetName, .. additionalRuleSets]
         );
+
         return validator.Validate(
             new ValidationContext<object>(instance, new PropertyChain(), validatorSelector)
         );

@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using Recyclarr.Config;
 using Recyclarr.Config.Parsing;
 using Recyclarr.TestLibrary;
 using Recyclarr.TrashGuide;
@@ -34,22 +33,25 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
             Paths.AppDataDirectory.File("secrets.yml").FullName,
             new MockFileData(secretsYml)
         );
-        var expected = new[]
-        {
-            new
-            {
-                InstanceName = "instance1",
-                ApiKey = "95283e6b156c42f3af8a9b16173f876b",
-                BaseUrl = new Uri("https://radarr:7878"),
-                CustomFormats = new[] { new { TrashIds = new[] { "1234567" } } },
-            },
-        };
 
-        configLoader
-            .Load(() => new StringReader(testYml))
-            .GetConfigsOfType(SupportedServices.Sonarr)
+        var results = configLoader.Load(() => new StringReader(testYml));
+
+        results
             .Should()
-            .BeEquivalentTo(expected);
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(
+                new LoadedConfigYaml(
+                    "instance1",
+                    SupportedServices.Sonarr,
+                    new SonarrConfigYaml
+                    {
+                        ApiKey = "95283e6b156c42f3af8a9b16173f876b",
+                        BaseUrl = "https://radarr:7878",
+                        CustomFormats = [new CustomFormatConfigYaml { TrashIds = ["1234567"] }],
+                    }
+                )
+            );
     }
 
     [Test]
@@ -73,9 +75,8 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         configLoader
             .Load(() => new StringReader(testYml))
-            .GetConfigsOfType(SupportedServices.Sonarr)
             .Should()
-            .BeEmpty();
+            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
     }
 
     [Test]
@@ -92,9 +93,8 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         configLoader
             .Load(() => new StringReader(testYml))
-            .GetConfigsOfType(SupportedServices.Sonarr)
             .Should()
-            .BeEmpty();
+            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
     }
 
     [Test]
@@ -111,9 +111,8 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         configLoader
             .Load(() => new StringReader(testYml))
-            .GetConfigsOfType(SupportedServices.Sonarr)
             .Should()
-            .BeEmpty();
+            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
     }
 
     [Test]
@@ -137,8 +136,7 @@ public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
         );
         configLoader
             .Load(() => new StringReader(testYml))
-            .GetConfigsOfType(SupportedServices.Sonarr)
             .Should()
-            .BeEmpty();
+            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
     }
 }

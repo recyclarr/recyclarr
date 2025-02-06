@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Models;
@@ -6,6 +7,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 {
     public abstract SupportedServices ServiceType { get; }
     public required string InstanceName { get; init; }
+    public IFileInfo? YamlPath { get; init; }
 
     public Uri BaseUrl { get; set; } = new("about:empty");
     public string ApiKey { get; init; } = "";

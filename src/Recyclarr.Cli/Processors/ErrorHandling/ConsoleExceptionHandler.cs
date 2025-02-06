@@ -63,6 +63,10 @@ public class ConsoleExceptionHandler(ILogger log)
                 );
                 break;
 
+            case InvalidConfigurationException:
+                log.Error("One or more invalid configurations were found");
+                break;
+
             case PostProcessingException e:
                 log.Error(e, "Configuration post-processing failed");
                 break;

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using YamlDotNet.Serialization;
@@ -82,16 +83,14 @@ public record ServiceConfigYaml
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record RootConfigYaml
 {
-    public IReadOnlyDictionary<string, RadarrConfigYaml>? Radarr { get; init; }
-    public IReadOnlyDictionary<string, SonarrConfigYaml>? Sonarr { get; init; }
+    public IReadOnlyDictionary<string, RadarrConfigYaml?>? Radarr { get; set; }
+    public IReadOnlyDictionary<string, SonarrConfigYaml?>? Sonarr { get; set; }
 
     // This exists for validation purposes only.
     [YamlIgnore]
-    public IEnumerable<RadarrConfigYaml> RadarrValues =>
-        Radarr?.Select(x => x.Value) ?? Array.Empty<RadarrConfigYaml>();
+    public IEnumerable<RadarrConfigYaml> RadarrValues => Radarr?.Values.NotNull() ?? [];
 
     // This exists for validation purposes only.
     [YamlIgnore]
-    public IEnumerable<SonarrConfigYaml> SonarrValues =>
-        Sonarr?.Select(x => x.Value) ?? Array.Empty<SonarrConfigYaml>();
+    public IEnumerable<SonarrConfigYaml> SonarrValues => Sonarr?.Values.NotNull() ?? [];
 }

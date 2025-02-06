@@ -1,41 +1,49 @@
 ﻿using System.IO.Abstractions;
-using AutoMapper;
-using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Logging;
+using Recyclarr.TrashGuide;
 using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing;
 
+public record LoadedConfigYaml(
+    string InstanceName,
+    SupportedServices ServiceType,
+    ServiceConfigYaml Yaml
+)
+{
+    public IFileInfo? YamlPath { get; init; }
+}
+
 public class ConfigurationLoader(
     ILogger log,
     ConfigParser parser,
-    IMapper mapper,
-    ConfigValidationExecutor validator,
     IOrderedEnumerable<IConfigPostProcessor> postProcessors
-) : IConfigurationLoader
+)
 {
-    public IReadOnlyCollection<IServiceConfiguration> Load(IFileInfo file)
+    public IReadOnlyCollection<LoadedConfigYaml> Load(IFileInfo file)
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
-        return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(file));
+        return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(file))
+            .Select(x => x with { YamlPath = file })
+            .ToList();
     }
 
-    public IReadOnlyCollection<IServiceConfiguration> Load(string yaml)
+    public IReadOnlyCollection<LoadedConfigYaml> Load(string yaml)
     {
         return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(yaml));
     }
 
-    public IReadOnlyCollection<IServiceConfiguration> Load(Func<TextReader> streamFactory)
+    public IReadOnlyCollection<LoadedConfigYaml> Load(Func<TextReader> streamFactory)
     {
         return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(streamFactory));
     }
 
-    private IReadOnlyCollection<IServiceConfiguration> ProcessLoadedConfigs(RootConfigYaml? config)
+    private List<LoadedConfigYaml> ProcessLoadedConfigs(RootConfigYaml? config)
     {
         if (config is null)
         {
-            return Array.Empty<IServiceConfiguration>();
+            return [];
         }
 
         config = postProcessors.Aggregate(
@@ -48,33 +56,21 @@ public class ConfigurationLoader(
             log.Warning("Configuration is empty");
         }
 
-        if (!validator.Validate(config, YamlValidatorRuleSets.RootConfig))
+        return Enumerable
+            .Empty<LoadedConfigYaml>()
+            .Concat(AsLoadedConfig(config.Radarr, SupportedServices.Radarr))
+            .Concat(AsLoadedConfig(config.Sonarr, SupportedServices.Sonarr))
+            .ToList();
+
+        IEnumerable<LoadedConfigYaml> AsLoadedConfig<T>(
+            IReadOnlyDictionary<string, T?>? configs,
+            SupportedServices serviceType
+        )
+            where T : ServiceConfigYaml
         {
-            return Array.Empty<IServiceConfiguration>();
+            return configs
+                    ?.Where(x => x.Value is not null)
+                    .Select(kvp => new LoadedConfigYaml(kvp.Key, serviceType, kvp.Value!)) ?? [];
         }
-
-        var convertedConfigs = new List<IServiceConfiguration>();
-        convertedConfigs.AddRange(MapConfigs<RadarrConfigYaml, RadarrConfiguration>(config.Radarr));
-        convertedConfigs.AddRange(MapConfigs<SonarrConfigYaml, SonarrConfiguration>(config.Sonarr));
-        return convertedConfigs;
-    }
-
-    private IEnumerable<IServiceConfiguration> MapConfigs<TConfigYaml, TServiceConfig>(
-        IReadOnlyDictionary<string, TConfigYaml>? configs
-    )
-        where TServiceConfig : ServiceConfiguration
-        where TConfigYaml : ServiceConfigYaml
-    {
-        if (configs is null)
-        {
-            return Array.Empty<IServiceConfiguration>();
-        }
-
-        return configs.Select(x =>
-            mapper.Map<TServiceConfig>(x.Value) with
-            {
-                InstanceName = x.Key,
-            }
-        );
     }
 }

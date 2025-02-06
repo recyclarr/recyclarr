@@ -47,8 +47,8 @@ public sealed class IncludePostProcessor(
         return config;
     }
 
-    private Dictionary<string, T>? ProcessIncludes<T>(
-        IReadOnlyDictionary<string, T>? configs,
+    private Dictionary<string, T?>? ProcessIncludes<T>(
+        IReadOnlyDictionary<string, T?>? configs,
         ServiceConfigMerger<T> merger,
         SupportedServices serviceType
     )
@@ -59,11 +59,11 @@ public sealed class IncludePostProcessor(
             return null;
         }
 
-        var mergedConfigs = new Dictionary<string, T>();
+        var mergedConfigs = new Dictionary<string, T?>();
 
         foreach (var (key, config) in configs)
         {
-            if (config.Include is null)
+            if (config?.Include is null)
             {
                 mergedConfigs.Add(key, config);
                 continue;
@@ -76,7 +76,7 @@ public sealed class IncludePostProcessor(
                     var include = LoadYamlInclude<T>(x, serviceType);
                     return deprecations.CheckAndTransform(include);
                 })
-                .Aggregate(new T(), merger.Merge);
+                .Aggregate(new T(), merger.Merge!);
 
             // Merge the config into the aggregated includes so that root config values overwrite included values.
             mergedConfigs.Add(

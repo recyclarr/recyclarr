@@ -27,7 +27,11 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 
         config
             .Should()
-            .BeEquivalentTo([new { BaseUrl = new Uri("http://the_url"), ApiKey = "the_api_key" }]);
+            .ContainSingle()
+            .Which.Yaml.Should()
+            .BeEquivalentTo(
+                new ServiceConfigYaml { BaseUrl = "http://the_url", ApiKey = "the_api_key" }
+            );
     }
 
     [Test]
@@ -43,7 +47,8 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://sonarr:1233") }]);
+
+        config.Should().ContainSingle().Which.Yaml.BaseUrl.Should().Be("http://sonarr:1233");
     }
 
     [Test]
@@ -62,7 +67,8 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
+
+        config.Should().ContainSingle().Which.Yaml.BaseUrl.Should().Be("http://somevalue");
     }
 
     [Test]
@@ -83,7 +89,11 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
         var config = sut.Load(testYml);
         config
             .Should()
-            .BeEquivalentTo([new { BaseUrl = new Uri("http://theurl"), ApiKey = "the key" }]);
+            .ContainSingle()
+            .Which.Yaml.Should()
+            .BeEquivalentTo(
+                new ServiceConfigYaml { BaseUrl = "http://theurl", ApiKey = "the key" }
+            );
     }
 
     [Test]
@@ -99,7 +109,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
+        config.Should().ContainSingle().Which.Yaml.BaseUrl.Should().Be("http://somevalue");
     }
 
     [Test]
@@ -115,7 +125,7 @@ public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
             """;
 
         var config = sut.Load(testYml);
-        config.Should().BeEquivalentTo([new { BaseUrl = new Uri("http://somevalue") }]);
+        config.Should().ContainSingle().Which.Yaml.BaseUrl.Should().Be("http://somevalue");
     }
 
     [Test]

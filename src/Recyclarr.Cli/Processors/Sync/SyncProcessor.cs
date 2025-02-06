@@ -4,6 +4,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Config;
+using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
 using Spectre.Console;
@@ -19,7 +20,7 @@ public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationSc
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 public class SyncProcessor(
     IAnsiConsole console,
-    IConfigurationRegistry configRegistry,
+    ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
     NotificationService notify
@@ -42,7 +43,7 @@ public class SyncProcessor(
                 new ConfigFilterCriteria
                 {
                     ManualConfigFiles = settings.Configs,
-                    Instances = settings.Instances,
+                    Instances = settings.Instances ?? [],
                     Service = settings.Service,
                 }
             );
