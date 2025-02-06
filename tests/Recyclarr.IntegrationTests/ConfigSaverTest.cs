@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 

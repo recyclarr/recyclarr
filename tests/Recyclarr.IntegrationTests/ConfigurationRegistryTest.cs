@@ -2,6 +2,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 

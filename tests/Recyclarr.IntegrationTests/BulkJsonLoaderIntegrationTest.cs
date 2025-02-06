@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Recyclarr.Json.Loading;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 

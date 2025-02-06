@@ -4,13 +4,12 @@ using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
-using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.VersionControl;
 using Spectre.Console;
 using Spectre.Console.Testing;
 
-namespace Recyclarr.IntegrationTests;
+namespace Recyclarr.TestLibrary;
 
 public abstract class IntegrationTestFixture : IDisposable
 {

@@ -3,6 +3,7 @@ using Recyclarr.Common;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.TestLibrary;
 using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;

@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using Autofac;
+using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.Tests.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;

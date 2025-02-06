@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 

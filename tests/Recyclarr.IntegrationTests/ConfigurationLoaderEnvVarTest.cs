@@ -1,5 +1,6 @@
 using Recyclarr.Config.Parsing;
 using Recyclarr.Platform;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.IntegrationTests;
 
