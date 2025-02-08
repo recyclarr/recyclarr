@@ -34,7 +34,7 @@ public class MediaNamingTransactionPhaseRadarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -55,7 +55,7 @@ public class MediaNamingTransactionPhaseRadarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ApiFetchOutput, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ApiFetchOutput, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -84,7 +84,7 @@ public class MediaNamingTransactionPhaseRadarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -120,7 +120,7 @@ public class MediaNamingTransactionPhaseRadarrTest
                     StandardMovieFormat = "file_format2",
                     MovieFolderFormat = "folder_format2",
                 },
-                o => o.RespectingRuntimeTypes()
+                o => o.PreferringRuntimeMemberTypes()
             );
     }
 }

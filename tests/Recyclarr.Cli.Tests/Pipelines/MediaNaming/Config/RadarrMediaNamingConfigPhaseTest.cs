@@ -59,7 +59,7 @@ public class RadarrMediaNamingConfigPhaseTest
                     StandardMovieFormat = "file_emby",
                     MovieFolderFormat = "folder_plex",
                 },
-                o => o.RespectingRuntimeTypes()
+                o => o.PreferringRuntimeMemberTypes()
             );
     }
 }

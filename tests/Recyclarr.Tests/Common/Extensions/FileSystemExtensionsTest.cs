@@ -117,7 +117,7 @@ public class FileSystemExtensionsTest
 
         var result = fs.CurrentDirectory().YamlFile("test");
         result.Should().NotBeNull();
-        result!.Name.Should().Be(yamlFilename);
+        result.Name.Should().Be(yamlFilename);
     }
 
     [Test]

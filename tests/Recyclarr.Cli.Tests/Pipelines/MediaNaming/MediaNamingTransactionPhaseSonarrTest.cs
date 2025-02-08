@@ -33,7 +33,7 @@ public class MediaNamingTransactionPhaseSonarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -57,7 +57,7 @@ public class MediaNamingTransactionPhaseSonarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ApiFetchOutput, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ApiFetchOutput, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -92,7 +92,7 @@ public class MediaNamingTransactionPhaseSonarrTest
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.RespectingRuntimeTypes());
+            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -137,7 +137,7 @@ public class MediaNamingTransactionPhaseSonarrTest
                     DailyEpisodeFormat = "episodes_daily_default2",
                     AnimeEpisodeFormat = "episodes_anime_default2",
                 },
-                o => o.RespectingRuntimeTypes()
+                o => o.PreferringRuntimeMemberTypes()
             );
     }
 }
