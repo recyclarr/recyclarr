@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling in YAML configuration as well as how those errors are rendered to console
   output. (#396)
 
+### Fixed
+
+- Cutoff is no longer modified on implicitly referenced quality profiles (those that are specified
+  in `assign_scores_to` but not under `quality_profiles`) (#417)
+
 ## [7.4.0] - 2024-11-11
 
 ### Added

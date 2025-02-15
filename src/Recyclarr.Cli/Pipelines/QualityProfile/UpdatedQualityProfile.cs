@@ -52,13 +52,24 @@ public record UpdatedQualityProfile
             newDto.Items = UpdatedQualities.Items;
         }
 
-        // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set to `false`.
-        // Because of this, we cannot set cutoff to null. We pick the first available if the user didn't specify one.
+        // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set
+        // to `false`. Because of this, we cannot set cutoff to null. We pick the first available if
+        // the user didn't specify one.
         //
-        // Also: It's important that we assign the cutoff *after* we set Items. Because we pull from a different list of
-        // items depending on if the `qualities` property is set in config.
-        newDto.Cutoff =
-            newDto.Items.FindCutoff(config.UpgradeUntilQuality) ?? newDto.Items.FirstCutoffId();
+        // Also: It's important that we assign the cutoff *after* we set Items. Because we pull from
+        // a different list of items depending on if the `qualities` property is set in config.
+        //
+        // In the case a quality profile is automatically added to the list of quality profiles (by
+        // specifying it in `assign_scores_to` without explicitly having it in the
+        // `quality_profiles` list), we only mutate the cutoff if it's not set.
+        //
+        // Additionally, there's no point in assigning a cutoff if the user didn't specify one in
+        // their config.
+        if (newDto.Cutoff is null || config.UpgradeUntilQuality is not null)
+        {
+            newDto.Cutoff =
+                newDto.Items.FindCutoff(config.UpgradeUntilQuality) ?? newDto.Items.FirstCutoffId();
+        }
 
         return newDto;
     }

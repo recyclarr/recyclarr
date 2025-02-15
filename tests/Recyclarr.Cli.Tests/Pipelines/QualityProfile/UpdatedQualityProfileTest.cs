@@ -149,13 +149,16 @@ public class UpdatedQualityProfileTest
         dto.Name.Should().Be("config_name");
     }
 
-    [Test]
-    public void Cutoff_obtained_from_updated_qualities()
+    [TestCase(null)]
+    [TestCase(8)]
+    public void Cutoff_obtained_from_updated_qualities(int? originalCutoff)
     {
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto
             {
+                // To verify that it gets overwritten because config specifies a cutoff
+                Cutoff = originalCutoff,
                 Items = new List<ProfileItemDto>
                 {
                     NewQp.QualityDto(8, "Quality Item 8", true),
@@ -188,13 +191,16 @@ public class UpdatedQualityProfileTest
         dto.Cutoff.Should().Be(2);
     }
 
-    [Test]
-    public void Cutoff_obtained_from_original_qualities()
+    [TestCase(null)]
+    [TestCase(8)]
+    public void Cutoff_obtained_from_original_qualities(int? originalCutoff)
     {
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto
             {
+                // To verify that it gets overwritten because config specifies a cutoff
+                Cutoff = originalCutoff,
                 Items = new List<ProfileItemDto>
                 {
                     NewQp.QualityDto(8, "Quality Item 8", true),
@@ -267,5 +273,34 @@ public class UpdatedQualityProfileTest
         var dto = profile.BuildUpdatedDto();
 
         dto.Cutoff.Should().Be(1);
+    }
+
+    [Test]
+    public void Cutoff_not_modified_when_already_set_and_no_upgrade_until()
+    {
+        var profile = new UpdatedQualityProfile
+        {
+            ProfileDto = new QualityProfileDto
+            {
+                Cutoff = 8,
+                Items = new List<ProfileItemDto>
+                {
+                    NewQp.QualityDto(8, "Quality Item 8", true),
+                    NewQp.QualityDto(9, "Quality Item 9", true),
+                },
+            },
+            ProfileConfig = NewQp.Processed(
+                new QualityProfileConfig
+                {
+                    // Do not specify an `UpgradeUntilQuality` here to keep existing cutoff
+                }
+            ),
+            UpdatedQualities = new UpdatedQualities { NumWantedItems = 0 },
+            UpdateReason = QualityProfileUpdateReason.New,
+        };
+
+        var dto = profile.BuildUpdatedDto();
+
+        dto.Cutoff.Should().Be(8);
     }
 }
