@@ -53,7 +53,7 @@
     <PackageVersion Include="FluentAssertions" Version="8.0.1" PrivateAssets="all" />
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.34.1" PrivateAssets="all" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" PrivateAssets="all" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" PrivateAssets="all" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" PrivateAssets="all" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" PrivateAssets="all" />
     <PackageVersion Include="NUnit" Version="4.3.2" PrivateAssets="all" />
