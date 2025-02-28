@@ -12,7 +12,7 @@
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
     <PackageVersion Include="AutoMapper" Version="13.0.1" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="8.1.0" />
-    <PackageVersion Include="CliWrap" Version="3.7.1" />
+    <PackageVersion Include="CliWrap" Version="3.8.1" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="Flurl" Version="4.0.0" />
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
