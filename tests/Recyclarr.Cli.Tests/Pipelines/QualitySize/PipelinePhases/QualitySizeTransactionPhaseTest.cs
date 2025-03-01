@@ -1,12 +1,12 @@
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.ServarrApi.QualityDefinition;
-using Recyclarr.Tests.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-internal class QualitySizeTransactionPhaseTest
+internal sealed class QualitySizeTransactionPhaseTest
 {
     [Test, AutoMockData]
     public async Task Skip_guide_qualities_that_do_not_exist_in_service(

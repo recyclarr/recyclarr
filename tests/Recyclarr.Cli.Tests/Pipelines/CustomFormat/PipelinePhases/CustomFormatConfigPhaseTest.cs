@@ -2,7 +2,7 @@ using AutoFixture;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Config.Models;
-using Recyclarr.Tests.TestLibrary;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.PipelinePhases;

@@ -9,7 +9,7 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-internal class QualitySizeConfigPhaseTest
+internal sealed class QualitySizeConfigPhaseTest
 {
     [Test, AutoMockData]
     public async Task Do_nothing_if_no_quality_definition(

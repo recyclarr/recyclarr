@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
-using Recyclarr.Tests.TestLibrary;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 

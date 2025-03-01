@@ -11,7 +11,7 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
     "CA2000:Dispose objects before losing scope",
     Justification = "Do not care about disposal in a testing context"
 )]
-internal class MediaNamingTransactionPhaseRadarrTest
+internal sealed class MediaNamingTransactionPhaseRadarrTest
 {
     [Test, AutoMockData]
     public async Task Radarr_left_null(MediaNamingTransactionPhase sut)

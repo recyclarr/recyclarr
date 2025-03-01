@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Recyclarr.Core\Recyclarr.Core.csproj" />
+    <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
+    <ProjectReference Include="..\Recyclarr.Core.TestLibrary\Recyclarr.Core.TestLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Common\DefaultDataFile.txt" />
+    <EmbeddedResource Include="Common\TestData\DataFile.txt" />
+  </ItemGroup>
+</Project>

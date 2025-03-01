@@ -7,7 +7,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 [TestFixture]
-internal class QualityProfileTransactionPhaseTest
+internal sealed class QualityProfileTransactionPhaseTest
 {
     [Test, AutoMockData]
     public async Task Non_existent_profile_names_mixed_with_valid_profiles(
