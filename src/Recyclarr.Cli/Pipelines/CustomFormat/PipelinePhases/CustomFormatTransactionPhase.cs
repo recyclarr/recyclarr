@@ -1,15 +1,14 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration config)
-    : ITransactionPipelinePhase<CustomFormatPipelineContext>
+internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration config)
+    : IPipelinePhase<CustomFormatPipelineContext>
 {
-    public void Execute(CustomFormatPipelineContext context)
+    public Task<bool> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         var transactions = new CustomFormatTransactionData();
 
@@ -57,6 +56,7 @@ public class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration con
         }
 
         context.TransactionOutput = transactions;
+        return Task.FromResult(true);
     }
 
     private void ProcessExistingCf(

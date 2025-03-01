@@ -5,7 +5,7 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-public class CompositeSyncPipeline(
+internal class CompositeSyncPipeline(
     ILogger log,
     IOrderedEnumerable<ISyncPipeline> pipelines,
     IEnumerable<IPipelineCache> caches,

@@ -13,7 +13,7 @@ namespace Recyclarr.Cli.IntegrationTests;
 internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 {
     [Test]
-    public void Add_new_cf()
+    public async Task Add_new_cf()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -26,7 +26,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -36,7 +36,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Update_cf_by_matching_name()
+    public async Task Update_cf_by_matching_name()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -58,7 +58,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -77,7 +77,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Update_cf_by_matching_id_different_names()
+    public async Task Update_cf_by_matching_id_different_names()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -99,7 +99,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -118,7 +118,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Update_cf_by_matching_id_same_names()
+    public async Task Update_cf_by_matching_id_same_names()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -146,7 +146,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -165,7 +165,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Conflicting_cf_when_new_cf_has_name_of_existing()
+    public async Task Conflicting_cf_when_new_cf_has_name_of_existing()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -188,7 +188,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -204,7 +204,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Conflicting_cf_when_cached_cf_has_name_of_existing()
+    public async Task Conflicting_cf_when_cached_cf_has_name_of_existing()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -227,7 +227,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -243,7 +243,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Updated_cf_with_matching_name_and_id()
+    public async Task Updated_cf_with_matching_name_and_id()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -275,7 +275,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -294,7 +294,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Unchanged_cfs_with_replace_enabled()
+    public async Task Unchanged_cfs_with_replace_enabled()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -313,7 +313,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -326,7 +326,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Unchanged_cfs_without_replace()
+    public async Task Unchanged_cfs_without_replace()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -345,7 +345,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -358,7 +358,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Deleted_cfs_when_enabled()
+    public async Task Deleted_cfs_when_enabled()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -377,7 +377,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -390,7 +390,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public void No_deleted_cfs_when_disabled()
+    public async Task No_deleted_cfs_when_disabled()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
@@ -409,13 +409,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData());
     }
 
     [Test]
-    public void Do_not_delete_cfs_in_config()
+    public async Task Do_not_delete_cfs_in_config()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -429,13 +429,13 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("two", "cf2", 2)],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.DeletedCustomFormats.Should().BeEmpty();
     }
 
     [Test]
-    public void Add_new_cf_when_in_cache_but_not_in_service()
+    public async Task Add_new_cf_when_in_cache_but_not_in_service()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -449,7 +449,7 @@ internal class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             ConfigOutput = [NewCf.Data("two", "cf2", 2)],
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()

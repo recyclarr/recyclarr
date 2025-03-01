@@ -1,20 +1,21 @@
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public class MediaNamingTransactionPhase : ITransactionPipelinePhase<MediaNamingPipelineContext>
+internal class MediaNamingTransactionPhase : IPipelinePhase<MediaNamingPipelineContext>
 {
-    public void Execute(MediaNamingPipelineContext context)
+    public Task<bool> Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
         context.TransactionOutput = context.ApiFetchOutput switch
         {
             RadarrMediaNamingDto dto => UpdateRadarrDto(dto, context.ConfigOutput),
             SonarrMediaNamingDto dto => UpdateSonarrDto(dto, context.ConfigOutput),
             _ => throw new ArgumentException(
-                "Config type not supported in media naming transation phase"
+                "Config type not supported in media naming transaction phase"
             ),
         };
+
+        return Task.FromResult(true);
     }
 
     private static RadarrMediaNamingDto UpdateRadarrDto(

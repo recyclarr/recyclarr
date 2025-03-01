@@ -12,6 +12,7 @@ namespace Recyclarr.Cli.IntegrationTests;
 [TestFixture]
 public class CompositionRootTest
 {
+    [UsedImplicitly]
     private sealed class ConcreteTypeEnumerator : IEnumerable
     {
         public IEnumerator GetEnumerator()

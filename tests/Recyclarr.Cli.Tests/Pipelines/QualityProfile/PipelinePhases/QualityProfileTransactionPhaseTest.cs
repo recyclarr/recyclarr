@@ -7,10 +7,10 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 [TestFixture]
-public class QualityProfileTransactionPhaseTest
+internal class QualityProfileTransactionPhaseTest
 {
     [Test, AutoMockData]
-    public void Non_existent_profile_names_mixed_with_valid_profiles(
+    public async Task Non_existent_profile_names_mixed_with_valid_profiles(
         QualityProfileTransactionPhase sut
     )
     {
@@ -29,7 +29,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -54,7 +54,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void New_profiles(QualityProfileTransactionPhase sut)
+    public async Task New_profiles(QualityProfileTransactionPhase sut)
     {
         var dtos = new[] { new QualityProfileDto { Name = "irrelevant_profile" } };
 
@@ -89,7 +89,7 @@ public class QualityProfileTransactionPhaseTest
             },
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -129,7 +129,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Updated_scores(QualityProfileTransactionPhase sut)
+    public async Task Updated_scores(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -160,7 +160,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.ChangedProfiles.Should()
@@ -176,7 +176,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void No_updated_profiles_when_no_custom_formats(QualityProfileTransactionPhase sut)
+    public async Task No_updated_profiles_when_no_custom_formats(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -207,13 +207,13 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.Should().BeEquivalentTo(new QualityProfileTransactionData());
     }
 
     [Test, AutoMockData]
-    public void Unchanged_scores(QualityProfileTransactionPhase sut)
+    public async Task Unchanged_scores(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -246,7 +246,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.UnchangedProfiles.Should()
@@ -262,7 +262,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Reset_scores_with_reset_unmatched_true(QualityProfileTransactionPhase sut)
+    public async Task Reset_scores_with_reset_unmatched_true(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -301,7 +301,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.ChangedProfiles.Should()
@@ -319,7 +319,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Reset_scores_with_reset_unmatched_false(QualityProfileTransactionPhase sut)
+    public async Task Reset_scores_with_reset_unmatched_false(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -355,8 +355,8 @@ public class QualityProfileTransactionPhaseTest
                         ResetUnmatchedScores = new ResetUnmatchedScoresConfig
                         {
                             Enabled = false,
-                            // Throw in some exceptions here, just to test whether or not these somehow affect the
-                            // result despite Enable being set to false.
+                            // Throw in some exceptions here, just to test whether these somehow
+                            // affect the result despite Enable being set to false.
                             Except = ["cf1"],
                         },
                     },
@@ -367,7 +367,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.ChangedProfiles.Should()
@@ -385,7 +385,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Reset_scores_with_reset_exceptions(QualityProfileTransactionPhase sut)
+    public async Task Reset_scores_with_reset_exceptions(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -431,7 +431,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.ChangedProfiles.Should()
@@ -449,7 +449,9 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Reset_scores_with_invalid_except_list_items(QualityProfileTransactionPhase sut)
+    public async Task Reset_scores_with_invalid_except_list_items(
+        QualityProfileTransactionPhase sut
+    )
     {
         var dtos = new[]
         {
@@ -493,7 +495,7 @@ public class QualityProfileTransactionPhaseTest
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.ChangedProfiles.Should()
@@ -503,7 +505,7 @@ public class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public void Missing_required_qualities_are_readded(QualityProfileTransactionPhase sut)
+    public async Task Missing_required_qualities_are_readded(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]
         {
@@ -556,7 +558,7 @@ public class QualityProfileTransactionPhaseTest
             },
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         var profiles = context.TransactionOutput.ChangedProfiles;
         profiles.Should().ContainSingle();

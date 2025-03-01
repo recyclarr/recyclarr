@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.Cli.Pipelines.QualitySize.Models;
 using Recyclarr.ServarrApi.QualityDefinition;
-using Recyclarr.TrashGuide;
+using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
 
@@ -11,14 +9,12 @@ namespace Recyclarr.Cli.Pipelines.QualitySize;
     "CA2227:Collection properties should be read only",
     Justification = "Context objects are similar to DTOs; for usability we want to assign not append"
 )]
-public class QualitySizePipelineContext : IPipelineContext
+internal class QualitySizePipelineContext : PipelineContext
 {
-    public string PipelineDescription => "Quality Definition";
-    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
-        [SupportedServices.Sonarr, SupportedServices.Radarr];
+    public override string PipelineDescription => "Quality Definition";
 
-    public ProcessedQualitySizeData? ConfigOutput { get; set; }
-    public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = default!;
-    public IList<ServiceQualityDefinitionItem> TransactionOutput { get; set; } = default!;
-    public string? ConfigError { get; set; }
+    public string QualitySizeType { get; set; } = "";
+    public IReadOnlyCollection<QualityItemWithLimits> Qualities { get; set; } = [];
+    public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
+    public IList<ServiceQualityDefinitionItem> TransactionOutput { get; set; } = null!;
 }

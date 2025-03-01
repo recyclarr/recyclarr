@@ -1,5 +1,3 @@
-using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.Cli.Pipelines.QualitySize.Models;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
@@ -7,21 +5,23 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-public class QualitySizeConfigPhase(
+internal class QualitySizeConfigPhase(
     ILogger log,
     IQualitySizeGuideService guide,
     IServiceConfiguration config,
     IQualityItemLimitFactory limitFactory
-) : IConfigPipelinePhase<QualitySizePipelineContext>
+) : IPipelinePhase<QualitySizePipelineContext>
 {
-    public async Task Execute(QualitySizePipelineContext context, CancellationToken ct)
+    public async Task<bool> Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
         {
             log.Debug("{Instance} has no quality definition", config.InstanceName);
-            return;
+            return false;
         }
+
+        ClampPreferredRatio(configSizeData);
 
         var guideSizeData = guide
             .GetQualitySizeData(config.ServiceType)
@@ -29,9 +29,11 @@ public class QualitySizeConfigPhase(
 
         if (guideSizeData == null)
         {
-            context.ConfigError =
-                $"The specified quality definition type does not exist: {configSizeData.Type}";
-            return;
+            log.Error(
+                "The specified quality definition type does not exist: {Type}",
+                configSizeData.Type
+            );
+            return false;
         }
 
         var itemLimits = await limitFactory.Create(config.ServiceType, ct);
@@ -40,11 +42,37 @@ public class QualitySizeConfigPhase(
             .Qualities.Select(x => new QualityItemWithLimits(x, itemLimits))
             .ToList();
 
+        if (sizeDataWithThresholds.Count == 0)
+        {
+            log.Debug("No Quality Definitions to process");
+            return false;
+        }
+
         AdjustPreferredRatio(configSizeData, sizeDataWithThresholds);
-        context.ConfigOutput = new ProcessedQualitySizeData(
-            configSizeData.Type,
-            sizeDataWithThresholds
+
+        context.QualitySizeType = configSizeData.Type;
+        context.Qualities = sizeDataWithThresholds;
+        return true;
+    }
+
+    private void ClampPreferredRatio(QualityDefinitionConfig configSizeData)
+    {
+        if (configSizeData.PreferredRatio is not (< 0 or > 1))
+        {
+            return;
+        }
+
+        // Fix an out of range ratio and warn the user
+        var clampedRatio = Math.Clamp(configSizeData.PreferredRatio.Value, 0, 1);
+
+        log.Warning(
+            "Your `preferred_ratio` of {CurrentRatio} is out of range. "
+                + "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
+            configSizeData.PreferredRatio,
+            clampedRatio
         );
+
+        configSizeData.PreferredRatio = clampedRatio;
     }
 
     private void AdjustPreferredRatio(
@@ -60,20 +88,6 @@ public class QualitySizeConfigPhase(
         log.Information(
             "Using an explicit preferred ratio which will override values from the guide"
         );
-
-        // Fix an out of range ratio and warn the user
-        if (configSizeData.PreferredRatio is < 0 or > 1)
-        {
-            var clampedRatio = Math.Clamp(configSizeData.PreferredRatio.Value, 0, 1);
-            log.Warning(
-                "Your `preferred_ratio` of {CurrentRatio} is out of range. "
-                    + "It must be a decimal between 0.0 and 1.0. It has been clamped to {ClampedRatio}",
-                configSizeData.PreferredRatio,
-                clampedRatio
-            );
-
-            configSizeData.PreferredRatio = clampedRatio;
-        }
 
         // Apply a calculated preferred size
         foreach (var quality in guideSizeData)

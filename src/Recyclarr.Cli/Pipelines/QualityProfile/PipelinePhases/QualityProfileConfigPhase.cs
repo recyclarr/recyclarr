@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
@@ -7,13 +6,13 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileConfigPhase(
+internal class QualityProfileConfigPhase(
     ILogger log,
     ProcessedCustomFormatCache cache,
     IServiceConfiguration config
-) : IConfigPipelinePhase<QualityProfilePipelineContext>
+) : IPipelinePhase<QualityProfilePipelineContext>
 {
-    public Task Execute(QualityProfilePipelineContext context, CancellationToken ct)
+    public Task<bool> Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         // 1. For each group of CFs that has a quality profile specified
         // 2. For each quality profile score config in that CF group
@@ -54,7 +53,14 @@ public class QualityProfileConfigPhase(
         var profilesToReturn = allProfiles.Values.ToList();
         PrintDiagnostics(profilesToReturn);
         context.ConfigOutput = profilesToReturn;
-        return Task.CompletedTask;
+
+        if (!context.ConfigOutput.Any())
+        {
+            log.Debug("No Quality Profiles to process");
+            return Task.FromResult(false);
+        }
+
+        return Task.FromResult(true);
     }
 
     private void PrintDiagnostics(IEnumerable<ProcessedQualityProfileData> profiles)

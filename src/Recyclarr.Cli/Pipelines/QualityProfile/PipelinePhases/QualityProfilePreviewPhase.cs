@@ -1,15 +1,14 @@
 using System.Globalization;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfilePreviewPhase(IAnsiConsole console)
-    : IPreviewPipelinePhase<QualityProfilePipelineContext>
+internal class QualityProfilePreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<QualityProfilePipelineContext>
 {
-    public void Execute(QualityProfilePipelineContext context)
+    protected override void RenderPreview(QualityProfilePipelineContext context)
     {
         var tree = new Tree("Quality Profile Changes [red](Preview)[/]");
 

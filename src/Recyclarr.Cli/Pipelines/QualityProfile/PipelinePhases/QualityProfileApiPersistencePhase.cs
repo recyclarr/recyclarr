@@ -1,13 +1,14 @@
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileApiPersistencePhase(IQualityProfileApiService api)
-    : IApiPersistencePipelinePhase<QualityProfilePipelineContext>
+internal class QualityProfileApiPersistencePhase(
+    IQualityProfileApiService api,
+    QualityProfileLogger logger
+) : IPipelinePhase<QualityProfilePipelineContext>
 {
-    public async Task Execute(QualityProfilePipelineContext context, CancellationToken ct)
+    public async Task<bool> Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         var changedProfiles = context.TransactionOutput.ChangedProfiles;
         foreach (var profile in changedProfiles.Select(x => x.Profile))
@@ -30,5 +31,8 @@ public class QualityProfileApiPersistencePhase(IQualityProfileApiService api)
                     );
             }
         }
+
+        logger.LogPersistenceResults(context);
+        return true;
     }
 }

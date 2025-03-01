@@ -1,5 +1,4 @@
 using Autofac.Features.Indexed;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -16,13 +15,14 @@ public record ProcessedNamingConfig
     public IReadOnlyCollection<InvalidNamingConfig> InvalidNaming { get; init; } = [];
 }
 
-public class MediaNamingConfigPhase(
+internal class MediaNamingConfigPhase(
+    ILogger log,
     IMediaNamingGuideService guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
     IServiceConfiguration config
-) : IConfigPipelinePhase<MediaNamingPipelineContext>
+) : IPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task Execute(MediaNamingPipelineContext context, CancellationToken ct)
+    public async Task<bool> Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
         var lookup = new NamingFormatLookup();
         var strategy = configPhaseStrategyFactory[config.ServiceType];
@@ -33,5 +33,44 @@ public class MediaNamingConfigPhase(
             Dto = dto,
             InvalidNaming = lookup.Errors,
         };
+
+        return LogConfigPhaseAndExitIfNeeded(context);
+    }
+
+    // Returning 'true' means to exit. 'false' means to proceed.
+    public bool LogConfigPhaseAndExitIfNeeded(MediaNamingPipelineContext context)
+    {
+        var configOutput = context.ConfigOutput;
+
+        if (configOutput.InvalidNaming.Count != 0)
+        {
+            foreach (var (topic, invalidValue) in configOutput.InvalidNaming)
+            {
+                log.Error(
+                    "An invalid media naming format is specified for {Topic}: {Value}",
+                    topic,
+                    invalidValue
+                );
+            }
+
+            return true;
+        }
+
+        var differences = configOutput.Dto switch
+        {
+            RadarrMediaNamingDto x => x.GetDifferences(new RadarrMediaNamingDto()),
+            SonarrMediaNamingDto x => x.GetDifferences(new SonarrMediaNamingDto()),
+            _ => throw new ArgumentException(
+                "Unsupported configuration type in LogConfigPhase method"
+            ),
+        };
+
+        if (differences.Count == 0)
+        {
+            log.Debug("No media naming changes to process");
+            return true;
+        }
+
+        return false;
     }
 }

@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.QualitySize;
-using Recyclarr.Cli.Pipelines.QualitySize.Models;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.Tests.TestLibrary;
@@ -7,45 +6,43 @@ using Recyclarr.Tests.TestLibrary;
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-public class QualitySizeTransactionPhaseTest
+internal class QualitySizeTransactionPhaseTest
 {
     [Test, AutoMockData]
-    public void Skip_guide_qualities_that_do_not_exist_in_service(QualitySizeTransactionPhase sut)
+    public async Task Skip_guide_qualities_that_do_not_exist_in_service(
+        QualitySizeTransactionPhase sut
+    )
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new ProcessedQualitySizeData(
-                "",
-                [
-                    NewQualitySize.WithLimits("non_existent1", 0, 2, 1),
-                    NewQualitySize.WithLimits("non_existent2", 0, 2, 1),
-                ]
-            ),
+            Qualities =
+            [
+                NewQualitySize.WithLimits("non_existent1", 0, 2, 1),
+                NewQualitySize.WithLimits("non_existent2", 0, 2, 1),
+            ],
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new() { Quality = new ServiceQualityItem { Name = "exists" } },
             },
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
-    public void Skip_guide_qualities_that_are_not_different_from_service(
+    public async Task Skip_guide_qualities_that_are_not_different_from_service(
         QualitySizeTransactionPhase sut
     )
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new ProcessedQualitySizeData(
-                "",
-                [
-                    NewQualitySize.WithLimits("same1", 0, 2, 1),
-                    NewQualitySize.WithLimits("same2", 0, 2, 1),
-                ]
-            ),
+            Qualities =
+            [
+                NewQualitySize.WithLimits("same1", 0, 2, 1),
+                NewQualitySize.WithLimits("same2", 0, 2, 1),
+            ],
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new()
@@ -65,25 +62,23 @@ public class QualitySizeTransactionPhaseTest
             },
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
-    public void Sync_guide_qualities_that_are_different_from_service(
+    public async Task Sync_guide_qualities_that_are_different_from_service(
         QualitySizeTransactionPhase sut
     )
     {
         var context = new QualitySizePipelineContext
         {
-            ConfigOutput = new ProcessedQualitySizeData(
-                "",
-                [
-                    NewQualitySize.WithLimits("same1", 0, 2, 1),
-                    NewQualitySize.WithLimits("different1", 0, 3, 1),
-                ]
-            ),
+            Qualities =
+            [
+                NewQualitySize.WithLimits("same1", 0, 2, 1),
+                NewQualitySize.WithLimits("different1", 0, 3, 1),
+            ],
             ApiFetchOutput = new List<ServiceQualityDefinitionItem>
             {
                 new()
@@ -103,7 +98,7 @@ public class QualitySizeTransactionPhaseTest
             },
         };
 
-        sut.Execute(context);
+        await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()

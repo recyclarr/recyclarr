@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
@@ -7,10 +6,12 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCalculator)
-    : ITransactionPipelinePhase<QualityProfilePipelineContext>
+internal class QualityProfileTransactionPhase(
+    QualityProfileStatCalculator statCalculator,
+    QualityProfileLogger logger
+) : IPipelinePhase<QualityProfilePipelineContext>
 {
-    public void Execute(QualityProfilePipelineContext context)
+    public Task<bool> Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         var transactions = new QualityProfileTransactionData();
 
@@ -25,6 +26,9 @@ public class QualityProfileTransactionPhase(QualityProfileStatCalculator statCal
 
         AssignProfiles(transactions, updatedProfiles);
         context.TransactionOutput = transactions;
+
+        logger.LogTransactionNotices(context);
+        return Task.FromResult(true);
     }
 
     private void AssignProfiles(

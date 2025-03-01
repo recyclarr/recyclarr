@@ -9,7 +9,7 @@ using Recyclarr.TrashGuide.QualitySize;
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
 [TestFixture]
-public class QualitySizeConfigPhaseTest
+internal class QualitySizeConfigPhaseTest
 {
     [Test, AutoMockData]
     public async Task Do_nothing_if_no_quality_definition(
@@ -22,7 +22,8 @@ public class QualitySizeConfigPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context.ConfigOutput.Should().BeNull();
+        context.QualitySizeType.Should().BeEmpty();
+        context.Qualities.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
@@ -42,7 +43,8 @@ public class QualitySizeConfigPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context.ConfigOutput.Should().BeNull();
+        context.QualitySizeType.Should().BeEmpty();
+        context.Qualities.Should().BeEmpty();
     }
 
     [Test]
@@ -106,9 +108,8 @@ public class QualitySizeConfigPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context.ConfigOutput.Should().NotBeNull();
         context
-            .ConfigOutput!.Qualities.Select(x => x.Item)
+            .Qualities.Select(x => x.Item)
             .Should()
             .BeEquivalentTo([new QualityItem("quality1", 0, 100, 50)]);
     }
@@ -139,9 +140,8 @@ public class QualitySizeConfigPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context.ConfigOutput.Should().NotBeNull();
         context
-            .ConfigOutput!.Qualities.Select(x => x.Item)
+            .Qualities.Select(x => x.Item)
             .Should()
             .BeEquivalentTo([new QualityItem("quality1", 0, 100, 90)]);
     }

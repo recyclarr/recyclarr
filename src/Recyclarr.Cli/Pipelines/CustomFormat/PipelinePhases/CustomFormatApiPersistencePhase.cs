@@ -1,16 +1,16 @@
 using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-public class CustomFormatApiPersistencePhase(
+internal class CustomFormatApiPersistencePhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCache> cachePersister
-) : IApiPersistencePipelinePhase<CustomFormatPipelineContext>
+    ICachePersister<CustomFormatCache> cachePersister,
+    CustomFormatTransactionLogger cfLogger
+) : IPipelinePhase<CustomFormatPipelineContext>
 {
-    public async Task Execute(CustomFormatPipelineContext context, CancellationToken ct)
+    public async Task<bool> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         var transactions = context.TransactionOutput;
 
@@ -35,5 +35,8 @@ public class CustomFormatApiPersistencePhase(
 
         context.Cache.Update(transactions);
         cachePersister.Save(context.Cache);
+
+        cfLogger.LogTransactions(context);
+        return true;
     }
 }

@@ -1,20 +1,16 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.Generic;
-using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-public class CustomFormatPipelineContext : IPipelineContext
+internal class CustomFormatPipelineContext : PipelineContext
 {
-    public string PipelineDescription => "Custom Format";
-    public IReadOnlyCollection<SupportedServices> SupportedServiceTypes { get; } =
-        [SupportedServices.Sonarr, SupportedServices.Radarr];
+    public override string PipelineDescription => "Custom Format";
 
     public IList<CustomFormatData> ConfigOutput { get; init; } = [];
     public IList<CustomFormatData> ApiFetchOutput { get; init; } = [];
-    public CustomFormatTransactionData TransactionOutput { get; set; } = default!;
-    public IReadOnlyCollection<string> InvalidFormats { get; set; } = default!;
-    public CustomFormatCache Cache { get; set; } = default!;
+    public CustomFormatTransactionData TransactionOutput { get; set; } = null!;
+    public IReadOnlyCollection<string> InvalidFormats { get; set; } = null!;
+    public CustomFormatCache Cache { get; set; } = null!;
 }

@@ -5,7 +5,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
@@ -24,7 +23,6 @@ public class PipelineAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterGeneric(typeof(GenericPipelinePhases<>));
         builder.RegisterComposite<CompositeSyncPipeline, ISyncPipeline>();
         builder
             .RegisterTypes(
@@ -61,8 +59,7 @@ public class PipelineAutofacModule : Module
                 typeof(MediaNamingApiFetchPhase),
                 typeof(MediaNamingTransactionPhase),
                 typeof(MediaNamingPreviewPhase),
-                typeof(MediaNamingApiPersistencePhase),
-                typeof(MediaNamingLogPhase)
+                typeof(MediaNamingApiPersistencePhase)
             )
             .AsImplementedInterfaces();
     }
@@ -70,6 +67,7 @@ public class PipelineAutofacModule : Module
     private static void RegisterQualityProfile(ContainerBuilder builder)
     {
         builder.RegisterType<QualityProfileStatCalculator>();
+        builder.RegisterType<QualityProfileLogger>();
 
         builder
             .RegisterTypes(
@@ -77,8 +75,7 @@ public class PipelineAutofacModule : Module
                 typeof(QualityProfilePreviewPhase),
                 typeof(QualityProfileApiFetchPhase),
                 typeof(QualityProfileTransactionPhase),
-                typeof(QualityProfileApiPersistencePhase),
-                typeof(QualityProfileLogPhase)
+                typeof(QualityProfileApiPersistencePhase)
             )
             .AsImplementedInterfaces();
     }
@@ -104,8 +101,7 @@ public class PipelineAutofacModule : Module
                 typeof(QualitySizePreviewPhase),
                 typeof(QualitySizeApiFetchPhase),
                 typeof(QualitySizeTransactionPhase),
-                typeof(QualitySizeApiPersistencePhase),
-                typeof(QualitySizeLogPhase)
+                typeof(QualitySizeApiPersistencePhase)
             )
             .AsImplementedInterfaces();
     }
@@ -128,9 +124,9 @@ public class PipelineAutofacModule : Module
                 typeof(CustomFormatApiFetchPhase),
                 typeof(CustomFormatTransactionPhase),
                 typeof(CustomFormatPreviewPhase),
-                typeof(CustomFormatApiPersistencePhase),
-                typeof(CustomFormatLogPhase)
+                typeof(CustomFormatApiPersistencePhase)
             )
-            .AsImplementedInterfaces();
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
     }
 }

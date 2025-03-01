@@ -1,27 +1,15 @@
-using Recyclarr.Cli.Pipelines.Generic;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Notifications;
 
-namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public class QualityProfileLogPhase(
+internal class QualityProfileLogger(
     ILogger log,
     ValidationLogger validationLogger,
     NotificationEmitter notificationEmitter
-) : ILogPipelinePhase<QualityProfilePipelineContext>
+)
 {
-    public bool LogConfigPhaseAndExitIfNeeded(QualityProfilePipelineContext context)
-    {
-        if (!context.ConfigOutput.Any())
-        {
-            log.Debug("No Quality Profiles to process");
-            return true;
-        }
-
-        return false;
-    }
-
     public void LogTransactionNotices(QualityProfilePipelineContext context)
     {
         var transactions = context.TransactionOutput;
