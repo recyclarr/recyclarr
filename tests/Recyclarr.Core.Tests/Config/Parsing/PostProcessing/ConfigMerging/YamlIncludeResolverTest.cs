@@ -10,11 +10,11 @@ namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 internal sealed class YamlIncludeResolverTest
 {
-    private abstract class TestYamlInclude1 : IYamlInclude;
+    internal abstract class TestYamlInclude1 : IYamlInclude;
 
-    private abstract class TestYamlInclude2 : IYamlInclude;
+    internal abstract class TestYamlInclude2 : IYamlInclude;
 
-    private abstract class TestYamlInclude3 : IYamlInclude;
+    internal abstract class TestYamlInclude3 : IYamlInclude;
 
     [Test, AutoMockData]
     public void Find_and_return_processor(
