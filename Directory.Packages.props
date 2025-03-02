@@ -10,9 +10,9 @@
     <PackageVersion Include="Autofac.Extras.AggregateService" Version="6.1.2" />
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
-    <PackageVersion Include="AutoMapper" Version="13.0.1" />
-    <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="8.1.0" />
-    <PackageVersion Include="CliWrap" Version="3.7.1" />
+    <PackageVersion Include="AutoMapper" Version="14.0.0" />
+    <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="9.0.0" />
+    <PackageVersion Include="CliWrap" Version="3.8.1" />
     <PackageVersion Include="FluentValidation" Version="11.11.0" />
     <PackageVersion Include="Flurl" Version="4.0.0" />
     <PackageVersion Include="Flurl.Http" Version="4.0.2" />
@@ -51,7 +51,7 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0012" PrivateAssets="all" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0012" PrivateAssets="all" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" />
-    <PackageVersion Include="FluentAssertions" Version="8.0.1" PrivateAssets="all" />
+    <PackageVersion Include="FluentAssertions" Version="8.1.1" PrivateAssets="all" />
     <PackageVersion Include="FluentAssertions.Analyzers" Version="0.34.1" PrivateAssets="all" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" PrivateAssets="all" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" PrivateAssets="all" />
@@ -72,6 +72,6 @@
   </ItemGroup>
   <!-- Global Package References -->
   <ItemGroup>
-    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.3.10" />
+    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.3.11" />
   </ItemGroup>
 </Project>
