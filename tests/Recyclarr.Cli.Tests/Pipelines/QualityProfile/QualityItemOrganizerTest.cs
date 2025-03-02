@@ -1,11 +1,11 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
-[TestFixture]
-public class QualityItemOrganizerTest
+internal sealed class QualityItemOrganizerTest
 {
     private readonly QualityProfileConfig _config = new()
     {

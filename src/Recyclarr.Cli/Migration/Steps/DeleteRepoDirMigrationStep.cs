@@ -6,7 +6,7 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Migration.Steps;
 
 [UsedImplicitly]
-public class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
+internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {
     public string Description => "Delete old repo directory";
     public IReadOnlyCollection<string> Remediation =>

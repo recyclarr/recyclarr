@@ -3,8 +3,7 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
-[TestFixture]
-public class MergeBaseUrlTest
+internal sealed class MergeBaseUrlTest
 {
     [Test]
     public void Empty_right_to_non_empty_left()

@@ -7,8 +7,7 @@ using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class CustomFormatServiceTest : IntegrationTestFixture
+internal sealed class CustomFormatServiceTest : IntegrationTestFixture
 {
     [Test]
     public async Task Get_can_parse_json()

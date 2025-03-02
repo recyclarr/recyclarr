@@ -3,7 +3,7 @@ namespace Recyclarr.Cli.Pipelines;
 /// <summary>
 /// Defines a mechanism for state sharing between pipelines.
 /// </summary>
-public interface IPipelineCache
+internal interface IPipelineCache
 {
     void Clear();
 }

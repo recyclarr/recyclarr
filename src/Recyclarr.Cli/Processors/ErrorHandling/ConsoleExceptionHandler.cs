@@ -10,7 +10,7 @@ using YamlDotNet.Core;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class ConsoleExceptionHandler(ILogger log)
+internal class ConsoleExceptionHandler(ILogger log)
 {
     public async Task<bool> HandleException(Exception sourceException)
     {

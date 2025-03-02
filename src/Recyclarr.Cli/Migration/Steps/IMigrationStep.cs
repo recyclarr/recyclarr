@@ -2,7 +2,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;
 
-public interface IMigrationStep
+internal interface IMigrationStep
 {
     /// <summary>
     /// A description printed to the user so that they understand the purpose of this migration step, and

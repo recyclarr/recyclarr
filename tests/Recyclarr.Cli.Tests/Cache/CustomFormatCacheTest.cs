@@ -1,12 +1,11 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Cache;
 
-[TestFixture]
-public class CustomFormatCacheTest
+internal sealed class CustomFormatCacheTest
 {
     [Test]
     public void New_updated_and_changed_are_added()

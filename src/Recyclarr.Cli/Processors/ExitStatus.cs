@@ -1,6 +1,6 @@
 namespace Recyclarr.Cli.Processors;
 
-public enum ExitStatus
+internal enum ExitStatus
 {
     Succeeded = 0,
     Failed,

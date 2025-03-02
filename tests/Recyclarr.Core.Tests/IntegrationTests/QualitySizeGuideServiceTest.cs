@@ -7,8 +7,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class QualitySizeGuideServiceTest : IntegrationTestFixture
+internal sealed class QualitySizeGuideServiceTest : IntegrationTestFixture
 {
     [TestCase(SupportedServices.Sonarr, "sonarr")]
     [TestCase(SupportedServices.Radarr, "radarr")]

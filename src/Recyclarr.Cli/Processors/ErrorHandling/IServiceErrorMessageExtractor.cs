@@ -1,6 +1,6 @@
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public interface IServiceErrorMessageExtractor
+internal interface IServiceErrorMessageExtractor
 {
     Task<string> GetErrorMessage();
     int? HttpStatusCode { get; }

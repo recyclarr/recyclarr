@@ -5,8 +5,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.Config.Filtering;
 
-[TestFixture]
-public class ConfigFiltersTest : IntegrationTestFixture
+internal sealed class ConfigFiltersTest : IntegrationTestFixture
 {
     [Test]
     public void Filter_out_invalid_instances()

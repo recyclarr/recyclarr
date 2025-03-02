@@ -3,7 +3,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class ProgramInformationDisplayTask(ILogger log, IAppPaths paths) : IGlobalSetupTask
+internal class ProgramInformationDisplayTask(ILogger log, IAppPaths paths) : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)
     {

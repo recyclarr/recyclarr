@@ -4,7 +4,7 @@ using AutoFixture.Kernel;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 
-public class AutofacSpecimenBuilder(ILifetimeScope container) : ISpecimenBuilder
+internal class AutofacSpecimenBuilder(ILifetimeScope container) : ISpecimenBuilder
 {
     public object Create(object request, ISpecimenContext context)
     {

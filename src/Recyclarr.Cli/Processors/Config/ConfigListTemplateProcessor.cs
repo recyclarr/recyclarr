@@ -1,11 +1,11 @@
 using System.Globalization;
-using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigListTemplateProcessor(
+internal class ConfigListTemplateProcessor(
     IAnsiConsole console,
     IConfigTemplateGuideService guideService
 )

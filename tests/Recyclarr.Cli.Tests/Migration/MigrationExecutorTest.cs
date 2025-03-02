@@ -6,8 +6,7 @@ using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Migration;
 
-[TestFixture]
-public class MigrationExecutorTest
+internal sealed class MigrationExecutorTest
 {
     [Test]
     public void Step_not_executed_if_check_returns_false()

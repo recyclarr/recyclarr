@@ -5,8 +5,7 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigurationRegistryTest : IntegrationTestFixture
+internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
 {
     [Test]
     public void Use_explicit_paths_instead_of_default()

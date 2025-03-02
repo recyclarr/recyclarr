@@ -8,9 +8,7 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
-[TestFixture]
-[Parallelizable(ParallelScope.All)]
-public class SonarrMediaNamingConfigPhaseTest
+internal sealed class SonarrMediaNamingConfigPhaseTest
 {
     private static readonly SonarrMediaNamingData SonarrNamingData = new()
     {

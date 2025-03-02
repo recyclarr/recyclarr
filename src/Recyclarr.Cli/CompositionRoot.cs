@@ -22,7 +22,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli;
 
-public static class CompositionRoot
+internal static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {
@@ -52,7 +52,7 @@ public static class CompositionRoot
         builder.RegisterType<FlurlHttpExceptionHandler>();
 
         // Sync
-        builder.RegisterType<SyncProcessor>().As<ISyncProcessor>();
+        builder.RegisterType<SyncProcessor>();
 
         // Configuration
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
@@ -70,7 +70,7 @@ public static class CompositionRoot
 
     private static void RegisterMigrations(ContainerBuilder builder)
     {
-        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
+        builder.RegisterType<MigrationExecutor>();
 
         // Migration Steps
         builder

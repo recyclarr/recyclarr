@@ -2,9 +2,7 @@ using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
-[TestFixture]
-[Parallelizable(ParallelScope.All)]
-public class NamingFormatLookupTest
+internal sealed class NamingFormatLookupTest
 {
     [Test, AutoMockData]
     public void Assign_null_when_config_null(NamingFormatLookup sut)

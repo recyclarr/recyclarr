@@ -5,8 +5,7 @@ using Recyclarr.Yaml;
 
 namespace Recyclarr.Core.Tests.Config.Settings;
 
-[TestFixture]
-public class SettingsLoaderTest
+internal sealed class SettingsLoaderTest
 {
     [Test, AutoMockData]
     public void Load_should_create_settings_file_if_not_exists(

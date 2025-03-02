@@ -3,7 +3,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public static class QualityProfileExtensions
+internal static class QualityProfileExtensions
 {
     private static IEnumerable<ProfileItemDto> FlattenItems(IEnumerable<ProfileItemDto> items)
     {

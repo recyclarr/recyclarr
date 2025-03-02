@@ -1,9 +1,8 @@
 using AutoMapper;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-[TestFixture]
 internal sealed class AutoMapperConfigurationTest : CliIntegrationFixture
 {
     [Test]

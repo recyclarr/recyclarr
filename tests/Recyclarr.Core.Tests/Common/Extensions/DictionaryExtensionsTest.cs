@@ -3,8 +3,7 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Core.Tests.Common.Extensions;
 
-[TestFixture]
-public class DictionaryExtensionsTest
+internal sealed class DictionaryExtensionsTest
 {
     [SuppressMessage(
         "SonarLint",

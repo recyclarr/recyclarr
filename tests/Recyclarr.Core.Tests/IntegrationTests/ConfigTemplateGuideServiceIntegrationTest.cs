@@ -6,8 +6,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
+internal sealed class ConfigTemplateGuideServiceIntegrationTest : IntegrationTestFixture
 {
     [Test, AutoMockData]
     public void Throw_when_templates_dir_does_not_exist(ConfigTemplateGuideService sut)

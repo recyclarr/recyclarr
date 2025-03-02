@@ -3,8 +3,7 @@ using Recyclarr.Compatibility.Sonarr;
 
 namespace Recyclarr.Core.Tests.Compatibility.Sonarr;
 
-[TestFixture]
-public class SonarrCapabilityEnforcerTest
+internal sealed class SonarrCapabilityEnforcerTest
 {
     [Test, AutoMockData]
     public void Minimum_version_not_met(

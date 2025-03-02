@@ -5,7 +5,7 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Migration.Steps;
 
 [UsedImplicitly]
-public class MoveOsxAppDataDotnet8(
+internal class MoveOsxAppDataDotnet8(
     IAppPaths paths,
     IEnvironment env,
     IRuntimeInformation runtimeInfo,

@@ -1,6 +1,6 @@
 namespace Recyclarr.Cli.Console.Settings;
 
-public interface ICreateConfigSettings
+internal interface ICreateConfigSettings
 {
     public string? Path { get; }
     public IReadOnlyCollection<string> Templates { get; }

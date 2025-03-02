@@ -6,8 +6,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Tests.Processors.Config;
 
-[TestFixture]
-public class TemplateConfigCreatorTest
+internal sealed class TemplateConfigCreatorTest
 {
     [Test, AutoMockData]
     public void Can_handle_returns_true_with_templates(

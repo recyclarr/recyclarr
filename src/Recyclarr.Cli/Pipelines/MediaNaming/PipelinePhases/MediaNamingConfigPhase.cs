@@ -7,9 +7,9 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-public record InvalidNamingConfig(string Type, string ConfigValue);
+internal record InvalidNamingConfig(string Type, string ConfigValue);
 
-public record ProcessedNamingConfig
+internal record ProcessedNamingConfig
 {
     public required MediaNamingDto Dto { get; init; }
     public IReadOnlyCollection<InvalidNamingConfig> InvalidNaming { get; init; } = [];

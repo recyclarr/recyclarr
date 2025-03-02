@@ -12,12 +12,12 @@ namespace Recyclarr.Cli.Console.Commands;
 #pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
-public class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
+internal class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
     : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings
+    internal class CliSettings : BaseCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]

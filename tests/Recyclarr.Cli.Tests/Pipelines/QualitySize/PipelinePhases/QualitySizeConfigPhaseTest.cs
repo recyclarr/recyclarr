@@ -2,13 +2,12 @@ using System.Globalization;
 using NSubstitute.ReturnsExtensions;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
-[TestFixture]
 internal sealed class QualitySizeConfigPhaseTest
 {
     [Test, AutoMockData]

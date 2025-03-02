@@ -3,7 +3,7 @@ using Recyclarr.Cli.Console.Commands;
 namespace Recyclarr.Cli.Console.Setup;
 
 [UsedImplicitly]
-public class CompositeGlobalSetupTask(IOrderedEnumerable<Lazy<IGlobalSetupTask>> tasks)
+internal class CompositeGlobalSetupTask(IOrderedEnumerable<Lazy<IGlobalSetupTask>> tasks)
     : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)

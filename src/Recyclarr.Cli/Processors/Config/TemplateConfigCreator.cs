@@ -6,7 +6,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class TemplateConfigCreator(
+internal class TemplateConfigCreator(
     ILogger log,
     IConfigTemplateGuideService templates,
     IAppPaths paths

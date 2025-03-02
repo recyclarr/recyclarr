@@ -4,7 +4,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
 
-public class QualitySizeDataLister(IAnsiConsole console, IQualitySizeGuideService guide)
+internal class QualitySizeDataLister(IAnsiConsole console, IQualitySizeGuideService guide)
 {
     public void ListQualities(SupportedServices serviceType)
     {

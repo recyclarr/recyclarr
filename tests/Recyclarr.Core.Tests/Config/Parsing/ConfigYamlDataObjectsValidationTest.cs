@@ -3,8 +3,7 @@ using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.Core.Tests.Config.Parsing;
 
-[TestFixture]
-public class ConfigYamlDataObjectsValidationTest
+internal sealed class ConfigYamlDataObjectsValidationTest
 {
     [Test]
     public void Quality_profile_format_upgrade_allowed_required()

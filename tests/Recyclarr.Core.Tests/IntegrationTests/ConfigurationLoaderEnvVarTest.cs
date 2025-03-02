@@ -4,8 +4,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
 {
     [Test]
     public void Test_successful_environment_variable_loading()

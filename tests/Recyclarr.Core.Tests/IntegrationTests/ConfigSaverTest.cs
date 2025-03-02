@@ -4,8 +4,7 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigSaverTest : IntegrationTestFixture
+internal sealed class ConfigSaverTest : IntegrationTestFixture
 {
     [Test]
     public void Replace_file_when_already_exists()

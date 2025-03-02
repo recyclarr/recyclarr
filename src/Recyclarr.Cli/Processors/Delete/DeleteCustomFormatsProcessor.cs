@@ -19,7 +19,7 @@ internal class CustomFormatConfigurationScope(ILifetimeScope scope) : Configurat
         scope.Resolve<ICustomFormatApiService>();
 }
 
-public class DeleteCustomFormatsProcessor(
+internal class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,

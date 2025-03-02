@@ -6,7 +6,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
-public class MediaNamingDataLister(IAnsiConsole console, IMediaNamingGuideService guide)
+internal class MediaNamingDataLister(IAnsiConsole console, IMediaNamingGuideService guide)
 {
     public void ListNaming(SupportedServices serviceType)
     {

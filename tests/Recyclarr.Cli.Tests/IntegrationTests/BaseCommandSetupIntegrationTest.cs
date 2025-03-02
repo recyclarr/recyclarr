@@ -1,11 +1,10 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Setup;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-[TestFixture]
 internal sealed class BaseCommandSetupIntegrationTest : CliIntegrationFixture
 {
     [Test]

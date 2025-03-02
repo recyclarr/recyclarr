@@ -1,12 +1,16 @@
 ﻿using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
+using NSubstitute;
+using NUnit.Framework;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.VersionControl;
+using Serilog;
 using Spectre.Console;
 using Spectre.Console.Testing;
 

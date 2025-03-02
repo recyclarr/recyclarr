@@ -6,8 +6,7 @@ using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.Tests.Common.Extensions;
 
-[TestFixture]
-public class FileSystemExtensionsTest
+internal sealed class FileSystemExtensionsTest
 {
     private static IEnumerable<string> ReRootFiles(
         MockFileSystem fs,

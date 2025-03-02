@@ -5,8 +5,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigurationLoaderSecretsTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 {
     [Test]
     public void Test_secret_loading()

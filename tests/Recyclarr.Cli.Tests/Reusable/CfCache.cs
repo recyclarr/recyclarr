@@ -1,8 +1,8 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-namespace Recyclarr.Cli.TestLibrary;
+namespace Recyclarr.Cli.Tests.Reusable;
 
-public static class CfCache
+internal static class CfCache
 {
     public static CustomFormatCache New(params TrashIdMapping[] mappings)
     {

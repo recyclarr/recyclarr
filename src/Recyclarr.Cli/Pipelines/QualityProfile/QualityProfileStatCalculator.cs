@@ -4,7 +4,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public record ProfileWithStats
+internal record ProfileWithStats
 {
     public required UpdatedQualityProfile Profile { get; set; }
     public bool ProfileChanged { get; set; }
@@ -14,7 +14,7 @@ public record ProfileWithStats
     public bool HasChanges => ProfileChanged || ScoresChanged || QualitiesChanged;
 }
 
-public class QualityProfileStatCalculator(ILogger log)
+internal class QualityProfileStatCalculator(ILogger log)
 {
     public ProfileWithStats Calculate(UpdatedQualityProfile profile)
     {

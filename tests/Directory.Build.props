@@ -6,7 +6,7 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);TestResults\*\**</DefaultItemExcludes>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <!-- Packages that apply to all tests -->
     <PackageReference Include="AgileObjects.ReadableExpressions" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
@@ -30,7 +30,7 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <Using Include="AutoFixture.NUnit4" />
     <Using Include="FluentAssertions" />
     <Using Include="NSubstitute" />

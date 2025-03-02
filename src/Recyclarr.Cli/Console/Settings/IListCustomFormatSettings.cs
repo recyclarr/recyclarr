@@ -2,7 +2,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Console.Settings;
 
-public interface IListCustomFormatSettings
+internal interface IListCustomFormatSettings
 {
     SupportedServices Service { get; }
     bool ScoreSets { get; }

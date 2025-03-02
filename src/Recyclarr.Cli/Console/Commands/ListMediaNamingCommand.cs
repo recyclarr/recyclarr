@@ -11,12 +11,12 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List media naming formats in the guide for a particular service.")]
-public class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpdater repoUpdater)
+internal class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUpdater repoUpdater)
     : AsyncCommand<ListMediaNamingCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings
+    internal class CliSettings : BaseCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]

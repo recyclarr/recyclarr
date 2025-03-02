@@ -3,8 +3,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Core.Tests.TrashGuide.CustomFormat;
 
-[Parallelizable(ParallelScope.All)]
-public class NondeterministicValueConverterTest
+internal sealed class NondeterministicValueConverterTest
 {
     private JsonSerializerOptions _options = default!;
 

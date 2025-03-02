@@ -5,7 +5,6 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Core.Tests.Cache;
 
-[TestFixture]
 [SuppressMessage(
     "ReSharper",
     "ClassNeverInstantiated.Local",
@@ -17,7 +16,7 @@ namespace Recyclarr.Core.Tests.Cache;
     Justification = "For testing only"
 )]
 [SuppressMessage("SonarLint", "S2094", Justification = "Used for unit test scenario")]
-public class CacheStoragePathTest
+internal sealed class CacheStoragePathTest
 {
     private const string ValidObjectName = "azAZ_09";
 

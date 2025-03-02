@@ -4,8 +4,7 @@ using Recyclarr.Config.Secrets;
 
 namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing;
 
-[TestFixture]
-public class ImplicitUrlAndKeyPostProcessorTest
+internal sealed class ImplicitUrlAndKeyPostProcessorTest
 {
     [Test, AutoMockData]
     public void Update_only_base_url_when_absent(

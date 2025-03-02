@@ -3,8 +3,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Core.Tests.TrashGuide.QualitySize;
 
-[TestFixture]
-public class QualityItemWithLimitsTest
+internal sealed class QualityItemWithLimitsTest
 {
     private static readonly object[] MaxTestValues =
     [

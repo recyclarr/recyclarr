@@ -4,7 +4,7 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class JanitorCleanupTask(
+internal class JanitorCleanupTask(
     LogJanitor janitor,
     ILogger log,
     ISettings<LogJanitorSettings> settings

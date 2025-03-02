@@ -3,7 +3,7 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public class CustomFormatCachePersister(
+internal class CustomFormatCachePersister(
     ILogger log,
     ICacheStoragePath storagePath,
     IServiceConfiguration config

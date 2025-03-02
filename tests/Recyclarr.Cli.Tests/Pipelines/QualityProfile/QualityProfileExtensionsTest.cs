@@ -1,12 +1,12 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.QualityProfile;
 
 // ReSharper disable CollectionNeverUpdated.Local
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
-[TestFixture]
-public class QualityProfileExtensionsTest
+internal sealed class QualityProfileExtensionsTest
 {
     [Test]
     public void Find_group_by_id_with_null_input()

@@ -1,6 +1,6 @@
-namespace Recyclarr.Cli.TestLibrary;
+namespace Recyclarr.Cli.Tests.Reusable;
 
-public class TrashRepoFileMapper : RemoteRepoFileMapper
+internal sealed class TrashRepoFileMapper : RemoteRepoFileMapper
 {
     private const string RepoUrlPrefix =
         "https://raw.githubusercontent.com/TRaSH-Guides/Guides/refs/heads/master";

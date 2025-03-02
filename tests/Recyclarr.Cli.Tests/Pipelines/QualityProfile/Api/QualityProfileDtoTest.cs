@@ -1,9 +1,9 @@
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.Api;
 
-[TestFixture]
-public class QualityProfileDtoTest
+internal sealed class QualityProfileDtoTest
 {
     [TestCase(null, false)]
     [TestCase(true, true)]

@@ -6,7 +6,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class LocalConfigCreator(
+internal class LocalConfigCreator(
     ILogger log,
     IAppPaths paths,
     IFileSystem fs,

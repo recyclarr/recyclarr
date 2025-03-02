@@ -4,7 +4,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public enum FormatScoreUpdateReason
+internal enum FormatScoreUpdateReason
 {
     /// <summary>
     /// A score who's value did not change.
@@ -29,7 +29,7 @@ public enum FormatScoreUpdateReason
     New,
 }
 
-public record UpdatedFormatScore(
+internal record UpdatedFormatScore(
     ProfileFormatItemDto Dto,
     int NewScore,
     FormatScoreUpdateReason Reason

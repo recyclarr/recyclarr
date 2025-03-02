@@ -3,9 +3,9 @@ using System.IO.Abstractions;
 using System.Reactive.Linq;
 using Flurl.Http;
 
-namespace Recyclarr.Cli.TestLibrary;
+namespace Recyclarr.Cli.Tests.Reusable;
 
-public class RemoteRepoFileMapper
+internal class RemoteRepoFileMapper
 {
     private Dictionary<string, string>? _guideDataCache;
 

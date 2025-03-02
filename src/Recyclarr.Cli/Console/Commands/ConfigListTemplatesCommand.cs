@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Repo;
@@ -9,13 +10,13 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List local configuration files.")]
-public class ConfigListTemplatesCommand(
+internal class ConfigListTemplatesCommand(
     ConfigListTemplateProcessor processor,
     IMultiRepoUpdater repoUpdater
 ) : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings, IConfigListTemplatesSettings
+    internal class CliSettings : BaseCommandSettings, IConfigListTemplatesSettings
     {
         [CommandOption("-i|--includes")]
         [Description(
@@ -31,9 +32,4 @@ public class ConfigListTemplatesCommand(
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }
-}
-
-public interface IConfigListTemplatesSettings
-{
-    bool Includes { get; }
 }

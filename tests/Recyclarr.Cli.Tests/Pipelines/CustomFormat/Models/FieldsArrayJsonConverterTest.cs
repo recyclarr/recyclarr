@@ -4,8 +4,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 
-[TestFixture]
-public class FieldsArrayJsonConverterTest
+internal sealed class FieldsArrayJsonConverterTest
 {
     [Test]
     public void Read_array_as_is()

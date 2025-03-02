@@ -9,7 +9,7 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigListLocalProcessor(
+internal class ConfigListLocalProcessor(
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     IAppPaths paths

@@ -1,13 +1,12 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.Console.Commands;
+using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Processors;
 
-[TestFixture]
-public class ConfigTemplateListerTest
+internal sealed class ConfigTemplateListerTest
 {
     [Test, AutoMockData]
     public void Hidden_templates_are_not_rendered(

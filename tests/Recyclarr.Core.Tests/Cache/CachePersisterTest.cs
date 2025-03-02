@@ -1,10 +1,45 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cache;
 using Recyclarr.Config.Models;
 
 namespace Recyclarr.Core.Tests.Cache;
 
-[TestFixture]
-public class CachePersisterTest
+[CacheObjectName("test-cache")]
+internal sealed record TestCacheObject() : CacheObject(LatestVersion)
+{
+    public new const int LatestVersion = 1;
+    public string? ExtraData
+    {
+        [UsedImplicitly]
+        get;
+        init;
+    }
+}
+
+internal sealed class TestCache(TestCacheObject cacheObject) : BaseCache(cacheObject);
+
+// This class exists because AutoFixture does not use NSubstitute's ForPartsOf()
+// See: https://github.com/AutoFixture/AutoFixture/issues/1355
+[SuppressMessage(
+    "Performance",
+    "CA1812:Avoid uninstantiated internal classes",
+    Justification = "Created by AutoFixture"
+)]
+internal sealed class TestCachePersister(
+    ILogger log,
+    ICacheStoragePath storagePath,
+    IServiceConfiguration config
+) : CachePersister<TestCacheObject, TestCache>(log, storagePath, config)
+{
+    protected override string CacheName => "Test Cache";
+
+    protected override TestCache CreateCache(TestCacheObject cacheObject)
+    {
+        return new TestCache(cacheObject);
+    }
+}
+
+internal sealed class CachePersisterTest
 {
     [Test, AutoMockData]
     public void Load_returns_default_when_file_does_not_exist(TestCachePersister sut)

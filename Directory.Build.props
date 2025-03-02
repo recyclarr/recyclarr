@@ -32,6 +32,8 @@
   <!-- For only NON-TEST projects -->
   <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('Tests'))">
     <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+    <!-- For NSubstitute -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
   <!-- ReferenceTrimmer - run build with /p:EnableReferenceTrimmer=true to enable -->

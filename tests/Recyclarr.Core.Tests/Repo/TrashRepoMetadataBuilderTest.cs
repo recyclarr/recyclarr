@@ -3,8 +3,7 @@ using Recyclarr.Repo;
 
 namespace Recyclarr.Core.Tests.Repo;
 
-[TestFixture]
-public class TrashRepoMetadataBuilderTest
+internal sealed class TrashRepoMetadataBuilderTest
 {
     private const string MetadataJson = """
         {

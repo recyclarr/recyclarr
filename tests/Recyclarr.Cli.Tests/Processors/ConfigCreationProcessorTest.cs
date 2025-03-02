@@ -7,8 +7,7 @@ using Recyclarr.Cli.Processors.Config;
 
 namespace Recyclarr.Cli.Tests.Processors;
 
-[TestFixture]
-public class ConfigCreationProcessorTest
+internal sealed class ConfigCreationProcessorTest
 {
     [SuppressMessage(
         "Performance",

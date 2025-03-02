@@ -1,13 +1,13 @@
 using FluentValidation.TestHelper;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
-[TestFixture]
-public class UpdatedQualityProfileValidatorTest
+internal sealed class UpdatedQualityProfileValidatorTest
 {
     [TestCase(399, true)]
     [TestCase(400, true)]

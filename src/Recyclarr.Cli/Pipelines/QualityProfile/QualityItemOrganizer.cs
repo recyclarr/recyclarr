@@ -5,7 +5,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public class QualityItemOrganizer
+internal class QualityItemOrganizer
 {
     private readonly List<string> _invalidItemNames = [];
 

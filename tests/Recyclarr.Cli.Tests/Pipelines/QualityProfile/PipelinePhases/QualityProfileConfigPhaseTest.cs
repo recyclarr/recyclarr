@@ -2,13 +2,13 @@ using AutoFixture;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
-[TestFixture]
-public class QualityProfileConfigPhaseTest
+internal sealed class QualityProfileConfigPhaseTest
 {
     private static RadarrConfiguration SetupCfs(params CustomFormatConfig[] cfConfigs)
     {

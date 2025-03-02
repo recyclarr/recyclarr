@@ -3,10 +3,10 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration;
 
-public class MigrationExecutor(
+internal class MigrationExecutor(
     IOrderedEnumerable<IMigrationStep> migrationSteps,
     IAnsiConsole console
-) : IMigrationExecutor
+)
 {
     public void PerformAllMigrationSteps(bool withDiagnostics)
     {

@@ -12,20 +12,19 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
 [UsedImplicitly]
-public class SyncCommand(
-    IMigrationExecutor migration,
+internal class SyncCommand(
+    MigrationExecutor migration,
     IMultiRepoUpdater repoUpdater,
-    ISyncProcessor syncProcessor
+    SyncProcessor syncProcessor
 ) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
-    [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage(
         "Performance",
         "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it"
     )]
-    public class CliSettings : BaseCommandSettings, ISyncSettings
+    internal class CliSettings : BaseCommandSettings, ISyncSettings
     {
         [CommandArgument(0, "[service]")]
         [EnumDescription<SupportedServices>(

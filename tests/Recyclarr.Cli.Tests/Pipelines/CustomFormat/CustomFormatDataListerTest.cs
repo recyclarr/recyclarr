@@ -6,8 +6,7 @@ using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
-[TestFixture]
-public class CustomFormatDataListerTest
+internal sealed class CustomFormatDataListerTest
 {
     [Test, AutoMockData]
     public void Custom_formats_appear_in_console_output(

@@ -3,7 +3,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-public class BaseCommandSettings : CommandSettings
+internal class BaseCommandSettings : CommandSettings
 {
     public CancellationToken CancellationToken { get; set; }
 

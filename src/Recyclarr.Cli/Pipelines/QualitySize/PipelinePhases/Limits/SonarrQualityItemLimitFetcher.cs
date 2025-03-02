@@ -3,7 +3,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 
-public class SonarrQualityItemLimitFetcher(ISonarrCapabilityFetcher capabilityFetcher)
+internal class SonarrQualityItemLimitFetcher(ISonarrCapabilityFetcher capabilityFetcher)
     : IQualityItemLimitFetcher
 {
     private QualityItemLimits? _cachedLimits;

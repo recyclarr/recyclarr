@@ -2,8 +2,7 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Core.Tests.Common.Extensions;
 
-[TestFixture]
-public class StringExtensionsTest
+internal sealed class StringExtensionsTest
 {
     [Test]
     public void Carriage_returns_and_newlines_are_stripped_from_front_and_back()

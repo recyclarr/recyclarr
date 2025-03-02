@@ -2,7 +2,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Models;
 
-public record QualityProfileServiceData(
+internal record QualityProfileServiceData(
     IReadOnlyList<QualityProfileDto> Profiles,
     QualityProfileDto Schema
 );

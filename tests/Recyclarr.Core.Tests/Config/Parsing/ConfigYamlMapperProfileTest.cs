@@ -4,8 +4,7 @@ using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.Core.Tests.Config.Parsing;
 
-[TestFixture]
-public class ConfigYamlMapperProfileTest
+internal sealed class ConfigYamlMapperProfileTest
 {
     private static IMapper CreateMapper()
     {

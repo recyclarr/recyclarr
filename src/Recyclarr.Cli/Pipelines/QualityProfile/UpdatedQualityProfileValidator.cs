@@ -4,7 +4,7 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQualityProfile>
+internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQualityProfile>
 {
     public UpdatedQualityProfileValidator()
     {

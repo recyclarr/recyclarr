@@ -5,8 +5,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Core.Tests.TrashGuide.CustomFormat;
 
-[TestFixture]
-public class CustomFormatCategoryParserTest
+internal sealed class CustomFormatCategoryParserTest
 {
     [Test, AutoMockData]
     public void It_works(

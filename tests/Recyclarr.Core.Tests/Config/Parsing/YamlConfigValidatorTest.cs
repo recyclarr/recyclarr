@@ -4,8 +4,7 @@ using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.Core.Tests.Config.Parsing;
 
-[TestFixture]
-public class YamlConfigValidatorTest
+internal sealed class YamlConfigValidatorTest
 {
     [Test]
     public void Validation_succeeds()

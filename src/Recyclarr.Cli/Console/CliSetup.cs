@@ -5,7 +5,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console;
 
-public static class CliSetup
+internal static class CliSetup
 {
     private static void AddCommands(IConfigurator cli)
     {

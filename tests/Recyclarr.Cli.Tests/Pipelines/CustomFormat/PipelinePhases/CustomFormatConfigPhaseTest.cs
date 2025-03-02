@@ -7,8 +7,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.PipelinePhases;
 
-[TestFixture]
-public class CustomFormatConfigPhaseTest
+internal sealed class CustomFormatConfigPhaseTest
 {
     [Test]
     public void Return_configs_that_exist_in_guide()

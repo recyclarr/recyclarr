@@ -12,19 +12,19 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Sync;
 
 [UsedImplicitly]
-public class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
     public ISyncPipeline Pipelines { get; } = scope.Resolve<ISyncPipeline>();
 }
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-public class SyncProcessor(
+internal class SyncProcessor(
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
     NotificationService notify
-) : ISyncProcessor
+)
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {

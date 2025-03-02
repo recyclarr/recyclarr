@@ -3,7 +3,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class AppDataDirSetupTask(IAppDataSetup appDataSetup) : IGlobalSetupTask
+internal class AppDataDirSetupTask(IAppDataSetup appDataSetup) : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)
     {

@@ -14,12 +14,14 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("List custom formats in the guide for a particular service.")]
-public class ListCustomFormatsCommand(CustomFormatDataLister lister, IMultiRepoUpdater repoUpdater)
-    : AsyncCommand<ListCustomFormatsCommand.CliSettings>
+internal class ListCustomFormatsCommand(
+    CustomFormatDataLister lister,
+    IMultiRepoUpdater repoUpdater
+) : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings, IListCustomFormatSettings
+    internal class CliSettings : BaseCommandSettings, IListCustomFormatSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]

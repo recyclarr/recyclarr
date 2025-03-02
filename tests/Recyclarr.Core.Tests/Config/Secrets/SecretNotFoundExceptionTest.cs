@@ -2,8 +2,7 @@ using Recyclarr.Config.Secrets;
 
 namespace Recyclarr.Core.Tests.Config.Secrets;
 
-[TestFixture]
-public class SecretNotFoundExceptionTest
+internal sealed class SecretNotFoundExceptionTest
 {
     [Test]
     public void Properties_get_initialized()

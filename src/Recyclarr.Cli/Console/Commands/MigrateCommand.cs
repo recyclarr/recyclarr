@@ -13,12 +13,12 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Perform migration steps that may be needed between versions")]
-public class MigrateCommand(IAnsiConsole console, IMigrationExecutor migration)
+internal class MigrateCommand(IAnsiConsole console, MigrationExecutor migration)
     : Command<MigrateCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    public class CliSettings : BaseCommandSettings;
+    internal class CliSettings : BaseCommandSettings;
 
     public override int Execute(CommandContext context, CliSettings settings)
     {

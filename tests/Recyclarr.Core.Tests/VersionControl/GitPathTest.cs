@@ -3,8 +3,7 @@ using Recyclarr.Settings;
 
 namespace Recyclarr.Core.Tests.VersionControl;
 
-[TestFixture]
-public class GitPathTest
+internal sealed class GitPathTest
 {
     [Test, AutoMockData]
     public void Default_path_used_when_setting_is_null(

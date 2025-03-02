@@ -5,8 +5,7 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
-[TestFixture]
-public class MergeQualityProfilesTest
+internal sealed class MergeQualityProfilesTest
 {
     [Test]
     public void Empty_right_to_non_empty_left()

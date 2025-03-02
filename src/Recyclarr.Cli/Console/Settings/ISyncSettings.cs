@@ -2,7 +2,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Console.Settings;
 
-public interface ISyncSettings
+internal interface ISyncSettings
 {
     SupportedServices? Service { get; }
     IReadOnlyCollection<string> Configs { get; }

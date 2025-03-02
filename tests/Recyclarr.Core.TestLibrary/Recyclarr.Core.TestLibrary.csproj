@@ -3,4 +3,7 @@
     <ProjectReference Include="..\..\src\Recyclarr.Core\Recyclarr.Core.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console.Testing" />
+  </ItemGroup>
 </Project>

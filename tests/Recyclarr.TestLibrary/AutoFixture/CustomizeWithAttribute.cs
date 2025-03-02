@@ -1,5 +1,6 @@
 using System.Reflection;
 using AutoFixture;
+using AutoFixture.NUnit4;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 

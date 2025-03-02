@@ -3,7 +3,7 @@ using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class FlurlHttpExceptionHandler(ILogger log)
+internal class FlurlHttpExceptionHandler(ILogger log)
 {
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task ProcessServiceErrorMessages(IServiceErrorMessageExtractor extractor)

@@ -4,8 +4,7 @@ using IEnvironment = Recyclarr.Platform.IEnvironment;
 
 namespace Recyclarr.Core.Tests.Platform;
 
-[TestFixture]
-public class DefaultAppDataSetupTest
+internal sealed class DefaultAppDataSetupTest
 {
     [Test, AutoMockData]
     public void Initialize_using_default_path(

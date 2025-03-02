@@ -2,8 +2,7 @@ using Recyclarr.Common;
 
 namespace Recyclarr.Core.Tests.Common;
 
-[TestFixture]
-public class ScopedStateTest
+internal sealed class ScopedStateTest
 {
     [Test]
     public void AccessValue_MultipleScopes_ScopeValuesReturned()

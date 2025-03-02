@@ -2,12 +2,11 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Repo;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-[TestFixture]
 internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
 {
     [Test]

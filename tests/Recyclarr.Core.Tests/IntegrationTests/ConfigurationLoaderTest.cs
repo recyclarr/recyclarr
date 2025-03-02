@@ -11,8 +11,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class ConfigurationLoaderTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
 {
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {

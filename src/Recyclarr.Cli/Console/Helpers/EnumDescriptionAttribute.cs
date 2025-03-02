@@ -6,7 +6,7 @@ using System.Text;
 namespace Recyclarr.Cli.Console.Helpers;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
+internal sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
     where TEnum : Enum
 {
     public override string Description { get; }

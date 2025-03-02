@@ -1,9 +1,9 @@
 using Autofac;
 using Recyclarr.Core.TestLibrary;
 
-namespace Recyclarr.Cli.TestLibrary;
+namespace Recyclarr.Cli.Tests.Reusable;
 
-public abstract class CliIntegrationFixture : IntegrationTestFixture
+internal abstract class CliIntegrationFixture : IntegrationTestFixture
 {
     protected override void RegisterTypes(ContainerBuilder builder)
     {

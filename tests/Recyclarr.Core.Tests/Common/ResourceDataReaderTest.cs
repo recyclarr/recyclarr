@@ -2,8 +2,7 @@ using Recyclarr.Common;
 
 namespace Recyclarr.Core.Tests.Common;
 
-[TestFixture]
-public class ResourceDataReaderTest
+internal sealed class ResourceDataReaderTest
 {
     [Test]
     public void GetResourceData_DefaultDir_ReturnResourceData()

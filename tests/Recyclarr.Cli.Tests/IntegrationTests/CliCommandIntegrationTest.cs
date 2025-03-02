@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console;
-using Recyclarr.Cli.TestLibrary;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Spectre.Console.Cli;

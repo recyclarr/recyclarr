@@ -2,7 +2,7 @@ using Recyclarr.Cli.Console.Settings;
 
 namespace Recyclarr.Cli.Processors.Config;
 
-public class ConfigCreationProcessor(IOrderedEnumerable<IConfigCreator> creators)
+internal class ConfigCreationProcessor(IOrderedEnumerable<IConfigCreator> creators)
     : IConfigCreationProcessor
 {
     public void Process(ICreateConfigSettings settings)

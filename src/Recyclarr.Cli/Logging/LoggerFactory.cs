@@ -6,7 +6,7 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-public class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
+internal class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
 {
     public ILogger Logger { get; private set; } =
         LogSetup

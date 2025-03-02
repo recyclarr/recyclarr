@@ -3,14 +3,14 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-public record UpdatedQualities
+internal record UpdatedQualities
 {
     public ICollection<string> InvalidQualityNames { get; init; } = [];
     public IReadOnlyCollection<ProfileItemDto> Items { get; init; } = [];
     public int NumWantedItems { get; init; }
 }
 
-public record UpdatedQualityProfile
+internal record UpdatedQualityProfile
 {
     public required QualityProfileDto ProfileDto { get; init; }
     public required ProcessedQualityProfileData ProfileConfig { get; init; }

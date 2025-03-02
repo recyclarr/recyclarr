@@ -4,9 +4,9 @@ using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
-namespace Recyclarr.Cli.Tests;
+namespace Recyclarr.Cli.Tests.Reusable;
 
-public static class NewQp
+internal static class NewQp
 {
     public static ProcessedQualityProfileData Processed(
         string profileName,

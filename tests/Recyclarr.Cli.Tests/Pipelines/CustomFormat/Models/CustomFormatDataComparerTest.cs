@@ -2,8 +2,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 
-[Parallelizable(ParallelScope.All)]
-public class CustomFormatDataComparerTest
+internal sealed class CustomFormatDataComparerTest
 {
     [Test]
     public void Custom_formats_equal()

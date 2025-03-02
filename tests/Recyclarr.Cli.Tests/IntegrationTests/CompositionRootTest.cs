@@ -10,8 +10,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-[TestFixture]
-public class CompositionRootTest
+internal sealed class CompositionRootTest
 {
     [SuppressMessage(
         "Microsoft.Performance",

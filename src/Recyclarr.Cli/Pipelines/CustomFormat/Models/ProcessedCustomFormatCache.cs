@@ -3,7 +3,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
-public class ProcessedCustomFormatCache : IPipelineCache
+internal class ProcessedCustomFormatCache : IPipelineCache
 {
     private readonly List<CustomFormatData> _customFormats = [];
 

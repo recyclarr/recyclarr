@@ -5,7 +5,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
-public record TrashIdMapping(string TrashId, string CustomFormatName, int CustomFormatId);
+internal record TrashIdMapping(string TrashId, string CustomFormatName, int CustomFormatId);
 
 [CacheObjectName("custom-format-cache")]
 [SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "POCO")]
@@ -14,12 +14,12 @@ public record TrashIdMapping(string TrashId, string CustomFormatName, int Custom
     "CA2227:Collection properties should be read only",
     Justification = "POCO"
 )]
-public record CustomFormatCacheObject() : CacheObject(1)
+internal record CustomFormatCacheObject() : CacheObject(1)
 {
     public List<TrashIdMapping> TrashIdMappings { get; set; } = [];
 }
 
-public class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(cacheObject)
+internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(cacheObject)
 {
     public IReadOnlyList<TrashIdMapping> TrashIdMappings => cacheObject.TrashIdMappings;
 

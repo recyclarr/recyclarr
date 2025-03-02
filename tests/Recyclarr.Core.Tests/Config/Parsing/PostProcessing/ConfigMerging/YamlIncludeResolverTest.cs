@@ -6,16 +6,15 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.Config.Parsing.PostProcessing.ConfigMerging;
 
-[TestFixture]
 [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public class YamlIncludeResolverTest
+internal sealed class YamlIncludeResolverTest
 {
-    public abstract class TestYamlInclude1 : IYamlInclude;
+    private abstract class TestYamlInclude1 : IYamlInclude;
 
-    public abstract class TestYamlInclude2 : IYamlInclude;
+    private abstract class TestYamlInclude2 : IYamlInclude;
 
-    public abstract class TestYamlInclude3 : IYamlInclude;
+    private abstract class TestYamlInclude3 : IYamlInclude;
 
     [Test, AutoMockData]
     public void Find_and_return_processor(

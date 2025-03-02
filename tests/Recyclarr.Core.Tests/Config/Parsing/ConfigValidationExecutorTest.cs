@@ -6,8 +6,7 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.Config.Parsing;
 
-[TestFixture]
-public class ConfigValidationExecutorTest
+internal sealed class ConfigValidationExecutorTest
 {
     [Test, AutoMockData]
     public void Return_false_on_validation_failure(

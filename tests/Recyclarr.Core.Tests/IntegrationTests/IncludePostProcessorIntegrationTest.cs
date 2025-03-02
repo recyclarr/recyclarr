@@ -6,8 +6,7 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-[TestFixture]
-public class IncludePostProcessorIntegrationTest : IntegrationTestFixture
+internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixture
 {
     [Test]
     public void No_change_when_no_includes()

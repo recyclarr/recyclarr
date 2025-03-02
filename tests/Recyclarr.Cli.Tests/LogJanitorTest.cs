@@ -4,8 +4,7 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Tests;
 
-[TestFixture]
-public class LogJanitorTest
+internal sealed class LogJanitorTest
 {
     [Test, AutoMockData]
     public void Keep_correct_number_of_newest_log_files(

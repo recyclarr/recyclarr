@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 
 namespace Recyclarr.TestLibrary;

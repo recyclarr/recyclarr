@@ -6,7 +6,7 @@ using Serilog.Events;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public class LoggerSetupTask(
+internal class LoggerSetupTask(
     LoggingLevelSwitch loggingLevelSwitch,
     LoggerFactory loggerFactory,
     IEnumerable<ILogConfigurator> logConfigurators

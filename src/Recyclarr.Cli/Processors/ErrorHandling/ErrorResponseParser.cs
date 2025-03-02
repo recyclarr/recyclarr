@@ -5,7 +5,7 @@ using Recyclarr.Json;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public sealed class ErrorResponseParser(ILogger log, string responseBody)
+internal sealed class ErrorResponseParser(ILogger log, string responseBody)
 {
     private readonly Func<Stream> _streamFactory = () =>
         new MemoryStream(Encoding.UTF8.GetBytes(responseBody));

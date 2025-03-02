@@ -2,7 +2,7 @@ using Recyclarr.Cli.Console.Commands;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-public interface IGlobalSetupTask
+internal interface IGlobalSetupTask
 {
     void OnStart(BaseCommandSettings cmd);
     void OnFinish();

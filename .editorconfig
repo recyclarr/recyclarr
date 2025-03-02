@@ -42,6 +42,3 @@ dotnet_diagnostic.CA2007.severity = none
 
 # Implement standard exception constructors
 dotnet_diagnostic.CA1032.severity = none
-
-# Consider making public types internal
-dotnet_diagnostic.CA1515.severity = none

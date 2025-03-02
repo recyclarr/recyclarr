@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-public class NamingFormatLookup
+internal class NamingFormatLookup
 {
     private readonly List<InvalidNamingConfig> _errors = [];
     public IReadOnlyCollection<InvalidNamingConfig> Errors => _errors;

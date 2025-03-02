@@ -4,7 +4,7 @@ using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
-public class SonarrMediaNamingConfigPhase(SonarrConfiguration config)
+internal class SonarrMediaNamingConfigPhase(SonarrConfiguration config)
     : IServiceBasedMediaNamingConfigPhase
 {
     public Task<MediaNamingDto> ProcessNaming(

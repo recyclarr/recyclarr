@@ -4,8 +4,7 @@ using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.Tests.Json;
 
-[TestFixture]
-public class JsonUtilsTest
+internal sealed class JsonUtilsTest
 {
     [Test]
     public void Log_files_that_do_not_exist()

@@ -2,7 +2,7 @@ using Flurl.Http;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
 
-public class ServiceErrorMessageExtractor(FlurlHttpException e) : IServiceErrorMessageExtractor
+internal class ServiceErrorMessageExtractor(FlurlHttpException e) : IServiceErrorMessageExtractor
 {
     public HttpRequestError? HttpError
     {

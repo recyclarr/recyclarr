@@ -4,7 +4,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 
-public class QualityItemLimitFactory(
+internal class QualityItemLimitFactory(
     IIndex<SupportedServices, IQualityItemLimitFetcher> limitFactory
 ) : IQualityItemLimitFactory
 {

@@ -10,20 +10,19 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Create a starter configuration file.")]
-public class ConfigCreateCommand(
+internal class ConfigCreateCommand(
     ILogger log,
     IConfigCreationProcessor processor,
     IMultiRepoUpdater repoUpdater
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     [UsedImplicitly]
-    [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     [SuppressMessage(
         "Performance",
         "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it"
     )]
-    public class CliSettings : BaseCommandSettings, ICreateConfigSettings
+    internal class CliSettings : BaseCommandSettings, ICreateConfigSettings
     {
         [CommandOption("-p|--path")]
         [Description("Path to where the configuration file should be created.")]
