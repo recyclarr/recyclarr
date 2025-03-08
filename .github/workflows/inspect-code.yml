@@ -37,7 +37,7 @@ jobs:
         run: dotnet restore
 
       - name: Inspect Code
-        uses: muno92/resharper_inspectcode@1.12.6
+        uses: muno92/resharper_inspectcode@1.12.11
         with:
           solutionPath: Recyclarr.sln
           minimumSeverity: warning
