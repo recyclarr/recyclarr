@@ -17,6 +17,8 @@ on:
       - "!src/**"
       - "!tests/**"
 
+permissions: read-all
+
 jobs:
   markdownlint:
     name: Markdown Lint

@@ -14,6 +14,8 @@ on:
 env:
   TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
 
+permissions: read-all
+
 jobs:
   notify:
     name: Discord Notification

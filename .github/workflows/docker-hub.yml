@@ -9,6 +9,8 @@ on:
       - .github/workflows/docker-hub.yml
   workflow_dispatch:
 
+permissions: read-all
+
 jobs:
   readme:
     name: Update Repo Metadata

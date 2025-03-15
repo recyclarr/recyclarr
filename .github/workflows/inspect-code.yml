@@ -18,6 +18,8 @@ env:
               (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
   dotnetVersion: 9.0.x
 
+permissions: read-all
+
 jobs:
   inspect:
     name: Resharper Inspect Code
