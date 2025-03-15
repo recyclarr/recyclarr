@@ -5,6 +5,8 @@ on:
 env:
   SHOULD_PUBLISH: ${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'master' }}
 
+permissions: read-all
+
 jobs:
   docker:
     name: Build & Push Docker Image

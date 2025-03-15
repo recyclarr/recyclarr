@@ -27,6 +27,8 @@ on:
 env:
   dotnetVersion: 9.0.x
 
+permissions: read-all
+
 jobs:
   sonarcloud:
     name: SonarCloud
