@@ -126,6 +126,8 @@ jobs:
     name: Docker
     # Wait on builds only to verify tests pass
     needs: [build-win, build-linux, build-osx, build-musl]
+    permissions:
+      packages: write
     uses: ./.github/workflows/reusable-docker.yml
     secrets: inherit
 
