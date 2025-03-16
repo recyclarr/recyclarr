@@ -45,11 +45,15 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
             switch (e.InnerException)
             {
                 case InvalidCastException:
-                    log.Error(e, "Incompatible value assigned/used at line {Line}", line);
+                    log.Error(
+                        e.InnerException,
+                        "Incompatible value assigned/used at line {Line}",
+                        line
+                    );
                     break;
 
                 default:
-                    log.Error(e, "Exception at line {Line}", line);
+                    log.Error(e.InnerException, "Exception at line {Line}", line);
                     break;
             }
 
@@ -61,6 +65,6 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
         }
 
         log.Error("Due to previous exception, this config will be skipped");
-        return default;
+        return null;
     }
 }

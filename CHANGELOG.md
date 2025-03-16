@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- YAML: Improved messaging in logs and console output for YAML errors.
+
 ## [7.4.1] - 2025-02-15
 
 ### Changed
