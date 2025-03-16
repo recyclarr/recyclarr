@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- YAML: New `!file` tag that allows including the contents of an external file as a YAML node value,
+  particularly useful for working with Docker Secrets (#278).
+
 ### Fixed
 
 - YAML: Improved messaging in logs and console output for YAML errors.
