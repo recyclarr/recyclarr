@@ -4,7 +4,7 @@
 [![Build Workflow Status](https://img.shields.io/github/actions/workflow/status/recyclarr/recyclarr/build.yml?branch=master&logo=githubactions)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml?query=branch%3Amaster)
 [![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/recyclarr_recyclarr?server=https%3A%2F%2Fsonarcloud.io&logo=sonarcloud)](https://sonarcloud.io/summary/new_code?id=recyclarr_recyclarr)
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
-[![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)](https://discord.com/invite/Vau8dZ3)
+[![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
 A command-line application that will automatically synchronize recommended settings from the [TRaSH
 guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
@@ -35,9 +35,24 @@ some main topics.
 - [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help/)
 - [Upgrade Guides](https://recyclarr.dev/wiki/upgrade-guide/)
 
+## Getting Support
+
+For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] and ask in the
+`#recyclarr` channel.
+
+> [!IMPORTANT]
+> The GitHub Issues section is reserved for:
+>
+> - Bug reports
+> - Feature requests
+>
+> Please do not use GitHub Issues for general support questions or configuration help.
+
 ## Supported By
 
 <!-- markdownlint-disable MD033 MD013 -->
 <a href="https://www.jetbrains.com/rider/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg" alt="Jetbrains Rider" style="margin-right: 10px;"></a>
 <a href="https://www.jetbrains.com/qodana/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Qodana_icon.svg" alt="Jetbrains Qodana"></a>
 <!-- markdownlint-enable MD033 MD013 -->
+
+[discord]: https://discord.com/invite/Vau8dZ3

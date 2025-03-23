@@ -3,9 +3,9 @@
 First, thank you for your interest in contributing to Recyclarr! Below is a list of requirements
 that everyone should follow.
 
-1. To avoid wasting your time and effort, please ensure all ideas get discussed first. Visit [the
-   Ideas discussion board][ideas] and open a thread there. I ask that you do this to avoid the
-   potential of rejecting work already done in a pull request.
+1. To avoid wasting your time and effort, please open an issue (feature request) first to ensure
+   ideas get discussed first. I ask that you do this to avoid the potential of rejecting work
+   already done in a pull request.
 
 1. **For Markdown changes,** any and all changes must pass configured [markdownlint] rules (see the
    `.markdownlint.json` files in this repository for project-specific adjustments to those rules).
@@ -16,7 +16,6 @@ that everyone should follow.
    you're using Visual Studio, I recommend the Resharper extension. For other editors, you are on
    your own. Formatting rules are stored in `.editorconfig` and `Recyclarr.sln.DotSettings`.
 
-[ideas]: https://github.com/recyclarr/recyclarr/discussions/categories/ideas
 [markdownlint]: https://github.com/DavidAnson/markdownlint
 [Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
 
