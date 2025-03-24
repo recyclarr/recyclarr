@@ -77,7 +77,7 @@ jobs:
           git diff --exit-code | tee code-cleanup.patch
 
       - name: Publish Patch File
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         if: failure()
         with:
           name: code-cleanup-patch-files
