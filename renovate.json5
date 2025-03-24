@@ -3,6 +3,7 @@
   "extends": ["config:recommended", ":disableRateLimiting"],
   "minimumReleaseAge": "5 days",
   "ignorePresets": ["mergeConfidence:all-badges"],
+  "configMigration": true,
   "packageRules": [
     {
       "matchDatasources": ["nuget"],
