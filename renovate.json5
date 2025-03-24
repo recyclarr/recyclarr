@@ -1,46 +1,38 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":disableRateLimiting"],
-  "minimumReleaseAge": "5 days",
-  "ignorePresets": ["mergeConfidence:all-badges"],
-  "configMigration": true,
-  "packageRules": [
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["config:recommended", ":disableRateLimiting"],
+  minimumReleaseAge: "5 days",
+  ignorePresets: ["mergeConfidence:all-badges"],
+  configMigration: true,
+  packageRules: [
     {
-      "matchDatasources": ["nuget"],
-      "matchUpdateTypes": ["patch", "minor", "major"],
-      "prBodyColumns": [
-        "Package",
-        "Change",
-        "Age",
-        "Adoption",
-        "Passing",
-        "Confidence",
-        "Pending"
-      ]
+      matchDatasources: ["nuget"],
+      matchUpdateTypes: ["patch", "minor", "major"],
+      prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"],
     },
     {
-      "matchFileNames": ["*.props", "*.csproj"],
-      "commitMessagePrefix": "build(deps):"
+      matchFileNames: ["*.props", "*.csproj"],
+      commitMessagePrefix: "build(deps):",
     },
     {
-      "matchManagers": ["github-actions"],
-      "commitMessagePrefix": "ci(deps):"
+      matchManagers: ["github-actions"],
+      commitMessagePrefix: "ci(deps):",
     },
     {
-      "groupName": "All GitVersion Packages",
-      "matchManagers": ["nuget"],
-      "matchPackageNames": ["gitversion*"],
-      "commitMessagePrefix": "build(deps):"
+      groupName: "All GitVersion Packages",
+      matchManagers: ["nuget"],
+      matchPackageNames: ["gitversion*"],
+      commitMessagePrefix: "build(deps):",
     },
     {
-      "groupName": "System.IO.Abstractions Packages",
-      "matchManagers": ["nuget"],
-      "matchPackageNames": ["TestableIO.System.IO.Abstractions*"]
+      groupName: "System.IO.Abstractions Packages",
+      matchManagers: ["nuget"],
+      matchPackageNames: ["TestableIO.System.IO.Abstractions*"],
     },
     {
-      "matchManagers": ["nuget"],
-      "matchPackageNames": ["MudBlazor"],
-      "minimumReleaseAge": "10 days",
-    }
-  ]
+      matchManagers: ["nuget"],
+      matchPackageNames: ["MudBlazor"],
+      minimumReleaseAge: "10 days",
+    },
+  ],
 }
