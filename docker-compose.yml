@@ -1,26 +1,70 @@
 name: recyclarr
 
-networks:
-  recyclarr:
-    name: recyclarr_dev
-    external: true
+volumes:
+  radarr_stable:
+  radarr_develop:
+  sonarr_stable:
+  sonarr_develop:
 
 services:
-  app:
+  recyclarr:
     image: ghcr.io/recyclarr/recyclarr:edge
-    user: $DOCKER_UID:$DOCKER_GID
-    container_name: recyclarr
+    user: ${DOCKER_UID:-1000}:${DOCKER_GID:-1000}
+    profiles: [recyclarr]
     read_only: true
     tmpfs: /tmp
     build:
       context: .
       # platforms:
-        # - linux/arm/v7
-        # - linux/arm64
-        # - linux/amd64
-    networks: [recyclarr]
+      #   - linux/arm/v7
+      #   - linux/arm64
+      #   - linux/amd64
     volumes:
-      - ./docker/config:/config
+      - ./docker/debugging/recyclarr:/config
     environment:
       CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
+
+  radarr_develop:
+    image: ghcr.io/home-operations/radarr:rolling
+    ports: [7890:7878]
+    volumes:
+      - radarr_develop:/config
+    environment:
+      - TZ=America/Chicago
+      - RADARR__AUTH__APIKEY=testkey
+
+  sonarr_develop:
+    image: ghcr.io/home-operations/sonarr:rolling
+    ports: [8990:8989]
+    volumes:
+      - sonarr_develop:/config
+    environment:
+      - TZ=America/Chicago
+      - SONARR__AUTH__APIKEY=testkey
+
+  sqlite:
+    image: keinos/sqlite3
+    profiles: [manual]
+    entrypoint: [sqlite3]
+    volumes:
+      - sonarr_develop:/sonarr/develop
+      - sonarr_stable:/sonarr/stable
+      - radarr_develop:/radarr/develop
+      - radarr_stable:/radarr/stable
+
+  # http://localhost:8000
+  apprise:
+    image: caronc/apprise
+    ports: [8000:8000]
+    init: true
+    tmpfs:
+      - /attach
+      - /plugin
+    volumes:
+      - ./docker/debugging/apprise:/config
+    environment:
+      - TZ=America/Chicago
+      - APPRISE_DEFAULT_THEM=dark
+      - APPRISE_STATEFUL_MODE=simple
+      - DEBUG=yes

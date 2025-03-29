@@ -3,9 +3,9 @@ $ErrorActionPreference = "Stop"
 $recyclarrYaml = "$PSScriptRoot/../docker-compose.yml"
 
 # Start the corresponding radarr/sonarr docker containers for testing/debugging
-& $PSScriptRoot/Debug.ps1
+& $PSScriptRoot/Docker-Debug.ps1
 
-docker compose -f $recyclarrYaml run --rm --build app @args
+docker compose -f $recyclarrYaml --profile recyclarr run --rm --build recyclarr @args
 if ($LASTEXITCODE -ne 0) {
-    throw "docker compose run failed"
+    throw "docker compose run failed (recyclarr)"
 }

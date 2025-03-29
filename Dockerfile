@@ -47,7 +47,7 @@ RUN set -ex; \
     mkdir -p /config && chown 1000:1000 /config;
 
 COPY --from=build /app /app/recyclarr/
-COPY --chmod=555 ./docker/scripts/prod/*.sh /
+COPY --chmod=555 ./docker/scripts/*.sh /
 
 USER 1000:1000
 VOLUME /config

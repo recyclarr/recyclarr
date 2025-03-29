@@ -3,29 +3,46 @@
   "tasks": [
     {
       "label": "build",
-      "command": "dotnet",
       "type": "process",
+      "command": "dotnet",
       "args": [
         "build",
-        "${workspaceFolder}/src/Recyclarr.Cli/Recyclarr.Cli.csproj",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
+        "-property:GenerateFullPaths=true",
+        "-consoleLoggerParameters:NoSummary",
       ],
-      "problemMatcher": "$msCompile"
+      "problemMatcher": {
+        "owner": "dotnet",
+        "fileLocation": "absolute",
+        "pattern": [
+          {
+            "regexp": "\\s*(.+)\\((\\d+),(\\d+)\\):\\s+(error|warning)\\s+(\\w+):\\s+(.+)",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "code": 5,
+            "message": 6
+          }
+        ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
     },
     {
       "label": "publish",
-      "command": "dotnet",
       "type": "process",
+      "command": "dotnet",
       "args": [
         "publish",
-        "${workspaceFolder}/src/Recyclarr.Cli/Recyclarr.Cli.csproj",
-        "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary",
+        "src/Recyclarr.Cli/Recyclarr.Cli.csproj",
+        "-property:GenerateFullPaths=true",
+        "-consoleLoggerParameters:NoSummary",
         "-o",
-        "${workspaceFolder}/docker/artifacts/${config:recyclarr.runtime}"
+        "docker/artifacts/${config:recyclarr.runtime}",
       ],
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
     },
     {
       "label": "test",
@@ -33,13 +50,14 @@
       "type": "process",
       "args": [
         "test",
-        "${workspaceFolder}/src/Recyclarr.sln"
+        "-property:GenerateFullPaths=true",
+        "-consoleLoggerParameters:NoSummary",
       ],
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "test",
-        "isDefault": true
-      }
+        "isDefault": true,
+      },
     }
   ]
 }
