@@ -1,149 +1,196 @@
 # Contributing
 
-First, thank you for your interest in contributing to Recyclarr! Below is a list of requirements
-that everyone should follow.
+Thank you for your interest in contributing to Recyclarr! This document outlines the requirements
+and expectations for all contributors.
 
-1. To avoid wasting your time and effort, please open an issue (feature request) first to ensure
-   ideas get discussed first. I ask that you do this to avoid the potential of rejecting work
-   already done in a pull request.
+## Before Contributing
 
-1. **For Markdown changes,** any and all changes must pass configured [markdownlint] rules (see the
-   `.markdownlint.json` files in this repository for project-specific adjustments to those rules).
+- **Open an issue first**: Always open an issue (feature request) before starting any work. This
+  ensures ideas are discussed first and prevents the potential rejection of work already done in a
+  pull request. This practice respects your valuable time as an open source contributor.
 
-1. **For C# changes,** code must conform to the project's style. My day to day coding is done in
-   Jetbrains Rider. If using that IDE, doing a simple [Code Cleanup] on modified source files should
-   be enough. Make sure to select the "Recyclarr Cleanup" profile when you do the code cleanup. If
-   you're using Visual Studio, I recommend the Resharper extension. For other editors, you are on
-   your own. Formatting rules are stored in `.editorconfig` and `Recyclarr.sln.DotSettings`.
+## Code & Documentation Standards
 
-[markdownlint]: https://github.com/DavidAnson/markdownlint
-[Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
+### Markdown Changes
 
-## Tooling Requirements
+- All changes must pass configured [markdownlint] rules
+- See the `.markdownlint.json` files in this repository for project-specific rule adjustments
 
-The following tools are required:
+### C# Code Requirements
 
-- .NET SDK 9.0 and tooling (e.g. dotnet CLI, which comes with the SDK)
+- Code must be free of warnings and analysis issues (zero tolerance policy)
+- All new code must use the "Recyclarr Cleanup" [Code Cleanup] profile for code quality and
+  redundancy fixes
+- All new code must be formatted with [CSharpier] for consistent code style
+- When using Jetbrains Rider, select the "Recyclarr Cleanup" profile for code cleanup
+- Visual Studio users should use the Resharper extension
+
+#### Using CSharpier
+
+There are two recommended ways to use CSharpier:
+
+1. **IDE Integration (preferred)**<br/>
+  CSharpier supports [many IDEs and editors][csharpier_plugins]. Configure your plugin to format on
+  save for automatic reformatting.
+
+1. **CLI Tool**<br/>
+   Install tooling: `dotnet tool restore` at the repo root. Format all C# files with `dotnet
+   csharpier .`, or format specific areas with `dotnet csharpier path/to/directory`.
+
+## Required Tools
+
+### Essential
+
+- .NET SDK 9.0 and tooling (including dotnet CLI)
 - Powershell v5.1 or greater
 - Docker CLI (Docker Desktop on Windows)
 
-The following tools are *highly recommended* but not strictly required:
+### Highly Recommended
 
 - Jetbrains Rider (IDE for editing C# code)
-- Visual Studio Code (install workspace-recommended extensions as well)
+- Visual Studio Code (with workspace-recommended extensions)
 
-Other required tooling can be installed via the `scripts/Install-Tooling.ps1` powershell script.
-It's also a good idea to occasionally run this for upgrade purposes, too.
-
-## Docker Development
-
-For more convenient building & testing Docker locally, run the `docker/DockerRun.ps1` script, which
-does the following:
-
-1. Starts the `docker/debugging/docker-compose.yml` stack, which includes instances of Sonarr,
-   Radarr, and other services that Recyclarr can connect to for testing purposes.
-1. Builds the official Recyclarr image using changes in your working copy, if any.
-1. Runs the locally built Recyclarr docker image as a container in its own compose stack that can
-   talk to the application services started earlier.
-
-The `Dockerfile` is configured to build Recyclarr as part of the image build process. By default, it
-uses the `linux-musl-x64` runtime but you can configure additional architectures if needed, through
-`docker buildx`.
-
-You may also provide runtime arguments to the `docker/DockerRun.ps1` script to run it in manual mode
-instead of cron mode. Example:
-
-```sh
-# Run `recyclarr radarr -h`:
-.\BuildAndRun.ps1 radarr -h
-```
+Additional required tooling can be installed via the `scripts/Install-Tooling.ps1` powershell
+script. Run this occasionally for upgrades as well.
 
 ## Conventional Commits
 
-This project uses and enforces [Conventional Commits][commits]. The below official commit types are
-used:
+This project uses and enforces [Conventional Commits][commits] with the following commit types:
 
-- `build`: Update project files, settings, etc.
-- `chore`: Anything not code related or that falls into other categories.
-- `ci`: Changes to CI/CD scripts or configuration.
-- `docs`: Updates to non-code documentation (markdown, readme, etc).
-- `feat`: A new feature was implemented.
-- `fix`: A defect or security issue was fixed.
-- `perf`: Change in code related to improving performance.
-- `refactor`: A code change that does not impact the observable functionality or shape of the apps.
-- `revert`: Prefix to be used for commits made by the `git revert` command.
-- `style`: A whitespace or code cleanup change in code.
-- `test`: Updates to unit test code only.
+| Type       | Description                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `build`    | Update project files, settings, etc.                          |
+| `chore`    | Anything not code related or that falls into other categories |
+| `ci`       | Changes to CI/CD scripts or configuration                     |
+| `docs`     | Updates to non-code documentation (markdown, readme, etc)     |
+| `feat`     | A new feature implementation                                  |
+| `fix`      | A defect or security issue fix                                |
+| `perf`     | Code changes related to improving performance                 |
+| `refactor` | Code changes that don't impact observable functionality       |
+| `revert`   | Prefix for commits made by the `git revert` command           |
+| `style`    | Whitespace or code cleanup changes                            |
+| `test`     | Updates to unit test code only                                |
+
+## Docker Development
+
+The project includes utility scripts to simplify development and debugging workflows using Docker,
+supporting both local and containerized execution of Recyclarr.
+
+### Debug Services Stack
+
+The root `docker-compose.yml` provides configuration for services used when debugging Recyclarr:
+
+- Radarr (develop and stable builds)
+- Sonarr (develop and stable builds)
+- Apprise (for testing notifications)
+- SQLite (for database inspection)
+
+To start these services:
+
+```powershell
+./scripts/Docker-Debug.ps1
+```
+
+This runs `docker compose up -d --pull always` to start services in detached mode with the latest images.
+
+Service endpoints are mapped to:
+
+- Radarr develop: <http://localhost:7890>
+- Sonarr develop: <http://localhost:8990>
+- Apprise: <http://localhost:8000>
+
+### Recyclarr Container
+
+To run Recyclarr inside a Docker container with your local code changes:
+
+```powershell
+# Example: Run the sync command
+./scripts/Docker-Recyclarr.ps1 sync
+
+# Pass additional arguments to Recyclarr
+./scripts/Docker-Recyclarr.ps1 config create --template your-template-name
+```
+
+This script:
+
+1. Calls `Docker-Debug.ps1` to ensure dependent services are running
+1. Builds a local Recyclarr image with your current code
+1. Uses `docker compose run` with the `recyclarr` profile
+1. Forwards all arguments to the Recyclarr container
+1. Removes the container after completion
+
+The path `docker/debugging/recyclarr` is mapped to `/config` inside the container for configuration
+and log access.
+
+> **Note**: By default, the image builds for your local architecture only. Multi-platform builds
+> using buildx are outside the scope of this documentation.
 
 ## Release Process
 
-Release numbering follows [Semantic Versioning][semver]. The [GitVersion] package is used in .NET
-projects to automatically version the executable according to [Conventional Commits][commits] rules
-in conjunction with semantic versioning.
+Recyclarr follows [Semantic Versioning][semver], using [GitVersion] to automatically version the
+executable according to [Conventional Commits][commits] rules.
 
-The goal is to allow commit messages to drive the way the semantic version number is advanced during
-development. When a feature is implemented, the corresponding commit results in the minor version
-number component being advanced by 1. Similarly, the patch portion is advanced by 1 when a bugfix is
-committed.
+### Making a Release
 
-To make a release, follow these steps:
+1. Run `scripts/Prepare-Release.ps1`, which will:
+   - Update the changelog according to [Keep a Changelog][changelog] rules
+   - Commit the changelog updates
+   - Create a tag for the release (using GitVersion)
+1. Push the new tag and commits on `master` to trigger Github Workflows
 
-1. Run `scripts/Prepare-Release.ps1`. This will do the following:
-   1. Update the changelog for the release according to [Keep a Changelog][changelog] rules.
-   1. Commit the changelog updates.
-   1. Create a tag for the release (using GitVersion).
-1. Use Git to push the new tag and commits on `master` upstream where the Github Workflows will take
-   over.
+### Automated Release Process
 
-The Github Workflows manage the release process after the push by doing the following:
+The Github Workflows handle:
 
-1. Compile the .NET projects.
-1. Create a [Github Release][release] with the .NET artifacts attached.
-1. Build and publish a new Docker image to the [Github Container Registry][ghcr] and [Docker
-   Hub][dockerhub].
-1. Send a release notification to the `#related-announcements` channel in the official [TRaSH Guides
-   Discord][discord].
+1. Compiling .NET projects
+1. Creating a [Github Release][release] with artifacts
+1. Building and publishing Docker images to [Github Container Registry][ghcr] and [Docker
+   Hub][dockerhub]
+1. Sending notifications to the `#related-announcements` channel in the [TRaSH Guides
+   Discord][discord]
 
+## Additional Development Tasks
+
+### Updating `.gitignore`
+
+Execute `scripts/Update-Gitignore.ps1` from the repo root. This pulls the latest relevant
+`.gitignore` patterns from [gitignore.io](https://gitignore.io) and commits them to your current
+branch.
+
+### Testing Discord Notifier
+
+1. Make a GET request to `https://api.github.com/recyclarr/recyclarr/releases/tags/v4.0.0` (or any
+   version)
+
+1. Save the response JSON to `ci/notify/release.json`
+
+1. In the `ci/notify` directory, run:
+
+   ```bash
+   jq -r '.assets[].browser_download_url' release.json > assets.txt
+   jq -r '.body' release.json > changelog.txt
+   ```
+
+1. Run the notifier with your test Discord webhook:
+
+   ```bash
+   python ./discord_notify.py \
+     --version v4.0.0 \
+     --repo recyclarr/recyclarr \
+     --webhook-url https://discord.com/api/webhooks/your_webhook_url \
+     --changelog ./changelog.txt \
+     --assets ./assets.txt
+   ```
+
+[markdownlint]: https://github.com/DavidAnson/markdownlint
+[Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
+[CSharpier]: https://csharpier.com/
+[csharpier_plugins]: https://csharpier.com/docs/Editors
+[commits]: https://www.conventionalcommits.org/en/v1.0.0/
 [semver]: https://semver.org/
 [GitVersion]: https://gitversion.net/
-[commits]: https://www.conventionalcommits.org/en/v1.0.0/
 [changelog]: https://keepachangelog.com/en/1.0.0/
 [release]: https://github.com/recyclarr/recyclarr/releases
 [ghcr]: https://github.com/recyclarr/recyclarr/pkgs/container/recyclarr
 [discord]: https://discord.com/invite/Vau8dZ3
 [dockerhub]: https://hub.docker.com/r/recyclarr/recyclarr
-
-## Update `.gitignore`
-
-Execute the `scripts/Update-Gitignore.ps1` script using Powershell. The working directory *must* be
-the root of the repo. This will pull the latest relevant `.gitignore` patterns from
-[gitignore.io](https://gitignore.io) and commit them automatically to your current branch.
-
-## Testing Discord Notifier
-
-Use Postman to make an HTTP `GET` request to the following URL. Note that `v4.0.0` can be any
-release.
-
-```txt
-https://api.github.com/recyclarr/recyclarr/releases/tags/v4.0.0
-```
-
-Copy the resulting response JSON to a file named `ci/notify/release.json`. In the `ci/notify`
-directory, run these commands to generate the other files needed:
-
-```bash
-jq -r '.assets[].browser_download_url' release.json > assets.txt
-jq -r '.body' release.json > changelog.txt
-```
-
-Also be sure to grab a discord webhook URL to a personal test server of yours. Then run the command
-below (using a Bash terminal)
-
-```bash
-python ./discord_notify.py \
-  --version v4.0.0 \
-  --repo recyclarr/recyclarr \
-  --webhook-url https://discord.com/api/webhooks/your_webhook_url \
-  --changelog ./changelog.txt \
-  --assets ./assets.txt
-```
