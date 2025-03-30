@@ -1,5 +1,6 @@
 using Recyclarr.Logging;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Serilog.Events;
 using Serilog.Templates;
 

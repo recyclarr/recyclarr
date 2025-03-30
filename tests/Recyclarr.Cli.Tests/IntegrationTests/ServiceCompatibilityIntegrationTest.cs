@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 

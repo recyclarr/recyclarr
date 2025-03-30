@@ -1,3 +1,5 @@
+using Recyclarr.Settings.Models;
+
 namespace Recyclarr.Settings;
 
 internal class SettingsProvider(SettingsLoader loader)

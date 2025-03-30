@@ -3,6 +3,7 @@ using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Platform;
+using Recyclarr.Settings.Models;
 using Recyclarr.Yaml;
 using YamlDotNet.Core;
 

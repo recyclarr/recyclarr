@@ -1,5 +1,6 @@
 using Recyclarr.Repo;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Core.Tests.VersionControl;
 

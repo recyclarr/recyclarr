@@ -4,6 +4,7 @@ using Flurl.Http;
 using Flurl.Http.Configuration;
 using Recyclarr.Http;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Notifications.Apprise;
 

@@ -1,5 +1,6 @@
 using FluentValidation;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Settings;
 

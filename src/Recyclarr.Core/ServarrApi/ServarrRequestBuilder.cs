@@ -6,6 +6,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.Http;
 using Recyclarr.Json;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ServarrApi;
 

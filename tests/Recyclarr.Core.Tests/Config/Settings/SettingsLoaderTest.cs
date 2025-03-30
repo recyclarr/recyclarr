@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Recyclarr.Yaml;
 
 namespace Recyclarr.Core.Tests.Config.Settings;

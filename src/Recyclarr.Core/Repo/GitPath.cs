@@ -1,4 +1,5 @@
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Repo;
