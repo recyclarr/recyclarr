@@ -4,6 +4,5 @@ namespace Recyclarr.Yaml;
 
 public interface IYamlSerializerFactory
 {
-    IDeserializer CreateDeserializer();
-    ISerializer CreateSerializer();
+    IDeserializer CreateDeserializer(YamlFileType yamlType);
 }

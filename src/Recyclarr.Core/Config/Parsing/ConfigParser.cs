@@ -10,7 +10,9 @@ namespace Recyclarr.Config.Parsing;
 [UsedImplicitly]
 public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
 {
-    private readonly IDeserializer _deserializer = yamlFactory.CreateDeserializer();
+    private readonly IDeserializer _deserializer = yamlFactory.CreateDeserializer(
+        YamlFileType.Config
+    );
 
     public T? Load<T>(IFileInfo file)
         where T : class

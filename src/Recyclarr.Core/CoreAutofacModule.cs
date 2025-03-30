@@ -10,8 +10,11 @@ using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
 using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
+using Recyclarr.Config.EnvironmentVariables;
+using Recyclarr.Config.File;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
@@ -94,11 +97,6 @@ public class CoreAutofacModule : Module
     {
         builder.RegisterAutoMapper(ThisAssembly);
 
-        builder
-            .RegisterAssemblyTypes(ThisAssembly)
-            .AssignableTo<IYamlBehavior>()
-            .As<IYamlBehavior>();
-
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
         builder.RegisterType<ConfigurationRegistry>();
@@ -106,7 +104,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<ConfigSaver>();
         builder.RegisterType<ConfigurationScopeFactory>();
 
         // Filter Processors
@@ -314,6 +311,19 @@ public class CoreAutofacModule : Module
 
     private static void RegisterYaml(ContainerBuilder builder)
     {
+        // General Purpose Yaml Behaviors
+        builder.RegisterType<EnvironmentVariablesYamlBehavior>().As<IYamlBehavior>();
+        builder.RegisterType<SecretsYamlBehavior>().As<IYamlBehavior>();
+        builder.RegisterType<FileYamlBehavior>().As<IYamlBehavior>();
+
+        // Config-Specific Yaml Behaviors
+        builder
+            .RegisterType<PolymorphicIncludeYamlBehavior>()
+            .Keyed<IYamlBehavior>(YamlFileType.Config);
+        builder
+            .RegisterType<ConfigFeatureRemovalBehavior>()
+            .Keyed<IYamlBehavior>(YamlFileType.Config);
+
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
     }

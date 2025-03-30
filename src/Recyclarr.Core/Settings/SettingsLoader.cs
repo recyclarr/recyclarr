@@ -18,7 +18,7 @@ public class SettingsLoader(IAppPaths paths, IYamlSerializerFactory serializerFa
         try
         {
             using var stream = yamlPath.OpenText();
-            var deserializer = serializerFactory.CreateDeserializer();
+            var deserializer = serializerFactory.CreateDeserializer(YamlFileType.Settings);
             var settings =
                 deserializer.Deserialize<RecyclarrSettings?>(stream.ReadToEnd())
                 ?? new RecyclarrSettings();
