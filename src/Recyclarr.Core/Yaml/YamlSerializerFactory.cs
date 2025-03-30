@@ -4,58 +4,34 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Recyclarr.Yaml;
 
-public class YamlSerializerFactory(
+internal class YamlSerializerFactory(
     IObjectFactory objectFactory,
-    IReadOnlyCollection<IYamlBehavior> behaviors
+    YamlBehaviorProvider behaviorProvider
 ) : IYamlSerializerFactory
 {
-    public IDeserializer CreateDeserializer()
+    public IDeserializer CreateDeserializer(YamlFileType yamlType)
     {
         var builder = new DeserializerBuilder();
 
-        // This MUST be first (amongst the other node type resolvers) because that means it will be processed LAST. This
-        // is a last resort utility resolver to make error messages more clear. We do not want it interfering with other
-        // resolvers.
+        // This MUST be first (amongst the other node type resolvers) because that means it will be
+        // processed LAST. This is a last resort utility resolver to make error messages more clear.
+        // We do not want it interfering with other resolvers.
         builder.WithNodeTypeResolver(new SyntaxErrorHelper());
 
-        CommonSetup(builder);
-
         builder
+            .IgnoreFields()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithTypeConverter(new YamlNullableEnumTypeConverter())
             .WithNodeDeserializer(new ForceEmptySequences(objectFactory))
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())
             .WithObjectFactory(objectFactory)
             .WithDuplicateKeyChecking();
 
-        foreach (var behavior in behaviors)
+        foreach (var behavior in behaviorProvider.GetBehaviors(yamlType))
         {
             behavior.Setup(builder);
         }
 
         return builder.Build();
-    }
-
-    public ISerializer CreateSerializer()
-    {
-        var builder = new SerializerBuilder();
-        CommonSetup(builder);
-
-        builder
-            .DisableAliases()
-            .ConfigureDefaultValuesHandling(
-                DefaultValuesHandling.OmitEmptyCollections
-                    | DefaultValuesHandling.OmitNull
-                    | DefaultValuesHandling.OmitDefaults
-            );
-
-        return builder.Build();
-    }
-
-    private static void CommonSetup<T>(BuilderSkeleton<T> builder)
-        where T : BuilderSkeleton<T>
-    {
-        builder
-            .IgnoreFields()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
-            .WithTypeConverter(new YamlNullableEnumTypeConverter());
     }
 }

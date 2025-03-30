@@ -15,9 +15,10 @@ public sealed class SyntaxErrorHelper : INodeTypeResolver
         return false;
     }
 
-    // If the user tries to specify an array as the value for a node type that is not a list type, then we provide our
-    // own exception type. The default error message that YamlDotNet would output doesn't make much sense to users: It
-    // just says "no node type resolver could resolve the type", or something along those lines -- which isn't helpful!
+    // If the user tries to specify an array as the value for a node type that is not a list type,
+    // then we provide our own exception type. The default error message that YamlDotNet would
+    // output doesn't make much sense to users: It just says "no node type resolver could resolve
+    // the type", or something along those lines -- which isn't helpful!
     private static void CheckSequenceAssignedToNonSequence(
         ParsingEvent? nodeEvent,
         MemberInfo currentType

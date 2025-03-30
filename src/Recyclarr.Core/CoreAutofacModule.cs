@@ -94,11 +94,6 @@ public class CoreAutofacModule : Module
     {
         builder.RegisterAutoMapper(ThisAssembly);
 
-        builder
-            .RegisterAssemblyTypes(ThisAssembly)
-            .AssignableTo<IYamlBehavior>()
-            .As<IYamlBehavior>();
-
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
         builder.RegisterType<ConfigurationRegistry>();
@@ -106,7 +101,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<ConfigSaver>();
         builder.RegisterType<ConfigurationScopeFactory>();
 
         // Filter Processors
@@ -312,10 +306,16 @@ public class CoreAutofacModule : Module
         builder.RegisterType<MediaNamingGuideService>().As<IMediaNamingGuideService>();
     }
 
-    private static void RegisterYaml(ContainerBuilder builder)
+    private void RegisterYaml(ContainerBuilder builder)
     {
+        builder
+            .RegisterAssemblyTypes(ThisAssembly)
+            .Where(t => typeof(IYamlBehavior).IsAssignableFrom(t) && !t.IsAbstract)
+            .As<IYamlBehavior>();
+
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
+        builder.RegisterType<YamlBehaviorProvider>();
     }
 
     private static void RegisterVersionControl(ContainerBuilder builder)
