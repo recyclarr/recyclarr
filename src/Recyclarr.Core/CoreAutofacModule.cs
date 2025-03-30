@@ -324,6 +324,11 @@ public class CoreAutofacModule : Module
             .RegisterType<ConfigFeatureRemovalBehavior>()
             .Keyed<IYamlBehavior>(YamlFileType.Config);
 
+        // Settings-Specific Yaml Behaviors
+        builder
+            .RegisterType<PolymorphicDataSourceYamlBehavior>()
+            .Keyed<IYamlBehavior>(YamlFileType.Config);
+
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
     }
