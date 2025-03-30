@@ -85,7 +85,7 @@ internal class SyncProcessor(
                     ===========================================
                     Processing {config.ServiceType} Server: [{config.InstanceName}]
                     ===========================================
-                    
+
                     """
                 );
 

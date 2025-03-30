@@ -1,30 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
-using System.IO.Abstractions;
 using Recyclarr.Json.Loading;
-using Recyclarr.Repo;
 
 namespace Recyclarr.TrashGuide.MediaNaming;
 
-public class MediaNamingGuideService(
-    IRepoMetadataBuilder metadataBuilder,
+public class MediaNamingResourceQuery(
+    IEnumerable<IMediaNamingResourceProvider> providers,
     GuideJsonLoader jsonLoader
 ) : IMediaNamingGuideService
 {
-    private IReadOnlyList<IDirectoryInfo> CreatePaths(SupportedServices serviceType)
-    {
-        var metadata = metadataBuilder.GetMetadata();
-        return serviceType switch
-        {
-            SupportedServices.Radarr => metadataBuilder.ToDirectoryInfoList(
-                metadata.JsonPaths.Radarr.Naming
-            ),
-            SupportedServices.Sonarr => metadataBuilder.ToDirectoryInfoList(
-                metadata.JsonPaths.Sonarr.Naming
-            ),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
-        };
-    }
-
     [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
     private static Dictionary<string, string> JoinDictionaries(
         IEnumerable<IReadOnlyDictionary<string, string>> dictionaries
@@ -37,7 +20,11 @@ public class MediaNamingGuideService(
 
     public RadarrMediaNamingData GetRadarrNamingData()
     {
-        var paths = CreatePaths(SupportedServices.Radarr);
+        // Get media naming directories from all providers
+        var paths = providers.SelectMany(provider =>
+            provider.GetMediaNamingPaths(SupportedServices.Radarr)
+        );
+
         var data = jsonLoader.LoadAllFilesAtPaths<RadarrMediaNamingData>(paths);
         return new RadarrMediaNamingData
         {
@@ -48,7 +35,11 @@ public class MediaNamingGuideService(
 
     public SonarrMediaNamingData GetSonarrNamingData()
     {
-        var paths = CreatePaths(SupportedServices.Sonarr);
+        // Get media naming directories from all providers
+        var paths = providers.SelectMany(provider =>
+            provider.GetMediaNamingPaths(SupportedServices.Sonarr)
+        );
+
         var data = jsonLoader.LoadAllFilesAtPaths<SonarrMediaNamingData>(paths);
         return new SonarrMediaNamingData
         {

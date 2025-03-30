@@ -149,7 +149,7 @@ public sealed class NotificationService(
                 {category}:
 
                 {string.Join('\n', events.Select(x => x.Render()))}
-                
+
                 """
             );
         }

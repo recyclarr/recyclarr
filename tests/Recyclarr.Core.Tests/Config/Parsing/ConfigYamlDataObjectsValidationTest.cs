@@ -195,14 +195,7 @@ internal sealed class ConfigYamlDataObjectsValidationTest
         var data = new QualityProfileConfigYaml
         {
             Name = "Profile",
-            Qualities =
-            [
-                new QualityProfileQualityConfigYaml
-                {
-                    Name = "Group",
-                    Qualities = Array.Empty<string>(),
-                },
-            ],
+            Qualities = [new QualityProfileQualityConfigYaml { Name = "Group", Qualities = [] }],
         };
 
         var validator = new QualityProfileConfigYamlValidator();

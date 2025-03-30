@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Repo;
+using Recyclarr.ConfigTemplates;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -32,12 +32,15 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
             }
             """;
 
-        var repo = Resolve<IConfigTemplatesRepo>();
-        Fs.AddFile(repo.Path.File("templates.json"), new MockFileData(templatesJson));
-        Fs.AddEmptyFile(repo.Path.File("template-file1.yml"));
-        Fs.AddEmptyFile(repo.Path.File("template-file2.yml"));
+        _ = Resolve<IConfigTemplatesResourceQuery>(); // Ensure resource provider is initialized
+        // Create a mock templates.json file in the expected location
+        var mockRepoPath = "/repos/config-templates-default";
+        Fs.AddDirectory(mockRepoPath);
+        Fs.AddFile($"{mockRepoPath}/templates.json", new MockFileData(templatesJson));
+        Fs.AddEmptyFile($"{mockRepoPath}/template-file1.yml");
+        Fs.AddEmptyFile($"{mockRepoPath}/template-file2.yml");
         // This one shouldn't show up in the result because the user didn't ask for it
-        Fs.AddEmptyFile(repo.Path.File("template-file3.yml"));
+        Fs.AddEmptyFile($"{mockRepoPath}/template-file3.yml");
 
         var settings = Substitute.For<ICreateConfigSettings>();
         settings.Templates.Returns(

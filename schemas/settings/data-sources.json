@@ -1,37 +1,76 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings/data_source.json",
-  "type": "array",
-  "title": "Array of configurable data sources",
-  "items": {
-    "anyOf": [{ "$ref": "#/definitions/local" }, { "$ref": "#/definitions/repository" }]
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Set up data sources for various content types",
+  "properties": {
+    "trash_guides": {
+      "$ref": "#/definitions/source_array",
+      "title": "Data sources for the Trash Guides"
+    },
+    "config_templates": {
+      "$ref": "#/definitions/source_array",
+      "title": "Data sources for the Recyclarr Config Templates"
+    },
+    "custom_formats": {
+      "$ref": "#/definitions/service_based_source_array",
+      "title": "Data sources for additional custom format JSON files",
+      "description": "These supplement the ones provided by the Trash Guides. The custom format JSON files are expected to be in the same format as the ones provided by the Trash Guides."
+    },
+    "media_naming": {
+      "$ref": "#/definitions/service_based_source_array",
+      "title": "Data sources for additional media naming JSON files",
+      "description": "These supplement the ones provided by the Trash Guides. The media naming JSON files are expected to be in the same format as the ones provided by the Trash Guides."
+    }
   },
   "definitions": {
+    "service_based_source_array": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "radarr": {
+          "$ref": "#/definitions/source_array",
+          "title": "Sources of data compatible with Radarr"
+        },
+        "sonarr": {
+          "$ref": "#/definitions/source_array",
+          "title": "Sources of data compatible with Sonarr"
+        }
+      }
+    },
+    "source_array": {
+      "type": "array",
+      "items": {
+        "anyOf": [{ "$ref": "#/definitions/local" }, { "$ref": "#/definitions/repository" }]
+      }
+    },
     "local": {
       "type": "object",
-      "required": ["path", "service"],
+      "required": ["path"],
       "additionalProperties": false,
       "properties": {
         "path": {
           "type": "string",
           "title": "Path to a directory containing the expected data files"
-        },
-        "service": {
-          "type": "string",
-          "enum": ["radarr", "sonarr"],
-          "title": "Service type that the data files are intended for and compatible with"
         }
       }
     },
     "repository": {
       "type": "object",
-      "required": ["clone_url"],
+      "required": ["clone_url", "name"],
       "additionalProperties": false,
       "properties": {
         "clone_url": {
           "type": "string",
           "title": "Git clone URL for the repository",
           "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "title": "Required name used to uniquely identify this repository.",
+          "description": "May only contain letters, numbers, hyphens, and underscores. Must be unique across all data sources for a single a content type",
+          "pattern": "^[a-zA-Z0-9_-]+$"
         },
         "reference": {
           "type": "string",

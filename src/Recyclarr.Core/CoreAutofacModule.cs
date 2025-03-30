@@ -16,6 +16,7 @@ using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
+using Recyclarr.ConfigTemplates;
 using Recyclarr.Http;
 using Recyclarr.Json.Loading;
 using Recyclarr.Logging;
@@ -23,6 +24,7 @@ using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.ResourceProviders;
 using Recyclarr.ServarrApi;
 using Recyclarr.ServarrApi.CustomFormat;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -55,6 +57,7 @@ public class CoreAutofacModule : Module
         RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
+        RegisterResourceProviders(builder);
         RegisterServarrApi(builder);
         RegisterSettings(builder);
         RegisterTrashGuide(builder);
@@ -227,18 +230,8 @@ public class CoreAutofacModule : Module
 
     private static void RegisterRepo(ContainerBuilder builder)
     {
-        // Unique Repo Registrations
-        builder
-            .RegisterType<ConfigTemplatesRepo>()
-            .As<IConfigTemplatesRepo>()
-            .As<IUpdateableRepo>();
-        builder.RegisterType<TrashGuidesRepo>().As<ITrashGuidesRepo>().As<IUpdateableRepo>();
-
+        // Keep only Git infrastructure components
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
-        builder
-            .RegisterType<TrashRepoMetadataBuilder>()
-            .As<IRepoMetadataBuilder>()
-            .InstancePerLifetimeScope();
         builder.RegisterType<GitPath>().As<IGitPath>();
     }
 
@@ -274,21 +267,40 @@ public class CoreAutofacModule : Module
 
         builder.RegisterSettings(x => x);
         builder.RegisterSettings(x => x.LogJanitor);
-        builder.RegisterSettings(x => x.Repositories.ConfigTemplates);
-        builder.RegisterSettings(x => x.Repositories.TrashGuides);
         builder.RegisterSettings(x => x.Notifications);
+        builder.RegisterSettings(x => x.ResourceProviders);
+    }
+
+    private static void RegisterResourceProviders(ContainerBuilder builder)
+    {
+        builder.RegisterType<ResourceProviderProcessor>();
+
+        // Register all resource provider implementations
+        builder
+            .RegisterType<GitTrashGuidesResourceProvider>()
+            .As<ICustomFormatsResourceProvider>()
+            .As<IQualitySizeResourceProvider>()
+            .As<IMediaNamingResourceProvider>()
+            .As<ICustomFormatCategoriesResourceProvider>()
+            .As<IResourceProvider>();
+
+        builder
+            .RegisterType<GitConfigTemplatesResourceProvider>()
+            .As<IConfigTemplatesResourceProvider>()
+            .As<IConfigIncludesResourceProvider>()
+            .As<IResourceProvider>();
     }
 
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
         builder
-            .RegisterType<ConfigTemplateGuideService>()
-            .As<IConfigTemplateGuideService>()
+            .RegisterType<ConfigTemplatesResourceQuery>()
+            .As<IConfigTemplatesResourceQuery>()
             .SingleInstance();
 
         // Custom Format
         builder
-            .RegisterType<CustomFormatGuideService>()
+            .RegisterType<CustomFormatsResourceQuery>()
             .As<ICustomFormatGuideService>()
             .SingleInstance();
         builder.RegisterType<CustomFormatLoader>().As<ICustomFormatLoader>();
@@ -296,13 +308,13 @@ public class CoreAutofacModule : Module
 
         // Quality Size
         builder
-            .RegisterType<QualitySizeGuideService>()
+            .RegisterType<QualitySizeResourceQuery>()
             .As<IQualitySizeGuideService>()
             .SingleInstance();
         builder.RegisterType<QualitySizeGuideParser>();
 
         // Media Naming
-        builder.RegisterType<MediaNamingGuideService>().As<IMediaNamingGuideService>();
+        builder.RegisterType<MediaNamingResourceQuery>().As<IMediaNamingGuideService>();
     }
 
     private void RegisterYaml(ContainerBuilder builder)

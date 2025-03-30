@@ -8,12 +8,7 @@ namespace Recyclarr.Core.Tests.Cache;
 internal sealed record TestCacheObject() : CacheObject(LatestVersion)
 {
     public new const int LatestVersion = 1;
-    public string? ExtraData
-    {
-        [UsedImplicitly]
-        get;
-        init;
-    }
+    public string? ExtraData { [UsedImplicitly] get; init; }
 }
 
 internal sealed class TestCache(TestCacheObject cacheObject) : BaseCache(cacheObject);
