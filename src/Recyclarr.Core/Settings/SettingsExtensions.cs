@@ -1,4 +1,5 @@
 using Autofac;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Settings;
 

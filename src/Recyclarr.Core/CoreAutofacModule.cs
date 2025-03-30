@@ -30,6 +30,7 @@ using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.TrashGuide.MediaNaming;

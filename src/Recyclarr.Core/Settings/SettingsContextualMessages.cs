@@ -1,3 +1,4 @@
+using Recyclarr.Settings.Models;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Settings;

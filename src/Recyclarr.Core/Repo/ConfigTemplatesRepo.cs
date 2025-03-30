@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Logging;
 using Recyclarr.Platform;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Serilog.Context;
 
 namespace Recyclarr.Repo;

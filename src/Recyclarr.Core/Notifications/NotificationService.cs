@@ -8,6 +8,7 @@ using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
 using Recyclarr.Notifications.Events;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Notifications;
 

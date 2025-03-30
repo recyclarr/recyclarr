@@ -1,5 +1,5 @@
 using Recyclarr.Notifications.Apprise.Dto;
-using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Notifications.Apprise;
 

@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Cli.Console.Setup;
 
