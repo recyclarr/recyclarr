@@ -8,14 +8,13 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatConfigPhase(
-    ILogger log,
     ICustomFormatGuideService guide,
     ProcessedCustomFormatCache cache,
     ICachePersister<CustomFormatCache> cachePersister,
     IServiceConfiguration config
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
-    public Task<bool> Execute(CustomFormatPipelineContext context, CancellationToken ct)
+    public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //
@@ -40,21 +39,7 @@ internal class CustomFormatConfigPhase(
         context.Cache = cachePersister.Load();
 
         cache.AddCustomFormats(context.ConfigOutput);
-        return Task.FromResult(LogConfigPhaseAndExitIfNeeded(context));
-    }
 
-    // Returning 'true' means to exit. 'false' means to proceed.
-    private bool LogConfigPhaseAndExitIfNeeded(CustomFormatPipelineContext context)
-    {
-        if (context.InvalidFormats.Count != 0)
-        {
-            log.Warning(
-                "These Custom Formats do not exist in the guide and will be skipped: {Cfs}",
-                context.InvalidFormats
-            );
-        }
-
-        // Do not exit when the config has zero custom formats. We still may need to delete old custom formats.
-        return false;
+        return Task.FromResult(PipelineFlow.Continue);
     }
 }

@@ -8,7 +8,10 @@ internal class QualityProfileApiPersistencePhase(
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
-    public async Task<bool> Execute(QualityProfilePipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        QualityProfilePipelineContext context,
+        CancellationToken ct
+    )
     {
         var changedProfiles = context.TransactionOutput.ChangedProfiles;
         foreach (var profile in changedProfiles.Select(x => x.Profile))
@@ -33,6 +36,6 @@ internal class QualityProfileApiPersistencePhase(
         }
 
         logger.LogPersistenceResults(context);
-        return true;
+        return PipelineFlow.Continue;
     }
 }

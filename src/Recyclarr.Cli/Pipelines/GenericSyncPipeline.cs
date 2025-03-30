@@ -4,7 +4,7 @@ namespace Recyclarr.Cli.Pipelines;
 
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
-    IReadOnlyCollection<IPipelinePhase<TContext>> phases
+    IOrderedEnumerable<IPipelinePhase<TContext>> phases
 ) : ISyncPipeline
     where TContext : PipelineContext, new()
 {
@@ -16,7 +16,8 @@ internal class GenericSyncPipeline<TContext>(
 
         foreach (var phase in phases)
         {
-            if (!await phase.Execute(context, ct))
+            var flow = await phase.Execute(context, ct);
+            if (flow == PipelineFlow.Terminate)
             {
                 break;
             }

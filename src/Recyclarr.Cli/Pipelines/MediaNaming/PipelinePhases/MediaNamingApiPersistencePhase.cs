@@ -9,11 +9,14 @@ internal class MediaNamingApiPersistencePhase(
     NotificationEmitter notificationEmitter
 ) : IPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task<bool> Execute(MediaNamingPipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        MediaNamingPipelineContext context,
+        CancellationToken ct
+    )
     {
         await api.UpdateNaming(context.TransactionOutput, ct);
         LogPersistenceResults(context);
-        return true;
+        return PipelineFlow.Continue;
     }
 
     private void LogPersistenceResults(MediaNamingPipelineContext context)
@@ -22,9 +25,7 @@ internal class MediaNamingApiPersistencePhase(
         {
             RadarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
             SonarrMediaNamingDto x => x.GetDifferences(context.TransactionOutput),
-            _ => throw new ArgumentException(
-                "Unsupported configuration type in LogPersistenceResults method"
-            ),
+            _ => throw new ArgumentException("Unsupported configuration type"),
         };
 
         if (differences.Count != 0)

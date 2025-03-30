@@ -9,18 +9,21 @@ internal class QualitySizeApiPersistencePhase(
     NotificationEmitter notificationEmitter
 ) : IPipelinePhase<QualitySizePipelineContext>
 {
-    public async Task<bool> Execute(QualitySizePipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        QualitySizePipelineContext context,
+        CancellationToken ct
+    )
     {
         var sizeData = context.TransactionOutput;
         if (sizeData.Count == 0)
         {
             log.Debug("No size data available to persist; skipping API call");
-            return false;
+            return PipelineFlow.Terminate;
         }
 
         await api.UpdateQualityDefinition(sizeData, ct);
         LogPersistenceResults(context);
-        return true;
+        return PipelineFlow.Continue;
     }
 
     private void LogPersistenceResults(QualitySizePipelineContext context)

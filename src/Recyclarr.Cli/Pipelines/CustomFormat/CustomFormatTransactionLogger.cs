@@ -6,6 +6,14 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
+        if (context.InvalidFormats.Count != 0)
+        {
+            log.Warning(
+                "These Custom Formats do not exist in the guide and have been skipped: {Cfs}",
+                context.InvalidFormats
+            );
+        }
+
         var transactions = context.TransactionOutput;
 
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)

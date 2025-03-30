@@ -10,7 +10,10 @@ internal class CustomFormatApiPersistencePhase(
     CustomFormatTransactionLogger cfLogger
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
-    public async Task<bool> Execute(CustomFormatPipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        CustomFormatPipelineContext context,
+        CancellationToken ct
+    )
     {
         var transactions = context.TransactionOutput;
 
@@ -37,6 +40,6 @@ internal class CustomFormatApiPersistencePhase(
         cachePersister.Save(context.Cache);
 
         cfLogger.LogTransactions(context);
-        return true;
+        return PipelineFlow.Continue;
     }
 }

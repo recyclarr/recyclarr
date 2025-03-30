@@ -12,13 +12,16 @@ internal class QualitySizeConfigPhase(
     IQualityItemLimitFactory limitFactory
 ) : IPipelinePhase<QualitySizePipelineContext>
 {
-    public async Task<bool> Execute(QualitySizePipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        QualitySizePipelineContext context,
+        CancellationToken ct
+    )
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
         {
             log.Debug("{Instance} has no quality definition", config.InstanceName);
-            return false;
+            return PipelineFlow.Terminate;
         }
 
         ClampPreferredRatio(configSizeData);
@@ -33,7 +36,7 @@ internal class QualitySizeConfigPhase(
                 "The specified quality definition type does not exist: {Type}",
                 configSizeData.Type
             );
-            return false;
+            return PipelineFlow.Terminate;
         }
 
         var itemLimits = await limitFactory.Create(config.ServiceType, ct);
@@ -45,14 +48,14 @@ internal class QualitySizeConfigPhase(
         if (sizeDataWithThresholds.Count == 0)
         {
             log.Debug("No Quality Definitions to process");
-            return false;
+            return PipelineFlow.Terminate;
         }
 
         AdjustPreferredRatio(configSizeData, sizeDataWithThresholds);
 
         context.QualitySizeType = configSizeData.Type;
         context.Qualities = sizeDataWithThresholds;
-        return true;
+        return PipelineFlow.Continue;
     }
 
     private void ClampPreferredRatio(QualityDefinitionConfig configSizeData)

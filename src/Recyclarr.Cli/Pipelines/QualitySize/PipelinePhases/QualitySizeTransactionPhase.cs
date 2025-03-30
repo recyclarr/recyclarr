@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<QualitySizePipelineContext>
 {
-    public Task<bool> Execute(QualitySizePipelineContext context, CancellationToken ct)
+    public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
         // Do not check ConfigOutput for null since the Config Phase does it for us
         var guideQuality = context.Qualities;
@@ -60,7 +60,7 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
         }
 
         context.TransactionOutput = newQuality;
-        return Task.FromResult(true);
+        return Task.FromResult(PipelineFlow.Continue);
     }
 
     private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItemWithLimits b)

@@ -4,7 +4,7 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
 internal class MediaNamingTransactionPhase : IPipelinePhase<MediaNamingPipelineContext>
 {
-    public Task<bool> Execute(MediaNamingPipelineContext context, CancellationToken ct)
+    public Task<PipelineFlow> Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
         context.TransactionOutput = context.ApiFetchOutput switch
         {
@@ -15,7 +15,7 @@ internal class MediaNamingTransactionPhase : IPipelinePhase<MediaNamingPipelineC
             ),
         };
 
-        return Task.FromResult(true);
+        return Task.FromResult(PipelineFlow.Continue);
     }
 
     private static RadarrMediaNamingDto UpdateRadarrDto(

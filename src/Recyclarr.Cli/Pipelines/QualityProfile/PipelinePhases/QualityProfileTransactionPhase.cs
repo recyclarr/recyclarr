@@ -11,7 +11,7 @@ internal class QualityProfileTransactionPhase(
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
-    public Task<bool> Execute(QualityProfilePipelineContext context, CancellationToken ct)
+    public Task<PipelineFlow> Execute(QualityProfilePipelineContext context, CancellationToken ct)
     {
         var transactions = new QualityProfileTransactionData();
 
@@ -28,7 +28,7 @@ internal class QualityProfileTransactionPhase(
         context.TransactionOutput = transactions;
 
         logger.LogTransactionNotices(context);
-        return Task.FromResult(true);
+        return Task.FromResult(PipelineFlow.Continue);
     }
 
     private void AssignProfiles(

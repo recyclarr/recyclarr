@@ -61,7 +61,8 @@ internal class PipelineAutofacModule : Module
                 typeof(MediaNamingPreviewPhase),
                 typeof(MediaNamingApiPersistencePhase)
             )
-            .AsImplementedInterfaces();
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
     }
 
     private static void RegisterQualityProfile(ContainerBuilder builder)
@@ -77,7 +78,8 @@ internal class PipelineAutofacModule : Module
                 typeof(QualityProfileTransactionPhase),
                 typeof(QualityProfileApiPersistencePhase)
             )
-            .AsImplementedInterfaces();
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
     }
 
     private static void RegisterQualitySize(ContainerBuilder builder)
@@ -103,7 +105,8 @@ internal class PipelineAutofacModule : Module
                 typeof(QualitySizeTransactionPhase),
                 typeof(QualitySizeApiPersistencePhase)
             )
-            .AsImplementedInterfaces();
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
     }
 
     private static void RegisterCustomFormat(ContainerBuilder builder)

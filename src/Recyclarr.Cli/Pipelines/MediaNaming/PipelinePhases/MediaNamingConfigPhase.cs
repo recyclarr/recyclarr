@@ -22,7 +22,10 @@ internal class MediaNamingConfigPhase(
     IServiceConfiguration config
 ) : IPipelinePhase<MediaNamingPipelineContext>
 {
-    public async Task<bool> Execute(MediaNamingPipelineContext context, CancellationToken ct)
+    public async Task<PipelineFlow> Execute(
+        MediaNamingPipelineContext context,
+        CancellationToken ct
+    )
     {
         var lookup = new NamingFormatLookup();
         var strategy = configPhaseStrategyFactory[config.ServiceType];
@@ -34,14 +37,11 @@ internal class MediaNamingConfigPhase(
             InvalidNaming = lookup.Errors,
         };
 
-        return LogConfigPhaseAndExitIfNeeded(context);
+        return LogAndExitIfNeeded(context.ConfigOutput);
     }
 
-    // Returning 'true' means to exit. 'false' means to proceed.
-    public bool LogConfigPhaseAndExitIfNeeded(MediaNamingPipelineContext context)
+    private PipelineFlow LogAndExitIfNeeded(ProcessedNamingConfig configOutput)
     {
-        var configOutput = context.ConfigOutput;
-
         if (configOutput.InvalidNaming.Count != 0)
         {
             foreach (var (topic, invalidValue) in configOutput.InvalidNaming)
@@ -53,24 +53,22 @@ internal class MediaNamingConfigPhase(
                 );
             }
 
-            return true;
+            return PipelineFlow.Terminate;
         }
 
         var differences = configOutput.Dto switch
         {
             RadarrMediaNamingDto x => x.GetDifferences(new RadarrMediaNamingDto()),
             SonarrMediaNamingDto x => x.GetDifferences(new SonarrMediaNamingDto()),
-            _ => throw new ArgumentException(
-                "Unsupported configuration type in LogConfigPhase method"
-            ),
+            _ => throw new ArgumentException("Unsupported configuration type"),
         };
 
         if (differences.Count == 0)
         {
             log.Debug("No media naming changes to process");
-            return true;
+            return PipelineFlow.Terminate;
         }
 
-        return false;
+        return PipelineFlow.Continue;
     }
 }

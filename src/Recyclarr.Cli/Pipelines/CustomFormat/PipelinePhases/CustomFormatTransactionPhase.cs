@@ -8,7 +8,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration config)
     : IPipelinePhase<CustomFormatPipelineContext>
 {
-    public Task<bool> Execute(CustomFormatPipelineContext context, CancellationToken ct)
+    public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         var transactions = new CustomFormatTransactionData();
 
@@ -56,7 +56,7 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         }
 
         context.TransactionOutput = transactions;
-        return Task.FromResult(true);
+        return Task.FromResult(PipelineFlow.Continue);
     }
 
     private void ProcessExistingCf(
