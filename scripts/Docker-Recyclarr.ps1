@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
 
 $recyclarrYaml = "$PSScriptRoot/../docker-compose.yml"

@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
 
 $debuggingYaml = "$PSScriptRoot/../docker-compose.yml"
