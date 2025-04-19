@@ -62,8 +62,9 @@ internal class DeleteCustomFormatsProcessor(
 
         if (
             !settings.Force
-            && !console.Confirm(
-                "\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?"
+            && !await console.ConfirmAsync(
+                "\nAre you sure you want to [bold red]permanently delete[/] the above custom formats?",
+                cancellationToken: ct
             )
         )
         {
