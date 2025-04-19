@@ -7,8 +7,6 @@ public record DataSourceSettings
 {
     public IReadOnlyCollection<IUnderlyingDataSource> TrashGuides { get; init; } = [];
     public IReadOnlyCollection<IUnderlyingDataSource> ConfigTemplates { get; init; } = [];
-    public IReadOnlyCollection<IUnderlyingDataSource> CustomFormats { get; init; } = [];
-    public IReadOnlyCollection<IUnderlyingDataSource> MediaNaming { get; init; } = [];
 }
 
 [SuppressMessage("Design", "CA1040:Avoid empty interfaces")]
