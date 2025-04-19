@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 $ErrorActionPreference = "Stop"
 
-$gitIgnorePath = "$PSScriptRoot/.gitignore"
+$gitIgnorePath = "$PSScriptRoot/../.gitignore"
 
 Function gig {
   param(
