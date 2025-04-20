@@ -62,7 +62,7 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
             var context = SettingsContextualMessages.GetContextualErrorFromException(e);
             if (context is not null)
             {
-                log.Error(context);
+                log.Error("{Context}", context);
             }
         }
 

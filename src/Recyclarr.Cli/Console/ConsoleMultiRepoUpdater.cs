@@ -1,13 +1,14 @@
+using Recyclarr.Repo;
 using Spectre.Console;
 
-namespace Recyclarr.Repo;
+namespace Recyclarr.Cli.Console;
 
-public class ConsoleMultiRepoUpdater(
+internal class ConsoleMultiRepoUpdater(
     IAnsiConsole console,
     IReadOnlyCollection<IUpdateableRepo> repos
 ) : IMultiRepoUpdater
 {
-    public async Task UpdateAllRepositories(CancellationToken token, bool hideConsoleOutput = false)
+    public async Task UpdateAllRepositories(bool hideConsoleOutput, CancellationToken token)
     {
         var options = new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = 3 };
 

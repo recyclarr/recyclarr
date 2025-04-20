@@ -3,6 +3,7 @@ using System.Reflection;
 using Autofac;
 using Autofac.Extras.Ordering;
 using AutoMapper.Contrib.Autofac.DependencyInjection;
+using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
@@ -15,7 +16,9 @@ using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
+using Recyclarr.Config.Filtering;
 using Recyclarr.Logging;
+using Recyclarr.Repo;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -38,12 +41,14 @@ internal static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
+        builder.RegisterType<ConsoleMultiRepoUpdater>().As<IMultiRepoUpdater>();
 
         builder.RegisterAutoMapper(thisAssembly);
 
         CliRegistrations(builder);
         RegisterMigrations(builder);
         RegisterServiceProcessors(builder);
+        RegisterConfigServices(builder);
     }
 
     private static void RegisterServiceProcessors(ContainerBuilder builder)
@@ -113,5 +118,18 @@ internal static class CompositionRoot
         builder
             .RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
             .AssignableTo<CommandSettings>();
+    }
+
+    private static void RegisterConfigServices(ContainerBuilder builder)
+    {
+        builder.RegisterType<ConsoleFilterResultRenderer>().As<IFilterResultRenderer>();
+        builder
+            .RegisterTypes(
+                typeof(DuplicateInstancesFilterResultRenderer),
+                typeof(InvalidInstancesFilterResultRenderer),
+                typeof(NonExistentInstancesFilterResultRenderer),
+                typeof(SplitInstancesFilterResultRenderer)
+            )
+            .As<IConsoleFilterResultRenderer>();
     }
 }

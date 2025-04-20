@@ -27,7 +27,7 @@ internal class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpda
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
         lister.ListQualities(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

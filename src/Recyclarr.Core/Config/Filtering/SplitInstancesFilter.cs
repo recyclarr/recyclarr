@@ -1,7 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Parsing;
-using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Config.Filtering;
 
@@ -41,25 +39,5 @@ public class SplitInstancesFilter(ILogger log) : IConfigFilter
                 StringComparer.InvariantCultureIgnoreCase
             )
             .ToList();
-    }
-}
-
-public class SplitInstancesFilterResult(IReadOnlyCollection<SplitInstanceErrorInfo> splitInstances)
-    : IFilterResult
-{
-    public IReadOnlyCollection<SplitInstanceErrorInfo> SplitInstances => splitInstances;
-
-    public IRenderable Render()
-    {
-        var tree = new Tree("[orange1]Split Instances[/]");
-
-        foreach (var (baseUrl, instanceNames) in splitInstances)
-        {
-            var instanceTree = new Tree($"[cornflowerblue]Base URL:[/] {baseUrl}");
-            instanceTree.AddNodes(instanceNames);
-            tree.AddNode(instanceTree);
-        }
-
-        return tree;
     }
 }

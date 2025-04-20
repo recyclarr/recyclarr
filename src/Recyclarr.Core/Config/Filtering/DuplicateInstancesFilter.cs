@@ -1,6 +1,4 @@
 using Recyclarr.Config.Parsing;
-using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Config.Filtering;
 
@@ -32,18 +30,5 @@ public class DuplicateInstancesFilter(ILogger log) : IConfigFilter
                 StringComparer.InvariantCultureIgnoreCase
             )
             .ToList();
-    }
-}
-
-public class DuplicateInstancesFilterResult(IReadOnlyCollection<string> duplicateInstances)
-    : IFilterResult
-{
-    public IReadOnlyCollection<string> DuplicateInstances => duplicateInstances;
-
-    public IRenderable Render()
-    {
-        var tree = new Tree("[orange1]Duplicate Instances[/]");
-        tree.AddNodes(duplicateInstances);
-        return tree;
     }
 }

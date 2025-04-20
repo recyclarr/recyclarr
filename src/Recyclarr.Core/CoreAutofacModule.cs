@@ -235,7 +235,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<TrashGuidesRepo>().As<ITrashGuidesRepo>().As<IUpdateableRepo>();
 
         builder.RegisterType<RepoUpdater>().As<IRepoUpdater>();
-        builder.RegisterType<ConsoleMultiRepoUpdater>().As<IMultiRepoUpdater>();
         builder
             .RegisterType<TrashRepoMetadataBuilder>()
             .As<IRepoMetadataBuilder>()

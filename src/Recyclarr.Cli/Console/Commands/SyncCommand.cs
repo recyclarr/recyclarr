@@ -59,7 +59,7 @@ internal class SyncCommand(
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
 
         return (int)await syncProcessor.Process(settings, settings.CancellationToken);
     }

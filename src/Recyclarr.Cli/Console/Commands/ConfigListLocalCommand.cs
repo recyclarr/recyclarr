@@ -19,7 +19,7 @@ internal class ConfigListLocalCommand(
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
         processor.Process();
         return (int)ExitStatus.Succeeded;
     }

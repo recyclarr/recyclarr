@@ -3,7 +3,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-internal class BaseCommandSettings : CommandSettings
+internal class BaseCommandSettings : CommandSettings, IBaseCommandSettings
 {
     public CancellationToken CancellationToken { get; set; }
 
@@ -16,4 +16,10 @@ internal class BaseCommandSettings : CommandSettings
     [Description("Custom path to the application data directory")]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     public string? AppData { get; init; }
+
+    [CommandOption("--raw")]
+    [Description(
+        "Omit any boilerplate text or colored formatting. This option primarily exists for scripts."
+    )]
+    public bool Raw { get; init; } = false;
 }

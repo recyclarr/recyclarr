@@ -33,17 +33,11 @@ internal class ListCustomFormatsCommand(
             "Instead of listing custom formats, list the score sets all custom formats are part of."
         )]
         public bool ScoreSets { get; init; } = false;
-
-        [CommandOption("--raw")]
-        [Description(
-            "Omit any boilerplate text or colored formatting. This option primarily exists for scripts."
-        )]
-        public bool Raw { get; init; } = false;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken, settings.Raw);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
         lister.List(settings);
         return (int)ExitStatus.Succeeded;
     }

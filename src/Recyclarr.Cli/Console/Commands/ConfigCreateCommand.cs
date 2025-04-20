@@ -48,7 +48,7 @@ internal class ConfigCreateCommand(
     {
         try
         {
-            await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+            await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

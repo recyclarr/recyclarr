@@ -26,7 +26,7 @@ internal class ListMediaNamingCommand(MediaNamingDataLister lister, IMultiRepoUp
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
         lister.ListNaming(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

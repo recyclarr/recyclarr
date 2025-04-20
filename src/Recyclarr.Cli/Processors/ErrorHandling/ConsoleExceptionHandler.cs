@@ -72,18 +72,18 @@ internal class ConsoleExceptionHandler(ILogger log)
                 break;
 
             case ServiceIncompatibilityException e:
-                log.Error(e.Message);
+                log.Error("{Message}", e.Message);
                 break;
 
             case CommandException e:
-                log.Error(e.Message);
+                log.Error("{Message}", e.Message);
                 break;
 
             case YamlException e:
                 log.Error(e, "Exception while parsing settings.yml at line {Line}", e.Start.Line);
                 if (e.Data["ContextualMessage"] is string context)
                 {
-                    log.Error(context);
+                    log.Error("{Context}", context);
                 }
 
                 break;

@@ -28,7 +28,7 @@ internal class ConfigListTemplatesCommand(
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.CancellationToken);
+        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

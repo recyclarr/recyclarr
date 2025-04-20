@@ -1,6 +1,4 @@
 using Recyclarr.Config.Parsing;
-using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Config.Filtering;
 
@@ -25,18 +23,5 @@ public class NonExistentInstancesFilter(ILogger log) : IConfigFilter
         }
 
         return configs;
-    }
-}
-
-public class NonExistentInstancesFilterResult(IReadOnlyCollection<string> nonExistentInstances)
-    : IFilterResult
-{
-    public IReadOnlyCollection<string> NonExistentInstances => nonExistentInstances;
-
-    public IRenderable Render()
-    {
-        var tree = new Tree("[orange1]Non-Existent Instances[/]");
-        tree.AddNodes(nonExistentInstances);
-        return tree;
     }
 }

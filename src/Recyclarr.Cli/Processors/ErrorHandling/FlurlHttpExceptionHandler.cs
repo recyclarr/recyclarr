@@ -59,7 +59,7 @@ internal class FlurlHttpExceptionHandler(ILogger log)
 
         // Last resort
         log.Error(
-            "Reason: Unable to determine. Please report this as a bug and attach your `debug.log` and `verbose.log` files."
+            "Reason: Unable to determine. Please report this as a bug and attach your `debug.log` and `verbose.log` files"
         );
     }
 }
