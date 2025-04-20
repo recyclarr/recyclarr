@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -13,6 +14,7 @@ internal sealed class CustomFormatDataListerTest
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
         [Frozen] ICustomFormatGuideService guide,
         IListCustomFormatSettings settings,
+        IConsoleOutputSettings outputSettings,
         CustomFormatDataLister sut
     )
     {
@@ -21,7 +23,7 @@ internal sealed class CustomFormatDataListerTest
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
         settings.ScoreSets.Returns(false);
 
-        sut.List(settings);
+        sut.List(outputSettings, settings);
 
         console.Output.Should().ContainAll(testData.SelectMany(x => new[] { x.Name, x.TrashId }));
     }

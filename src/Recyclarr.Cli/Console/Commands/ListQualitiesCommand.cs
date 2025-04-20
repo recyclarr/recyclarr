@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Processors;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -12,8 +12,11 @@ namespace Recyclarr.Cli.Console.Commands;
 #pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List quality definitions in the guide for a particular service.")]
-internal class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpdater repoUpdater)
-    : AsyncCommand<ListQualitiesCommand.CliSettings>
+internal class ListQualitiesCommand(
+    QualitySizeDataLister lister,
+    ConsoleMultiRepoUpdater repoUpdater,
+    RecyclarrConsoleSettings consoleSettings
+) : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -27,7 +30,8 @@ internal class ListQualitiesCommand(QualitySizeDataLister lister, IMultiRepoUpda
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
+        var outputSettings = consoleSettings.GetOutputSettings(settings);
+        await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
         lister.ListQualities(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

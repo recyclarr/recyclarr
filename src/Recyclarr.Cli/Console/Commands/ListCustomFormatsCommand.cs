@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Processors;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -16,7 +16,8 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List custom formats in the guide for a particular service.")]
 internal class ListCustomFormatsCommand(
     CustomFormatDataLister lister,
-    IMultiRepoUpdater repoUpdater
+    ConsoleMultiRepoUpdater repoUpdater,
+    RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -37,8 +38,9 @@ internal class ListCustomFormatsCommand(
 
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
-        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
-        lister.List(settings);
+        var outputSettings = consoleSettings.GetOutputSettings(settings);
+        await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
+        lister.List(outputSettings, settings);
         return (int)ExitStatus.Succeeded;
     }
 }

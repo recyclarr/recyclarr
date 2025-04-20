@@ -3,7 +3,7 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-internal class BaseCommandSettings : CommandSettings, IBaseCommandSettings
+internal class BaseCommandSettings : CommandSettings
 {
     public CancellationToken CancellationToken { get; set; }
 
@@ -21,5 +21,6 @@ internal class BaseCommandSettings : CommandSettings, IBaseCommandSettings
     [Description(
         "Omit any boilerplate text or colored formatting. This option primarily exists for scripts."
     )]
-    public bool Raw { get; init; } = false;
+    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+    public bool? Raw { get; init; }
 }

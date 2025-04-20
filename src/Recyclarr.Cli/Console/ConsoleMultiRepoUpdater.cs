@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Logging;
 using Recyclarr.Repo;
 using Spectre.Console;
 
@@ -6,9 +7,12 @@ namespace Recyclarr.Cli.Console;
 internal class ConsoleMultiRepoUpdater(
     IAnsiConsole console,
     IReadOnlyCollection<IUpdateableRepo> repos
-) : IMultiRepoUpdater
+)
 {
-    public async Task UpdateAllRepositories(bool hideConsoleOutput, CancellationToken token)
+    public async Task UpdateAllRepositories(
+        IConsoleOutputSettings outputSettings,
+        CancellationToken token
+    )
     {
         var options = new ParallelOptions { CancellationToken = token, MaxDegreeOfParallelism = 3 };
 
@@ -18,13 +22,12 @@ internal class ConsoleMultiRepoUpdater(
             async (repo, innerToken) => await repo.Update(innerToken)
         );
 
-        if (!hideConsoleOutput)
-        {
-            await console.Status().StartAsync("Updating Git Repositories...", _ => task);
-        }
-        else
+        if (outputSettings.IsRawOutputEnabled)
         {
             await task;
+            return;
         }
+
+        await console.Status().StartAsync("Updating Git Repositories...", _ => task);
     }
 }

@@ -7,6 +7,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.Platform;
 using Recyclarr.TestLibrary.Autofac;
 using Spectre.Console;
+using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -24,14 +25,20 @@ internal sealed class CompositionRootTest
             var builder = new ContainerBuilder();
             CompositionRoot.Setup(builder);
 
-            // These are things that Spectre.Console normally registers for us, so they won't explicitly be
-            // in the CompositionRoot. Register mocks/stubs here.
+            // These are things that Spectre.Console normally registers for us, so they won't
+            // explicitly be in the CompositionRoot. Register mocks/stubs here.
             builder.RegisterMockFor<IAnsiConsole>();
 
-            // Normally in per-instance syncing, a child lifetime scope is created to register IServiceConfiguration.
-            // However, in the test for checking whether all necessary dependencies are registered, we provide a mock
-            // registration here for the purposes of getting the test to pass.
+            // Normally in per-instance syncing, a child lifetime scope is created to register
+            // IServiceConfiguration. However, in the test for checking whether all necessary
+            // dependencies are registered, we provide a mock registration here for the purposes of
+            // getting the test to pass.
             builder.RegisterMockFor<IServiceConfiguration>();
+
+            // Add all the AsyncCommand implementations. Spectre.Console does this for us, usually.
+            builder
+                .RegisterAssemblyTypes(typeof(CompositionRoot).Assembly)
+                .AssignableTo<ICommand>();
 
             var container = builder.Build();
             return container

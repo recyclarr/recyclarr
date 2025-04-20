@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
@@ -7,16 +8,16 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
 internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideService guide)
 {
-    public void List(IListCustomFormatSettings settings)
+    public void List(IConsoleOutputSettings outputSettings, IListCustomFormatSettings settings)
     {
         switch (settings)
         {
             case { ScoreSets: true }:
-                ListScoreSets(settings.Service, settings.Raw);
+                ListScoreSets(settings.Service, outputSettings.IsRawOutputEnabled);
                 break;
 
             default:
-                ListCustomFormats(settings.Service, settings.Raw);
+                ListCustomFormats(settings.Service, outputSettings.IsRawOutputEnabled);
                 break;
         }
     }

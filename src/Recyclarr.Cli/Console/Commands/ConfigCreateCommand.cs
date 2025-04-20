@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Repo;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -13,7 +13,8 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ConfigCreateCommand(
     ILogger log,
     IConfigCreationProcessor processor,
-    IMultiRepoUpdater repoUpdater
+    ConsoleMultiRepoUpdater repoUpdater,
+    RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -48,7 +49,8 @@ internal class ConfigCreateCommand(
     {
         try
         {
-            await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
+            var outputSettings = consoleSettings.GetOutputSettings(settings);
+            await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

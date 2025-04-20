@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
-using Recyclarr.Repo;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -14,8 +14,9 @@ namespace Recyclarr.Cli.Console.Commands;
 [UsedImplicitly]
 internal class SyncCommand(
     MigrationExecutor migration,
-    IMultiRepoUpdater repoUpdater,
-    SyncProcessor syncProcessor
+    ConsoleMultiRepoUpdater repoUpdater,
+    SyncProcessor syncProcessor,
+    RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -59,7 +60,8 @@ internal class SyncCommand(
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        await repoUpdater.UpdateAllRepositories(settings.Raw, settings.CancellationToken);
+        var outputSettings = consoleSettings.GetOutputSettings(settings);
+        await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
 
         return (int)await syncProcessor.Process(settings, settings.CancellationToken);
     }

@@ -6,5 +6,4 @@ internal interface IListCustomFormatSettings
 {
     SupportedServices Service { get; }
     bool ScoreSets { get; }
-    bool Raw { get; }
 }
