@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.14-labs
+# syntax=docker/dockerfile:1.15-labs
 
 # Following Microsoft's pattern shown here:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/dotnetapp/Dockerfile.alpine
