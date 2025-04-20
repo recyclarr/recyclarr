@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - YAML: Improved messaging in logs and console output for YAML errors.
+- CLI: Respect the NO_COLOR environment variable when piping command output to files (#462).
 
 ## [7.4.1] - 2025-02-15
 
