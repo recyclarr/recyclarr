@@ -579,3 +579,5 @@ $RECYCLE.BIN/
 .pre-commit-cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider,sonarqube
+
+megalinter-reports/
