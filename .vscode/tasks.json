@@ -8,7 +8,7 @@
       "args": [
         "build",
         "-property:GenerateFullPaths=true",
-        "-consoleLoggerParameters:NoSummary",
+        "-consoleLoggerParameters:NoSummary"
       ],
       "problemMatcher": {
         "owner": "dotnet",
@@ -28,7 +28,7 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      },
+      }
     },
     {
       "label": "publish",
@@ -40,9 +40,9 @@
         "-property:GenerateFullPaths=true",
         "-consoleLoggerParameters:NoSummary",
         "-o",
-        "docker/artifacts/${config:recyclarr.runtime}",
+        "docker/artifacts/${config:recyclarr.runtime}"
       ],
-      "problemMatcher": "$msCompile",
+      "problemMatcher": "$msCompile"
     },
     {
       "label": "test",
@@ -51,13 +51,13 @@
       "args": [
         "test",
         "-property:GenerateFullPaths=true",
-        "-consoleLoggerParameters:NoSummary",
+        "-consoleLoggerParameters:NoSummary"
       ],
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "test",
-        "isDefault": true,
-      },
+        "isDefault": true
+      }
     }
   ]
 }

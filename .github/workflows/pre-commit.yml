@@ -1,0 +1,59 @@
+# GitHub Actions workflow for pre-commit
+# This runs the same pre-commit hooks in CI that developers run locally
+name: Pre-commit
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - .pre-commit-config.yaml
+      - '**.cs'
+      - '**.md'
+      - '**.yml'
+      - '**.yaml'
+      - '**.json'
+      - '**.sh'
+      - '**.ps1'
+  pull_request:
+    paths:
+      - .pre-commit-config.yaml
+      - '**.cs'
+      - '**.md'
+      - '**.yml'
+      - '**.yaml'
+      - '**.json'
+      - '**.sh'
+      - '**.ps1'
+
+permissions: read-all
+
+jobs:
+  pre-commit:
+    name: Pre-commit Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # avoid shallow clone for better pre-commit performance
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore .NET Tools
+        run: dotnet tool restore
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run Pre-commit
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --show-diff-on-failure
+        env:
+          # Skip heavy operations in CI to keep builds fast
+          SKIP: resharper-cleanup,dotnet-build

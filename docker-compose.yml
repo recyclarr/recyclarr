@@ -24,10 +24,9 @@ services:
     environment:
       CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
-
   radarr_develop:
     image: ghcr.io/home-operations/radarr:rolling
-    ports: [7890:7878]
+    ports: ["7890:7878"]
     volumes:
       - radarr_develop:/config
     environment:
@@ -36,7 +35,7 @@ services:
 
   sonarr_develop:
     image: ghcr.io/home-operations/sonarr:rolling
-    ports: [8990:8989]
+    ports: ["8990:8989"]
     volumes:
       - sonarr_develop:/config
     environment:
@@ -52,11 +51,10 @@ services:
       - sonarr_stable:/sonarr/stable
       - radarr_develop:/radarr/develop
       - radarr_stable:/radarr/stable
-
   # http://localhost:8000
   apprise:
     image: caronc/apprise
-    ports: [8000:8000]
+    ports: ["8000:8000"]
     init: true
     tmpfs:
       - /attach

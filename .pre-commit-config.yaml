@@ -1,0 +1,69 @@
+# Pre-commit configuration for Recyclarr
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # Built-in hooks for basic file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+        exclude: 'tests/.*invalid.*\.json$'
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  # Shellcheck for shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        files: \.(sh|bash)$
+
+  # Markdown linting (matches your existing GitHub Actions setup)
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: ['--config', '.markdownlint.json']
+        exclude: '(src/|tests/)'  # Match your existing exclusions
+
+  # Local hooks for .NET specific tools
+  - repo: local
+    hooks:
+      # CSharpier formatting
+      - id: csharpier
+        name: CSharpier Code Formatter
+        entry: dotnet csharpier
+        language: system
+        files: '\.cs$'
+        pass_filenames: true
+        description: "Format C# code with CSharpier"
+
+      # ReSharper Code Cleanup (optimized for modified files only)
+      - id: resharper-cleanup
+        name: ReSharper Code Cleanup
+        entry: powershell
+        language: system
+        args: ['-Command', 'dotnet jb cleanupcode --settings="Recyclarr.sln.DotSettings" --profile="Recyclarr Cleanup" $args']
+        files: '\.cs$'
+        pass_filenames: true
+        description: "Run ReSharper code cleanup on modified C# files only"
+
+default_stages: [pre-commit]
+
+# Configuration for specific scenarios
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [resharper-cleanup]  # Skip heavy operations in CI
+  submodules: false

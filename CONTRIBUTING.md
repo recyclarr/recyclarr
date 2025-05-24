@@ -49,9 +49,41 @@ There are two recommended ways to use CSharpier:
 
 - Jetbrains Rider (IDE for editing C# code)
 - Visual Studio Code (with workspace-recommended extensions)
+- [Pre-commit](https://pre-commit.com/) for automated code quality checks
 
 Additional required tooling can be installed via the `scripts/Install-Tooling.ps1` powershell
 script. Run this occasionally for upgrades as well.
+
+### Pre-commit Setup
+
+Pre-commit hooks automatically run code quality checks before each commit. To set up:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install hooks for this repository
+./scripts/Install-PreCommit.ps1
+```
+
+The pre-commit framework will automatically run:
+
+- CSharpier code formatting
+- ReSharper code cleanup (on modified files only)
+- Markdown linting
+- Basic file checks (JSON/YAML/XML validation, merge conflicts, etc.)
+
+To run checks manually: `pre-commit run --all-files`
+
+**Bypassing Pre-commit (when necessary):**
+
+```bash
+# Skip pre-commit hooks for a single commit (use sparingly)
+git commit --no-verify -m "your commit message"
+
+# Skip specific hooks only
+SKIP=resharper-cleanup git commit -m "your commit message"
+```
 
 ## Conventional Commits
 

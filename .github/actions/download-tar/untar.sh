@@ -8,10 +8,10 @@ else
   dirs=(.)
 fi
 
-for dir in ${dirs[@]}; do
+for dir in "${dirs[@]}"; do
   echo "> Extracting: $dir"
-  pushd "$dir" > /dev/null
+  pushd "$dir" > /dev/null || exit
   tar xvf artifact.tar
   rm artifact.tar
-  popd > /dev/null
+  popd > /dev/null || exit
 done
