@@ -27,7 +27,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Lint Markdown Files
-        uses: DavidAnson/markdownlint-cli2-action@v19
+        uses: DavidAnson/markdownlint-cli2-action@v20
         with:
           globs: |
             **.md
