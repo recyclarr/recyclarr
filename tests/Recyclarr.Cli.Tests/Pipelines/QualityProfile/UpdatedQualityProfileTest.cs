@@ -44,6 +44,7 @@ internal sealed class UpdatedQualityProfileTest
                 Id = 1,
                 Name = "dto_name",
                 MinFormatScore = 100,
+                MinFormatUpgradeScore = 100,
                 CutoffFormatScore = 200,
                 UpgradeAllowed = false,
                 Cutoff = 1,
@@ -53,6 +54,7 @@ internal sealed class UpdatedQualityProfileTest
                 {
                     Name = "config_name",
                     MinFormatScore = 110,
+                    MinFormatUpgradeScore = 110,
                     UpgradeAllowed = true,
                     UpgradeUntilScore = 220,
                 }
@@ -88,6 +90,7 @@ internal sealed class UpdatedQualityProfileTest
                     Name = "dto_name",
                     Id = 1,
                     MinFormatScore = 110,
+                    MinFormatUpgradeScore = 110,
                     CutoffFormatScore = 220,
                     UpgradeAllowed = true,
                     Items = profile.UpdatedQualities.Items,
