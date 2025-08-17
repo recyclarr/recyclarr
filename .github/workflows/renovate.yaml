@@ -1,0 +1,56 @@
+name: Renovate
+
+on:
+  schedule:
+  - cron: "0 2 * * *" # Daily at 2 AM
+  push:
+    branches: ["master"]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: Log level
+        required: false
+        default: debug
+        type: choice
+        options: [info, debug, trace]
+      dryRun:
+        description: Dry run (no changes made)
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'issue_comment' || contains(github.event.comment.body, '- [x]')
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Generate App Token
+      id: generate-token
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ secrets.RENOVATE_APP_ID }}
+        private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
+
+    - name: Self-hosted Renovate
+      uses: renovatebot/github-action@v43.0.7
+      with:
+        token: ${{ steps.generate-token.outputs.token }}
+      env:
+        LOG_LEVEL: ${{ inputs.logLevel || 'debug' }}
+        RENOVATE_DRY_RUN: ${{ inputs.dryRun == true }}
+        RENOVATE_REPOSITORIES: '["${{ github.repository }}"]'
+        RENOVATE_INTERNAL_CHECKS_FILTER: strict
+        RENOVATE_PLATFORM: github
+        RENOVATE_PLATFORM_COMMIT: true
