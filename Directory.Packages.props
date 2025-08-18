@@ -5,7 +5,7 @@
   </PropertyGroup>
   <!-- Central Package Versions -->
   <ItemGroup>
-    <PackageVersion Include="Autofac" Version="8.3.0" />
+    <PackageVersion Include="Autofac" Version="8.4.0" />
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="Autofac.Extras.AggregateService" Version="6.1.2" />
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
