@@ -58,6 +58,7 @@ public record QualityProfileConfigYaml
     public ResetUnmatchedScoresConfigYaml? ResetUnmatchedScores { get; init; }
     public QualityProfileFormatUpgradeYaml? Upgrade { get; init; }
     public int? MinFormatScore { get; init; }
+    public int? MinFormatUpgradeScore { get; init; }
     public QualitySortAlgorithm? QualitySort { get; init; }
     public IReadOnlyCollection<QualityProfileQualityConfigYaml>? Qualities { get; init; }
     public string? ScoreSet { get; init; }
