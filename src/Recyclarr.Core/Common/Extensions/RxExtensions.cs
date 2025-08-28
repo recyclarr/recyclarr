@@ -55,13 +55,12 @@ public static class RxExtensions
                     .Subscribe(obs);
                 return new CompositeDisposable(
                     subscription,
-                    Disposable.Create(
-                        () =>
-                            log.Debug(
-                                "{OpName}: Cleaned up on Thread: {ThreadId}",
-                                opName,
-                                Environment.CurrentManagedThreadId
-                            )
+                    Disposable.Create(() =>
+                        log.Debug(
+                            "{OpName}: Cleaned up on Thread: {ThreadId}",
+                            opName,
+                            Environment.CurrentManagedThreadId
+                        )
                     )
                 );
             }

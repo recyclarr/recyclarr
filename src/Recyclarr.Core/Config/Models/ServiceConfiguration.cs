@@ -14,12 +14,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } = [];
 
-    public bool DeleteOldCustomFormats
-    {
-        get;
-        [UsedImplicitly]
-        init;
-    }
+    public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
     public bool ReplaceExistingCustomFormats { get; init; }
 
     public QualityDefinitionConfig? QualityDefinition { get; init; }

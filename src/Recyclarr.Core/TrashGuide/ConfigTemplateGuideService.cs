@@ -10,18 +10,10 @@ public record TemplateEntry(string Id, string Template, bool Hidden = false);
 
 public record TemplatesData
 {
-    public IReadOnlyCollection<TemplateEntry> Radarr
-    {
-        get;
-        [UsedImplicitly]
-        init;
-    } = Array.Empty<TemplateEntry>();
-    public IReadOnlyCollection<TemplateEntry> Sonarr
-    {
-        get;
-        [UsedImplicitly]
-        init;
-    } = Array.Empty<TemplateEntry>();
+    public IReadOnlyCollection<TemplateEntry> Radarr { get; [UsedImplicitly] init; } =
+        Array.Empty<TemplateEntry>();
+    public IReadOnlyCollection<TemplateEntry> Sonarr { get; [UsedImplicitly] init; } =
+        Array.Empty<TemplateEntry>();
 }
 
 public record TemplatePath

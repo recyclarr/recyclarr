@@ -51,8 +51,7 @@ internal sealed class ConfigIncludeProcessorTest
     [Test, AutoMockData]
     public void Throw_when_relative_config_include_path_does_not_exist(
         // Freeze the mock FS even though we don't use it so that the "Exists" check works right.
-        [Frozen(Matching.ImplementedInterfaces)]
-            MockFileSystem fs,
+        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         ConfigIncludeProcessor sut
     )
     {
