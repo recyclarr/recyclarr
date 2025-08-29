@@ -39,7 +39,7 @@ internal static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
-        builder.RegisterType<ConsoleMultiRepoUpdater>();
+        builder.RegisterType<ConsoleResourceProviderInitializer>();
 
         builder.RegisterAutoMapper(thisAssembly);
 

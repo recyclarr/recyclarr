@@ -1,7 +1,5 @@
-using System.IO.Abstractions;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Spectre.Console.Cli;
 
@@ -24,15 +22,19 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [SetUp]
     public void MapFiles()
     {
-        Mapper.AddToFilesystem(Fs, Resolve<ITrashGuidesRepo>().Path);
+        // The new GitTrashGuidesResourceProvider expects files in repos/trash-guides-default
+        var trashGuidesPath = Fs.DirectoryInfo.New("/repos/trash-guides-default");
+        Mapper.AddToFilesystem(Fs, trashGuidesPath);
     }
 
     [Test]
     public async Task List_custom_format_radarr_score_sets()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
+        // Create test files in the expected trash guides repository location
+        var trashGuidesPath = "/repos/trash-guides-default";
+        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/radarr/cf");
         Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/radarr/cf"),
+            targetDir,
             typeof(CliCommandIntegrationTest),
             "Data/radarr/cfs"
         );
@@ -49,9 +51,11 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_custom_format_sonarr_score_sets()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
+        // Create test files in the expected trash guides repository location
+        var trashGuidesPath = "/repos/trash-guides-default";
+        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/sonarr/cf");
         Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/sonarr/cf"),
+            targetDir,
             typeof(CliCommandIntegrationTest),
             "Data/sonarr/cfs"
         );
@@ -75,9 +79,11 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_naming_sonarr()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
+        // Create test files in the expected trash guides repository location
+        var trashGuidesPath = "/repos/trash-guides-default";
+        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/sonarr/naming");
         Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/sonarr/naming"),
+            targetDir,
             typeof(CliCommandIntegrationTest),
             "Data/sonarr/naming"
         );

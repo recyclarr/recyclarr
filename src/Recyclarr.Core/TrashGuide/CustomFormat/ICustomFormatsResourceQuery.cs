@@ -1,6 +1,6 @@
 namespace Recyclarr.TrashGuide.CustomFormat;
 
-public interface ICustomFormatGuideService
+public interface ICustomFormatsResourceQuery
 {
     ICollection<CustomFormatData> GetCustomFormatData(SupportedServices serviceType);
 }

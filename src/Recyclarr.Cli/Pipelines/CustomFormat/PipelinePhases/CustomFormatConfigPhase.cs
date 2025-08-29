@@ -8,7 +8,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatConfigPhase(
-    ICustomFormatGuideService guide,
+    ICustomFormatsResourceQuery guide,
     ProcessedCustomFormatCache cache,
     ICachePersister<CustomFormatCache> cachePersister,
     IServiceConfiguration config

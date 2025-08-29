@@ -8,7 +8,7 @@ internal class SonarrMediaNamingConfigPhase(SonarrConfiguration config)
     : IServiceBasedMediaNamingConfigPhase
 {
     public Task<MediaNamingDto> ProcessNaming(
-        IMediaNamingGuideService guide,
+        IMediaNamingResourceQuery guide,
         NamingFormatLookup lookup
     )
     {

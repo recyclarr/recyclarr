@@ -1,6 +1,6 @@
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public interface IQualitySizeGuideService
+public interface IQualitySizeResourceQuery
 {
     IReadOnlyList<QualitySizeData> GetQualitySizeData(SupportedServices serviceType);
 }

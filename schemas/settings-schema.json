@@ -50,29 +50,7 @@
       "$ref": "settings/notifications.json"
     },
     "data_sources": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "Set up data sources for repos and service data",
-      "properties": {
-        "trash_guides": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for the Trash Guides"
-        },
-        "config_templates": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for the Recyclarr Config Templates"
-        },
-        "custom_formats": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for additional custom format JSON files",
-          "description": "These supplement the ones provided by the Trash Guides. The custom format JSON files are expected to be in the same format as the ones provided by the Trash Guides."
-        },
-        "media_naming": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for additional media naming JSON files",
-          "description": "These supplement the ones provided by the Trash Guides. The media naming JSON files are expected to be in the same format as the ones provided by the Trash Guides."
-        }
-      }
+      "$ref": "settings/data-sources.json"
     }
   }
 }

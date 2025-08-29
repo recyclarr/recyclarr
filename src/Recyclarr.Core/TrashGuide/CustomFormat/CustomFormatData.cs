@@ -28,8 +28,7 @@ public record CustomFormatData
     public int Id { get; set; }
     public string Name { get; init; } = "";
     public bool IncludeCustomFormatWhenRenaming { get; init; }
-    public IReadOnlyCollection<CustomFormatSpecificationData> Specifications { get; init; } =
-        Array.Empty<CustomFormatSpecificationData>();
+    public IReadOnlyCollection<CustomFormatSpecificationData> Specifications { get; init; } = [];
 
     public virtual bool Equals(CustomFormatData? other)
     {
@@ -71,8 +70,7 @@ public record CustomFormatSpecificationData
     public bool Required { get; init; }
 
     [JsonConverter(typeof(FieldsArrayJsonConverter))]
-    public IReadOnlyCollection<CustomFormatFieldData> Fields { get; init; } =
-        Array.Empty<CustomFormatFieldData>();
+    public IReadOnlyCollection<CustomFormatFieldData> Fields { get; init; } = [];
 
     public virtual bool Equals(CustomFormatSpecificationData? other)
     {

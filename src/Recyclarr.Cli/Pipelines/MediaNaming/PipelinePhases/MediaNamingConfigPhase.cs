@@ -17,7 +17,7 @@ internal record ProcessedNamingConfig
 
 internal class MediaNamingConfigPhase(
     ILogger log,
-    IMediaNamingGuideService guide,
+    IMediaNamingResourceQuery guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
     IServiceConfiguration config
 ) : IPipelinePhase<MediaNamingPipelineContext>

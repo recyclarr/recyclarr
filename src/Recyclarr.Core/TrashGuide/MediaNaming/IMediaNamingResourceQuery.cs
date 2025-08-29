@@ -1,6 +1,6 @@
 namespace Recyclarr.TrashGuide.MediaNaming;
 
-public interface IMediaNamingGuideService
+public interface IMediaNamingResourceQuery
 {
     RadarrMediaNamingData GetRadarrNamingData();
     SonarrMediaNamingData GetSonarrNamingData();
