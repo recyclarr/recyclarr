@@ -57,6 +57,9 @@
       "min_format_score": {
         "type": "number"
       },
+      "min_format_upgrade_score": {
+        "type": "number"
+      },
       "quality_sort": {
         "enum": ["bottom", "top"],
         "default": "top"
