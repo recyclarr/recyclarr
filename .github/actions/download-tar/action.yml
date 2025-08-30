@@ -15,7 +15,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@v4.3.0
+    - uses: actions/download-artifact@v5.0.0
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
