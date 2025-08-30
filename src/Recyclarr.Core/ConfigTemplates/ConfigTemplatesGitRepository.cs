@@ -9,7 +9,7 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ConfigTemplates;
 
-public class GitConfigTemplatesResourceProvider(
+public class ConfigTemplatesGitRepository(
     ISettings<ResourceProviderSettings> settings,
     IRepoUpdater repoUpdater,
     IAppPaths appPaths
@@ -49,14 +49,14 @@ public class GitConfigTemplatesResourceProvider(
             );
         }
 
-        var repoPath = appPaths.ReposDirectory.SubDirectory(
-            $"config-templates-{config.Name ?? "default"}"
-        );
+        var repoPath = appPaths.ReposDirectory
+            .SubDirectory("config-templates")
+            .SubDirectory(config.Name ?? "default");
 
         var repoSettings = new GitRepositorySettings
         {
             CloneUrl = config.CloneUrl,
-            Branch = config.Reference ?? "master",
+            Branch = config.Reference,
             Sha1 = null,
         };
 

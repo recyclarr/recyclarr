@@ -11,7 +11,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.TrashGuide;
 
-public class GitTrashGuidesResourceProvider(
+public class TrashGuidesGitRepository(
     ISettings<ResourceProviderSettings> settings,
     IRepoUpdater repoUpdater,
     IAppPaths appPaths
@@ -55,14 +55,14 @@ public class GitTrashGuidesResourceProvider(
             );
         }
 
-        var repoPath = appPaths.ReposDirectory.SubDirectory(
-            $"trash-guides-{config.Name ?? "default"}"
-        );
+        var repoPath = appPaths.ReposDirectory
+            .SubDirectory("trash-guides")
+            .SubDirectory(config.Name ?? "default");
 
         var repoSettings = new GitRepositorySettings
         {
             CloneUrl = config.CloneUrl,
-            Branch = config.Reference ?? "master",
+            Branch = config.Reference,
             Sha1 = null,
         };
 

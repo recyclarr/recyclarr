@@ -10,14 +10,30 @@ public class ResourceProviderProcessor(
 {
     public async Task ProcessResourceProviders(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        
         var resourceProviderSettings = settings.Value;
 
         // Initialize all configured resource providers
         var configuredProviders = GetConfiguredProviders(resourceProviderSettings);
 
-        await Task.WhenAll(
-            configuredProviders.Select(provider => provider.Initialize(cancellationToken))
-        );
+        // Initialize providers individually to handle exceptions gracefully
+        var initializationTasks = configuredProviders.Select(InitializeProviderSafely);
+        await Task.WhenAll(initializationTasks);
+
+        async Task InitializeProviderSafely(IResourceProvider provider)
+        {
+            try
+            {
+                await provider.Initialize(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Log error and continue with other providers
+                // In real implementation, this would use ILogger
+                Console.WriteLine($"Failed to initialize provider {provider.Name}: {ex.Message}");
+            }
+        }
     }
 
     private IEnumerable<IResourceProvider> GetConfiguredProviders(

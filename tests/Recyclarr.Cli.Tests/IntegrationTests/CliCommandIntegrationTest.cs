@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Console;
-using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Cli.Tests;
 using Recyclarr.TestLibrary;
 using Spectre.Console.Cli;
 
@@ -7,32 +7,12 @@ namespace Recyclarr.Cli.Tests.IntegrationTests;
 
 internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
 {
-    private static readonly TrashRepoFileMapper Mapper = new();
-
-    [OneTimeSetUp]
-    public static async Task OneTimeSetup()
-    {
-        await Mapper.DownloadFiles(
-            "metadata.json",
-            "docs/Radarr/Radarr-collection-of-custom-formats.md",
-            "docs/Sonarr/sonarr-collection-of-custom-formats.md"
-        );
-    }
-
-    [SetUp]
-    public void MapFiles()
-    {
-        // The new GitTrashGuidesResourceProvider expects files in repos/trash-guides-default
-        var trashGuidesPath = Fs.DirectoryInfo.New("/repos/trash-guides-default");
-        Mapper.AddToFilesystem(Fs, trashGuidesPath);
-    }
-
     [Test]
     public async Task List_custom_format_radarr_score_sets()
     {
-        // Create test files in the expected trash guides repository location
-        var trashGuidesPath = "/repos/trash-guides-default";
-        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/radarr/cf");
+        // StubRepoUpdater provides hierarchical structure: repositories/trash-guides/default
+        var reposDir = Fs.CurrentDirectory().SubDirectory("repositories").SubDirectory("trash-guides").SubDirectory("default");
+        var targetDir = reposDir.SubDirectory("docs").SubDirectory("json").SubDirectory("radarr").SubDirectory("cf");
         Fs.AddFilesFromEmbeddedNamespace(
             targetDir,
             typeof(CliCommandIntegrationTest),
@@ -51,9 +31,9 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_custom_format_sonarr_score_sets()
     {
-        // Create test files in the expected trash guides repository location
-        var trashGuidesPath = "/repos/trash-guides-default";
-        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/sonarr/cf");
+        // StubRepoUpdater provides hierarchical structure: repositories/trash-guides/default
+        var reposDir = Fs.CurrentDirectory().SubDirectory("repositories").SubDirectory("trash-guides").SubDirectory("default");
+        var targetDir = reposDir.SubDirectory("docs").SubDirectory("json").SubDirectory("sonarr").SubDirectory("cf");
         Fs.AddFilesFromEmbeddedNamespace(
             targetDir,
             typeof(CliCommandIntegrationTest),
@@ -79,9 +59,9 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_naming_sonarr()
     {
-        // Create test files in the expected trash guides repository location
-        var trashGuidesPath = "/repos/trash-guides-default";
-        var targetDir = Fs.DirectoryInfo.New($"{trashGuidesPath}/docs/json/sonarr/naming");
+        // StubRepoUpdater provides hierarchical structure: repositories/trash-guides/default
+        var reposDir = Fs.CurrentDirectory().SubDirectory("repositories").SubDirectory("trash-guides").SubDirectory("default");
+        var targetDir = reposDir.SubDirectory("docs").SubDirectory("json").SubDirectory("sonarr").SubDirectory("naming");
         Fs.AddFilesFromEmbeddedNamespace(
             targetDir,
             typeof(CliCommandIntegrationTest),

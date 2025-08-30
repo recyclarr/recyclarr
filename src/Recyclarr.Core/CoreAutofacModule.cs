@@ -276,12 +276,12 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ResourceProviderProcessor>();
 
         builder
-            .RegisterType<GitConfigTemplatesResourceProvider>()
+            .RegisterType<ConfigTemplatesGitRepository>()
             .AsImplementedInterfaces()
             .SingleInstance();
 
         builder
-            .RegisterType<GitTrashGuidesResourceProvider>()
+            .RegisterType<TrashGuidesGitRepository>()
             .AsImplementedInterfaces()
             .SingleInstance();
     }

@@ -596,3 +596,42 @@ Determined split between `Recyclarr.Core` (reusable business logic) and `Recycla
 - Repository classes deleted and replaced by Git resource providers
 - Processor simplified to coordination only
 - Console updater replaced with resource provider initializer
+
+## Phase 5: Modern Architecture Refactoring (Latest Updates)
+
+**Resource Provider Renaming for Domain Clarity:**
+- `GitTrashGuidesResourceProvider` → `TrashGuidesGitRepository` (reflects true domain nature)
+- `GitConfigTemplatesResourceProvider` → `ConfigTemplatesGitRepository` (consistency)
+
+**Repository Directory Structure Modernization:**
+- **Old:** Flat structure `/repos/trash-guides-{name}`, `/repos/config-templates-{name}`
+- **New:** Hierarchical structure:
+  ```
+  repositories/
+  ├── trash-guides/
+  │   ├── official/
+  │   ├── custom-1/
+  │   └── custom-2/
+  └── config-templates/
+      ├── official/
+      ├── custom-1/
+      └── custom-2/
+  ```
+- **Responsibility:** Repository classes handle all path construction below `/repos`, AppPaths unchanged
+
+**Test Infrastructure Overhaul:**
+- **Deleted:** `ResourceProviderTestBuilder` (violated repository conventions)
+- **Deleted:** `TrashRepoFileMapper`, `RemoteRepoFileMapper` (network dependencies in tests)
+- **Created:** `StubRepoUpdater` with embedded test resources (no network calls)
+- **Pattern:** Path-based detection for automatic test data setup
+- **Integration:** Auto-registered in `IntegrationTestFixture` for all Core tests
+
+**Configuration Model Improvements:**
+- **Default Values:** Moved from business logic to `GitRepositorySource` model
+- **Centralization:** All configuration defaults now in models, not scattered in code
+
+**Test Modernization:**
+- **Convention:** Integration tests inherit from `IntegrationTestFixture`, use `Resolve<T>()`
+- **NO AutoFixture:** Integration tests use real DI container
+- **NO Custom Builders:** Follow established repository patterns
+- **Embedded Resources:** Real metadata.json, collection files as test data

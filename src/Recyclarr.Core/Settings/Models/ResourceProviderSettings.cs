@@ -26,7 +26,7 @@ public record GitRepositorySource : IUnderlyingResourceProvider
 {
     public string? Name { get; init; }
     public Uri? CloneUrl { get; init; }
-    public string? Reference { get; init; }
+    public string Reference { get; init; } = "master";
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
