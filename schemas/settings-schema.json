@@ -49,8 +49,8 @@
     "notifications": {
       "$ref": "settings/notifications.json"
     },
-    "data_sources": {
-      "$ref": "settings/data-sources.json"
+    "resource_providers": {
+      "$ref": "settings/resource-providers.json"
     }
   }
 }

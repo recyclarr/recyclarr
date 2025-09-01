@@ -41,7 +41,7 @@ jobs:
       - name: Inspect Code
         uses: muno92/resharper_inspectcode@1.13.0
         with:
-          solutionPath: Recyclarr.sln
+          solutionPath: Recyclarr.slnx
           minimumSeverity: warning
           include: '**.cs'
 

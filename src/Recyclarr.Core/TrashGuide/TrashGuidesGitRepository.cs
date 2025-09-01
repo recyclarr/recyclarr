@@ -120,8 +120,8 @@ internal class TrashGuidesGitRepository(
     {
         var fileName = serviceType switch
         {
-            SupportedServices.Radarr => "docs/Radarr-collection-of-custom-formats.md",
-            SupportedServices.Sonarr => "docs/sonarr-collection-of-custom-formats.md",
+            SupportedServices.Radarr => "docs/Radarr/Radarr-collection-of-custom-formats.md",
+            SupportedServices.Sonarr => "docs/Sonarr/sonarr-collection-of-custom-formats.md",
             _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
         };
 
