@@ -1,47 +1,41 @@
+using System.IO.Abstractions;
+
 namespace Recyclarr.TrashGuide.CustomFormat;
 
 public class CustomFormatsResourceQuery(
-    IEnumerable<ICustomFormatsResourceProvider> customFormatsProviders,
-    IEnumerable<ICustomFormatCategoriesResourceProvider> categoriesProviders,
+    IReadOnlyCollection<ICustomFormatsResourceProvider> customFormatsProviders,
+    IReadOnlyCollection<ICustomFormatCategoriesResourceProvider> categoriesProviders,
     ICustomFormatLoader cfLoader
 ) : ICustomFormatsResourceQuery
 {
-    private readonly Lazy<
-        IReadOnlyDictionary<SupportedServices, ICollection<CustomFormatData>>
-    > _cache = new(() =>
+    private readonly Dictionary<SupportedServices, ICollection<CustomFormatData>> _cache = [];
+
+    public ICollection<CustomFormatData> GetCustomFormatData(SupportedServices serviceType)
     {
-        var result = new Dictionary<SupportedServices, ICollection<CustomFormatData>>();
-
-        // Get category data from all providers (computed once for all services)
-        var categoryData = categoriesProviders
-            .SelectMany(provider => provider.GetCategoryData())
-            .ToList();
-
-        foreach (var serviceType in Enum.GetValues<SupportedServices>())
+        if (_cache.TryGetValue(serviceType, out var cached))
         {
-            // Get custom format directories from all providers for this service
-            var customFormatPaths = customFormatsProviders.SelectMany(provider =>
-                provider.GetCustomFormatPaths(serviceType)
-            );
+            return cached;
+        }
 
-            // For now, we need to adapt to the existing CustomFormatLoader interface
-            // This will need refactoring when we integrate category parsing properly
-            // TODO: Integrate categoryData with CustomFormatLoader when category parsing is implemented
-            _ = categoryData; // Acknowledge variable to suppress warning
-            var paths = new CustomFormatPaths(
-                customFormatPaths.ToList(),
-                null! // We'll handle categories separately for now
-            );
+        // Get custom format directories from all providers for this service
+        var customFormatPaths = customFormatsProviders.SelectMany(provider =>
+            provider.GetCustomFormatPaths(serviceType)
+        );
 
-            result[serviceType] = cfLoader.LoadAllCustomFormatsAtPaths(
-                paths.CustomFormatDirectories,
-                paths.CollectionOfCustomFormatsMarkdown
+        // Get the appropriate category markdown file for this service
+        var categoryFile = categoriesProviders
+            .Select(provider => provider.GetCategoryMarkdownFile(serviceType))
+            .FirstOrDefault(file => file != null);
+
+        if (categoryFile == null)
+        {
+            throw new InvalidOperationException(
+                $"No category markdown file found for service {serviceType}"
             );
         }
 
+        var result = cfLoader.LoadAllCustomFormatsAtPaths(customFormatPaths, categoryFile);
+        _cache[serviceType] = result;
         return result;
-    });
-
-    public ICollection<CustomFormatData> GetCustomFormatData(SupportedServices serviceType) =>
-        _cache.Value[serviceType];
+    }
 }

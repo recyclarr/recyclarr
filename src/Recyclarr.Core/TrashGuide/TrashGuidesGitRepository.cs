@@ -23,7 +23,7 @@ internal class TrashGuidesGitRepository(
 {
     private record ProcessedRepository(IDirectoryInfo RepoPath, RepoMetadata Metadata);
 
-    private readonly List<IDirectoryInfo> _repositoryPaths = [];
+    private readonly Dictionary<string, ProcessedRepository> _processedRepositories = [];
 
     public string Name => "Git Trash Guides Provider";
 
@@ -47,7 +47,8 @@ internal class TrashGuidesGitRepository(
         foreach (var gitRepo in allRepos)
         {
             var repoPath = await UpdateSingleRepository(gitRepo, ct);
-            _repositoryPaths.Add(repoPath);
+            var metadata = DeserializeMetadata(repoPath.File("metadata.json"));
+            _processedRepositories[gitRepo.Name] = new ProcessedRepository(repoPath, metadata);
         }
     }
 
@@ -60,7 +61,7 @@ internal class TrashGuidesGitRepository(
 
         var repoSettings = new GitRepositorySettings
         {
-            CloneUrl = config.CloneUrl!,
+            CloneUrl = config.CloneUrl,
             Branch = config.Reference,
             Sha1 = null,
         };
@@ -70,68 +71,68 @@ internal class TrashGuidesGitRepository(
         return repoPath;
     }
 
-    private IEnumerable<ProcessedRepository> GetProcessedRepositories()
-    {
-        return _repositoryPaths.Select(repoPath =>
-        {
-            var metadata = DeserializeMetadata(repoPath.File("metadata.json"));
-            return new ProcessedRepository(repoPath, metadata);
-        });
-    }
-
     public IEnumerable<IDirectoryInfo> GetCustomFormatPaths(SupportedServices service)
     {
-        return GetProcessedRepositories()
-            .SelectMany(repo =>
+        return _processedRepositories.Values.SelectMany(repo =>
+        {
+            var relativePaths = service switch
             {
-                var relativePaths = service switch
-                {
-                    SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.CustomFormats,
-                    SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.CustomFormats,
-                    _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
-                };
+                SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.CustomFormats,
+                SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.CustomFormats,
+                _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
+            };
 
-                return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
-            });
+            return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
+        });
     }
 
     public IEnumerable<IDirectoryInfo> GetQualitySizePaths(SupportedServices service)
     {
-        return GetProcessedRepositories()
-            .SelectMany(repo =>
+        return _processedRepositories.Values.SelectMany(repo =>
+        {
+            var relativePaths = service switch
             {
-                var relativePaths = service switch
-                {
-                    SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.Qualities,
-                    SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.Qualities,
-                    _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
-                };
+                SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.Qualities,
+                SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.Qualities,
+                _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
+            };
 
-                return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
-            });
+            return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
+        });
     }
 
     public IEnumerable<IDirectoryInfo> GetMediaNamingPaths(SupportedServices service)
     {
-        return GetProcessedRepositories()
-            .SelectMany(repo =>
+        return _processedRepositories.Values.SelectMany(repo =>
+        {
+            var relativePaths = service switch
             {
-                var relativePaths = service switch
-                {
-                    SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.Naming,
-                    SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.Naming,
-                    _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
-                };
+                SupportedServices.Radarr => repo.Metadata.JsonPaths.Radarr.Naming,
+                SupportedServices.Sonarr => repo.Metadata.JsonPaths.Sonarr.Naming,
+                _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
+            };
 
-                return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
-            });
+            return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
+        });
     }
 
-    public ICollection<CustomFormatCategoryItem> GetCategoryData()
+    public IFileInfo? GetCategoryMarkdownFile(SupportedServices serviceType)
     {
-        // For now, return empty collection - we'll implement this properly when we integrate the category parser
-        // The category parser logic will be moved here from CustomFormatLoader
-        return new List<CustomFormatCategoryItem>();
+        var fileName = serviceType switch
+        {
+            SupportedServices.Radarr => "docs/Radarr-collection-of-custom-formats.md",
+            SupportedServices.Sonarr => "docs/sonarr-collection-of-custom-formats.md",
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
+
+        // Get category file from official repository only (explicit name-based lookup)
+        if (_processedRepositories.TryGetValue("official", out var officialRepo))
+        {
+            var file = officialRepo.RepoPath.File(fileName);
+            return file.Exists ? file : null;
+        }
+
+        return null;
     }
 
     private static RepoMetadata DeserializeMetadata(IFileInfo jsonFile)

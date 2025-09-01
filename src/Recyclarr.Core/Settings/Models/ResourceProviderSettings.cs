@@ -21,8 +21,8 @@ public interface IUnderlyingResourceProvider;
 
 public record GitRepositorySource : IUnderlyingResourceProvider
 {
-    public string? Name { get; init; }
-    public Uri? CloneUrl { get; init; }
+    public string Name { get; init; } = "";
+    public Uri CloneUrl { get; init; } = new("about:blank");
     public string Reference { get; init; } = "master";
 }
 

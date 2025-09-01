@@ -1,8 +1,9 @@
+using System.IO.Abstractions;
 using Recyclarr.ResourceProviders;
 
 namespace Recyclarr.TrashGuide.CustomFormat;
 
 public interface ICustomFormatCategoriesResourceProvider : IResourceProvider
 {
-    ICollection<CustomFormatCategoryItem> GetCategoryData();
+    IFileInfo? GetCategoryMarkdownFile(SupportedServices serviceType);
 }

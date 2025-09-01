@@ -33,11 +33,11 @@ public class ConfigTemplatesGitRepository(
     {
         var repoPath = appPaths
             .ReposDirectory.SubDirectory("config-templates")
-            .SubDirectory(config.Name!);
+            .SubDirectory(config.Name);
 
         var repoSettings = new GitRepositorySettings
         {
-            CloneUrl = config.CloneUrl!,
+            CloneUrl = config.CloneUrl,
             Branch = config.Reference,
             Sha1 = null,
         };

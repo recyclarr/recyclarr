@@ -28,8 +28,10 @@ public class GitRepositorySourceValidator : AbstractValidator<GitRepositorySourc
 {
     public GitRepositorySourceValidator()
     {
-        RuleFor(x => x.Name).NotNull().WithMessage("Repository name is required");
-        RuleFor(x => x.CloneUrl).NotNull().WithMessage("Repository clone URL is required");
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Repository name is required");
+        RuleFor(x => x.CloneUrl)
+            .Must(uri => uri.Scheme != "about")
+            .WithMessage("Repository clone URL is required");
     }
 }
 

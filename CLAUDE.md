@@ -136,6 +136,11 @@ dotnet gitversion
 - Target .NET 9.0
 - Zero tolerance for warnings/analysis issues
 
+### Backward Compatibility
+
+**CODE**: No backward compatibility required - refactor freely
+**USER DATA**: Mandatory backward compatibility - YAML configs and settings files must remain functional
+
 ## C# Coding Standards
 
 **MANDATORY:** Follow these modern C# patterns for consistency, performance, and maintainability.
