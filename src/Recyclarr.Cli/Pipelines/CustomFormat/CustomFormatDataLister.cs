@@ -6,7 +6,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideService guide)
+internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatsResourceQuery guide)
 {
     public void List(IConsoleOutputSettings outputSettings, IListCustomFormatSettings settings)
     {

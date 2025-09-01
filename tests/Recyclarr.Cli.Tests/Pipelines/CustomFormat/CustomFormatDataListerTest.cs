@@ -12,7 +12,7 @@ internal sealed class CustomFormatDataListerTest
     [Test, AutoMockData]
     public void Custom_formats_appear_in_console_output(
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
-        [Frozen] ICustomFormatGuideService guide,
+        [Frozen] ICustomFormatsResourceQuery guide,
         IListCustomFormatSettings settings,
         IConsoleOutputSettings outputSettings,
         CustomFormatDataLister sut

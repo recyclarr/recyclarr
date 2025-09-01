@@ -10,7 +10,7 @@ public record Repositories
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record TrashRepository : IRepositorySettings
 {
-    public Uri CloneUrl { get; init; } = new("https://github.com/TRaSH-Guides/Guides.git");
+    public Uri CloneUrl { get; init; } = null!;
     public string Branch { get; init; } = "master";
     public string? Sha1 { get; init; }
 }
@@ -18,7 +18,7 @@ public record TrashRepository : IRepositorySettings
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record ConfigTemplateRepository : IRepositorySettings
 {
-    public Uri CloneUrl { get; init; } = new("https://github.com/recyclarr/config-templates.git");
+    public Uri CloneUrl { get; init; } = null!;
     public string Branch { get; init; } = "master";
     public string? Sha1 { get; init; }
 }

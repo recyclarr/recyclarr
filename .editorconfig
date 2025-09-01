@@ -42,3 +42,6 @@ dotnet_diagnostic.CA2007.severity = none
 
 # Implement standard exception constructors
 dotnet_diagnostic.CA1032.severity = none
+
+# Normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = none

@@ -9,6 +9,27 @@ public class RecyclarrSettingsValidator : AbstractValidator<RecyclarrSettings>
     public RecyclarrSettingsValidator()
     {
         RuleFor(x => x.Notifications).SetValidator(new NotificationSettingsValidator());
+        RuleFor(x => x.ResourceProviders).SetValidator(new ResourceProviderSettingsValidator());
+    }
+}
+
+public class ResourceProviderSettingsValidator : AbstractValidator<ResourceProviderSettings>
+{
+    public ResourceProviderSettingsValidator()
+    {
+        RuleForEach(x => x.TrashGuides.OfType<GitRepositorySource>())
+            .SetValidator(new GitRepositorySourceValidator());
+        RuleForEach(x => x.ConfigTemplates.OfType<GitRepositorySource>())
+            .SetValidator(new GitRepositorySourceValidator());
+    }
+}
+
+public class GitRepositorySourceValidator : AbstractValidator<GitRepositorySource>
+{
+    public GitRepositorySourceValidator()
+    {
+        RuleFor(x => x.Name).NotNull().WithMessage("Repository name is required");
+        RuleFor(x => x.CloneUrl).NotNull().WithMessage("Repository clone URL is required");
     }
 }
 

@@ -14,7 +14,7 @@ internal sealed class CustomFormatConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var guide = fixture.Freeze<ICustomFormatGuideService>();
+        var guide = fixture.Freeze<ICustomFormatsResourceQuery>();
         guide
             .GetCustomFormatData(default!)
             .ReturnsForAnyArgs([NewCf.Data("one", "cf1"), NewCf.Data("two", "cf2")]);
@@ -46,7 +46,7 @@ internal sealed class CustomFormatConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var guide = fixture.Freeze<ICustomFormatGuideService>();
+        var guide = fixture.Freeze<ICustomFormatsResourceQuery>();
         guide.GetCustomFormatData(default!).ReturnsForAnyArgs([NewCf.Data("", "cf4")]);
 
         fixture.Inject<IServiceConfiguration>(

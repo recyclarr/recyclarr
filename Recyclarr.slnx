@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Props/">
+    <File Path=".config/dotnet-tools.json" />
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="GitVersion.yml" />
+    <File Path="renovate.json5" />
+    <File Path="scratch.ignored.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <File Path="tests/.editorconfig" />
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/Recyclarr.Cli.Tests/Recyclarr.Cli.Tests.csproj" />
+    <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
+    <Project Path="tests/Recyclarr.Core.Tests/Recyclarr.Core.Tests.csproj" />
+    <Project Path="tests/Recyclarr.TestLibrary/Recyclarr.TestLibrary.csproj" />
+  </Folder>
+  <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
+  <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
+</Solution>
