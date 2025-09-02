@@ -28,7 +28,14 @@ public class GitRepositorySourceValidator : AbstractValidator<GitRepositorySourc
 {
     public GitRepositorySourceValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().WithMessage("Repository name is required");
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .WithMessage("Repository name is required")
+            .Matches("^[a-zA-Z0-9_-]+$")
+            .WithMessage(
+                "Repository name must contain only letters, numbers, hyphens, and underscores"
+            );
+
         RuleFor(x => x.CloneUrl)
             .Must(uri => uri.Scheme != "about")
             .WithMessage("Repository clone URL is required");
