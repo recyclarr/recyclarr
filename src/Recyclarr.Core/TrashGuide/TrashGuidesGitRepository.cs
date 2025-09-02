@@ -3,6 +3,7 @@ using System.Text.Json;
 using Recyclarr.Json;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.ResourceProviders;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -32,6 +33,9 @@ internal class TrashGuidesGitRepository(
 
     public async Task Initialize(CancellationToken ct)
     {
+        // Clean up legacy Git repository if it exists
+        LegacyRepositoryCleanup.CleanLegacyRepository(RepoParentPath);
+
         // Always include official TRaSH Guides repository first so it may be overridden
         var officialRepo = new GitRepositorySource
         {

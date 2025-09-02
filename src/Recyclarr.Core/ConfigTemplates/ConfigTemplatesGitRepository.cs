@@ -3,6 +3,7 @@ using System.Text.Json;
 using Recyclarr.Json;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.ResourceProviders;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Recyclarr.TrashGuide;
@@ -26,14 +27,17 @@ public class ConfigTemplatesGitRepository(
 {
     private readonly List<IDirectoryInfo> _repositoryPaths = [];
 
+    public string Name => "Git Config Templates Provider";
+
+    public IDirectoryInfo RepoParentPath { get; } =
+        appPaths.ReposDirectory.SubDirectory("config-templates");
+
     private async Task<IDirectoryInfo> ProcessSingleRepository(
         GitRepositorySource config,
         CancellationToken token
     )
     {
-        var repoPath = appPaths
-            .ReposDirectory.SubDirectory("config-templates")
-            .SubDirectory(config.Name);
+        var repoPath = RepoParentPath.SubDirectory(config.Name);
 
         var repoSettings = new GitRepositorySettings
         {
@@ -47,10 +51,11 @@ public class ConfigTemplatesGitRepository(
         return repoPath;
     }
 
-    public string Name => "Git Config Templates Provider";
-
     public async Task Initialize(CancellationToken token)
     {
+        // Clean up legacy Git repository if it exists
+        LegacyRepositoryCleanup.CleanLegacyRepository(RepoParentPath);
+
         // Always include official config templates repository first
         var officialRepo = new GitRepositorySource
         {
