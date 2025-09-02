@@ -152,11 +152,16 @@ tests/
 **YOU MUST use FluentAssertions patterns:**
 
 ### Standard Assertions
-- `result.Should().BeEquivalentTo(expected)`: Deep object comparisons
+- `result.Should().BeEquivalentTo(expected)`: Deep object comparisons (PREFER over multiple property assertions)
 - `act.Should().Throw<ExceptionType>().WithMessage("pattern")`: Exception verification
 - `collection.Should().HaveCount(expected).And.Contain(item)`: Collections
 - `result.Should().Be(true)` / `result.Should().BeFalse()`: Booleans
 - `result.Should().BeNull()` / `result.Should().NotBeNull()`: Null checks
+
+### Object Comparison Best Practices
+- **PREFER**: `result.Should().BeEquivalentTo(expected)` for multi-property object verification
+- **AVOID**: Multiple individual property assertions (`obj.Prop1.Should().Be()`, `obj.Prop2.Should().Be()`)
+- **BENEFIT**: Cleaner, more maintainable tests that are resilient to property additions
 
 ### Advanced Patterns
 - `result.Where(x => condition).Should().BeEquivalentTo(expected)`: Filtered comparisons

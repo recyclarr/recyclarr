@@ -32,6 +32,7 @@ using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
 using Recyclarr.Settings;
+using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -145,6 +146,16 @@ public class CoreAutofacModule : Module
                 typeof(CfQualityProfilesDeprecationCheck)
             )
             .As<IConfigDeprecationCheck>()
+            .OrderByRegistration();
+
+        // Settings Deprecations
+        builder.RegisterType<SettingsDeprecations>();
+        builder
+            .RegisterTypes(
+                // Order-sensitive!
+                typeof(RepositoriesToResourceProvidersDeprecationCheck)
+            )
+            .As<ISettingsDeprecationCheck>()
             .OrderByRegistration();
 
         // These validators are required by IncludePostProcessor
