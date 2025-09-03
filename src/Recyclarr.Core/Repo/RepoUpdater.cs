@@ -1,15 +1,21 @@
 using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Repo;
 
 public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) : IRepoUpdater
 {
+    private static bool IsCommitSha1(string reference)
+    {
+        return Regex.IsMatch(reference, @"^[0-9a-f]{7,40}$", RegexOptions.IgnoreCase);
+    }
+
     public async Task UpdateRepo(
         IDirectoryInfo repoPath,
-        IRepositorySettings repoSettings,
+        GitRepositorySource repositorySource,
         CancellationToken token
     )
     {
@@ -20,7 +26,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         // fresh.
         try
         {
-            await CheckoutAndUpdateRepo(repoPath, repoSettings, token);
+            await CheckoutAndUpdateRepo(repoPath, repositorySource, token);
             succeeded = true;
         }
         catch (GitCmdException e)
@@ -36,32 +42,28 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         {
             log.Warning("Deleting local git repo and retrying git operation due to error");
             repoPath.DeleteReadOnlyDirectory();
-            await CheckoutAndUpdateRepo(repoPath, repoSettings, token);
+            await CheckoutAndUpdateRepo(repoPath, repositorySource, token);
         }
     }
 
     private async Task CheckoutAndUpdateRepo(
         IDirectoryInfo repoPath,
-        IRepositorySettings repoSettings,
+        GitRepositorySource repositorySource,
         CancellationToken token
     )
     {
-        var cloneUrl = repoSettings.CloneUrl;
-        var branch = repoSettings.Branch;
+        var cloneUrl = repositorySource.CloneUrl;
+        var reference = repositorySource.Reference;
 
-        log.Debug("Using Branch & Clone URL: {Branch}, {Url}", branch, cloneUrl);
-        if (repoSettings.Sha1 is not null)
-        {
-            log.Warning("Using explicit SHA1 for local repository: {Sha1}", repoSettings.Sha1);
-        }
+        log.Debug("Using Reference & Clone URL: {Reference}, {Url}", reference, cloneUrl);
 
         using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
             cloneUrl,
             repoPath,
-            branch,
+            reference,
             token
         );
-        await repo.ForceCheckout(token, branch);
+        await repo.ForceCheckout(token, reference);
 
         try
         {
@@ -76,6 +78,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
             );
         }
 
-        await repo.ResetHard(token, repoSettings.Sha1 ?? $"origin/{branch}");
+        var resetTarget = IsCommitSha1(reference) ? reference : $"origin/{reference}";
+        await repo.ResetHard(token, resetTarget);
     }
 }

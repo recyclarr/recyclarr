@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-**IMPORTANT:** This file provides mandatory guidance for Claude Code when working with this repository.
+**IMPORTANT:** This file provides mandatory guidance for Claude Code when working with this
+repository.
 
 ## Project Overview
 
@@ -41,6 +42,7 @@ dotnet gitversion
 ```
 
 **CRITICAL CSHARPIER USAGE FOR AI:**
+
 - **CSharpier is the ONLY authoritative code formatting solution for this project**
 - **NEVER use:** `dotnet csharpier .` (this is WRONG - shows help instead of formatting)
 - **ALWAYS use:** `dotnet csharpier format .` (CORRECT - formats all files in current directory)
@@ -64,14 +66,17 @@ dotnet gitversion
 - **Recyclarr.ServarrApi**: Sonarr/Radarr API clients
 - **Supporting libraries**: Platform, config, logging, notifications
 
-**Pipeline Architecture**: `GenericSyncPipeline<TContext>` phases: Config → API Fetch → Transaction → Persistence → Preview. Shared infrastructure across Sonarr/Radarr.
+**Pipeline Architecture**: `GenericSyncPipeline<TContext>` phases: Config → API Fetch → Transaction
+→ Persistence → Preview. Shared infrastructure across Sonarr/Radarr.
 
 **Dependency Injection**: Autofac with composition root:
+
 - `CompositionRoot`: Application bootstrap/container setup
-- `CoreAutofacModule`: Core services/business logic  
+- `CoreAutofacModule`: Core services/business logic
 - `PipelineAutofacModule`: Pipeline registrations
 
-**Configuration**: YAML with schema validation, templates, environment variables, secrets. Schema: `schemas/config-schema.json`.
+**Configuration**: YAML with schema validation, templates, environment variables, secrets. Schema:
+`schemas/config-schema.json`.
 
 ### Key Services
 
@@ -90,17 +95,20 @@ dotnet gitversion
 ## Key Files and Locations
 
 ### Core Architecture
+
 - `src/Recyclarr.Cli/CompositionRoot.cs`: DI container setup
 - `src/Recyclarr.Core/CoreAutofacModule.cs`: Core services registration
 - `src/Recyclarr.Cli/Pipelines/GenericSyncPipeline.cs`: Pipeline implementation
 
-### Configuration  
+### Configuration
+
 - `Directory.Build.props`: MSBuild/compiler settings
 - `Directory.Packages.props`: Package versions
 - `GitVersion.yml`: Semantic versioning
 - `.editorconfig`: Code formatting
 
 ### Directories
+
 - `src/`: Source code by component
 - `tests/`: Tests mirroring src structure
 - `ci/`: Build/deployment scripts
@@ -111,13 +119,16 @@ dotnet gitversion
 ### Mandatory Development Requirements
 
 **CLAUDE MUST:**
+
 - Run tests after making changes to verify functionality (`dotnet test`)
-- Run `dotnet csharpier format .` on modified files to format them correctly (NEVER use `dotnet csharpier .`)
+- Run `dotnet csharpier format .` on modified files to format them correctly (NEVER use
+  `dotnet csharpier .`)
 - Follow existing repository coding conventions and style
 
-**MANDATORY: ZERO DUPLICATION POLICY**
+MANDATORY: ZERO DUPLICATION POLICY
 
 **AI COMPLIANCE REQUIREMENT - EVERY CODE CHANGE:**
+
 1. **Search first**: `rg "similar_logic"` - Find existing implementations BEFORE writing
 2. **Reuse existing**: Use/extend existing code instead of recreating
 3. **Refactor, don't duplicate**: If similar exists, make it reusable
@@ -129,6 +140,7 @@ dotnet gitversion
 ### Code Style
 
 **YOU MUST:**
+
 - Use nullable reference types throughout
 - Pass CSharpier formatting (`dotnet csharpier format .`) - CSharpier is the ONLY formatting tool
 - Add XML documentation to all new code
@@ -138,17 +150,17 @@ dotnet gitversion
 
 ### Backward Compatibility
 
-**CODE**: No backward compatibility required - refactor freely
-**USER DATA**: Mandatory backward compatibility - YAML configs and settings files must remain functional
+**CODE**: No backward compatibility required - refactor freely **USER DATA**: Mandatory backward
+compatibility - YAML configs and settings files must remain functional
 
 ## C# Coding Standards
 
 **MANDATORY:** Follow these modern C# patterns for consistency, performance, and maintainability.
 
-
 ### Language Features (C# 12/13)
 
 **YOU MUST use:**
+
 - **File-scoped namespaces**: `namespace Recyclarr.Core;` (single line, reduce indentation)
 - **Primary constructors**: `class Service(IDep dep, ILogger logger)` for DI injection
 - **Collection spread operator**: `[..collection1, item2, ..collection2]` for combining collections
@@ -161,25 +173,34 @@ dotnet gitversion
 ### Class Visibility
 
 **YOU MUST use `internal` access modifier for implementation details:**
-- **Library classes with public interfaces**: When a class implements a public interface registered in Autofac, make the class `internal` since only the interface needs external access
-- **Executable application classes**: In leaf projects (CLI applications), ALL classes should be `internal` as they are implementation details with no external dependencies
-- **Service implementations**: Concrete service classes should be `internal` when registered via interface in DI container
-- **Pipeline components**: Pipeline stages, contexts, and handlers should be `internal` unless explicitly designed for extension
 
-**Exception:** Only mark classes `public` when they are genuinely intended for external consumption (e.g., public APIs, extension points, or shared library contracts).
+- **Library classes with public interfaces**: When a class implements a public interface registered
+  in Autofac, make the class `internal` since only the interface needs external access
+- **Executable application classes**: In leaf projects (CLI applications), ALL classes should be
+  `internal` as they are implementation details with no external dependencies
+- **Service implementations**: Concrete service classes should be `internal` when registered via
+  interface in DI container
+- **Pipeline components**: Pipeline stages, contexts, and handlers should be `internal` unless
+  explicitly designed for extension
+
+**Exception:** Only mark classes `public` when they are genuinely intended for external consumption
+(e.g., public APIs, extension points, or shared library contracts).
 
 ### Repository Patterns (Observed)
 
 **YOU MUST follow existing patterns:**
+
 - **Records everywhere**: Use `record` types for all data models and DTOs
 - **Readonly collections**: `IReadOnlyCollection<T>` for return types (established pattern)
-- **Autofac registration**: Static methods in modules, `RegisterTypes()`, `As<T>()`, lifecycle management
+- **Autofac registration**: Static methods in modules, `RegisterTypes()`, `As<T>()`, lifecycle
+  management
 - **LINQ chains**: Extensive use of `SelectMany()`, `Where()`, `ToList()`, `Distinct()`, `OrderBy()`
 - **Nullable reference types**: `#nullable enable` globally (Directory.Build.props)
 
 ### LINQ and Collections
 
 **YOU MUST:**
+
 - **Method chaining over loops**: `collection.Where().SelectMany().ToList()` not `foreach`
 - **Spread for concatenation**: `[..first, ..second]` instead of `Concat()` or `Union()`
 - **Collection initialization**: `ICollection<T> items = [item1, item2];`
@@ -189,15 +210,17 @@ dotnet gitversion
 ### Async/Performance
 
 **YOU MUST:**
+
 - **ValueTask for hot paths**: Use when frequent synchronous completion expected
 - **CancellationToken everywhere**: All async methods must accept CancellationToken
 - **ConfigureAwait(false)**: In library code to avoid deadlocks
-- **Span<T>/Memory<T>**: For performance-critical collection operations
+- **Span\<T>/Memory\<T>**: For performance-critical collection operations
 - **Local functions after control flow**: Prevent unreachable code warnings
 
 ### Testing Standards
 
 **YOU MUST follow existing stack:**
+
 - **NUnit framework**: `[Test]`, `[TestCase]`, `internal sealed class {Name}Test`
 - **NSubstitute mocking**: `Freeze<T>()`, `Returns()`, `ReturnsForAnyArgs()`
 - **AutoFixture data**: `[AutoMockData]`, `fixture.Create<T>()`
@@ -207,6 +230,7 @@ dotnet gitversion
 ### Autofac DI Patterns
 
 **YOU MUST follow established patterns:**
+
 - **Module registration**: Static methods like `RegisterCache(ContainerBuilder builder)`
 - **Lifecycle management**: `SingleInstance()`, `InstancePerLifetimeScope()`
 - **Interface binding**: `RegisterType<Impl>().As<IInterface>()`
@@ -216,6 +240,7 @@ dotnet gitversion
 ### Testing
 
 **YOU MUST:**
+
 - Write comprehensive unit tests for all new functionality
 - Use NSubstitute for mocking + AutoFixture for data
 - Follow existing patterns in test libraries
@@ -229,6 +254,7 @@ dotnet gitversion
 ## Common Patterns
 
 ### Adding New Sync Types
+
 1. Create pipeline context in `Recyclarr.Core/Pipelines/`
 2. Implement pipeline stages (inherit from base classes)
 3. Register in `PipelineAutofacModule`
@@ -236,12 +262,14 @@ dotnet gitversion
 5. Create comprehensive tests
 
 ### Service Integration
+
 - Inherit from `ServiceCommand` (CLI commands)
 - Use `IServarrApi` (API communication)
 - Implement `IServiceCompatibility` (version checking)
 - Add FluentValidation
 
 ### Configuration Extensions
+
 - Update `schemas/config-schema.json`
 - Add post-processing in configuration pipeline
 - Support environment variables/secrets

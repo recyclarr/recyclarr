@@ -38,16 +38,7 @@ public class ConfigTemplatesGitRepository(
     )
     {
         var repoPath = RepoParentPath.SubDirectory(config.Name);
-
-        var repoSettings = new GitRepositorySettings
-        {
-            CloneUrl = config.CloneUrl,
-            Branch = config.Reference,
-            Sha1 = null,
-        };
-
-        await repoUpdater.UpdateRepo(repoPath, repoSettings, token);
-
+        await repoUpdater.UpdateRepo(repoPath, config, token);
         return repoPath;
     }
 
@@ -135,12 +126,5 @@ public class ConfigTemplatesGitRepository(
         }
 
         return obj;
-    }
-
-    private class GitRepositorySettings : IRepositorySettings
-    {
-        public Uri CloneUrl { get; init; } = null!;
-        public string Branch { get; init; } = "master";
-        public string? Sha1 { get; init; }
     }
 }

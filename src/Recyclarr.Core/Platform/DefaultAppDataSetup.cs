@@ -26,7 +26,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         return paths;
     }
 
-    private string GetAppDataDirectory(string appDataDirectoryOverride)
+    private string GetAppDataDirectory(string? appDataDirectoryOverride)
     {
         if (string.IsNullOrEmpty(appDataDirectoryOverride))
         {

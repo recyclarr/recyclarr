@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Recyclarr.Repo;
-using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.TestLibrary;
@@ -10,7 +10,7 @@ public class StubRepoUpdater(MockFileSystem fileSystem) : IRepoUpdater
 {
     public Task UpdateRepo(
         IDirectoryInfo repoPath,
-        IRepositorySettings repoSettings,
+        GitRepositorySource repositorySource,
         CancellationToken token
     )
     {

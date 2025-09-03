@@ -62,16 +62,7 @@ internal class TrashGuidesGitRepository(
     )
     {
         var repoPath = RepoParentPath.SubDirectory(config.Name);
-
-        var repoSettings = new GitRepositorySettings
-        {
-            CloneUrl = config.CloneUrl,
-            Branch = config.Reference,
-            Sha1 = null,
-        };
-
-        await repoUpdater.UpdateRepo(repoPath, repoSettings, ct);
-
+        await repoUpdater.UpdateRepo(repoPath, config, ct);
         return repoPath;
     }
 
@@ -153,12 +144,5 @@ internal class TrashGuidesGitRepository(
         }
 
         return obj;
-    }
-
-    private class GitRepositorySettings : IRepositorySettings
-    {
-        public Uri CloneUrl { get; init; } = null!;
-        public string Branch { get; init; } = "master";
-        public string? Sha1 { get; init; }
     }
 }
