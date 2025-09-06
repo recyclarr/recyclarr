@@ -5,5 +5,5 @@ auto_install = true
 "asdf:dotnet" = "9"
 "dotnet:csharpier" = "1.1.2"
 "dotnet:gitversion.tool" = "6.3.0"
-"dotnet:dotnet-sonarscanner" = "10.2.0"
+"dotnet:dotnet-sonarscanner" = "10.3.0"
 "dotnet:jetbrains.resharper.globaltools" = "2025.1.3"
