@@ -120,6 +120,7 @@ internal class PipelineAutofacModule : Module
         builder.RegisterType<CustomFormatDataLister>();
         builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
         builder.RegisterType<CustomFormatTransactionLogger>();
+        builder.RegisterType<DuplicateCustomFormatRenderer>();
 
         builder
             .RegisterTypes(

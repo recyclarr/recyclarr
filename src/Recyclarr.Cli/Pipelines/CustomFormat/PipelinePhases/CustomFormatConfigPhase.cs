@@ -16,6 +16,12 @@ internal class CustomFormatConfigPhase(
 {
     public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
+        // Get custom format data with duplicate detection
+        var formatDataResult = guide.GetCustomFormatData(config.ServiceType);
+
+        // Store duplicate information in context for later reporting
+        context.DuplicateFormats = formatDataResult.Duplicates;
+
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //
         // This solution is conservative: CustomFormatData is only created for CFs in the guide that are
@@ -27,7 +33,7 @@ internal class CustomFormatConfigPhase(
             .CustomFormats.SelectMany(x => x.TrashIds)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .GroupJoin(
-                guide.GetCustomFormatData(config.ServiceType),
+                formatDataResult.CustomFormats,
                 x => x,
                 x => x.TrashId,
                 (id, cf) => (Id: id, CustomFormats: cf)

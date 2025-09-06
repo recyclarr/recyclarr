@@ -15,7 +15,8 @@ namespace Recyclarr.TrashGuide;
 internal class TrashGuidesGitRepository(
     ISettings<ResourceProviderSettings> settings,
     IRepoUpdater repoUpdater,
-    IAppPaths appPaths
+    IAppPaths appPaths,
+    ILogger log
 )
     : ICustomFormatsResourceProvider,
         IQualitySizeResourceProvider,
@@ -27,6 +28,13 @@ internal class TrashGuidesGitRepository(
     private readonly Dictionary<string, ProcessedRepository> _processedRepositories = [];
 
     public string Name => "Git Trash Guides Provider";
+
+    public string GetSourceDescription()
+    {
+        var repoCount = _processedRepositories.Count;
+        var repoNames = string.Join(", ", _processedRepositories.Keys);
+        return $"Git Repositories ({repoCount}): {repoNames}";
+    }
 
     public IDirectoryInfo RepoParentPath { get; } =
         appPaths.ReposDirectory.SubDirectory("trash-guides");
@@ -44,15 +52,39 @@ internal class TrashGuidesGitRepository(
             Reference = "master",
         };
 
-        var allRepos = new[] { officialRepo }.Concat(
-            settings.Value.TrashGuides.OfType<GitRepositorySource>()
+        var allRepos = new[] { officialRepo }
+            .Concat(settings.Value.TrashGuides.OfType<GitRepositorySource>())
+            .ToList();
+
+        log.Debug(
+            "TrashGuidesGitRepository.Initialize: Processing {RepoCount} repositories",
+            allRepos.Count
         );
+        foreach (var repo in allRepos)
+        {
+            log.Debug(
+                "  - Name: '{Name}', CloneUrl: '{CloneUrl}', Reference: '{Reference}'",
+                repo.Name,
+                repo.CloneUrl,
+                repo.Reference
+            );
+        }
 
         foreach (var gitRepo in allRepos)
         {
+            log.Debug(
+                "TrashGuidesGitRepository.Initialize: Processing repo '{Name}' at '{CloneUrl}'",
+                gitRepo.Name,
+                gitRepo.CloneUrl
+            );
             var repoPath = await UpdateSingleRepository(gitRepo, ct);
             var metadata = DeserializeMetadata(repoPath.File("metadata.json"));
             _processedRepositories[gitRepo.Name] = new ProcessedRepository(repoPath, metadata);
+            log.Debug(
+                "TrashGuidesGitRepository.Initialize: Added repo '{Name}' to _processedRepositories (total: {Total})",
+                gitRepo.Name,
+                _processedRepositories.Count
+            );
         }
     }
 
@@ -68,7 +100,15 @@ internal class TrashGuidesGitRepository(
 
     public IEnumerable<IDirectoryInfo> GetCustomFormatPaths(SupportedServices service)
     {
-        return _processedRepositories.Values.SelectMany(repo =>
+        log.Debug("GetCustomFormatPaths called for service {Service}", service);
+        log.Debug(
+            "Available repositories: {RepoNames}",
+            string.Join(", ", _processedRepositories.Keys)
+        );
+
+        var allPaths = new List<IDirectoryInfo>();
+
+        foreach (var repo in _processedRepositories.Values)
         {
             var relativePaths = service switch
             {
@@ -77,8 +117,19 @@ internal class TrashGuidesGitRepository(
                 _ => throw new ArgumentOutOfRangeException(nameof(service), service, null),
             };
 
-            return relativePaths.Select(path => repo.RepoPath.SubDirectory(path));
-        });
+            var repoPaths = relativePaths.Select(path => repo.RepoPath.SubDirectory(path)).ToList();
+            log.Debug(
+                "Repository '{RepoPath}' contributes {PathCount} paths: {Paths}",
+                repo.RepoPath.FullName,
+                repoPaths.Count,
+                string.Join(", ", repoPaths.Select(p => p.FullName))
+            );
+
+            allPaths.AddRange(repoPaths);
+        }
+
+        log.Debug("Total custom format paths returned: {TotalCount}", allPaths.Count);
+        return allPaths;
     }
 
     public IEnumerable<IDirectoryInfo> GetQualitySizePaths(SupportedServices service)

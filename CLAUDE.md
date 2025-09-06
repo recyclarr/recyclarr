@@ -282,6 +282,16 @@ compatibility - YAML configs and settings files must remain functional
 
 Configs: YAML with schema validation and templates.
 
+## Logging Standards
+
+**YOU MUST follow Serilog logging patterns:**
+
+- **NEVER use Console.WriteLine**: Always inject `ILogger` from Serilog for all logging
+- **Debug()**: Debugging and diagnostics; only visible with `-d|--debug` option
+- **Information()**: Normal operation status visible to users; use sparingly to avoid spam
+- **Warning()**: Non-critical issues needing user attention (deprecated features, skipped data)
+- **Error()**: Critical issues requiring user intervention (exceptions, blocking errors)
+
 ## Key Dependencies
 
 - **Spectre.Console**: CLI framework

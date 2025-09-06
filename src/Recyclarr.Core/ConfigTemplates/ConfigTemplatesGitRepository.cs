@@ -29,6 +29,12 @@ public class ConfigTemplatesGitRepository(
 
     public string Name => "Git Config Templates Provider";
 
+    public string GetSourceDescription()
+    {
+        var repoCount = _repositoryPaths.Count;
+        return $"Config Template Repositories ({repoCount})";
+    }
+
     public IDirectoryInfo RepoParentPath { get; } =
         appPaths.ReposDirectory.SubDirectory("config-templates");
 

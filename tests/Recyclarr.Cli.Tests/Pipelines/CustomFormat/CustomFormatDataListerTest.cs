@@ -20,7 +20,9 @@ internal sealed class CustomFormatDataListerTest
     {
         var testData = new[] { NewCf.Data("First", "123"), NewCf.Data("Second", "456") };
 
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
+        guide
+            .GetCustomFormatData(default!)
+            .ReturnsForAnyArgs(new CustomFormatDataResult(testData, []));
         settings.ScoreSets.Returns(false);
 
         sut.List(outputSettings, settings);

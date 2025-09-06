@@ -12,5 +12,6 @@ internal class CustomFormatPipelineContext : PipelineContext
     public IList<CustomFormatData> ApiFetchOutput { get; init; } = [];
     public CustomFormatTransactionData TransactionOutput { get; set; } = null!;
     public IReadOnlyCollection<string> InvalidFormats { get; set; } = null!;
+    public IReadOnlyCollection<DuplicateCustomFormatInfo> DuplicateFormats { get; set; } = [];
     public CustomFormatCache Cache { get; set; } = null!;
 }
