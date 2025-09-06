@@ -34,7 +34,7 @@ There are two recommended ways to use CSharpier:
   save for automatic reformatting.
 
 1. **CLI Tool**<br/>
-   Install tooling: `dotnet tool restore` at the repo root. Format all C# files with `dotnet
+   Install tooling: `mise install` at the repo root. Format all C# files with `dotnet
    csharpier .`, or format specific areas with `dotnet csharpier path/to/directory`.
 
 ## Required Tools

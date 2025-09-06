@@ -13,9 +13,6 @@ on:
       skip-test:
         type: boolean
 
-env:
-  dotnetVersion: 9.0.x
-
 jobs:
   build:
     name: Build, Test, Smoke
@@ -28,10 +25,8 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
-      - name: Setup .NET Core SDK ${{ env.dotnetVersion }}
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
+      - name: Setup mise
+        uses: ./.github/actions/setup-mise
 
       - name: Test
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
