@@ -16,7 +16,6 @@ on:
 env:
   baseRef: ${{ github.ref == 'refs/heads/master' && github.event.before ||
               (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
-  dotnetVersion: 9.0.x
 
 permissions: read-all
 
@@ -30,10 +29,8 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
+      - name: Setup mise
+        uses: ./.github/actions/setup-mise
 
       - name: Restore
         run: dotnet restore
@@ -57,18 +54,14 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
+      - name: Setup mise
+        uses: ./.github/actions/setup-mise
 
       # - name: Build
       #   run: dotnet build
 
       - name: Run Code Cleanup
-        run: |
-          dotnet tool restore
-          ci/code_cleanup.sh
+        run: ci/code_cleanup.sh
 
       - name: Check Diff
         run: |
@@ -90,12 +83,8 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.dotnetVersion }}
+      - name: Setup mise
+        uses: ./.github/actions/setup-mise
 
       - name: Run CSharpier
-        run: |
-          dotnet tool restore
-          dotnet csharpier --check .
+        run: dotnet csharpier --check .
