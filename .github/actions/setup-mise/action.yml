@@ -6,7 +6,6 @@ runs:
     - name: Setup mise
       uses: jdx/mise-action@v2
       env:
-        RUST_BACKTRACE: 1
         DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         DOTNET_NOLOGO: 1
@@ -14,8 +13,3 @@ runs:
         experimental: true
         log_level: trace
         reshim: true
-
-#    - name: Add mise to PATH
-#      run: |
-#        echo "$HOME/.local/share/mise/bin" >> $GITHUB_PATH
-#        echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
