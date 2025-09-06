@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-dotnet jb cleanupcode Recyclarr.sln \
-  --settings="Recyclarr.sln.DotSettings" \
+dotnet jb cleanupcode Recyclarr.slnx \
+  --settings="Recyclarr.slnx.DotSettings" \
   --profile="Recyclarr Cleanup" \
   --include="**.cs"
