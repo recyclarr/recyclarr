@@ -10,7 +10,7 @@
     <PackageVersion Include="Autofac.Extras.AggregateService" Version="6.1.2" />
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
-    <PackageVersion Include="AutoMapper" Version="14.0.0" />
+    <PackageVersion Include="AutoMapper" Version="15.0.1" />
     <PackageVersion Include="AutoMapper.Contrib.Autofac.DependencyInjection" Version="9.0.0" />
     <PackageVersion Include="CliWrap" Version="3.9.0" />
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
