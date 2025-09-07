@@ -38,8 +38,8 @@ jobs:
         with:
           fetch-depth: 0 # avoid shallow clone for better analysis
 
-      - name: Setup mise
-        uses: ./.github/actions/setup-mise
+      - name: Setup .NET & Tools
+        uses: ./.github/actions/setup-dotnet
 
       - name: Run Qodana Analysis
         uses: JetBrains/qodana-action@v2025.2.1

@@ -1,3 +1,3 @@
 #!/usr/bin/env pwsh
-mise install
+dotnet tool restore
 Install-Module -Force -Name ChangelogManagement
