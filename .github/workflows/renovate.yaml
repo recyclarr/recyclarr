@@ -34,17 +34,17 @@ jobs:
     if: github.event_name != 'issue_comment' || contains(github.event.comment.body, '- [x]')
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
     - name: Generate App Token
       id: generate-token
-      uses: actions/create-github-app-token@v2
+      uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2
       with:
         app-id: ${{ secrets.RENOVATE_APP_ID }}
         private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
 
     - name: Self-hosted Renovate
-      uses: renovatebot/github-action@v43.0.7
+      uses: renovatebot/github-action@85b17ebd5abf43d1c34c01bd4c8dbb8d45bbc2c7 # v43.0.7
       with:
         token: ${{ steps.generate-token.outputs.token }}
       env:

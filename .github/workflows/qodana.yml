@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           fetch-depth: 0 # avoid shallow clone for better analysis
 
@@ -42,14 +42,14 @@ jobs:
         uses: ./.github/actions/setup-dotnet
 
       - name: Run Qodana Analysis
-        uses: JetBrains/qodana-action@v2025.2.1
+        uses: JetBrains/qodana-action@27de2a744479d1d731934eeaf79287575ebc5dd3 # v2025.2.1
         with:
           upload-result: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
         if: success() || failure()
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
