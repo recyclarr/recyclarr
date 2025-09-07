@@ -7,15 +7,16 @@ on:
     branches: ["**"]
     paths:
       - .github/workflows/inspect-code.yml
-      - '**.cs'
+      - "**.cs"
   pull_request:
     paths:
       - .github/workflows/inspect-code.yml
-      - '**.cs'
+      - "**.cs"
 
 env:
-  baseRef: ${{ github.ref == 'refs/heads/master' && github.event.before ||
-              (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
+  baseRef: >-
+    ${{ github.ref == 'refs/heads/master' && github.event.before ||
+    (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
 
 permissions: read-all
 
@@ -40,14 +41,25 @@ jobs:
         with:
           solutionPath: Recyclarr.slnx
           minimumSeverity: warning
-          include: '**.cs'
+          include: "**.cs"
 
+  # DISABLED: ReSharper CLI tools don't properly support SLNX format yet
+  # This causes the tool to run in "solution-less mode" which limits functionality
+  # and results in "No items were found to cleanup" errors (exit code 3)
+  #
+  # Related JetBrains YouTrack issues:
+  # - RSRP-501603: "Resharper .slnx support failures/problems"
+  # - RSRP-500988: "ReSharper build doesn't work for solution in slnx format"
+  # - RSRP-501504: "Cannot resolve symbol from C++/CLR with slnx solution"
+  #
+  # See also: https://blog.jetbrains.com/dotnet/2024/10/04/support-for-slnx-solution-files/
+  # Quote: "The .NET CLI and MSBuild don't yet support SLNX files"
+  #
+  # TODO: Re-enable when ReSharper CLI tools gain full SLNX support
   cleanup:
+    if: false # Remove when above issue is resolved
     name: Resharper Code Cleanup
     runs-on: ubuntu-latest
-    # Temporarily disable this job until this issue is resolved:
-    # https://youtrack.jetbrains.com/issue/RSRP-499679
-    if: false
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -57,11 +69,16 @@ jobs:
       - name: Setup .NET & Tools
         uses: ./.github/actions/setup-dotnet
 
-      # - name: Build
-      #   run: dotnet build
-
       - name: Run Code Cleanup
-        run: ci/code_cleanup.sh
+        run: >-
+          dotnet jb cleanupcode Recyclarr.slnx
+          --settings="Recyclarr.slnx.DotSettings"
+          --profile="Recyclarr Cleanup"
+          --include="**.cs"
+          --no-updates
+          --verbosity=TRACE
+          --LogLevel=TRACE
+          --debug
 
       - name: Check Diff
         run: |
@@ -74,7 +91,7 @@ jobs:
         if: failure()
         with:
           name: code-cleanup-patch-files
-          path: '*.patch'
+          path: "*.patch"
 
   style:
     name: CSharpier Style
@@ -87,4 +104,4 @@ jobs:
         uses: ./.github/actions/setup-dotnet
 
       - name: Run CSharpier
-        run: dotnet csharpier --check .
+        run: dotnet csharpier check .
