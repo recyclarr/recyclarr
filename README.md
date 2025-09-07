@@ -2,7 +2,7 @@
 
 [![GitHub License](https://img.shields.io/github/license/recyclarr/recyclarr)](https://github.com/recyclarr/recyclarr/blob/master/LICENSE)
 [![Build Workflow Status](https://img.shields.io/github/actions/workflow/status/recyclarr/recyclarr/build.yml?branch=master&logo=githubactions)](https://github.com/recyclarr/recyclarr/actions/workflows/build.yml?query=branch%3Amaster)
-[![Qodana](https://github.com/recyclarr/recyclarr/actions/workflows/qodana.yml/badge.svg)](https://github.com/recyclarr/recyclarr/actions/workflows/qodana.yml)
+[![Qodana](https://github.com/recyclarr/recyclarr/actions/workflows/qodana.yml/badge.svg)](https://qodana.cloud/projects/p5QRr)
 [![GitHub Release](https://img.shields.io/github/v/release/recyclarr/recyclarr?logo=github)](https://github.com/recyclarr/recyclarr/releases/)
 [![Discord](https://img.shields.io/discord/492590071455940612?label=TRaSH-Guides&logo=discord)][discord]
 
