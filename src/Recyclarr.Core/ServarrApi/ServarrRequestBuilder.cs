@@ -29,10 +29,6 @@ public class ServarrRequestBuilder(
         return client.Request(path).WithHeader("X-Api-Key", config.ApiKey);
     }
 
-    [SuppressMessage(
-        "SonarCloud",
-        "S4830:Server certificates should be verified during SSL/TLS connections"
-    )]
     [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
     private void Configure(IFlurlClientBuilder builder)
     {
