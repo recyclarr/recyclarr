@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Qodana
+
+on:
+  push:
+    # Explicitly specifying this results in tags being ignored
+    branches: ["**"]
+    paths:
+      - .github/workflows/qodana.yml
+      - qodana.yaml
+      - "**.props"
+      - "src/**"
+      - "tests/**"
+      - "ci/**"
+
+  pull_request:
+    paths:
+      - .github/workflows/qodana.yml
+      - qodana.yaml
+      - "**.props"
+      - "src/**"
+      - "tests/**"
+      - "ci/**"
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  qodana:
+    name: Qodana Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # avoid shallow clone for better analysis
+
+      - name: Setup mise
+        uses: ./.github/actions/setup-mise
+
+      - name: Run Qodana Analysis
+        uses: JetBrains/qodana-action@v2025.2.1
+        with:
+          upload-result: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: success() || failure()
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+          category: qodana
