@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider,sonarqube
-# Edit at https://www.toptal.com/developers/gitignore?templates=archives,windows,macos,csharp,rider,sonarqube
+# Created by https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider
+# Edit at https://www.toptal.com/developers/gitignore?templates=archives,windows,macos,csharp,rider
 
 ### Archives ###
 # It's better to unpack these files and commit the raw source because
@@ -541,19 +541,6 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 **/.idea/caches/build_file_checksums.ser
 
-### SonarQube ###
-# SonarQube ignore files.
-#
-# https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner
-# Sonar Scanner working directories
-.sonar/
-.sonarqube/
-.scannerwork/
-
-# http://www.sonarlint.org/commandline/
-# SonarLint working directories, configuration files (including credentials)
-.sonarlint/
-
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
@@ -575,4 +562,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider,sonarqube
+# End of https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider

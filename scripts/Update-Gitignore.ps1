@@ -14,7 +14,7 @@ Function gig {
     Set-Content -Path $gitIgnorePath -Encoding utf8 -NoNewline
 }
 
-gig archives,windows,macos,csharp,rider,sonarqube
+gig archives,windows,macos,csharp,rider
 
 # Replace specific ignore patterns
 $(Get-Content $gitIgnorePath) `
