@@ -21,28 +21,6 @@ env:
 permissions: read-all
 
 jobs:
-  inspect:
-    name: Resharper Inspect Code
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # avoid shallow clone for GitVersion
-
-      - name: Setup .NET & Tools
-        uses: ./.github/actions/setup-dotnet
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Inspect Code
-        uses: muno92/resharper_inspectcode@1.13.0
-        with:
-          solutionPath: Recyclarr.slnx
-          minimumSeverity: warning
-          include: "**.cs"
-
   # DISABLED: ReSharper CLI tools don't properly support SLNX format yet
   # This causes the tool to run in "solution-less mode" which limits functionality
   # and results in "No items were found to cleanup" errors (exit code 3)

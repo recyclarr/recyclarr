@@ -19,6 +19,7 @@ and expectations for all contributors.
 ### C# Code Requirements
 
 - Code must be free of warnings and analysis issues (zero tolerance policy)
+- Code quality is enforced via [Qodana] analysis in CI/CD
 - All new code must use the "Recyclarr Cleanup" [Code Cleanup] profile for code quality and
   redundancy fixes
 - All new code must be formatted with [CSharpier] for consistent code style
@@ -183,6 +184,7 @@ branch.
    ```
 
 [markdownlint]: https://github.com/DavidAnson/markdownlint
+[Qodana]: https://www.jetbrains.com/qodana/
 [Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
 [CSharpier]: https://csharpier.com/
 [csharpier_plugins]: https://csharpier.com/docs/Editors
