@@ -91,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The node `quality_profiles` under `custom_formats` was renamed to `assign_scores_to` to
   disambiguate it from the top-level `quality_profiles`. The old name is deprecated until the next
-  major release. See [here][qp_rename] for details.
+  major release. See the [upgrade guide][qp_rename] for details.
 - Quality Definition: Improved information about sync result in console output.
 
 [qp_rename]: https://recyclarr.dev/wiki/upgrade-guide/v8.0/#assign-scores-to
@@ -448,11 +448,11 @@ changes you may need to make.
 - `replace_existing_custom_formats` must be explicitly specified, otherwise you will get a
   deprecation warning. In a future release, the default will change from `true` to `false`. To
   prepare for that, users must explicitly state what behavior they want to avoid unwanted behavior
-  in the future. Read more
-  [here](https://recyclarr.dev/wiki/upgrade-guide/v5.0#replace-existing-custom-formats).
+  in the future. Read more on the [upgrade
+  guide](https://recyclarr.dev/wiki/upgrade-guide/v5.0#replace-existing-custom-formats).
 - `reset_unmatched_scores` is being moved to the `quality_profiles` section; a deprecation message
-  will be logged until it is moved. Read more
-  [here](https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores).
+  will be logged until it is moved. Read more on the [upgrade
+  guide](https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores).
 
 ### Fixed
 
@@ -648,7 +648,7 @@ the executable has been removed.
 - For both Sonarr and Radarr, the custom formats in the output of `--list-custom-formats` are now
   grouped by their category, as determined by the tables at the top of the "Collection of custom
   formats" pages in the guide for each service.
-- Recyclarr's Docker image is now available on Docker Hub! [Link][dockerhub]
+- Recyclarr's Docker image is now available on [Docker Hub][dockerhub]!
 
 [dockerhub]: https://hub.docker.com/r/recyclarr/recyclarr
 
