@@ -15,7 +15,7 @@ internal class RecyclarrConsoleSettings(IEnvironment env, IAnsiConsole console, 
             console.Profile.Out.IsTerminal,
         };
 
-        log.Information("Console Output Settings {@Settings}", rawConfig);
+        log.Debug("Console Output Settings {@Settings}", rawConfig);
         return new ConsoleOutputSettings
         {
             IsRawOutputEnabled =

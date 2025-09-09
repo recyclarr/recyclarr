@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Autofac;
 using Autofac.Extras.Ordering;
-using AutoMapper.Contrib.Autofac.DependencyInjection;
 using FluentValidation;
 using Flurl.Http.Configuration;
 using Recyclarr.Cache;
@@ -90,10 +89,8 @@ public class CoreAutofacModule : Module
         builder.RegisterType<RadarrCapabilityEnforcer>();
     }
 
-    private void RegisterConfig(ContainerBuilder builder)
+    private static void RegisterConfig(ContainerBuilder builder)
     {
-        builder.RegisterAutoMapper(ThisAssembly);
-
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
         builder.RegisterType<ConfigurationRegistry>();

@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extras.Ordering;
-using AutoMapper.Contrib.Autofac.DependencyInjection;
 using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Setup;
@@ -40,8 +39,6 @@ internal static class CompositionRoot
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
         builder.RegisterType<ConsoleMultiRepoUpdater>();
-
-        builder.RegisterAutoMapper(thisAssembly);
 
         CliRegistrations(builder);
         RegisterMigrations(builder);
