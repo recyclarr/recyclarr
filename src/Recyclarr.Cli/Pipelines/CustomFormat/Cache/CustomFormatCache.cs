@@ -19,12 +19,29 @@ internal record CustomFormatCacheObject() : CacheObject(1)
     public List<TrashIdMapping> TrashIdMappings { get; set; } = [];
 }
 
-internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCache(cacheObject)
+internal class CustomFormatCache(CustomFormatCacheObject cacheObject, ILogger logger) : BaseCache(cacheObject)
 {
     public IReadOnlyList<TrashIdMapping> TrashIdMappings => cacheObject.TrashIdMappings;
 
+    private void LogCacheState(string context)
+    {
+        logger.Debug("Cache state at {Context}: {Count} mappings", context, cacheObject.TrashIdMappings.Count);
+        foreach (var mapping in cacheObject.TrashIdMappings)
+        {
+            logger.Debug("  - {TrashId} ({Name}) -> ID {Id}", mapping.TrashId, mapping.CustomFormatName, mapping.CustomFormatId);
+        }
+        
+        var duplicateGroups = cacheObject.TrashIdMappings.GroupBy(x => x.CustomFormatId).Where(g => g.Count() > 1);
+        foreach (var group in duplicateGroups)
+        {
+            logger.Warning("  DUPLICATE ID {Id}: {Count} entries", group.Key, group.Count());
+        }
+    }
+
     public void Update(CustomFormatTransactionData transactions)
     {
+        LogCacheState("Update - BEFORE");
+        
         // Assume that RemoveStale() is called before this method, and that TrashIdMappings contains existing CFs
         // in the remote service that we want to keep and update.
 
@@ -32,8 +49,59 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCach
             .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
             .Concat(transactions.NewCustomFormats);
 
-        cacheObject.TrashIdMappings = cacheObject
-            .TrashIdMappings.DistinctBy(x => x.CustomFormatId)
+        logger.Debug("Update: Processing {UpdatedCount} updated, {UnchangedCount} unchanged, {NewCount} new CFs",
+            transactions.UpdatedCustomFormats.Count, 
+            transactions.UnchangedCustomFormats.Count, 
+            transactions.NewCustomFormats.Count);
+            
+        foreach (var cf in existingCfs)
+        {
+            logger.Debug("  Transaction CF: {TrashId} ({Name}) -> ID {Id}", cf.TrashId, cf.Name, cf.Id);
+        }
+
+        var beforeDistinct = cacheObject.TrashIdMappings.ToList();
+        var afterDistinct = beforeDistinct.DistinctBy(x => x.CustomFormatId).ToList();
+        
+        if (beforeDistinct.Count != afterDistinct.Count)
+        {
+            logger.Warning("DistinctBy removed {Removed} duplicate mappings ({Before} -> {After})", 
+                beforeDistinct.Count - afterDistinct.Count, beforeDistinct.Count, afterDistinct.Count);
+                
+            var removedIds = beforeDistinct.GroupBy(x => x.CustomFormatId).Where(g => g.Count() > 1).Select(g => g.Key);
+            foreach (var removedId in removedIds)
+            {
+                var duplicates = beforeDistinct.Where(x => x.CustomFormatId == removedId).ToList();
+                logger.Debug("  Removed duplicates for ID {Id}:", removedId);
+                foreach (var dup in duplicates.Skip(1))
+                {
+                    logger.Debug("    Removed: {TrashId} ({Name}) -> ID {Id}", dup.TrashId, dup.CustomFormatName, dup.CustomFormatId);
+                }
+            }
+        }
+
+        logger.Debug("About to join - LEFT side (cache after DistinctBy): {Count} entries", afterDistinct.Count);
+        foreach (var left in afterDistinct)
+        {
+            logger.Debug("  LEFT: {TrashId} ({Name}) -> ID {Id}", left.TrashId, left.CustomFormatName, left.CustomFormatId);
+        }
+
+        logger.Debug("About to join - RIGHT side (transaction CFs): {Count} entries", existingCfs.Count());
+        foreach (var right in existingCfs)
+        {
+            logger.Debug("  RIGHT: {TrashId} ({Name}) -> ID {Id}", right.TrashId, right.Name, right.Id);
+        }
+
+        var duplicateTransactionIds = existingCfs.GroupBy(x => x.Id).Where(g => g.Count() > 1);
+        foreach (var group in duplicateTransactionIds)
+        {
+            logger.Warning("  DUPLICATE TRANSACTION ID {Id}: {Count} entries", group.Key, group.Count());
+            foreach (var dup in group)
+            {
+                logger.Warning("    - {TrashId} ({Name}) -> ID {Id}", dup.TrashId, dup.Name, dup.Id);
+            }
+        }
+
+        cacheObject.TrashIdMappings = afterDistinct
             .Where(x =>
                 transactions.DeletedCustomFormats.All(y => y.CustomFormatId != x.CustomFormatId)
             )
@@ -51,13 +119,26 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCach
             .Where(x => x.CustomFormatId != 0)
             .OrderBy(x => x.CustomFormatId)
             .ToList();
+            
+        LogCacheState("Update - AFTER");
     }
 
     public void RemoveStale(IEnumerable<CustomFormatData> serviceCfs)
     {
+        LogCacheState("RemoveStale - BEFORE");
+        
+        var beforeCount = cacheObject.TrashIdMappings.Count;
         cacheObject.TrashIdMappings.RemoveAll(x =>
             x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId)
         );
+        
+        var afterCount = cacheObject.TrashIdMappings.Count;
+        if (beforeCount != afterCount)
+        {
+            logger.Debug("RemoveStale removed {Removed} mappings ({Before} -> {After})", beforeCount - afterCount, beforeCount, afterCount);
+        }
+        
+        LogCacheState("RemoveStale - AFTER");
     }
 
     public int? FindId(CustomFormatData cf)

@@ -20,11 +20,26 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
                 guideCf.Name
             );
 
-            guideCf.Id = context.Cache.FindId(guideCf) ?? 0;
+            var cachedId = context.Cache.FindId(guideCf);
+            guideCf.Id = cachedId ?? 0;
+            
+            log.Debug(
+                "Cache lookup for {TrashId} ({Name}): found ID {CachedId}, assigned ID {AssignedId}",
+                guideCf.TrashId,
+                guideCf.Name,
+                cachedId,
+                guideCf.Id
+            );
 
             var serviceCf = FindServiceCfByName(context.ApiFetchOutput, guideCf.Name);
             if (serviceCf is not null)
             {
+                log.Debug(
+                    "Found service CF by name for {TrashId} ({Name}): service ID {ServiceId}",
+                    guideCf.TrashId,
+                    guideCf.Name,
+                    serviceCf.Id
+                );
                 ProcessExistingCf(guideCf, serviceCf, transactions);
                 continue;
             }
@@ -32,6 +47,14 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
             serviceCf = FindServiceCfById(context.ApiFetchOutput, guideCf.Id);
             if (serviceCf is not null)
             {
+                log.Debug(
+                    "Found service CF by ID for {TrashId} ({Name}): guide ID {GuideId}, service ID {ServiceId}, service name '{ServiceName}'",
+                    guideCf.TrashId,
+                    guideCf.Name,
+                    guideCf.Id,
+                    serviceCf.Id,
+                    serviceCf.Name
+                );
                 // We do not use AddUpdatedCustomFormat() here because it's impossible for the CFs to be identical if we
                 // got to this point. Reason: We reach this code if the names are not the same. At the very least, this
                 // means the name needs to be updated in the service.
@@ -39,6 +62,12 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
             }
             else
             {
+                log.Debug(
+                    "No service CF found for {TrashId} ({Name}) with ID {Id} - will create new",
+                    guideCf.TrashId,
+                    guideCf.Name,
+                    guideCf.Id
+                );
                 transactions.NewCustomFormats.Add(guideCf);
             }
         }
