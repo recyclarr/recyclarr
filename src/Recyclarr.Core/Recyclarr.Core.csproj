@@ -5,7 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AutoMapper.Contrib.Autofac.DependencyInjection" />
       <PackageReference Include="Autofac" />
       <PackageReference Include="Autofac.Extras.Ordering" />
       <PackageReference Include="CliWrap" />

@@ -180,4 +180,35 @@ internal sealed class CustomFormatCacheTest
                 o => o.WithStrictOrdering()
             );
     }
+
+    [Test]
+    public void Duplicate_mappings_are_resolved_by_service_name_match()
+    {
+        // Arrange: Cache has two mappings with same ID but different names
+        var cache = CfCache.New(
+            new TrashIdMapping("remaster-trash-id", "Remaster", 3), // Wrong name
+            new TrashIdMapping("4k-remaster-trash-id", "4K Remaster", 3), // Correct name
+            new TrashIdMapping("other-trash-id", "Other Format", 5) // Different ID, should remain
+        );
+
+        // Service only has one CF with ID 3, named "4K Remaster"
+        var serviceCfs = new[]
+        {
+            NewCf.Data("4K Remaster", "service-trash-id", 3), // This matches the second cache entry
+            NewCf.Data("Other Format", "other-service-trash-id", 5),
+        };
+
+        // Act
+        cache.RemoveStale(serviceCfs);
+
+        // Assert: Should keep the mapping that matches the service CF name
+        cache
+            .TrashIdMappings.Should()
+            .BeEquivalentTo(
+                [
+                    new TrashIdMapping("4k-remaster-trash-id", "4K Remaster", 3), // Kept because name matches service
+                    new TrashIdMapping("other-trash-id", "Other Format", 5), // Kept because different ID
+                ]
+            );
+    }
 }

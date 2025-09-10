@@ -13,6 +13,6 @@ internal class CustomFormatCachePersister(
 
     protected override CustomFormatCache CreateCache(CustomFormatCacheObject cacheObject)
     {
-        return new CustomFormatCache(cacheObject);
+        return new CustomFormatCache(cacheObject, log);
     }
 }

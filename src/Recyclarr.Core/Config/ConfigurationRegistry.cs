@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using AutoMapper;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
@@ -13,7 +12,6 @@ public class ConfigurationRegistry(
     ConfigurationLoader loader,
     IConfigurationFinder finder,
     IFileSystem fs,
-    IMapper mapper,
     ConfigFilterProcessor filterProcessor
 )
 {
@@ -62,21 +60,17 @@ public class ConfigurationRegistry(
                 using var logScope = LogContext.PushProperty(LogProperty.Scope, x.YamlPath);
                 return x.Yaml switch
                 {
-                    RadarrConfigYaml => MapConfig<RadarrConfiguration>(x),
-                    SonarrConfigYaml => MapConfig<SonarrConfiguration>(x),
+                    RadarrConfigYaml radarr => radarr.ToRadarrConfiguration(
+                        x.InstanceName,
+                        x.YamlPath
+                    ),
+                    SonarrConfigYaml sonarr => sonarr.ToSonarrConfiguration(
+                        x.InstanceName,
+                        x.YamlPath
+                    ),
                     _ => throw new InvalidOperationException("Unknown config type"),
                 };
             })
             .ToList();
-    }
-
-    private IServiceConfiguration MapConfig<TServiceConfig>(LoadedConfigYaml config)
-        where TServiceConfig : ServiceConfiguration
-    {
-        return mapper.Map<TServiceConfig>(config.Yaml) with
-        {
-            InstanceName = config.InstanceName,
-            YamlPath = config.YamlPath,
-        };
     }
 }
