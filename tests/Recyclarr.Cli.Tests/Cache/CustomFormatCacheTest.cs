@@ -180,4 +180,32 @@ internal sealed class CustomFormatCacheTest
                 o => o.WithStrictOrdering()
             );
     }
+
+    [Test]
+    public void Mappings_with_duplicate_ids_are_removed()
+    {
+        // Arrange: Cache has two mappings with same CustomFormatId
+        var cache = CfCache.New(
+            new TrashIdMapping("first-trash-id", "First Format", 3), // First occurrence - should be kept
+            new TrashIdMapping("second-trash-id", "Second Format", 3), // Duplicate ID - should be removed
+            new TrashIdMapping("other-trash-id", "Other Format", 5) // Different ID, should remain
+        );
+
+        // Service has CF with the duplicate ID
+        var serviceCfs = new[]
+        {
+            NewCf.Data("Some Format", "service-trash-id", 3),
+            NewCf.Data("Other Format", "other-service-trash-id", 5),
+        };
+
+        // Act
+        cache.RemoveStale(serviceCfs);
+
+        // Assert: Should have exactly one mapping for each unique CustomFormatId
+        cache
+            .TrashIdMappings.Should()
+            .HaveCount(2)
+            .And.ContainSingle(x => x.CustomFormatId == 3)
+            .And.ContainSingle(x => x.CustomFormatId == 5);
+    }
 }

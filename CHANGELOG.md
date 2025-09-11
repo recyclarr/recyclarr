@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Cache: Remove duplicate custom format ID mappings during cache cleanup to prevent downstream
+  transaction processing issues.
 - YAML: Improved messaging in logs and console output for YAML errors.
 - CLI: Respect the NO_COLOR environment variable when piping command output to files (#462).
 

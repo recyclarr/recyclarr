@@ -58,6 +58,18 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCach
         cacheObject.TrashIdMappings.RemoveAll(x =>
             x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId)
         );
+
+        // Clean up duplicate IDs - keep first occurrence, remove the rest
+        //
+        // The reasons for duplicates are not known, but they screw up everything so this is the
+        // opportunity to clean them up early before transaction processing.
+        var duplicatesToRemove = cacheObject
+            .TrashIdMappings.GroupBy(x => x.CustomFormatId)
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Skip(1))
+            .ToList();
+
+        cacheObject.TrashIdMappings.RemoveAll(duplicatesToRemove.Contains);
     }
 
     public int? FindId(CustomFormatData cf)
