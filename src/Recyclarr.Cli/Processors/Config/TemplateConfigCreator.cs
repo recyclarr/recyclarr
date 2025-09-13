@@ -1,14 +1,14 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
+using Recyclarr.ConfigTemplates;
 using Recyclarr.Platform;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Processors.Config;
 
 internal class TemplateConfigCreator(
     ILogger log,
-    IConfigTemplateGuideService templates,
+    IConfigTemplatesResourceQuery templates,
     IAppPaths paths
 ) : IConfigCreator
 {
@@ -22,7 +22,7 @@ internal class TemplateConfigCreator(
         log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
         var matchingTemplateData = templates
-            .GetTemplateData()
+            .GetTemplates()
             .IntersectBy(
                 settings.Templates,
                 path => path.Id,

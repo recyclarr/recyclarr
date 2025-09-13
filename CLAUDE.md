@@ -79,6 +79,11 @@ dotnet csharpier check .     # Verify formatting
 - Conventional commits
 - Preserve YAML config backward compatibility
 
+### Backward Compatibility
+
+**CODE**: No backward compatibility required - refactor freely
+**USER DATA**: Mandatory backward compatibility - YAML configs and settings files must remain functional
+
 ## C# Standards
 
 **REQUIRED FEATURES:**
@@ -171,6 +176,16 @@ Serilog, FluentValidation, YamlDotNet, Flurl.Http, LibGit2Sharp
 - Settings schema: `schemas/settings-schema.json`
 - Add schema validation comment to YAML files:
   `# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
+
+## Logging Standards
+
+**YOU MUST follow Serilog logging patterns:**
+
+- **NEVER use Console.WriteLine**: Always inject `ILogger` from Serilog for all logging
+- **Debug()**: Debugging and diagnostics; only visible with `-d|--debug` option
+- **Information()**: Normal operation status visible to users; use sparingly to avoid spam
+- **Warning()**: Non-critical issues needing user attention (deprecated features, skipped data)
+- **Error()**: Critical issues requiring user intervention (exceptions, blocking errors)
 
 **TRaSH Guides & Config Templates Integration:**
 - TRaSH Guides repo auto-cloned to `${appdata}/repositories/trash_guides/`

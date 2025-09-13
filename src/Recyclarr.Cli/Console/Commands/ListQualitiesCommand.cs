@@ -14,7 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List quality definitions in the guide for a particular service.")]
 internal class ListQualitiesCommand(
     QualitySizeDataLister lister,
-    ConsoleMultiRepoUpdater repoUpdater,
+    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
@@ -31,7 +31,10 @@ internal class ListQualitiesCommand(
     public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
+        await gitRepositoryInitializer.InitializeGitRepositories(
+            outputSettings,
+            settings.CancellationToken
+        );
         lister.ListQualities(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

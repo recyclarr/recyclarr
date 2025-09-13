@@ -57,7 +57,7 @@ internal sealed class QualityProfileDtoTest
             Items = [NewQp.QualityDto(1, "one", true), NewQp.QualityDto(2, "two", true)],
         };
 
-        var result = dto with { Items = Array.Empty<ProfileItemDto>() };
+        var result = dto with { Items = [] };
 
         result.Items.Should().BeEquivalentTo(dto.Items);
     }

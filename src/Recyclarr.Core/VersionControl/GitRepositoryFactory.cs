@@ -18,7 +18,7 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
 
         if (!repoPath.Exists)
         {
-            log.Information("Cloning...");
+            log.Debug("Cloning repository to {RepoPath}", repoPath.FullName);
             await repo.Clone(token, repoUrl, branch, 1);
         }
         else

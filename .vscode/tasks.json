@@ -5,30 +5,20 @@
       "label": "build",
       "type": "process",
       "command": "dotnet",
-      "args": [
-        "build",
-        "-property:GenerateFullPaths=true",
-        "-consoleLoggerParameters:NoSummary",
-      ],
-      "problemMatcher": {
-        "owner": "dotnet",
-        "fileLocation": "absolute",
-        "pattern": [
-          {
-            "regexp": "\\s*(.+)\\((\\d+),(\\d+)\\):\\s+(error|warning)\\s+(\\w+):\\s+(.+)",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "code": 5,
-            "message": 6
-          }
-        ]
-      },
+      "args": ["build", "-property:GenerateFullPaths=true", "-consoleLoggerParameters:NoSummary"],
+      "problemMatcher": "$msCompile",
       "group": {
         "kind": "build",
         "isDefault": true
       },
+      "presentation": {
+        "reveal": "never",
+        "revealProblems": "onProblem",
+        "echo": false,
+        "showReuseMessage": false,
+        "panel": "shared",
+        "clear": false
+      }
     },
     {
       "label": "publish",
@@ -40,24 +30,36 @@
         "-property:GenerateFullPaths=true",
         "-consoleLoggerParameters:NoSummary",
         "-o",
-        "docker/artifacts/${config:recyclarr.runtime}",
+        "docker/artifacts/${config:recyclarr.runtime}"
       ],
       "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "never",
+        "revealProblems": "onProblem",
+        "echo": false,
+        "showReuseMessage": false,
+        "panel": "shared",
+        "clear": false
+      }
     },
     {
       "label": "test",
-      "command": "dotnet",
       "type": "process",
-      "args": [
-        "test",
-        "-property:GenerateFullPaths=true",
-        "-consoleLoggerParameters:NoSummary",
-      ],
+      "command": "dotnet",
+      "args": ["test", "-property:GenerateFullPaths=true", "-consoleLoggerParameters:NoSummary"],
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "test",
-        "isDefault": true,
+        "isDefault": true
       },
+      "presentation": {
+        "reveal": "never",
+        "revealProblems": "onProblem",
+        "echo": false,
+        "showReuseMessage": false,
+        "panel": "shared",
+        "clear": false
+      }
     }
   ]
 }

@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Spectre.Console.Cli;
 
@@ -9,32 +8,20 @@ namespace Recyclarr.Cli.Tests.IntegrationTests;
 
 internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
 {
-    private static readonly TrashRepoFileMapper Mapper = new();
-
-    [OneTimeSetUp]
-    public static async Task OneTimeSetup()
-    {
-        await Mapper.DownloadFiles(
-            "metadata.json",
-            "docs/Radarr/Radarr-collection-of-custom-formats.md",
-            "docs/Sonarr/sonarr-collection-of-custom-formats.md"
-        );
-    }
-
-    [SetUp]
-    public void MapFiles()
-    {
-        Mapper.AddToFilesystem(Fs, Resolve<ITrashGuidesRepo>().Path);
-    }
-
     [Test]
     public async Task List_custom_format_radarr_score_sets()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
+        var reposDir = Paths.ReposDirectory.SubDirectory("trash-guides").SubDirectory("official");
+
+        var targetDir = reposDir
+            .SubDirectory("docs")
+            .SubDirectory("json")
+            .SubDirectory("radarr")
+            .SubDirectory("cf");
         Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/radarr/cf"),
+            targetDir,
             typeof(CliCommandIntegrationTest),
-            "Data/radarr/cfs"
+            "Data.radarr.cfs"
         );
 
         var exitCode = await CliSetup.Run(
@@ -49,11 +36,17 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_custom_format_sonarr_score_sets()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
+        var reposDir = Paths.ReposDirectory.SubDirectory("trash-guides").SubDirectory("official");
+
+        var targetDir = reposDir
+            .SubDirectory("docs")
+            .SubDirectory("json")
+            .SubDirectory("sonarr")
+            .SubDirectory("cf");
         Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/sonarr/cf"),
+            targetDir,
             typeof(CliCommandIntegrationTest),
-            "Data/sonarr/cfs"
+            "Data.sonarr.cfs"
         );
 
         var exitCode = await CliSetup.Run(
@@ -75,11 +68,44 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_naming_sonarr()
     {
-        var repo = Resolve<ITrashGuidesRepo>();
-        Fs.AddFilesFromEmbeddedNamespace(
-            repo.Path.SubDirectory("docs/json/sonarr/naming"),
-            typeof(CliCommandIntegrationTest),
-            "Data/sonarr/naming"
+        // Add naming data file at the expected path (StubRepoUpdater handles metadata.json)
+        var officialRepoPath = Paths
+            .ReposDirectory.SubDirectory("trash-guides")
+            .SubDirectory("official");
+
+        var namingFile = officialRepoPath
+            .SubDirectory("docs")
+            .SubDirectory("json")
+            .SubDirectory("sonarr")
+            .SubDirectory("naming")
+            .File("sonarr-naming.json");
+
+        Fs.AddFile(
+            namingFile,
+            new MockFileData(
+                """
+                {
+                  "season": { "default": "Season {season:00}" },
+                  "series": {
+                    "default": "{Series TitleYear}",
+                    "plex-imdb": "{Series TitleYear} {imdb-{ImdbId}}"
+                  },
+                  "episodes": {
+                    "standard": {
+                      "default": "{Series TitleYear} - S{season:00}E{episode:00}",
+                      "original": "{Original Title}"
+                    },
+                    "daily": {
+                      "default": "{Series TitleYear} - {Air-Date}",
+                      "original": "{Original Title}"
+                    },
+                    "anime": {
+                      "default": "{Series TitleYear} - S{season:00}E{episode:00}"
+                    }
+                  }
+                }
+                """
+            )
         );
 
         var exitCode = await CliSetup.Run(Container, ["list", "naming", "sonarr"]);

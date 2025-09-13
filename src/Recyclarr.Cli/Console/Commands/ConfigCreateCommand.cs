@@ -13,7 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ConfigCreateCommand(
     ILogger log,
     IConfigCreationProcessor processor,
-    ConsoleMultiRepoUpdater repoUpdater,
+    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
@@ -50,7 +50,10 @@ internal class ConfigCreateCommand(
         try
         {
             var outputSettings = consoleSettings.GetOutputSettings(settings);
-            await repoUpdater.UpdateAllRepositories(outputSettings, settings.CancellationToken);
+            await gitRepositoryInitializer.InitializeGitRepositories(
+                outputSettings,
+                settings.CancellationToken
+            );
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

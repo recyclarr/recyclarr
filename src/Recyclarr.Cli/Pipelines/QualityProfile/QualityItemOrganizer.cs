@@ -122,7 +122,7 @@ internal class QualityItemOrganizer
             ];
         }
 
-        return Array.Empty<ProfileItemDto>();
+        return [];
     }
 
     private static IEnumerable<ProfileItemDto> GetUnwantedItems(

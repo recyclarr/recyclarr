@@ -13,12 +13,6 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
 
     public IAppPaths CreateAppPaths()
     {
-        // If anything (like the Spectre.Console interceptors) tries to grab IAppPaths directly or indirectly (in the
-        // case of ILogger, which uses LoggerFactory, which uses IAppPaths to get the path where log files should be
-        // saved), the app data dir override won't be initialized yet, so we error out. This will assist in finding
-        // logic/programming errors.
-        ArgumentNullException.ThrowIfNull(_appDataDirectoryOverride);
-
         var appDir = GetAppDataDirectory(_appDataDirectoryOverride);
         var paths = new AppPaths(fs.DirectoryInfo.New(appDir));
 
@@ -32,7 +26,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         return paths;
     }
 
-    private string GetAppDataDirectory(string appDataDirectoryOverride)
+    private string GetAppDataDirectory(string? appDataDirectoryOverride)
     {
         if (string.IsNullOrEmpty(appDataDirectoryOverride))
         {

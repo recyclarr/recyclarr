@@ -2,10 +2,17 @@ using Recyclarr.Notifications;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter notify)
+internal class CustomFormatTransactionLogger(
+    ILogger log,
+    NotificationEmitter notify,
+    DuplicateCustomFormatRenderer duplicateRenderer
+)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
+        // Render duplicate resource provider conflicts using AnsiConsole
+        duplicateRenderer.RenderDuplicates(context.DuplicateFormats);
+
         if (context.InvalidFormats.Count != 0)
         {
             log.Warning(

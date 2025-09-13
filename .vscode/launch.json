@@ -2,17 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "radarr.run",
+      "name": "recyclarr sync",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
       "program": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net9.0/recyclarr",
-      "args": [
-        "radarr"
-      ],
-      "cwd": "${workspaceFolder}/src/Recyclarr.Cli/bin/Debug/net9.0/",
+      "args": ["sync"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
       "stopAtEntry": false,
-      "console": "internalConsole"
+      "preLaunchTask": "build"
     }
   ]
 }

@@ -11,21 +11,6 @@
       "title": "Provide an explicit path to your git executable",
       "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
     },
-    "repositories": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "[DEPRECATED] Settings for any local git clones that Recyclarr manages",
-      "properties": {
-        "trash_guides": {
-          "$ref": "settings/repository.json",
-          "title": "Settings for the Trash Guides GitHub repository"
-        },
-        "config_templates": {
-          "$ref": "settings/repository.json",
-          "title": "Settings for the Recyclarr Config Templates GitHub repository"
-        }
-      }
-    },
     "enable_ssl_certificate_validation": {
       "type": "boolean",
       "title": "Allow SSL certificate validation for Sonarr & Radarr",
@@ -49,30 +34,8 @@
     "notifications": {
       "$ref": "settings/notifications.json"
     },
-    "data_sources": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "Set up data sources for repos and service data",
-      "properties": {
-        "trash_guides": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for the Trash Guides"
-        },
-        "config_templates": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for the Recyclarr Config Templates"
-        },
-        "custom_formats": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for additional custom format JSON files",
-          "description": "These supplement the ones provided by the Trash Guides. The custom format JSON files are expected to be in the same format as the ones provided by the Trash Guides."
-        },
-        "media_naming": {
-          "$ref": "settings/data-sources.json",
-          "title": "Data sources for additional media naming JSON files",
-          "description": "These supplement the ones provided by the Trash Guides. The media naming JSON files are expected to be in the same format as the ones provided by the Trash Guides."
-        }
-      }
+    "resource_providers": {
+      "$ref": "settings/resource-providers.json"
     }
   }
 }

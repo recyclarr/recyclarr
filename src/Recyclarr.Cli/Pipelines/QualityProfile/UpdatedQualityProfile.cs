@@ -15,11 +15,10 @@ internal record UpdatedQualityProfile
     public required QualityProfileDto ProfileDto { get; init; }
     public required ProcessedQualityProfileData ProfileConfig { get; init; }
     public required QualityProfileUpdateReason UpdateReason { get; set; }
-    public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } =
-        Array.Empty<UpdatedFormatScore>();
+    public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
-    public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = Array.Empty<string>();
-    public IReadOnlyCollection<string> MissingQualities { get; set; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = [];
+    public IReadOnlyCollection<string> MissingQualities { get; set; } = [];
 
     public string ProfileName
     {
