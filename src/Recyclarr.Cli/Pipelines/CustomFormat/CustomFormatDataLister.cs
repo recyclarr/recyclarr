@@ -6,7 +6,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideService guide)
+internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatsResourceQuery guide)
 {
     public void List(IConsoleOutputSettings outputSettings, IListCustomFormatSettings settings)
     {
@@ -36,7 +36,7 @@ internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideSe
 
         var scoreSets = guide
             .GetCustomFormatData(serviceType)
-            .SelectMany(x => x.TrashScores.Keys)
+            .CustomFormats.SelectMany(x => x.TrashScores.Keys)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Order(StringComparer.InvariantCultureIgnoreCase);
 
@@ -57,7 +57,7 @@ internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatGuideSe
 
         var categories = guide
             .GetCustomFormatData(serviceType)
-            .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
+            .CustomFormats.Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
             .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key);

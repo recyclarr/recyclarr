@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 internal class QualitySizeConfigPhase(
     ILogger log,
-    IQualitySizeGuideService guide,
+    IQualitySizeResourceQuery guide,
     IServiceConfiguration config,
     IQualityItemLimitFactory limitFactory
 ) : IPipelinePhase<QualitySizePipelineContext>

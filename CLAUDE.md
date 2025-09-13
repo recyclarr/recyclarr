@@ -82,6 +82,9 @@ dotnet csharpier check .     # Verify formatting
 
 ## Development Requirements
 
+- You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
+  code.
+
 **MANDATORY WORKFLOW:**
 
 1. Search existing code first: `rg "pattern"` before writing new code
@@ -96,6 +99,11 @@ dotnet csharpier check .     # Verify formatting
 - Zero warnings/analysis issues
 - Conventional commits
 - Preserve YAML config backward compatibility
+
+### Backward Compatibility
+
+**CODE**: No backward compatibility required - refactor freely **USER DATA**: Mandatory backward
+compatibility - YAML configs and settings files must remain functional
 
 ## C# Standards
 
@@ -170,12 +178,14 @@ Serilog, FluentValidation, YamlDotNet, Flurl.Http, LibGit2Sharp
 ## Recyclarr Configuration & Operation
 
 **Application Data Directories (Platform-Specific):**
+
 - Windows: `%APPDATA%\recyclarr`
 - Linux: `~/.config/recyclarr`
 - macOS: `~/Library/Application Support/recyclarr`
 - Docker: `/config`
 
 **Configuration File Structure:**
+
 - `recyclarr.yml` - Main config file in app data directory
 - `configs/` - Additional YAML files (auto-loaded, non-recursive)
 - `includes/` - Include templates directory for reusable YAML snippets
@@ -185,21 +195,23 @@ Serilog, FluentValidation, YamlDotNet, Flurl.Http, LibGit2Sharp
 - `repositories/` - Local clones of TRaSH guides and config templates
 
 **Schema Validation (MANDATORY):**
+
 - ALWAYS validate config files using `schemas/config-schema.json` before ANY modifications
 - Settings schema: `schemas/settings-schema.json`
-- Add schema validation comment to YAML files:
-  `# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
+- Add schema validation comment to YAML files: `# yaml-language-server:
+  $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
 
-**TRaSH Guides & Config Templates Integration:**
-- TRaSH Guides repo auto-cloned to `${appdata}/repositories/trash_guides/`
-- Config Templates repo auto-cloned to `${appdata}/repositories/config_templates/`
-- Reference these local clones to understand `trash_ids`, custom formats, quality profiles
-- Templates repo: `https://github.com/recyclarr/config-templates`
-- Custom formats use `trash_ids` arrays (hexadecimal identifiers) from TRaSH guides
+## Logging Standards
 
-**Configuration Concepts:**
-- `trash_ids`: Hexadecimal identifiers for TRaSH guide custom formats and profiles
-- Include templates: Reusable YAML from config templates repo (use `include:` directive)
-- Multiple config files supported in `configs/` directory (all `.yml`/`.yaml` files loaded)
-- Secrets support via `secrets.yml` file (use `!secret` tags)
-- Instance-based configuration: Multiple Sonarr/Radarr instances per config file
+- User-facing messages use `IAnsiConsole`
+- Diagnostic information uses `ILogger` from serilog
+- Must use DI for both
+- Some user-facing logs still use Serilogs; this is legacy and will eventually be phased out.
+
+**YOU MUST follow Serilog logging patterns:**
+
+- **NEVER use Console.WriteLine**: Always inject `ILogger` from Serilog for all logging
+- **Debug()**: Debugging and diagnostics; only visible with `-d|--debug` option
+- **Information()**: Normal operation status visible to users; use sparingly to avoid spam
+- **Warning()**: Non-critical issues needing user attention (deprecated features, skipped data)
+- **Error()**: Critical issues requiring user intervention (exceptions, blocking errors)

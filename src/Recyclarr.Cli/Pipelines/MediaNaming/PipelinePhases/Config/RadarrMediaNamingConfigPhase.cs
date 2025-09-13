@@ -8,7 +8,7 @@ internal class RadarrMediaNamingConfigPhase(RadarrConfiguration config)
     : IServiceBasedMediaNamingConfigPhase
 {
     public Task<MediaNamingDto> ProcessNaming(
-        IMediaNamingGuideService guide,
+        IMediaNamingResourceQuery guide,
         NamingFormatLookup lookup
     )
     {

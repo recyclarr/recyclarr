@@ -8,7 +8,7 @@ using Recyclarr.TrashGuide.CustomFormat;
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatConfigPhase(
-    ICustomFormatGuideService guide,
+    ICustomFormatsResourceQuery guide,
     ProcessedCustomFormatCache cache,
     ICachePersister<CustomFormatCache> cachePersister,
     IServiceConfiguration config
@@ -16,6 +16,9 @@ internal class CustomFormatConfigPhase(
 {
     public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
+        // Get custom format data with precedence-based provider handling
+        var formatDataResult = guide.GetCustomFormatData(config.ServiceType);
+
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //
         // This solution is conservative: CustomFormatData is only created for CFs in the guide that are
@@ -27,7 +30,7 @@ internal class CustomFormatConfigPhase(
             .CustomFormats.SelectMany(x => x.TrashIds)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .GroupJoin(
-                guide.GetCustomFormatData(config.ServiceType),
+                formatDataResult.CustomFormats,
                 x => x,
                 x => x.TrashId,
                 (id, cf) => (Id: id, CustomFormats: cf)

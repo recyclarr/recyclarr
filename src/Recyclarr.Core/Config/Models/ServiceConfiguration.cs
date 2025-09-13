@@ -19,8 +19,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 
     public QualityDefinitionConfig? QualityDefinition { get; init; }
 
-    public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; init; } =
-        Array.Empty<QualityProfileConfig>();
+    public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -50,7 +49,7 @@ public record QualityProfileQualityConfig
 {
     public string Name { get; init; } = "";
     public bool Enabled { get; init; }
-    public IReadOnlyCollection<string> Qualities { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> Qualities { get; init; } = [];
 }
 
 public enum QualitySortAlgorithm
@@ -62,7 +61,7 @@ public enum QualitySortAlgorithm
 public record ResetUnmatchedScoresConfig
 {
     public bool Enabled { get; init; }
-    public IReadOnlyCollection<string> Except { get; init; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> Except { get; init; } = [];
 }
 
 public record QualityProfileConfig
@@ -75,6 +74,5 @@ public record QualityProfileConfig
     public string? ScoreSet { get; init; }
     public ResetUnmatchedScoresConfig ResetUnmatchedScores { get; init; } = new();
     public QualitySortAlgorithm QualitySort { get; init; }
-    public IReadOnlyCollection<QualityProfileQualityConfig> Qualities { get; init; } =
-        Array.Empty<QualityProfileQualityConfig>();
+    public IReadOnlyCollection<QualityProfileQualityConfig> Qualities { get; init; } = [];
 }

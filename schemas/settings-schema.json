@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema",
+  "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json",
   "type": "object",
   "title": "Recyclarr Settings",
@@ -10,21 +10,6 @@
       "type": "string",
       "title": "Provide an explicit path to your git executable",
       "description": "Note that this is a path to the actual executable itself and not a directory path. If this setting is not specified, Recyclarr will attempt to find git via your PATH environment variable."
-    },
-    "repositories": {
-      "type": "object",
-      "additionalProperties": false,
-      "title": "Settings for any local git clones that Recyclarr manages",
-      "properties": {
-        "trash_guides": {
-          "$ref": "settings/repository.json",
-          "title": "Settings for the Trash Guides GitHub repository"
-        },
-        "config_templates": {
-          "$ref": "settings/repository.json",
-          "title": "Settings for the Recyclarr Config Templates GitHub repository"
-        }
-      }
     },
     "enable_ssl_certificate_validation": {
       "type": "boolean",
@@ -48,6 +33,9 @@
     },
     "notifications": {
       "$ref": "settings/notifications.json"
+    },
+    "resource_providers": {
+      "$ref": "settings/resource-providers.json"
     }
   }
 }

@@ -29,7 +29,7 @@ internal sealed class RadarrMediaNamingConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var guide = fixture.Freeze<IMediaNamingGuideService>();
+        var guide = fixture.Freeze<IMediaNamingResourceQuery>();
         guide.GetRadarrNamingData().Returns(RadarrNamingData);
 
         fixture.Inject(

@@ -47,7 +47,7 @@ internal sealed class SonarrMediaNamingConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         fixture.Freeze<ISonarrCapabilityFetcher>(); // Frozen for instance sharing
-        var guide = fixture.Freeze<IMediaNamingGuideService>();
+        var guide = fixture.Freeze<IMediaNamingResourceQuery>();
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
         fixture.Inject(
@@ -94,7 +94,7 @@ internal sealed class SonarrMediaNamingConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         fixture.Freeze<ISonarrCapabilityFetcher>(); // Frozen for instance sharing
-        var guide = fixture.Freeze<IMediaNamingGuideService>();
+        var guide = fixture.Freeze<IMediaNamingResourceQuery>();
         guide.GetSonarrNamingData().Returns(SonarrNamingData);
 
         fixture.Inject(

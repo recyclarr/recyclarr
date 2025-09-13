@@ -156,7 +156,7 @@ internal class QualityProfileTransactionPhase(
         }
     }
 
-    private static IReadOnlyCollection<string> GetInvalidExceptCfNames(
+    private static List<string> GetInvalidExceptCfNames(
         ResetUnmatchedScoresConfig resetConfig,
         QualityProfileDto profileDto
     )
@@ -164,7 +164,7 @@ internal class QualityProfileTransactionPhase(
         var except = resetConfig.Except;
         if (except.Count == 0)
         {
-            return Array.Empty<string>();
+            return [];
         }
 
         var serviceCfNames = profileDto.FormatItems.Select(x => x.Name).ToList();

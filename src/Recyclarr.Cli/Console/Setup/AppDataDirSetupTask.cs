@@ -7,7 +7,10 @@ internal class AppDataDirSetupTask(IAppDataSetup appDataSetup) : IGlobalSetupTas
 {
     public void OnStart(BaseCommandSettings cmd)
     {
-        appDataSetup.SetAppDataDirectoryOverride(cmd.AppData ?? "");
+        if (cmd.AppData is not null)
+        {
+            appDataSetup.SetAppDataDirectoryOverride(cmd.AppData);
+        }
     }
 
     public void OnFinish() { }

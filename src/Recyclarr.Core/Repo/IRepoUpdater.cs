@@ -1,5 +1,5 @@
 using System.IO.Abstractions;
-using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Repo;
 
@@ -7,7 +7,7 @@ public interface IRepoUpdater
 {
     Task UpdateRepo(
         IDirectoryInfo repoPath,
-        IRepositorySettings repoSettings,
+        GitRepositorySource repositorySource,
         CancellationToken token
     );
 }

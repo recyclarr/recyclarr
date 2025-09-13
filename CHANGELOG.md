@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - YAML: New `!file` tag that allows including the contents of an external file as a YAML node value,
   particularly useful for working with Docker Secrets (#278).
+- Settings: New `resource_providers` configuration enables custom data sources for TRaSH Guides and
+  config templates (#238).
+
+### Deprecated
+
+- Settings: `repositories` configuration is deprecated in favor of `resource_providers`.
 
 ### Fixed
 

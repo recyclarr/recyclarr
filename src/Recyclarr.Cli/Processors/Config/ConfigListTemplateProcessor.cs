@@ -1,5 +1,6 @@
 using System.Globalization;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.ConfigTemplates;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
 
@@ -7,18 +8,19 @@ namespace Recyclarr.Cli.Processors.Config;
 
 internal class ConfigListTemplateProcessor(
     IAnsiConsole console,
-    IConfigTemplateGuideService guideService
+    IConfigTemplatesResourceQuery templatesService,
+    IConfigIncludesResourceQuery includesService
 )
 {
     public void Process(IConfigListTemplatesSettings settings)
     {
         if (settings.Includes)
         {
-            ListData(guideService.GetIncludeData());
+            ListData(includesService.GetIncludes());
             return;
         }
 
-        ListData(guideService.GetTemplateData());
+        ListData(templatesService.GetTemplates());
     }
 
     private void ListData(IReadOnlyCollection<TemplatePath> data)

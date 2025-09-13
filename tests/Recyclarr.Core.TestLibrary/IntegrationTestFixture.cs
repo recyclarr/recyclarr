@@ -7,6 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
+using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.VersionControl;
@@ -58,9 +59,11 @@ public abstract class IntegrationTestFixture : IDisposable
     /// </summary>
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
-        builder.RegisterInstance(Fs).As<IFileSystem>();
+        builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
         builder.RegisterInstance(Console).As<IAnsiConsole>();
         builder.RegisterInstance(Logger).As<ILogger>();
+
+        builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 
         builder.RegisterMockFor<IEnvironment>();
         builder.RegisterMockFor<IGitRepository>();

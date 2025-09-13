@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings/resource-providers.json",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Set up resource providers for various content types",
+  "properties": {
+    "trash_guides": {
+      "$ref": "#/definitions/provider_array",
+      "title": "Resource providers for the Trash Guides"
+    },
+    "config_templates": {
+      "$ref": "#/definitions/provider_array",
+      "title": "Resource providers for the Recyclarr Config Templates"
+    }
+  },
+  "definitions": {
+    "provider_array": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/git_repository" },
+          { "$ref": "#/definitions/local_path" }
+        ]
+      }
+    },
+    "git_repository": {
+      "type": "object",
+      "required": ["clone_url", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "clone_url": {
+          "type": "string",
+          "title": "Git clone URL for the repository",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "title": "Required name used to uniquely identify this repository.",
+          "description": "May only contain letters, numbers, hyphens, and underscores. Must be unique across all resource providers for a single content type",
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "reference": {
+          "type": "string",
+          "title": "Optional branch name or SHA1 commit hash to check out"
+        }
+      }
+    },
+    "local_path": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "title": "Local directory path containing trash guides structure",
+          "description": "Path to a local directory that contains a metadata.json file and follows the TRaSH Guides directory structure"
+        }
+      }
+    }
+  }
+}

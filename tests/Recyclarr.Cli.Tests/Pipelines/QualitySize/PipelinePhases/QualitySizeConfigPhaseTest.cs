@@ -27,7 +27,7 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Do_nothing_if_no_matching_quality_definition(
-        [Frozen] IQualitySizeGuideService guide,
+        [Frozen] IQualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut
     )
@@ -52,7 +52,7 @@ internal sealed class QualitySizeConfigPhaseTest
     public async Task Preferred_ratio_clamping_works(
         string testPreferred,
         string expectedPreferred,
-        [Frozen] IQualitySizeGuideService guide,
+        [Frozen] IQualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut
     )
@@ -81,7 +81,7 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Preferred_is_set_via_ratio(
-        [Frozen] IQualitySizeGuideService guide,
+        [Frozen] IQualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut
@@ -115,7 +115,7 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Preferred_is_set_via_guide(
-        [Frozen] IQualitySizeGuideService guide,
+        [Frozen] IQualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut

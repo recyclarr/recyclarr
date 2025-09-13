@@ -12,7 +12,7 @@ internal sealed class CustomFormatDataListerTest
     [Test, AutoMockData]
     public void Custom_formats_appear_in_console_output(
         [Frozen(Matching.ImplementedInterfaces)] TestConsole console,
-        [Frozen] ICustomFormatGuideService guide,
+        [Frozen] ICustomFormatsResourceQuery guide,
         IListCustomFormatSettings settings,
         IConsoleOutputSettings outputSettings,
         CustomFormatDataLister sut
@@ -20,7 +20,7 @@ internal sealed class CustomFormatDataListerTest
     {
         var testData = new[] { NewCf.Data("First", "123"), NewCf.Data("Second", "456") };
 
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(testData);
+        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new CustomFormatDataResult(testData));
         settings.ScoreSets.Returns(false);
 
         sut.List(outputSettings, settings);
