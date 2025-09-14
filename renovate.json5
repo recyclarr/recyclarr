@@ -1,6 +1,6 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", ":disableRateLimiting", "helpers:pinGitHubActionDigests"],
+  extends: ["config:recommended", ":disableRateLimiting", "helpers:pinGitHubActionDigestsToSemver"],
   minimumReleaseAge: "5 days",
   ignorePresets: ["mergeConfidence:all-badges"],
   configMigration: true,
