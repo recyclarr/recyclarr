@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Sync: Crash during quality profile and quality size operations.
 - Cache: Remove duplicate custom format ID mappings during cache cleanup to prevent downstream
   transaction processing issues.
 - YAML: Improved messaging in logs and console output for YAML errors.

@@ -73,9 +73,9 @@ internal class PipelineAutofacModule : Module
         builder
             .RegisterTypes(
                 typeof(QualityProfileConfigPhase),
-                typeof(QualityProfilePreviewPhase),
                 typeof(QualityProfileApiFetchPhase),
                 typeof(QualityProfileTransactionPhase),
+                typeof(QualityProfilePreviewPhase),
                 typeof(QualityProfileApiPersistencePhase)
             )
             .AsImplementedInterfaces()
@@ -100,9 +100,9 @@ internal class PipelineAutofacModule : Module
         builder
             .RegisterTypes(
                 typeof(QualitySizeConfigPhase),
-                typeof(QualitySizePreviewPhase),
                 typeof(QualitySizeApiFetchPhase),
                 typeof(QualitySizeTransactionPhase),
+                typeof(QualitySizePreviewPhase),
                 typeof(QualitySizeApiPersistencePhase)
             )
             .AsImplementedInterfaces()
