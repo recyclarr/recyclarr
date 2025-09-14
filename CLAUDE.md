@@ -62,6 +62,24 @@ dotnet csharpier check .     # Verify formatting
 - `Directory.Packages.props` - Package versions
 - `schemas/config-schema.json` - YAML validation
 
+## Release Notes / Changelogs
+
+- Key File: `CHANGELOG.md`
+- Follows keepachangelog.com format and rules
+- Newest entries are at the top of the file under the `[Unreleased]` section.
+- Audience: Non-technical end users
+- When requested, add ONLY ONE line under the appropriate section for changes.
+- Entries should be section-aware: For example, items under a section named "Fixed" shouldn't start
+  with the word "Fixed".
+- Entries should start with a general area/scope of the progrma to which the change applies. For
+  example:
+
+  ```txt
+  ### Fixed
+
+  - Sync: Crash while processing quality profiles
+  ```
+
 ## Development Requirements
 
 **MANDATORY WORKFLOW:**
