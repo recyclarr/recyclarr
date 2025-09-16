@@ -13,6 +13,10 @@ on:
       - .github/workflows/inspect-code.yml
       - "**.cs"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 env:
   baseRef: >-
     ${{ github.ref == 'refs/heads/master' && github.event.before ||
