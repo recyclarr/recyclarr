@@ -177,12 +177,12 @@ jobs:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
+        uses: gittools/actions/gitversion/setup@c368911c8982846e30b6855f79e579104849bfc3 # v0.13.6
         with:
           versionSpec: 6.0.x
 
       - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0
+        uses: gittools/actions/gitversion/execute@c368911c8982846e30b6855f79e579104849bfc3 # v0.13.6
         id: gitversion
 
       - name: Download Artifacts
