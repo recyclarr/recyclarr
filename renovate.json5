@@ -4,6 +4,16 @@
   minimumReleaseAge: "5 days",
   ignorePresets: ["mergeConfidence:all-badges"],
   configMigration: true,
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Update GitVersion versionSpec in GitHub Actions workflows",
+      fileMatch: ["^\\.github/workflows/.+\\.yml$"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)",
+      ],
+    },
+  ],
   packageRules: [
     {
       matchDatasources: ["nuget"],
@@ -20,8 +30,8 @@
     },
     {
       groupName: "All GitVersion Packages",
-      matchManagers: ["nuget"],
-      matchPackageNames: ["gitversion*"],
+      matchManagers: ["nuget", "custom.regex"],
+      matchPackageNames: ["gitversion*", "GitTools/GitVersion"],
       commitMessagePrefix: "build(deps):",
     },
     {

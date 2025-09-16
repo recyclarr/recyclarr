@@ -179,7 +179,8 @@ jobs:
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
         with:
-          versionSpec: 6.0.x
+          # renovate: datasource=github-tags depName=GitTools/GitVersion
+          versionSpec: 6.0.0
 
       - name: Determine Version
         uses: gittools/actions/gitversion/execute@v0
