@@ -208,27 +208,3 @@ jobs:
           tag_name: ${{ github.event.create.ref }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
-
-  #############################################
-  # The main purpose of this job is to group all the other jobs together into one single job status
-  # that can be set as a requirement to merge pull requests. This is easier than enumerating all
-  # jobs in a workflow to ensure they all pass.
-  check:
-    if: always()
-    name: Report Build Status
-    needs:
-      - build-win
-      - build-linux
-      - build-osx
-      - build-musl
-      - codesign
-      - docker
-      - release
-      - test-artifact-download
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check if all jobs succeeded
-        uses: re-actors/alls-green@release/v1
-        with:
-          allowed-skips: codesign, release, test-artifact-download
-          jobs: ${{ toJSON(needs) }}
