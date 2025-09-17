@@ -3,7 +3,8 @@ name: Build & Test
 
 on:
   push:
-  pull_request:
+    branches: [master]
+    tags: [v*]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
@@ -67,11 +68,6 @@ jobs:
   codesign:
     name: Apple Signing
     runs-on: macos-latest
-    # non-master branches
-    if: |
-      github.event_name == 'pull_request' ||
-      github.ref == 'refs/heads/master' ||
-      startsWith(github.ref, 'refs/tags/v')
     needs: [build-osx]
     strategy:
       matrix:
