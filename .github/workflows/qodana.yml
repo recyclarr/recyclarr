@@ -49,6 +49,9 @@ jobs:
         uses: JetBrains/qodana-action@27de2a744479d1d731934eeaf79287575ebc5dd3 # v2025.2.1
         with:
           upload-result: true
+          # Only save cache on default branch to prevent cache storage explosion.
+          # Feature branches can still read from master's cache for performance benefits.
+          cache-default-branch-only: true
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
