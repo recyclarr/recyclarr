@@ -173,13 +173,13 @@ jobs:
           fetch-depth: 0 # avoid shallow clone for GitVersion
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v0
+        uses: gittools/actions/gitversion/setup@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
         with:
           # renovate: datasource=github-tags depName=GitTools/GitVersion
           versionSpec: 6.0.0
 
       - name: Determine Version
-        uses: gittools/actions/gitversion/execute@v0
+        uses: gittools/actions/gitversion/execute@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
         id: gitversion
 
       - name: Download Artifacts
