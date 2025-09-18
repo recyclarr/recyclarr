@@ -21,14 +21,8 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
-        with:
-          # renovate: datasource=github-tags depName=GitTools/GitVersion
-          versionSpec: 6.0.0
-
-      - name: Determine Version
-        uses: gittools/actions/gitversion/execute@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
+      - name: Setup GitVersion
+        uses: ./.github/actions/setup-gitversion
         id: gitversion
 
       - name: Set Docker Tags

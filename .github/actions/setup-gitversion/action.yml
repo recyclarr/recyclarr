@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: Setup GitVersion
+description: Install GitVersion and determine version information
+author: Recyclarr
+
+outputs:
+  preReleaseTag:
+    description: The PreReleaseTag value
+    value: ${{ steps.gitversion.outputs.preReleaseTag }}
+  semVer:
+    description: The SemVer value
+    value: ${{ steps.gitversion.outputs.semVer }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
+      with:
+        # renovate: datasource=github-tags depName=GitTools/GitVersion
+        versionSpec: 6.4.0
+
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@b82e662a7199df56ac962118e506d9efb9830f82 # v4.1.0
+      id: gitversion
