@@ -48,7 +48,7 @@ For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] a
 >
 > Please do not use GitHub Issues for general support questions or configuration help.
 
-## Supported By
+## Powered By
 
 <!-- markdownlint-disable MD033 MD013 -->
 <a href="https://www.jetbrains.com/rider/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg" alt="Jetbrains Rider" style="margin-right: 10px;"></a>
