@@ -1,5 +1,4 @@
 {
-  "$schema": "metadata.schema.json",
   "json_paths": {
     "radarr": {
       "custom_formats": ["docs/json/radarr/cf"],
