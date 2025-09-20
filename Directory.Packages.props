@@ -25,7 +25,7 @@
     <PackageVersion Include="SuperLinq" Version="6.4.0" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="6.0.2" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.6" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.9" />
     <PackageVersion Include="SystemTextJson.JsonDiffPatch" Version="2.0.0" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions" Version="22.0.15" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.Extensions" Version="22.0.4" />
