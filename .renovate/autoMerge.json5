@@ -1,0 +1,47 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      description: "Auto-merge NuGet patch updates",
+      matchDatasources: ["nuget"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["patch"],
+      minimumReleaseAge: "1 day",
+      ignoreTests: false
+    },
+    {
+      description: "Auto-merge GitHub Actions",
+      matchManagers: ["github-actions"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "1 day",
+      ignoreTests: true
+    },
+    {
+      description: "Auto-merge trusted GitHub Actions",
+      matchManagers: ["github-actions"],
+      matchPackageNames: [
+        "/^actions\\//",
+        "/^renovatebot\\//",
+        "/^docker:\\//"
+      ],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "1 day",
+      ignoreTests: true
+    },
+    {
+      description: "Auto-merge .NET Docker images (SDK/runtime) - patch and digest only",
+      matchDatasources: ["docker"],
+      matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["patch", "digest"],
+      minimumReleaseAge: "1 day",
+      ignoreTests: false
+    }
+  ]
+}
