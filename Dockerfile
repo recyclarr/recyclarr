@@ -4,7 +4,7 @@
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/dotnetapp/Dockerfile.alpine
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
 
-ARG DOTNET_VERSION=9.0
+ARG DOTNET_VERSION=10.0
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine AS build
 
