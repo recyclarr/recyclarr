@@ -4,12 +4,15 @@
     {
       description: "NuGet packages in .props and .csproj files",
       matchFileNames: ["*.props", "*.csproj"],
-      commitMessagePrefix: "build(deps):"
+      commitMessagePrefix: "build(deps):",
+      commitMessageExtra: "( {{currentVersion}} → {{newVersion}} )"
     },
     {
-      description: "GitHub Actions updates",
+      description: "GitHub Actions",
       matchManagers: ["github-actions"],
-      commitMessagePrefix: "ci(deps):"
+      commitMessagePrefix: "ci(deps):",
+      commitMessageTopic: "action {{depName}}",
+      commitMessageExtra: "( {{currentVersion}} → {{newVersion}} )"
     }
   ]
 }
