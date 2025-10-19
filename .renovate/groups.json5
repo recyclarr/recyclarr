@@ -19,12 +19,13 @@
     {
       description: ".NET SDK and runtime major version upgrades (replaces built-in dotnet monorepo preset)",
       groupName: "dotnet monorepo",
-      matchManagers: ["nuget", "dockerfile", "github-actions", "custom.regex"],
+      matchDatasources: ["docker", "dotnet-version"],
       matchPackagePatterns: [
         "^mcr\\.microsoft\\.com/dotnet/",
-        "^dotnet"
+        "^dotnet-sdk$"
       ],
       matchUpdateTypes: ["major"],
+      ignoreUnstable: true,
       commitMessagePrefix: "build(deps):",
       minimumGroupSize: 2
     }

@@ -25,6 +25,14 @@
       matchStrings: ["<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>"],
       depNameTemplate: "dotnet-sdk",
       datasourceTemplate: "dotnet-version"
+    },
+    {
+      description: "Update dotnet-version input in setup-dotnet action",
+      customType: "regex",
+      fileMatch: ["\\.github/actions/.+\\.ya?ml$", "\\.github/workflows/.+\\.ya?ml$"],
+      matchStrings: ["dotnet-version:\\s*(?<currentValue>\\d+\\.\\d+)\\.x"],
+      depNameTemplate: "dotnet-sdk",
+      datasourceTemplate: "dotnet-version"
     }
   ]
 }
