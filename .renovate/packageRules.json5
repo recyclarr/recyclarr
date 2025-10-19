@@ -19,6 +19,12 @@
       matchDatasources: ["docker", "dotnet-version"],
       matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
       allowedVersions: "!/-(rc|preview|alpha|beta)/"
+    },
+    {
+      description: "Add changelog URLs for GitHub Actions digest updates",
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["digest"],
+      prBodyNotes: ["Changelog: {{{changelogUrl}}}"]
     }
   ]
 }
