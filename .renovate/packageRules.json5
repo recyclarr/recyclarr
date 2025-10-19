@@ -6,6 +6,11 @@
       matchDatasources: ["nuget"],
       matchUpdateTypes: ["patch", "minor", "major"],
       prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"]
+    },
+    {
+      description: "Disable minimumReleaseAge for datasources without timestamp support",
+      matchDatasources: ["custom.endoflife-date", "dotnet-version"],
+      minimumReleaseAge: null
     }
   ]
 }
