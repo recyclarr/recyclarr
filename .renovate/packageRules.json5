@@ -5,12 +5,8 @@
       description: "NuGet package presentation configuration",
       matchDatasources: ["nuget"],
       matchUpdateTypes: ["patch", "minor", "major"],
-      prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"]
-    },
-    {
-      description: "Disable minimumReleaseAge for datasources without timestamp support",
-      matchDatasources: ["custom.endoflife-date", "dotnet-version", "docker"],
-      minimumReleaseAge: null
+      prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"],
+      minimumReleaseAge: "5 days"
     },
     {
       // dotnet-version datasource doesn't mark RC/preview releases as unstable,
