@@ -56,7 +56,7 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@f1f6e5f6af878fb37288ce1c627459e94dbf7d01 # v3
+        uses: github/codeql-action/upload-sarif@42213152a85ae7569bdb6bec7bcd74cd691bfe41 # v3
         if: success() || failure()
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
