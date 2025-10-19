@@ -97,8 +97,37 @@ dotnet csharpier check .     # Verify formatting
 - .NET 9.0 + nullable reference types
 - XML documentation for all public APIs
 - Zero warnings/analysis issues
-- Conventional commits
+- Conventional commits (see rules below)
 - Preserve YAML config backward compatibility
+
+**CONVENTIONAL COMMIT RULES** (file path-based classification):
+
+**Direct path mapping:**
+
+- `ci:` → `.github/workflows/**`, `ci/*`, `scripts/*`
+- `build:` → `*.props`, `*.csproj`, `*.slnx`, `Directory.*`, `.config/dotnet-tools.json`
+- `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.gitignore`, `.csharpierignore`,
+  `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`
+- `test:` → `tests/**/*Test.cs`, `tests/**/Data/**`
+- `docs:` → `*.md`, `docs/**`, `LICENSE`, `CODEOWNERS`, `SECURITY.md`
+
+**For `src/` files - inspect git diff + CHANGELOG.md:**
+
+- `feat:` → New public class/interface/method, CHANGELOG "Added" section, new user-facing capability
+- `fix:` → Bug fixes, CHANGELOG "Fixed", exception handling corrections
+- `refactor:` → File moves/renames, internal restructuring, no CHANGELOG entry
+- `perf:` → Performance improvements without functionality changes
+
+**Breaking changes (!:):**
+
+- YAML schema property removals in `schemas/**/*.json`
+- CHANGELOG "Removed" section entries
+- Settings migration in `Settings/Deprecations/`
+
+**Scopes from paths:**
+
+- `src/*/Pipelines/*` → `(sync)`, `src/*/Config/*` → `(config)`, `src/*/Console/Commands/*` →
+  `(cli)`, `schemas/*` → `(yaml)`, `src/*/Cache/*` → `(cache)`
 
 ### Backward Compatibility
 
