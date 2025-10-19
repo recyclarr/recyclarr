@@ -15,5 +15,6 @@
   ],
   minimumReleaseAge: "5 days",
   ignorePresets: ["mergeConfidence:all-badges"],
-  configMigration: true
+  configMigration: true,
+  gitIgnoredAuthors: ["227055450+renohate[bot]@users.noreply.github.com"]
 }
