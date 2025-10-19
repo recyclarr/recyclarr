@@ -1,0 +1,13 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  customManagers: [
+    {
+      description: "Update GitVersion versionSpec in GitHub Actions workflows",
+      customType: "regex",
+      fileMatch: ["^\\.github/workflows/.+\\.ya?ml$"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)"
+      ]
+    }
+  ]
+}

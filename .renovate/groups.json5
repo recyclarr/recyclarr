@@ -1,0 +1,20 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      description: "GitVersion packages and tools",
+      groupName: "All GitVersion Packages",
+      matchManagers: ["nuget", "custom.regex"],
+      matchPackageNames: ["gitversion*", "GitTools/GitVersion"],
+      commitMessagePrefix: "build(deps):",
+      minimumGroupSize: 2
+    },
+    {
+      description: "System.IO.Abstractions packages",
+      groupName: "System.IO.Abstractions Packages",
+      matchManagers: ["nuget"],
+      matchPackageNames: ["TestableIO.System.IO.Abstractions*"],
+      minimumGroupSize: 2
+    }
+  ]
+}

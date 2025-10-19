@@ -1,48 +1,19 @@
 {
+  // !!! IMPORTANT NOTICE !!!
+  // Modular renovate configuration is in the `.renovate/` directory!
+  //
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", ":disableRateLimiting", "helpers:pinGitHubActionDigestsToSemver"],
+  extends: [
+    "config:recommended",
+    ":disableRateLimiting",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "local>.renovate/customManagers.json5",
+    "local>.renovate/groups.json5",
+    "local>.renovate/labels.json5",
+    "local>.renovate/packageRules.json5",
+    "local>.renovate/semanticCommits.json5"
+  ],
   minimumReleaseAge: "5 days",
   ignorePresets: ["mergeConfidence:all-badges"],
-  configMigration: true,
-  customManagers: [
-    {
-      customType: "regex",
-      description: "Update GitVersion versionSpec in GitHub Actions workflows",
-      fileMatch: ["^\\.github/workflows/.+\\.yml$"],
-      matchStrings: [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)",
-      ],
-    },
-  ],
-  packageRules: [
-    {
-      matchDatasources: ["nuget"],
-      matchUpdateTypes: ["patch", "minor", "major"],
-      prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"],
-    },
-    {
-      matchFileNames: ["*.props", "*.csproj"],
-      commitMessagePrefix: "build(deps):",
-    },
-    {
-      matchManagers: ["github-actions"],
-      commitMessagePrefix: "ci(deps):",
-    },
-    {
-      groupName: "All GitVersion Packages",
-      matchManagers: ["nuget", "custom.regex"],
-      matchPackageNames: ["gitversion*", "GitTools/GitVersion"],
-      commitMessagePrefix: "build(deps):",
-    },
-    {
-      groupName: "System.IO.Abstractions Packages",
-      matchManagers: ["nuget"],
-      matchPackageNames: ["TestableIO.System.IO.Abstractions*"],
-    },
-    {
-      matchManagers: ["nuget"],
-      matchPackageNames: ["MudBlazor"],
-      minimumReleaseAge: "10 days",
-    },
-  ],
+  configMigration: true
 }

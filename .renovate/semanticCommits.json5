@@ -1,0 +1,15 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      description: "NuGet packages in .props and .csproj files",
+      matchFileNames: ["*.props", "*.csproj"],
+      commitMessagePrefix: "build(deps):"
+    },
+    {
+      description: "GitHub Actions updates",
+      matchManagers: ["github-actions"],
+      commitMessagePrefix: "ci(deps):"
+    }
+  ]
+}
