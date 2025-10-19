@@ -5,6 +5,33 @@ on:
   push:
     branches: [master]
     tags: [v*]
+    paths:
+      # Source code and tests
+      - 'src/**'
+      - 'tests/**'
+
+      # Build configuration
+      - '*.props'
+      - '*.csproj'
+      - '*.slnx'
+      - '.config/dotnet-tools.json'
+
+      # CI/CD infrastructure
+      - '.github/workflows/build.yml'
+      - '.github/workflows/reusable-build.yml'
+      - '.github/workflows/reusable-docker.yml'
+      - '.github/actions/**'
+      - 'ci/**'
+
+      # Docker
+      - 'Dockerfile'
+      - 'docker/**'
+
+      # Versioning (affects build outputs)
+      - 'GitVersion.yml'
+
+      # YAML schemas (runtime validation of user configs)
+      - 'schemas/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
