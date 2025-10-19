@@ -7,11 +7,11 @@
     "config:recommended",
     ":disableRateLimiting",
     "helpers:pinGitHubActionDigestsToSemver",
-    "recyclarr/recyclarr:.renovate/customManagers.json5",
-    "recyclarr/recyclarr:.renovate/groups.json5",
-    "recyclarr/recyclarr:.renovate/labels.json5",
-    "recyclarr/recyclarr:.renovate/packageRules.json5",
-    "recyclarr/recyclarr:.renovate/semanticCommits.json5"
+    "recyclarr/recyclarr//.renovate/customManagers.json5",
+    "recyclarr/recyclarr//.renovate/groups.json5",
+    "recyclarr/recyclarr//.renovate/labels.json5",
+    "recyclarr/recyclarr//.renovate/packageRules.json5",
+    "recyclarr/recyclarr//.renovate/semanticCommits.json5"
   ],
   minimumReleaseAge: "5 days",
   ignorePresets: ["mergeConfidence:all-badges"],
