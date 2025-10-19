@@ -8,6 +8,23 @@
       matchStrings: [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)"
       ]
+    },
+    {
+      description: "Update DOTNET_VERSION ARG in Dockerfile",
+      customType: "regex",
+      fileMatch: ["^Dockerfile$"],
+      matchStrings: ["ARG DOTNET_VERSION=(?<currentValue>\\d+\\.\\d+)\\s"],
+      depNameTemplate: "dotnet-sdk",
+      packageNameTemplate: "mcr.microsoft.com/dotnet/sdk",
+      datasourceTemplate: "docker"
+    },
+    {
+      description: "Update TargetFramework in MSBuild props files",
+      customType: "regex",
+      fileMatch: ["\\.props$"],
+      matchStrings: ["<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>"],
+      depNameTemplate: "dotnet-sdk",
+      datasourceTemplate: "dotnet-version"
     }
   ]
 }

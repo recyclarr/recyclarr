@@ -15,6 +15,18 @@
       matchManagers: ["nuget"],
       matchPackageNames: ["TestableIO.System.IO.Abstractions*"],
       minimumGroupSize: 2
+    },
+    {
+      description: ".NET SDK and runtime major version upgrades (replaces built-in dotnet monorepo preset)",
+      groupName: "dotnet monorepo",
+      matchManagers: ["nuget", "dockerfile", "github-actions", "custom.regex"],
+      matchPackagePatterns: [
+        "^mcr\\.microsoft\\.com/dotnet/",
+        "^dotnet"
+      ],
+      matchUpdateTypes: ["major"],
+      commitMessagePrefix: "build(deps):",
+      minimumGroupSize: 2
     }
   ]
 }
