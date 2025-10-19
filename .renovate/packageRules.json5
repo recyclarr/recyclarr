@@ -11,6 +11,14 @@
       description: "Disable minimumReleaseAge for datasources without timestamp support",
       matchDatasources: ["custom.endoflife-date", "dotnet-version"],
       minimumReleaseAge: null
+    },
+    {
+      // dotnet-version datasource doesn't mark RC/preview releases as unstable,
+      // so ignoreUnstable preset doesn't work. Block pre-releases until GA.
+      description: "Prevent .NET pre-release versions (RC/preview) until GA",
+      matchDatasources: ["docker", "dotnet-version"],
+      matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
+      allowedVersions: "!/-(rc|preview|alpha|beta)/"
     }
   ]
 }
