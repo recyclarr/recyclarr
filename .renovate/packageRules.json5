@@ -9,7 +9,7 @@
     },
     {
       description: "Disable minimumReleaseAge for datasources without timestamp support",
-      matchDatasources: ["custom.endoflife-date", "dotnet-version"],
+      matchDatasources: ["custom.endoflife-date", "dotnet-version", "docker"],
       minimumReleaseAge: null
     },
     {
