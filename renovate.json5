@@ -6,6 +6,7 @@
   extends: [
     "config:recommended",
     ":disableRateLimiting",
+    ":ignoreUnstable",
     "helpers:pinGitHubActionDigestsToSemver",
     "recyclarr/recyclarr//.renovate/customManagers.json5",
     "recyclarr/recyclarr//.renovate/groups.json5",

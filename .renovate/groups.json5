@@ -25,7 +25,6 @@
         "^dotnet-sdk$"
       ],
       matchUpdateTypes: ["major"],
-      ignoreUnstable: true,
       commitMessagePrefix: "build(deps):",
       minimumGroupSize: 2
     }
