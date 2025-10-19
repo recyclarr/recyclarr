@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Renovate Dashboard Handler
+
+on:
+  issues:
+    types: [edited]
+  pull_request_target:
+    types: [closed, edited]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.number || github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-dashboard:
+    name: Dependency Dashboard Handler
+    if: >
+      (
+        github.event_name == 'issues' &&
+        github.actor != 'renohate[bot]' &&
+        contains(github.event.issue.title, 'Renovate Dashboard') &&
+        (
+          contains(github.event.issue.body, '- [x]') ||
+          contains(github.event.issue.body, 'approve-all-pending-prs') ||
+          contains(github.event.issue.body, 'create-all-rate-limited-prs')
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate App Token
+        id: generate-token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        with:
+          app-id: ${{ secrets.RENOVATE_APP_ID }}
+          private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Trigger Renovate for Dashboard Actions
+        uses: peter-evans/repository-dispatch@5fc4efd1a4797ddb68ffd0714a238564e4cc0e6f # v4.0.0
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          event-type: renovate-trigger
+          client-payload: |
+            {
+              "source": "dependency-dashboard",
+              "action": "${{ github.event.action }}",
+              "issue_number": ${{ github.event.issue.number }},
+              "triggered_by": "${{ github.actor }}"
+            }
+
+  pull-request-handler:
+    name: Pull Request Handler
+    if: >
+      (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.user.login == 'renohate[bot]' &&
+        github.actor != 'renohate[bot]' &&
+        (
+          github.event.action == 'closed' ||
+          (
+            github.event.action == 'edited' &&
+            contains(github.event.pull_request.body, '- [x]')
+          )
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate App Token
+        id: generate-token
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+        with:
+          app-id: ${{ secrets.RENOVATE_APP_ID }}
+          private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Trigger Renovate for PR Actions
+        uses: peter-evans/repository-dispatch@5fc4efd1a4797ddb68ffd0714a238564e4cc0e6f # v4.0.0
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          event-type: renovate-trigger
+          client-payload: |
+            {
+              "source": "pull-request",
+              "action": "${{ github.event.action }}",
+              "pr_number": ${{ github.event.pull_request.number }},
+              "ref": "${{ github.head_ref || github.ref_name }}",
+              "triggered_by": "${{ github.actor }}"
+            }
