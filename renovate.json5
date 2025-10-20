@@ -7,15 +7,19 @@
     "config:recommended",
     ":disableRateLimiting",
     ":ignoreUnstable",
+    "security:openssf-scorecard",
     "helpers:pinGitHubActionDigestsToSemver",
     "recyclarr/recyclarr//.renovate/autoMerge.json5",
     "recyclarr/recyclarr//.renovate/customManagers.json5",
     "recyclarr/recyclarr//.renovate/groups.json5",
     "recyclarr/recyclarr//.renovate/labels.json5",
     "recyclarr/recyclarr//.renovate/packageRules.json5",
-    "recyclarr/recyclarr//.renovate/semanticCommits.json5"
+    "recyclarr/recyclarr//.renovate/semanticCommits.json5",
   ],
   ignorePresets: ["mergeConfidence:all-badges"],
   configMigration: true,
-  gitIgnoredAuthors: ["227055450+renohate[bot]@users.noreply.github.com"]
+  gitIgnoredAuthors: ["227055450+renohate[bot]@users.noreply.github.com"],
+  "pre-commit": {
+    enabled: true,
+  },
 }
