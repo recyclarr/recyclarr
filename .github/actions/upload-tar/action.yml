@@ -13,7 +13,6 @@ inputs:
 runs:
   using: composite
   steps:
-
     - run: tar cvf artifact.tar *
       shell: bash
       working-directory: ${{ inputs.path }}

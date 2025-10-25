@@ -31,8 +31,8 @@ and expectations for all contributors.
 There are two recommended ways to use CSharpier:
 
 1. **IDE Integration (preferred)**<br/>
-  CSharpier supports [many IDEs and editors][csharpier_plugins]. Configure your plugin to format on
-  save for automatic reformatting.
+   CSharpier supports [many IDEs and editors][csharpier_plugins]. Configure your plugin to format on
+   save for automatic reformatting.
 
 1. **CLI Tool**<br/>
    Install tooling: `dotnet tool restore` at the repo root. Format all C# files with `dotnet

@@ -9,7 +9,7 @@
       automergeType: "pr",
       matchUpdateTypes: ["patch"],
       minimumReleaseAge: "1 day",
-      ignoreTests: false
+      ignoreTests: false,
     },
     {
       description: "Auto-merge GitHub Actions",
@@ -17,7 +17,7 @@
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch", "digest"],
-      ignoreTests: true
+      ignoreTests: true,
     },
     {
       description: "Auto-merge trusted GitHub Actions",
@@ -25,12 +25,12 @@
       matchPackageNames: [
         "/^actions\\//",
         "/^renovatebot\\//",
-        "/^docker:\\//"
+        "/^docker:\\//",
       ],
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch", "digest"],
-      ignoreTests: true
+      ignoreTests: true,
     },
     {
       description: "Auto-merge .NET Docker images (SDK/runtime) - patch and digest only",
@@ -39,7 +39,7 @@
       automerge: true,
       automergeType: "pr",
       matchUpdateTypes: ["patch", "digest"],
-      ignoreTests: false
-    }
-  ]
+      ignoreTests: false,
+    },
+  ],
 }

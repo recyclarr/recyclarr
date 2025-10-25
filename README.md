@@ -51,8 +51,10 @@ For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] a
 ## Powered By
 
 <!-- markdownlint-disable MD033 MD013 -->
+
 <a href="https://www.jetbrains.com/rider/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider_icon.svg" alt="Jetbrains Rider" style="margin-right: 10px;"></a>
 <a href="https://www.jetbrains.com/qodana/" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Qodana_icon.svg" alt="Jetbrains Qodana"></a>
+
 <!-- markdownlint-enable MD033 MD013 -->
 
 [discord]: https://discord.com/invite/Vau8dZ3

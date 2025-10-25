@@ -4,13 +4,16 @@
 
 ## Core Testing Philosophy
 
-**Primary Coverage**: Integration tests mock only externals (Git, filesystem, HTTP APIs) while using real business logic. Provides majority coverage through public interfaces.
+**Primary Coverage**: Integration tests mock only externals (Git, filesystem, HTTP APIs) while using
+real business logic. Provides majority coverage through public interfaces.
 
-**Gap Filling**: Targeted lower-level tests for paths integration tests cannot reach (negative testing, error conditions).
+**Gap Filling**: Targeted lower-level tests for paths integration tests cannot reach (negative
+testing, error conditions).
 
 ### Key Principles
 
 **YOU MUST:**
+
 - Test behavior, not implementation details
 - Focus on interface contracts
 - Ensure test resilience to architectural changes
@@ -21,6 +24,7 @@
 ### System Integration Testing
 
 **YOU MUST:**
+
 - Test complete workflows through public interfaces
 - Use real business logic implementations
 - Mock only externals (Git, filesystem, HTTP APIs)
@@ -56,6 +60,7 @@ tests/
 ### Test Structure Guidelines
 
 **YOU MUST:**
+
 - Use `internal sealed class {ClassName}Test` pattern
 - Integration tests inherit from `IntegrationTestFixture`
 - Custom mocks override `RegisterStubsAndMocks(ContainerBuilder builder)`
@@ -64,6 +69,7 @@ tests/
 ### Test Naming Conventions
 
 **YOU MUST:**
+
 - Test classes: `{ComponentUnderTest}Test`
 - Integration tests: `{Component}IntegrationTest`
 - Methods: Descriptive underscore-separated behavior names:
@@ -76,6 +82,7 @@ tests/
 ### AutoFixture Usage Patterns
 
 **YOU MUST use these patterns:**
+
 - `[AutoMockData]`: Basic dependency injection
 - `[InlineAutoMockData(params)]`: Parameterized tests with auto-mocking
 - `[Frozen]` or `[Frozen(Matching.ImplementedInterfaces)]`: Shared mocks
@@ -85,6 +92,7 @@ tests/
 ### NSubstitute Mocking Patterns
 
 **YOU MUST use these patterns:**
+
 - `dependency.Method().Returns(value)`: Method returns
 - `dependency.Property.ReturnsNull()`: Null property returns
 - `dependency.Method(default!).ReturnsForAnyArgs(value)`: Flexible matching
@@ -94,6 +102,7 @@ tests/
 ### Test Data Management
 
 **YOU MUST:**
+
 - Store JSON test data in `Data/` as embedded resources
 - Use factory classes: `NewCf`, `NewConfig`, `NewQualitySize`
 - Use collection initializers and record `with` expressions
@@ -105,21 +114,25 @@ tests/
 **YOU MUST leverage:**
 
 #### Libraries
+
 - `Recyclarr.TestLibrary`: Core utilities (AutoFixture, NSubstitute extensions)
 - `Recyclarr.Core.TestLibrary`: Core-specific fixtures/builders
 - `Recyclarr.Cli.TestLibrary`: CLI utilities
 
 #### Base Fixtures
+
 - `IntegrationTestFixture`: Integration tests with DI container
 - `CliIntegrationFixture`: CLI integration with composition root
 
 #### Key Utilities
+
 - `Verify.That<T>()`: NSubstitute matcher with FluentAssertions
 - `TestableLogger`: Observable logger for testing log output
 - `TestConsole`: Console output verification
 - `MockFileSystem`, `MockFileData`: File system testing
 
 #### Data Builders
+
 - `NewCf.DataWithScore(name, trashId, score)`: CustomFormatData factory
 - `NewConfig.Radarr()`, `NewConfig.Sonarr()`: Config factories
 - `NewQualitySize`: Quality size factory
@@ -127,21 +140,27 @@ tests/
 ### Mocking Strategy
 
 #### What to Mock (External Dependencies)
+
 **YOU MUST mock:**
+
 - Git operations (LibGit2Sharp)
 - HTTP API calls (Sonarr/Radarr APIs)
 - External configuration sources
 - Filesystem (when testing logic, not I/O)
 
 #### What NOT to Mock (Internal Dependencies)
+
 **NEVER mock:**
+
 - Business logic classes
 - Data transformation logic
 - Internal interfaces/contracts
 - Domain models/value objects
 
 #### Integration Test Mocking
+
 **YOU MUST:**
+
 - Use `RegisterStubsAndMocks(ContainerBuilder builder)` for custom mocks
 - Use `MockFileSystem` for file operations
 - Use `TestConsole` for console verification
@@ -152,18 +171,23 @@ tests/
 **YOU MUST use FluentAssertions patterns:**
 
 ### Standard Assertions
-- `result.Should().BeEquivalentTo(expected)`: Deep object comparisons (PREFER over multiple property assertions)
+
+- `result.Should().BeEquivalentTo(expected)`: Deep object comparisons (PREFER over multiple property
+  assertions)
 - `act.Should().Throw<ExceptionType>().WithMessage("pattern")`: Exception verification
 - `collection.Should().HaveCount(expected).And.Contain(item)`: Collections
 - `result.Should().Be(true)` / `result.Should().BeFalse()`: Booleans
 - `result.Should().BeNull()` / `result.Should().NotBeNull()`: Null checks
 
 ### Object Comparison Best Practices
+
 - **PREFER**: `result.Should().BeEquivalentTo(expected)` for multi-property object verification
-- **AVOID**: Multiple individual property assertions (`obj.Prop1.Should().Be()`, `obj.Prop2.Should().Be()`)
+- **AVOID**: Multiple individual property assertions (`obj.Prop1.Should().Be()`,
+  `obj.Prop2.Should().Be()`)
 - **BENEFIT**: Cleaner, more maintainable tests that are resilient to property additions
 
 ### Advanced Patterns
+
 - `result.Where(x => condition).Should().BeEquivalentTo(expected)`: Filtered comparisons
 - `result.Select(x => x.Property).Should().BeEquivalentTo(expected)` for property-based comparisons
 - `result.Should().NotBeNull().And.BeOfType<Type>()` for chained assertions

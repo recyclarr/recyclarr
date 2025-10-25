@@ -4,12 +4,12 @@
     {
       description: "Label NuGet package updates",
       matchDatasources: ["nuget"],
-      addLabels: ["renovate/nuget"]
+      addLabels: ["renovate/nuget"],
     },
     {
       description: "Label GitHub Actions updates",
       matchManagers: ["github-actions"],
-      addLabels: ["renovate/github-action"]
-    }
-  ]
+      addLabels: ["renovate/github-action"],
+    },
+  ],
 }

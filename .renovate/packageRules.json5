@@ -5,8 +5,16 @@
       description: "NuGet package presentation configuration",
       matchDatasources: ["nuget"],
       matchUpdateTypes: ["patch", "minor", "major"],
-      prBodyColumns: ["Package", "Change", "Age", "Adoption", "Passing", "Confidence", "Pending"],
-      minimumReleaseAge: "5 days"
+      prBodyColumns: [
+        "Package",
+        "Change",
+        "Age",
+        "Adoption",
+        "Passing",
+        "Confidence",
+        "Pending",
+      ],
+      minimumReleaseAge: "5 days",
     },
     {
       // dotnet-version datasource doesn't mark RC/preview releases as unstable,
@@ -14,13 +22,13 @@
       description: "Prevent .NET pre-release versions (RC/preview) until GA",
       matchDatasources: ["docker", "dotnet-version"],
       matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
-      allowedVersions: "!/-(rc|preview|alpha|beta)/"
+      allowedVersions: "!/-(rc|preview|alpha|beta)/",
     },
     {
       description: "Add changelog URLs for GitHub Actions digest updates",
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["digest"],
-      prBodyNotes: ["Changelog: {{{changelogUrl}}}"]
-    }
-  ]
+      prBodyNotes: ["Changelog: {{{changelogUrl}}}"],
+    },
+  ],
 }

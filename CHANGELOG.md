@@ -1,4 +1,5 @@
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -632,7 +633,7 @@ changes you need to make.
 - **BREAKING**: Completely removed support for `names` under `custom_formats` in `recyclarr.yml`.
   Note that this had already been deprecated for quite some time.
 - **BREAKING**: The deprecated feature that still allowed you to keep your `recyclarr.yml` next to
-the executable has been removed.
+  the executable has been removed.
 
 ### Fixed
 
@@ -842,7 +843,7 @@ make.
 ### Changed
 
 - **BREAKING**: Sonarr Release profiles are now synced based on a "Trash ID" taken from [the sonarr
-JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes *are required*.
+  JSON files][sonarrjson]. This breaks existing `trash.yml` and manual changes _are required_.
 - Do not follow HTTP redirects and instead issue a warning to the user that they are potentially
   using the wrong URL.
 - Radarr: Sanitize URLs in HTTP exception messages ([#17]).

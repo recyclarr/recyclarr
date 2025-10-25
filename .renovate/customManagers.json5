@@ -6,24 +6,29 @@
       customType: "regex",
       fileMatch: ["^\\.github/workflows/.+\\.ya?ml$"],
       matchStrings: [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)"
-      ]
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)",
+      ],
     },
     {
       description: "Update TargetFramework in MSBuild props files",
       customType: "regex",
       fileMatch: ["\\.props$"],
-      matchStrings: ["<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>"],
+      matchStrings: [
+        "<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>",
+      ],
       depNameTemplate: "dotnet-sdk",
-      datasourceTemplate: "dotnet-version"
+      datasourceTemplate: "dotnet-version",
     },
     {
       description: "Update dotnet-version input in setup-dotnet action",
       customType: "regex",
-      fileMatch: ["\\.github/actions/.+\\.ya?ml$", "\\.github/workflows/.+\\.ya?ml$"],
+      fileMatch: [
+        "\\.github/actions/.+\\.ya?ml$",
+        "\\.github/workflows/.+\\.ya?ml$",
+      ],
       matchStrings: ["dotnet-version:\\s*(?<currentValue>\\d+\\.\\d+)\\.x"],
       depNameTemplate: "dotnet-sdk",
-      datasourceTemplate: "dotnet-version"
-    }
-  ]
+      datasourceTemplate: "dotnet-version",
+    },
+  ],
 }
