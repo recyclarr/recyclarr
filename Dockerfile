@@ -14,11 +14,11 @@ WORKDIR /source
 #
 # NOTE: --parents requires dockerfile version 1.7-labs since it isn't released yet. More info here:
 # https://docs.docker.com/build/dockerfile/release-notes/#170
-COPY --parents *.props src/*/*.csproj ./
+COPY --link --parents *.props src/*/*.csproj ./
 RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH
 
 # copy and publish app and libraries
-COPY . .
+COPY --link . .
 RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app
 
 # Enable globalization and time zones:
@@ -44,7 +44,7 @@ RUN set -ex; \
     apk add --no-cache bash tzdata supercronic git tini; \
     mkdir -p /config && chown 1000:1000 /config;
 
-COPY --from=build /app /app/recyclarr/
+COPY --link --from=build /app /app/recyclarr/
 COPY --chmod=555 ./docker/scripts/*.sh /
 
 USER 1000:1000
