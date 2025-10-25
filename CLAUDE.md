@@ -1,66 +1,124 @@
 # Recyclarr Development Guide
 
+.NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr.
+
 ## Project Context
 
-.NET 9.0 CLI synchronizing TRaSH Guides to Sonarr/Radarr. Clean Architecture + Autofac + NUnit.
+- Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
+- Components: Cli (entry) → Core (logic) → TrashGuide/ServarrApi (integrations)
+- Pipeline: `GenericSyncPipeline<TContext>` - Config → Fetch → Transaction → Persist → Preview
+- DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
+  gets its own Autofac Module to keep DI registration modular.
+- Config: YAML + `schemas/config-schema.json` validation
+- Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
+- Dotnet tools in `.config/dotnet-tools.json`
+- CLI: `Spectre.Console` package for CLI framework
 
-**IMPORTANT:** Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
+## Coding Standards & Development Requirements
 
-## Development Commands
+- You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
+  code.
+- Search existing code first: `rg "pattern"` before writing new code. Holistically and
+  comprehensively make changes, don't just do it in isolation which ignores other important areas of
+  code that might be in-scope or indirectly affected by a change.
+- Reuse/extend existing implementations - zero duplication tolerance
+- CRITICAL: Follow SOLID, DRY, YAGNI principles
+- .NET 9.0 + nullable reference types
+- DO NOT use XML documentation for ANY types.
+- NO VERBOSE/USELESS C# COMMENTS. C# comments are code too, and thus incur a maintenance cost. They
+  must have value. Focus on documenting the WHY, not WHAT code does. Preference for self-documenting
+  code: Self-describing variable, class, function names, etc.
+- Zero warnings/analysis issues
 
-### Build and Test
+### C# Requirements
 
-```bash
-# Core commands
-dotnet build
-dotnet test
-dotnet run --project src/Recyclarr.Cli/
+- File-scoped namespaces: `namespace Recyclarr.Core;`
+- Primary constructors: `class Service(IDep dep, ILogger logger)`
+- Collection expressions: `[]`, `[item]`, `[item1, item2]`, `[..collection]`
+- Records for DTOs, `required` properties, `init` setters
+- Pattern matching: `is not null`, switch expressions
+- Use `internal` for implementation classes (CLI apps, service implementations)
+- Use `public` only for genuine external APIs
+- Concrete classes implementing public interfaces should be `internal`
+- Records for data models
+- `IReadOnlyCollection<T>` return types
+- LINQ method chaining over loops
+- Spread operator for collections: `[..first, ..second]`
+- `ValueTask` for hot paths, `CancellationToken` everywhere
 
-# CI/Release
-dotnet test -c Release --logger GitHubActions
-dotnet publish src/Recyclarr.Cli/ -c Release -o publish/
-ci/Publish.ps1 -Runtime <runtime-id>
-ci/SmokeTest.ps1 publish/<runtime>/recyclarr
+### Testing Requirements
 
-# Specific testing
-dotnet test tests/Recyclarr.Core.Tests/
-dotnet test --filter "FullyQualifiedName~TestMethodName"
-```
+Core Mandates:
 
-### Code Formatting
+- **Tests must verify BEHAVIOR, not implementation detail!**
+- Avoid super granular unit tests with heavy mocking, even if you find this pattern in the existing
+  code.
+- Focus on high level integration tests that verify large chunks of the system. These are less
+  brittle and result in more meaningful tests.
+- Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Mocks for
+  external dependencies at a high level, with real objects in the center.
+- Integration test fixtures MUST derive from one of the base test fixture classes:
+  - `IntegrationTestFixture`: Integration tests for the Recyclarr.Core library.
+  - `CliIntegrationTestFixture`: Integration tests for the Recyclarr.Cli library.
 
-```bash
-dotnet tool restore
-dotnet csharpier format .    # ONLY formatting tool allowed
-dotnet csharpier check .     # Verify formatting
-```
+Patterns:
 
-**MANDATORY:**
+- NUnit: `[Test]`, `internal sealed class {Name}Test`
+- NSubstitute + AutoFixture + FluentAssertions
+- `Freeze<T>()`, `Should().BeEquivalentTo()`
+- Static registration methods in modules
+- `RegisterType<Impl>().As<IInterface>()`
+- Lifecycle: `SingleInstance()`, `InstancePerLifetimeScope()`
 
-- Use context7 to understand CSharpier before using it
-- CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
+## Backward Compatibility
 
-### Docker
+- **CODE**: No backward compatibility required - refactor freely
+- **USER DATA**: Mandatory backward compatibility - User-observable things like YAML configs and
+  settings files must remain functional.
+- DEPRECATIONS: Removed or deprecated features need helpful user-facing diagnostics. Look at
+  existing patterns in the code base for this BEFORE you make a modification. Follow these existing
+  patterns.
 
-```bash
-./scripts/Docker-Debug.ps1           # External services
-./scripts/Docker-Recyclarr.ps1 sync  # Container execution
-```
+## Repository Structure
 
-## Architecture
+- `src/`: All C# source code
+- `tests/`: All C# unit and integration tests
+- `ci/`: contains scripts and other utilities utilized by github workflows
+- `.github/`: contains actions and workflows for Github
 
-- **Components**: Cli (entry) → Core (logic) → TrashGuide/ServarrApi (integrations)
-- **Pipeline**: `GenericSyncPipeline<TContext>` - Config → Fetch → Transaction → Persist → Preview
-- **DI**: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`
-- **Config**: YAML + `schemas/config-schema.json` validation
-- **Testing**: NUnit 4 + NSubstitute + AutoFixture + parallel execution
+Some key files and directories:
 
-## Key Files
-
+- Primary CLI project is `src/Recyclarr.Cli/`
 - `src/Recyclarr.Cli/CompositionRoot.cs` - DI setup
 - `src/Recyclarr.Core/CoreAutofacModule.cs` - Service registration
-- `Directory.Packages.props` - Package versions
-- `schemas/config-schema.json` - YAML validation
+- `Directory.Packages.props` - Package versions (Nuget central package management enabled)
+- `schemas/**.json` - Schemas for different Recyclarr YAML files
+
+## Tooling Requirements
+
+- CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
+- MUST run `pre-commit run <file1> <file2> ...` for all changes
+- Use `dotnet test` at solution level to verify all tests pass
+
+## Scripts
+
+All scripts under `scripts/`:
+
+**Development and Testing:**
+
+- `Docker-Debug.ps1`: Start external service dependencies (Sonarr, Radarr, Apprise) via docker
+  compose. Use when debugging locally or testing integration scenarios.
+  - Usage: `./scripts/Docker-Debug.ps1`
+- `Docker-Recyclarr.ps1`: Run Recyclarr in a container (equivalent to `docker compose run`). Rarely
+  used; auto-starts `Docker-Debug.ps1` if needed.
+  - Usage: `./scripts/Docker-Recyclarr.ps1 sync`
+
+**ONLY for human use (AI must never run these):**
+
+- `Prepare-Release.ps1`: Initiates a release of Recyclarr.
+- `Update-Gitignore.ps1`: Updates the global `.gitignore`.
+- `Install-Tooling.ps1`: Install or update local tools.
+- `Commit-Gitignore.ps1`: Commit git ignore changes.
 
 ## Release Notes / Changelogs
 
@@ -74,33 +132,15 @@ dotnet csharpier check .     # Verify formatting
 - Entries should start with a general area/scope of the progrma to which the change applies. For
   example:
 
-  ```txt
+  ```md
   ### Fixed
 
   - Sync: Crash while processing quality profiles
   ```
 
-## Development Requirements
+## Conventional Commits
 
-- You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
-  code.
-
-**MANDATORY WORKFLOW:**
-
-1. Search existing code first: `rg "pattern"` before writing new code
-2. Reuse/extend existing implementations - zero duplication tolerance
-3. Run tests after changes: `dotnet test`
-4. Format code: `dotnet csharpier format .`
-
-**CODE STANDARDS:**
-
-- .NET 9.0 + nullable reference types
-- XML documentation for all public APIs
-- Zero warnings/analysis issues
-- Conventional commits (see rules below)
-- Preserve YAML config backward compatibility
-
-**CONVENTIONAL COMMIT RULES** (file path-based classification):
+file path-based classification:
 
 **Direct path mapping:**
 
@@ -129,91 +169,27 @@ dotnet csharpier check .     # Verify formatting
 - `src/*/Pipelines/*` → `(sync)`, `src/*/Config/*` → `(config)`, `src/*/Console/Commands/*` →
   `(cli)`, `schemas/*` → `(yaml)`, `src/*/Cache/*` → `(cache)`
 
-### Backward Compatibility
+## Logging and Console Output
 
-**CODE**: No backward compatibility required - refactor freely **USER DATA**: Mandatory backward
-compatibility - YAML configs and settings files must remain functional
+- Diagnostic information uses `ILogger` from serilog (facilitated via DI)
+- User-facing messages use `IAnsiConsole` (facilitated via DI)
+- NEVER use `Console.WriteLine`
+- `ILogger.Debug()`: Diagnostics (requires `-d|--debug`)
+- `ILogger.Information()`: User status (use sparingly)
+- `ILogger.Warning()`: Non-critical issues (e.g. deprecations)
+- `ILogger.Error()`: Critical failures (usually results in application stopping)
+- Some user-facing logs still use Serilogs; this is legacy and will eventually be phased out.
 
-## C# Standards
+## Recyclarr Runtime Behavior
 
-**REQUIRED FEATURES:**
-
-- File-scoped namespaces: `namespace Recyclarr.Core;`
-- Primary constructors: `class Service(IDep dep, ILogger logger)`
-- Collection expressions: `[]`, `[item]`, `[item1, item2]`, `[..collection]`
-- Records for DTOs, `required` properties, `init` setters
-- Pattern matching: `is not null`, switch expressions
-
-**CLASS VISIBILITY:**
-
-- Use `internal` for implementation classes (CLI apps, service implementations)
-- Use `public` only for genuine external APIs
-- Concrete classes implementing public interfaces should be `internal`
-
-**PATTERNS:**
-
-- Records for data models
-- `IReadOnlyCollection<T>` return types
-- LINQ method chaining over loops
-- Spread operator for collections: `[..first, ..second]`
-- `ValueTask` for hot paths, `CancellationToken` everywhere
-
-**TESTING:**
-
-- Use context7 to understand NUnit, NSubstitute, AutoFixture, FluentAssertions before using
-- NUnit: `[Test]`, `internal sealed class {Name}Test`
-- NSubstitute + AutoFixture + FluentAssertions
-- `Freeze<T>()`, `Should().BeEquivalentTo()`
-
-**AUTOFAC:**
-
-- Use context7 to understand Autofac patterns before implementing DI
-- Static registration methods in modules
-- `RegisterType<Impl>().As<IInterface>()`
-- Lifecycle: `SingleInstance()`, `InstancePerLifetimeScope()`
-
-## Implementation Patterns
-
-**New Sync Types:**
-
-1. Context in `Recyclarr.Core/Pipelines/`
-2. Pipeline stages (inherit base classes)
-3. Register in `PipelineAutofacModule`
-4. Update `schemas/config-schema.json`
-5. Add tests
-
-**Service Integration:**
-
-- Use context7 to understand Spectre.Console and FluentValidation before implementing
-- CLI: Inherit `ServiceCommand`
-- API: Use `IServarrApi`
-- Validation: `IServiceCompatibility` + FluentValidation
-
-## Logging
-
-**NEVER use Console.WriteLine** - inject `ILogger` everywhere.
-
-- Use context7 to understand Serilog patterns before implementing logging
-- `Debug()`: Diagnostics (requires `-d|--debug`)
-- `Information()`: User status (use sparingly)
-- `Warning()`: Non-critical issues
-- `Error()`: Critical failures
-
-## Dependencies
-
-**MANDATORY:** Use context7 to understand each dependency before using: Spectre.Console, Autofac,
-Serilog, FluentValidation, YamlDotNet, Flurl.Http, LibGit2Sharp
-
-## Recyclarr Configuration & Operation
-
-**Application Data Directories (Platform-Specific):**
+Application Data Directories (Platform-Specific):
 
 - Windows: `%APPDATA%\recyclarr`
 - Linux: `~/.config/recyclarr`
 - macOS: `~/Library/Application Support/recyclarr`
 - Docker: `/config`
 
-**Configuration File Structure:**
+App Data Dir File Structure:
 
 - `recyclarr.yml` - Main config file in app data directory
 - `configs/` - Additional YAML files (auto-loaded, non-recursive)
@@ -221,26 +197,11 @@ Serilog, FluentValidation, YamlDotNet, Flurl.Http, LibGit2Sharp
 - `settings.yml` - Global settings file (optional)
 - `cache/` - Internal cache data
 - `logs/` - Application logs
-- `repositories/` - Local clones of TRaSH guides and config templates
+- `repositories/` - Local clones of TRaSH guides and config templates (resource providers)
 
-**Schema Validation (MANDATORY):**
+Schema Validation (MANDATORY):
 
 - ALWAYS validate config files using `schemas/config-schema.json` before ANY modifications
 - Settings schema: `schemas/settings-schema.json`
 - Add schema validation comment to YAML files: `# yaml-language-server:
-  $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
-
-## Logging Standards
-
-- User-facing messages use `IAnsiConsole`
-- Diagnostic information uses `ILogger` from serilog
-- Must use DI for both
-- Some user-facing logs still use Serilogs; this is legacy and will eventually be phased out.
-
-**YOU MUST follow Serilog logging patterns:**
-
-- **NEVER use Console.WriteLine**: Always inject `ILogger` from Serilog for all logging
-- **Debug()**: Debugging and diagnostics; only visible with `-d|--debug` option
-- **Information()**: Normal operation status visible to users; use sparingly to avoid spam
-- **Warning()**: Non-critical issues needing user attention (deprecated features, skipped data)
-- **Error()**: Critical issues requiring user intervention (exceptions, blocking errors)
+$schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
