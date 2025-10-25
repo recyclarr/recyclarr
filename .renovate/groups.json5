@@ -24,7 +24,6 @@
       matchUpdateTypes: ["major"],
       commitMessagePrefix: "build(deps):",
       minimumGroupSize: 3,
-      schedule: ["after November 1st"],
     },
   ],
 }
