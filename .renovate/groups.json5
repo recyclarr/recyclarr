@@ -23,7 +23,8 @@
       matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
       matchUpdateTypes: ["major"],
       commitMessagePrefix: "build(deps):",
-      minimumGroupSize: 2,
+      minimumGroupSize: 3,
+      schedule: ["after November 1st"],
     },
   ],
 }

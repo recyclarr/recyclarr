@@ -36,7 +36,7 @@ repos:
     hooks:
       - id: prettier
         args: [--write]
-        files: \.(json|xml|html|yaml|yml|js|md)$
+        types_or: [json, json5, xml, html, yaml, javascript, markdown]
         exclude: ^\.pre-commit-hooks\.yaml$
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
