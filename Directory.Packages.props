@@ -22,7 +22,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.51.1" />
-    <PackageVersion Include="SuperLinq" Version="6.4.0" />
+    <PackageVersion Include="SuperLinq" Version="6.4.1" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="6.0.2" />
     <PackageVersion Include="System.Text.Json" Version="9.0.6" />
