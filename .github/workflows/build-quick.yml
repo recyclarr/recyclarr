@@ -10,8 +10,15 @@ permissions: read-all
 
 jobs:
   #############################################
+  pre-check:
+    name: Check for Duplicate Runs
+    uses: ./.github/workflows/reusable-precheck.yml
+
+  #############################################
   build-validation:
     name: Build Validation
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
     uses: ./.github/workflows/reusable-build.yml
     with:
@@ -31,7 +38,7 @@ jobs:
   # The main purpose of this job is to group all the other jobs together into one single job status
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
   # jobs in a workflow to ensure they all pass.
-  check:
+  post-check:
     if: always()
     name: Report Quick Build Status
     needs:

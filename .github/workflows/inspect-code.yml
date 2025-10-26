@@ -25,6 +25,11 @@ env:
 permissions: read-all
 
 jobs:
+  #############################################
+  pre-check:
+    name: Check for Duplicate Runs
+    uses: ./.github/workflows/reusable-precheck.yml
+
   # DISABLED: ReSharper CLI tools don't properly support SLNX format yet
   # This causes the tool to run in "solution-less mode" which limits functionality
   # and results in "No items were found to cleanup" errors (exit code 3)
@@ -39,7 +44,8 @@ jobs:
   #
   # TODO: Re-enable when ReSharper CLI tools gain full SLNX support
   cleanup:
-    if: false # Remove when above issue is resolved
+    needs: pre-check
+    if: false && needs.pre-check.outputs.should_run == 'true' # Remove 'false &&' when above issue is resolved
     name: Resharper Code Cleanup
     runs-on: ubuntu-latest
     steps:
@@ -76,6 +82,8 @@ jobs:
           path: "*.patch"
 
   style:
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     name: CSharpier Style
     runs-on: ubuntu-latest
     steps:

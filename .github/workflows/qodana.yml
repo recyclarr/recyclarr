@@ -33,7 +33,15 @@ permissions:
   actions: read
 
 jobs:
+  #############################################
+  pre-check:
+    name: Check for Duplicate Runs
+    uses: ./.github/workflows/reusable-precheck.yml
+
+  #############################################
   qodana:
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     name: Qodana Analysis
     runs-on: ubuntu-latest
     steps:

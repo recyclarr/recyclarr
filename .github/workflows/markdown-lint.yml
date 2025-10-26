@@ -24,7 +24,15 @@ concurrency:
 permissions: read-all
 
 jobs:
+  #############################################
+  pre-check:
+    name: Check for Duplicate Runs
+    uses: ./.github/workflows/reusable-precheck.yml
+
+  #############################################
   markdownlint:
+    needs: pre-check
+    if: needs.pre-check.outputs.should_run == 'true'
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
