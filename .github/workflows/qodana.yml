@@ -54,7 +54,12 @@ jobs:
       - name: Setup .NET & Tools
         uses: ./.github/actions/setup-dotnet
 
+      # Skip Qodana on fork PRs since QODANA_TOKEN secret is unavailable (GitHub security).
+      # Qodana requires the token for cloud connectivity and will fail without it.
       - name: Run Qodana Analysis
+        if: |
+          github.event.pull_request.head.repo.full_name == github.repository ||
+          github.event_name != 'pull_request'
         uses: JetBrains/qodana-action@27de2a744479d1d731934eeaf79287575ebc5dd3 # v2025.2.1
         with:
           upload-result: true
@@ -66,7 +71,10 @@ jobs:
 
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@d198d2fabf39a7f36b5ce57ce70d4942944f006e # v3.31.0
-        if: success() || failure()
+        if: |
+          (success() || failure()) &&
+          (github.event.pull_request.head.repo.full_name == github.repository ||
+          github.event_name != 'pull_request')
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
           category: qodana
