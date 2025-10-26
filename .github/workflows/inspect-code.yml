@@ -14,7 +14,7 @@ on:
       - "**.cs"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -27,7 +27,6 @@ permissions: read-all
 jobs:
   #############################################
   pre-check:
-    name: Check for Duplicate Runs
     uses: ./.github/workflows/reusable-precheck.yml
 
   # DISABLED: ReSharper CLI tools don't properly support SLNX format yet

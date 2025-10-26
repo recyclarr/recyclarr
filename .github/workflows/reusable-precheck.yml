@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   precheck:
-    name: Check for Duplicate Runs
+    name: Duplicate Runs
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}

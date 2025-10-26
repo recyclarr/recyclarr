@@ -18,7 +18,7 @@ on:
       - "!tests/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions: read-all
@@ -26,7 +26,6 @@ permissions: read-all
 jobs:
   #############################################
   pre-check:
-    name: Check for Duplicate Runs
     uses: ./.github/workflows/reusable-precheck.yml
 
   #############################################
