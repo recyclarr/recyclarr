@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Pre-Check for Duplicate Runs
+name: ⚙️ Pre-Check for Duplicate Runs
 
 on:
   workflow_call:

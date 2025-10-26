@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: ⚙️ Docker Build & Publish
+
 on:
   workflow_call:
 
