@@ -42,9 +42,10 @@ jobs:
   # that can be set as a requirement to merge pull requests. This is easier than enumerating all
   # jobs in a workflow to ensure they all pass.
   post-check:
-    if: always()
+    if: always() && needs.pre-check.outputs.should_run == 'true'
     name: Report Quick Build Status
     needs:
+      - pre-check
       - build-validation
       - docker-validation
     runs-on: ubuntu-latest
