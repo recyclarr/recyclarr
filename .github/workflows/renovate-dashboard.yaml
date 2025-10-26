@@ -18,13 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  debug-payload:
-    name: Debug Event Payload
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Event Payload
-        run: echo '${{ toJSON(github.event) }}' | jq .
-
   dependency-dashboard:
     name: Dependency Dashboard Handler
     if: >
