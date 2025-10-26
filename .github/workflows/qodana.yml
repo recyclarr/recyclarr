@@ -3,6 +3,7 @@
 name: Qodana
 
 on:
+  workflow_dispatch:
   push:
     # Explicitly specifying this results in tags being ignored
     branches: ["**"]
