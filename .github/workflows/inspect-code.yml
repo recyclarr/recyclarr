@@ -93,4 +93,4 @@ jobs:
         uses: ./.github/actions/setup-dotnet
 
       - name: Run CSharpier
-        run: dotnet csharpier check .
+        run: dotnet csharpier check . --log-format MsBuild
