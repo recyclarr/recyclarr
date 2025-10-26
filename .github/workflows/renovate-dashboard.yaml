@@ -35,7 +35,8 @@ jobs:
         (
           contains(github.event.issue.body, '- [x]') ||
           contains(github.event.issue.body, 'approve-all-pending-prs') ||
-          contains(github.event.issue.body, 'create-all-rate-limited-prs')
+          contains(github.event.issue.body, 'create-all-rate-limited-prs') ||
+          contains(github.event.issue.body, 'rebase-all-open-prs')
         )
       )
     runs-on: ubuntu-latest
