@@ -8,7 +8,8 @@ on:
         description: Whether the calling workflow should run (false if push event has a PR)
         value: ${{ jobs.precheck.outputs.should_run }}
 
-permissions: read-all
+permissions:
+  pull-requests: read
 
 jobs:
   precheck:
