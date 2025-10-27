@@ -13,8 +13,6 @@ on:
       - .renovate/**
       - .github/workflows/renovate.yaml
   merge_group:
-  issue_comment:
-    types: [created]
   repository_dispatch:
     types: [renovate-trigger]
   workflow_dispatch:
@@ -35,71 +33,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  check-conditions:
-    name: Check Run Conditions
-    runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.conditions.outputs.should-run }}
-      skip-reason: ${{ steps.conditions.outputs.skip-reason }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 2
-
-      - name: Evaluate run conditions
-        id: conditions
-        run: |
-          SHOULD_RUN="true"
-          SKIP_REASON=""
-
-          # Skip if triggered by issue comment but not dashboard checkbox
-          if [[ "${{ github.event_name }}" == "issue_comment" ]]; then
-            if [[ ! "${{ contains(github.event.issue.title, 'Renovate Dashboard') }}" == "true" ]] || [[ ! "${{ github.event.comment.body }}" =~ "- [x]" ]]; then
-              SHOULD_RUN="false"
-              SKIP_REASON="Issue comment not from dependency dashboard checkbox"
-            fi
-          fi
-
-          # Enhanced filtering for repository_dispatch events
-          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
-            SOURCE="${{ github.event.client_payload.source || 'unknown' }}"
-            ACTION="${{ github.event.client_payload.action || 'unknown' }}"
-            TRIGGERED_BY="${{ github.event.client_payload.triggered_by || 'unknown' }}"
-
-            # Skip if triggered by pull-request synchronize events (automated)
-            if [[ "$SOURCE" == "pull-request" && "$ACTION" == "synchronize" ]]; then
-              SHOULD_RUN="false"
-              SKIP_REASON="Repository dispatch from automated PR synchronization"
-            # Skip if triggered by pull-request closed events without human interaction
-            elif [[ "$SOURCE" == "pull-request" && "$ACTION" == "closed" && "$TRIGGERED_BY" == "renohate[bot]" ]]; then
-              SHOULD_RUN="false"
-              SKIP_REASON="Repository dispatch from automated PR closure"
-            # Skip if not triggered by human actor
-            elif [[ "$TRIGGERED_BY" == "renohate[bot]" || "$TRIGGERED_BY" == "unknown" ]]; then
-              SHOULD_RUN="false"
-              SKIP_REASON="Repository dispatch not triggered by human actor"
-            fi
-          fi
-
-          echo "should-run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
-          echo "skip-reason=$SKIP_REASON" >> "$GITHUB_OUTPUT"
-
-          if [[ "$SHOULD_RUN" == "false" ]]; then
-            echo "⏭️ Skipping Renovate run: $SKIP_REASON"
-          else
-            echo "✅ Conditions met, proceeding with Renovate run"
-          fi
-
   renovate:
     name: Renovate
     runs-on: ubuntu-latest
-    needs: check-conditions
-    if: needs.check-conditions.outputs.should-run == 'true'
     permissions:
       contents: read
       packages: read
