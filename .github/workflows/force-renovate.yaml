@@ -76,7 +76,7 @@ jobs:
           esac
 
       - name: Force Renovate Run
-        uses: renovatebot/github-action@aec779d4f7845f8431ddf403cf9659d4702ddde0 # v43.0.18
+        uses: renovatebot/github-action@a3c115cd6676c8a5bc72f9715f108759e570daf5 # v43.0.19
         with:
           token: ${{ steps.generate-token.outputs.token }}
         env:
