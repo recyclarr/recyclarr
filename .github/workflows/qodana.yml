@@ -70,7 +70,7 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@c503cb4fbb5ac9c4ff92454b2613f5bf931403e5 # v3.31.1
+        uses: github/codeql-action/upload-sarif@5d5cd550d3e189c569da8f16ea8de2d821c9bf7a # v3.31.2
         if: |
           (success() || failure()) &&
           (github.event.pull_request.head.repo.full_name == github.repository ||
