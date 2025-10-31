@@ -21,7 +21,7 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
-    <PackageVersion Include="Spectre.Console.Cli" Version="0.51.1" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.0" />
     <PackageVersion Include="SuperLinq" Version="6.4.1" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive" Version="6.0.2" />
@@ -57,7 +57,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.Observable" Version="3.0.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" PrivateAssets="all" />
-    <PackageVersion Include="Spectre.Console.Testing" Version="0.51.1" PrivateAssets="all" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.53.0" PrivateAssets="all" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.0.16" PrivateAssets="all" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
