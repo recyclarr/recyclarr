@@ -36,13 +36,14 @@ internal class ListCustomFormatsCommand(
         public bool ScoreSets { get; init; } = false;
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(
-            outputSettings,
-            settings.CancellationToken
-        );
+        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
         lister.List(outputSettings, settings);
         return (int)ExitStatus.Succeeded;
     }

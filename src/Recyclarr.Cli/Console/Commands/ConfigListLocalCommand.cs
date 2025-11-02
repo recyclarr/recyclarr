@@ -18,13 +18,14 @@ internal class ConfigListLocalCommand(
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : BaseCommandSettings;
 
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(
-            outputSettings,
-            settings.CancellationToken
-        );
+        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
         processor.Process();
         return (int)ExitStatus.Succeeded;
     }

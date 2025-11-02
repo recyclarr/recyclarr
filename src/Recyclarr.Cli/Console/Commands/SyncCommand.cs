@@ -55,17 +55,18 @@ internal class SyncCommand(
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(
-            outputSettings,
-            settings.CancellationToken
-        );
+        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
 
-        return (int)await syncProcessor.Process(settings, settings.CancellationToken);
+        return (int)await syncProcessor.Process(settings, ct);
     }
 }

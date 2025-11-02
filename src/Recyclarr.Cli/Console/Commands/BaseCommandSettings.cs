@@ -5,8 +5,6 @@ namespace Recyclarr.Cli.Console.Commands;
 
 internal class BaseCommandSettings : CommandSettings
 {
-    public CancellationToken CancellationToken { get; set; }
-
     [CommandOption("-d|--debug")]
     [Description("Show debug logs in console output.")]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]

@@ -27,13 +27,14 @@ internal class ConfigListTemplatesCommand(
         public bool Includes { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(
-            outputSettings,
-            settings.CancellationToken
-        );
+        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

@@ -20,7 +20,7 @@ internal class MigrateCommand(IAnsiConsole console, MigrationExecutor migration)
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : BaseCommandSettings;
 
-    public override int Execute(CommandContext context, CliSettings settings)
+    public override int Execute(CommandContext context, CliSettings settings, CancellationToken ct)
     {
         try
         {

@@ -97,7 +97,6 @@ internal static class CompositionRoot
         builder.RegisterInstance(AnsiConsole.Console);
         builder.RegisterType<AutofacTypeRegistrar>().As<ITypeRegistrar>();
         builder.RegisterType<CommandApp>();
-        builder.RegisterType<CommandSetupInterceptor>().As<ICommandInterceptor>();
 
         builder.RegisterComposite<CompositeGlobalSetupTask, IGlobalSetupTask>();
         builder

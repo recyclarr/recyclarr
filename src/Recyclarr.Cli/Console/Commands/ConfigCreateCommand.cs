@@ -45,15 +45,16 @@ internal class ConfigCreateCommand(
         public bool Force { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         try
         {
             var outputSettings = consoleSettings.GetOutputSettings(settings);
-            await gitRepositoryInitializer.InitializeGitRepositories(
-                outputSettings,
-                settings.CancellationToken
-            );
+            await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

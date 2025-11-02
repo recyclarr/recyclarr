@@ -27,13 +27,14 @@ internal class ListMediaNamingCommand(
         public SupportedServices Service { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, CliSettings settings)
+    public override async Task<int> ExecuteAsync(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(
-            outputSettings,
-            settings.CancellationToken
-        );
+        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
         lister.ListNaming(settings.Service);
         return (int)ExitStatus.Succeeded;
     }
