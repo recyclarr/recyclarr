@@ -148,8 +148,8 @@ file path-based classification:
 - `build:` → `*.props`, `*.csproj`, `*.slnx`, `Directory.*`, `.config/dotnet-tools.json`
 - `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.gitignore`, `.csharpierignore`,
   `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`
-- `test:` → `tests/**/*Test.cs`, `tests/**/Data/**`
-- `docs:` → `*.md`, `docs/**`, `LICENSE`, `CODEOWNERS`, `SECURITY.md`
+- `test:` → `tests/**/*.cs`, `tests/**/*.csproj`, `tests/**/Data/**`, `tests/**/*.md`
+- `docs:` → Top-level `*.md` (exclude `tests/**/*.md`), `docs/**`, `LICENSE`, `CODEOWNERS`, `SECURITY.md`
 
 **For `src/` files - inspect git diff + CHANGELOG.md:**
 
