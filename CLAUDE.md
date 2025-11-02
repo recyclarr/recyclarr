@@ -64,7 +64,7 @@ Core Mandates:
 Patterns:
 
 - NUnit: `[Test]`, `internal sealed class {Name}Test`
-- NSubstitute + AutoFixture + FluentAssertions
+- NSubstitute + AutoFixture + AwesomeAssertions
 - `Freeze<T>()`, `Should().BeEquivalentTo()`
 - Static registration methods in modules
 - `RegisterType<Impl>().As<IInterface>()`

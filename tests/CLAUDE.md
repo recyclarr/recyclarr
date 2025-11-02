@@ -126,7 +126,7 @@ tests/
 
 #### Key Utilities
 
-- `Verify.That<T>()`: NSubstitute matcher with FluentAssertions
+- `Verify.That<T>()`: NSubstitute matcher with AwesomeAssertions
 - `TestableLogger`: Observable logger for testing log output
 - `TestConsole`: Console output verification
 - `MockFileSystem`, `MockFileData`: File system testing
@@ -168,7 +168,7 @@ tests/
 
 ## Assertion and Verification Guidelines
 
-**YOU MUST use FluentAssertions patterns:**
+**YOU MUST use AwesomeAssertions patterns:**
 
 ### Standard Assertions
 
@@ -229,12 +229,12 @@ Use `[Test, AutoMockData]` with lambda expressions and
 Integration tests inherit from `IntegrationTestFixture`, override
 `RegisterStubsAndMocks(ContainerBuilder builder)` for custom mocks, use `Fs.AddFile()` for test
 data, resolve components with `Resolve<ComponentUnderTest>()`, and verify results with
-FluentAssertions.
+AwesomeAssertions.
 
 ### Unit Test Pattern
 
 Unit tests use `[Test, AutoMockData]` with `[Frozen]` for shared dependencies, arrange mocks with
-`Returns()`, and verify results with FluentAssertions.
+`Returns()`, and verify results with AwesomeAssertions.
 
 ### Parameterized Test Pattern
 
