@@ -54,7 +54,7 @@
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" PrivateAssets="all" />
     <PackageVersion Include="NUnit" Version="4.4.0" PrivateAssets="all" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.0" PrivateAssets="all" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" PrivateAssets="all" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.Observable" Version="3.0.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" PrivateAssets="all" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.51.1" PrivateAssets="all" />
