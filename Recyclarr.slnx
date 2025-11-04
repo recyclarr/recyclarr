@@ -14,6 +14,7 @@
     <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
     <Project Path="tests/Recyclarr.Core.Tests/Recyclarr.Core.Tests.csproj" />
     <Project Path="tests/Recyclarr.TestLibrary/Recyclarr.TestLibrary.csproj" />
+    <Project Path="tests\Recyclarr.EndToEndTests\Recyclarr.EndToEndTests.csproj" />
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
   </Folder>
