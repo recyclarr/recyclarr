@@ -4,271 +4,173 @@
 
 ## Core Testing Philosophy
 
-**Primary Coverage**: Integration tests mock only externals (Git, filesystem, HTTP APIs) while using
-real business logic. Provides majority coverage through public interfaces.
+**Test Pyramid Strategy:**
 
-**Gap Filling**: Targeted lower-level tests for paths integration tests cannot reach (negative
-testing, error conditions).
+- **E2E (Tip)**: Critical user workflows produce expected system state. Minimal detail, high-level
+  outcomes.
+- **Integration (Middle)**: Complete workflows through public interfaces. Mock externals only (Git,
+  filesystem, HTTP APIs). Real business logic.
+- **Unit (Base)**: Targeted tests for paths integration cannot reach (error conditions, edge cases).
 
-### Key Principles
+**Key Principles:**
 
-**YOU MUST:**
-
-- Test behavior, not implementation details
+- Test behavior, not implementation
 - Focus on interface contracts
-- Ensure test resilience to architectural changes
-- Validate real user scenarios and edge cases
+- Resilient to architectural changes
+- Validate user scenarios and edge cases
 
-## Testing Strategy by System
+## Test Types by Layer
 
-### System Integration Testing
+### E2E Tests (`tests/Recyclarr.EndToEndTests/`)
 
-**YOU MUST:**
+**Purpose**: Validate critical user workflows end-to-end with real external services.
 
-- Test complete workflows through public interfaces
-- Use real business logic implementations
-- Mock only externals (Git, filesystem, HTTP APIs)
-- Focus on end-to-end behavior
+**Scope**:
 
-### Configuration System Testing
+- Full `recyclarr sync` execution against containerized Sonarr/Radarr
+- Verify expected configuration state (profiles exist, custom formats synced)
+- High-level outcomes only - detailed validation belongs in integration/unit tests
 
-- **Integration**: Complete YAML parsing, validation, transformation, env vars, secrets
-- **Targeted**: Validation errors, parsing edge cases, migrations
+**Infrastructure**:
 
-### Pipeline Testing
+- Use Testcontainers for external services
+- Isolated temp directories for app data and published binaries
+- Test idempotency via clean state per run
 
-- **Integration**: End-to-end execution with mocked external APIs, multi-service sync
-- **Targeted**: Error conditions, transaction rollbacks, data transformation edge cases
+**When to Use**: Validating complete user workflows produce correct system state.
+
+### Integration Tests
+
+**Coverage**:
+
+- Configuration: YAML parsing, validation, transformation, env vars, secrets
+- Pipeline: End-to-end execution with mocked APIs, multi-service sync
+- CLI: Command execution through composition root
+
+**Requirements**:
+
+- Inherit from `IntegrationTestFixture` or `CliIntegrationFixture`
+- Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (MockFileSystem)
+- Use real business logic, data transformation, domain models
+- Override `RegisterStubsAndMocks(ContainerBuilder builder)` for custom mocks
+
+### Unit Tests
+
+**Coverage**: Validation errors, parsing edge cases, transaction rollbacks, data transformation edge
+cases.
+
+**Patterns**: `[Test, AutoMockData]` with `[Frozen]` dependencies, arrange mocks with `Returns()`.
 
 ## Test Organization
 
-### Directory Structure
+**Directory Structure**:
 
 ```txt
 tests/
+├── Recyclarr.EndToEndTests/     # E2E tests
 ├── Recyclarr.Core.Tests/
-│   ├── IntegrationTests/     # High-level integration
-│   └── Unit/                 # Targeted unit tests
+│   ├── IntegrationTests/
+│   └── Unit/
 ├── Recyclarr.Cli.Tests/
-│   ├── IntegrationTests/     # Command execution integration
-│   └── Unit/                 # CLI unit tests
+│   ├── IntegrationTests/
+│   └── Unit/
 └── TestLibraries/
     ├── Recyclarr.TestLibrary/          # Core utilities
     └── Recyclarr.Core.TestLibrary/     # Core-specific utilities
 ```
 
-### Test Structure Guidelines
+**Naming Conventions**:
 
-**YOU MUST:**
+- Classes: `{Component}Test` or `{Component}IntegrationTest`
+- Methods: Descriptive underscore-separated behavior (`Load_many_iterations_of_config`,
+  `Throw_when_templates_dir_does_not_exist`)
 
-- Use `internal sealed class {ClassName}Test` pattern
-- Integration tests inherit from `IntegrationTestFixture`
-- Custom mocks override `RegisterStubsAndMocks(ContainerBuilder builder)`
-- Store test data in `Data/` directories as embedded resources
+**Structure**:
 
-### Test Naming Conventions
+- `internal sealed class` pattern
+- Store test data in `Data/` as embedded resources
+- Use factory classes: `NewCf`, `NewConfig`, `NewQualitySize`
 
-**YOU MUST:**
+## Test Infrastructure
 
-- Test classes: `{ComponentUnderTest}Test`
-- Integration tests: `{Component}IntegrationTest`
-- Methods: Descriptive underscore-separated behavior names:
-  - `Load_many_iterations_of_config`
-  - `Can_handle_returns_true_with_templates`
-  - `Throw_when_templates_dir_does_not_exist`
+### AutoFixture Patterns
 
-## Test Infrastructure Guidelines
-
-### AutoFixture Usage Patterns
-
-**YOU MUST use these patterns:**
-
-- `[AutoMockData]`: Basic dependency injection
-- `[InlineAutoMockData(params)]`: Parameterized tests with auto-mocking
+- `[AutoMockData]`: Basic DI
+- `[InlineAutoMockData(params)]`: Parameterized tests
 - `[Frozen]` or `[Frozen(Matching.ImplementedInterfaces)]`: Shared mocks
-- `[CustomizeWith(typeof(CustomizationType))]`: Specialized configurations
+- `[CustomizeWith(typeof(CustomizationType))]`: Specialized config
 - `[AutoMockData(typeof(TestClass), nameof(MethodName))]`: DI container integration
 
-### NSubstitute Mocking Patterns
-
-**YOU MUST use these patterns:**
+### NSubstitute Patterns
 
 - `dependency.Method().Returns(value)`: Method returns
-- `dependency.Property.ReturnsNull()`: Null property returns
+- `dependency.Property.ReturnsNull()`: Null returns
 - `dependency.Method(default!).ReturnsForAnyArgs(value)`: Flexible matching
 - `Verify.That<T>(x => x.Property.Should().Be(expected))`: Complex assertions
-- `dependency.Method().Returns([item1, item2])`: Collection returns
+- `dependency.Method().Returns([item1, item2])`: Collections
 
-### Test Data Management
+### Utilities
 
-**YOU MUST:**
+**Base Fixtures**:
 
-- Store JSON test data in `Data/` as embedded resources
-- Use factory classes: `NewCf`, `NewConfig`, `NewQualitySize`
-- Use collection initializers and record `with` expressions
-- Use `MockFileSystem` and `MockFileData` for file system testing
-- Mirror real-world scenarios and API responses
-
-### Test Utilities and Libraries
-
-**YOU MUST leverage:**
-
-#### Libraries
-
-- `Recyclarr.TestLibrary`: Core utilities (AutoFixture, NSubstitute extensions)
-- `Recyclarr.Core.TestLibrary`: Core-specific fixtures/builders
-- `Recyclarr.Cli.TestLibrary`: CLI utilities
-
-#### Base Fixtures
-
-- `IntegrationTestFixture`: Integration tests with DI container
+- `IntegrationTestFixture`: Integration tests with DI
 - `CliIntegrationFixture`: CLI integration with composition root
 
-#### Key Utilities
+**Key Tools**:
 
 - `Verify.That<T>()`: NSubstitute matcher with AwesomeAssertions
-- `TestableLogger`: Observable logger for testing log output
-- `TestConsole`: Console output verification
-- `MockFileSystem`, `MockFileData`: File system testing
+- `TestableLogger`: Observable logger
+- `TestConsole`: Console verification
+- `MockFileSystem`, `MockFileData`: Filesystem testing
 
-#### Data Builders
+## Assertions (AwesomeAssertions)
 
-- `NewCf.DataWithScore(name, trashId, score)`: CustomFormatData factory
-- `NewConfig.Radarr()`, `NewConfig.Sonarr()`: Config factories
-- `NewQualitySize`: Quality size factory
+**Preferred Patterns**:
 
-### Mocking Strategy
-
-#### What to Mock (External Dependencies)
-
-**YOU MUST mock:**
-
-- Git operations (LibGit2Sharp)
-- HTTP API calls (Sonarr/Radarr APIs)
-- External configuration sources
-- Filesystem (when testing logic, not I/O)
-
-#### What NOT to Mock (Internal Dependencies)
-
-**NEVER mock:**
-
-- Business logic classes
-- Data transformation logic
-- Internal interfaces/contracts
-- Domain models/value objects
-
-#### Integration Test Mocking
-
-**YOU MUST:**
-
-- Use `RegisterStubsAndMocks(ContainerBuilder builder)` for custom mocks
-- Use `MockFileSystem` for file operations
-- Use `TestConsole` for console verification
-- Mock infrastructure, use real business logic
-
-## Assertion and Verification Guidelines
-
-**YOU MUST use AwesomeAssertions patterns:**
-
-### Standard Assertions
-
-- `result.Should().BeEquivalentTo(expected)`: Deep object comparisons (PREFER over multiple property
+- `result.Should().BeEquivalentTo(expected)`: Deep object comparison (prefer over multiple property
   assertions)
-- `act.Should().Throw<ExceptionType>().WithMessage("pattern")`: Exception verification
-- `collection.Should().HaveCount(expected).And.Contain(item)`: Collections
+- `result.Select(x => x.Property).Should().BeEquivalentTo(expected)`: Property-based collection
+  comparison
+- `act.Should().Throw<ExceptionType>().WithMessage("pattern")`: Exceptions
+- `collection.Should().HaveCount(n).And.Contain(item)`: Collections
 - `result.Should().Be(true)` / `result.Should().BeFalse()`: Booleans
-- `result.Should().BeNull()` / `result.Should().NotBeNull()`: Null checks
 
-### Object Comparison Best Practices
-
-- **PREFER**: `result.Should().BeEquivalentTo(expected)` for multi-property object verification
-- **AVOID**: Multiple individual property assertions (`obj.Prop1.Should().Be()`,
-  `obj.Prop2.Should().Be()`)
-- **BENEFIT**: Cleaner, more maintainable tests that are resilient to property additions
-
-### Advanced Patterns
+**Advanced**:
 
 - `result.Where(x => condition).Should().BeEquivalentTo(expected)`: Filtered comparisons
-- `result.Select(x => x.Property).Should().BeEquivalentTo(expected)` for property-based comparisons
-- `result.Should().NotBeNull().And.BeOfType<Type>()` for chained assertions
+- `result.Should().NotBeNull().And.BeOfType<Type>()`: Chained assertions
 
-### NSubstitute Verification
+**NSubstitute Verification**:
 
-- `mock.Received().Method(arguments)` for call verification
-- `mock.Received().Property` for property access verification
-- `Verify.That<T>(x => x.Property.Should().Be(expected))` for complex argument verification
+- `mock.Received().Method(arguments)`: Call verification
+- `Verify.That<T>(x => x.Property.Should().Be(expected))`: Complex argument verification
 
-## Performance Considerations
+## Anti-Patterns
 
-### Test Execution Speed
+**Avoid**:
 
-Claude MUST ensure tests follow these performance guidelines:
+- Over-mocking dependencies or mocking business logic/domain models
+- Coupling tests to implementation details
+- Excessive test isolation or granularity
+- Duplicate coverage for same logical paths
+- Repeated setup across test classes
+- Unexplained magic constants
+- Too many assertions obscuring intent
+- Production code added solely for testing
 
-- Integration tests with mocked external dependencies run quickly (no network/disk I/O)
-- Use `MockFileSystem` instead of real file operations for speed
-- Ensure tests don't depend on external state or timing
+## Performance and CI/CD
 
-### CI/CD Integration
+**Requirements**:
 
-Claude MUST ensure tests are CI-friendly:
-
-- All tests should run reliably in CI environment
-- Tests should not depend on external services or network access
-- Tests should produce consistent results across different environments
-- Tests should work on different operating systems where applicable
-
-## Common Testing Patterns
-
-### Exception Testing Pattern
-
-Use `[Test, AutoMockData]` with lambda expressions and
-`act.Should().Throw<ExceptionType>().WithMessage("pattern")` for exception testing.
-
-### Integration Test Pattern
-
-Integration tests inherit from `IntegrationTestFixture`, override
-`RegisterStubsAndMocks(ContainerBuilder builder)` for custom mocks, use `Fs.AddFile()` for test
-data, resolve components with `Resolve<ComponentUnderTest>()`, and verify results with
-AwesomeAssertions.
-
-### Unit Test Pattern
-
-Unit tests use `[Test, AutoMockData]` with `[Frozen]` for shared dependencies, arrange mocks with
-`Returns()`, and verify results with AwesomeAssertions.
-
-### Parameterized Test Pattern
-
-Parameterized tests use `[Test, InlineAutoMockData(params)]` with multiple test cases for different
-input scenarios.
-
-## Anti-Patterns to Avoid
-
-Claude MUST avoid these anti-patterns:
-
-### Brittle Test Patterns
-
-Avoid over-mocking dependencies, coupling tests to implementation details, excessive test isolation,
-and duplicating test coverage for the same logical paths.
-
-### Maintenance Anti-Patterns
-
-Avoid repeating test setup across multiple test classes, using unexplained constants instead of
-meaningful test data, too many assertions that obscure test intent, adding code to production solely
-for testing, and improper async/await patterns in test methods.
-
-## Migration Strategy for Existing Tests
-
-When updating existing tests to follow this philosophy:
-
-1. Look for tests that can be combined into higher-level integration tests
-2. Keep targeted tests for important edge cases that integration tests can't reach
-3. Remove tests that are tightly coupled to implementation details
-4. Use shared builders and utilities to reduce duplication
-5. Shift from testing implementation to testing behavior and contracts
+- Integration tests with mocked externals run quickly (no network/disk I/O)
+- Use `MockFileSystem` instead of real file operations
+- No external state or timing dependencies
+- Reliable in CI across environments and operating systems
+- Consistent, deterministic results
 
 ## Success Metrics
 
 - Tests survive internal refactoring without modification
-- High confidence in system behavior with reasonable test count
-- Test updates required only for actual behavior changes
-- Tests enable rapid development without excessive maintenance overhead
+- High confidence with reasonable test count
+- Updates required only for behavior changes
+- Rapid development without excessive maintenance

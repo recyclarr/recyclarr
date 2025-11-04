@@ -64,7 +64,7 @@ Core Mandates:
 Patterns:
 
 - NUnit: `[Test]`, `internal sealed class {Name}Test`
-- NSubstitute + AutoFixture + AwesomeAssertions
+- NSubstitute + AutoFixture + **AwesomeAssertions** (NOT FluentAssertions)
 - `Freeze<T>()`, `Should().BeEquivalentTo()`
 - Static registration methods in modules
 - `RegisterType<Impl>().As<IInterface>()`
@@ -99,6 +99,8 @@ Some key files and directories:
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
 - MUST run `pre-commit run <file1> <file2> ...` for all changes
 - Use `dotnet test` at solution level to verify all tests pass
+- **Package Management**: Use `dotnet add package` CLI for adding packages (central package
+  management via `Directory.Packages.props`)
 
 ## Scripts
 
@@ -149,7 +151,8 @@ file path-based classification:
 - `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.gitignore`, `.csharpierignore`,
   `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`
 - `test:` → `tests/**/*.cs`, `tests/**/*.csproj`, `tests/**/Data/**`, `tests/**/*.md`
-- `docs:` → Top-level `*.md` (exclude `tests/**/*.md`), `docs/**`, `LICENSE`, `CODEOWNERS`, `SECURITY.md`
+- `docs:` → Top-level `*.md` (exclude `tests/**/*.md`), `docs/**`, `LICENSE`, `CODEOWNERS`,
+  `SECURITY.md`
 
 **For `src/` files - inspect git diff + CHANGELOG.md:**
 
@@ -204,4 +207,4 @@ Schema Validation (MANDATORY):
 - ALWAYS validate config files using `schemas/config-schema.json` before ANY modifications
 - Settings schema: `schemas/settings-schema.json`
 - Add schema validation comment to YAML files: `# yaml-language-server:
-$schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
+  $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
