@@ -33,7 +33,7 @@ jobs:
       - name: Test
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
         run: >-
-          dotnet test -c Release --logger GitHubActions
+          dotnet test -c Release
           --filter FullyQualifiedName!~Recyclarr.EndToEndTests
 
       - name: Publish
