@@ -42,7 +42,7 @@ internal record UpdatedQualityProfile
             Name = config.Name, // Must keep this for NEW profile syncing. It will only assign if src is not null.
             UpgradeAllowed = config.UpgradeAllowed,
             MinFormatScore = config.MinFormatScore,
-            MinFormatUpgradeScore = config.MinFormatUpgradeScore,
+            MinUpgradeFormatScore = config.MinUpgradeFormatScore,
             CutoffFormatScore = config.UpgradeUntilScore,
             FormatItems = UpdatedScores.Select(x => x.Dto with { Score = x.NewScore }).ToList(),
         };

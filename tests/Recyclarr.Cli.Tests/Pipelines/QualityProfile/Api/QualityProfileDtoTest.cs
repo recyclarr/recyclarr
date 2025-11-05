@@ -31,11 +31,11 @@ internal sealed class QualityProfileDtoTest
     [TestCase(20, 20)]
     public void Min_format_upgrade_score_set_behavior(int? value, int? expected)
     {
-        var dto = new QualityProfileDto { MinFormatUpgradeScore = 10 };
+        var dto = new QualityProfileDto { MinUpgradeFormatScore = 10 };
 
-        var result = dto with { MinFormatUpgradeScore = value };
+        var result = dto with { MinUpgradeFormatScore = value };
 
-        result.MinFormatUpgradeScore.Should().Be(expected);
+        result.MinUpgradeFormatScore.Should().Be(expected);
     }
 
     [TestCase(null, 10)]
