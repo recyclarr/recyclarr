@@ -45,7 +45,7 @@ internal class QualityProfileStatCalculator(ILogger log)
         );
         Log("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
         Log("Minimum Score", oldDto.MinFormatScore, newDto.MinFormatScore);
-        Log("Minimum Upgrade Score", oldDto.MinFormatUpgradeScore, newDto.MinFormatUpgradeScore);
+        Log("Minimum Upgrade Score", oldDto.MinUpgradeFormatScore, newDto.MinUpgradeFormatScore);
 
         return;
 

@@ -71,7 +71,7 @@ public record QualityProfileConfig
     public string? UpgradeUntilQuality { get; init; }
     public int? UpgradeUntilScore { get; init; }
     public int? MinFormatScore { get; init; }
-    public int? MinFormatUpgradeScore { get; init; }
+    public int? MinUpgradeFormatScore { get; init; }
     public string? ScoreSet { get; init; }
     public ResetUnmatchedScoresConfig ResetUnmatchedScores { get; init; } = new();
     public QualitySortAlgorithm QualitySort { get; init; }
