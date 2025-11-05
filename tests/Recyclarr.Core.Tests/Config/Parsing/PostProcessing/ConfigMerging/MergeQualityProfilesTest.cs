@@ -19,6 +19,7 @@ internal sealed class MergeQualityProfilesTest
                     Name = "e",
                     QualitySort = QualitySortAlgorithm.Top,
                     MinFormatScore = 100,
+                    MinFormatUpgradeScore = 100,
                     ScoreSet = "set1",
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
@@ -67,6 +68,7 @@ internal sealed class MergeQualityProfilesTest
                     Name = "e",
                     QualitySort = QualitySortAlgorithm.Top,
                     MinFormatScore = 100,
+                    MinFormatUpgradeScore = 100,
                     ScoreSet = "set1",
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
@@ -112,6 +114,7 @@ internal sealed class MergeQualityProfilesTest
                     Name = "e",
                     QualitySort = QualitySortAlgorithm.Top,
                     MinFormatScore = 100,
+                    MinFormatUpgradeScore = 100,
                     ScoreSet = "set1",
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
@@ -185,6 +188,7 @@ internal sealed class MergeQualityProfilesTest
                             Name = "e",
                             QualitySort = QualitySortAlgorithm.Top,
                             MinFormatScore = 100,
+                            MinFormatUpgradeScore = 100,
                             ScoreSet = "set2",
                             ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                             {

@@ -29,6 +29,17 @@ internal sealed class QualityProfileDtoTest
 
     [TestCase(null, 10)]
     [TestCase(20, 20)]
+    public void Min_format_upgrade_score_set_behavior(int? value, int? expected)
+    {
+        var dto = new QualityProfileDto { MinFormatUpgradeScore = 10 };
+
+        var result = dto with { MinFormatUpgradeScore = value };
+
+        result.MinFormatUpgradeScore.Should().Be(expected);
+    }
+
+    [TestCase(null, 10)]
+    [TestCase(20, 20)]
     public void Cutoff_set_behavior(int? value, int? expected)
     {
         var dto = new QualityProfileDto { Cutoff = 10 };

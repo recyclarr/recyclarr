@@ -7,6 +7,7 @@ public record QualityProfileDto
 {
     private readonly bool? _upgradeAllowed;
     private readonly int? _minFormatScore;
+    private readonly int? _minFormatUpgradeScore;
     private int? _cutoff;
     private readonly int? _cutoffFormatScore;
     private readonly string _name = "";
@@ -36,6 +37,12 @@ public record QualityProfileDto
     {
         get => _minFormatScore;
         init => DtoUtil.SetIfNotNull(ref _minFormatScore, value);
+    }
+
+    public int? MinFormatUpgradeScore
+    {
+        get => _minFormatUpgradeScore;
+        init => DtoUtil.SetIfNotNull(ref _minFormatUpgradeScore, value);
     }
 
     public int? Cutoff

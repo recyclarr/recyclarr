@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   particularly useful for working with Docker Secrets (#278).
 - Settings: New `resource_providers` configuration enables custom data sources for TRaSH Guides and
   config templates (#238).
+- Quality Profiles: Support for `min_format_upgrade_score` to control minimum custom format score
+  required for upgrading already-downloaded releases (contributed by @beschoenen in #503).
 
 ### Deprecated
 
