@@ -20,7 +20,8 @@ public class QualitySizeResourceQuery(
 
             result[serviceType] = parser
                 .GetQualities(qualitySizePaths)
-                .DistinctBy(q => q.Type) // First occurrence wins precedence
+                .GroupBy(q => q.Type)
+                .Select(group => group.Last()) // Last occurrence wins precedence
                 .ToList();
         }
 

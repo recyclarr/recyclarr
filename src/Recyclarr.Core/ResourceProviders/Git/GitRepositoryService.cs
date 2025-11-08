@@ -1,27 +1,14 @@
-using System.IO.Abstractions;
 using Recyclarr.Logging;
-using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Serilog.Context;
 
 namespace Recyclarr.ResourceProviders.Git;
 
-public interface IGitRepositoryService
-{
-    Task InitializeAsync(
-        IProgress<RepositoryProgress>? progress = null,
-        CancellationToken ct = default
-    );
-    IEnumerable<IDirectoryInfo> GetRepositoriesOfType(string repositoryType);
-}
-
 internal class GitRepositoryService(
     IEnumerable<IRepositoryDefinitionProvider> definitionProviders,
-    IRepoUpdater repoUpdater,
-    IAppPaths appPaths
+    IRepoUpdater repoUpdater
 ) : IGitRepositoryService
 {
-    private readonly Dictionary<string, List<IDirectoryInfo>> _repositoriesByType = new();
     private bool _isInitialized;
 
     public async Task InitializeAsync(
@@ -34,94 +21,68 @@ internal class GitRepositoryService(
             return;
         }
 
-        _repositoriesByType.Clear();
-
-        var allRepositoryDefinitions = definitionProviders
+        var tasks = definitionProviders
             .SelectMany(provider =>
-                provider
-                    .GetRepositoryDefinitions()
-                    .Select(repo => new { provider.RepositoryType, Repository = repo })
-            )
-            .ToList();
-
-        // Clean up legacy repositories for each type
-        foreach (var repositoryType in definitionProviders.Select(p => p.RepositoryType).Distinct())
-        {
-            var repoParentPath = appPaths.ReposDirectory.SubDirectory(repositoryType);
-            LegacyRepositoryCleanup.CleanLegacyRepository(repoParentPath);
-        }
-
-        // Process all repositories in parallel
-        var tasks = allRepositoryDefinitions.Select(async definition =>
-        {
-            var repoType = definition.RepositoryType;
-            var gitRepo = definition.Repository;
-
-            try
-            {
-                progress?.Report(
-                    new RepositoryProgress(
-                        repoType,
-                        gitRepo.Name,
-                        RepositoryProgressStatus.Processing
-                    )
-                );
-
-                var repoParentPath = appPaths.ReposDirectory.SubDirectory(repoType);
-                var repoPath = repoParentPath.SubDirectory(gitRepo.Name);
-
-                var scopeName = $"{repoType} Repository ({gitRepo.Name})";
-                using var logScope = LogContext.PushProperty(LogProperty.Scope, scopeName);
-                await repoUpdater.UpdateRepo(repoPath, gitRepo, ct);
-
-                lock (_repositoriesByType)
+                provider.RepositoryDefinitions.Select(repo => new
                 {
-                    if (!_repositoriesByType.TryGetValue(repoType, out var repos))
-                    {
-                        repos = [];
-                        _repositoriesByType[repoType] = repos;
-                    }
-                    repos.Add(repoPath);
-                }
-
-                progress?.Report(
-                    new RepositoryProgress(
-                        repoType,
-                        gitRepo.Name,
-                        RepositoryProgressStatus.Completed
-                    )
-                );
-                return repoPath;
-            }
-            catch (Exception ex)
-            {
-                progress?.Report(
-                    new RepositoryProgress(
-                        repoType,
-                        gitRepo.Name,
-                        RepositoryProgressStatus.Failed,
-                        ex.Message
-                    )
-                );
-                throw;
-            }
-        });
+                    provider.RepositoryType,
+                    Repository = repo,
+                })
+            )
+            .Select(definition =>
+                ProcessRepositoryAsync(
+                    definition.RepositoryType,
+                    definition.Repository,
+                    progress,
+                    ct
+                )
+            );
 
         await Task.WhenAll(tasks);
         _isInitialized = true;
     }
 
-    public IEnumerable<IDirectoryInfo> GetRepositoriesOfType(string repositoryType)
+    private async Task ProcessRepositoryAsync(
+        string repoType,
+        GitRepositorySource repoSource,
+        IProgress<RepositoryProgress>? progress,
+        CancellationToken ct
+    )
     {
-        if (!_isInitialized)
+        try
         {
-            throw new InvalidOperationException(
-                "GitRepositoryService has not been initialized. Call InitializeAsync first."
+            progress?.Report(
+                new RepositoryProgress(
+                    repoType,
+                    repoSource.Name,
+                    RepositoryProgressStatus.Processing
+                )
+            );
+
+            var scopeName = $"{repoType} Repository ({repoSource.Name})";
+            using var logScope = LogContext.PushProperty(LogProperty.Scope, scopeName);
+
+            await repoUpdater.UpdateRepo(repoSource, ct);
+
+            progress?.Report(
+                new RepositoryProgress(
+                    repoType,
+                    repoSource.Name,
+                    RepositoryProgressStatus.Completed
+                )
             );
         }
-
-        return _repositoriesByType.TryGetValue(repositoryType, out var repositories)
-            ? repositories
-            : [];
+        catch (Exception ex)
+        {
+            progress?.Report(
+                new RepositoryProgress(
+                    repoType,
+                    repoSource.Name,
+                    RepositoryProgressStatus.Failed,
+                    ex.Message
+                )
+            );
+            throw;
+        }
     }
 }

@@ -1,29 +1,51 @@
+using System.IO.Abstractions;
+using Recyclarr.Platform;
+using Recyclarr.Repo;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Git;
 
-public abstract class BaseRepositoryDefinitionProvider : IRepositoryDefinitionProvider
+public abstract class BaseRepositoryDefinitionProvider(IAppPaths appPaths)
+    : IRepositoryDefinitionProvider
 {
+    private IReadOnlyCollection<GitRepositorySource>? _repositoryDefinitions;
+
     public abstract string RepositoryType { get; }
 
-    public IEnumerable<GitRepositorySource> GetRepositoryDefinitions()
+    public IReadOnlyCollection<GitRepositorySource> RepositoryDefinitions =>
+        _repositoryDefinitions ??= BuildRepositoryDefinitions();
+
+    private List<GitRepositorySource> BuildRepositoryDefinitions()
     {
-        var userRepositories = GetUserRepositories().OfType<GitRepositorySource>().ToList();
+        var gitProviders = GetUserProviders()
+            .Where(p => p.Type == RepositoryType && p is GitResourceProvider)
+            .Cast<GitResourceProvider>()
+            .ToList();
 
-        // Check if user explicitly configured an "official" repository
-        var hasExplicitOfficial = userRepositories.Any(repo => repo.Name == "official");
-
-        if (hasExplicitOfficial)
+        if (!gitProviders.Any(p => p.ReplaceDefault))
         {
-            // User knows what they're doing - return only their explicit configuration
-            return userRepositories;
+            gitProviders.Insert(0, CreateOfficialRepository());
         }
 
-        // Add implicit official repository first for highest precedence
-        var officialRepo = CreateOfficialRepository();
-        return new[] { officialRepo }.Concat(userRepositories);
+        return gitProviders.Select(ConvertToRepositorySource).ToList();
     }
 
-    protected abstract IReadOnlyCollection<IUnderlyingResourceProvider> GetUserRepositories();
-    protected abstract GitRepositorySource CreateOfficialRepository();
+    private GitRepositorySource ConvertToRepositorySource(GitResourceProvider gitProvider)
+    {
+        var repoPath = appPaths
+            .ReposDirectory.SubDirectory(RepositoryType)
+            .SubDirectory("git")
+            .SubDirectory(gitProvider.Name);
+
+        return new GitRepositorySource
+        {
+            Name = gitProvider.Name,
+            CloneUrl = gitProvider.CloneUrl,
+            Reference = gitProvider.Reference,
+            Path = repoPath,
+        };
+    }
+
+    protected abstract IReadOnlyCollection<ResourceProvider> GetUserProviders();
+    protected abstract GitResourceProvider CreateOfficialRepository();
 }

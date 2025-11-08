@@ -7,7 +7,8 @@ public class ConfigTemplatesResourceQuery(
     private readonly Lazy<IReadOnlyCollection<TemplatePath>> _templatesCache = new(() =>
         templatesProviders
             .SelectMany(provider => provider.GetTemplates())
-            .DistinctBy(t => t.Id) // First occurrence wins precedence
+            .GroupBy(t => t.Id)
+            .Select(group => group.Last()) // Last occurrence wins precedence
             .ToList()
     );
 

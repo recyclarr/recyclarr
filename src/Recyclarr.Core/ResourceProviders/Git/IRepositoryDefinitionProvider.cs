@@ -1,9 +1,9 @@
-using Recyclarr.Settings.Models;
+using Recyclarr.Repo;
 
 namespace Recyclarr.ResourceProviders.Git;
 
 public interface IRepositoryDefinitionProvider
 {
     string RepositoryType { get; }
-    IEnumerable<GitRepositorySource> GetRepositoryDefinitions();
+    IReadOnlyCollection<GitRepositorySource> RepositoryDefinitions { get; }
 }

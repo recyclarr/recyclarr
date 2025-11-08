@@ -11,10 +11,12 @@ internal class ConfigTemplatesDirectoryBasedResourceProvider(
 {
     protected override IEnumerable<IDirectoryInfo> GetSourceDirectories()
     {
-        var localSources = settings.Value.ConfigTemplates.OfType<LocalPathSource>();
+        var localProviders = settings
+            .Value.Providers.Where(p => p.Type == "config-templates" && p is LocalResourceProvider)
+            .Cast<LocalResourceProvider>();
 
-        return localSources
-            .Where(source => fileSystem.Directory.Exists(source.Path))
-            .Select(source => fileSystem.DirectoryInfo.New(source.Path));
+        return localProviders
+            .Where(provider => fileSystem.Directory.Exists(provider.Path))
+            .Select(provider => fileSystem.DirectoryInfo.New(provider.Path));
     }
 }

@@ -11,10 +11,12 @@ internal class TrashGuidesDirectoryBasedResourceProvider(
 {
     protected override IEnumerable<IDirectoryInfo> GetSourceDirectories()
     {
-        var localSources = settings.Value.TrashGuides.OfType<LocalPathSource>();
+        var localProviders = settings
+            .Value.Providers.Where(p => p.Type == "trash-guides" && p is LocalResourceProvider)
+            .Cast<LocalResourceProvider>();
 
-        return localSources
-            .Where(source => fileSystem.Directory.Exists(source.Path))
-            .Select(source => fileSystem.DirectoryInfo.New(source.Path));
+        return localProviders
+            .Where(provider => fileSystem.Directory.Exists(provider.Path))
+            .Select(provider => fileSystem.DirectoryInfo.New(provider.Path));
     }
 }

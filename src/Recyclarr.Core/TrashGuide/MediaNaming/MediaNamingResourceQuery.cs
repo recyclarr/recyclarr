@@ -18,8 +18,9 @@ public class MediaNamingResourceQuery(
     {
         return dictionaries
             .SelectMany(dict => dict)
-            .DistinctBy(kvp => kvp.Key.ToLowerInvariant()) // first occurrence wins
-            .ToDictionary(kvp => kvp.Key.ToLowerInvariant(), kvp => kvp.Value);
+            .GroupBy(kvp => kvp.Key.ToLowerInvariant())
+            .Select(group => group.Last()) // last occurrence wins
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
     public RadarrMediaNamingData GetRadarrNamingData()

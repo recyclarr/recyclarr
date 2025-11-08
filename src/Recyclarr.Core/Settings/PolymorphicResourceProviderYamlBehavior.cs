@@ -1,4 +1,3 @@
-using Recyclarr.Common.Extensions;
 using Recyclarr.Settings.Models;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
@@ -11,14 +10,14 @@ public class PolymorphicResourceProviderYamlBehavior : IYamlBehavior
 {
     private static readonly Dictionary<string, Type> Mapping = new()
     {
-        [nameof(GitRepositorySource.CloneUrl).ToSnakeCase()] = typeof(GitRepositorySource),
-        [nameof(LocalPathSource.Path).ToSnakeCase()] = typeof(LocalPathSource),
+        ["clone_url"] = typeof(GitResourceProvider),
+        ["path"] = typeof(LocalResourceProvider),
     };
 
     public void Setup(DeserializerBuilder builder)
     {
         builder.WithTypeDiscriminatingNodeDeserializer(o =>
-            o.AddUniqueKeyTypeDiscriminator<IUnderlyingResourceProvider>(Mapping)
+            o.AddUniqueKeyTypeDiscriminator<ResourceProvider>(Mapping)
         );
     }
 }

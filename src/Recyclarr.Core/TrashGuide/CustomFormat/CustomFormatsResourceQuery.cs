@@ -45,10 +45,10 @@ public class CustomFormatsResourceQuery(
             allFormatsWithSources.AddRange(providerFormats);
         }
 
-        // Apply precedence-based approach: first provider wins for each TrashId
+        // Apply precedence-based approach: last provider wins for each TrashId
         var cleanFormats = allFormatsWithSources
             .GroupBy(item => item.TrashId)
-            .Select(group => group.First()) // First occurrence takes precedence
+            .Select(group => group.Last()) // Last occurrence takes precedence
             .ToList();
 
         // No duplicate tracking needed - multiple providers are expected for redundancy/fallback

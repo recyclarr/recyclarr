@@ -3,11 +3,12 @@ using Recyclarr.ResourceProviders.Git;
 
 namespace Recyclarr.TrashGuide;
 
-internal class TrashGuidesGitBasedResourceProvider(IGitRepositoryService gitRepositoryService)
-    : TrashGuidesResourceProvider
+internal class TrashGuidesGitBasedResourceProvider(
+    TrashGuidesRepositoryDefinitionProvider definitionProvider
+) : TrashGuidesResourceProvider
 {
     protected override IEnumerable<IDirectoryInfo> GetSourceDirectories()
     {
-        return gitRepositoryService.GetRepositoriesOfType("trash-guides");
+        return definitionProvider.RepositoryDefinitions.Select(repo => repo.Path);
     }
 }

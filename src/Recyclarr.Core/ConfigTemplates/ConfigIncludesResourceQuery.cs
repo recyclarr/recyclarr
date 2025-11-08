@@ -7,7 +7,8 @@ public class ConfigIncludesResourceQuery(
     private readonly Lazy<IReadOnlyCollection<TemplatePath>> _includesCache = new(() =>
         includesProviders
             .SelectMany(provider => provider.GetIncludes())
-            .DistinctBy(t => t.Id) // First occurrence wins precedence
+            .GroupBy(t => t.Id)
+            .Select(group => group.Last()) // Last occurrence wins precedence
             .ToList()
     );
 

@@ -3,11 +3,12 @@ using Recyclarr.ResourceProviders.Git;
 
 namespace Recyclarr.ConfigTemplates;
 
-internal class ConfigTemplatesGitBasedResourceProvider(IGitRepositoryService gitRepositoryService)
-    : ConfigTemplatesResourceProvider
+internal class ConfigTemplatesGitBasedResourceProvider(
+    ConfigTemplatesRepositoryDefinitionProvider definitionProvider
+) : ConfigTemplatesResourceProvider
 {
     protected override IEnumerable<IDirectoryInfo> GetSourceDirectories()
     {
-        return gitRepositoryService.GetRepositoriesOfType("config-templates");
+        return definitionProvider.RepositoryDefinitions.Select(repo => repo.Path);
     }
 }
