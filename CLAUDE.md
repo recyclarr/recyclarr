@@ -29,6 +29,8 @@
   must have value. Focus on documenting the WHY, not WHAT code does. Preference for self-documenting
   code: Self-describing variable, class, function names, etc.
 - Zero warnings/analysis issues
+- Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
+  polymorphism tradeoffs for discussion rather than defaulting to enums.
 
 ### C# Requirements
 
