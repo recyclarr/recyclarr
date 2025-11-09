@@ -63,6 +63,7 @@ internal static class ConfigYamlExtensions
             UpgradeUntilQuality = yaml.Upgrade?.UntilQuality,
             UpgradeUntilScore = yaml.Upgrade?.UntilScore,
             MinFormatScore = yaml.MinFormatScore,
+            MinUpgradeFormatScore = yaml.MinUpgradeFormatScore,
             ScoreSet = yaml.ScoreSet,
             QualitySort = yaml.QualitySort ?? QualitySortAlgorithm.Top,
             ResetUnmatchedScores = yaml.ResetUnmatchedScores.ToResetUnmatchedScoresConfig(),
