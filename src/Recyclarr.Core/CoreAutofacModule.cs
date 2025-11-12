@@ -23,7 +23,6 @@ using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
-using Recyclarr.ResourceProviders.Git;
 using Recyclarr.ServarrApi;
 using Recyclarr.ServarrApi.CustomFormat;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -57,7 +56,6 @@ public class CoreAutofacModule : Module
         RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
-        RegisterResourceProviders(builder);
         RegisterServarrApi(builder);
         RegisterSettings(builder);
         RegisterTrashGuide(builder);
@@ -279,41 +277,6 @@ public class CoreAutofacModule : Module
         builder.RegisterSettings(x => x.ResourceProviders);
     }
 
-    private static void RegisterResourceProviders(ContainerBuilder builder)
-    {
-        // Git Repository Service and Definition Providers
-        builder.RegisterType<GitRepositoryService>().As<IGitRepositoryService>().SingleInstance();
-
-        builder
-            .RegisterType<TrashGuidesRepositoryDefinitionProvider>()
-            .As<IRepositoryDefinitionProvider>()
-            .SingleInstance();
-
-        builder
-            .RegisterType<ConfigTemplatesRepositoryDefinitionProvider>()
-            .As<IRepositoryDefinitionProvider>()
-            .SingleInstance();
-
-        // Resource Providers (now lightweight consumers)
-        builder
-            .RegisterType<ConfigTemplatesGitBasedResourceProvider>()
-            .AsImplementedInterfaces()
-            .SingleInstance();
-        builder
-            .RegisterType<ConfigTemplatesDirectoryBasedResourceProvider>()
-            .AsImplementedInterfaces()
-            .SingleInstance();
-
-        builder
-            .RegisterType<TrashGuidesGitBasedResourceProvider>()
-            .AsImplementedInterfaces()
-            .SingleInstance();
-        builder
-            .RegisterType<TrashGuidesDirectoryBasedResourceProvider>()
-            .AsImplementedInterfaces()
-            .SingleInstance();
-    }
-
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
         builder
@@ -331,7 +294,6 @@ public class CoreAutofacModule : Module
             .RegisterType<CustomFormatsResourceQuery>()
             .As<ICustomFormatsResourceQuery>()
             .SingleInstance();
-        builder.RegisterType<CustomFormatLoader>().As<ICustomFormatLoader>();
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
 
         // Quality Size

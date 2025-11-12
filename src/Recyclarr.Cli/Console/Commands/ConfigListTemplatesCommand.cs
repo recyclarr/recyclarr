@@ -12,7 +12,6 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List local configuration files.")]
 internal class ConfigListTemplatesCommand(
     ConfigListTemplateProcessor processor,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
@@ -33,8 +32,6 @@ internal class ConfigListTemplatesCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

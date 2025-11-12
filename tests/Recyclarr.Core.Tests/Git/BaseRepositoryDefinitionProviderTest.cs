@@ -1,3 +1,4 @@
+using Recyclarr.Repo;
 using Recyclarr.ResourceProviders.Git;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;

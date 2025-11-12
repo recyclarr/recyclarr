@@ -1,5 +1,5 @@
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
-internal record ConflictingCustomFormat(CustomFormatData GuideCf, int ConflictingId);
+internal record ConflictingCustomFormat(CustomFormatResource GuideCf, int ConflictingId);

@@ -1,11 +1,9 @@
+using Recyclarr.ResourceProviders.Domain;
+
 namespace Recyclarr.TrashGuide.CustomFormat;
 
-public class CustomFormatsResourceQuery(
-    IReadOnlyCollection<ICustomFormatsResourceProvider> customFormatsProviders,
-    IReadOnlyCollection<ICustomFormatCategoriesResourceProvider> categoriesProviders,
-    ICustomFormatLoader cfLoader,
-    ILogger log
-) : ICustomFormatsResourceQuery
+public class CustomFormatsResourceQuery(CustomFormatResourceQuery newQuery)
+    : ICustomFormatsResourceQuery
 {
     private readonly Dictionary<SupportedServices, CustomFormatDataResult> _cache = [];
 
@@ -16,43 +14,14 @@ public class CustomFormatsResourceQuery(
             return cached;
         }
 
-        // Get custom format directories from all providers for this service, tracking sources
-        log.Debug(
-            "CustomFormatsResourceQuery.GetCustomFormatData called for {ServiceType}",
-            serviceType
-        );
-
-        var allFormatsWithSources = new List<CustomFormatData>();
-
-        foreach (var provider in customFormatsProviders)
+        var formats = serviceType switch
         {
-            var providerPaths = provider.GetCustomFormatPaths(serviceType);
+            SupportedServices.Radarr => newQuery.GetRadarr().Cast<CustomFormatResource>().ToList(),
+            SupportedServices.Sonarr => newQuery.GetSonarr().Cast<CustomFormatResource>().ToList(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
 
-            // Get category file for this provider
-            var categoryFile = categoriesProviders
-                .Select(p => p.GetCategoryMarkdownFile(serviceType))
-                .FirstOrDefault(file => file != null);
-
-            if (categoryFile == null)
-            {
-                throw new InvalidOperationException(
-                    $"No category markdown file found for service {serviceType}"
-                );
-            }
-
-            var providerFormats = cfLoader.LoadAllCustomFormatsAtPaths(providerPaths, categoryFile);
-
-            allFormatsWithSources.AddRange(providerFormats);
-        }
-
-        // Apply precedence-based approach: last provider wins for each TrashId
-        var cleanFormats = allFormatsWithSources
-            .GroupBy(item => item.TrashId)
-            .Select(group => group.Last()) // Last occurrence takes precedence
-            .ToList();
-
-        // No duplicate tracking needed - multiple providers are expected for redundancy/fallback
-        var result = new CustomFormatDataResult(cleanFormats);
+        var result = new CustomFormatDataResult(formats);
         _cache[serviceType] = result;
         return result;
     }

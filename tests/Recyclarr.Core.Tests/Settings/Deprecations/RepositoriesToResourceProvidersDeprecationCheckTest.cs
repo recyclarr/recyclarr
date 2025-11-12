@@ -1,3 +1,4 @@
+using Recyclarr.Repo;
 using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
 using Recyclarr.TestLibrary;

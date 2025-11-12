@@ -1,69 +1,31 @@
-using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Json.Loading;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.TrashGuide.MediaNaming;
 
 public class MediaNamingResourceQuery(
-    IEnumerable<IMediaNamingResourceProvider> providers,
-    GuideJsonLoader jsonLoader
+    RadarrMediaNamingResourceQuery radarrQuery,
+    SonarrMediaNamingResourceQuery sonarrQuery
 ) : IMediaNamingResourceQuery
 {
-    private RadarrMediaNamingData? _radarrCache;
-    private SonarrMediaNamingData? _sonarrCache;
-
-    [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
-    private static Dictionary<string, string> JoinDictionaries(
-        IEnumerable<IReadOnlyDictionary<string, string>> dictionaries
-    )
-    {
-        return dictionaries
-            .SelectMany(dict => dict)
-            .GroupBy(kvp => kvp.Key.ToLowerInvariant())
-            .Select(group => group.Last()) // last occurrence wins
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-    }
-
     public RadarrMediaNamingData GetRadarrNamingData()
     {
-        if (_radarrCache is not null)
-            return _radarrCache;
-
-        // Get media naming directories from all providers
-        var paths = providers.SelectMany(provider =>
-            provider.GetMediaNamingPaths(SupportedServices.Radarr)
-        );
-
-        var data = jsonLoader.LoadAllFilesAtPaths<RadarrMediaNamingData>(paths);
-        _radarrCache = new RadarrMediaNamingData
-        {
-            File = JoinDictionaries(data.Select(x => x.File)),
-            Folder = JoinDictionaries(data.Select(x => x.Folder)),
-        };
-        return _radarrCache;
+        var resource = radarrQuery.GetNaming();
+        return new RadarrMediaNamingData { File = resource.File, Folder = resource.Folder };
     }
 
     public SonarrMediaNamingData GetSonarrNamingData()
     {
-        if (_sonarrCache is not null)
-            return _sonarrCache;
-
-        // Get media naming directories from all providers
-        var paths = providers.SelectMany(provider =>
-            provider.GetMediaNamingPaths(SupportedServices.Sonarr)
-        );
-
-        var data = jsonLoader.LoadAllFilesAtPaths<SonarrMediaNamingData>(paths);
-        _sonarrCache = new SonarrMediaNamingData
+        var resource = sonarrQuery.GetNaming();
+        return new SonarrMediaNamingData
         {
-            Season = JoinDictionaries(data.Select(x => x.Season)),
-            Series = JoinDictionaries(data.Select(x => x.Series)),
+            Season = resource.Season,
+            Series = resource.Series,
             Episodes = new SonarrEpisodeNamingData
             {
-                Anime = JoinDictionaries(data.Select(x => x.Episodes.Anime)),
-                Daily = JoinDictionaries(data.Select(x => x.Episodes.Daily)),
-                Standard = JoinDictionaries(data.Select(x => x.Episodes.Standard)),
+                Anime = resource.Episodes.Anime,
+                Daily = resource.Episodes.Daily,
+                Standard = resource.Episodes.Standard,
             },
         };
-        return _sonarrCache;
     }
 }

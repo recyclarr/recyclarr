@@ -1,33 +1,27 @@
+using Recyclarr.ResourceProviders.Domain;
+
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public class QualitySizeResourceQuery(
-    IReadOnlyCollection<IQualitySizeResourceProvider> providers,
-    QualitySizeGuideParser parser
-) : IQualitySizeResourceQuery
+public class QualitySizeResourceQuery(ResourceProviders.Domain.QualitySizeResourceQuery newQuery)
+    : IQualitySizeResourceQuery
 {
-    private readonly Lazy<
-        IReadOnlyDictionary<SupportedServices, IReadOnlyList<QualitySizeData>>
-    > _cache = new(() =>
+    private readonly Dictionary<SupportedServices, IReadOnlyList<QualitySizeResource>> _cache = [];
+
+    public IReadOnlyList<QualitySizeResource> GetQualitySizeData(SupportedServices serviceType)
     {
-        var result = new Dictionary<SupportedServices, IReadOnlyList<QualitySizeData>>();
-
-        foreach (var serviceType in Enum.GetValues<SupportedServices>())
+        if (_cache.TryGetValue(serviceType, out var cached))
         {
-            // Get quality size directories from all providers for this service
-            var qualitySizePaths = providers.SelectMany(provider =>
-                provider.GetQualitySizePaths(serviceType)
-            );
-
-            result[serviceType] = parser
-                .GetQualities(qualitySizePaths)
-                .GroupBy(q => q.Type)
-                .Select(group => group.Last()) // Last occurrence wins precedence
-                .ToList();
+            return cached;
         }
 
-        return result;
-    });
+        var result = serviceType switch
+        {
+            SupportedServices.Radarr => newQuery.GetRadarr().Cast<QualitySizeResource>().ToList(),
+            SupportedServices.Sonarr => newQuery.GetSonarr().Cast<QualitySizeResource>().ToList(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
 
-    public IReadOnlyList<QualitySizeData> GetQualitySizeData(SupportedServices serviceType) =>
-        _cache.Value[serviceType];
+        _cache[serviceType] = result;
+        return result;
+    }
 }

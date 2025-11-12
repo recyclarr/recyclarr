@@ -1,16 +1,61 @@
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.TrashGuide;
+
 namespace Recyclarr.ConfigTemplates;
 
-public class ConfigIncludesResourceQuery(
-    IEnumerable<IConfigIncludesResourceProvider> includesProviders
-) : IConfigIncludesResourceQuery
+public class ConfigIncludesResourceQuery(IResourcePathRegistry registry)
 {
-    private readonly Lazy<IReadOnlyCollection<TemplatePath>> _includesCache = new(() =>
-        includesProviders
-            .SelectMany(provider => provider.GetIncludes())
-            .GroupBy(t => t.Id)
-            .Select(group => group.Last()) // Last occurrence wins precedence
-            .ToList()
-    );
+    public IReadOnlyCollection<RadarrConfigIncludeResource> GetRadarr()
+    {
+        var files = registry.GetFiles<RadarrConfigIncludeResource>();
+        return files
+            .Select(f => new RadarrConfigIncludeResource
+            {
+                Id = Path.GetFileNameWithoutExtension(f.Name),
+                TemplateFile = f,
+            })
+            .ToList();
+    }
 
-    public IReadOnlyCollection<TemplatePath> GetIncludes() => _includesCache.Value;
+    public IReadOnlyCollection<SonarrConfigIncludeResource> GetSonarr()
+    {
+        var files = registry.GetFiles<SonarrConfigIncludeResource>();
+        return files
+            .Select(f => new SonarrConfigIncludeResource
+            {
+                Id = Path.GetFileNameWithoutExtension(f.Name),
+                TemplateFile = f,
+            })
+            .ToList();
+    }
+}
+
+internal class ConfigIncludesResourceQueryAdapter(ConfigIncludesResourceQuery newQuery)
+    : IConfigIncludesResourceQuery
+{
+    public IReadOnlyCollection<TemplatePath> GetIncludes()
+    {
+        var radarr = newQuery
+            .GetRadarr()
+            .Select(r => new TemplatePath
+            {
+                Id = r.Id,
+                TemplateFile = r.TemplateFile,
+                Service = SupportedServices.Radarr,
+                Hidden = r.Hidden,
+            });
+
+        var sonarr = newQuery
+            .GetSonarr()
+            .Select(s => new TemplatePath
+            {
+                Id = s.Id,
+                TemplateFile = s.TemplateFile,
+                Service = SupportedServices.Sonarr,
+                Hidden = s.Hidden,
+            });
+
+        return radarr.Concat(sonarr).ToList();
+    }
 }

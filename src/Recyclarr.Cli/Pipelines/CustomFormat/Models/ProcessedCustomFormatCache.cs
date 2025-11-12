@@ -1,13 +1,13 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
 internal class ProcessedCustomFormatCache : IPipelineCache
 {
-    private readonly List<CustomFormatData> _customFormats = [];
+    private readonly List<CustomFormatResource> _customFormats = [];
 
-    public void AddCustomFormats(IEnumerable<CustomFormatData> customFormats)
+    public void AddCustomFormats(IEnumerable<CustomFormatResource> customFormats)
     {
         _customFormats.AddRange(customFormats);
     }
@@ -17,12 +17,12 @@ internal class ProcessedCustomFormatCache : IPipelineCache
         _customFormats.Clear();
     }
 
-    public CustomFormatData? LookupByTrashId(string trashId)
+    public CustomFormatResource? LookupByTrashId(string trashId)
     {
         return _customFormats.Find(x => x.TrashId.EqualsIgnoreCase(trashId));
     }
 
-    public CustomFormatData? LookupByServiceId(int id)
+    public CustomFormatResource? LookupByServiceId(int id)
     {
         return _customFormats.Find(x => x.Id == id);
     }

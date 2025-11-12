@@ -2,7 +2,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
@@ -88,7 +88,7 @@ internal class QualityProfileConfigPhase(
     private void AddCustomFormatScoreData(
         ProcessedQualityProfileData profile,
         AssignScoresToConfig scoreConfig,
-        CustomFormatData cf
+        CustomFormatResource cf
     )
     {
         var existingScoreData = profile.CfScores;
@@ -133,7 +133,7 @@ internal class QualityProfileConfigPhase(
     private int? DetermineScore(
         QualityProfileConfig profile,
         AssignScoresToConfig scoreConfig,
-        CustomFormatData cf
+        CustomFormatResource cf
     )
     {
         if (scoreConfig.Score is not null)
