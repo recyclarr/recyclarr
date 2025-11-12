@@ -53,6 +53,11 @@
 Core Mandates:
 
 - **Tests must verify BEHAVIOR, not implementation detail!**
+- ALWAYS test new functionality using a single, high level integration test that verifies the "happy
+  path". Then, based on code coverage, consider other integration tests for failure or edge cases.
+  Continue to validate code coverage (lines of code covered, NOT percentage statistics) after every
+  single integration test is added. If an integration test is unable to exercise a significant area
+  of code, only then should you consider a unit test (highest level of granularity).
 - Avoid super granular unit tests with heavy mocking, even if you find this pattern in the existing
   code.
 - Focus on high level integration tests that verify large chunks of the system. These are less
