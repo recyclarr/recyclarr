@@ -1,5 +1,5 @@
 using Recyclarr.Config.Models;
-using Recyclarr.Core.ResourceProvider.Domain;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Models;
 

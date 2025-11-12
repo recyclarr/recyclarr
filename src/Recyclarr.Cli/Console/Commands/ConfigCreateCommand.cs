@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
@@ -13,7 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ConfigCreateCommand(
     ILogger log,
     IConfigCreationProcessor processor,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
+    ProviderProgressHandler providerProgressHandler,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
@@ -54,7 +55,7 @@ internal class ConfigCreateCommand(
         try
         {
             var outputSettings = consoleSettings.GetOutputSettings(settings);
-            await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
+            await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

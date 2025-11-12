@@ -13,7 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List media naming formats in the guide for a particular service.")]
 internal class ListMediaNamingCommand(
     MediaNamingDataLister lister,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
+    ProviderProgressHandler providerProgressHandler,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ListMediaNamingCommand.CliSettings>
 {
@@ -34,7 +34,7 @@ internal class ListMediaNamingCommand(
     )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
         lister.ListNaming(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

@@ -108,27 +108,23 @@
 - ✅ Added ConfigTemplates namespace import to ResourceProviderAutofacModule
 - ✅ Fixed query class names (ConfigTemplatesResourceQuery, ConfigIncludesResourceQuery)
 
-### CLI Integration (In Progress)
+### CLI Integration (Complete)
 
 - ✅ Created ProviderProgressHandler helper class for Spectre.Console integration
-- ✅ ProviderProgressHandler injects ProviderInitializationFactory (reduced DI overhead in commands)
-- ✅ Updated SyncCommand to use ProviderProgressHandler pattern
-- ⏳ Remaining commands to update: ConfigListTemplatesCommand, ListQualitiesCommand,
-  ConfigListLocalCommand, ListMediaNamingCommand, ListCustomFormatsCommand, ConfigCreateCommand
+- ✅ ProviderProgressHandler injects ProviderInitializationFactory (reduced DI overhead)
+- ✅ Updated all 7 commands to use ProviderProgressHandler pattern:
+  - SyncCommand, ConfigListTemplatesCommand, ListQualitiesCommand
+  - ConfigListLocalCommand, ListMediaNamingCommand, ListCustomFormatsCommand, ConfigCreateCommand
+- ✅ Fixed ProcessedQualityProfileData namespace (Recyclarr.ResourceProviders.Domain)
+- ✅ All production code compiles successfully
 
 ### Remaining Work
 
-**Commands (5 remaining):**
+**Test Fixes (Only Errors Left):**
 
-- Apply same pattern as SyncCommand: inject only ProviderProgressHandler
-- Replace deleted ConsoleGitRepositoryInitializer references
-- Pattern: `await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);`
-
-**Test Fixes:**
-
-- Update test library (NewCf, StubRepoUpdater) for new types
-- Fix ProcessedQualityProfileData namespace/type references
-- Address remaining CustomFormatData → CustomFormatResource renames in tests
+- NewCf.cs: CustomFormatData → CustomFormatResource (3 occurrences)
+- StubRepoUpdater.cs: Implement new IRepoUpdater.UpdateRepo signature
+- All other test files with CustomFormatData renames
 
 **Code Analysis Warnings:**
 

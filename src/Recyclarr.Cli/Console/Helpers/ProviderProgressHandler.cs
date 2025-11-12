@@ -12,7 +12,7 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
         CancellationToken ct
     )
     {
-        if (!outputSettings.RawMode)
+        if (!outputSettings.IsRawOutputEnabled)
         {
             await console
                 .Progress()
