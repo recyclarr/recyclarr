@@ -2,6 +2,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console.Testing;
 
@@ -20,7 +21,9 @@ internal sealed class CustomFormatDataListerTest
     {
         var testData = new[] { NewCf.Data("First", "123"), NewCf.Data("Second", "456") };
 
-        guide.GetCustomFormatData(default!).ReturnsForAnyArgs(new CustomFormatDataResult(testData));
+        guide
+            .GetCustomFormatResource(default!)
+            .ReturnsForAnyArgs(new CustomFormatResourceResult(testData));
         settings.ScoreSets.Returns(false);
 
         sut.List(outputSettings, settings);

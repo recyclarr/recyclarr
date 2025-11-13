@@ -8,12 +8,10 @@ namespace Recyclarr.Core.TestLibrary;
 
 public class StubRepoUpdater(MockFileSystem fileSystem) : IRepoUpdater
 {
-    public Task UpdateRepo(
-        IDirectoryInfo repoPath,
-        GitRepositorySource repositorySource,
-        CancellationToken token
-    )
+    public Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
+        var repoPath = repositorySource.Path;
+
         switch (repoPath.Parent?.Name)
         {
             case "trash-guides":

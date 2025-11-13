@@ -118,13 +118,24 @@
 - ✅ Fixed ProcessedQualityProfileData namespace (Recyclarr.ResourceProviders.Domain)
 - ✅ All production code compiles successfully
 
-### Remaining Work
+### Test Fixes (In Progress)
 
-**Test Fixes (Only Errors Left):**
+**Completed:**
 
-- NewCf.cs: CustomFormatData → CustomFormatResource (3 occurrences)
-- StubRepoUpdater.cs: Implement new IRepoUpdater.UpdateRepo signature
-- All other test files with CustomFormatData renames
+- ✅ NewCf.cs: CustomFormatData → CustomFormatResource
+- ✅ StubRepoUpdater.cs: Updated IRepoUpdater.UpdateRepo signature
+- ✅ Deleted BaseRepositoryDefinitionProviderTest (obsolete per design doc)
+- ✅ Updated RepositoriesToResourceProvidersDeprecationCheckTest for new settings structure
+- ✅ Updated CustomFormatLoaderIntegrationTest to use JsonResourceLoader
+- ✅ Batch renamed CustomFormatData → CustomFormatResource in test files
+- ✅ Added missing ResourceProviders.Domain using statements
+
+**Remaining:**
+
+- Test method calls to ICustomFormatsResourceQuery need updates (GetCustomFormatData → new API)
+- CustomFormatResourceResult type references
+- IGitRepositoryService references (obsolete)
+- ~30 test errors remaining
 
 **Code Analysis Warnings:**
 

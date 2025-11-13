@@ -4,7 +4,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ConfigTemplates;
-using Recyclarr.ResourceProviders.Git;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
