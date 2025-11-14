@@ -1,6 +1,6 @@
 # Resource Provider Implementation Progress
 
-**Status:** Phase 1 - New Infrastructure Complete **Last Updated:** 2025-01-12
+**Status:** Phase 2 Complete - Adapters Removed, Production Code Clean **Last Updated:** 2025-01-13
 
 ## Completed Work
 
@@ -95,52 +95,63 @@
 
 - `src/Recyclarr.Core/ResourceProvider/ResourceProviderAutofacModule.cs`
 
-## Phase 2 Progress (In Progress)
+## Phase 2: Adapter Removal & Direct Refactoring (Complete)
 
-### Compilation Fixes (Completed)
+### Production Code (Complete)
 
-- ✅ Fixed ConfigTemplate/Include query instantiation (removed new() constraint, direct instantiation)
-- ✅ Removed CustomFormatLoader registration from CoreAutofacModule
-- ✅ Fixed TrashGuidesStrategy CloneUrl type (string → Uri)
-- ✅ Fixed ConfigTemplatesStrategy CloneUrl type (string → Uri)
-- ✅ Fixed CustomFormatsStrategy provider type reference (LocalResourceProvider pattern matching)
-- ✅ Fixed IIndex enumeration in ProviderInitializationFactory (explicit strategy keys)
-- ✅ Added ConfigTemplates namespace import to ResourceProviderAutofacModule
-- ✅ Fixed query class names (ConfigTemplatesResourceQuery, ConfigIncludesResourceQuery)
+**Adapter Removal (Design Doc Compliance):**
 
-### CLI Integration (Complete)
+- ✅ Deleted `CustomFormatsResourceQuery` adapter wrapper
+- ✅ Deleted `QualitySizeResourceQuery` adapter wrapper
+- ✅ Removed adapter code from `ConfigTemplatesResourceQuery`
+- ✅ Removed adapter code from `ConfigIncludesResourceQuery`
+- ✅ Deleted `ICustomFormatsResourceQuery` interface
+- ✅ Deleted `IQualitySizeResourceQuery` interface
+- ✅ Deleted `IConfigTemplatesResourceQuery` interface
+- ✅ Deleted `IConfigIncludesResourceQuery` interface
+- ✅ Deleted `CustomFormatDataResult` wrapper type
 
-- ✅ Created ProviderProgressHandler helper class for Spectre.Console integration
-- ✅ ProviderProgressHandler injects ProviderInitializationFactory (reduced DI overhead)
-- ✅ Updated all 7 commands to use ProviderProgressHandler pattern:
-  - SyncCommand, ConfigListTemplatesCommand, ListQualitiesCommand
-  - ConfigListLocalCommand, ListMediaNamingCommand, ListCustomFormatsCommand, ConfigCreateCommand
-- ✅ Fixed ProcessedQualityProfileData namespace (Recyclarr.ResourceProviders.Domain)
-- ✅ All production code compiles successfully
+**Consumer Refactoring (8 files):**
 
-### Test Fixes (In Progress)
+- ✅ `CustomFormatConfigPhase`: Uses `guide.GetRadarr()`/`guide.GetSonarr()` with service switch
+- ✅ `CustomFormatDataLister`: Service-specific method calls
+- ✅ `QualitySizeConfigPhase`: Direct service-specific queries
+- ✅ `QualitySizeDataLister`: Service-specific method calls
+- ✅ `ConfigListTemplateProcessor`: Separate `ListTemplates()`/`ListIncludes()` methods
+- ✅ `TemplateConfigCreator`: Combines both services with `Concat<ConfigTemplateResource>()`
+- ✅ `TemplateIncludeProcessor`: Service switch for includes
+- ✅ `CoreAutofacModule`: Removed obsolete query registrations
+
+**Build Status:**
+
+- ✅ Production code: 0 errors, 12 warnings
+- ✅ All adapter removal complete per design doc
+
+### Test Fixes (Partial)
 
 **Completed:**
 
-- ✅ NewCf.cs: CustomFormatData → CustomFormatResource
-- ✅ StubRepoUpdater.cs: Updated IRepoUpdater.UpdateRepo signature
-- ✅ Deleted BaseRepositoryDefinitionProviderTest (obsolete per design doc)
-- ✅ Updated RepositoriesToResourceProvidersDeprecationCheckTest for new settings structure
-- ✅ Updated CustomFormatLoaderIntegrationTest to use JsonResourceLoader
-- ✅ Batch renamed CustomFormatData → CustomFormatResource in test files
-- ✅ Added missing ResourceProviders.Domain using statements
+- ✅ `CustomFormatDataListerTest`: Updated to concrete query with `GetRadarr()`/`GetSonarr()`
+- ✅ `QualitySizeConfigPhaseTest`: Updated all 4 tests to use service-specific methods
 
-**Remaining:**
+**Remaining (~20 errors in 5 files):**
 
-- Test method calls to ICustomFormatsResourceQuery need updates (GetCustomFormatData → new API)
-- CustomFormatResourceResult type references
-- IGitRepositoryService references (obsolete)
-- ~30 test errors remaining
+- `CustomFormatConfigPhaseTest`: Replace deleted interface/types
+- `CustomFormatTransactionPhaseTest`: Add ResourceProviders.Domain using
+- `ConfigCreationProcessorIntegrationTest`: Replace IGitRepositoryService
+- `TemplateConfigCreatorIntegrationTest`: Replace IGitRepositoryService
+- Type mismatches in mock setup calls
 
-**Code Analysis Warnings:**
+**Code Analysis Warnings (12):**
 
-- Address CA1031, CA1854, CA1860, CA1859, CA1822, CA1861 warnings
-- Most are performance suggestions (TryGetValue, Count > 0, static methods)
+- CA1031: Catch specific exceptions (2 instances)
+- CA1854: Use TryGetValue instead of ContainsKey+indexer
+- CA1859: Return List<T> instead of IReadOnlyCollection<T> (2 instances)
+- CA1860: Prefer Count > 0 over Any()
+- CA1822: Mark GlobJsonFiles as static
+- CA1861: Use static readonly for constant arrays
+- CA2208: Fix ArgumentOutOfRangeException parameter names (2 instances)
+- CS9113: Remove unused parameters (2 instances)
 
 ## Phase 2 Progress (Earlier Work)
 

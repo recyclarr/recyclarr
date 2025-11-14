@@ -1,6 +1,5 @@
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ConfigTemplates;
 
@@ -28,34 +27,5 @@ public class ConfigIncludesResourceQuery(IResourcePathRegistry registry)
                 TemplateFile = f,
             })
             .ToList();
-    }
-}
-
-internal class ConfigIncludesResourceQueryAdapter(ConfigIncludesResourceQuery newQuery)
-    : IConfigIncludesResourceQuery
-{
-    public IReadOnlyCollection<TemplatePath> GetIncludes()
-    {
-        var radarr = newQuery
-            .GetRadarr()
-            .Select(r => new TemplatePath
-            {
-                Id = r.Id,
-                TemplateFile = r.TemplateFile,
-                Service = SupportedServices.Radarr,
-                Hidden = r.Hidden,
-            });
-
-        var sonarr = newQuery
-            .GetSonarr()
-            .Select(s => new TemplatePath
-            {
-                Id = s.Id,
-                TemplateFile = s.TemplateFile,
-                Service = SupportedServices.Sonarr,
-                Hidden = s.Hidden,
-            });
-
-        return radarr.Concat(sonarr).ToList();
     }
 }

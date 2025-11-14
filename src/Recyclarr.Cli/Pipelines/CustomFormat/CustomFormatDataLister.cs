@@ -1,12 +1,12 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Logging;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatsResourceQuery guide)
+internal class CustomFormatDataLister(IAnsiConsole console, CustomFormatResourceQuery guide)
 {
     public void List(IConsoleOutputSettings outputSettings, IListCustomFormatSettings settings)
     {
@@ -34,9 +34,15 @@ internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatsResour
             console.WriteLine();
         }
 
-        var scoreSets = guide
-            .GetCustomFormatData(serviceType)
-            .CustomFormats.SelectMany(x => x.TrashScores.Keys)
+        IEnumerable<CustomFormatResource> customFormats = serviceType switch
+        {
+            SupportedServices.Radarr => guide.GetRadarr(),
+            SupportedServices.Sonarr => guide.GetSonarr(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
+        };
+
+        var scoreSets = customFormats
+            .SelectMany(x => x.TrashScores.Keys)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Order(StringComparer.InvariantCultureIgnoreCase);
 
@@ -55,9 +61,15 @@ internal class CustomFormatDataLister(IAnsiConsole console, ICustomFormatsResour
             console.WriteLine();
         }
 
-        var categories = guide
-            .GetCustomFormatData(serviceType)
-            .CustomFormats.Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
+        IEnumerable<CustomFormatResource> customFormats = serviceType switch
+        {
+            SupportedServices.Radarr => guide.GetRadarr(),
+            SupportedServices.Sonarr => guide.GetSonarr(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
+        };
+
+        var categories = customFormats
+            .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
             .OrderBy(x => x.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key);

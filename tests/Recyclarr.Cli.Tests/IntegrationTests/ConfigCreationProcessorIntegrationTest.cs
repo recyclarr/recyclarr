@@ -4,6 +4,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ConfigTemplates;
+using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -12,12 +13,6 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Config_file_created_when_using_default_path()
     {
-        _ = Resolve<IConfigTemplatesResourceQuery>(); // Ensure resource provider is initialized
-        // Create a mock templates.json file in the expected location
-        var mockRepoPath = "/repos/config-templates-default";
-        Fs.AddDirectory(mockRepoPath);
-        Fs.AddFile($"{mockRepoPath}/templates.json", new MockFileData("{}"));
-
         var sut = Resolve<ConfigCreationProcessor>();
 
         sut.Process(new ConfigCreateCommand.CliSettings { Path = null });
@@ -89,9 +84,9 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
             }
             """;
 
-        // Initialize the Git repository service to populate repository paths
-        var gitRepositoryService = Resolve<IGitRepositoryService>();
-        await gitRepositoryService.InitializeAsync(null, CancellationToken.None);
+        // Initialize resource providers to populate repository paths
+        var factory = Resolve<ProviderInitializationFactory>();
+        await factory.InitializeProvidersAsync(null, CancellationToken.None);
         // Create a mock templates.json file in the expected location
         var mockRepoPath = Paths
             .ReposDirectory.SubDirectory("config-templates")

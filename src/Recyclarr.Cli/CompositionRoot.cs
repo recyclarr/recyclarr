@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -111,6 +112,7 @@ internal static class CompositionRoot
             .OrderByRegistration();
 
         builder.RegisterType<RecyclarrConsoleSettings>();
+        builder.RegisterType<ProviderProgressHandler>();
     }
 
     private static void RegisterConfigServices(ContainerBuilder builder)

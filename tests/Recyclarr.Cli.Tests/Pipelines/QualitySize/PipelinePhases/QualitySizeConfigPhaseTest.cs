@@ -4,6 +4,8 @@ using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
@@ -27,16 +29,16 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Do_nothing_if_no_matching_quality_definition(
-        [Frozen] IQualitySizeResourceQuery guide,
+        [Frozen] ResourceProviders.Domain.QualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut
     )
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig { Type = "not_real" });
+        config.ServiceType.Returns(SupportedServices.Radarr);
 
-        guide
-            .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs([new QualitySizeData { Type = "real" }]);
+        guide.GetRadarr().Returns([new RadarrQualitySizeResource { Type = "real" }]);
+        guide.GetSonarr().Returns([new SonarrQualitySizeResource { Type = "real" }]);
 
         var context = new QualitySizePipelineContext();
 
@@ -52,7 +54,7 @@ internal sealed class QualitySizeConfigPhaseTest
     public async Task Preferred_ratio_clamping_works(
         string testPreferred,
         string expectedPreferred,
-        [Frozen] IQualitySizeResourceQuery guide,
+        [Frozen] ResourceProviders.Domain.QualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         QualitySizeConfigPhase sut
     )
@@ -64,10 +66,10 @@ internal sealed class QualitySizeConfigPhaseTest
                 PreferredRatio = decimal.Parse(testPreferred, CultureInfo.InvariantCulture),
             }
         );
+        config.ServiceType.Returns(SupportedServices.Radarr);
 
-        guide
-            .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs([new QualitySizeData { Type = "real" }]);
+        guide.GetRadarr().Returns([new RadarrQualitySizeResource { Type = "real" }]);
+        guide.GetSonarr().Returns([new SonarrQualitySizeResource { Type = "real" }]);
 
         var context = new QualitySizePipelineContext();
 
@@ -81,7 +83,7 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Preferred_is_set_via_ratio(
-        [Frozen] IQualitySizeResourceQuery guide,
+        [Frozen] ResourceProviders.Domain.QualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut
@@ -90,12 +92,13 @@ internal sealed class QualitySizeConfigPhaseTest
         config.QualityDefinition.Returns(
             new QualityDefinitionConfig { Type = "real", PreferredRatio = 0.5m }
         );
+        config.ServiceType.Returns(SupportedServices.Radarr);
 
         guide
-            .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs(
+            .GetRadarr()
+            .Returns(
                 [
-                    new QualitySizeData
+                    new RadarrQualitySizeResource
                     {
                         Type = "real",
                         Qualities = [new QualityItem("quality1", 0, 100, 90)],
@@ -115,19 +118,20 @@ internal sealed class QualitySizeConfigPhaseTest
 
     [Test, AutoMockData]
     public async Task Preferred_is_set_via_guide(
-        [Frozen] IQualitySizeResourceQuery guide,
+        [Frozen] ResourceProviders.Domain.QualitySizeResourceQuery guide,
         [Frozen] IServiceConfiguration config,
         [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
         QualitySizeConfigPhase sut
     )
     {
         config.QualityDefinition.Returns(new QualityDefinitionConfig { Type = "real" });
+        config.ServiceType.Returns(SupportedServices.Radarr);
 
         guide
-            .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs(
+            .GetRadarr()
+            .Returns(
                 [
-                    new QualitySizeData
+                    new RadarrQualitySizeResource
                     {
                         Type = "real",
                         Qualities = [new QualityItem("quality1", 0, 100, 90)],

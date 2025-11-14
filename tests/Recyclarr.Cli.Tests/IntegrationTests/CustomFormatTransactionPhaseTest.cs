@@ -5,6 +5,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;

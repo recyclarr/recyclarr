@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -31,9 +32,9 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
             }
             """;
 
-        // Initialize the Git repository service to populate repository paths
-        var gitRepositoryService = Resolve<IGitRepositoryService>();
-        await gitRepositoryService.InitializeAsync(null, CancellationToken.None);
+        // Initialize resource providers to populate repository paths
+        var factory = Resolve<ProviderInitializationFactory>();
+        await factory.InitializeProvidersAsync(null, CancellationToken.None);
 
         // Create a mock templates.json file in the expected location
         var mockRepoPath = Paths

@@ -279,31 +279,8 @@ public class CoreAutofacModule : Module
 
     private static void RegisterTrashGuide(ContainerBuilder builder)
     {
-        builder
-            .RegisterType<ConfigTemplatesResourceQuery>()
-            .As<IConfigTemplatesResourceQuery>()
-            .SingleInstance();
-
-        builder
-            .RegisterType<ConfigIncludesResourceQuery>()
-            .As<IConfigIncludesResourceQuery>()
-            .SingleInstance();
-
-        // Custom Format
-        builder
-            .RegisterType<CustomFormatsResourceQuery>()
-            .As<ICustomFormatsResourceQuery>()
-            .SingleInstance();
         builder.RegisterType<CustomFormatCategoryParser>().As<ICustomFormatCategoryParser>();
-
-        // Quality Size
-        builder
-            .RegisterType<QualitySizeResourceQuery>()
-            .As<IQualitySizeResourceQuery>()
-            .SingleInstance();
         builder.RegisterType<QualitySizeGuideParser>();
-
-        // Media Naming
         builder.RegisterType<MediaNamingResourceQuery>().As<IMediaNamingResourceQuery>();
     }
 

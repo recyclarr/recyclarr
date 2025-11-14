@@ -45,4 +45,24 @@ public static class NewCf
             TrashId = trashId,
         };
     }
+
+    public static RadarrCustomFormatResource RadarrData(string name, string trashId, int id = 0)
+    {
+        return new RadarrCustomFormatResource
+        {
+            Id = id,
+            Name = name,
+            TrashId = trashId,
+        };
+    }
+
+    public static SonarrCustomFormatResource SonarrData(string name, string trashId, int id = 0)
+    {
+        return new SonarrCustomFormatResource
+        {
+            Id = id,
+            Name = name,
+            TrashId = trashId,
+        };
+    }
 }
