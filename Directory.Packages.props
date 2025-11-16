@@ -48,7 +48,7 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0012" PrivateAssets="all" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0012" PrivateAssets="all" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" PrivateAssets="all" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" PrivateAssets="all" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" PrivateAssets="all" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" PrivateAssets="all" />
     <PackageVersion Include="NUnit" Version="4.4.0" PrivateAssets="all" />
