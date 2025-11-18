@@ -56,7 +56,7 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.Observable" Version="3.0.0" PrivateAssets="all" />
     <PackageVersion Include="Serilog.Sinks.NUnit" Version="1.0.3" PrivateAssets="all" />
-    <PackageVersion Include="Spectre.Console.Testing" Version="0.53.0" PrivateAssets="all" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.54.0" PrivateAssets="all" />
     <PackageVersion Include="Testcontainers" Version="4.8.1" PrivateAssets="all" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.0.16" PrivateAssets="all" />
   </ItemGroup>
