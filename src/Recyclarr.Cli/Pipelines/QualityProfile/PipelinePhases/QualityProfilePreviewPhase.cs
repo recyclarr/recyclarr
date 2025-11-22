@@ -65,8 +65,8 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         );
         table.AddRow(
             "Minimum Format Upgrade Score",
-            Null(oldDto.MinFormatUpgradeScore),
-            Null(newDto.MinFormatUpgradeScore)
+            Null(oldDto.MinUpgradeFormatScore),
+            Null(newDto.MinUpgradeFormatScore)
         );
 
         // ReSharper disable once InvertIf
