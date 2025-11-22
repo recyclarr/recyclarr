@@ -41,7 +41,7 @@ repos:
         exclude: ^\.pre-commit-hooks\.yaml$
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.18.1
+    rev: v0.19.1
     hooks:
       - id: markdownlint-cli2
         args: [--fix]
