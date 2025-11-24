@@ -18,6 +18,7 @@
       ],
       depNameTemplate: "dotnet-sdk",
       datasourceTemplate: "dotnet-version",
+      extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
     },
     {
       description: "Update dotnet-version input in setup-dotnet action",
@@ -29,6 +30,7 @@
       matchStrings: ["dotnet-version:\\s*(?<currentValue>\\d+\\.\\d+)\\.x"],
       depNameTemplate: "dotnet-sdk",
       datasourceTemplate: "dotnet-version",
+      extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
     },
   ],
 }
