@@ -1,14 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <RecyclarrRepositoryRoot>$(MSBuildThisFileDirectory)..\..\</RecyclarrRepositoryRoot>
-  </PropertyGroup>
-
   <ItemGroup>
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>RecyclarrRepositoryRoot</_Parameter1>
