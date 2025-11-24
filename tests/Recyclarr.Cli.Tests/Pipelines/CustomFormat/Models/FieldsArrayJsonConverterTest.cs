@@ -43,12 +43,10 @@ internal sealed class FieldsArrayJsonConverterTest
 
         result!
             .Fields.Should()
-            .BeEquivalentTo(
-                [
-                    new CustomFormatFieldData { Name = "min", Value = 25 },
-                    new CustomFormatFieldData { Name = "max", Value = 40 },
-                ]
-            );
+            .BeEquivalentTo([
+                new CustomFormatFieldData { Name = "min", Value = 25 },
+                new CustomFormatFieldData { Name = "max", Value = 40 },
+            ]);
     }
 
     [Test]
@@ -69,12 +67,10 @@ internal sealed class FieldsArrayJsonConverterTest
 
         result!
             .Fields.Should()
-            .BeEquivalentTo(
-                [
-                    new CustomFormatFieldData { Name = "value", Value = 8 },
-                    new CustomFormatFieldData { Name = "exceptLanguage", Value = false },
-                ]
-            );
+            .BeEquivalentTo([
+                new CustomFormatFieldData { Name = "value", Value = 8 },
+                new CustomFormatFieldData { Name = "exceptLanguage", Value = false },
+            ]);
     }
 
     [Test]

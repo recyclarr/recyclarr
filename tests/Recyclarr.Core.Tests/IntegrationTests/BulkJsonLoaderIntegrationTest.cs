@@ -36,9 +36,9 @@ internal sealed class BulkJsonLoaderIntegrationTest : IntegrationTestFixture
 
         result
             .Should()
-            .BeEquivalentTo(
-                [new TestGuideObject("90cedc1fea7ea5d11298bebd3d1d3223", -10000, "TheName")]
-            );
+            .BeEquivalentTo([
+                new TestGuideObject("90cedc1fea7ea5d11298bebd3d1d3223", -10000, "TheName"),
+            ]);
     }
 
     [Test]

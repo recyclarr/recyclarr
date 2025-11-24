@@ -20,19 +20,17 @@ internal sealed class QualitySizeGuideParserTest : IntegrationTestFixture
 
         result
             .Should()
-            .BeEquivalentTo(
-                [
-                    new QualitySizeData
-                    {
-                        Type = "series",
-                        Qualities =
-                        [
-                            new QualityItem("quality1", 1, 2, 3),
-                            new QualityItem("quality2", 4.1m, 5.1m, 6.1m),
-                        ],
-                    },
-                ]
-            );
+            .BeEquivalentTo([
+                new QualitySizeData
+                {
+                    Type = "series",
+                    Qualities =
+                    [
+                        new QualityItem("quality1", 1, 2, 3),
+                        new QualityItem("quality2", 4.1m, 5.1m, 6.1m),
+                    ],
+                },
+            ]);
     }
 
     [Test]

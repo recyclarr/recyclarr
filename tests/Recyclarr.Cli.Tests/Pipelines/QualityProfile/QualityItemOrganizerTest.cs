@@ -201,18 +201,16 @@ internal sealed class QualityItemOrganizerTest
 
         result
             .Items.Should()
-            .BeEquivalentTo(
-                [
-                    NewQp.QualityDto(1, "one", true),
-                    NewQp.GroupDto(
-                        1001,
-                        "group1",
-                        false,
-                        NewQp.QualityDto(2, "two", false),
-                        NewQp.QualityDto(3, "three", false)
-                    ),
-                ]
-            );
+            .BeEquivalentTo([
+                NewQp.QualityDto(1, "one", true),
+                NewQp.GroupDto(
+                    1001,
+                    "group1",
+                    false,
+                    NewQp.QualityDto(2, "two", false),
+                    NewQp.QualityDto(3, "three", false)
+                ),
+            ]);
     }
 
     [Test]
@@ -244,18 +242,16 @@ internal sealed class QualityItemOrganizerTest
 
         result
             .Items.Should()
-            .BeEquivalentTo(
-                [
-                    NewQp.GroupDto(
-                        1001,
-                        "group1",
-                        true,
-                        NewQp.QualityDto(1, "one", true),
-                        NewQp.QualityDto(2, "two", true),
-                        NewQp.QualityDto(3, "three", true)
-                    ),
-                    NewQp.QualityDto(4, "four", false),
-                ]
-            );
+            .BeEquivalentTo([
+                NewQp.GroupDto(
+                    1001,
+                    "group1",
+                    true,
+                    NewQp.QualityDto(1, "one", true),
+                    NewQp.QualityDto(2, "two", true),
+                    NewQp.QualityDto(3, "three", true)
+                ),
+                NewQp.QualityDto(4, "four", false),
+            ]);
     }
 }

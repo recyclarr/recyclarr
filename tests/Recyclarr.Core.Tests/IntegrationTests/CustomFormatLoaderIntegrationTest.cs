@@ -40,9 +40,9 @@ internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
         var categoryParser = Resolve<ICustomFormatCategoryParser>();
         categoryParser
             .Parse(default!)
-            .ReturnsForAnyArgs(
-                [new CustomFormatCategoryItem("Streaming Services", "iTunes", "iT")]
-            );
+            .ReturnsForAnyArgs([
+                new CustomFormatCategoryItem("Streaming Services", "iTunes", "iT"),
+            ]);
 
         Fs.AddFile("it.json", new MockFileData("""{"name":"iT"}"""));
         Fs.AddEmptyFile("collection_of_cfs.md");

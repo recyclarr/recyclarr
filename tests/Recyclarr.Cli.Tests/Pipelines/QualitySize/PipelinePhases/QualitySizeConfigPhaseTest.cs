@@ -93,15 +93,13 @@ internal sealed class QualitySizeConfigPhaseTest
 
         guide
             .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs(
-                [
-                    new QualitySizeData
-                    {
-                        Type = "real",
-                        Qualities = [new QualityItem("quality1", 0, 100, 90)],
-                    },
-                ]
-            );
+            .ReturnsForAnyArgs([
+                new QualitySizeData
+                {
+                    Type = "real",
+                    Qualities = [new QualityItem("quality1", 0, 100, 90)],
+                },
+            ]);
 
         var context = new QualitySizePipelineContext();
 
@@ -125,15 +123,13 @@ internal sealed class QualitySizeConfigPhaseTest
 
         guide
             .GetQualitySizeData(default!)
-            .ReturnsForAnyArgs(
-                [
-                    new QualitySizeData
-                    {
-                        Type = "real",
-                        Qualities = [new QualityItem("quality1", 0, 100, 90)],
-                    },
-                ]
-            );
+            .ReturnsForAnyArgs([
+                new QualitySizeData
+                {
+                    Type = "real",
+                    Qualities = [new QualityItem("quality1", 0, 100, 90)],
+                },
+            ]);
 
         var context = new QualitySizePipelineContext();
 

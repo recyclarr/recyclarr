@@ -82,9 +82,15 @@ internal sealed class RecyclarrSyncTests
         var sonarrStartTask = _sonarrContainer.StartAsync();
         var radarrStartTask = _radarrContainer.StartAsync();
         var publishTask = Cli.Wrap("dotnet")
-            .WithArguments(
-                ["publish", cliProjectPath, "-c", "Release", "--self-contained", "-o", _publishPath]
-            )
+            .WithArguments([
+                "publish",
+                cliProjectPath,
+                "-c",
+                "Release",
+                "--self-contained",
+                "-o",
+                _publishPath,
+            ])
             .ExecuteAsync();
 
         await Task.WhenAll(sonarrStartTask, radarrStartTask, publishTask);

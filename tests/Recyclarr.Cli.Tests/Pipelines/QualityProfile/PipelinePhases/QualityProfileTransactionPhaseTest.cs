@@ -566,21 +566,19 @@ internal sealed class QualityProfileTransactionPhaseTest
         profiles
             .First()
             .Profile.ProfileDto.Items.Should()
-            .BeEquivalentTo(
-                [
-                    new ProfileItemDto
-                    {
-                        Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
-                    },
-                    new ProfileItemDto
-                    {
-                        Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
-                    },
-                    new ProfileItemDto
-                    {
-                        Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
-                    },
-                ]
-            );
+            .BeEquivalentTo([
+                new ProfileItemDto
+                {
+                    Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                },
+                new ProfileItemDto
+                {
+                    Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                },
+                new ProfileItemDto
+                {
+                    Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
+                },
+            ]);
     }
 }

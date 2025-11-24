@@ -21,9 +21,10 @@ internal sealed class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(
-            [NewCf.DataWithScore("", "id1", 101, 1), NewCf.DataWithScore("", "id2", 201, 2)]
-        );
+        cache.AddCustomFormats([
+            NewCf.DataWithScore("", "id1", 101, 1),
+            NewCf.DataWithScore("", "id2", 201, 2),
+        ]);
 
         fixture.Inject<IServiceConfiguration>(
             SetupCfs(
@@ -57,9 +58,10 @@ internal sealed class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(
-            [NewCf.DataWithScore("", "id1", 100, 1), NewCf.DataWithScore("", "id2", 200, 2)]
-        );
+        cache.AddCustomFormats([
+            NewCf.DataWithScore("", "id1", 100, 1),
+            NewCf.DataWithScore("", "id2", 200, 2),
+        ]);
 
         fixture.Inject<IServiceConfiguration>(
             SetupCfs(
@@ -186,12 +188,10 @@ internal sealed class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(
-            [
-                NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
-                NewCf.DataWithScores("", "id2", 2, ("default", 201), ("set2", 202)),
-            ]
-        );
+        cache.AddCustomFormats([
+            NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
+            NewCf.DataWithScores("", "id2", 2, ("default", 201), ("set2", 202)),
+        ]);
 
         var config = NewConfig.Radarr() with
         {
@@ -258,9 +258,10 @@ internal sealed class QualityProfileConfigPhaseTest
         var fixture = NSubstituteFixture.Create();
 
         var cache = fixture.Freeze<ProcessedCustomFormatCache>();
-        cache.AddCustomFormats(
-            [NewCf.DataWithScore("", "id1", 101, 1), NewCf.DataWithScore("", "id2", 201, 2)]
-        );
+        cache.AddCustomFormats([
+            NewCf.DataWithScore("", "id1", 101, 1),
+            NewCf.DataWithScore("", "id2", 201, 2),
+        ]);
 
         fixture.Inject<IServiceConfiguration>(
             SetupCfs(

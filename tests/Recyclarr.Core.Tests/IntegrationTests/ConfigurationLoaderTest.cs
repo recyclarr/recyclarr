@@ -45,13 +45,11 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
             .Where(x => x.ServiceType == SupportedServices.Sonarr)
             .Select(x => x.Yaml)
             .Should()
-            .BeEquivalentTo(
-                [
-                    new { ApiKey = "abc", BaseUrl = "http://one" },
-                    new { ApiKey = "abc", BaseUrl = "http://two" },
-                    new { ApiKey = "abc", BaseUrl = "http://three" },
-                ]
-            );
+            .BeEquivalentTo([
+                new { ApiKey = "abc", BaseUrl = "http://one" },
+                new { ApiKey = "abc", BaseUrl = "http://two" },
+                new { ApiKey = "abc", BaseUrl = "http://three" },
+            ]);
 
         result
             .Where(x => x.ServiceType == SupportedServices.Radarr)

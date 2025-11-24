@@ -46,29 +46,25 @@ internal sealed class RepositoriesToResourceProvidersDeprecationCheckTest
         // Should create new resource providers
         result
             .ResourceProviders.TrashGuides.Should()
-            .BeEquivalentTo(
-                [
-                    new GitRepositorySource
-                    {
-                        Name = "official",
-                        CloneUrl = new Uri("https://github.com/TRaSH-Guides/Guides.git"),
-                        Reference = "master",
-                    },
-                ]
-            );
+            .BeEquivalentTo([
+                new GitRepositorySource
+                {
+                    Name = "official",
+                    CloneUrl = new Uri("https://github.com/TRaSH-Guides/Guides.git"),
+                    Reference = "master",
+                },
+            ]);
 
         result
             .ResourceProviders.ConfigTemplates.Should()
-            .BeEquivalentTo(
-                [
-                    new GitRepositorySource
-                    {
-                        Name = "official",
-                        CloneUrl = new Uri("https://github.com/recyclarr/config-templates.git"),
-                        Reference = "main",
-                    },
-                ]
-            );
+            .BeEquivalentTo([
+                new GitRepositorySource
+                {
+                    Name = "official",
+                    CloneUrl = new Uri("https://github.com/recyclarr/config-templates.git"),
+                    Reference = "main",
+                },
+            ]);
     }
 
     [Test, AutoMockData]

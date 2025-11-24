@@ -34,9 +34,9 @@ internal sealed class ConfigValidationExecutorTest
         validationService
             .Validate(default!)
             .ReturnsForAnyArgs(
-                new ValidationResult(
-                    [new ValidationFailure("property", "message") { Severity = Severity.Warning }]
-                )
+                new ValidationResult([
+                    new ValidationFailure("property", "message") { Severity = Severity.Warning },
+                ])
             );
 
         var result = sut.Validate(NewConfig.Radarr());

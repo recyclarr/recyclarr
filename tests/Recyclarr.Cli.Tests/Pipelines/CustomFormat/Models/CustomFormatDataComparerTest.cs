@@ -153,15 +153,13 @@ internal sealed class CustomFormatDataComparerTest
                     spec with
                     {
                         Fields = spec
-                            .Fields.Concat(
-                                [
-                                    new CustomFormatFieldData
-                                    {
-                                        Name = "AdditionalField",
-                                        Value = "ExtraValue",
-                                    },
-                                ]
-                            )
+                            .Fields.Concat([
+                                new CustomFormatFieldData
+                                {
+                                    Name = "AdditionalField",
+                                    Value = "ExtraValue",
+                                },
+                            ])
                             .ToList(),
                     }
                 )

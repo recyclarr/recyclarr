@@ -390,20 +390,18 @@ internal sealed class QualityProfileExtensionsTest
 
         result
             .Items.Should()
-            .BeEquivalentTo(
-                [
-                    NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
-                    NewQp.GroupDto(
-                        1002,
-                        "Group 2",
-                        true,
-                        NewQp.QualityDto(3, "Quality 3", true),
-                        NewQp.QualityDto(2, "Quality 2", true)
-                    ),
-                    NewQp.QualityDto(1, "Quality 1", true),
-                    NewQp.GroupDto(1001, "Group 1", true),
-                ]
-            );
+            .BeEquivalentTo([
+                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupDto(
+                    1002,
+                    "Group 2",
+                    true,
+                    NewQp.QualityDto(3, "Quality 3", true),
+                    NewQp.QualityDto(2, "Quality 2", true)
+                ),
+                NewQp.QualityDto(1, "Quality 1", true),
+                NewQp.GroupDto(1001, "Group 1", true),
+            ]);
     }
 
     [Test]
