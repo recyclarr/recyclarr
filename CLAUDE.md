@@ -29,33 +29,47 @@
   must have value. Focus on documenting the WHY, not WHAT code does. Preference for self-documenting
   code: Self-describing variable, class, function names, etc.
 - Zero warnings/analysis issues
+- Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
+  polymorphism tradeoffs for discussion rather than defaulting to enums.
 
 ### C# Requirements
+
+Language Features:
 
 - File-scoped namespaces: `namespace Recyclarr.Core;`
 - Primary constructors: `class Service(IDep dep, ILogger logger)`
 - Collection expressions: `[]`, `[item]`, `[item1, item2]`, `[..collection]`
-- Records for DTOs, `required` properties, `init` setters
+- Records for DTOs, `init` setters
 - Pattern matching: `is not null`, switch expressions
+- Spread operator for collections: `[..first, ..second]`
+
+Required Idioms:
+
 - Use `internal` for implementation classes (CLI apps, service implementations)
 - Use `public` only for genuine external APIs
 - Concrete classes implementing public interfaces should be `internal`
 - Records for data models
-- `IReadOnlyCollection<T>` return types
 - LINQ method chaining over loops
-- Spread operator for collections: `[..first, ..second]`
-- `ValueTask` for hot paths, `CancellationToken` everywhere
+- LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
+- `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
+- Avoid interface pollution: not every service class must have an interface. Add interfaces when
+  justified (e.g. testability, more than one implementation)
 
 ### Testing Requirements
 
 Core Mandates:
 
 - **Tests must verify BEHAVIOR, not implementation detail!**
+- ALWAYS test new functionality using a single, high level integration test that verifies the "happy
+  path". Then, based on code coverage, consider other integration tests for failure or edge cases.
+  Continue to validate code coverage (lines of code covered, NOT percentage statistics) after every
+  single integration test is added. If an integration test is unable to exercise a significant area
+  of code, only then should you consider a unit test (highest level of granularity).
 - Avoid super granular unit tests with heavy mocking, even if you find this pattern in the existing
   code.
 - Focus on high level integration tests that verify large chunks of the system. These are less
   brittle and result in more meaningful tests.
-- Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Mocks for
+- Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Stubs for
   external dependencies at a high level, with real objects in the center.
 - Integration test fixtures MUST derive from one of the base test fixture classes:
   - `IntegrationTestFixture`: Integration tests for the Recyclarr.Core library.
@@ -99,8 +113,14 @@ Some key files and directories:
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
 - MUST run `pre-commit run <file1> <file2> ...` for all changes
 - Use `dotnet test` at solution level to verify all tests pass
-- **Package Management**: Use `dotnet add package` CLI for adding packages (central package
-  management via `Directory.Packages.props`)
+- You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
+  Prioritize the CLI for all project-specific modifications if possible. Central package management
+  is enabled via `Directory.Packages.props`.
+- Avoid adding 'optimization' to `dotnet` CLI calls. For example, don't do `--no-build`,
+  `--no-restore`, etc. Rely on simple invocations: `dotnet test` will always restore + build, so
+  there's no need to do `dotnet build` followed by `dotnet test`.
+- Use low-verbosity options for all tool commands. Generally, we only care about information we can
+  act on (e.g. warnings, errors). Reason: Informational/debug logs consume valuable context.
 
 ## Scripts
 
