@@ -152,7 +152,11 @@ All scripts under `scripts/`:
 - Follows keepachangelog.com format and rules
 - Newest entries are at the top of the file under the `[Unreleased]` section.
 - Audience: Non-technical end users
-- When requested, add ONLY ONE line under the appropriate section for changes.
+- MUST add entry for: bug fixes, new features, breaking changes, deprecations, any user-observable
+  behavior change, or items that fall under the keepachangelog categories
+- NO entry for: refactoring, test-only changes, CI/build changes, documentation updates (unless
+  user-facing docs)
+- Add ONLY ONE line under the appropriate section for changes.
 - Entries should be section-aware: For example, items under a section named "Fixed" shouldn't start
   with the word "Fixed".
 - Entries should start with a general area/scope of the progrma to which the change applies. For
