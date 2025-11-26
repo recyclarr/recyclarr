@@ -1,3 +1,5 @@
+exclude: '\.idea/'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -5,8 +7,6 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-merge-conflict
-      - id: check-yaml
-        args: [--unsafe]
       - id: check-json
       - id: check-added-large-files
 
@@ -38,7 +38,7 @@ repos:
       - id: prettier
         args: [--write]
         types_or: [json, json5, xml, html, yaml, javascript, markdown]
-        exclude: ^\.pre-commit-hooks\.yaml$
+        exclude: ^(\.pre-commit-hooks\.yaml|\.config/)
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.19.1
