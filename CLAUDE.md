@@ -49,6 +49,9 @@ Required Idioms:
 - Use `public` only for genuine external APIs
 - Concrete classes implementing public interfaces should be `internal`
 - Records for data models
+- System.Text.Json: Use `JsonSerializerOptions` for convention/style settings applied uniformly.
+  Reserve attributes (`[JsonPropertyName]`, etc.) for special cases only. Check for existing options
+  configuration before creating new instances.
 - LINQ method chaining over loops
 - LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
 - `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
@@ -121,6 +124,7 @@ Some key files and directories:
   there's no need to do `dotnet build` followed by `dotnet test`.
 - Use low-verbosity options for all tool commands. Generally, we only care about information we can
   act on (e.g. warnings, errors). Reason: Informational/debug logs consume valuable context.
+- Prioritize using Serena MCP tools for searching the code base over built-in and CLI tools.
 
 ## Scripts
 
@@ -228,3 +232,11 @@ Schema Validation (MANDATORY):
 - Settings schema: `schemas/settings-schema.json`
 - Add schema validation comment to YAML files: `# yaml-language-server:
   $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
+
+## Reference Repositories
+
+- Trash Guides: <https://github.com/TRaSH-Guides/Guides><br>
+  Houses official trash guides markdown files, and resources such as custom formats, naming, quality
+  sizes
+- Recyclarr Config Templates: <https://github.com/recyclarr/config-templates><br>
+  Contains official Recyclarr Config and Include Templates
