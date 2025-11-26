@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Sync: Custom format `includeCustomFormatWhenRenaming` property now deserializes correctly from
+  TRaSH Guides JSON files (#213).
 - Sync: Crash during quality profile and quality size operations.
 - Cache: Remove duplicate custom format ID mappings during cache cleanup to prevent downstream
   transaction processing issues.

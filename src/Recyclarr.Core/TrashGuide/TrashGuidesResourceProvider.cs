@@ -114,7 +114,7 @@ internal abstract class TrashGuidesResourceProvider
 
         var obj = JsonSerializer.Deserialize<RepoMetadata>(
             stream,
-            GlobalJsonSerializerSettings.Guide
+            GlobalJsonSerializerSettings.Metadata
         );
         if (obj is null)
         {

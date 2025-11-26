@@ -35,6 +35,16 @@ public static class GlobalJsonSerializerSettings
     public static JsonSerializerOptions Guide { get; } =
         new()
         {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+        };
+
+    /// <summary>
+    /// JSON settings used by Trash Guides metadata files.
+    /// </summary>
+    public static JsonSerializerOptions Metadata { get; } =
+        new()
+        {
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
         };
