@@ -1,0 +1,14 @@
+{
+  "json_paths": {
+    "radarr": {
+      "custom_formats": ["docs/Radarr/Custom Formats"],
+      "qualities": [],
+      "naming": []
+    },
+    "sonarr": {
+      "custom_formats": [],
+      "qualities": [],
+      "naming": []
+    }
+  }
+}

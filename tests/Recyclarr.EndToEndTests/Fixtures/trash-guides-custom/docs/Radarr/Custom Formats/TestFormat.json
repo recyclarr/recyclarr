@@ -1,0 +1,16 @@
+{
+  "trash_id": "00000000000000000000000000000001",
+  "name": "E2E-TestFormat",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "name": "E2E Test",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": false,
+      "fields": {
+        "value": "e2e"
+      }
+    }
+  ]
+}

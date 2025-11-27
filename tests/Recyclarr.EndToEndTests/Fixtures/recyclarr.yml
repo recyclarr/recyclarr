@@ -33,6 +33,7 @@ sonarr:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
+          - 00000000000000000000000000000002 # E2E-SonarrCustom
         assign_scores_to:
           - name: HD-1080p
 
@@ -72,6 +73,7 @@ radarr:
           - 9d27d9d2181838f76dee150882bdc58c # Masters of Cinema
           - db9b4c4b53d312a3ca5f1378f6440fc9 # Vinegar Syndrome
           - 957d0f44b592285f26449575e8b1167e # Special Edition
+          - 00000000000000000000000000000001 # E2E-TestFormat
         assign_scores_to:
           - name: HD-1080p
 

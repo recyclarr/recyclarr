@@ -23,44 +23,40 @@ internal class RepositoriesToResourceProvidersDeprecationCheck(ILogger log)
                 + "See: <https://recyclarr.dev/wiki/upgrade-guide/v8.0/#resource-providers>"
         );
 
-        var resourceProviders = settings.ResourceProviders;
-        var newTrashGuides = new List<IUnderlyingResourceProvider>(resourceProviders.TrashGuides);
-        var newConfigTemplates = new List<IUnderlyingResourceProvider>(
-            resourceProviders.ConfigTemplates
-        );
+        var newProviders = new List<ResourceProvider>(settings.ResourceProviders);
 
         // Transform trash_guides repository to resource provider
         if (settings.Repositories.TrashGuides.CloneUrl is not null)
         {
-            var gitSource = new GitRepositorySource
+            var gitProvider = new GitResourceProvider
             {
                 Name = "official",
+                Type = "trash-guides",
                 CloneUrl = settings.Repositories.TrashGuides.CloneUrl,
                 Reference = settings.Repositories.TrashGuides.Branch ?? "master",
+                ReplaceDefault = true,
             };
-            newTrashGuides.Add(gitSource);
+            newProviders.Add(gitProvider);
         }
 
         // Transform config_templates repository to resource provider
         if (settings.Repositories.ConfigTemplates.CloneUrl is not null)
         {
-            var gitSource = new GitRepositorySource
+            var gitProvider = new GitResourceProvider
             {
                 Name = "official",
+                Type = "config-templates",
                 CloneUrl = settings.Repositories.ConfigTemplates.CloneUrl,
                 Reference = settings.Repositories.ConfigTemplates.Branch ?? "master",
+                ReplaceDefault = true,
             };
-            newConfigTemplates.Add(gitSource);
+            newProviders.Add(gitProvider);
         }
 
         return settings with
         {
             Repositories = null, // Clear deprecated field after transformation
-            ResourceProviders = resourceProviders with
-            {
-                TrashGuides = newTrashGuides,
-                ConfigTemplates = newConfigTemplates,
-            },
+            ResourceProviders = newProviders,
         };
     }
 }

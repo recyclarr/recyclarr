@@ -11,7 +11,10 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_custom_format_radarr_score_sets()
     {
-        var reposDir = Paths.ReposDirectory.SubDirectory("trash-guides").SubDirectory("official");
+        var reposDir = Paths
+            .ReposDirectory.SubDirectory("trash-guides")
+            .SubDirectory("git")
+            .SubDirectory("official");
 
         var targetDir = reposDir
             .SubDirectory("docs")
@@ -36,7 +39,10 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     [Test]
     public async Task List_custom_format_sonarr_score_sets()
     {
-        var reposDir = Paths.ReposDirectory.SubDirectory("trash-guides").SubDirectory("official");
+        var reposDir = Paths
+            .ReposDirectory.SubDirectory("trash-guides")
+            .SubDirectory("git")
+            .SubDirectory("official");
 
         var targetDir = reposDir
             .SubDirectory("docs")
@@ -71,6 +77,7 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
         // Add naming data file at the expected path (StubRepoUpdater handles metadata.json)
         var officialRepoPath = Paths
             .ReposDirectory.SubDirectory("trash-guides")
+            .SubDirectory("git")
             .SubDirectory("official");
 
         var namingFile = officialRepoPath

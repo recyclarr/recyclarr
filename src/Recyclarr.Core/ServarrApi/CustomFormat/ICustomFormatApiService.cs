@@ -1,11 +1,11 @@
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
 public interface ICustomFormatApiService
 {
-    Task<IList<CustomFormatData>> GetCustomFormats(CancellationToken ct);
-    Task<CustomFormatData?> CreateCustomFormat(CustomFormatData cf, CancellationToken ct);
-    Task UpdateCustomFormat(CustomFormatData cf, CancellationToken ct);
+    Task<IList<CustomFormatResource>> GetCustomFormats(CancellationToken ct);
+    Task<CustomFormatResource?> CreateCustomFormat(CustomFormatResource cf, CancellationToken ct);
+    Task UpdateCustomFormat(CustomFormatResource cf, CancellationToken ct);
     Task DeleteCustomFormat(int customFormatId, CancellationToken ct);
 }

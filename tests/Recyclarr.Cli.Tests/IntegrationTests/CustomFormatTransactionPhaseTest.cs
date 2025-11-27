@@ -5,7 +5,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -44,10 +44,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatData { Name = "one" }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "one" }],
             ConfigOutput =
             [
-                new CustomFormatData
+                new CustomFormatResource
                 {
                     Name = "one",
                     TrashId = "cf1",
@@ -85,10 +85,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(new TrashIdMapping("cf1", "", 2)),
-            ApiFetchOutput = [new CustomFormatData { Name = "different2", Id = 2 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "different2", Id = 2 }],
             ConfigOutput =
             [
-                new CustomFormatData
+                new CustomFormatResource
                 {
                     Name = "different1",
                     TrashId = "cf1",
@@ -132,10 +132,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatData { Name = "different1", Id = 2 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "different1", Id = 2 }],
             ConfigOutput =
             [
-                new CustomFormatData
+                new CustomFormatResource
                 {
                     Name = "different1",
                     TrashId = "cf1",
@@ -181,8 +181,8 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Cache = CfCache.New(),
             ApiFetchOutput =
             [
-                new CustomFormatData { Name = "one", Id = 2 },
-                new CustomFormatData { Name = "two", Id = 1 },
+                new CustomFormatResource { Name = "one", Id = 2 },
+                new CustomFormatResource { Name = "two", Id = 1 },
             ],
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
@@ -220,8 +220,8 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput =
             [
-                new CustomFormatData { Name = "one", Id = 2 },
-                new CustomFormatData { Name = "two", Id = 1 },
+                new CustomFormatResource { Name = "one", Id = 2 },
+                new CustomFormatResource { Name = "two", Id = 1 },
             ],
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
@@ -259,12 +259,12 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput =
             [
-                new CustomFormatData { Name = "two", Id = 2 },
-                new CustomFormatData { Name = "one", Id = 1 },
+                new CustomFormatResource { Name = "two", Id = 2 },
+                new CustomFormatResource { Name = "one", Id = 1 },
             ],
             ConfigOutput =
             [
-                new CustomFormatData
+                new CustomFormatResource
                 {
                     Name = "one",
                     TrashId = "cf1",
@@ -308,7 +308,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatData { Name = "one", Id = 1 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 1 }],
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
@@ -340,7 +340,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
-            ApiFetchOutput = [new CustomFormatData { Name = "one", Id = 1 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 1 }],
             ConfigOutput = [NewCf.Data("one", "cf1")],
         };
 
@@ -372,7 +372,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
-            ApiFetchOutput = [new CustomFormatData { Name = "two", Id = 2 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
             ConfigOutput = [],
         };
 
@@ -404,7 +404,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
-            ApiFetchOutput = [new CustomFormatData { Name = "two", Id = 2 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
             ConfigOutput = [],
         };
 
@@ -424,7 +424,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         var context = new CustomFormatPipelineContext
         {
             Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
-            ApiFetchOutput = [new CustomFormatData { Name = "two", Id = 2 }],
+            ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
             ConfigOutput = [NewCf.Data("two", "cf2", 2)],
         };
 
@@ -457,7 +457,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     NewCustomFormats =
                     {
-                        new CustomFormatData
+                        new CustomFormatResource
                         {
                             Name = "two",
                             TrashId = "cf2",

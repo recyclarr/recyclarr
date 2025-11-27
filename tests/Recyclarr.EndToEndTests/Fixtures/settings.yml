@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
+
+# Note: paths will be replaced with absolute paths by test setup
+resource_providers:
+  - name: local-test-guides
+    type: trash-guides
+    path: PLACEHOLDER_TRASH_GUIDES_PATH
+  - name: local-sonarr-cfs
+    type: custom-formats
+    path: PLACEHOLDER_SONARR_CFS_PATH
+    service: sonarr
+  - name: local-override-guides
+    type: trash-guides
+    path: PLACEHOLDER_OVERRIDE_PATH

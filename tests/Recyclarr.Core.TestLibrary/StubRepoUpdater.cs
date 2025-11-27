@@ -1,20 +1,17 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Recyclarr.Repo;
-using Recyclarr.Settings.Models;
 using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.TestLibrary;
 
 public class StubRepoUpdater(MockFileSystem fileSystem) : IRepoUpdater
 {
-    public Task UpdateRepo(
-        IDirectoryInfo repoPath,
-        GitRepositorySource repositorySource,
-        CancellationToken token
-    )
+    public Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
-        switch (repoPath.Parent?.Name)
+        var repoPath = repositorySource.Path;
+
+        switch (repoPath.Parent?.Parent?.Name)
         {
             case "trash-guides":
                 SetupTrashGuidesRepo(repoPath);

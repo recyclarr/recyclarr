@@ -45,24 +45,23 @@ internal sealed class RepositoriesToResourceProvidersDeprecationCheckTest
 
         // Should create new resource providers
         result
-            .ResourceProviders.TrashGuides.Should()
+            .ResourceProviders.Should()
             .BeEquivalentTo([
-                new GitRepositorySource
+                new GitResourceProvider
                 {
                     Name = "official",
+                    Type = "trash-guides",
                     CloneUrl = new Uri("https://github.com/TRaSH-Guides/Guides.git"),
                     Reference = "master",
+                    ReplaceDefault = true,
                 },
-            ]);
-
-        result
-            .ResourceProviders.ConfigTemplates.Should()
-            .BeEquivalentTo([
-                new GitRepositorySource
+                new GitResourceProvider
                 {
                     Name = "official",
+                    Type = "config-templates",
                     CloneUrl = new Uri("https://github.com/recyclarr/config-templates.git"),
                     Reference = "main",
+                    ReplaceDefault = true,
                 },
             ]);
     }
@@ -83,8 +82,7 @@ internal sealed class RepositoriesToResourceProvidersDeprecationCheckTest
 
         var result = sut.Transform(settings);
 
-        result.ResourceProviders.TrashGuides.Should().BeEmpty();
-        result.ResourceProviders.ConfigTemplates.Should().BeEmpty();
+        result.ResourceProviders.Should().BeEmpty();
         result.Repositories.Should().BeNull();
     }
 }

@@ -1,12 +1,17 @@
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.TestLibrary;
 
 public static class NewCf
 {
-    public static CustomFormatData DataWithScore(string name, string trashId, int score, int id = 0)
+    public static CustomFormatResource DataWithScore(
+        string name,
+        string trashId,
+        int score,
+        int id = 0
+    )
     {
-        return new CustomFormatData
+        return new CustomFormatResource
         {
             Id = id,
             Name = name,
@@ -15,14 +20,14 @@ public static class NewCf
         };
     }
 
-    public static CustomFormatData DataWithScores(
+    public static CustomFormatResource DataWithScores(
         string name,
         string trashId,
         int id,
         params (string ScoreSet, int Score)[] scores
     )
     {
-        return new CustomFormatData
+        return new CustomFormatResource
         {
             Id = id,
             Name = name,
@@ -31,9 +36,29 @@ public static class NewCf
         };
     }
 
-    public static CustomFormatData Data(string name, string trashId, int id = 0)
+    public static CustomFormatResource Data(string name, string trashId, int id = 0)
     {
-        return new CustomFormatData
+        return new CustomFormatResource
+        {
+            Id = id,
+            Name = name,
+            TrashId = trashId,
+        };
+    }
+
+    public static RadarrCustomFormatResource RadarrData(string name, string trashId, int id = 0)
+    {
+        return new RadarrCustomFormatResource
+        {
+            Id = id,
+            Name = name,
+            TrashId = trashId,
+        };
+    }
+
+    public static SonarrCustomFormatResource SonarrData(string name, string trashId, int id = 0)
+    {
+        return new SonarrCustomFormatResource
         {
             Id = id,
             Name = name,

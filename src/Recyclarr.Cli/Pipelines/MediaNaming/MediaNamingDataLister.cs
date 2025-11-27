@@ -1,23 +1,23 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.MediaNaming;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
-internal class MediaNamingDataLister(IAnsiConsole console, IMediaNamingResourceQuery guide)
+internal class MediaNamingDataLister(IAnsiConsole console, MediaNamingResourceQuery guide)
 {
     public void ListNaming(SupportedServices serviceType)
     {
         switch (serviceType)
         {
             case SupportedServices.Radarr:
-                ListRadarrNaming(guide.GetRadarrNamingData());
+                ListRadarrNaming(guide.GetRadarr());
                 break;
 
             case SupportedServices.Sonarr:
-                ListSonarrNaming(guide.GetSonarrNamingData());
+                ListSonarrNaming(guide.GetSonarr());
                 break;
 
             default:
@@ -25,7 +25,7 @@ internal class MediaNamingDataLister(IAnsiConsole console, IMediaNamingResourceQ
         }
     }
 
-    private void ListRadarrNaming(RadarrMediaNamingData guideData)
+    private void ListRadarrNaming(RadarrMediaNamingResource guideData)
     {
         console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 
@@ -35,7 +35,7 @@ internal class MediaNamingDataLister(IAnsiConsole console, IMediaNamingResourceQ
         console.Write(DictionaryToTableRadarr("Standard Movie Format", guideData.File));
     }
 
-    private void ListSonarrNaming(SonarrMediaNamingData guideData)
+    private void ListSonarrNaming(SonarrMediaNamingResource guideData)
     {
         console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 

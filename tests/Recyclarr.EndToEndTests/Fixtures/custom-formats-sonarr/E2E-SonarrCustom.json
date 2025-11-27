@@ -1,0 +1,16 @@
+{
+  "trash_id": "00000000000000000000000000000002",
+  "name": "E2E-SonarrCustom",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "name": "E2E Sonarr Test",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": false,
+      "fields": {
+        "value": "e2e-sonarr"
+      }
+    }
+  ]
+}

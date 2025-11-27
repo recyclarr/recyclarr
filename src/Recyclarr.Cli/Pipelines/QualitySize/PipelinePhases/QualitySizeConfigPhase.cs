@@ -1,13 +1,15 @@
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 internal class QualitySizeConfigPhase(
     ILogger log,
-    IQualitySizeResourceQuery guide,
+    QualitySizeResourceQuery guide,
     IServiceConfiguration config,
     IQualityItemLimitFactory limitFactory
 ) : IPipelinePhase<QualitySizePipelineContext>
@@ -26,9 +28,16 @@ internal class QualitySizeConfigPhase(
 
         ClampPreferredRatio(configSizeData);
 
-        var guideSizeData = guide
-            .GetQualitySizeData(config.ServiceType)
-            .FirstOrDefault(x => x.Type.EqualsIgnoreCase(configSizeData.Type));
+        IEnumerable<QualitySizeResource> qualitySizes = config.ServiceType switch
+        {
+            SupportedServices.Radarr => guide.GetRadarr(),
+            SupportedServices.Sonarr => guide.GetSonarr(),
+            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
+        };
+
+        var guideSizeData = qualitySizes.LastOrDefault(x =>
+            x.Type.EqualsIgnoreCase(configSizeData.Type)
+        );
 
         if (guideSizeData == null)
         {

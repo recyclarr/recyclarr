@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 
@@ -53,7 +53,7 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCach
             .ToList();
     }
 
-    public void RemoveStale(IEnumerable<CustomFormatData> serviceCfs)
+    public void RemoveStale(IEnumerable<CustomFormatResource> serviceCfs)
     {
         cacheObject.TrashIdMappings.RemoveAll(x =>
             x.CustomFormatId == 0 || serviceCfs.All(y => y.Id != x.CustomFormatId)
@@ -72,7 +72,7 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject) : BaseCach
         cacheObject.TrashIdMappings.RemoveAll(duplicatesToRemove.Contains);
     }
 
-    public int? FindId(CustomFormatData cf)
+    public int? FindId(CustomFormatResource cf)
     {
         return cacheObject.TrashIdMappings.Find(c => c.TrashId == cf.TrashId)?.CustomFormatId;
     }

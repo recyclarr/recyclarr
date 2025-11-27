@@ -6,8 +6,8 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
-using Recyclarr.TrashGuide.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;
@@ -78,7 +78,7 @@ internal class DeleteCustomFormatsProcessor(
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     private async Task DeleteCustomFormats(
         ICustomFormatApiService api,
-        ICollection<CustomFormatData> cfs
+        ICollection<CustomFormatResource> cfs
     )
     {
         await console
@@ -110,12 +110,12 @@ internal class DeleteCustomFormatsProcessor(
             });
     }
 
-    private async Task<IList<CustomFormatData>> ObtainCustomFormats(
+    private async Task<IList<CustomFormatResource>> ObtainCustomFormats(
         ICustomFormatApiService api,
         CancellationToken ct
     )
     {
-        IList<CustomFormatData> cfs = [];
+        IList<CustomFormatResource> cfs = [];
 
         await console
             .Status()
@@ -130,12 +130,12 @@ internal class DeleteCustomFormatsProcessor(
         return cfs;
     }
 
-    private IList<CustomFormatData> ProcessManuallySpecifiedFormats(
+    private IList<CustomFormatResource> ProcessManuallySpecifiedFormats(
         IDeleteCustomFormatSettings settings,
-        IList<CustomFormatData> cfs
+        IList<CustomFormatResource> cfs
     )
     {
-        ILookup<bool, (string Name, IEnumerable<CustomFormatData> Cfs)> result = settings
+        ILookup<bool, (string Name, IEnumerable<CustomFormatResource> Cfs)> result = settings
             .CustomFormatNames.GroupJoin(
                 cfs,
                 x => x,
@@ -164,7 +164,7 @@ internal class DeleteCustomFormatsProcessor(
     }
 
     [SuppressMessage("ReSharper", "CoVariantArrayConversion")]
-    private void PrintPreview(ICollection<CustomFormatData> cfs)
+    private void PrintPreview(ICollection<CustomFormatResource> cfs)
     {
         console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");
         console.WriteLine();

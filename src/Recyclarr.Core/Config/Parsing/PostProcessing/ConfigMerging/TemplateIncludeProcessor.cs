@@ -1,11 +1,12 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ConfigTemplates;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-public class TemplateIncludeProcessor(IConfigIncludesResourceQuery includes) : IIncludeProcessor
+public class TemplateIncludeProcessor(ConfigIncludesResourceQuery includes) : IIncludeProcessor
 {
     public IFileInfo GetPathToConfig(IYamlInclude includeDirective, SupportedServices serviceType)
     {
@@ -16,10 +17,16 @@ public class TemplateIncludeProcessor(IConfigIncludesResourceQuery includes) : I
             throw new YamlIncludeException("`template` property is required.");
         }
 
-        var includePath = includes
-            .GetIncludes()
-            .Where(x => x.Service == serviceType)
-            .FirstOrDefault(x => x.Id.EqualsIgnoreCase(include.Template));
+        IEnumerable<ConfigIncludeResource> includesForService = serviceType switch
+        {
+            SupportedServices.Radarr => includes.GetRadarr(),
+            SupportedServices.Sonarr => includes.GetSonarr(),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
+        };
+
+        var includePath = includesForService.LastOrDefault(x =>
+            x.Id.EqualsIgnoreCase(include.Template)
+        );
 
         if (includePath is null)
         {

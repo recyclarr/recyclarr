@@ -73,6 +73,15 @@ public abstract class IntegrationTestFixture : IDisposable
             // By default, choose some extremely high number so that all the newest features are enabled.
             m.GetVersion(CancellationToken.None).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
         });
+
+        // Create empty settings.yml to avoid SettingsLoader creating one and triggering YAML errors
+        Fs.AddFile(
+            Fs.Path.Combine(
+                Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName,
+                "settings.yml"
+            ),
+            new MockFileData("# Empty settings for tests\n")
+        );
     }
 
     [SetUp]

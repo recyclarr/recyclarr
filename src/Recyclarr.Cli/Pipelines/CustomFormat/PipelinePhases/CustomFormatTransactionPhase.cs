@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
@@ -60,8 +60,8 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
     }
 
     private void ProcessExistingCf(
-        CustomFormatData guideCf,
-        CustomFormatData serviceCf,
+        CustomFormatResource guideCf,
+        CustomFormatResource serviceCf,
         CustomFormatTransactionData transactions
     )
     {
@@ -102,8 +102,8 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
     }
 
     private static void AddUpdatedCustomFormat(
-        CustomFormatData guideCf,
-        CustomFormatData serviceCf,
+        CustomFormatResource guideCf,
+        CustomFormatResource serviceCf,
         CustomFormatTransactionData transactions
     )
     {
@@ -117,16 +117,16 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         }
     }
 
-    private static CustomFormatData? FindServiceCfByName(
-        IEnumerable<CustomFormatData> serviceCfs,
+    private static CustomFormatResource? FindServiceCfByName(
+        IEnumerable<CustomFormatResource> serviceCfs,
         string cfName
     )
     {
         return serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Name));
     }
 
-    private static CustomFormatData? FindServiceCfById(
-        IEnumerable<CustomFormatData> serviceCfs,
+    private static CustomFormatResource? FindServiceCfById(
+        IEnumerable<CustomFormatResource> serviceCfs,
         int cfId
     )
     {

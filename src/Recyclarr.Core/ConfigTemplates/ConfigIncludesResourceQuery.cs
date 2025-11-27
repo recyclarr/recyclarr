@@ -1,15 +1,37 @@
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.ResourceProviders.Infrastructure;
+
 namespace Recyclarr.ConfigTemplates;
 
-public class ConfigIncludesResourceQuery(
-    IEnumerable<IConfigIncludesResourceProvider> includesProviders
-) : IConfigIncludesResourceQuery
+public class ConfigIncludesResourceQuery(ResourceRegistry<TemplateMetadata> registry)
 {
-    private readonly Lazy<IReadOnlyCollection<TemplatePath>> _includesCache = new(() =>
-        includesProviders
-            .SelectMany(provider => provider.GetIncludes())
-            .DistinctBy(t => t.Id) // First occurrence wins precedence
-            .ToList()
-    );
+    public IReadOnlyCollection<RadarrConfigIncludeResource> GetRadarr()
+    {
+        var metadata = registry.Get<RadarrConfigIncludeResource>();
+        return metadata
+            .Select(m => new RadarrConfigIncludeResource
+            {
+                Id = m.Id,
+                TemplateFile = m.TemplateFile,
+                Hidden = m.Hidden,
+            })
+            .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.Last())
+            .ToList();
+    }
 
-    public IReadOnlyCollection<TemplatePath> GetIncludes() => _includesCache.Value;
+    public IReadOnlyCollection<SonarrConfigIncludeResource> GetSonarr()
+    {
+        var metadata = registry.Get<SonarrConfigIncludeResource>();
+        return metadata
+            .Select(m => new SonarrConfigIncludeResource
+            {
+                Id = m.Id,
+                TemplateFile = m.TemplateFile,
+                Hidden = m.Hidden,
+            })
+            .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.Last())
+            .ToList();
+    }
 }

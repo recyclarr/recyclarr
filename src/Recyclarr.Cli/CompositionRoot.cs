@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
@@ -16,6 +17,7 @@ using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Logging;
+using Recyclarr.ResourceProviders;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -35,10 +37,10 @@ internal static class CompositionRoot
 
         builder.RegisterModule<CoreAutofacModule>();
         builder.RegisterModule<PipelineAutofacModule>();
+        builder.RegisterModule<ResourceProviderAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
-        builder.RegisterType<ConsoleGitRepositoryInitializer>();
 
         CliRegistrations(builder);
         RegisterMigrations(builder);
@@ -110,6 +112,7 @@ internal static class CompositionRoot
             .OrderByRegistration();
 
         builder.RegisterType<RecyclarrConsoleSettings>();
+        builder.RegisterType<ProviderProgressHandler>();
     }
 
     private static void RegisterConfigServices(ContainerBuilder builder)

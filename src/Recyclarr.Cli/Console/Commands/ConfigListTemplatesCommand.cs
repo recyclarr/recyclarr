@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
@@ -12,7 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List local configuration files.")]
 internal class ConfigListTemplatesCommand(
     ConfigListTemplateProcessor processor,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
+    ProviderProgressHandler providerProgressHandler,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
@@ -34,7 +35,7 @@ internal class ConfigListTemplatesCommand(
     )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

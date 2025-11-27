@@ -3,12 +3,13 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatConfigPhase(
-    ICustomFormatsResourceQuery guide,
+    CustomFormatResourceQuery guide,
     ProcessedCustomFormatCache cache,
     ICachePersister<CustomFormatCache> cachePersister,
     IServiceConfiguration config
@@ -17,7 +18,12 @@ internal class CustomFormatConfigPhase(
     public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
         // Get custom format data with precedence-based provider handling
-        var formatDataResult = guide.GetCustomFormatData(config.ServiceType);
+        IEnumerable<CustomFormatResource> customFormats = config.ServiceType switch
+        {
+            SupportedServices.Radarr => guide.GetRadarr(),
+            SupportedServices.Sonarr => guide.GetSonarr(),
+            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
+        };
 
         // Match custom formats in the YAML config to those in the guide, by Trash ID
         //
@@ -30,7 +36,7 @@ internal class CustomFormatConfigPhase(
             .CustomFormats.SelectMany(x => x.TrashIds)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .GroupJoin(
-                formatDataResult.CustomFormats,
+                customFormats,
                 x => x,
                 x => x.TrashId,
                 (id, cf) => (Id: id, CustomFormats: cf)

@@ -1,5 +1,5 @@
 using Flurl.Http;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
@@ -10,22 +10,22 @@ public class CustomFormatApiService(IServarrRequestBuilder service) : ICustomFor
         return service.Request(["customformat", .. path]);
     }
 
-    public async Task<IList<CustomFormatData>> GetCustomFormats(CancellationToken ct)
+    public async Task<IList<CustomFormatResource>> GetCustomFormats(CancellationToken ct)
     {
-        return await Request().GetJsonAsync<IList<CustomFormatData>>(cancellationToken: ct);
+        return await Request().GetJsonAsync<IList<CustomFormatResource>>(cancellationToken: ct);
     }
 
-    public async Task<CustomFormatData?> CreateCustomFormat(
-        CustomFormatData cf,
+    public async Task<CustomFormatResource?> CreateCustomFormat(
+        CustomFormatResource cf,
         CancellationToken ct
     )
     {
         return await Request()
             .PostJsonAsync(cf, cancellationToken: ct)
-            .ReceiveJson<CustomFormatData>();
+            .ReceiveJson<CustomFormatResource>();
     }
 
-    public async Task UpdateCustomFormat(CustomFormatData cf, CancellationToken ct)
+    public async Task UpdateCustomFormat(CustomFormatResource cf, CancellationToken ct)
     {
         await Request(cf.Id).PutJsonAsync(cf, cancellationToken: ct);
     }

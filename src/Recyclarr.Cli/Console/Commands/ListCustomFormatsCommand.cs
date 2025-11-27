@@ -16,7 +16,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List custom formats in the guide for a particular service.")]
 internal class ListCustomFormatsCommand(
     CustomFormatDataLister lister,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
+    ProviderProgressHandler providerProgressHandler,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
@@ -43,7 +43,7 @@ internal class ListCustomFormatsCommand(
     )
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
         lister.List(outputSettings, settings);
         return (int)ExitStatus.Succeeded;
     }

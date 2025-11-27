@@ -1,7 +1,5 @@
-using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Settings.Models;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Repo;
@@ -13,11 +11,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         return Regex.IsMatch(reference, @"^[0-9a-f]{7,40}$", RegexOptions.IgnoreCase);
     }
 
-    public async Task UpdateRepo(
-        IDirectoryInfo repoPath,
-        GitRepositorySource repositorySource,
-        CancellationToken token
-    )
+    public async Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
         // Assume failure until it succeeds, to simplify the catch handlers.
         var succeeded = false;
@@ -26,7 +20,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         // fresh.
         try
         {
-            await CheckoutAndUpdateRepo(repoPath, repositorySource, token);
+            await CheckoutAndUpdateRepo(repositorySource, token);
             succeeded = true;
         }
         catch (GitCmdException e)
@@ -41,13 +35,12 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         if (!succeeded)
         {
             log.Warning("Deleting local git repo and retrying git operation due to error");
-            repoPath.DeleteReadOnlyDirectory();
-            await CheckoutAndUpdateRepo(repoPath, repositorySource, token);
+            repositorySource.Path.DeleteReadOnlyDirectory();
+            await CheckoutAndUpdateRepo(repositorySource, token);
         }
     }
 
     private async Task CheckoutAndUpdateRepo(
-        IDirectoryInfo repoPath,
         GitRepositorySource repositorySource,
         CancellationToken token
     )
@@ -59,7 +52,7 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
 
         using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
             cloneUrl,
-            repoPath,
+            repositorySource.Path,
             reference,
             token
         );

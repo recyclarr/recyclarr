@@ -8,29 +8,42 @@ namespace Recyclarr.Cli.Processors.Config;
 
 internal class ConfigListTemplateProcessor(
     IAnsiConsole console,
-    IConfigTemplatesResourceQuery templatesService,
-    IConfigIncludesResourceQuery includesService
+    ConfigTemplatesResourceQuery templatesService,
+    ConfigIncludesResourceQuery includesService
 )
 {
     public void Process(IConfigListTemplatesSettings settings)
     {
         if (settings.Includes)
         {
-            ListData(includesService.GetIncludes());
+            ListIncludes();
             return;
         }
 
-        ListData(templatesService.GetTemplates());
+        ListTemplates();
     }
 
-    private void ListData(IReadOnlyCollection<TemplatePath> data)
+    private void ListIncludes()
     {
         var table = new Table();
         var empty = new Markup("");
 
-        var sonarrRowItems = RenderTemplates(table, data, SupportedServices.Sonarr);
-        var radarrRowItems = RenderTemplates(table, data, SupportedServices.Radarr);
-        var items = sonarrRowItems.ZipLongest(radarrRowItems, (s, r) => (s ?? empty, r ?? empty));
+        var sonarrIncludes = includesService
+            .GetSonarr()
+            .Where(x => !x.Hidden)
+            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+            .ToList();
+
+        var radarrIncludes = includesService
+            .GetRadarr()
+            .Where(x => !x.Hidden)
+            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+            .ToList();
+
+        table.AddColumn(SupportedServices.Sonarr.ToString());
+        table.AddColumn(SupportedServices.Radarr.ToString());
+
+        var items = sonarrIncludes.ZipLongest(radarrIncludes, (s, r) => (s ?? empty, r ?? empty));
 
         foreach (var (s, r) in items)
         {
@@ -40,19 +53,33 @@ internal class ConfigListTemplateProcessor(
         console.Write(table);
     }
 
-    private static List<Markup> RenderTemplates(
-        Table table,
-        IEnumerable<TemplatePath> templatePaths,
-        SupportedServices service
-    )
+    private void ListTemplates()
     {
-        var paths = templatePaths
-            .Where(x => x.Service == service && !x.Hidden)
+        var table = new Table();
+        var empty = new Markup("");
+
+        var sonarrTemplates = templatesService
+            .GetSonarr()
+            .Where(x => !x.Hidden)
             .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
             .ToList();
 
-        table.AddColumn(service.ToString());
+        var radarrTemplates = templatesService
+            .GetRadarr()
+            .Where(x => !x.Hidden)
+            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+            .ToList();
 
-        return paths;
+        table.AddColumn(SupportedServices.Sonarr.ToString());
+        table.AddColumn(SupportedServices.Radarr.ToString());
+
+        var items = sonarrTemplates.ZipLongest(radarrTemplates, (s, r) => (s ?? empty, r ?? empty));
+
+        foreach (var (s, r) in items)
+        {
+            table.AddRow(s, r);
+        }
+
+        console.Write(table);
     }
 }

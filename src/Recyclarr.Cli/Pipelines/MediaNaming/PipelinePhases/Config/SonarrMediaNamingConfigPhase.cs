@@ -1,6 +1,6 @@
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.MediaNaming;
-using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
@@ -8,11 +8,11 @@ internal class SonarrMediaNamingConfigPhase(SonarrConfiguration config)
     : IServiceBasedMediaNamingConfigPhase
 {
     public Task<MediaNamingDto> ProcessNaming(
-        IMediaNamingResourceQuery guide,
+        MediaNamingResourceQuery guide,
         NamingFormatLookup lookup
     )
     {
-        var guideData = guide.GetSonarrNamingData();
+        var guideData = guide.GetSonarr();
         var configData = config.MediaNaming;
         const string keySuffix = ":4";
 

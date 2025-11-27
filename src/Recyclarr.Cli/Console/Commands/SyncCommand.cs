@@ -14,7 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [UsedImplicitly]
 internal class SyncCommand(
     MigrationExecutor migration,
-    ConsoleGitRepositoryInitializer gitRepositoryInitializer,
+    ProviderProgressHandler providerProgressHandler,
     SyncProcessor syncProcessor,
     RecyclarrConsoleSettings consoleSettings
 ) : AsyncCommand<SyncCommand.CliSettings>
@@ -65,7 +65,7 @@ internal class SyncCommand(
         migration.CheckNeededMigrations();
 
         var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await gitRepositoryInitializer.InitializeGitRepositories(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
 
         return (int)await syncProcessor.Process(settings, ct);
     }

@@ -1,9 +1,9 @@
 using Autofac.Features.Indexed;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
@@ -17,7 +17,7 @@ internal record ProcessedNamingConfig
 
 internal class MediaNamingConfigPhase(
     ILogger log,
-    IMediaNamingResourceQuery guide,
+    MediaNamingResourceQuery guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
     IServiceConfiguration config
 ) : IPipelinePhase<MediaNamingPipelineContext>

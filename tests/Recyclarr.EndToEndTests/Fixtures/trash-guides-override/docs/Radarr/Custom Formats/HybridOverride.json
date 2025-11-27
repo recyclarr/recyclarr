@@ -1,0 +1,16 @@
+{
+  "trash_id": "0f12c086e289cf966fa5948eac571f44",
+  "name": "Hybrid-OVERRIDE",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "name": "Hybrid Override Test",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": false,
+      "fields": {
+        "value": "hybrid-override"
+      }
+    }
+  ]
+}

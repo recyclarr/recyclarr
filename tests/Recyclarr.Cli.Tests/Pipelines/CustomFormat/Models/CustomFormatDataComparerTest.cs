@@ -1,15 +1,16 @@
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 
-internal sealed class CustomFormatDataComparerTest
+internal sealed class CustomFormatResourceComparerTest
 {
     [Test]
     public void Custom_formats_equal()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
-        var b = CreateMockCustomFormatData();
+        var b = CreateMockCustomFormatResource();
 
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
@@ -17,9 +18,9 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Custom_formats_not_equal_when_field_value_different()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
-        var b = CreateMockCustomFormatData() with
+        var b = CreateMockCustomFormatResource() with
         {
             Specifications = a
                 .Specifications.Select(spec =>
@@ -37,14 +38,14 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Equal_when_ignored_fields_are_different()
     {
-        var a = new CustomFormatData
+        var a = new CustomFormatResource
         {
             TrashId = "a",
             TrashScores = { ["default"] = 1 },
             Category = "one",
         };
 
-        var b = new CustomFormatData
+        var b = new CustomFormatResource
         {
             TrashId = "b",
             TrashScores = { ["default"] = 2 },
@@ -57,8 +58,8 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Not_equal_when_right_is_null()
     {
-        var a = new CustomFormatData();
-        CustomFormatData? b = null;
+        var a = new CustomFormatResource();
+        CustomFormatResource? b = null;
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
@@ -66,8 +67,8 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Not_equal_when_left_is_null()
     {
-        CustomFormatData? a = null;
-        var b = new CustomFormatData();
+        CustomFormatResource? a = null;
+        var b = new CustomFormatResource();
 
         a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
@@ -75,7 +76,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Equal_for_same_reference()
     {
-        var a = new CustomFormatData();
+        var a = new CustomFormatResource();
 
         a.Should().BeEquivalentTo(a, o => o.ComparingRecordsByValue());
     }
@@ -83,7 +84,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Not_equal_when_different_spec_count()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
         var b = a with
         {
@@ -98,7 +99,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Not_equal_when_non_matching_spec_names()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
         var b = a with
         {
@@ -118,7 +119,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Not_equal_when_different_spec_names_and_values()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
         var b = a with
         {
             Specifications = a
@@ -145,7 +146,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Equal_when_different_field_counts_but_same_names_and_values()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
         var b = a with
         {
             Specifications = a
@@ -172,7 +173,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Equal_when_specifications_order_different()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
         var b = a with { Specifications = a.Specifications.Reverse().ToList() };
 
@@ -182,7 +183,7 @@ internal sealed class CustomFormatDataComparerTest
     [Test]
     public void Equal_when_fields_order_different_for_each_specification()
     {
-        var a = CreateMockCustomFormatData();
+        var a = CreateMockCustomFormatResource();
 
         var b = a with
         {
@@ -199,7 +200,6 @@ internal sealed class CustomFormatDataComparerTest
         a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
     }
 
-    [TestCase(typeof(CustomFormatData))]
     [TestCase(typeof(CustomFormatSpecificationData))]
     public void Throws_exception_when_used_as_key_in_dictionary(Type type)
     {
@@ -209,7 +209,6 @@ internal sealed class CustomFormatDataComparerTest
         act.Should().Throw<NotImplementedException>();
     }
 
-    [TestCase(typeof(CustomFormatData))]
     [TestCase(typeof(CustomFormatSpecificationData))]
     public void Throws_exception_when_used_as_key_in_hash_set(Type type)
     {
@@ -218,9 +217,9 @@ internal sealed class CustomFormatDataComparerTest
         act.Should().Throw<NotImplementedException>();
     }
 
-    private static CustomFormatData CreateMockCustomFormatData()
+    private static CustomFormatResource CreateMockCustomFormatResource()
     {
-        return new CustomFormatData
+        return new CustomFormatResource
         {
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,

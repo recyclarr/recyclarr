@@ -5,7 +5,7 @@ public record RecyclarrSettings
 {
     // Replaced by ResourceProviders
     public Repositories? Repositories { get; init; }
-    public ResourceProviderSettings ResourceProviders { get; init; } = new();
+    public IReadOnlyCollection<ResourceProvider> ResourceProviders { get; init; } = [];
     public bool EnableSslCertificateValidation { get; init; } = true;
     public LogJanitorSettings LogJanitor { get; init; } = new();
     public string? GitPath { get; init; }

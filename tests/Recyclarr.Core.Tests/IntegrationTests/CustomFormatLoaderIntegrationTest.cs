@@ -1,30 +1,26 @@
 using System.IO.Abstractions;
 using System.Text.Json;
-using Autofac;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.TestLibrary.Autofac;
-using Recyclarr.TrashGuide.CustomFormat;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
 internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
 {
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-        builder.RegisterMockFor<ICustomFormatCategoryParser>();
-    }
-
     [Test]
-    public void Get_custom_format_json_works()
+    public void Load_custom_format_json_works()
     {
-        var sut = Resolve<CustomFormatLoader>();
+        var sut = Resolve<JsonResourceLoader>();
         Fs.AddFile("first.json", new MockFileData("""{"name":"first","trash_id":"1"}"""));
         Fs.AddFile("second.json", new MockFileData("""{"name":"second","trash_id":"2"}"""));
-        Fs.AddFile("collection_of_cfs.md", new MockFileData(""));
 
-        var dir = Fs.CurrentDirectory();
-        var results = sut.LoadAllCustomFormatsAtPaths([dir], dir.File("collection_of_cfs.md"));
+        var files = new[]
+        {
+            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "first.json")),
+            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "second.json")),
+        };
+
+        var results = sut.Load<CustomFormatResource>(files).Select(t => t.Resource).ToList();
 
         results
             .Should()
@@ -32,26 +28,5 @@ internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
                 [NewCf.Data("first", "1"), NewCf.Data("second", "2")],
                 o => o.Excluding(x => x.Type == typeof(JsonElement))
             );
-    }
-
-    [Test]
-    public void Categorize_by_file_name()
-    {
-        var categoryParser = Resolve<ICustomFormatCategoryParser>();
-        categoryParser
-            .Parse(default!)
-            .ReturnsForAnyArgs([
-                new CustomFormatCategoryItem("Streaming Services", "iTunes", "iT"),
-            ]);
-
-        Fs.AddFile("it.json", new MockFileData("""{"name":"iT"}"""));
-        Fs.AddEmptyFile("collection_of_cfs.md");
-
-        var sut = Resolve<CustomFormatLoader>();
-
-        var dir = Fs.CurrentDirectory();
-        var results = sut.LoadAllCustomFormatsAtPaths([dir], dir.File("collection_of_cfs.md"));
-
-        results.Should().ContainSingle().Which.Category.Should().Be("Streaming Services");
     }
 }
