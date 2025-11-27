@@ -5,7 +5,11 @@
       "label": "build",
       "type": "process",
       "command": "dotnet",
-      "args": ["build", "-property:GenerateFullPaths=true", "-consoleLoggerParameters:NoSummary"],
+      "args": [
+        "build",
+        "-property:GenerateFullPaths=true",
+        "-consoleLoggerParameters:NoSummary"
+      ],
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "build",
@@ -46,7 +50,11 @@
       "label": "test",
       "type": "process",
       "command": "dotnet",
-      "args": ["test", "-property:GenerateFullPaths=true", "-consoleLoggerParameters:NoSummary"],
+      "args": [
+        "test",
+        "-property:GenerateFullPaths=true",
+        "-consoleLoggerParameters:NoSummary"
+      ],
       "problemMatcher": "$msCompile",
       "group": {
         "kind": "test",
