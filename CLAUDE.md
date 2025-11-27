@@ -74,6 +74,11 @@ Core Mandates:
   brittle and result in more meaningful tests.
 - Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Stubs for
   external dependencies at a high level, with real objects in the center.
+- NEVER make a class or method `virtual` just to enable mocking with NSubstitute. If you encounter a
+  test that attempts to mock a concrete type and fails, STOP and evaluate: Is the mock even
+  necessary? Should you use the real object instead? Is the test verifying behavior or
+  implementation details? Is the test even valid? The answer is almost always to restructure the
+  test or use real objects, not to modify production code for testability.
 - Integration test fixtures MUST derive from one of the base test fixture classes:
   - `IntegrationTestFixture`: Integration tests for the Recyclarr.Core library.
   - `CliIntegrationTestFixture`: Integration tests for the Recyclarr.Cli library.
@@ -102,6 +107,7 @@ Patterns:
 - `tests/`: All C# unit and integration tests
 - `ci/`: contains scripts and other utilities utilized by github workflows
 - `.github/`: contains actions and workflows for Github
+- `docs`: Documentation for `architecture`, `decisions` (ADRs), `reference` (external info)
 
 Some key files and directories:
 
@@ -124,7 +130,15 @@ Some key files and directories:
   there's no need to do `dotnet build` followed by `dotnet test`.
 - Use low-verbosity options for all tool commands. Generally, we only care about information we can
   act on (e.g. warnings, errors). Reason: Informational/debug logs consume valuable context.
+
+### Serena
+
 - Prioritize using Serena MCP tools for searching the code base over built-in and CLI tools.
+- Never read files under the `.serena` directory directly; those are working files for the Serena
+  MCP tools.
+- Serena memories persist project knowledge across sessions. Check list_memories when starting work
+  on unfamiliar areas. Consider creating memories when discovering non-obvious architectural
+  decisions or gotchas.
 
 ## Scripts
 
@@ -177,7 +191,8 @@ file path-based classification:
 - `ci:` → `.github/workflows/**`, `ci/*`, `scripts/*`
 - `build:` → `*.props`, `*.csproj`, `*.slnx`, `Directory.*`, `.config/dotnet-tools.json`
 - `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.gitignore`, `.csharpierignore`,
-  `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`
+  `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`,
+  `schemas/*`
 - `test:` → `tests/**/*.cs`, `tests/**/*.csproj`, `tests/**/Data/**`, `tests/**/*.md`
 - `docs:` → Top-level `*.md` (exclude `tests/**/*.md`), `docs/**`, `LICENSE`, `CODEOWNERS`,
   `SECURITY.md`
@@ -191,7 +206,6 @@ file path-based classification:
 
 **Breaking changes (!:):**
 
-- YAML schema property removals in `schemas/**/*.json`
 - CHANGELOG "Removed" section entries
 - Settings migration in `Settings/Deprecations/`
 
