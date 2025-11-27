@@ -14,8 +14,7 @@ internal static class SettingsExtensions
             .Register(c =>
             {
                 var provider = c.Resolve<SettingsProvider>();
-                var settings = settingsSelector(provider.Settings);
-                return new Settings<TSettings>(settings);
+                return new Settings<TSettings>(() => settingsSelector(provider.Settings));
             })
             .As<ISettings<TSettings>>()
             .SingleInstance();

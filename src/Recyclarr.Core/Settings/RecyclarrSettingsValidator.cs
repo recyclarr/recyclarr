@@ -64,35 +64,40 @@ public class ResourceProviderValidator : AbstractValidator<ResourceProvider>
             .NotEmpty()
             .WithMessage("Provider name is required")
             .Matches("^[a-zA-Z0-9_-]+$")
-            .WithMessage(
-                "Provider name must contain only letters, numbers, hyphens, and underscores"
+            .WithMessage(x =>
+                $"Provider '{x.Name}': name must contain only letters, numbers, hyphens, and underscores"
             );
 
         RuleFor(x => x.Type)
             .NotEmpty()
-            .WithMessage("Provider type is required")
+            .WithMessage(x => $"Provider '{x.Name}': type is required")
             .Must(type => type is "trash-guides" or "config-templates" or "custom-formats")
-            .WithMessage(
-                "Provider type must be one of: trash-guides, config-templates, custom-formats"
+            .WithMessage(x =>
+                $"Provider '{x.Name}': type must be one of: trash-guides, config-templates, custom-formats"
             );
 
-        // Service required for custom-formats, not allowed otherwise
         When(
                 x => x.Type == "custom-formats",
                 () =>
                 {
                     RuleFor(x => x.Service)
                         .NotEmpty()
-                        .WithMessage("Service is required for custom-formats providers")
+                        .WithMessage(x =>
+                            $"Provider '{x.Name}': service is required for custom-formats providers"
+                        )
                         .Must(service => service is "radarr" or "sonarr")
-                        .WithMessage("Service must be either 'radarr' or 'sonarr'");
+                        .WithMessage(x =>
+                            $"Provider '{x.Name}': service must be either 'radarr' or 'sonarr'"
+                        );
                 }
             )
             .Otherwise(() =>
             {
                 RuleFor(x => x.Service)
                     .Empty()
-                    .WithMessage("Service field is only allowed for custom-formats providers");
+                    .WithMessage(x =>
+                        $"Provider '{x.Name}': service field is only allowed for custom-formats providers"
+                    );
             });
     }
 }
@@ -104,7 +109,7 @@ public class GitResourceProviderValidator : AbstractValidator<GitResourceProvide
         RuleFor(x => x.CloneUrl)
             .NotNull()
             .Must(uri => uri.IsAbsoluteUri && uri.Scheme is "http" or "https")
-            .WithMessage("Provider clone URL must be a valid HTTP/HTTPS URL");
+            .WithMessage(x => $"Provider '{x.Name}': clone_url must be a valid HTTP/HTTPS URL");
     }
 }
 
@@ -112,7 +117,7 @@ public class LocalResourceProviderValidator : AbstractValidator<LocalResourcePro
 {
     public LocalResourceProviderValidator()
     {
-        RuleFor(x => x.Path).NotEmpty().WithMessage("Provider path is required");
+        RuleFor(x => x.Path).NotEmpty().WithMessage(x => $"Provider '{x.Name}': path is required");
     }
 }
 
