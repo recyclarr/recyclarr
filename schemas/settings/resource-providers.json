@@ -1,62 +1,87 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings/resource-providers.json",
-  "type": "object",
-  "additionalProperties": false,
-  "title": "Set up resource providers for various content types",
-  "properties": {
-    "trash_guides": {
-      "$ref": "#/definitions/provider_array",
-      "title": "Resource providers for the Trash Guides"
-    },
-    "config_templates": {
-      "$ref": "#/definitions/provider_array",
-      "title": "Resource providers for the Recyclarr Config Templates"
-    }
-  },
+  "title": "Resource provider configuration",
+  "oneOf": [
+    { "$ref": "#/definitions/git_provider" },
+    { "$ref": "#/definitions/local_provider" }
+  ],
   "definitions": {
-    "provider_array": {
-      "type": "array",
-      "items": {
-        "oneOf": [
-          { "$ref": "#/definitions/git_repository" },
-          { "$ref": "#/definitions/local_path" }
-        ]
-      }
-    },
-    "git_repository": {
+    "base_provider": {
       "type": "object",
-      "required": ["clone_url", "name"],
-      "additionalProperties": false,
+      "required": ["name", "type"],
       "properties": {
-        "clone_url": {
-          "type": "string",
-          "title": "Git clone URL for the repository",
-          "format": "uri"
-        },
         "name": {
           "type": "string",
-          "title": "Required name used to uniquely identify this repository.",
-          "description": "May only contain letters, numbers, hyphens, and underscores. Must be unique across all resource providers for a single content type",
+          "title": "Unique identifier for this provider",
+          "description": "Must be globally unique across all providers. Used for directory naming. May only contain letters, numbers, hyphens, and underscores.",
           "pattern": "^[a-zA-Z0-9_-]+$"
         },
-        "reference": {
+        "type": {
           "type": "string",
-          "title": "Optional branch name or SHA1 commit hash to check out"
+          "title": "Provider type indicating content structure",
+          "enum": ["trash-guides", "config-templates", "custom-formats"]
+        },
+        "replace_default": {
+          "type": "boolean",
+          "title": "Replace implicit official provider for this type",
+          "description": "When true, prevents injection of implicit official provider. Only one provider per type can have this set to true.",
+          "default": false
+        },
+        "service": {
+          "type": "string",
+          "title": "Service this provider targets (required for custom-formats type)",
+          "description": "Specifies which service (Radarr or Sonarr) these resources are for. Required when type is 'custom-formats'.",
+          "enum": ["radarr", "sonarr"]
         }
       }
     },
-    "local_path": {
-      "type": "object",
-      "required": ["path"],
-      "additionalProperties": false,
-      "properties": {
-        "path": {
-          "type": "string",
-          "title": "Local directory path containing trash guides structure",
-          "description": "Path to a local directory that contains a metadata.json file and follows the TRaSH Guides directory structure"
+    "git_provider": {
+      "allOf": [
+        { "$ref": "#/definitions/base_provider" },
+        {
+          "type": "object",
+          "required": ["clone_url"],
+          "additionalProperties": false,
+          "properties": {
+            "name": true,
+            "type": true,
+            "replace_default": true,
+            "service": true,
+            "clone_url": {
+              "type": "string",
+              "title": "Git clone URL for the repository",
+              "format": "uri"
+            },
+            "reference": {
+              "type": "string",
+              "title": "Branch name, tag, or SHA1 commit hash to check out",
+              "default": "master"
+            }
+          }
         }
-      }
+      ]
+    },
+    "local_provider": {
+      "allOf": [
+        { "$ref": "#/definitions/base_provider" },
+        {
+          "type": "object",
+          "required": ["path"],
+          "additionalProperties": false,
+          "properties": {
+            "name": true,
+            "type": true,
+            "replace_default": true,
+            "service": true,
+            "path": {
+              "type": "string",
+              "title": "Local directory path",
+              "description": "For trash-guides/config-templates: directory containing metadata.json. For custom-formats: flat directory of CF JSON files."
+            }
+          }
+        }
+      ]
     }
   }
 }

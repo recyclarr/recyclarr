@@ -35,7 +35,12 @@
       "$ref": "settings/notifications.json"
     },
     "resource_providers": {
-      "$ref": "settings/resource-providers.json"
+      "type": "array",
+      "title": "Resource providers for various content types",
+      "description": "Flat list of resource providers with explicit precedence (bottom-up: last provider wins for duplicate resources)",
+      "items": {
+        "$ref": "settings/resource-providers.json"
+      }
     }
   }
 }
