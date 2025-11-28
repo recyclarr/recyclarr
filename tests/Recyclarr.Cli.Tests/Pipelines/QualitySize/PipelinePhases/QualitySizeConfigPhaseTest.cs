@@ -12,6 +12,7 @@ using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
+using Serilog;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
@@ -192,7 +193,8 @@ internal sealed class QualitySizeConfigPhaseTest
         registry.Register<SonarrQualitySizeResource>(sonarrFiles);
 
         var loader = new JsonResourceLoader(fs);
-        return new QualitySizeResourceQuery(registry, loader);
+        var log = Substitute.For<ILogger>();
+        return new QualitySizeResourceQuery(registry, loader, log);
     }
 
     private static string SerializeResource(QualitySizeResource resource)

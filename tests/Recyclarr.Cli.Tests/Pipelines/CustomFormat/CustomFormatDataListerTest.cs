@@ -56,9 +56,10 @@ internal sealed class CustomFormatDataListerTest
         categoryRegistry.Register<RadarrCategoryMarkdownResource>([]);
         categoryRegistry.Register<SonarrCategoryMarkdownResource>([]);
         var categoryParser = Substitute.For<ICustomFormatCategoryParser>();
-        var categoryQuery = new CategoryResourceQuery(categoryRegistry, categoryParser);
+        var log = Substitute.For<ILogger>();
+        var categoryQuery = new CategoryResourceQuery(categoryRegistry, categoryParser, log);
 
-        var guide = new CustomFormatResourceQuery(registry, loader, categoryQuery);
+        var guide = new CustomFormatResourceQuery(registry, loader, categoryQuery, log);
         var sut = new CustomFormatDataLister(console, guide);
 
         settings.ScoreSets.Returns(false);

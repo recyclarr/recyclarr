@@ -2,23 +2,31 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide.CustomFormat;
+using Serilog;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
 public class CustomFormatResourceQuery(
     ResourceRegistry<IFileInfo> registry,
     JsonResourceLoader loader,
-    CategoryResourceQuery categoryQuery
+    CategoryResourceQuery categoryQuery,
+    ILogger log
 )
 {
     public IReadOnlyList<RadarrCustomFormatResource> GetRadarr()
     {
-        return GetCustomFormats<RadarrCustomFormatResource>(categoryQuery.GetRadarr());
+        log.Debug("CustomFormat: Querying Radarr custom formats");
+        var result = GetCustomFormats<RadarrCustomFormatResource>(categoryQuery.GetRadarr());
+        log.Debug("CustomFormat: Retrieved {Count} Radarr custom formats", result.Count);
+        return result;
     }
 
     public IReadOnlyList<SonarrCustomFormatResource> GetSonarr()
     {
-        return GetCustomFormats<SonarrCustomFormatResource>(categoryQuery.GetSonarr());
+        log.Debug("CustomFormat: Querying Sonarr custom formats");
+        var result = GetCustomFormats<SonarrCustomFormatResource>(categoryQuery.GetSonarr());
+        log.Debug("CustomFormat: Retrieved {Count} Sonarr custom formats", result.Count);
+        return result;
     }
 
     private List<TResource> GetCustomFormats<TResource>(
@@ -27,6 +35,8 @@ public class CustomFormatResourceQuery(
         where TResource : CustomFormatResource
     {
         var files = registry.Get<TResource>();
+        log.Debug("CustomFormat: Found {Count} CF files in registry", files.Count);
+
         var loaded = loader.Load<TResource>(files);
 
         return loaded
