@@ -53,7 +53,6 @@ public class ProviderInitializationFactory(
                 progress?.Report(
                     new ProviderProgress(config.Type, config.Name, ProviderStatus.Failed, e.Message)
                 );
-                log.Error(e, "Provider {Name} failed initialization", config.Name);
                 throw;
             }
         }

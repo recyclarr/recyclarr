@@ -3,11 +3,8 @@ using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Storage;
 
-public class LocalProviderLocation(
-    LocalResourceProvider config,
-    IFileSystem fileSystem,
-    ILogger log
-) : IProviderLocation
+public class LocalProviderLocation(LocalResourceProvider config, IFileSystem fileSystem)
+    : IProviderLocation
 {
     public delegate LocalProviderLocation Factory(LocalResourceProvider config);
 
@@ -22,11 +19,6 @@ public class LocalProviderLocation(
 
         if (!path.Exists)
         {
-            log.Warning(
-                "Local provider {Name} path does not exist: {Path}",
-                config.Name,
-                config.Path
-            );
             progress?.Report(
                 new ProviderProgress(
                     config.Type,

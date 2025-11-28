@@ -26,7 +26,7 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
                 .StartAsync(async ctx =>
                 {
                     var task = ctx.AddTask("Initializing Resource Providers");
-                    var progress = new ProgressReporter(task);
+                    var progress = new ProgressReporter(console, task);
                     await factory.InitializeProvidersAsync(progress, ct);
                 });
         }
@@ -36,7 +36,8 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
         }
     }
 
-    private class ProgressReporter(ProgressTask task) : IProgress<ProviderProgress>
+    private class ProgressReporter(IAnsiConsole console, ProgressTask task)
+        : IProgress<ProviderProgress>
     {
         public void Report(ProviderProgress value)
         {
@@ -56,8 +57,9 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
 
                 case ProviderStatus.Failed:
                     task.Increment(1);
-                    task.Description =
-                        $"[red]Failed: {value.ProviderName} - {value.ErrorMessage}[/]";
+                    console.MarkupLine(
+                        $"[red]Failed: {value.ProviderName} - {value.ErrorMessage}[/]"
+                    );
                     break;
             }
         }
