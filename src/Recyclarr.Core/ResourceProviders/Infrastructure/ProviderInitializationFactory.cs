@@ -34,11 +34,7 @@ public class ProviderInitializationFactory(
 
         foreach (var config in providers)
         {
-            log.Information(
-                "Initializing provider: {Name} (type: {Type})",
-                config.Name,
-                config.Type
-            );
+            log.Debug("Initializing provider: {Name} (type: {Type})", config.Name, config.Type);
 
             try
             {

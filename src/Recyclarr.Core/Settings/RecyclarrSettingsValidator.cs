@@ -81,6 +81,7 @@ public class ResourceProviderValidator : AbstractValidator<ResourceProvider>
                 () =>
                 {
                     RuleFor(x => x.Service)
+                        .Cascade(CascadeMode.Stop)
                         .NotEmpty()
                         .WithMessage(x =>
                             $"Provider '{x.Name}': service is required for custom-formats providers"
