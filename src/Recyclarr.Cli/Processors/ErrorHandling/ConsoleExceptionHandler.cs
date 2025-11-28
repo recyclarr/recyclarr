@@ -6,6 +6,7 @@ using Recyclarr.Compatibility;
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.VersionControl;
+using Spectre.Console.Cli;
 using YamlDotNet.Core;
 
 namespace Recyclarr.Cli.Processors.ErrorHandling;
@@ -76,6 +77,10 @@ internal class ConsoleExceptionHandler(ILogger log)
                 break;
 
             case CommandException e:
+                log.Error("{Message}", e.Message);
+                break;
+
+            case CommandRuntimeException e:
                 log.Error("{Message}", e.Message);
                 break;
 
