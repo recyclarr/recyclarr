@@ -50,6 +50,11 @@ internal class QualitySizeConfigPhase(
 
         var itemLimits = await limitFactory.Create(config.ServiceType, ct);
 
+        if (!ValidateAndApplyQualityOverrides(configSizeData, guideSizeData.Qualities, itemLimits))
+        {
+            return PipelineFlow.Terminate;
+        }
+
         var sizeDataWithThresholds = guideSizeData
             .Qualities.Select(x => new QualityItemWithLimits(x, itemLimits))
             .ToList();
@@ -108,5 +113,114 @@ internal class QualitySizeConfigPhase(
                 configSizeData.PreferredRatio.Value
             );
         }
+    }
+
+    private bool ValidateAndApplyQualityOverrides(
+        QualityDefinitionConfig configSizeData,
+        IReadOnlyCollection<QualityItem> guideQualities,
+        QualityItemLimits limits
+    )
+    {
+        if (configSizeData.Qualities.Count == 0)
+        {
+            return true;
+        }
+
+        var guideQualityLookup = guideQualities.ToDictionary(
+            x => x.Quality,
+            StringComparer.OrdinalIgnoreCase
+        );
+
+        foreach (var configQuality in configSizeData.Qualities)
+        {
+            if (!guideQualityLookup.TryGetValue(configQuality.Name, out var guideQuality))
+            {
+                log.Error(
+                    "Quality '{QualityName}' does not exist in the guide for type '{Type}'",
+                    configQuality.Name,
+                    configSizeData.Type
+                );
+                return false;
+            }
+
+            ApplyQualityOverride(guideQuality, configQuality, limits);
+
+            log.Debug(
+                "Applied quality override for {QualityName}: Min={Min}, Max={Max}, Preferred={Preferred}",
+                configQuality.Name,
+                guideQuality.Min,
+                guideQuality.Max,
+                guideQuality.Preferred
+            );
+
+            if (!ValidateQualitySizeOrder(guideQuality, configQuality.Name))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static void ApplyQualityOverride(
+        QualityItem guideQuality,
+        QualityDefinitionItemConfig configQuality,
+        QualityItemLimits limits
+    )
+    {
+        if (configQuality.Min is not null)
+        {
+            guideQuality.Min = ResolveQualitySizeValue(configQuality.Min, limits.MaxLimit);
+        }
+
+        if (configQuality.Max is not null)
+        {
+            guideQuality.Max = ResolveQualitySizeValue(configQuality.Max, limits.MaxLimit);
+        }
+
+        if (configQuality.Preferred is not null)
+        {
+            guideQuality.Preferred = ResolveQualitySizeValue(
+                configQuality.Preferred,
+                limits.PreferredLimit
+            );
+        }
+    }
+
+    private static decimal ResolveQualitySizeValue(QualitySizeValue value, decimal unlimitedValue)
+    {
+        return value switch
+        {
+            QualitySizeValue.Numeric numeric => numeric.Value,
+            QualitySizeValue.Unlimited => unlimitedValue,
+            _ => throw new InvalidOperationException($"Unknown QualitySizeValue type: {value}"),
+        };
+    }
+
+    private bool ValidateQualitySizeOrder(QualityItem quality, string qualityName)
+    {
+        if (quality.Min > quality.Preferred)
+        {
+            log.Error(
+                "Quality '{QualityName}': min ({Min}) cannot be greater than preferred ({Preferred})",
+                qualityName,
+                quality.Min,
+                quality.Preferred
+            );
+            return false;
+        }
+
+        if (quality.Preferred > quality.Max)
+        {
+            log.Error(
+                "Quality '{QualityName}': preferred ({Preferred}) cannot be greater than max ({Max})",
+                qualityName,
+                quality.Preferred,
+                quality.Max
+            );
+            return false;
+        }
+
+        return true;
     }
 }

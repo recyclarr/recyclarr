@@ -20,6 +20,19 @@ internal static class ConfigYamlExtensions
         };
     }
 
+    private static QualityDefinitionItemConfig ToQualityDefinitionItemConfig(
+        this QualitySizeItemConfigYaml yaml
+    )
+    {
+        return new QualityDefinitionItemConfig
+        {
+            Name = yaml.Name ?? "",
+            Min = QualitySizeValue.Parse(yaml.Min),
+            Max = QualitySizeValue.Parse(yaml.Max),
+            Preferred = QualitySizeValue.Parse(yaml.Preferred),
+        };
+    }
+
     private static QualityDefinitionConfig ToQualityDefinitionConfig(
         this QualitySizeConfigYaml yaml
     )
@@ -28,6 +41,8 @@ internal static class ConfigYamlExtensions
         {
             Type = yaml.Type ?? "",
             PreferredRatio = yaml.PreferredRatio,
+            Qualities =
+                yaml.Qualities?.Select(x => x.ToQualityDefinitionItemConfig()).ToList() ?? [],
         };
     }
 

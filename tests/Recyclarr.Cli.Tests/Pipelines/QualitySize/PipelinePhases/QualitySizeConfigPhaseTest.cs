@@ -2,17 +2,17 @@ using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.Json;
 using NSubstitute.ReturnsExtensions;
+using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.QualitySize;
-using Serilog;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
 
@@ -110,7 +110,7 @@ internal sealed class QualitySizeConfigPhaseTest
                 new RadarrQualitySizeResource
                 {
                     Type = "real",
-                    Qualities = [new QualityItem("quality1", 0, 100, 90)],
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
                 },
             ],
             []
@@ -124,7 +124,7 @@ internal sealed class QualitySizeConfigPhaseTest
         context
             .Qualities.Select(x => x.Item)
             .Should()
-            .BeEquivalentTo([new QualityItem("quality1", 0, 100, 50)]);
+            .BeEquivalentTo([NewQualitySize.Item("quality1", 0, 100, 50)]);
     }
 
     [Test, AutoMockData]
@@ -142,7 +142,7 @@ internal sealed class QualitySizeConfigPhaseTest
                 new RadarrQualitySizeResource
                 {
                     Type = "real",
-                    Qualities = [new QualityItem("quality1", 0, 100, 90)],
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
                 },
             ],
             []
@@ -156,7 +156,7 @@ internal sealed class QualitySizeConfigPhaseTest
         context
             .Qualities.Select(x => x.Item)
             .Should()
-            .BeEquivalentTo([new QualityItem("quality1", 0, 100, 90)]);
+            .BeEquivalentTo([NewQualitySize.Item("quality1", 0, 100, 90)]);
     }
 
     private static QualitySizeResourceQuery CreateQualityQuery(
@@ -200,5 +200,279 @@ internal sealed class QualitySizeConfigPhaseTest
     private static string SerializeResource(QualitySizeResource resource)
     {
         return JsonSerializer.Serialize(resource, GlobalJsonSerializerSettings.Guide);
+    }
+
+    [Test, AutoMockData]
+    public async Task Per_quality_overrides_are_applied(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "quality1",
+                        Min = new QualitySizeValue.Numeric(5),
+                        Max = new QualitySizeValue.Numeric(80),
+                        Preferred = new QualitySizeValue.Numeric(50),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .Qualities.Select(x => x.Item)
+            .Should()
+            .BeEquivalentTo([NewQualitySize.Item("quality1", 5, 80, 50)]);
+    }
+
+    [Test, AutoMockData]
+    public async Task Unspecified_qualities_keep_guide_defaults(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "quality1",
+                        Min = new QualitySizeValue.Numeric(10),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities =
+                    [
+                        NewQualitySize.Item("quality1", 0, 100, 90),
+                        NewQualitySize.Item("quality2", 5, 50, 25),
+                    ],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .Qualities.Select(x => x.Item)
+            .Should()
+            .BeEquivalentTo([
+                NewQualitySize.Item("quality1", 10, 100, 90),
+                NewQualitySize.Item("quality2", 5, 50, 25),
+            ]);
+    }
+
+    [Test, AutoMockData]
+    public async Task Invalid_quality_name_returns_terminate(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "nonexistent_quality",
+                        Min = new QualitySizeValue.Numeric(10),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        var result = await sut.Execute(context, CancellationToken.None);
+
+        result.Should().Be(PipelineFlow.Terminate);
+    }
+
+    [Test, AutoMockData]
+    public async Task Min_greater_than_preferred_returns_terminate(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "quality1",
+                        Min = new QualitySizeValue.Numeric(60),
+                        Preferred = new QualitySizeValue.Numeric(50),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        var result = await sut.Execute(context, CancellationToken.None);
+
+        result.Should().Be(PipelineFlow.Terminate);
+    }
+
+    [Test, AutoMockData]
+    public async Task Preferred_greater_than_max_returns_terminate(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "quality1",
+                        Preferred = new QualitySizeValue.Numeric(80),
+                        Max = new QualitySizeValue.Numeric(50),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        var result = await sut.Execute(context, CancellationToken.None);
+
+        result.Should().Be(PipelineFlow.Terminate);
+    }
+
+    [Test, AutoMockData]
+    public async Task Unlimited_value_is_converted_to_limit(
+        [Frozen] IServiceConfiguration config,
+        [Frozen(Matching.ImplementedInterfaces)] TestQualityItemLimitFactory limitFactory,
+        ILogger log
+    )
+    {
+        config.QualityDefinition.Returns(
+            new QualityDefinitionConfig
+            {
+                Type = "real",
+                Qualities =
+                [
+                    new QualityDefinitionItemConfig
+                    {
+                        Name = "quality1",
+                        Max = new QualitySizeValue.Unlimited(),
+                        Preferred = new QualitySizeValue.Unlimited(),
+                    },
+                ],
+            }
+        );
+        config.ServiceType.Returns(SupportedServices.Radarr);
+
+        var guide = CreateQualityQuery(
+            [
+                new RadarrQualitySizeResource
+                {
+                    Type = "real",
+                    Qualities = [NewQualitySize.Item("quality1", 0, 100, 90)],
+                },
+            ],
+            []
+        );
+
+        var sut = new QualitySizeConfigPhase(log, guide, config, limitFactory);
+        var context = new QualitySizePipelineContext();
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // TestQualityItemLimitFactory uses TestQualityItemLimits (400 for both)
+        context
+            .Qualities.Select(x => x.Item)
+            .Should()
+            .BeEquivalentTo([NewQualitySize.Item("quality1", 0, 400, 400)]);
     }
 }

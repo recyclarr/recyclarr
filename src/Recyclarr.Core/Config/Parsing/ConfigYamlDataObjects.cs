@@ -22,10 +22,20 @@ public record CustomFormatConfigYaml
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public record QualitySizeItemConfigYaml
+{
+    public string? Name { get; init; }
+    public string? Min { get; init; }
+    public string? Max { get; init; }
+    public string? Preferred { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeConfigYaml
 {
     public string? Type { get; init; }
     public decimal? PreferredRatio { get; init; }
+    public IReadOnlyCollection<QualitySizeItemConfigYaml>? Qualities { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

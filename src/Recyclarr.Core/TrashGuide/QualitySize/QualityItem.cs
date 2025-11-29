@@ -1,6 +1,9 @@
 namespace Recyclarr.TrashGuide.QualitySize;
 
-public record QualityItem(string Quality, decimal Min, decimal Max, decimal Preferred)
+public record QualityItem
 {
-    public decimal Preferred { get; set; } = Preferred;
+    public required string Quality { get; init; }
+    public required decimal Min { get; set; }
+    public required decimal Max { get; set; }
+    public required decimal Preferred { get; set; }
 }

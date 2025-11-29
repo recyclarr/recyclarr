@@ -13,6 +13,42 @@
       "default": 1.0,
       "minimum": 0.0,
       "maximum": 1.0
+    },
+    "qualities": {
+      "type": "array",
+      "description": "Per-quality size overrides. Values not specified default to guide data.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The quality name to override (must exist in the guide)"
+          },
+          "min": {
+            "oneOf": [
+              { "type": "number", "minimum": 0 },
+              { "const": "unlimited" }
+            ],
+            "description": "Minimum size in MB/minute"
+          },
+          "max": {
+            "oneOf": [
+              { "type": "number", "minimum": 0 },
+              { "const": "unlimited" }
+            ],
+            "description": "Maximum size in MB/minute. Use 'unlimited' for no limit."
+          },
+          "preferred": {
+            "oneOf": [
+              { "type": "number", "minimum": 0 },
+              { "const": "unlimited" }
+            ],
+            "description": "Preferred size in MB/minute. Use 'unlimited' for no limit."
+          }
+        }
+      }
     }
   }
 }

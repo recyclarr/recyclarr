@@ -36,6 +36,7 @@ public abstract class ServiceConfigMerger<T>
                     {
                         Type = b1.Type ?? a1.Type,
                         PreferredRatio = b1.PreferredRatio ?? a1.PreferredRatio,
+                        Qualities = MergeQualitySizeItems(a1.Qualities, b1.Qualities),
                     }
             ),
 
@@ -179,6 +180,43 @@ public abstract class ServiceConfigMerger<T>
                     }
             ),
             Qualities = b.Qualities ?? a.Qualities,
+        };
+    }
+
+    private static IReadOnlyCollection<QualitySizeItemConfigYaml>? MergeQualitySizeItems(
+        IReadOnlyCollection<QualitySizeItemConfigYaml>? a,
+        IReadOnlyCollection<QualitySizeItemConfigYaml>? b
+    )
+    {
+        return Combine(
+            a,
+            b,
+            (a1, b1) =>
+            {
+                return a1.FullOuterHashJoin(
+                        b1,
+                        x => x.Name,
+                        x => x.Name,
+                        l => l,
+                        r => r,
+                        MergeQualitySizeItem,
+                        StringComparer.InvariantCultureIgnoreCase
+                    )
+                    .ToList();
+            }
+        );
+    }
+
+    private static QualitySizeItemConfigYaml MergeQualitySizeItem(
+        QualitySizeItemConfigYaml a,
+        QualitySizeItemConfigYaml b
+    )
+    {
+        return a with
+        {
+            Min = b.Min ?? a.Min,
+            Max = b.Max ?? a.Max,
+            Preferred = b.Preferred ?? a.Preferred,
         };
     }
 }

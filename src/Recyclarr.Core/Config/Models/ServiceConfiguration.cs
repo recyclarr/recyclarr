@@ -38,10 +38,20 @@ public record AssignScoresToConfig
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public record QualityDefinitionItemConfig
+{
+    public string Name { get; init; } = "";
+    public QualitySizeValue? Min { get; init; }
+    public QualitySizeValue? Max { get; init; }
+    public QualitySizeValue? Preferred { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityDefinitionConfig
 {
     public string Type { get; init; } = "";
     public decimal? PreferredRatio { get; set; }
+    public IReadOnlyCollection<QualityDefinitionItemConfig> Qualities { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

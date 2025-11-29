@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Quality Definitions: Per-quality size overrides allow setting explicit `min`, `max`, and
+  `preferred` values for individual qualities, with support for `unlimited` keyword (#253).
 - YAML: New `!file` tag that allows including the contents of an external file as a YAML node value,
   particularly useful for working with Docker Secrets (#278).
 - Settings: New `resource_providers` configuration enables custom data sources for TRaSH Guides and

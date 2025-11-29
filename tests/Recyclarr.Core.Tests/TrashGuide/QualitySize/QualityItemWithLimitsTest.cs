@@ -198,10 +198,10 @@ internal sealed class QualityItemWithLimitsTest
     public void Max_and_preferred_are_capped_when_over_limit()
     {
         var sut = new QualityItemWithLimits(
-            new QualityItem("TestQuality", 10m, 100m, 100m),
+            NewQualitySize.Item("TestQuality", 10m, 100m, 100m),
             new QualityItemLimits(50m, 70m)
         );
 
-        sut.Item.Should().BeEquivalentTo(new QualityItem("TestQuality", 10m, 50m, 70m));
+        sut.Item.Should().BeEquivalentTo(NewQualitySize.Item("TestQuality", 10m, 50m, 70m));
     }
 }
