@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://github.com/DavidAnson/markdownlint-cli2/raw/refs/heads/main/schema/markdownlint-cli2-config-schema.json
 
 ignores:
+  - .serena/memories/**
   - docs/memory-bank/**
   - tests/**
   - src/**
