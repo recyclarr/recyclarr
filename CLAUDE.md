@@ -127,11 +127,10 @@ Some key files and directories:
   is enabled via `Directory.Packages.props`.
 - Avoid `--no-build` or `--no-restore` flags. Rely on simple invocations: `dotnet test` will always
   restore + build, so there's no need to do `dotnet build` followed by `dotnet test`.
-- Use minimal verbosity for build/test commands to show only warnings and errors:
-  `dotnet build -v m --no-incremental` and `dotnet test -v m --no-incremental`. Informational logs
-  consume valuable context. When verbose output is needed for debugging, pipe to a log file
-  (`dotnet test -v d 2>&1 > /tmp/test.log`) and read from it with targeted searches (`rg "pattern"
-  /tmp/test.log`).
+- Use minimal verbosity for build/test commands to show only warnings and errors: `dotnet build -v m
+  --no-incremental` and `dotnet test -v m --no-incremental`. Informational logs consume valuable
+  context. When verbose output is needed for debugging, pipe to a log file (`dotnet test -v d 2>&1 >
+  /tmp/test.log`) and read from it with targeted searches (`rg "pattern" /tmp/test.log`).
 
 ### Serena
 
@@ -252,6 +251,50 @@ Schema Validation (MANDATORY):
 - Settings schema: `schemas/settings-schema.json`
 - Add schema validation comment to YAML files: `# yaml-language-server:
   $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json`
+
+## Debugging and Diagnosis
+
+When diagnosing user configuration issues (invalid trash_ids, missing custom formats, template
+errors), reference the local cached repositories in the app data directory. These contain the
+authoritative upstream data that Recyclarr uses.
+
+First, check `settings.yml` for configured resource providers. The `resource_providers` section
+defines where Recyclarr loads CFs and templates from:
+
+- `type: custom-formats` + `path:` - Local CF JSON files (check `service:` for radarr/sonarr)
+- `type: config-templates` + `path:` - Local include templates
+- Official providers are cached under `cache/resources/`
+
+Search ALL configured provider locations for valid trash_ids, not just the official cache.
+
+Cache Structure (under `cache/resources/`):
+
+- `config-templates/git/official/` - Recyclarr include templates
+  - `templates.json` - Template registry with IDs
+  - `{radarr,sonarr}/templates/` - Top-level config templates
+  - `{radarr,sonarr}/includes/` - Reusable include snippets (quality-profiles, custom-formats, etc.)
+- `trash-guides/git/official/docs/json/` - TRaSH Guides resource data
+  - `{radarr,sonarr}/cf/` - Custom format JSONs (one per CF, filename = slug)
+  - `{radarr,sonarr}/quality-size/` - Quality definition sizes
+  - `{radarr,sonarr}/quality-profiles/` - Quality profile definitions
+  - `{radarr,sonarr}/naming/` - Media naming schemes
+
+Diagnosis Workflow:
+
+1. Identify the problematic `trash_id` from user logs/errors
+2. Search the appropriate `cf/` directory: `rg "trash_id_value"
+   cache/resources/trash-guides/.../cf/`
+3. If not found, check git history in the cached repo to understand why:
+   - `cd cache/resources/trash-guides/git/official && git log --all -p -S "trash_id_value" --
+     docs/json/`
+   - This reveals when/why the CF was removed, renamed, or consolidated
+4. Cross-reference with user's config to identify which file contains the stale reference
+5. For template issues, check `config-templates/.../templates/` and `includes/`
+6. Check git history for templates similarly if include references are broken
+
+Key insight: Sonarr and Radarr have SEPARATE custom format definitions with different trash_ids.
+Audio/HDR/codec CFs have different IDs per service. A common misconfiguration is using Radarr
+trash_ids in Sonarr configs (or vice versa).
 
 ## Reference Repositories
 
