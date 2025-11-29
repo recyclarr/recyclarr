@@ -48,7 +48,6 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
                     break;
 
                 case ProviderStatus.Processing:
-                    task.Description = $"Initializing {value.ProviderName}";
                     break;
 
                 case ProviderStatus.Completed:
