@@ -1,6 +1,5 @@
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
-using Serilog;
 
 namespace Recyclarr.ConfigTemplates;
 

@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide.CustomFormat;
-using Serilog;
 
 namespace Recyclarr.ResourceProviders.Domain;
 

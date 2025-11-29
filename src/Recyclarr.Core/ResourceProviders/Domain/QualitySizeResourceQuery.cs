@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.ResourceProviders.Infrastructure;
-using Serilog;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
