@@ -37,6 +37,15 @@ sonarr:
         assign_scores_to:
           - name: HD-1080p
 
+    # Quality definition with explicit overrides (tests numeric values)
+    quality_definition:
+      type: series
+      qualities:
+        - name: HDTV-1080p
+          min: 5
+          max: 50
+          preferred: 30
+
 radarr:
   radarr_main:
     base_url: !env_var RADARR_URL
@@ -77,8 +86,17 @@ radarr:
         assign_scores_to:
           - name: HD-1080p
 
+    # Quality definition with unlimited values and guide defaults
     quality_definition:
       type: movie
+      qualities:
+        - name: Bluray-1080p
+          max: unlimited
+          preferred: unlimited
+        - name: HDTV-1080p
+          min: 0
+          max: 100
+          preferred: 50
 
     media_naming:
       folder: default

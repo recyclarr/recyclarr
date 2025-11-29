@@ -53,7 +53,6 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
         using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
             cloneUrl,
             repositorySource.Path,
-            reference,
             token
         );
         await repo.ForceCheckout(token, reference);

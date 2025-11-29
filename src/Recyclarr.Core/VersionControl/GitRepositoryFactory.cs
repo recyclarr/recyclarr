@@ -10,7 +10,6 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
     public async Task<IGitRepository> CreateAndCloneIfNeeded(
         Uri repoUrl,
         IDirectoryInfo repoPath,
-        string branch,
         CancellationToken token
     )
     {
@@ -19,7 +18,7 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
         if (!repoPath.Exists)
         {
             log.Debug("Cloning repository to {RepoPath}", repoPath.FullName);
-            await repo.Clone(token, repoUrl, branch, 1);
+            await repo.Clone(token, repoUrl);
         }
         else
         {

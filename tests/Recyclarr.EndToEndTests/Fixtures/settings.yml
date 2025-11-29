@@ -1,14 +1,30 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
 
-# Note: paths will be replaced with absolute paths by test setup
+# E2E test resource providers - official sources pinned to stable SHAs
 resource_providers:
-  - name: local-test-guides
+  # Official trash-guides at pinned SHA (replaces default)
+  - name: trash-guides-pinned
     type: trash-guides
-    path: PLACEHOLDER_TRASH_GUIDES_PATH
-  - name: local-sonarr-cfs
+    clone_url: https://github.com/TRaSH-Guides/Guides.git
+    reference: 18267920336876d151523a79c11d819fd1455a97
+    replace_default: true
+  # Official config-templates at pinned SHA (replaces default)
+  - name: config-templates-pinned
+    type: config-templates
+    clone_url: https://github.com/recyclarr/config-templates.git
+    reference: dd49e8697c8bed32f7d1f4bcf1f12b8ccbedd776
+    replace_default: true
+  # Local Sonarr custom formats (supplements official)
+  - name: sonarr-cfs-local
     type: custom-formats
-    path: PLACEHOLDER_SONARR_CFS_PATH
     service: sonarr
-  - name: local-override-guides
+    path: PLACEHOLDER_SONARR_CFS_PATH
+  # Local Radarr custom formats (supplements official)
+  - name: radarr-cfs-local
+    type: custom-formats
+    service: radarr
+    path: PLACEHOLDER_RADARR_CFS_PATH
+  # Local Radarr override (last = highest precedence)
+  - name: radarr-override
     type: trash-guides
     path: PLACEHOLDER_OVERRIDE_PATH

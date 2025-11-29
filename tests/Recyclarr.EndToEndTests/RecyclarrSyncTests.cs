@@ -82,20 +82,20 @@ internal sealed class RecyclarrSyncTests
             FileSystem.Path.Combine(TestContext.CurrentContext.TestDirectory, "Fixtures")
         );
 
-        // Copy trash-guides-custom directory
-        var trashGuidesCustomSource = fixturesDir.SubDirectory("trash-guides-custom");
-        var trashGuidesCustomDest = _tempAppDataDir.SubDirectory("trash-guides-custom");
-        if (trashGuidesCustomSource.Exists)
-        {
-            CopyDirectory(trashGuidesCustomSource, trashGuidesCustomDest);
-        }
-
         // Copy custom-formats-sonarr directory
         var sonarrCfsSource = fixturesDir.SubDirectory("custom-formats-sonarr");
         var sonarrCfsDest = _tempAppDataDir.SubDirectory("custom-formats-sonarr");
         if (sonarrCfsSource.Exists)
         {
             CopyDirectory(sonarrCfsSource, sonarrCfsDest);
+        }
+
+        // Copy custom-formats-radarr directory
+        var radarrCfsSource = fixturesDir.SubDirectory("custom-formats-radarr");
+        var radarrCfsDest = _tempAppDataDir.SubDirectory("custom-formats-radarr");
+        if (radarrCfsSource.Exists)
+        {
+            CopyDirectory(radarrCfsSource, radarrCfsDest);
         }
 
         // Copy trash-guides-override directory
@@ -116,13 +116,13 @@ internal sealed class RecyclarrSyncTests
             );
             settingsContent = settingsContent
                 .Replace(
-                    "PLACEHOLDER_TRASH_GUIDES_PATH",
-                    trashGuidesCustomDest.FullName,
+                    "PLACEHOLDER_SONARR_CFS_PATH",
+                    sonarrCfsDest.FullName,
                     StringComparison.Ordinal
                 )
                 .Replace(
-                    "PLACEHOLDER_SONARR_CFS_PATH",
-                    sonarrCfsDest.FullName,
+                    "PLACEHOLDER_RADARR_CFS_PATH",
+                    radarrCfsDest.FullName,
                     StringComparison.Ordinal
                 )
                 .Replace(
@@ -201,7 +201,10 @@ internal sealed class RecyclarrSyncTests
     }
 
     [Test]
-    public async Task RecyclarrSync_WithComprehensiveConfig_SynchronizesAllFeatures()
+    [CancelAfter(30_000)]
+    public async Task RecyclarrSync_WithComprehensiveConfig_SynchronizesAllFeatures(
+        CancellationToken ct
+    )
     {
         var configPath = Path.Combine(
             TestContext.CurrentContext.TestDirectory,
@@ -220,7 +223,7 @@ internal sealed class RecyclarrSyncTests
                     .Set("RECYCLARR_APP_DATA", _tempAppDataDir.FullName)
             )
             .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync();
+            .ExecuteBufferedAsync(ct);
 
         // Assert - Exit code should be 0
         await TestContext.Out.WriteLineAsync($"Recyclarr stdout:\n{result.StandardOutput}");
@@ -233,11 +236,14 @@ internal sealed class RecyclarrSyncTests
                 $"recyclarr sync failed with output:\n{result.StandardOutput}\n{result.StandardError}"
             );
 
+        // Wait for async quality definition updates to complete (services return 202 Accepted)
+        await WaitForQualityDefinitionUpdates(ct);
+
         // Assert - Verify Sonarr quality profiles were synced
         var sonarrProfiles = await _sonarrUrl
             .AppendPathSegment("api/v3/qualityprofile")
             .WithHeader("X-Api-Key", _sonarrApiKey)
-            .GetJsonAsync<List<QualityProfile>>();
+            .GetJsonAsync<List<QualityProfile>>(cancellationToken: ct);
 
         sonarrProfiles
             .Select(p => p.Name)
@@ -248,7 +254,7 @@ internal sealed class RecyclarrSyncTests
         var sonarrCustomFormats = await _sonarrUrl
             .AppendPathSegment("api/v3/customformat")
             .WithHeader("X-Api-Key", _sonarrApiKey)
-            .GetJsonAsync<List<CustomFormat>>();
+            .GetJsonAsync<List<CustomFormat>>(cancellationToken: ct);
 
         sonarrCustomFormats
             .Select(cf => cf.Name)
@@ -262,7 +268,7 @@ internal sealed class RecyclarrSyncTests
         var radarrProfiles = await _radarrUrl
             .AppendPathSegment("api/v3/qualityprofile")
             .WithHeader("X-Api-Key", _radarrApiKey)
-            .GetJsonAsync<List<QualityProfile>>();
+            .GetJsonAsync<List<QualityProfile>>(cancellationToken: ct);
 
         radarrProfiles
             .Select(p => p.Name)
@@ -273,7 +279,7 @@ internal sealed class RecyclarrSyncTests
         var radarrCustomFormats = await _radarrUrl
             .AppendPathSegment("api/v3/customformat")
             .WithHeader("X-Api-Key", _radarrApiKey)
-            .GetJsonAsync<List<CustomFormat>>();
+            .GetJsonAsync<List<CustomFormat>>(cancellationToken: ct);
 
         radarrCustomFormats
             .Select(cf => cf.Name)
@@ -291,6 +297,91 @@ internal sealed class RecyclarrSyncTests
                 ],
                 "Radarr should have 8 CFs with 'Hybrid-OVERRIDE' proving last provider wins"
             );
+
+        // Assert - Verify Sonarr quality definitions with explicit overrides
+        var sonarrQualityDefs = await _sonarrUrl
+            .AppendPathSegment("api/v3/qualitydefinition")
+            .WithHeader("X-Api-Key", _sonarrApiKey)
+            .GetJsonAsync<List<QualityDefinition>>(cancellationToken: ct);
+
+        var sonarrHdtv1080P = sonarrQualityDefs.First(q => q.Title == "HDTV-1080p");
+        sonarrHdtv1080P.MinSize.Should().Be(5, "Sonarr HDTV-1080p min should be overridden to 5");
+        sonarrHdtv1080P.MaxSize.Should().Be(50, "Sonarr HDTV-1080p max should be overridden to 50");
+        sonarrHdtv1080P
+            .PreferredSize.Should()
+            .Be(30, "Sonarr HDTV-1080p preferred should be overridden to 30");
+
+        // Verify non-overridden quality keeps guide defaults
+        var sonarrBluray1080P = sonarrQualityDefs.First(q => q.Title == "Bluray-1080p");
+        sonarrBluray1080P
+            .MinSize.Should()
+            .Be(50.4m, "Sonarr Bluray-1080p min should be guide default");
+
+        // Assert - Verify Radarr quality definitions with unlimited and explicit values
+        var radarrQualityDefs = await _radarrUrl
+            .AppendPathSegment("api/v3/qualitydefinition")
+            .WithHeader("X-Api-Key", _radarrApiKey)
+            .GetJsonAsync<List<QualityDefinition>>(cancellationToken: ct);
+
+        var radarrBluray1080P = radarrQualityDefs.First(q => q.Title == "Bluray-1080p");
+        radarrBluray1080P
+            .MaxSize.Should()
+            .BeNull("Radarr Bluray-1080p max should be null (unlimited)");
+        radarrBluray1080P
+            .PreferredSize.Should()
+            .BeNull("Radarr Bluray-1080p preferred should be null (unlimited)");
+
+        var radarrHdtv1080P = radarrQualityDefs.First(q => q.Title == "HDTV-1080p");
+        radarrHdtv1080P.MinSize.Should().Be(0, "Radarr HDTV-1080p min should be 0");
+        radarrHdtv1080P.MaxSize.Should().Be(100, "Radarr HDTV-1080p max should be 100");
+        radarrHdtv1080P.PreferredSize.Should().Be(50, "Radarr HDTV-1080p preferred should be 50");
+
+        // Verify non-overridden quality keeps guide defaults
+        var radarrWebdl1080P = radarrQualityDefs.First(q => q.Title == "WEBDL-1080p");
+        radarrWebdl1080P
+            .MinSize.Should()
+            .Be(12.5m, "Radarr WEBDL-1080p min should be guide default");
+    }
+
+    private static async Task WaitForQualityDefinitionUpdates(CancellationToken ct)
+    {
+        var timeout = TimeSpan.FromSeconds(10);
+        var pollInterval = TimeSpan.FromMilliseconds(500);
+        var deadline = DateTime.UtcNow + timeout;
+
+        // Poll Sonarr - expect HDTV-1080p MinSize=5 (from quality override)
+        while (DateTime.UtcNow < deadline)
+        {
+            var sonarrDefs = await _sonarrUrl
+                .AppendPathSegment("api/v3/qualitydefinition")
+                .WithHeader("X-Api-Key", _sonarrApiKey)
+                .GetJsonAsync<List<QualityDefinition>>(cancellationToken: ct);
+
+            var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
+            if (sonarrHdtv?.MinSize == 5)
+            {
+                break;
+            }
+
+            await Task.Delay(pollInterval, ct);
+        }
+
+        // Poll Radarr - expect HDTV-1080p MinSize=0 (from quality override)
+        while (DateTime.UtcNow < deadline)
+        {
+            var radarrDefs = await _radarrUrl
+                .AppendPathSegment("api/v3/qualitydefinition")
+                .WithHeader("X-Api-Key", _radarrApiKey)
+                .GetJsonAsync<List<QualityDefinition>>(cancellationToken: ct);
+
+            var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
+            if (radarrHdtv?.MinSize == 0)
+            {
+                break;
+            }
+
+            await Task.Delay(pollInterval, ct);
+        }
     }
 
     [UsedImplicitly]
@@ -298,4 +389,13 @@ internal sealed class RecyclarrSyncTests
 
     [UsedImplicitly]
     private record CustomFormat(int Id, string Name);
+
+    [UsedImplicitly]
+    private record QualityDefinition(
+        int Id,
+        string Title,
+        decimal MinSize,
+        decimal? MaxSize,
+        decimal? PreferredSize
+    );
 }
