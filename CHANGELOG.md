@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Sync: Crash when using `--preview` flag after rendering quality sizes table.
+- Sync: Custom formats being updated on every run even when unchanged.
 
 ## [7.5.1] - 2025-11-29
 

@@ -6,40 +6,21 @@ namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat.Models;
 internal sealed class CustomFormatResourceComparerTest
 {
     [Test]
-    public void Custom_formats_equal()
+    public void Equivalent_when_all_properties_match()
     {
         var a = CreateMockCustomFormatResource();
-
         var b = CreateMockCustomFormatResource();
 
-        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeTrue();
     }
 
     [Test]
-    public void Custom_formats_not_equal_when_field_value_different()
-    {
-        var a = CreateMockCustomFormatResource();
-
-        var b = CreateMockCustomFormatResource() with
-        {
-            Specifications = a
-                .Specifications.Select(spec =>
-                    spec with
-                    {
-                        Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name,
-                    }
-                )
-                .ToList(),
-        };
-
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
-    }
-
-    [Test]
-    public void Equal_when_ignored_fields_are_different()
+    public void Equivalent_when_ignored_fields_are_different()
     {
         var a = new CustomFormatResource
         {
+            Id = 1,
+            Name = "Test",
             TrashId = "a",
             TrashScores = { ["default"] = 1 },
             Category = "one",
@@ -47,77 +28,48 @@ internal sealed class CustomFormatResourceComparerTest
 
         var b = new CustomFormatResource
         {
+            Id = 1,
+            Name = "Test",
             TrashId = "b",
             TrashScores = { ["default"] = 2 },
             Category = "two",
         };
 
-        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeTrue();
     }
 
     [Test]
-    public void Not_equal_when_right_is_null()
-    {
-        var a = new CustomFormatResource();
-        CustomFormatResource? b = null;
-
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
-    }
-
-    [Test]
-    public void Not_equal_when_left_is_null()
-    {
-        CustomFormatResource? a = null;
-        var b = new CustomFormatResource();
-
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
-    }
-
-    [Test]
-    public void Equal_for_same_reference()
+    public void Not_equivalent_when_other_is_null()
     {
         var a = new CustomFormatResource();
 
-        a.Should().BeEquivalentTo(a, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(null).Should().BeFalse();
     }
 
     [Test]
-    public void Not_equal_when_different_spec_count()
+    public void Equivalent_for_same_reference()
+    {
+        var a = new CustomFormatResource();
+
+        a.IsEquivalentTo(a).Should().BeTrue();
+    }
+
+    [Test]
+    public void Not_equivalent_when_different_spec_count()
     {
         var a = CreateMockCustomFormatResource();
-
         var b = a with
         {
             Specifications = a
-                .Specifications.Concat([new CustomFormatSpecificationData()])
+                .Specifications.Concat([new CustomFormatSpecificationData { Name = "Extra" }])
                 .ToList(),
         };
 
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeFalse();
     }
 
     [Test]
-    public void Not_equal_when_non_matching_spec_names()
-    {
-        var a = CreateMockCustomFormatResource();
-
-        var b = a with
-        {
-            Specifications = a
-                .Specifications.Select(spec =>
-                    spec with
-                    {
-                        Name = spec.Name == "WEBRIP" ? "WEBRIP2" : spec.Name,
-                    }
-                )
-                .ToList(),
-        };
-
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
-    }
-
-    [Test]
-    public void Not_equal_when_different_spec_names_and_values()
+    public void Not_equivalent_when_spec_names_differ()
     {
         var a = CreateMockCustomFormatResource();
         var b = a with
@@ -126,25 +78,17 @@ internal sealed class CustomFormatResourceComparerTest
                 .Specifications.Select(spec =>
                     spec with
                     {
-                        Name = spec.Name == "WEBRIP" ? "UNIQUE_NAME" : spec.Name,
-                        Fields = spec
-                            .Fields.Select(field =>
-                                field with
-                                {
-                                    Value = field.Value is int ? 99 : "NEW_VALUE",
-                                }
-                            )
-                            .ToList(),
+                        Name = spec.Name == "WEBRIP" ? "DIFFERENT_NAME" : spec.Name,
                     }
                 )
                 .ToList(),
         };
 
-        a.Should().NotBeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeFalse();
     }
 
     [Test]
-    public void Equal_when_different_field_counts_but_same_names_and_values()
+    public void Equivalent_when_extra_fields_in_service_response()
     {
         var a = CreateMockCustomFormatResource();
         var b = a with
@@ -167,37 +111,68 @@ internal sealed class CustomFormatResourceComparerTest
                 .ToList(),
         };
 
-        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeTrue();
     }
 
     [Test]
-    public void Equal_when_specifications_order_different()
+    public void Equivalent_when_spec_and_field_order_differs()
     {
         var a = CreateMockCustomFormatResource();
-
-        var b = a with { Specifications = a.Specifications.Reverse().ToList() };
-
-        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
-    }
-
-    [Test]
-    public void Equal_when_fields_order_different_for_each_specification()
-    {
-        var a = CreateMockCustomFormatResource();
-
         var b = a with
         {
             Specifications = a
-                .Specifications.Select(spec =>
-                    spec with
-                    {
-                        Fields = spec.Fields.Reverse().ToList(),
-                    }
-                )
+                .Specifications.Reverse()
+                .Select(spec => spec with { Fields = spec.Fields.Reverse().ToList() })
                 .ToList(),
         };
 
-        a.Should().BeEquivalentTo(b, o => o.ComparingRecordsByValue());
+        a.IsEquivalentTo(b).Should().BeTrue();
+    }
+
+    [Test]
+    public void Equivalent_across_derived_and_base_types()
+    {
+        // This is the critical test: guide CFs are SonarrCustomFormatResource,
+        // but API responses deserialize to base CustomFormatResource.
+        // IsEquivalentTo() must work across this type boundary.
+        var guideCf = new SonarrCustomFormatResource
+        {
+            Id = 1,
+            Name = "Test CF",
+            TrashId = "abc123",
+            IncludeCustomFormatWhenRenaming = false,
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "TestSpec",
+                    Implementation = "ReleaseTitleSpecification",
+                    Negate = false,
+                    Required = true,
+                    Fields = [new CustomFormatFieldData { Name = "value", Value = "test" }],
+                },
+            ],
+        };
+
+        var serviceCf = new CustomFormatResource
+        {
+            Id = 1,
+            Name = "Test CF",
+            IncludeCustomFormatWhenRenaming = false,
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "TestSpec",
+                    Implementation = "ReleaseTitleSpecification",
+                    Negate = false,
+                    Required = true,
+                    Fields = [new CustomFormatFieldData { Name = "value", Value = "test" }],
+                },
+            ],
+        };
+
+        guideCf.IsEquivalentTo(serviceCf).Should().BeTrue();
     }
 
     [TestCase(typeof(CustomFormatSpecificationData))]
@@ -221,6 +196,7 @@ internal sealed class CustomFormatResourceComparerTest
     {
         return new CustomFormatResource
         {
+            Id = 1,
             Name = "EVO (no WEBDL)",
             IncludeCustomFormatWhenRenaming = false,
             Specifications =
@@ -231,11 +207,11 @@ internal sealed class CustomFormatResourceComparerTest
                     Implementation = "ReleaseTitleSpecification",
                     Negate = false,
                     Required = true,
-                    Fields = new List<CustomFormatFieldData>
-                    {
-                        new() { Name = "value", Value = @"\bEVO(TGX)?\b" },
-                        new() { Name = "foo1", Value = "foo1" },
-                    },
+                    Fields =
+                    [
+                        new CustomFormatFieldData { Name = "value", Value = @"\bEVO(TGX)?\b" },
+                        new CustomFormatFieldData { Name = "foo1", Value = "foo1" },
+                    ],
                 },
                 new CustomFormatSpecificationData
                 {
@@ -243,11 +219,11 @@ internal sealed class CustomFormatResourceComparerTest
                     Implementation = "SourceSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new List<CustomFormatFieldData>
-                    {
-                        new() { Name = "value", Value = 7 },
-                        new() { Name = "foo2", Value = "foo2" },
-                    },
+                    Fields =
+                    [
+                        new CustomFormatFieldData { Name = "value", Value = 7 },
+                        new CustomFormatFieldData { Name = "foo2", Value = "foo2" },
+                    ],
                 },
                 new CustomFormatSpecificationData
                 {
@@ -255,12 +231,12 @@ internal sealed class CustomFormatResourceComparerTest
                     Implementation = "LanguageSpecification",
                     Negate = true,
                     Required = true,
-                    Fields = new List<CustomFormatFieldData>
-                    {
-                        new() { Name = "value", Value = 8 },
-                        new() { Name = "exceptLanguage", Value = false },
-                        new() { Name = "foo3", Value = "foo3" },
-                    },
+                    Fields =
+                    [
+                        new CustomFormatFieldData { Name = "value", Value = 8 },
+                        new CustomFormatFieldData { Name = "exceptLanguage", Value = false },
+                        new CustomFormatFieldData { Name = "foo3", Value = "foo3" },
+                    ],
                 },
             ],
         };

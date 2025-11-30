@@ -107,7 +107,12 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         CustomFormatTransactionData transactions
     )
     {
-        if (guideCf != serviceCf)
+        // Use IsEquivalentTo() instead of Equals() or == operator.
+        // Guide CFs are SonarrCustomFormatResource/RadarrCustomFormatResource (derived types),
+        // while API responses deserialize to base CustomFormatResource. C# record inheritance
+        // causes Equals() to fail across type boundaries due to EqualityContract checks.
+        // IsEquivalentTo() is a non-virtual method that compares only the relevant properties.
+        if (!guideCf.IsEquivalentTo(serviceCf))
         {
             transactions.UpdatedCustomFormats.Add(guideCf);
         }

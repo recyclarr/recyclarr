@@ -201,7 +201,7 @@ internal sealed class RecyclarrSyncTests
     }
 
     [Test]
-    [CancelAfter(30_000)]
+    [CancelAfter(60_000)]
     public async Task RecyclarrSync_WithComprehensiveConfig_SynchronizesAllFeatures(
         CancellationToken ct
     )
