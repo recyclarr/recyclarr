@@ -165,6 +165,7 @@ All scripts under `scripts/`:
 
 - Key File: `CHANGELOG.md`
 - Follows keepachangelog.com format and rules
+- Section order (strictly enforced): Added, Changed, Deprecated, Removed, Fixed, Security
 - Newest entries are at the top of the file under the `[Unreleased]` section.
 - Audience: Non-technical end users
 - MUST add entry for: bug fixes, new features, breaking changes, deprecations, any user-observable

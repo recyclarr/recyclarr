@@ -24,6 +24,5 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
 
         console.WriteLine();
         console.Write(table);
-        throw new NotImplementedException();
     }
 }
