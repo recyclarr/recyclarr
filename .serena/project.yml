@@ -74,7 +74,36 @@ read_only: false
 #  * `think_about_task_adherence`: Thinking tool for determining whether the agent is still on track with the current task.
 #  * `think_about_whether_you_are_done`: Thinking tool for determining whether the task is truly completed.
 #  * `write_memory`: Writes a named memory (for future reference) to Serena's project-specific memory store.
-excluded_tools: []
+excluded_tools:
+  [
+    "activate_project",
+    "check_onboarding_performed",
+    "create_text_file",
+    "delete_lines",
+    "delete_memory",
+    "execute_shell_command",
+    "find_file",
+    "initial_instructions",
+    "insert_after_symbol",
+    "insert_at_line",
+    "insert_before_symbol",
+    "list_dir",
+    "list_memories",
+    "onboarding",
+    "prepare_for_new_conversation",
+    "read_file",
+    "read_memory",
+    "remove_project",
+    "replace_lines",
+    "replace_symbol_body",
+    "search_for_pattern",
+    "summarize_changes",
+    "switch_modes",
+    "think_about_collected_information",
+    "think_about_task_adherence",
+    "think_about_whether_you_are_done",
+    "write_memory",
+  ]
 
 # initial prompt for the project. It will always be given to the LLM upon activating the project
 # (contrary to the memories, which are loaded on demand).
