@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/setup-dotnet
 
       - name: Run E2E Tests
-        run: dotnet test tests/Recyclarr.EndToEndTests --logger "console;verbosity=detailed"
+        run: dotnet test tests/Recyclarr.EndToEndTests --filter "TestCategory=E2E" --logger "console;verbosity=detailed"
 
       - name: Upload test results on failure
         if: failure()

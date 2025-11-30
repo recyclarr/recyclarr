@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace Recyclarr.EndToEndTests;
 
-[Explicit]
+[TestFixture(Category = "E2E"), Explicit]
 internal sealed class RecyclarrSyncTests
 {
     private static readonly FileSystem FileSystem = new();
