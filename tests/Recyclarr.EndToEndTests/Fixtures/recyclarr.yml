@@ -18,6 +18,7 @@ sonarr:
           until_quality: Bluray-1080p
           until_score: 10000
         min_format_score: 0
+        min_upgrade_format_score: 100
         quality_sort: top
         qualities:
           - name: Bluray-1080p
@@ -60,6 +61,7 @@ radarr:
           until_quality: Bluray-1080p
           until_score: 10000
         min_format_score: 0
+        min_upgrade_format_score: 200
         quality_sort: top
         qualities:
           - name: Bluray-1080p

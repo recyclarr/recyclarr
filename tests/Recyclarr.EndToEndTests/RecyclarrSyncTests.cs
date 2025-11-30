@@ -250,6 +250,11 @@ internal sealed class RecyclarrSyncTests
             .Should()
             .Contain("HD-1080p", "Sonarr should have synced HD-1080p quality profile");
 
+        sonarrProfiles
+            .First(p => p.Name == "HD-1080p")
+            .MinUpgradeFormatScore.Should()
+            .Be(100, "Sonarr HD-1080p should have min_upgrade_format_score of 100");
+
         // Assert - Verify Sonarr custom formats were synced
         var sonarrCustomFormats = await _sonarrUrl
             .AppendPathSegment("api/v3/customformat")
@@ -274,6 +279,11 @@ internal sealed class RecyclarrSyncTests
             .Select(p => p.Name)
             .Should()
             .Contain("HD-1080p", "Radarr should have synced HD-1080p quality profile");
+
+        radarrProfiles
+            .First(p => p.Name == "HD-1080p")
+            .MinUpgradeFormatScore.Should()
+            .Be(200, "Radarr HD-1080p should have min_upgrade_format_score of 200");
 
         // Assert - Verify Radarr custom formats were synced
         var radarrCustomFormats = await _radarrUrl
@@ -385,7 +395,7 @@ internal sealed class RecyclarrSyncTests
     }
 
     [UsedImplicitly]
-    private record QualityProfile(int Id, string Name);
+    private record QualityProfile(int Id, string Name, int MinUpgradeFormatScore);
 
     [UsedImplicitly]
     private record CustomFormat(int Id, string Name);
