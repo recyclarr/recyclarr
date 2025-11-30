@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Quality Profiles: The `min_upgrade_format_score` property now works correctly. The YAML property
+  was renamed from `min_format_upgrade_score` to match the Sonarr/Radarr API naming convention.
+
 ## [7.5.0] - 2025-11-29
 
 ### Added
