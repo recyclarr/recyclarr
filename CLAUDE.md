@@ -23,11 +23,12 @@
   code that might be in-scope or indirectly affected by a change.
 - Reuse/extend existing implementations - zero duplication tolerance
 - CRITICAL: Follow SOLID, DRY, YAGNI principles
-- .NET 9.0 + nullable reference types
+- .NET 10.0 + nullable reference types
 - DO NOT use XML documentation for ANY types.
 - NO VERBOSE/USELESS C# COMMENTS. C# comments are code too, and thus incur a maintenance cost. They
   must have value. Focus on documenting the WHY, not WHAT code does. Preference for self-documenting
-  code: Self-describing variable, class, function names, etc.
+  code: Self-describing variable, class, function names, etc. DO add comments for non-obvious design
+  decisions (e.g., backward compat attributes, complex algorithms).
 - Zero warnings/analysis issues
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
   polymorphism tradeoffs for discussion rather than defaulting to enums.
@@ -42,6 +43,14 @@ Language Features:
 - Records for DTOs, `init` setters
 - Pattern matching: `is not null`, switch expressions
 - Spread operator for collections: `[..first, ..second]`
+
+C# 14 Features (.NET 10):
+
+- `field` keyword: `public string Name { get; set => field = value ?? throw; } = "";`
+- Extension blocks: `extension(T src) { public bool IsEmpty => !src.Any(); }` (properties + statics)
+- Null-conditional assignment: `obj?.Prop = value;` (RHS evaluated only if obj not null)
+- Lambda modifiers without types: `(text, out result) => int.TryParse(text, out result)`
+- Migration: Use new syntax for new code; opportunistically refactor existing code when revisiting
 
 Required Idioms:
 
