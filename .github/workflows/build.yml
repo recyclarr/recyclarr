@@ -238,3 +238,21 @@ jobs:
           tag_name: ${{ github.event.create.ref }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
+
+      - name: Generate Homebrew Tap Token
+        if: steps.gitversion.outputs.preReleaseTag == ''
+        id: homebrew-token
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          repositories: homebrew-recyclarr
+
+      - name: Update Homebrew Tap
+        if: steps.gitversion.outputs.preReleaseTag == ''
+        env:
+          GH_TOKEN: ${{ steps.homebrew-token.outputs.token }}
+        run: |
+          gh workflow run update-formula.yml \
+            --repo recyclarr/homebrew-recyclarr \
+            -f version=${{ steps.gitversion.outputs.semVer }}

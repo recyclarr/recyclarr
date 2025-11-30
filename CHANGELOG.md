@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Installation: Homebrew is now supported on macOS and Linux. See the
+  [installation docs][homebrew] for details.
+
+[homebrew]: https://recyclarr.dev/guide/installation/manual-install#homebrew-macos--linux
+
 ## [7.5.1] - 2025-11-29
 
 ### Fixed
