@@ -47,11 +47,11 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         {
             transactions.DeletedCustomFormats.AddRange(
                 context
-                    .Cache.TrashIdMappings
+                    .Cache.Mappings
                     // Custom format must be in the cache but NOT in the user's config
                     .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
                     // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
-                    .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.CustomFormatId))
+                    .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.ServiceId))
             );
         }
 

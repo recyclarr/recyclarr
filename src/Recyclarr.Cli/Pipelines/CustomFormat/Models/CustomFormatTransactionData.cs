@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cache;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
