@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [homebrew]: https://recyclarr.dev/guide/installation/manual-install#homebrew-macos--linux
 
+### Fixed
+
+- Sync: Crash when using `--preview` flag after rendering quality sizes table.
+
 ## [7.5.1] - 2025-11-29
 
 ### Fixed
