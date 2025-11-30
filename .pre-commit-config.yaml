@@ -1,4 +1,4 @@
-exclude: '\.idea/'
+exclude: (\.idea/|\.serena/memories/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
