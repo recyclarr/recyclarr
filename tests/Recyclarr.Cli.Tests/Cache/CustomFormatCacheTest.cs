@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Core.TestLibrary;
@@ -21,7 +21,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([
                 new TrashIdMapping("1", "one", 1),
                 new TrashIdMapping("2", "two", 2),
@@ -47,7 +47,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([
                 new TrashIdMapping("1", "one", 1),
                 new TrashIdMapping("2", "two", 2),
@@ -70,7 +70,7 @@ internal sealed class CustomFormatCacheTest
         cache.RemoveStale(serviceCfs);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([new TrashIdMapping("1", "one", 1), new TrashIdMapping("2", "two", 2)]);
     }
 
@@ -88,7 +88,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([new TrashIdMapping("1", "one", 1), new TrashIdMapping("2", "two", 2)]);
     }
 
@@ -112,7 +112,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([
                 new TrashIdMapping("1", "one_new", 1),
                 new TrashIdMapping("2", "two_new", 2),
@@ -137,7 +137,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo([
                 new TrashIdMapping("1", "one", 1),
                 new TrashIdMapping("2", "two", 2),
@@ -161,7 +161,7 @@ internal sealed class CustomFormatCacheTest
         cache.Update(transactions);
 
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .BeEquivalentTo(
                 [
                     new TrashIdMapping("1", "one", 1),
@@ -195,9 +195,9 @@ internal sealed class CustomFormatCacheTest
 
         // Assert: Should have exactly one mapping for each unique CustomFormatId
         cache
-            .TrashIdMappings.Should()
+            .Mappings.Should()
             .HaveCount(2)
-            .And.ContainSingle(x => x.CustomFormatId == 3)
-            .And.ContainSingle(x => x.CustomFormatId == 5);
+            .And.ContainSingle(x => x.ServiceId == 3)
+            .And.ContainSingle(x => x.ServiceId == 5);
     }
 }

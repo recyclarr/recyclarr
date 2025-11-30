@@ -33,7 +33,7 @@ internal class CustomFormatApiPersistencePhase(
 
         foreach (var map in transactions.DeletedCustomFormats)
         {
-            await api.DeleteCustomFormat(map.CustomFormatId, ct);
+            await api.DeleteCustomFormat(map.ServiceId, ct);
         }
 
         context.Cache.Update(transactions);

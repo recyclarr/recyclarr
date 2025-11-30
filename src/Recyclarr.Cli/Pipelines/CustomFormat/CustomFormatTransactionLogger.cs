@@ -69,11 +69,7 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
 
             foreach (var mapping in deleted)
             {
-                log.Debug(
-                    "> Deleted: {TrashId} ({CustomFormatName})",
-                    mapping.TrashId,
-                    mapping.CustomFormatName
-                );
+                log.Debug("> Deleted: {TrashId} ({Name})", mapping.TrashId, mapping.Name);
             }
         }
 
