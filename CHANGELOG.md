@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.5.0] - 2025-11-29
+
 ### Added
 
 - Quality Definitions: Per-quality size overrides allow setting explicit `min`, `max`, and
@@ -1099,7 +1101,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.4.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v7.5.0...HEAD
+[7.5.0]: https://github.com/recyclarr/recyclarr/compare/v7.4.1...v7.5.0
 [7.4.1]: https://github.com/recyclarr/recyclarr/compare/v7.4.0...v7.4.1
 [7.4.0]: https://github.com/recyclarr/recyclarr/compare/v7.3.0...v7.4.0
 [7.3.0]: https://github.com/recyclarr/recyclarr/compare/v7.2.4...v7.3.0
