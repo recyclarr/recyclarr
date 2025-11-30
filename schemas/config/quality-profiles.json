@@ -58,7 +58,7 @@
         "type": "number",
         "description": "The minimum custom format score required to download a release."
       },
-      "min_format_upgrade_score": {
+      "min_upgrade_format_score": {
         "type": "number",
         "description": "The minimum custom format score required to upgrade an already-downloaded release."
       },
