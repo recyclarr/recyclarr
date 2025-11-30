@@ -20,7 +20,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2),
@@ -57,7 +57,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 100, 1),
             NewCf.DataWithScore("", "id2", 200, 2),
@@ -93,7 +93,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([NewCf.Data("", "id1", 1), NewCf.Data("", "id2", 2)]);
 
         fixture.Inject<IServiceConfiguration>(
@@ -126,7 +126,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([NewCf.DataWithScore("", "id1", 100, 1)]);
 
         fixture.Inject<IServiceConfiguration>(
@@ -187,7 +187,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([
             NewCf.DataWithScores("", "id1", 1, ("default", 101), ("set1", 102)),
             NewCf.DataWithScores("", "id2", 2, ("default", 201), ("set2", 202)),
@@ -257,7 +257,7 @@ internal sealed class QualityProfileConfigPhaseTest
     {
         var fixture = NSubstituteFixture.Create();
 
-        var cache = fixture.Freeze<ProcessedCustomFormatCache>();
+        var cache = fixture.Freeze<CustomFormatLookup>();
         cache.AddCustomFormats([
             NewCf.DataWithScore("", "id1", 101, 1),
             NewCf.DataWithScore("", "id2", 201, 2),

@@ -10,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatConfigPhase(
     CustomFormatResourceQuery guide,
-    ProcessedCustomFormatCache cache,
+    CustomFormatLookup lookup,
     ICachePersister<CustomFormatCache> cachePersister,
     IServiceConfiguration config
 ) : IPipelinePhase<CustomFormatPipelineContext>
@@ -47,7 +47,7 @@ internal class CustomFormatConfigPhase(
         context.ConfigOutput.AddRange(processedCfs[true].SelectMany(x => x.CustomFormats));
         context.Cache = cachePersister.Load();
 
-        cache.AddCustomFormats(context.ConfigOutput);
+        lookup.AddCustomFormats(context.ConfigOutput);
 
         return Task.FromResult(PipelineFlow.Continue);
     }

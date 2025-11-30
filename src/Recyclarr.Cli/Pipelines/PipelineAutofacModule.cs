@@ -112,7 +112,7 @@ internal class PipelineAutofacModule : Module
     private static void RegisterCustomFormat(ContainerBuilder builder)
     {
         builder
-            .RegisterType<ProcessedCustomFormatCache>()
+            .RegisterType<CustomFormatLookup>()
             .As<IPipelineCache>()
             .AsSelf()
             .InstancePerLifetimeScope();

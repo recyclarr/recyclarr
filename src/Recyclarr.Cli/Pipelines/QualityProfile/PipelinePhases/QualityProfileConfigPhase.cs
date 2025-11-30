@@ -8,7 +8,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileConfigPhase(
     ILogger log,
-    ProcessedCustomFormatCache cache,
+    CustomFormatLookup lookup,
     IServiceConfiguration config
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
@@ -20,7 +20,7 @@ internal class QualityProfileConfigPhase(
         var profileAndCfs = config
             .CustomFormats.SelectMany(x => x.AssignScoresTo.Select(y => (Profile: y, x.TrashIds)))
             .SelectMany(x =>
-                x.TrashIds.Select(cache.LookupByTrashId).NotNull().Select(y => (x.Profile, Cf: y))
+                x.TrashIds.Select(lookup.LookupByTrashId).NotNull().Select(y => (x.Profile, Cf: y))
             );
 
         var allProfiles = config

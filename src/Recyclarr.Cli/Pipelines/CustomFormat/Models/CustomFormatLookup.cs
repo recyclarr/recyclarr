@@ -3,7 +3,7 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
-internal class ProcessedCustomFormatCache : IPipelineCache
+internal class CustomFormatLookup : IPipelineCache
 {
     private readonly List<CustomFormatResource> _customFormats = [];
 
