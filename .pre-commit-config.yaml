@@ -33,7 +33,7 @@ repos:
         description: CSharpier is an opinionated C# formatter inspired by Prettier.
 
   - repo: https://github.com/JoC0de/pre-commit-prettier
-    rev: v3.7.2
+    rev: v3.7.3
     hooks:
       - id: prettier
         args: [--write]
