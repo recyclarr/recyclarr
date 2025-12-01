@@ -32,6 +32,8 @@
 - Zero warnings/analysis issues
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
   polymorphism tradeoffs for discussion rather than defaulting to enums.
+- When registering types as themselves in Autofac, `RegisterType<>()` already registers "as self",
+  so don't use `.AsSelf()`; it is redundant.
 
 ### C# Requirements
 
@@ -57,7 +59,8 @@ Required Idioms:
 - Use `internal` for implementation classes (CLI apps, service implementations)
 - Use `public` only for genuine external APIs
 - Concrete classes implementing public interfaces should be `internal`
-- Records for data models
+- Records for data models. Favor immutability where reasonable. Use immutable collections along with
+  it (e.g. `IReadOnlyCollection`, `IReadOnlyDictionary`).
 - System.Text.Json: Use `JsonSerializerOptions` for convention/style settings applied uniformly.
   Reserve attributes (`[JsonPropertyName]`, etc.) for special cases only. Check for existing options
   configuration before creating new instances.
@@ -116,7 +119,8 @@ Patterns:
 - `tests/`: All C# unit and integration tests
 - `ci/`: contains scripts and other utilities utilized by github workflows
 - `.github/`: contains actions and workflows for Github
-- `docs`: Documentation for `architecture`, `decisions` (ADRs), `reference` (external info)
+- `docs`: Documentation for `architecture`, `decisions` (ADRs), `reference` (external info),
+  `memory-bank` (working memory for AI use)
 
 Some key files and directories:
 
@@ -143,12 +147,10 @@ Some key files and directories:
 
 ### Serena
 
-- Prioritize using Serena MCP tools for searching the code base over built-in and CLI tools.
+- Prioritize using Serena MCP tools for semantic search of C# code over built-in and CLI tools. You
+  must not give up on using these tools when there's errors from using them incorrectly.
 - Never read files under the `.serena` directory directly; those are working files for the Serena
   MCP tools.
-- Serena memories persist project knowledge across sessions. Check list_memories when starting work
-  on unfamiliar areas. Consider creating memories when discovering non-obvious architectural
-  decisions or gotchas.
 
 ## Scripts
 
@@ -313,3 +315,14 @@ trash_ids in Sonarr configs (or vice versa).
   sizes
 - Recyclarr Config Templates: <https://github.com/recyclarr/config-templates><br>
   Contains official Recyclarr Config and Include Templates
+
+## Memory Bank
+
+- Working memory is in `docs/memory-bank`. This is for AI use only to track persistent memory
+  between working sessions. Use `ls docs/memory-bank` at the start of a session or task to see
+  what's available.
+- You will freely read from, update/modify, create, and delete these memories as you see fit. These
+  memory bank files are entirely AI-managed.
+- Memory bank files should be small, single-topic units. Avoid monolithic memory bank files.
+  Instead, focus on decomposing memories into reusable chunks (multiple files). These are easier to
+  organize and load in isolation based on information AI needs for a given task.
