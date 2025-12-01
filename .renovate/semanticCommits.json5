@@ -1,18 +1,23 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  commitMessageExtra: "( {{currentVersion}} → {{newVersion}} )",
   packageRules: [
     {
       description: "NuGet packages in .props and .csproj files",
       matchFileNames: ["*.props", "*.csproj"],
       commitMessagePrefix: "build(deps):",
-      commitMessageExtra: "( {{currentVersion}} → {{newVersion}} )",
     },
     {
       description: "GitHub Actions",
       matchManagers: ["github-actions"],
       commitMessagePrefix: "ci(deps):",
       commitMessageTopic: "action {{depName}}",
-      commitMessageExtra: "( {{currentVersion}} → {{newVersion}} )",
+    },
+    {
+      description: "Pre-commit hooks",
+      matchManagers: ["pre-commit"],
+      commitMessagePrefix: "chore(deps):",
+      commitMessageTopic: "pre-commit hook {{depName}}",
     },
   ],
 }

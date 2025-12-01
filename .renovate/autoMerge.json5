@@ -3,6 +3,13 @@
   automergeStrategy: "rebase",
   packageRules: [
     {
+      description: "Auto-merge all patch updates",
+      matchUpdateTypes: ["patch"],
+      automerge: true,
+      automergeType: "pr",
+      ignoreTests: false,
+    },
+    {
       description: "Auto-merge NuGet patch updates",
       matchDatasources: ["nuget"],
       automerge: true,
