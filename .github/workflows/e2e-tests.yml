@@ -17,7 +17,7 @@ jobs:
   #############################################
   e2e-tests:
     needs: pre-check
-    if: needs.pre-check.outputs.should_run == 'true' && github.actor != 'renovate[bot]'
+    if: needs.pre-check.outputs.should_run == 'true' && github.event.pull_request.user.login != 'app/renovate'
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
