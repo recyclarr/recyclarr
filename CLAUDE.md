@@ -41,7 +41,9 @@ Language Features:
 
 - File-scoped namespaces: `namespace Recyclarr.Core;`
 - Primary constructors: `class Service(IDep dep, ILogger logger)`
-- Collection expressions: `[]`, `[item]`, `[item1, item2]`, `[..collection]`
+- Collection expressions (MANDATORY): `[]`, `[item]`, `[..spread]`. NEVER use `new[]`, `new
+  List<T>()`, `Array.Empty<T>()`. For type inference, prefer `[new T { }, new T { }]` over casts;
+  use `T[] x = [...]` only when simpler forms fail.
 - Records for DTOs, `init` setters
 - Pattern matching: `is not null`, switch expressions
 - Spread operator for collections: `[..first, ..second]`
@@ -64,6 +66,15 @@ Required Idioms:
 - System.Text.Json: Use `JsonSerializerOptions` for convention/style settings applied uniformly.
   Reserve attributes (`[JsonPropertyName]`, etc.) for special cases only. Check for existing options
   configuration before creating new instances.
+- `[UsedImplicitly]`: Mark runtime-used members (deserialization, reflection, DI). Cheat sheet:
+  - `[UsedImplicitly]` - type instantiated implicitly (DI, empty marker records)
+  - `[UsedImplicitly(ImplicitUseKindFlags.Assign)]` - properties set via deserialization
+  - `[UsedImplicitly(..., ImplicitUseTargetFlags.WithMembers)]` - applies to type AND all members
+  - Common: `[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]` for
+    DTOs/records deserialized from JSON/YAML
+- Suppressing warnings: NEVER use `#pragma warning disable`. Use `[SuppressMessage]` with
+  `Justification` on class/method level. Prefer class-level when multiple members need same
+  suppression.
 - LINQ method chaining over loops
 - LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
 - `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
