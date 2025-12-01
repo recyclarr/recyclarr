@@ -183,60 +183,77 @@ All scripts under `scripts/`:
 - `Install-Tooling.ps1`: Install or update local tools.
 - `Commit-Gitignore.ps1`: Commit git ignore changes.
 
-## Release Notes / Changelogs
+## Commits and Changelog
 
-- Key File: `CHANGELOG.md`
-- Follows keepachangelog.com format and rules
-- Section order (strictly enforced): Added, Changed, Deprecated, Removed, Fixed, Security
-- Newest entries are at the top of the file under the `[Unreleased]` section.
-- Audience: Non-technical end users
-- MUST add entry for: bug fixes, new features, breaking changes, deprecations, any user-observable
-  behavior change, or items that fall under the keepachangelog categories
-- NO entry for: refactoring, test-only changes, CI/build changes, documentation updates (unless
-  user-facing docs)
-- Add ONLY ONE line under the appropriate section for changes.
-- Entries should be section-aware: For example, items under a section named "Fixed" shouldn't start
-  with the word "Fixed".
-- Entries should start with a general area/scope of the progrma to which the change applies. For
-  example:
+### Path-Based Classification (deterministic)
 
-  ```md
-  ### Fixed
+Use these mappings for non-src files:
 
-  - Sync: Crash while processing quality profiles
-  ```
-
-## Conventional Commits
-
-file path-based classification:
-
-**Direct path mapping:**
-
-- `ci:` → `.github/workflows/**`, `ci/*`, `scripts/*`
+- `test:` → `tests/**`
+- `ci:` → `.github/**`, `ci/**`, `scripts/**`
 - `build:` → `*.props`, `*.csproj`, `*.slnx`, `Directory.*`, `.config/dotnet-tools.json`
-- `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.gitignore`, `.csharpierignore`,
-  `.yamllint.yml`, `.pre-commit-config.yaml`, `.markdownlint.json`, `.vscode/*`, `.dockerignore`,
-  `schemas/*`
-- `test:` → `tests/**/*.cs`, `tests/**/*.csproj`, `tests/**/Data/**`, `tests/**/*.md`
-- `docs:` → Top-level `*.md` (exclude `tests/**/*.md`), `docs/**`, `LICENSE`, `CODEOWNERS`,
-  `SECURITY.md`
+- `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.vscode/*`, `schemas/*`, linter
+  configs
+- `docs:` → `docs/**`, top-level `*.md` (except `CHANGELOG.md`)
 
-**For `src/` files - inspect git diff + CHANGELOG.md:**
+### Source Code Classification (`src/**`)
 
-- `feat:` → New public class/interface/method, CHANGELOG "Added" section, new user-facing capability
-- `fix:` → Bug fixes, CHANGELOG "Fixed", exception handling corrections
-- `refactor:` → File moves/renames, internal restructuring, no CHANGELOG entry
-- `perf:` → Performance improvements without functionality changes
+For `src/**` files, CHANGELOG determines commit type:
 
-**Breaking changes (!:):**
+- **CHANGELOG required** (user-observable change):
+  - `feat:` → CHANGELOG "Added" (new user capability)
+  - `fix:` → CHANGELOG "Fixed" (bug correction)
+  - `feat!:` / `fix!:` → CHANGELOG "Removed/Changed" (breaking change)
+  - `perf:` → CHANGELOG "Changed" (significant performance improvement)
+- **No CHANGELOG** (internal change):
+  - `refactor:` → Internal restructuring, new infrastructure for future features, code
+    reorganization. If users cannot observe it, use refactor.
 
-- CHANGELOG "Removed" section entries
-- Settings migration in `Settings/Deprecations/`
+### Scopes
 
-**Scopes from paths:**
+Derive scope from primary file path:
 
-- `src/*/Pipelines/*` → `(sync)`, `src/*/Config/*` → `(config)`, `src/*/Console/Commands/*` →
-  `(cli)`, `schemas/*` → `(yaml)`, `src/*/Cache/*` → `(cache)`
+- `src/*/Pipelines/*` → `(sync)`
+- `src/*/Config/*` → `(config)`
+- `src/*/Console/Commands/*` → `(cli)`
+- `src/*/Cache/*` → `(cache)`
+- `schemas/*` → `(yaml)`
+
+### CHANGELOG Format
+
+File: `CHANGELOG.md` (keepachangelog.com format)
+
+Section order: Added, Changed, Deprecated, Removed, Fixed, Security
+
+Entry format: `- Scope: Description`
+
+```md
+### Fixed
+
+- Sync: Crash while processing quality profiles
+```
+
+Rules:
+
+- Audience is non-technical end users
+- One line per change
+- Entries under "Fixed" should not start with "Fixed"
+- New entries go under `[Unreleased]` section near the top of the file
+
+Breaking changes format (required for any release with breaking changes):
+
+```md
+## [X.0.0] - YYYY-MM-DD
+
+This release contains **BREAKING CHANGES**. See the [vX.0 Upgrade Guide][breakingX] for required
+changes you may need to make.
+
+[breakingX]: https://recyclarr.dev/wiki/upgrade-guide/vX.0/
+
+### Changed
+
+- **BREAKING**: Description of breaking change
+```
 
 ## Logging and Console Output
 
