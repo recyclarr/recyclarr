@@ -44,5 +44,7 @@ public class ResourceProviderAutofacModule : Module
         builder.RegisterType<MediaNamingResourceQuery>().AsSelf().SingleInstance();
         builder.RegisterType<ConfigTemplatesResourceQuery>().AsSelf().SingleInstance();
         builder.RegisterType<ConfigIncludesResourceQuery>().AsSelf().SingleInstance();
+        builder.RegisterType<CfGroupResourceQuery>().AsSelf().SingleInstance();
+        builder.RegisterType<QualityProfileResourceQuery>().AsSelf().SingleInstance();
     }
 }

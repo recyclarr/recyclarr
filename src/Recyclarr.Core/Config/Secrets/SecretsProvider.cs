@@ -22,12 +22,12 @@ public class SecretsProvider : ISecretsProvider
         var yamlPath = _paths.AppDataDirectory.YamlFile("secrets");
         if (yamlPath is null)
         {
-            return new Dictionary<string, string>();
+            return [];
         }
 
         using var stream = yamlPath.OpenText();
         var deserializer = new DeserializerBuilder().Build();
         var result = deserializer.Deserialize<Dictionary<string, string>?>(stream);
-        return result ?? new Dictionary<string, string>();
+        return result ?? [];
     }
 }

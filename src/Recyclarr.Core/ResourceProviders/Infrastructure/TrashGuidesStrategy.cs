@@ -80,6 +80,20 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
         registry.Register<SonarrMediaNamingResource>(
             GlobJsonFiles(metadata.JsonPaths.Sonarr.Naming, rootPath)
         );
+
+        registry.Register<RadarrCfGroupResource>(
+            GlobJsonFiles(metadata.JsonPaths.Radarr.CfGroups, rootPath)
+        );
+        registry.Register<SonarrCfGroupResource>(
+            GlobJsonFiles(metadata.JsonPaths.Sonarr.CfGroups, rootPath)
+        );
+
+        registry.Register<RadarrQualityProfileResource>(
+            GlobJsonFiles(metadata.JsonPaths.Radarr.QualityProfiles, rootPath)
+        );
+        registry.Register<SonarrQualityProfileResource>(
+            GlobJsonFiles(metadata.JsonPaths.Sonarr.QualityProfiles, rootPath)
+        );
     }
 
     private IEnumerable<IFileInfo> GlobJsonFiles(

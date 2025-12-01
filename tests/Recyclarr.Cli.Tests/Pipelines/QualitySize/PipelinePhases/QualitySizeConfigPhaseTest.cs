@@ -192,7 +192,7 @@ internal sealed class QualitySizeConfigPhaseTest
         registry.Register<RadarrQualitySizeResource>(radarrFiles);
         registry.Register<SonarrQualitySizeResource>(sonarrFiles);
 
-        var loader = new JsonResourceLoader(fs);
+        var loader = new JsonResourceLoader();
         var log = Substitute.For<ILogger>();
         return new QualitySizeResourceQuery(registry, loader, log);
     }

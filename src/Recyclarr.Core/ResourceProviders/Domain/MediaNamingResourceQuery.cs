@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.ResourceProviders.Domain;
@@ -16,7 +17,7 @@ public class MediaNamingResourceQuery(
         log.Debug("MediaNaming: Found {Count} naming files in registry", files.Count);
 
         var allData = loader
-            .Load<RadarrMediaNamingResource>(files)
+            .Load<RadarrMediaNamingResource>(files, GlobalJsonSerializerSettings.Guide)
             .Select(tuple => tuple.Resource)
             .ToList();
 
@@ -41,7 +42,7 @@ public class MediaNamingResourceQuery(
         log.Debug("MediaNaming: Found {Count} naming files in registry", files.Count);
 
         var allData = loader
-            .Load<SonarrMediaNamingResource>(files)
+            .Load<SonarrMediaNamingResource>(files, GlobalJsonSerializerSettings.Guide)
             .Select(tuple => tuple.Resource)
             .ToList();
 

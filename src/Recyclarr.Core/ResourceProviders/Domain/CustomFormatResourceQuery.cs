@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide.CustomFormat;
 
@@ -36,7 +37,7 @@ public class CustomFormatResourceQuery(
         var files = registry.Get<TResource>();
         log.Debug("CustomFormat: Found {Count} CF files in registry", files.Count);
 
-        var loaded = loader.Load<TResource>(files);
+        var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
         return loaded
             .Select(tuple => AssignCategory(tuple, categories))

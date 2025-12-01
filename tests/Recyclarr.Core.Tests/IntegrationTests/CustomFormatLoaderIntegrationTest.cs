@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
@@ -20,7 +21,9 @@ internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
             Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "second.json")),
         };
 
-        var results = sut.Load<CustomFormatResource>(files).Select(t => t.Resource).ToList();
+        var results = sut.Load<CustomFormatResource>(files, GlobalJsonSerializerSettings.Guide)
+            .Select(t => t.Resource)
+            .ToList();
 
         results
             .Should()

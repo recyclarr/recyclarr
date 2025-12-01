@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.ResourceProviders.Domain;
@@ -32,7 +33,7 @@ public class QualitySizeResourceQuery(
         log.Debug("QualitySize: Found {Count} quality size files in registry", files.Count);
 
         return loader
-            .Load<TResource>(files)
+            .Load<TResource>(files, GlobalJsonSerializerSettings.Guide)
             .Select(tuple => tuple.Resource)
             .GroupBy(x => x.Type, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.Last())

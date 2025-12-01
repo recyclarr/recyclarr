@@ -1,26 +1,31 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Text.Json;
-using Recyclarr.Json;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-public class JsonResourceLoader(IFileSystem fs)
+[SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used for DI")]
+public class JsonResourceLoader
 {
     public IEnumerable<(TResource Resource, IFileInfo SourceFile)> Load<TResource>(
-        IEnumerable<IFileInfo> files
+        IEnumerable<IFileInfo> files,
+        JsonSerializerOptions options
     )
         where TResource : class
     {
         return files
-            .Select(file => (Resource: DeserializeFile<TResource>(file), SourceFile: file))
+            .Select(file => (Resource: DeserializeFile<TResource>(file, options), SourceFile: file))
             .Where(tuple => tuple.Resource is not null)
             .Cast<(TResource, IFileInfo)>();
     }
 
-    private TResource? DeserializeFile<TResource>(IFileInfo file)
+    private static TResource? DeserializeFile<TResource>(
+        IFileInfo file,
+        JsonSerializerOptions options
+    )
         where TResource : class
     {
-        var json = fs.File.ReadAllText(file.FullName);
-        return JsonSerializer.Deserialize<TResource>(json, GlobalJsonSerializerSettings.Guide);
+        using var stream = file.OpenRead();
+        return JsonSerializer.Deserialize<TResource>(stream, options);
     }
 }

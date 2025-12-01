@@ -50,7 +50,7 @@ internal sealed class CustomFormatDataListerTest
             fs.FileInfo.New("/sonarr/cf2.json"),
         ]);
 
-        var loader = new JsonResourceLoader(fs);
+        var loader = new JsonResourceLoader();
 
         var categoryRegistry = new ResourceRegistry<IFileInfo>();
         categoryRegistry.Register<RadarrCategoryMarkdownResource>([]);
