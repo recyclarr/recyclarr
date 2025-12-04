@@ -156,13 +156,6 @@ Some key files and directories:
   context. When verbose output is needed for debugging, pipe to a log file (`dotnet test -v d 2>&1 >
   /tmp/test.log`) and read from it with targeted searches (`rg "pattern" /tmp/test.log`).
 
-### Serena
-
-- Prioritize using Serena MCP tools for semantic search of C# code over built-in and CLI tools. You
-  must not give up on using these tools when there's errors from using them incorrectly.
-- Never read files under the `.serena` directory directly; those are working files for the Serena
-  MCP tools.
-
 ## Scripts
 
 All scripts under `scripts/`:
