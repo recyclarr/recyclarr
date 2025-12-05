@@ -5,71 +5,63 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 [UsedImplicitly]
 public record QualityProfileDto
 {
-    private readonly bool? _upgradeAllowed;
-    private readonly int? _minFormatScore;
-    private readonly int? _minUpgradeFormatScore;
-    private int? _cutoff;
-    private readonly int? _cutoffFormatScore;
-    private readonly string _name = "";
-    private IReadOnlyCollection<ProfileItemDto> _items = [];
-
     public int? Id { get; set; }
 
     public string Name
     {
-        get => _name;
+        get;
         init
         {
-            if (string.IsNullOrEmpty(_name))
+            if (string.IsNullOrEmpty(field))
             {
-                _name = value;
+                field = value;
             }
         }
-    }
+    } = "";
 
     public bool? UpgradeAllowed
     {
-        get => _upgradeAllowed;
-        init => DtoUtil.SetIfNotNull(ref _upgradeAllowed, value);
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public int? MinFormatScore
     {
-        get => _minFormatScore;
-        init => DtoUtil.SetIfNotNull(ref _minFormatScore, value);
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public int? MinUpgradeFormatScore
     {
-        get => _minUpgradeFormatScore;
-        init => DtoUtil.SetIfNotNull(ref _minUpgradeFormatScore, value);
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public int? Cutoff
     {
-        get => _cutoff;
-        set => DtoUtil.SetIfNotNull(ref _cutoff, value);
+        get;
+        set => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public int? CutoffFormatScore
     {
-        get => _cutoffFormatScore;
-        init => DtoUtil.SetIfNotNull(ref _cutoffFormatScore, value);
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public IReadOnlyCollection<ProfileFormatItemDto> FormatItems { get; init; } = [];
 
     public IReadOnlyCollection<ProfileItemDto> Items
     {
-        get => _items;
+        get;
         set
         {
             if (value.Count > 0)
             {
-                _items = value;
+                field = value;
             }
         }
-    }
+    } = [];
 
     [UsedImplicitly, JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
@@ -89,15 +81,13 @@ public record ProfileFormatItemDto
 [UsedImplicitly]
 public record ProfileItemDto
 {
-    private readonly bool? _allowed;
-
     public int? Id { get; set; }
     public string? Name { get; init; }
 
     public bool? Allowed
     {
-        get => _allowed;
-        init => DtoUtil.SetIfNotNull(ref _allowed, value);
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
     public ProfileItemQualityDto? Quality { get; init; }
