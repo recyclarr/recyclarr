@@ -86,13 +86,20 @@ Required Idioms:
 Core Mandates:
 
 - **Tests must verify BEHAVIOR, not implementation detail!**
-- ALWAYS test new functionality using a single, high level integration test that verifies the "happy
-  path". Then, based on code coverage, consider other integration tests for failure or edge cases.
-  Continue to validate code coverage (lines of code covered, NOT percentage statistics) after every
-  single integration test is added. If an integration test is unable to exercise a significant area
-  of code, only then should you consider a unit test (highest level of granularity).
-- Avoid super granular unit tests with heavy mocking, even if you find this pattern in the existing
-  code.
+- ALWAYS start by writing a high level integration test that fails first (red) for the "happy path",
+  then implement until it passes (green). Based on code coverage, consider other integration tests
+  for failure or edge cases. Continue to validate code coverage (lines of code covered, NOT
+  percentage statistics) after every integration test is added. If an integration test cannot
+  exercise a significant area of code, only then should you consider a unit test (highest level of
+  granularity).
+- Avoid long-lived super granular unit tests with heavy mocking, even if you find this pattern in
+  the existing code.
+- Use fine-grained unit tests as disposable tools during RCA or initial implementation to pin down
+  defects or edge cases, then delete the ones that no longer add durable value. Keep only tests that
+  materially harden behavior.
+- For regressions, first capture the failure with an integration test. If the bug resists
+  integration-level reproduction, use a temporary fine-grained test to isolate it, then remove it
+  once fixed unless it materially improves regression safety.
 - Focus on high level integration tests that verify large chunks of the system. These are less
   brittle and result in more meaningful tests.
 - Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Stubs for
@@ -105,6 +112,7 @@ Core Mandates:
 - Integration test fixtures MUST derive from one of the base test fixture classes:
   - `IntegrationTestFixture`: Integration tests for the Recyclarr.Core library.
   - `CliIntegrationTestFixture`: Integration tests for the Recyclarr.Cli library.
+- NEVER remove valid coverage from a test as a solution to test failures!
 
 Patterns:
 
@@ -114,6 +122,15 @@ Patterns:
 - Static registration methods in modules
 - `RegisterType<Impl>().As<IInterface>()`
 - Lifecycle: `SingleInstance()`, `InstancePerLifetimeScope()`
+
+End to End Tests:
+
+- Default to skipped and tagged: `[TestFixture(Category = "E2E"), Explicit]`
+- Run explicitly with `dotnet test --filter` (required because of `Explicit`)
+- When you run them, pipe stdout+stderr to a file in `/tmp` so you can `rg` logs without rerunning
+- No `-v` option is to be used when you're piping to a file
+- Add durable debug logs when existing ones don't explain failures; keep them concise and useful
+  long-term, not noisy or disposable.
 
 ## Backward Compatibility
 
