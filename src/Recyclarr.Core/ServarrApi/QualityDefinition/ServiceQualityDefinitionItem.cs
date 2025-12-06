@@ -1,23 +1,23 @@
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class ServiceQualityItem
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record ServiceQualityItem
 {
-    public int Id { get; set; }
-    public string Modifier { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string Source { get; set; } = "";
-    public int Resolution { get; set; }
+    public int Id { get; init; }
+    public string Modifier { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Source { get; init; } = "";
+    public int Resolution { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public class ServiceQualityDefinitionItem
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record ServiceQualityDefinitionItem
 {
-    public int Id { get; set; }
-    public ServiceQualityItem? Quality { get; set; }
-    public string Title { get; set; } = "";
-    public int Weight { get; set; }
-    public decimal MinSize { get; set; }
-    public decimal? MaxSize { get; set; }
-    public decimal? PreferredSize { get; set; }
+    public int Id { get; init; }
+    public ServiceQualityItem? Quality { get; init; }
+    public string Title { get; init; } = "";
+    public int Weight { get; init; }
+    public decimal MinSize { get; init; }
+    public decimal? MaxSize { get; init; }
+    public decimal? PreferredSize { get; init; }
 }

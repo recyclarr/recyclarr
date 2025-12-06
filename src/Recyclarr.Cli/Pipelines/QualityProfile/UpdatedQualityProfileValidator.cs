@@ -8,13 +8,13 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
 {
     public UpdatedQualityProfileValidator()
     {
-        RuleFor(x => x.ProfileConfig.Profile.MinFormatScore).Custom(ValidateMinScoreSatisfied);
+        RuleFor(x => x.ProfileConfig.Config.MinFormatScore).Custom(ValidateMinScoreSatisfied);
 
-        RuleFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
+        RuleFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
             .Custom(ValidateCutoff!)
-            .When(x => x.ProfileConfig.Profile.UpgradeUntilQuality is not null);
+            .When(x => x.ProfileConfig.Config.UpgradeUntilQuality is not null);
 
-        RuleFor(x => x.ProfileConfig.Profile.Qualities)
+        RuleFor(x => x.ProfileConfig.Config.Qualities)
             .NotEmpty()
             .When(x => x.UpdateReason == QualityProfileUpdateReason.New)
             .WithMessage("`qualities` is required when creating profiles for the first time");

@@ -26,7 +26,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset),
             ],
             ProfileDto = new QualityProfileDto { Name = "ProfileName" },
-            ProfileConfig = NewQp.Processed(profileConfig),
+            ProfileConfig = NewPlan.Qp(profileConfig),
             UpdateReason = QualityProfileUpdateReason.Changed,
         };
 
@@ -42,7 +42,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
             const int expectedTotalScore = 400;
 
             result
-                .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.MinFormatScore)
+                .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore)
                 .WithErrorMessage(
                     $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
                         + $"positive scores is {expectedTotalScore}"
@@ -59,7 +59,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         {
             UpdatedQualities = new UpdatedQualities { InvalidQualityNames = ["foo1"] },
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = NewQp.Processed(profileConfig),
+            ProfileConfig = NewPlan.Qp(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New,
         };
 
@@ -67,7 +67,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var result = validator.TestValidate(updatedProfile);
 
         result
-            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
             .WithErrorMessage("`until_quality` references invalid quality 'foo1'");
     }
 
@@ -79,7 +79,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var updatedProfile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = NewQp.Processed(profileConfig),
+            ProfileConfig = NewPlan.Qp(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New,
         };
 
@@ -87,7 +87,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var result = validator.TestValidate(updatedProfile);
 
         result
-            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.Qualities)
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.Qualities)
             .WithErrorMessage("`qualities` is required when creating profiles for the first time");
     }
 
@@ -102,7 +102,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
             {
                 Items = [NewQp.QualityDto(1, "disabled_quality", false)],
             },
-            ProfileConfig = NewQp.Processed(profileConfig),
+            ProfileConfig = NewPlan.Qp(profileConfig),
             UpdateReason = QualityProfileUpdateReason.New,
         };
 
@@ -110,7 +110,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var result = validator.TestValidate(updatedProfile);
 
         result
-            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Profile.UpgradeUntilQuality)
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
             .WithErrorMessage(
                 "'until_quality' must refer to an existing and enabled quality or group"
             );

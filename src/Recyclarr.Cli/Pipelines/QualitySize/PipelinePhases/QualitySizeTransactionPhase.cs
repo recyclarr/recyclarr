@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -8,26 +8,40 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
 {
     public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
-        // Do not check ConfigOutput for null since the Config Phase does it for us
-        var guideQuality = context.Qualities;
+        if (!context.Plan.QualitySizesAvailable)
+        {
+            return Task.FromResult(PipelineFlow.Terminate);
+        }
+
+        var planned = context.Plan.QualitySizes;
+        var limits = context.Limits;
         var serverQuality = context.ApiFetchOutput;
 
-        var newQuality = new Collection<ServiceQualityDefinitionItem>();
-        foreach (var qualityData in guideQuality)
+        var updatedItems = new List<UpdatedQualityItem>();
+        foreach (var plannedQuality in planned.Qualities)
         {
             var serverEntry = serverQuality.FirstOrDefault(q =>
-                q.Quality?.Name == qualityData.Item.Quality
+                q.Quality?.Name == plannedQuality.Quality
             );
             if (serverEntry == null)
             {
                 log.Warning(
                     "Server lacks quality definition for {Quality}; it will be skipped",
-                    qualityData.Item.Quality
+                    plannedQuality.Quality
                 );
                 continue;
             }
 
-            var isDifferent = QualityIsDifferent(serverEntry, qualityData);
+            var resolved = ResolveValues(plannedQuality, planned.PreferredRatio, limits);
+            var item = new UpdatedQualityItem
+            {
+                Quality = plannedQuality.Quality,
+                Min = resolved.Min,
+                Max = resolved.Max,
+                Preferred = resolved.Preferred,
+                IsDifferent = IsDifferent(serverEntry, resolved, limits),
+                ServerItem = serverEntry,
+            };
 
             log.Debug(
                 "Processed Quality {Name}: "
@@ -35,38 +49,64 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
                     + "[Min: {Min1}, {Min2}] "
                     + "[Max: {Max1}, {Max2} ({MaxLimit})] "
                     + "[Preferred: {Preferred1}, {Preferred2} ({PreferredLimit})]",
-                serverEntry.Quality?.Name,
-                isDifferent,
+                item.Quality,
+                item.IsDifferent,
                 serverEntry.MinSize,
-                qualityData.Item.Min,
+                item.Min,
                 serverEntry.MaxSize,
-                qualityData.Item.Max,
-                qualityData.Limits.MaxLimit,
+                item.Max,
+                limits.MaxLimit,
                 serverEntry.PreferredSize,
-                qualityData.Item.Preferred,
-                qualityData.Limits.PreferredLimit
+                item.Preferred,
+                limits.PreferredLimit
             );
 
-            if (!isDifferent)
-            {
-                continue;
-            }
-
-            // Not using the original list again, so it's OK to modify the definition ref type objects in-place.
-            serverEntry.MinSize = qualityData.MinForApi;
-            serverEntry.MaxSize = qualityData.MaxForApi;
-            serverEntry.PreferredSize = qualityData.PreferredForApi;
-            newQuality.Add(serverEntry);
+            updatedItems.Add(item);
         }
 
-        context.TransactionOutput = newQuality;
+        context.TransactionOutput = updatedItems;
+        context.QualityDefinitionType = planned.Type;
+
         return Task.FromResult(PipelineFlow.Continue);
     }
 
-    private static bool QualityIsDifferent(ServiceQualityDefinitionItem a, QualityItemWithLimits b)
+    private static (decimal Min, decimal Max, decimal Preferred) ResolveValues(
+        PlannedQualityItem planned,
+        decimal? preferredRatio,
+        QualityItemLimits limits
+    )
     {
-        return b.IsMinDifferent(a.MinSize)
-            || b.IsMaxDifferent(a.MaxSize)
-            || b.IsPreferredDifferent(a.PreferredSize);
+        var min = planned.Min;
+        var max = Math.Min(planned.Max ?? limits.MaxLimit, limits.MaxLimit);
+        var preferred = Math.Min(planned.Preferred ?? limits.PreferredLimit, limits.PreferredLimit);
+
+        if (preferredRatio is not null)
+        {
+            var cappedMax = Math.Min(max, limits.PreferredLimit);
+            preferred = Math.Round(min + (cappedMax - min) * preferredRatio.Value, 1);
+        }
+
+        return (min, max, preferred);
+    }
+
+    private static bool IsDifferent(
+        ServiceQualityDefinitionItem server,
+        (decimal Min, decimal Max, decimal Preferred) resolved,
+        QualityItemLimits limits
+    )
+    {
+        if (server.MinSize != resolved.Min)
+        {
+            return true;
+        }
+
+        var serverMax = server.MaxSize ?? limits.MaxLimit;
+        if (serverMax != resolved.Max)
+        {
+            return true;
+        }
+
+        var serverPreferred = server.PreferredSize ?? limits.PreferredLimit;
+        return serverPreferred != resolved.Preferred;
     }
 }

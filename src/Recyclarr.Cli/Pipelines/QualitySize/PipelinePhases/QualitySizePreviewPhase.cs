@@ -1,3 +1,4 @@
+using System.Globalization;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
@@ -7,6 +8,7 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
 {
     protected override void RenderPreview(QualitySizePipelineContext context)
     {
+        var limits = context.Limits;
         var table = new Table();
 
         table.Title("Quality Sizes [red](Preview)[/]");
@@ -15,14 +17,26 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
         table.AddColumn("[bold]Max[/]");
         table.AddColumn("[bold]Preferred[/]");
 
-        // Do not check ConfigOutput for null here since the Config Phase checks that for us
-        foreach (var q in context.Qualities)
+        foreach (var item in context.TransactionOutput)
         {
-            var quality = $"[dodgerblue1]{q.Item.Quality}[/]";
-            table.AddRow(quality, q.AnnotatedMin, q.AnnotatedMax, q.AnnotatedPreferred);
+            var style = item.IsDifferent ? "bold " : "dim ";
+            table.AddRow(
+                $"[{style}dodgerblue1]{item.Quality}[/]",
+                $"[{style}default]{item.Min.ToString(CultureInfo.InvariantCulture)}[/]",
+                $"[{style}default]{FormatWithLimit(item.Max, limits.MaxLimit)}[/]",
+                $"[{style}default]{FormatWithLimit(item.Preferred, limits.PreferredLimit)}[/]"
+            );
         }
+
+        table.Caption("[grey]Bold items will be updated[/]");
 
         console.WriteLine();
         console.Write(table);
+    }
+
+    private static string FormatWithLimit(decimal value, decimal limit)
+    {
+        var formatted = value.ToString(CultureInfo.InvariantCulture);
+        return value >= limit ? $"{formatted} (Unlimited)" : formatted;
     }
 }

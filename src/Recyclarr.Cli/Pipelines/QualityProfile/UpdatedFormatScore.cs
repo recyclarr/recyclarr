@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ServarrApi.QualityProfile;
 
@@ -35,18 +35,18 @@ internal record UpdatedFormatScore(
     FormatScoreUpdateReason Reason
 )
 {
-    public static UpdatedFormatScore New(ProcessedQualityProfileScore score)
+    public static UpdatedFormatScore New(PlannedCfScore score)
     {
-        var dto = new ProfileFormatItemDto { Format = score.FormatId, Name = score.CfName };
+        var dto = new ProfileFormatItemDto { Format = score.ServiceId, Name = score.Name };
         return new UpdatedFormatScore(dto, score.Score, FormatScoreUpdateReason.New);
     }
 
     public static UpdatedFormatScore Reset(
         ProfileFormatItemDto dto,
-        ProcessedQualityProfileData profileData
+        PlannedQualityProfile profileData
     )
     {
-        var reset = profileData.Profile.ResetUnmatchedScores;
+        var reset = profileData.Config.ResetUnmatchedScores;
         var shouldReset = reset.Enabled && reset.Except.All(x => !dto.Name.EqualsIgnoreCase(x));
 
         var score = shouldReset ? 0 : dto.Score;
@@ -54,10 +54,7 @@ internal record UpdatedFormatScore(
         return new UpdatedFormatScore(dto, score, reason);
     }
 
-    public static UpdatedFormatScore Updated(
-        ProfileFormatItemDto dto,
-        ProcessedQualityProfileScore score
-    )
+    public static UpdatedFormatScore Updated(ProfileFormatItemDto dto, PlannedCfScore score)
     {
         var reason =
             dto.Score == score.Score
