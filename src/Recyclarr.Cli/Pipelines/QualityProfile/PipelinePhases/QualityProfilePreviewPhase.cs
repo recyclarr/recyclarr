@@ -25,7 +25,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
                 new Rows(new Markup("[b]Profile Updates[/]"), SetupProfileTable(profile))
             );
 
-            if (profile.ProfileConfig.Profile.Qualities.Count != 0)
+            if (profile.ProfileConfig.Config.Qualities.Count != 0)
             {
                 profileTree.AddNode(SetupQualityItemTable(profile));
             }
@@ -135,7 +135,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
 
         table.Collapse();
 
-        var sortMode = profile.ProfileConfig.Profile.QualitySort;
+        var sortMode = profile.ProfileConfig.Config.QualitySort;
         return new Rows(
             Markup.FromInterpolated(
                 CultureInfo.InvariantCulture,

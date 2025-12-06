@@ -14,27 +14,4 @@ public static class NewQualitySize
             Preferred = preferred,
         };
     }
-
-    public static QualityItemWithLimits WithLimits(
-        string quality,
-        decimal min,
-        decimal max,
-        decimal preferred
-    )
-    {
-        var item = new QualityItem
-        {
-            Quality = quality,
-            Min = min,
-            Max = max,
-            Preferred = preferred,
-        };
-        return new QualityItemWithLimits(
-            item,
-            new QualityItemLimits(
-                TestQualityItemLimits.MaxUnlimitedThreshold,
-                TestQualityItemLimits.PreferredUnlimitedThreshold
-            )
-        );
-    }
 }

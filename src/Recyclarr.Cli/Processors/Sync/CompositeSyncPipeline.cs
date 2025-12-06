@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 
@@ -13,7 +14,11 @@ internal class CompositeSyncPipeline(
     IServiceConfiguration config
 ) : ISyncPipeline
 {
-    public virtual async Task Execute(ISyncSettings settings, CancellationToken ct)
+    public virtual async Task Execute(
+        ISyncSettings settings,
+        PipelinePlan plan,
+        CancellationToken ct
+    )
     {
         log.Debug("Processing {Server} server {Name}", config.ServiceType, config.InstanceName);
 
@@ -26,7 +31,7 @@ internal class CompositeSyncPipeline(
 
         foreach (var pipeline in pipelines)
         {
-            await pipeline.Execute(settings, ct);
+            await pipeline.Execute(settings, plan, ct);
         }
 
         log.Information("Completed at {Date}", DateTime.Now);

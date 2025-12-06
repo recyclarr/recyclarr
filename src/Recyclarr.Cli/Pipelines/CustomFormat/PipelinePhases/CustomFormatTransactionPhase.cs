@@ -10,10 +10,12 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
 {
     public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
     {
+        var plannedCfs = context.Plan.CustomFormats;
         var transactions = new CustomFormatTransactionData();
 
-        foreach (var guideCf in context.ConfigOutput)
+        foreach (var planned in plannedCfs)
         {
+            var guideCf = planned.Resource;
             log.Debug(
                 "Process transaction for guide CF {TrashId} ({Name})",
                 guideCf.TrashId,
@@ -32,9 +34,10 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
             serviceCf = FindServiceCfById(context.ApiFetchOutput, guideCf.Id);
             if (serviceCf is not null)
             {
-                // We do not use AddUpdatedCustomFormat() here because it's impossible for the CFs to be identical if we
-                // got to this point. Reason: We reach this code if the names are not the same. At the very least, this
-                // means the name needs to be updated in the service.
+                // We do not use AddUpdatedCustomFormat() here because it's impossible for the CFs
+                // to be identical if we got to this point. Reason: We reach this code if the names
+                // are not the same. At the very least, this means the name needs to be updated in
+                // the service.
                 transactions.UpdatedCustomFormats.Add(guideCf);
             }
             else
@@ -49,8 +52,9 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
                 context
                     .Cache.Mappings
                     // Custom format must be in the cache but NOT in the user's config
-                    .Where(map => context.ConfigOutput.All(cf => cf.TrashId != map.TrashId))
-                    // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
+                    .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
+                    // Also, that cache-only CF must exist in the service (otherwise there is
+                    // nothing to delete)
                     .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.ServiceId))
             );
         }
@@ -107,12 +111,7 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         CustomFormatTransactionData transactions
     )
     {
-        // Use IsEquivalentTo() instead of Equals() or == operator.
-        // Guide CFs are SonarrCustomFormatResource/RadarrCustomFormatResource (derived types),
-        // while API responses deserialize to base CustomFormatResource. C# record inheritance
-        // causes Equals() to fail across type boundaries due to EqualityContract checks.
-        // IsEquivalentTo() is a non-virtual method that compares only the relevant properties.
-        if (!guideCf.IsEquivalentTo(serviceCf))
+        if (!IsEquivalent(guideCf, serviceCf))
         {
             transactions.UpdatedCustomFormats.Add(guideCf);
         }
@@ -120,6 +119,35 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         {
             transactions.UnchangedCustomFormats.Add(guideCf);
         }
+    }
+
+    // Compares custom format data for equivalence, ignoring record type differences.
+    // Guide CFs are SonarrCustomFormatResource/RadarrCustomFormatResource (derived types),
+    // while API responses deserialize to base CustomFormatResource.
+    private static bool IsEquivalent(CustomFormatResource a, CustomFormatResource b)
+    {
+        if (ReferenceEquals(a, b))
+        {
+            return true;
+        }
+
+        // FullOuterHashJoin matches specs by name. For matched pairs, delegates to
+        // CustomFormatSpecificationData equality. Returns false for unmatched specs.
+        var specsEqual = a
+            .Specifications.FullOuterHashJoin(
+                b.Specifications,
+                x => x.Name,
+                x => x.Name,
+                _ => false,
+                _ => false,
+                (x, y) => x == y
+            )
+            .All(x => x);
+
+        return a.Id == b.Id
+            && a.Name == b.Name
+            && a.IncludeCustomFormatWhenRenaming == b.IncludeCustomFormatWhenRenaming
+            && specsEqual;
     }
 
     private static CustomFormatResource? FindServiceCfByName(

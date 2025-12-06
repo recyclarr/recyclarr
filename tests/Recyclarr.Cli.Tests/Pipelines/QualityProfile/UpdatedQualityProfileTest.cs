@@ -14,7 +14,7 @@ internal sealed class UpdatedQualityProfileTest
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto { Name = "dto_name" },
-            ProfileConfig = NewQp.Processed("config_name"),
+            ProfileConfig = NewPlan.Qp("config_name"),
             UpdateReason = QualityProfileUpdateReason.New,
         };
 
@@ -27,7 +27,7 @@ internal sealed class UpdatedQualityProfileTest
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto(),
-            ProfileConfig = NewQp.Processed("config_name"),
+            ProfileConfig = NewPlan.Qp("config_name"),
             UpdateReason = QualityProfileUpdateReason.New,
         };
 
@@ -49,7 +49,7 @@ internal sealed class UpdatedQualityProfileTest
                 UpgradeAllowed = false,
                 Cutoff = 1,
             },
-            ProfileConfig = NewQp.Processed(
+            ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig
                 {
                     Name = "config_name",
@@ -112,7 +112,7 @@ internal sealed class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true),
                 },
             },
-            ProfileConfig = NewQp.Processed(""),
+            ProfileConfig = NewPlan.Qp(""),
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 0,
@@ -142,7 +142,7 @@ internal sealed class UpdatedQualityProfileTest
         var profile = new UpdatedQualityProfile
         {
             ProfileDto = new QualityProfileDto { Name = "" },
-            ProfileConfig = NewQp.Processed("config_name"),
+            ProfileConfig = NewPlan.Qp("config_name"),
             UpdatedQualities = new UpdatedQualities { Items = [new ProfileItemDto()] },
             UpdateReason = QualityProfileUpdateReason.New,
         };
@@ -168,7 +168,7 @@ internal sealed class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true),
                 },
             },
-            ProfileConfig = NewQp.Processed(
+            ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig { UpgradeUntilQuality = "Quality Item 2" }
             ),
             UpdatedQualities = new UpdatedQualities
@@ -210,7 +210,7 @@ internal sealed class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true),
                 },
             },
-            ProfileConfig = NewQp.Processed(
+            ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig { UpgradeUntilQuality = "Quality Item 9" }
             ),
             UpdatedQualities = new UpdatedQualities
@@ -249,7 +249,7 @@ internal sealed class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true),
                 },
             },
-            ProfileConfig = NewQp.Processed(
+            ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig
                 {
                     // Do not specify an `UpgradeUntilQuality` here to simulate fallback
@@ -292,7 +292,7 @@ internal sealed class UpdatedQualityProfileTest
                     NewQp.QualityDto(9, "Quality Item 9", true),
                 },
             },
-            ProfileConfig = NewQp.Processed(
+            ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig
                 {
                     // Do not specify an `UpgradeUntilQuality` here to keep existing cutoff

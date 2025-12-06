@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
@@ -9,6 +10,17 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 internal sealed class QualityProfileTransactionPhaseTest
 {
+    private static PipelinePlan CreatePlan(params PlannedQualityProfile[] profiles)
+    {
+        var plan = new PipelinePlan();
+        foreach (var profile in profiles)
+        {
+            plan.AddQualityProfile(profile);
+        }
+
+        return plan;
+    }
+
     [Test, AutoMockData]
     public async Task Non_existent_profile_names_mixed_with_valid_profiles(
         QualityProfileTransactionPhase sut
@@ -16,16 +28,12 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[] { new QualityProfileDto { Name = "profile1" } };
 
+        var invalidProfile = NewPlan.Qp("invalid_profile_name", false);
+        var validProfile = NewPlan.Qp("profile1");
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed("invalid_profile_name") with
-                {
-                    ShouldCreate = false,
-                },
-                NewQp.Processed("profile1"),
-            ],
+            Plan = CreatePlan(invalidProfile, validProfile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -43,7 +51,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                         {
                             Profile = new UpdatedQualityProfile
                             {
-                                ProfileConfig = context.ConfigOutput[1],
+                                ProfileConfig = validProfile,
                                 ProfileDto = dtos[0],
                                 UpdateReason = QualityProfileUpdateReason.Changed,
                             },
@@ -58,34 +66,28 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[] { new QualityProfileDto { Name = "irrelevant_profile" } };
 
+        var newProfile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                Qualities = [new QualityProfileQualityConfig { Name = "quality1", Enabled = true }],
+            }
+        );
+
+        var schema = new QualityProfileDto
+        {
+            Items =
+            [
+                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+            ],
+        };
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                new ProcessedQualityProfileData
-                {
-                    Profile = new QualityProfileConfig
-                    {
-                        Name = "profile1",
-                        Qualities =
-                        [
-                            new QualityProfileQualityConfig { Name = "quality1", Enabled = true },
-                        ],
-                    },
-                },
-            ],
+            Plan = CreatePlan(newProfile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
             {
-                Schema = new QualityProfileDto
-                {
-                    Items =
-                    [
-                        new ProfileItemDto
-                        {
-                            Quality = new ProfileItemQualityDto { Name = "quality1" },
-                        },
-                    ],
-                },
+                Schema = schema,
             },
         };
 
@@ -103,8 +105,8 @@ internal sealed class QualityProfileTransactionPhaseTest
                             QualitiesChanged = true,
                             Profile = new UpdatedQualityProfile
                             {
-                                ProfileConfig = context.ConfigOutput[0],
-                                ProfileDto = context.ApiFetchOutput.Schema,
+                                ProfileConfig = newProfile,
+                                ProfileDto = schema,
                                 UpdateReason = QualityProfileUpdateReason.New,
                                 UpdatedQualities = new UpdatedQualities
                                 {
@@ -154,9 +156,15 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            "profile1",
+            NewPlan.CfScore("id1", 1, 100),
+            NewPlan.CfScore("id2", 2, 500)
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput = [NewQp.Processed("profile1", ("id1", 1, 100), ("id2", 2, 500))],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -203,7 +211,7 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput = Array.Empty<ProcessedQualityProfileData>(),
+            Plan = new PipelinePlan(),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -238,11 +246,15 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            "profile1",
+            NewPlan.CfScore("id1", 1, 200),
+            NewPlan.CfScore("id2", 2, 300)
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            // Must simulate at least 1 custom format coming from configuration otherwise processing doesn't happen.
-            // Profile name must match but the format IDs for each quality should not
-            ConfigOutput = [NewQp.Processed("profile1", ("id1", 1, 200), ("id2", 2, 300))],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -287,17 +299,19 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig { Enabled = true },
+            },
+            NewPlan.CfScore("quality3", "id3", 3, 100),
+            NewPlan.CfScore("quality4", "id4", 4, 500)
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed(
-                    "profile1",
-                    true,
-                    ("quality3", "id3", 3, 100),
-                    ("quality4", "id4", 4, 500)
-                ),
-            ],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -344,26 +358,23 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = false,
+                    Except = ["cf1"],
+                },
+            },
+            NewPlan.CfScore("cf3", "id3", 3, 100),
+            NewPlan.CfScore("cf4", "id4", 4, 500)
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed(
-                    new QualityProfileConfig
-                    {
-                        Name = "profile1",
-                        ResetUnmatchedScores = new ResetUnmatchedScoresConfig
-                        {
-                            Enabled = false,
-                            // Throw in some exceptions here, just to test whether these somehow
-                            // affect the result despite Enable being set to false.
-                            Except = ["cf1"],
-                        },
-                    },
-                    ("cf3", "id3", 3, 100),
-                    ("cf4", "id4", 4, 500)
-                ),
-            ],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -410,24 +421,23 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    Except = ["cf1"],
+                },
+            },
+            NewPlan.CfScore("cf3", "id3", 3, 100),
+            NewPlan.CfScore("cf4", "id4", 4, 500)
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed(
-                    new QualityProfileConfig
-                    {
-                        Name = "profile1",
-                        ResetUnmatchedScores = new ResetUnmatchedScoresConfig
-                        {
-                            Enabled = true,
-                            Except = ["cf1"],
-                        },
-                    },
-                    ("cf3", "id3", 3, 100),
-                    ("cf4", "id4", 4, 500)
-                ),
-            ],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -476,22 +486,21 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    Except = ["cf50"],
+                },
+            }
+        );
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                NewQp.Processed(
-                    new QualityProfileConfig
-                    {
-                        Name = "profile1",
-                        ResetUnmatchedScores = new ResetUnmatchedScoresConfig
-                        {
-                            Enabled = true,
-                            Except = ["cf50"],
-                        },
-                    }
-                ),
-            ],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
         };
 
@@ -526,15 +535,11 @@ internal sealed class QualityProfileTransactionPhaseTest
             },
         };
 
+        var profile = NewPlan.Qp(new QualityProfileConfig { Name = "profile1" });
+
         var context = new QualityProfilePipelineContext
         {
-            ConfigOutput =
-            [
-                new ProcessedQualityProfileData
-                {
-                    Profile = new QualityProfileConfig { Name = "profile1" },
-                },
-            ],
+            Plan = CreatePlan(profile),
             ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
             {
                 Schema = new QualityProfileDto

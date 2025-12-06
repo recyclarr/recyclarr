@@ -13,8 +13,8 @@ internal class QualitySizePipelineContext : PipelineContext
 {
     public override string PipelineDescription => "Quality Definition";
 
-    public string QualitySizeType { get; set; } = "";
-    public IReadOnlyCollection<QualityItemWithLimits> Qualities { get; set; } = [];
     public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
-    public IList<ServiceQualityDefinitionItem> TransactionOutput { get; set; } = null!;
+    public QualityItemLimits Limits { get; set; } = null!;
+    public string QualityDefinitionType { get; set; } = null!;
+    public IReadOnlyCollection<UpdatedQualityItem> TransactionOutput { get; set; } = [];
 }

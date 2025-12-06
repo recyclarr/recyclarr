@@ -5,5 +5,5 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
 internal interface IServiceBasedMediaNamingConfigPhase
 {
-    Task<MediaNamingDto> ProcessNaming(MediaNamingResourceQuery guide, NamingFormatLookup lookup);
+    MediaNamingDto ProcessNaming(MediaNamingResourceQuery guide, NamingFormatLookup lookup);
 }

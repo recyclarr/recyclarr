@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Pipelines;
 
@@ -8,9 +9,9 @@ internal class GenericSyncPipeline<TContext>(
 ) : ISyncPipeline
     where TContext : PipelineContext, new()
 {
-    public async Task Execute(ISyncSettings settings, CancellationToken ct)
+    public async Task Execute(ISyncSettings settings, PipelinePlan plan, CancellationToken ct)
     {
-        var context = new TContext { SyncSettings = settings };
+        var context = new TContext { SyncSettings = settings, Plan = plan };
 
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
 

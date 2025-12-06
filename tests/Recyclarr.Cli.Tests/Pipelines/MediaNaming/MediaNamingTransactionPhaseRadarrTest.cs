@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
@@ -12,54 +13,68 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 )]
 internal sealed class MediaNamingTransactionPhaseRadarrTest
 {
+    private static PipelinePlan CreatePlan(MediaNamingDto dto)
+    {
+        var plan = new PipelinePlan { MediaNaming = new PlannedMediaNaming { Dto = dto } };
+        return plan;
+    }
+
     [Test, AutoMockData]
     public async Task Radarr_left_null(MediaNamingTransactionPhase sut)
     {
+        var configDto = new RadarrMediaNamingDto
+        {
+            RenameMovies = true,
+            StandardMovieFormat = "file_format",
+            MovieFolderFormat = "folder_format",
+        };
+
         var context = new MediaNamingPipelineContext
         {
             ApiFetchOutput = new RadarrMediaNamingDto(),
-            ConfigOutput = new ProcessedNamingConfig
-            {
-                Dto = new RadarrMediaNamingDto
-                {
-                    RenameMovies = true,
-                    StandardMovieFormat = "file_format",
-                    MovieFolderFormat = "folder_format",
-                },
-            },
+            Plan = CreatePlan(configDto),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Radarr_right_null(MediaNamingTransactionPhase sut)
     {
+        var apiDto = new RadarrMediaNamingDto
+        {
+            RenameMovies = true,
+            StandardMovieFormat = "file_format",
+            MovieFolderFormat = "folder_format",
+        };
+
         var context = new MediaNamingPipelineContext
         {
-            ApiFetchOutput = new RadarrMediaNamingDto
-            {
-                RenameMovies = true,
-                StandardMovieFormat = "file_format",
-                MovieFolderFormat = "folder_format",
-            },
-            ConfigOutput = new ProcessedNamingConfig { Dto = new RadarrMediaNamingDto() },
+            ApiFetchOutput = apiDto,
+            Plan = CreatePlan(new RadarrMediaNamingDto()),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ApiFetchOutput, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(apiDto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Radarr_right_and_left_with_rename(MediaNamingTransactionPhase sut)
     {
+        var configDto = new RadarrMediaNamingDto
+        {
+            RenameMovies = true,
+            StandardMovieFormat = "file_format2",
+            MovieFolderFormat = "folder_format2",
+        };
+
         var context = new MediaNamingPipelineContext
         {
             ApiFetchOutput = new RadarrMediaNamingDto
@@ -68,22 +83,14 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
                 StandardMovieFormat = "file_format",
                 MovieFolderFormat = "folder_format",
             },
-            ConfigOutput = new ProcessedNamingConfig
-            {
-                Dto = new RadarrMediaNamingDto
-                {
-                    RenameMovies = true,
-                    StandardMovieFormat = "file_format2",
-                    MovieFolderFormat = "folder_format2",
-                },
-            },
+            Plan = CreatePlan(configDto),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(context.ConfigOutput.Dto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -97,15 +104,14 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
                 StandardMovieFormat = "file_format",
                 MovieFolderFormat = "folder_format",
             },
-            ConfigOutput = new ProcessedNamingConfig
-            {
-                Dto = new RadarrMediaNamingDto
+            Plan = CreatePlan(
+                new RadarrMediaNamingDto
                 {
                     RenameMovies = false,
                     StandardMovieFormat = "file_format2",
                     MovieFolderFormat = "folder_format2",
-                },
-            },
+                }
+            ),
         };
 
         await sut.Execute(context, CancellationToken.None);

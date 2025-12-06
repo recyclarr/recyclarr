@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
@@ -6,6 +8,28 @@ using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
+/*
+ * CodeReview: Design question - we have dependencies across pipelines sometimes (e.g. CF -> QP).
+   If the CF pipeline fails and is skipped, shouldn't dependent pipelines also be skipped?
+   To make this work, wouldn't we need dependencies to be first-class (actually linked somehow) as
+   opposed to simply ordered in the composition root?
+
+   Thought: Could compose pipelines instead of making them ordered.
+
+   example today (psuedocode only):
+   - new NamingPipeline()
+   - new CustomFormatPipeline()
+   - new QualityProfilePipeline()
+
+   composition / linked list-like approach:
+   - new NamingPipeline()
+   - new CustomFormatPipeline(new QualityProfilePipeline())
+
+   if CF pipeline fails, it won't walk children.
+
+   I'm thinking this would also be useful for parallelizing pipelines later,
+   since you'd only parallelize the top level, not children.
+ */
 internal class QualityProfileTransactionPhase(
     QualityProfileStatCalculator statCalculator,
     QualityProfileLogger logger
@@ -17,7 +41,7 @@ internal class QualityProfileTransactionPhase(
 
         var updatedProfiles = BuildUpdatedProfiles(
             transactions,
-            context.ConfigOutput,
+            context.Plan.QualityProfiles,
             context.ApiFetchOutput
         );
         UpdateProfileScores(updatedProfiles);
@@ -61,7 +85,7 @@ internal class QualityProfileTransactionPhase(
 
     private static List<UpdatedQualityProfile> BuildUpdatedProfiles(
         QualityProfileTransactionData transactions,
-        IEnumerable<ProcessedQualityProfileData> processedConfig,
+        IEnumerable<PlannedQualityProfile> plannedProfiles,
         QualityProfileServiceData serviceData
     )
     {
@@ -69,9 +93,9 @@ internal class QualityProfileTransactionPhase(
         // For each match, we return a tuple including the list of custom format scores ("formatItems").
         // Using GroupJoin() because we want a LEFT OUTER JOIN so we can list which quality profiles in config
         // do not match profiles in Radarr.
-        var matchedProfiles = processedConfig.GroupJoin(
+        var matchedProfiles = plannedProfiles.GroupJoin(
             serviceData.Profiles,
-            x => x.Profile.Name,
+            x => x.Config.Name,
             x => x.Name,
             (x, y) => (x, y.FirstOrDefault()),
             StringComparer.InvariantCultureIgnoreCase
@@ -83,7 +107,7 @@ internal class QualityProfileTransactionPhase(
         {
             if (dto is null && !config.ShouldCreate)
             {
-                transactions.NonExistentProfiles.Add(config.Profile.Name);
+                transactions.NonExistentProfiles.Add(config.Config.Name);
                 continue;
             }
 
@@ -110,7 +134,7 @@ internal class QualityProfileTransactionPhase(
                         ProfileConfig = config,
                         ProfileDto = newDto,
                         UpdateReason = reason,
-                        UpdatedQualities = organizer.OrganizeItems(newDto, config.Profile),
+                        UpdatedQualities = organizer.OrganizeItems(newDto, config.Config),
                     }
                 );
             }
@@ -148,7 +172,7 @@ internal class QualityProfileTransactionPhase(
         foreach (var profile in updatedProfiles)
         {
             profile.InvalidExceptCfNames = GetInvalidExceptCfNames(
-                profile.ProfileConfig.Profile.ResetUnmatchedScores,
+                profile.ProfileConfig.Config.ResetUnmatchedScores,
                 profile.ProfileDto
             );
 
@@ -174,15 +198,20 @@ internal class QualityProfileTransactionPhase(
             .ToList();
     }
 
+    [SuppressMessage(
+        "ReSharper",
+        "ConvertClosureToMethodGroup",
+        Justification = "Keep New() for readability and consistency"
+    )]
     private static List<UpdatedFormatScore> ProcessScoreUpdates(
-        ProcessedQualityProfileData profileData,
+        PlannedQualityProfile profileData,
         QualityProfileDto profileDto
     )
     {
         var scoreMap = profileData
             .CfScores.FullOuterHashJoin(
                 profileDto.FormatItems,
-                x => x.FormatId,
+                x => x.ServiceId,
                 x => x.Format,
                 // Exists in config, but not in service (these are unusual and should be errors)
                 // See `FormatScoreUpdateReason` for reason why we need this (it's preview mode)

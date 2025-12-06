@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
@@ -14,6 +15,8 @@ namespace Recyclarr.Cli.Processors.Sync;
 [UsedImplicitly]
 internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
+    public PlanBuilder PlanBuilder { get; } = scope.Resolve<PlanBuilder>();
+    public DiagnosticsReporter DiagnosticsReporter { get; } = scope.Resolve<DiagnosticsReporter>();
     public ISyncPipeline Pipelines { get; } = scope.Resolve<ISyncPipeline>();
 }
 
@@ -89,7 +92,15 @@ internal class SyncProcessor(
                     """
                 );
 
-                await scope.Pipelines.Execute(settings, ct);
+                var (plan, diagnostics) = scope.PlanBuilder.Build();
+                scope.DiagnosticsReporter.Report(diagnostics);
+
+                if (!diagnostics.ShouldProceed)
+                {
+                    continue;
+                }
+
+                await scope.Pipelines.Execute(settings, plan, ct);
             }
             catch (Exception e)
             {

@@ -1,11 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 
 internal class NamingFormatLookup
 {
-    private readonly List<InvalidNamingConfig> _errors = [];
-    public IReadOnlyCollection<InvalidNamingConfig> Errors => _errors;
+    private readonly List<InvalidNamingEntry> _errors = [];
+    public IReadOnlyCollection<InvalidNamingEntry> Errors => _errors;
 
     public string? ObtainFormat(
         IReadOnlyDictionary<string, string> guideFormats,
@@ -29,8 +30,9 @@ internal class NamingFormatLookup
             return null;
         }
 
-        // Use lower-case for the config value because System.Text.Json doesn't let us create a case-insensitive
-        // dictionary. The MediaNamingGuideService converts all parsed guide JSON keys to lower case.
+        // Use lower-case for the config value because System.Text.Json doesn't let us create a
+        // case-insensitive dictionary. The MediaNamingGuideService converts all parsed guide JSON
+        // keys to lower case.
         var lowerKey = configFormatKey.ToLowerInvariant();
 
         var keys = new List<string> { lowerKey };
@@ -48,7 +50,7 @@ internal class NamingFormatLookup
             }
         }
 
-        _errors.Add(new InvalidNamingConfig(errorDescription, configFormatKey));
+        _errors.Add(new InvalidNamingEntry(errorDescription, configFormatKey));
         return null;
     }
 }

@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
@@ -54,7 +54,7 @@ internal sealed class NamingFormatLookupTest
         var result = sut.ObtainFormat(GuideFormats, "invalid_key", "Test Format");
 
         result.Should().BeNull();
-        sut.Errors.Should().BeEquivalentTo([new InvalidNamingConfig("Test Format", "invalid_key")]);
+        sut.Errors.Should().BeEquivalentTo([new InvalidNamingEntry("Test Format", "invalid_key")]);
     }
 
     [Test]
@@ -90,9 +90,9 @@ internal sealed class NamingFormatLookupTest
 
         sut.Errors.Should()
             .BeEquivalentTo([
-                new InvalidNamingConfig("Format A", "bad1"),
-                new InvalidNamingConfig("Format B", "bad2"),
-                new InvalidNamingConfig("Format C", "bad3"),
+                new InvalidNamingEntry("Format A", "bad1"),
+                new InvalidNamingEntry("Format B", "bad2"),
+                new InvalidNamingEntry("Format C", "bad3"),
             ]);
     }
 }

@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Pipelines;
 
@@ -6,5 +7,5 @@ namespace Recyclarr.Cli.Pipelines;
 // without needing to be aware of the generic parameters.
 internal interface ISyncPipeline
 {
-    public Task Execute(ISyncSettings settings, CancellationToken ct);
+    Task Execute(ISyncSettings settings, PipelinePlan plan, CancellationToken ct);
 }

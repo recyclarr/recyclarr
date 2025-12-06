@@ -3,11 +3,12 @@ using Autofac.Extras.Ordering;
 using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize;
@@ -36,10 +37,29 @@ internal class PipelineAutofacModule : Module
             .As<ISyncPipeline>()
             .OrderByRegistration();
 
+        RegisterPlan(builder);
         RegisterQualityProfile(builder);
         RegisterQualitySize(builder);
         RegisterCustomFormat(builder);
         RegisterMediaNaming(builder);
+    }
+
+    private static void RegisterPlan(ContainerBuilder builder)
+    {
+        builder.RegisterType<PlanBuilder>();
+        builder.RegisterType<DiagnosticsReporter>();
+
+        // ORDER HERE IS IMPORTANT!
+        // CF must run before QP (QP references CFs from plan)
+        builder
+            .RegisterTypes(
+                typeof(CustomFormatPlanComponent),
+                typeof(QualityProfilePlanComponent),
+                typeof(QualitySizePlanComponent),
+                typeof(MediaNamingPlanComponent)
+            )
+            .As<IPlanComponent>()
+            .OrderByRegistration();
     }
 
     private static void RegisterMediaNaming(ContainerBuilder builder)
@@ -55,7 +75,6 @@ internal class PipelineAutofacModule : Module
 
         builder
             .RegisterTypes(
-                typeof(MediaNamingConfigPhase),
                 typeof(MediaNamingApiFetchPhase),
                 typeof(MediaNamingTransactionPhase),
                 typeof(MediaNamingPreviewPhase),
@@ -72,7 +91,6 @@ internal class PipelineAutofacModule : Module
 
         builder
             .RegisterTypes(
-                typeof(QualityProfileConfigPhase),
                 typeof(QualityProfileApiFetchPhase),
                 typeof(QualityProfileTransactionPhase),
                 typeof(QualityProfilePreviewPhase),
@@ -99,7 +117,6 @@ internal class PipelineAutofacModule : Module
 
         builder
             .RegisterTypes(
-                typeof(QualitySizeConfigPhase),
                 typeof(QualitySizeApiFetchPhase),
                 typeof(QualitySizeTransactionPhase),
                 typeof(QualitySizePreviewPhase),
@@ -111,19 +128,12 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterCustomFormat(ContainerBuilder builder)
     {
-        builder
-            .RegisterType<CustomFormatLookup>()
-            .As<IPipelineCache>()
-            .AsSelf()
-            .InstancePerLifetimeScope();
-
         builder.RegisterType<CustomFormatDataLister>();
         builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
         builder.RegisterType<CustomFormatTransactionLogger>();
 
         builder
             .RegisterTypes(
-                typeof(CustomFormatConfigPhase),
                 typeof(CustomFormatApiFetchPhase),
                 typeof(CustomFormatTransactionPhase),
                 typeof(CustomFormatPreviewPhase),

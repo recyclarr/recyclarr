@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
@@ -13,7 +14,7 @@ internal record UpdatedQualities
 internal record UpdatedQualityProfile
 {
     public required QualityProfileDto ProfileDto { get; init; }
-    public required ProcessedQualityProfileData ProfileConfig { get; init; }
+    public required PlannedQualityProfile ProfileConfig { get; init; }
     public required QualityProfileUpdateReason UpdateReason { get; set; }
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
@@ -27,7 +28,7 @@ internal record UpdatedQualityProfile
             var name = ProfileDto.Name;
             if (string.IsNullOrEmpty(name))
             {
-                name = ProfileConfig.Profile.Name;
+                name = ProfileConfig.Config.Name;
             }
 
             return name;
@@ -36,7 +37,7 @@ internal record UpdatedQualityProfile
 
     public QualityProfileDto BuildUpdatedDto()
     {
-        var config = ProfileConfig.Profile;
+        var config = ProfileConfig.Config;
         var newDto = ProfileDto with
         {
             Name = config.Name, // Must keep this for NEW profile syncing. It will only assign if src is not null.
