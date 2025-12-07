@@ -1,14 +1,13 @@
 using System.Globalization;
-using System.Reactive.Disposables;
 using System.Text;
 using Autofac.Features.Indexed;
 using Flurl.Http;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
-using Recyclarr.Notifications.Events;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Notifications;
 
@@ -16,46 +15,15 @@ public sealed class NotificationService(
     ILogger log,
     IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettings<NotificationSettings> settings,
-    NotificationEmitter notificationEmitter,
-    IVerbosityStrategy verbosity
-) : IDisposable
+    SyncEventStorage eventStorage,
+    VerbosityOptions verbosity
+)
 {
     private const string NoInstance = "[no instance]";
-
-    private readonly Dictionary<string, List<IPresentableNotification>> _events = new();
-    private readonly CompositeDisposable _eventConnection = new();
     private readonly AppriseNotificationSettings? _settings = settings.Value.Apprise;
-
-    private string? _activeInstanceName;
-
-    public void Dispose()
-    {
-        _eventConnection.Dispose();
-    }
-
-    public void SetInstanceName(string instanceName)
-    {
-        _activeInstanceName = instanceName;
-    }
-
-    public void BeginWatchEvents()
-    {
-        _events.Clear();
-        _eventConnection.Clear();
-        _eventConnection.Add(
-            notificationEmitter.OnNotification.Subscribe(x =>
-            {
-                var key = _activeInstanceName ?? NoInstance;
-                _events.GetOrCreate(key).Add(x);
-            })
-        );
-    }
 
     public async Task SendNotification(bool succeeded)
     {
-        // stop receiving events while we build the report
-        _eventConnection.Clear();
-
         // If the user didn't configure notifications, exit early and do nothing.
         if (_settings is null)
         {
@@ -76,7 +44,7 @@ public sealed class NotificationService(
         AppriseMessageType messageType
     )
     {
-        if (string.IsNullOrEmpty(body) && !verbosity.ShouldSendEmpty())
+        if (string.IsNullOrEmpty(body) && !verbosity.SendEmpty)
         {
             log.Debug("Skipping notification because the body is empty");
             return;
@@ -112,18 +80,24 @@ public sealed class NotificationService(
     {
         var body = new StringBuilder();
 
-        foreach (var (instanceName, notifications) in _events)
+        // Group by instance, with [no instance] first, then named instances alphabetically
+        var eventsByInstance = eventStorage
+            .Events.GroupBy(e => e.InstanceName ?? NoInstance)
+            .OrderBy(g => g.Key == NoInstance ? 0 : 1)
+            .ThenBy(g => g.Key);
+
+        foreach (var instanceGroup in eventsByInstance)
         {
-            RenderInstanceEvents(body, instanceName, notifications);
+            RenderInstanceEvents(body, instanceGroup.Key, instanceGroup);
         }
 
         return body.ToString();
     }
 
-    private static void RenderInstanceEvents(
+    private void RenderInstanceEvents(
         StringBuilder body,
         string instanceName,
-        IEnumerable<IPresentableNotification> notifications
+        IEnumerable<SyncEvent> events
     )
     {
         if (instanceName == NoInstance)
@@ -137,21 +111,68 @@ public sealed class NotificationService(
 
         body.AppendLine();
 
-        var groupedEvents = notifications
-            .GroupBy(x => x.Category)
-            .ToDictionary(x => x.Key, x => x.ToList());
+        var eventList = events.ToList();
 
-        foreach (var (category, events) in groupedEvents)
+        // Render completion counts (Information category)
+        var completionEvents = eventList.OfType<CompletionEvent>().ToList();
+        if (completionEvents.Count > 0 && verbosity.SendInfo)
         {
-            body.AppendLine(
-                CultureInfo.InvariantCulture,
-                $"""
-                {category}:
+            body.AppendLine("Information:");
+            body.AppendLine();
+            foreach (var evt in completionEvents)
+            {
+                var description = GetPipelineDescription(evt.Pipeline);
+                body.AppendLine(CultureInfo.InvariantCulture, $"- {description}: {evt.Count}");
+            }
 
-                {string.Join('\n', events.Select(x => x.Render()))}
-
-                """
-            );
+            body.AppendLine();
         }
+
+        // Render errors
+        var errors = eventList
+            .OfType<DiagnosticEvent>()
+            .Where(e => e.Type == DiagnosticType.Error)
+            .ToList();
+        if (errors.Count > 0)
+        {
+            body.AppendLine("Errors:");
+            body.AppendLine();
+            foreach (var evt in errors)
+            {
+                body.AppendLine(CultureInfo.InvariantCulture, $"- {evt.Message}");
+            }
+
+            body.AppendLine();
+        }
+
+        // Render warnings (including deprecations)
+        var warnings = eventList
+            .OfType<DiagnosticEvent>()
+            .Where(e => e.Type is DiagnosticType.Warning or DiagnosticType.Deprecation)
+            .ToList();
+        if (warnings.Count > 0)
+        {
+            body.AppendLine("Warnings:");
+            body.AppendLine();
+            foreach (var evt in warnings)
+            {
+                var prefix = evt.Type == DiagnosticType.Deprecation ? "[DEPRECATED] " : "";
+                body.AppendLine(CultureInfo.InvariantCulture, $"- {prefix}{evt.Message}");
+            }
+
+            body.AppendLine();
+        }
+    }
+
+    private static string GetPipelineDescription(PipelineType? pipeline)
+    {
+        return pipeline switch
+        {
+            PipelineType.CustomFormat => "Custom Formats Synced",
+            PipelineType.QualityProfile => "Quality Profiles Synced",
+            PipelineType.QualitySize => "Quality Sizes Synced",
+            PipelineType.MediaNaming => "Media Naming Synced",
+            _ => "Items Synced",
+        };
     }
 }

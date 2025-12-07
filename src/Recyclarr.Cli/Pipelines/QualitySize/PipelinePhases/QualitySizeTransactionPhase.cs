@@ -1,10 +1,12 @@
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Sync.Events;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<QualitySizePipelineContext>
+internal class QualitySizeTransactionPhase(ILogger log, ISyncEventCollector eventCollector)
+    : IPipelinePhase<QualitySizePipelineContext>
 {
     public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
@@ -25,9 +27,8 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
             );
             if (serverEntry == null)
             {
-                log.Warning(
-                    "Server lacks quality definition for {Quality}; it will be skipped",
-                    plannedQuality.Quality
+                eventCollector.AddWarning(
+                    $"Server lacks quality definition for {plannedQuality.Quality}; it will be skipped"
                 );
                 continue;
             }
@@ -83,7 +84,7 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
         if (preferredRatio is not null)
         {
             var cappedMax = Math.Min(max, limits.PreferredLimit);
-            preferred = Math.Round(min + (cappedMax - min) * preferredRatio.Value, 1);
+            preferred = Math.Round(min + (cappedMax - min) * preferredRatio.Value, decimals: 1);
         }
 
         return (min, max, preferred);

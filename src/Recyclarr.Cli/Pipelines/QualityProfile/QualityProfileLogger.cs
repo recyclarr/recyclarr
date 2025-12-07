@@ -1,13 +1,13 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.Notifications;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 internal class QualityProfileLogger(
     ILogger log,
     ValidationLogger validationLogger,
-    NotificationEmitter notificationEmitter
+    ISyncEventCollector eventCollector
 )
 {
     public void LogTransactionNotices(QualityProfilePipelineContext context)
@@ -16,18 +16,17 @@ internal class QualityProfileLogger(
 
         if (transactions.NonExistentProfiles.Count > 0)
         {
-            log.Warning(
+            eventCollector.AddWarning(
                 "The following quality profile names have no definition in the top-level `quality_profiles` "
                     + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
                     + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
-                    + "you: {QualityProfileNames}",
-                transactions.NonExistentProfiles
+                    + $"you: {string.Join(", ", transactions.NonExistentProfiles)}"
             );
         }
 
         if (transactions.InvalidProfiles.Count > 0)
         {
-            log.Warning(
+            eventCollector.AddWarning(
                 "The following validation errors occurred for one or more quality profiles. "
                     + "These profiles will *not* be synced"
             );
@@ -45,21 +44,18 @@ internal class QualityProfileLogger(
             var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
             if (invalidQualityNames.Count != 0)
             {
-                log.Warning(
-                    "Quality profile '{ProfileName}' references invalid quality names: {InvalidNames}",
-                    profile.ProfileName,
-                    invalidQualityNames
+                eventCollector.AddWarning(
+                    $"Quality profile '{profile.ProfileName}' references invalid quality names: "
+                        + string.Join(", ", invalidQualityNames)
                 );
             }
 
             var invalidCfExceptNames = profile.InvalidExceptCfNames;
             if (invalidCfExceptNames.Count != 0)
             {
-                log.Warning(
-                    "`except` under `reset_unmatched_scores` in quality profile '{ProfileName}' has invalid "
-                        + "CF names: {CfNames}",
-                    profile.ProfileName,
-                    invalidCfExceptNames
+                eventCollector.AddWarning(
+                    $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
+                        + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}"
                 );
             }
 
@@ -120,23 +116,22 @@ internal class QualityProfileLogger(
 
         if (changedProfiles.Count != 0)
         {
-            var numProfiles = changedProfiles.Count;
             var numQuality = changedProfiles.Count(x => x.QualitiesChanged);
             var numScores = changedProfiles.Count(x => x.ScoresChanged);
 
             log.Information(
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and "
                     + "{NumScores} contain updated scores",
-                numProfiles,
+                changedProfiles.Count,
                 numQuality,
                 numScores
             );
-
-            notificationEmitter.SendStatistic("Quality Profiles Synced", numProfiles);
         }
         else
         {
             log.Information("All quality profiles are up to date!");
         }
+
+        eventCollector.AddCompletionCount(changedProfiles.Count);
     }
 }

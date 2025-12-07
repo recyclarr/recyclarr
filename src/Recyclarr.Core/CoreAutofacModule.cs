@@ -17,7 +17,6 @@ using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
 using Recyclarr.Http;
 using Recyclarr.Json.Loading;
-using Recyclarr.Logging;
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
@@ -188,9 +187,7 @@ public class CoreAutofacModule : Module
 
     private static void RegisterNotifications(ContainerBuilder builder)
     {
-        builder.RegisterType<NotificationLogSinkConfigurator>().As<ILogConfigurator>();
         builder.RegisterType<NotificationService>().SingleInstance();
-        builder.RegisterType<NotificationEmitter>().SingleInstance();
 
         // Apprise
         builder
@@ -203,20 +200,10 @@ public class CoreAutofacModule : Module
 
         builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
 
-        // Verbosity Strategies
-        builder
-            .RegisterType<MinimalVerbosityStrategy>()
-            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Minimal);
-        builder
-            .RegisterType<NormalVerbosityStrategy>()
-            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Normal);
-        builder
-            .RegisterType<DetailedVerbosityStrategy>()
-            .Keyed<IVerbosityStrategy>(NotificationVerbosity.Detailed);
         builder.Register(c =>
         {
             var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
-            return c.ResolveKeyed<IVerbosityStrategy>(settings.Verbosity);
+            return VerbosityOptions.From(settings.Verbosity);
         });
     }
 

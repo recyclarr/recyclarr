@@ -1,12 +1,12 @@
-using Recyclarr.Notifications;
 using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 internal class QualitySizeApiPersistencePhase(
     ILogger log,
     IQualityDefinitionApiService api,
-    NotificationEmitter notificationEmitter
+    ISyncEventCollector eventCollector
 ) : IPipelinePhase<QualitySizePipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -25,6 +25,7 @@ internal class QualitySizeApiPersistencePhase(
                 "All sizes for quality definition {Name} are already up to date!",
                 context.QualityDefinitionType
             );
+            eventCollector.AddCompletionCount(0);
             return PipelineFlow.Terminate;
         }
 
@@ -35,7 +36,7 @@ internal class QualitySizeApiPersistencePhase(
             itemsToUpdate.Count,
             context.QualityDefinitionType
         );
-        notificationEmitter.SendStatistic("Quality Sizes Synced", itemsToUpdate.Count);
+        eventCollector.AddCompletionCount(itemsToUpdate.Count);
 
         return PipelineFlow.Continue;
     }

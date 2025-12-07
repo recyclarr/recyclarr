@@ -1,8 +1,8 @@
-using Recyclarr.Notifications;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter notify)
+internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector eventCollector)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
@@ -10,13 +10,10 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
 
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
-            log.Warning(
-                "Custom Format with name {Name} (Trash ID: {TrashId}) will be skipped because another "
-                    + "CF already exists with that name (ID: {ConflictId}). To fix the conflict, delete or "
-                    + "rename the CF with the mentioned name",
-                guideCf.Name,
-                guideCf.TrashId,
-                conflictingId
+            eventCollector.AddWarning(
+                $"Custom Format with name {guideCf.Name} (Trash ID: {guideCf.TrashId}) will be skipped "
+                    + $"because another CF already exists with that name (ID: {conflictingId}). To fix the "
+                    + "conflict, delete or rename the CF with the mentioned name"
             );
         }
 
@@ -69,12 +66,13 @@ internal class CustomFormatTransactionLogger(ILogger log, NotificationEmitter no
         if (totalCount > 0)
         {
             log.Information("Total of {Count} custom formats were synced", totalCount);
-            notify.SendStatistic("Custom Formats Synced", totalCount);
         }
         else
         {
             log.Information("All custom formats are already up to date!");
         }
+
+        eventCollector.AddCompletionCount(totalCount);
 
         // Logging is done (and shared with) in CustomFormatPreviewPhase
     }

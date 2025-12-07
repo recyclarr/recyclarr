@@ -1,12 +1,12 @@
-using Recyclarr.Notifications;
 using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
 internal class MediaNamingApiPersistencePhase(
     ILogger log,
     IMediaNamingApiService api,
-    NotificationEmitter notificationEmitter
+    ISyncEventCollector eventCollector
 ) : IPipelinePhase<MediaNamingPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -32,11 +32,12 @@ internal class MediaNamingApiPersistencePhase(
         {
             log.Information("Media naming has been updated");
             log.Debug("Naming differences: {Diff}", differences);
-            notificationEmitter.SendStatistic("Media Naming Synced");
         }
         else
         {
             log.Information("Media naming is up to date!");
         }
+
+        eventCollector.AddCompletionCount(differences.Count != 0 ? 1 : 0);
     }
 }

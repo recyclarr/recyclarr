@@ -1,5 +1,3 @@
-using AwesomeAssertions;
-using NUnit.Framework;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
 
@@ -8,11 +6,16 @@ namespace Recyclarr.Core.Tests.Sync.Events;
 [TestFixture]
 internal sealed class SyncEventCollectorTest
 {
+    private static SyncEventCollector CreateCollector(SyncEventStorage storage)
+    {
+        return new SyncEventCollector(Substitute.For<ILogger>(), storage);
+    }
+
     [Test]
     public void Events_from_different_instances_are_distinguishable()
     {
         var storage = new SyncEventStorage();
-        var collector = new SyncEventCollector(storage);
+        var collector = CreateCollector(storage);
 
         collector.SetInstance("sonarr-main");
         collector.AddError("error 1");
@@ -31,7 +34,7 @@ internal sealed class SyncEventCollectorTest
     public void Events_from_different_pipelines_are_distinguishable()
     {
         var storage = new SyncEventStorage();
-        var collector = new SyncEventCollector(storage);
+        var collector = CreateCollector(storage);
 
         collector.SetInstance("sonarr-main");
 
@@ -53,7 +56,7 @@ internal sealed class SyncEventCollectorTest
     public void Changing_context_does_not_affect_previously_added_events()
     {
         var storage = new SyncEventStorage();
-        var collector = new SyncEventCollector(storage);
+        var collector = CreateCollector(storage);
 
         collector.SetInstance("instance-1");
         collector.SetPipeline(PipelineType.CustomFormat);
@@ -73,7 +76,7 @@ internal sealed class SyncEventCollectorTest
     public void All_diagnostic_types_accumulate_in_storage()
     {
         var storage = new SyncEventStorage();
-        var collector = new SyncEventCollector(storage);
+        var collector = CreateCollector(storage);
 
         collector.SetInstance("test");
         collector.SetPipeline(PipelineType.MediaNaming);
@@ -98,7 +101,7 @@ internal sealed class SyncEventCollectorTest
     public void Clear_removes_all_events()
     {
         var storage = new SyncEventStorage();
-        var collector = new SyncEventCollector(storage);
+        var collector = CreateCollector(storage);
 
         collector.AddError("error");
         collector.AddWarning("warning");

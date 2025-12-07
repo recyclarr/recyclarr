@@ -8,6 +8,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Recyclarr.Sync.Events;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -26,12 +27,12 @@ internal class SyncProcessor(
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
-    NotificationService notify
+    NotificationService notify,
+    ISyncEventCollector eventCollector
 )
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
-        notify.BeginWatchEvents();
         var result = await ProcessConfigs(settings, ct);
         await notify.SendNotification(result != ExitStatus.Failed);
         return result;
@@ -80,7 +81,7 @@ internal class SyncProcessor(
             try
             {
                 using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
-                notify.SetInstanceName(config.InstanceName);
+                eventCollector.SetInstance(config.InstanceName);
 
                 console.WriteLine(
                     $"""

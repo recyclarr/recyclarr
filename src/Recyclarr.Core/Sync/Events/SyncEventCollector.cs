@@ -1,6 +1,6 @@
 namespace Recyclarr.Sync.Events;
 
-public class SyncEventCollector(SyncEventStorage storage) : ISyncEventCollector
+public class SyncEventCollector(ILogger log, SyncEventStorage storage) : ISyncEventCollector
 {
     private string? _currentInstance;
     private PipelineType? _currentPipeline;
@@ -9,17 +9,25 @@ public class SyncEventCollector(SyncEventStorage storage) : ISyncEventCollector
 
     public void SetPipeline(PipelineType? pipeline) => _currentPipeline = pipeline;
 
-    public void AddError(string message) =>
+    public void AddError(string message, Exception? exception = null)
+    {
+        log.Error(exception, "{Message}", message);
         storage.Add(
             new DiagnosticEvent(_currentInstance, _currentPipeline, DiagnosticType.Error, message)
         );
+    }
 
-    public void AddWarning(string message) =>
+    public void AddWarning(string message)
+    {
+        log.Warning("{Message}", message);
         storage.Add(
             new DiagnosticEvent(_currentInstance, _currentPipeline, DiagnosticType.Warning, message)
         );
+    }
 
-    public void AddDeprecation(string message) =>
+    public void AddDeprecation(string message)
+    {
+        log.Warning("{Message}", message);
         storage.Add(
             new DiagnosticEvent(
                 _currentInstance,
@@ -28,6 +36,7 @@ public class SyncEventCollector(SyncEventStorage storage) : ISyncEventCollector
                 message
             )
         );
+    }
 
     public void AddCompletionCount(int count) =>
         storage.Add(new CompletionEvent(_currentInstance, _currentPipeline, count));
