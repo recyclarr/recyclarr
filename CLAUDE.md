@@ -77,6 +77,8 @@ Required Idioms:
   suppression.
 - LINQ method chaining over loops
 - LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
+- Named arguments for boolean literals and consecutive same-type parameters to clarify intent
+  (e.g., `new Options(SendInfo: false, SendEmpty: true)` not `new Options(false, true)`)
 - `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
 - Avoid interface pollution: not every service class must have an interface. Add interfaces when
   justified (e.g. testability, more than one implementation)
