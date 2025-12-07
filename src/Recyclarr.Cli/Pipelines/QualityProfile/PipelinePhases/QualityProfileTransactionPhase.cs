@@ -9,7 +9,7 @@ using Recyclarr.ServarrApi.QualityProfile;
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 /*
- * CodeReview: Design question - we have dependencies across pipelines sometimes (e.g. CF -> QP).
+ * TODO: Design question - we have dependencies across pipelines sometimes (e.g. CF -> QP).
    If the CF pipeline fails and is skipped, shouldn't dependent pipelines also be skipped?
    To make this work, wouldn't we need dependencies to be first-class (actually linked somehow) as
    opposed to simply ordered in the composition root?

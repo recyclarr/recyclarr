@@ -31,6 +31,7 @@ using Recyclarr.ServarrApi.System;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
+using Recyclarr.Sync.Events;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
@@ -57,6 +58,7 @@ public class CoreAutofacModule : Module
         RegisterTrashGuide(builder);
         RegisterYaml(builder);
         RegisterVersionControl(builder);
+        RegisterSyncEvents(builder);
     }
 
     private static void RegisterCache(ContainerBuilder builder)
@@ -293,5 +295,11 @@ public class CoreAutofacModule : Module
     private static void RegisterVersionControl(ContainerBuilder builder)
     {
         builder.RegisterType<GitRepositoryFactory>().As<IGitRepositoryFactory>();
+    }
+
+    private static void RegisterSyncEvents(ContainerBuilder builder)
+    {
+        builder.RegisterType<SyncEventStorage>().SingleInstance();
+        builder.RegisterType<SyncEventCollector>().As<ISyncEventCollector>().SingleInstance();
     }
 }
