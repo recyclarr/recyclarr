@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
@@ -16,7 +15,6 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
 using Recyclarr.Http;
-using Recyclarr.Json.Loading;
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
@@ -48,7 +46,6 @@ public class CoreAutofacModule : Module
         RegisterCompatibility(builder);
         RegisterConfig(builder);
         RegisterHttp(builder);
-        RegisterJson(builder);
         RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
@@ -169,20 +166,6 @@ public class CoreAutofacModule : Module
                 typeof(FlurlRedirectPreventer)
             )
             .As<FlurlSpecificEventHandler>();
-    }
-
-    private static void RegisterJson(ContainerBuilder builder)
-    {
-        builder.Register<Func<JsonSerializerOptions, IBulkJsonLoader>>(c =>
-        {
-            return settings => new BulkJsonLoader(c.Resolve<ILogger>(), settings);
-        });
-
-        // Decorators for BulkJsonLoader. We do not use RegisterDecorator() here for these reasons:
-        // - We consume the BulkJsonLoader as a delegate factory, not by instance
-        // - We do not want all implementations of BulkJsonLoader to be decorated, only a specific implementation.
-        builder.RegisterType<GuideJsonLoader>();
-        builder.RegisterType<ServiceJsonLoader>();
     }
 
     private static void RegisterNotifications(ContainerBuilder builder)

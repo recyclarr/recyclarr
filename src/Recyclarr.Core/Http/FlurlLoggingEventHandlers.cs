@@ -61,8 +61,7 @@ public class FlurlRedirectPreventer(ILogger log) : FlurlSpecificEventHandler
         );
 
         // Must follow redirect because we want an exception to be thrown eventually. If it is set to false, HTTP
-        // communication stops and existing methods will return nothing / null. This messes with Observable
-        // pipelines (which normally either expect a response object or an exception)
+        // communication stops and existing methods will return nothing / null.
         call.Redirect.Follow = true;
     }
 }

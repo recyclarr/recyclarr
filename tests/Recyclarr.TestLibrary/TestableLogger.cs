@@ -15,8 +15,8 @@ public sealed class TestableLogger : ILogger
     {
         _log = new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
-            .WriteTo.Observers(o =>
-                o.Subscribe(x => _messages.Add(x.RenderMessage(CultureInfo.InvariantCulture)))
+            .WriteTo.Sink(
+                new DelegateSink(x => _messages.Add(x.RenderMessage(CultureInfo.InvariantCulture)))
             )
             .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
             .CreateLogger();
@@ -28,4 +28,9 @@ public sealed class TestableLogger : ILogger
     }
 
     public IEnumerable<string> Messages => _messages;
+
+    private sealed class DelegateSink(Action<LogEvent> write) : ILogEventSink
+    {
+        public void Emit(LogEvent logEvent) => write(logEvent);
+    }
 }

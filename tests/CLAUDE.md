@@ -119,7 +119,7 @@ tests/
 **Key Tools**:
 
 - `Verify.That<T>()`: NSubstitute matcher with AwesomeAssertions
-- `TestableLogger`: Observable logger
+- `TestableLogger`: Log message capture for assertions
 - `TestConsole`: Console verification
 - `MockFileSystem`, `MockFileData`: Filesystem testing
 

@@ -7,8 +7,6 @@
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Serilog.Sinks.Observable" />
-    <PackageReference Include="System.Reactive" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
