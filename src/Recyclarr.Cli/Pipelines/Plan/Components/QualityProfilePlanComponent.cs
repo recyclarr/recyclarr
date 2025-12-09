@@ -1,12 +1,13 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class QualityProfilePlanComponent(IServiceConfiguration config, ILogger log)
     : IPlanComponent
 {
-    public void Process(PipelinePlan plan, PlanDiagnostics diagnostics)
+    public void Process(PipelinePlan plan, ISyncEventPublisher events)
     {
         log.Debug(
             "Planning quality profiles for {Service} {Instance}: {Count} profiles",
@@ -56,7 +57,7 @@ internal class QualityProfilePlanComponent(IServiceConfiguration config, ILogger
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf, diagnostics);
+            AddCustomFormatScore(profile, scoreConfig, cf, events);
         }
 
         // Add all profiles to the plan
@@ -70,7 +71,7 @@ internal class QualityProfilePlanComponent(IServiceConfiguration config, ILogger
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
         PlannedCustomFormat cf,
-        PlanDiagnostics diagnostics
+        ISyncEventPublisher events
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -88,7 +89,7 @@ internal class QualityProfilePlanComponent(IServiceConfiguration config, ILogger
         {
             if (existingScore.Score != scoreToUse)
             {
-                diagnostics.AddWarning(
+                events.AddWarning(
                     $"Custom format {cf.Resource.Name} ({cf.Resource.TrashId}) is duplicated in quality profile "
                         + $"{profile.Name} with conflicting scores: {existingScore.Score} vs {scoreToUse}"
                 );

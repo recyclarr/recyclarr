@@ -44,17 +44,35 @@ SyncEventCollector (lives entire sync)
 - **Warning** - Non-blocking; informational
 - **Deprecation** - Non-blocking warning with `[DEPRECATED]` prefix and distinct styling
 
-### SyncEventCollector API
+### Interface Segregation
 
-See `ISyncEventCollector` interface. Key methods:
+The event system uses interface segregation to enforce role-based dependency injection:
 
-- `SetInstance(string?)` / `SetPipeline(PipelineType?)` - Set context (called by orchestrator)
+**ISyncScopeFactory** (context management):
+
+- `SetInstance(string?)` - Set current instance context, returns `IDisposable` scope
+- `SetPipeline(PipelineType?)` - Set current pipeline context, returns `IDisposable` scope
+- Used by: Orchestrators (`SyncProcessor`, `GenericSyncPipeline`)
+
+**ISyncEventPublisher** (event publishing):
+
 - `AddError(string, Exception?)` - Logs error + collects DiagnosticEvent
 - `AddWarning(string)` - Logs warning + collects DiagnosticEvent
 - `AddDeprecation(string)` - Logs warning + collects DiagnosticEvent
-- `AddCompletionCount(int)` - Collects CompletionEvent only (no log - pipeline loggers handle this)
+- `AddCompletionCount(int)` - Collects CompletionEvent only
+- Used by: Publishers (plan components, pipeline phases, loggers)
 
-All methods dual-write: collect for UI AND log via ILogger immediately.
+**SyncEventStorage** (reading/querying):
+
+- `Diagnostics`, `Completions`, `AllEvents` - Access collected events
+- `HasInstanceErrors(string instanceName)` - Query for instance errors
+- Used by: Readers (`DiagnosticsRenderer`, `NotificationService`, `SyncProcessor`)
+
+`SyncEventCollector` implements both `ISyncScopeFactory` and `ISyncEventPublisher`. All publishing
+methods dual-write: collect for UI AND log via ILogger immediately.
+
+**Design principle**: Nothing should be both a reader and a publisher. Inject only what your role
+needs - this prevents leaky abstractions and makes dependencies explicit.
 
 ## UX Design
 
@@ -172,9 +190,10 @@ src/Recyclarr.Core/Sync/Events/
 ├── DiagnosticEvent.cs            # errors, warnings, deprecations
 ├── DiagnosticType.cs             # Error, Warning, Deprecation enum
 ├── CompletionEvent.cs            # pipeline completion counts
-├── SyncEventStorage.cs           # List<SyncEvent>, singleton within sync
-├── ISyncEventCollector.cs        # collection interface
-└── SyncEventCollector.cs         # implementation with dual-write logging
+├── SyncEventStorage.cs           # storage + query methods (HasInstanceErrors)
+├── ISyncScopeFactory.cs          # context management interface (SetInstance, SetPipeline)
+├── ISyncEventPublisher.cs        # publishing interface (AddError, AddWarning, etc.)
+└── SyncEventCollector.cs         # implements both interfaces with dual-write logging
 
 src/Recyclarr.Cli/Pipelines/
 ├── PipelineContext.cs            # base class with abstract PipelineType property
@@ -245,42 +264,25 @@ Unifying it with SyncEventCollector is a future consideration, not MVP.
 
 ## Implementation Plan
 
-### Phase 1: PlanDiagnostics Migration (NEXT)
+### Phase 1: PlanDiagnostics Migration (DONE)
 
-Migrate `PlanDiagnostics` to use `ISyncEventCollector` while **preserving immediate rendering timing**.
+Migrated `PlanDiagnostics` to use unified event system while **preserving immediate rendering timing**.
 
-**Rationale**: Unify collection first so DiagnosticsRenderer has a single data source.
+**Completed**:
 
-**Key Decision**: Plan errors continue to render immediately (before pipelines run), not deferred to
-end-of-sync. Add a TODO comment in `SyncProcessor` to revisit timing once DiagnosticsRenderer is
-complete.
+- Deleted `PlanDiagnostics.cs`
+- `PlanBuilder` injects `ISyncEventPublisher`, returns only `PipelinePlan`
+- `DiagnosticsRenderer` reads from `SyncEventStorage`, matches prototype UI exactly
+- `SyncProcessor` queries `eventStorage.HasInstanceErrors(instanceName)` for plan errors
+- Plan components use `ISyncEventPublisher` directly with inline message formatting
+- Scoped context pattern: `SetInstance`/`SetPipeline` return `IDisposable` that auto-clears on dispose
 
-**Files to modify**:
+### Phase 2: DiagnosticsRenderer (DONE)
 
-- `src/Recyclarr.Cli/Pipelines/Plan/PlanDiagnostics.cs` - Replace with `ISyncEventCollector` usage
-- `src/Recyclarr.Cli/Pipelines/Plan/PlanBuilder.cs` - Update to use collector
-- `src/Recyclarr.Cli/Pipelines/Plan/DiagnosticsReporter.cs` - Read from `SyncEventStorage`
-- `src/Recyclarr.Cli/Processors/Sync/SyncProcessor.cs` - Add TODO comment about timing
-- Plan components that inject `PlanDiagnostics`:
-  - `CustomFormatPlanComponent` - invalid trash_ids
-  - `QualityProfilePlanComponent` - duplicate CF score conflicts
-  - `MediaNamingPlanComponent` - naming format validation
-  - `QualitySizePlanComponent` - quality size errors
-
-**Migration pattern**:
-
-- `PlanDiagnostics.AddError()` → `eventCollector.AddError()`
-- `PlanDiagnostics.AddWarning()` → `eventCollector.AddWarning()`
-- `PlanDiagnostics.AddInvalidTrashId()` → `eventCollector.AddWarning()` with formatted message
-- `PlanDiagnostics.AddInvalidNaming()` → `eventCollector.AddError()` with formatted message
-- `PlanDiagnostics.ShouldProceed` → Query `SyncEventStorage` for errors
-
-### Phase 2: DiagnosticsRenderer
-
-- Implement `DiagnosticsRenderer` (Spectre panel matching POC design)
-- Wire `SyncProcessor` to call renderer at end of sync
-- Consider unifying plan + runtime diagnostics into single end-of-sync panel
-- Delete old `DiagnosticsReporter` once timing is unified
+- `DiagnosticsReporter` renders Spectre panel matching POC design
+- Called at end of sync in `SyncProcessor.Process()` (after all instances complete)
+- Renders all diagnostics (plan + runtime) in single consolidated panel
+- `SyncEventStorage` provides typed access: `Diagnostics`, `Completions`, `AllEvents`
 
 ### Phase 3: ProgressRenderer (Separate Work)
 
@@ -289,35 +291,42 @@ complete.
 - Address preview mode questions
 - Remove `log.Information()` calls for completion stats
 
-## Current State (Session 2024-12-07)
+## Current State (Session 2024-12-09)
 
 ### Event System Status
 
 **Fully implemented**:
 
-- `SyncEventCollector` + `ISyncEventCollector` - complete API
-- `SyncEventStorage` - in-memory list storage
+- `SyncEventCollector` implements `ISyncScopeFactory` + `ISyncEventPublisher`
+- `SyncEventStorage` - typed properties + `HasInstanceErrors(instanceName)` query method
 - Event types: `DiagnosticEvent`, `CompletionEvent`, `SyncEvent` base
 - `DiagnosticType` enum: Error, Warning, Deprecation
 - `PipelineType` enum: CustomFormat, QualityProfile, QualitySize, MediaNaming
 - DI registration in `CoreAutofacModule.RegisterSyncEvents()`
 
-**Integration points**:
+**Integration points by role**:
 
-- `SyncProcessor` calls `SetInstance()` before each config
-- `GenericSyncPipeline` calls `SetPipeline()` before phases
-- Runtime consumers: `CustomFormatTransactionLogger`, `QualityProfileLogger`, etc.
-- `NotificationService` reads `SyncEventStorage` for external notifications
+- **Orchestrators** (inject `ISyncScopeFactory`):
+  - `SyncProcessor` - uses `syncScopeFactory.SetInstance()` for instance context
+  - `GenericSyncPipeline` - uses `syncScopeFactory.SetPipeline()` for pipeline context
 
-### Plan Phase Status
+- **Publishers** (inject `ISyncEventPublisher`):
+  - Plan components (`CustomFormatPlanComponent`, `QualityProfilePlanComponent`, etc.)
+  - Pipeline phases (`MediaNamingApiPersistencePhase`, `QualitySizeTransactionPhase`, etc.)
+  - Loggers (`CustomFormatTransactionLogger`, `QualityProfileLogger`)
+  - Deprecation checks (`CfQualityProfilesDeprecationCheck`)
 
-**Current (to be migrated)**:
+- **Readers** (inject `SyncEventStorage`):
+  - `SyncProcessor` - uses `eventStorage.HasInstanceErrors(instanceName)` for error checks
+  - `DiagnosticsRenderer` - reads `Diagnostics` for console panel
+  - `NotificationService` - reads `AllEvents` for external notifications
 
-- `PlanDiagnostics` - separate collection class
-- `DiagnosticsReporter` - immediate Spectre panel rendering
-- Plan components inject `PlanDiagnostics` directly
+### Diagnostics Rendering (COMPLETED)
 
-**Gap**: Plan errors don't flow through `SyncEventCollector`, creating two parallel systems
+- `DiagnosticsRenderer.Report()` called at END of sync (in `SyncProcessor.Process()`)
+- Renders ALL diagnostics from ALL instances in single panel
+- Matches prototype UI: instance colors, deprecation styling, error/warning sections
+- Injected directly into `SyncProcessor` (not scoped per-config)
 
 ## Open Questions (Future Sessions)
 

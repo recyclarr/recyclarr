@@ -1,5 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Events;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
@@ -9,7 +10,7 @@ internal class CustomFormatPlanComponent(
     IServiceConfiguration config
 ) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, PlanDiagnostics diagnostics)
+    public void Process(PipelinePlan plan, ISyncEventPublisher events)
     {
         var customFormats = GetCustomFormatsForService();
 
@@ -29,7 +30,7 @@ internal class CustomFormatPlanComponent(
         // Track invalid trash_ids in diagnostics
         foreach (var invalid in processedCfs[false])
         {
-            diagnostics.AddInvalidTrashId(invalid.Id);
+            events.AddWarning($"Invalid trash_id: {invalid.Id}");
         }
 
         // Add matched CFs to plan

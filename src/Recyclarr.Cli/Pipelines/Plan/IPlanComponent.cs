@@ -1,6 +1,8 @@
+using Recyclarr.Sync.Events;
+
 namespace Recyclarr.Cli.Pipelines.Plan;
 
 internal interface IPlanComponent
 {
-    void Process(PipelinePlan plan, PlanDiagnostics diagnostics);
+    void Process(PipelinePlan plan, ISyncEventPublisher events);
 }

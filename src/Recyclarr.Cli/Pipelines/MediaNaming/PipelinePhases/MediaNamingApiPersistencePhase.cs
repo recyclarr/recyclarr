@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 internal class MediaNamingApiPersistencePhase(
     ILogger log,
     IMediaNamingApiService api,
-    ISyncEventCollector eventCollector
+    ISyncEventPublisher eventPublisher
 ) : IPipelinePhase<MediaNamingPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -38,6 +38,6 @@ internal class MediaNamingApiPersistencePhase(
             log.Information("Media naming is up to date!");
         }
 
-        eventCollector.AddCompletionCount(differences.Count != 0 ? 1 : 0);
+        eventPublisher.AddCompletionCount(differences.Count != 0 ? 1 : 0);
     }
 }

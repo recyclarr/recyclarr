@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Pipelines;
 
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
-    ISyncEventCollector eventCollector,
+    ISyncScopeFactory syncScopeFactory,
     IOrderedEnumerable<IPipelinePhase<TContext>> phases
 ) : ISyncPipeline
     where TContext : PipelineContext, new()
@@ -14,16 +14,17 @@ internal class GenericSyncPipeline<TContext>(
     public async Task Execute(ISyncSettings settings, PipelinePlan plan, CancellationToken ct)
     {
         var context = new TContext { SyncSettings = settings, Plan = plan };
-
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
-        eventCollector.SetPipeline(context.PipelineType);
 
-        foreach (var phase in phases)
+        using (syncScopeFactory.SetPipeline(context.PipelineType))
         {
-            var flow = await phase.Execute(context, ct);
-            if (flow == PipelineFlow.Terminate)
+            foreach (var phase in phases)
             {
-                break;
+                var flow = await phase.Execute(context, ct);
+                if (flow == PipelineFlow.Terminate)
+                {
+                    break;
+                }
             }
         }
     }

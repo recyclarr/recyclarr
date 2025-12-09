@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 internal class QualityProfileLogger(
     ILogger log,
     ValidationLogger validationLogger,
-    ISyncEventCollector eventCollector
+    ISyncEventPublisher eventPublisher
 )
 {
     public void LogTransactionNotices(QualityProfilePipelineContext context)
@@ -16,7 +16,7 @@ internal class QualityProfileLogger(
 
         if (transactions.NonExistentProfiles.Count > 0)
         {
-            eventCollector.AddWarning(
+            eventPublisher.AddWarning(
                 "The following quality profile names have no definition in the top-level `quality_profiles` "
                     + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
                     + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
@@ -26,7 +26,7 @@ internal class QualityProfileLogger(
 
         if (transactions.InvalidProfiles.Count > 0)
         {
-            eventCollector.AddWarning(
+            eventPublisher.AddWarning(
                 "The following validation errors occurred for one or more quality profiles. "
                     + "These profiles will *not* be synced"
             );
@@ -44,7 +44,7 @@ internal class QualityProfileLogger(
             var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
             if (invalidQualityNames.Count != 0)
             {
-                eventCollector.AddWarning(
+                eventPublisher.AddWarning(
                     $"Quality profile '{profile.ProfileName}' references invalid quality names: "
                         + string.Join(", ", invalidQualityNames)
                 );
@@ -53,7 +53,7 @@ internal class QualityProfileLogger(
             var invalidCfExceptNames = profile.InvalidExceptCfNames;
             if (invalidCfExceptNames.Count != 0)
             {
-                eventCollector.AddWarning(
+                eventPublisher.AddWarning(
                     $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
                         + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}"
                 );
@@ -132,6 +132,6 @@ internal class QualityProfileLogger(
             log.Information("All quality profiles are up to date!");
         }
 
-        eventCollector.AddCompletionCount(changedProfiles.Count);
+        eventPublisher.AddCompletionCount(changedProfiles.Count);
     }
 }

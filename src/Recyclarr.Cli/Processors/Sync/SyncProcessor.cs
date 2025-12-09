@@ -17,7 +17,6 @@ namespace Recyclarr.Cli.Processors.Sync;
 internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
     public PlanBuilder PlanBuilder { get; } = scope.Resolve<PlanBuilder>();
-    public DiagnosticsReporter DiagnosticsReporter { get; } = scope.Resolve<DiagnosticsReporter>();
     public ISyncPipeline Pipelines { get; } = scope.Resolve<ISyncPipeline>();
 }
 
@@ -28,12 +27,15 @@ internal class SyncProcessor(
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
     NotificationService notify,
-    ISyncEventCollector eventCollector
+    ISyncScopeFactory syncScopeFactory,
+    SyncEventStorage eventStorage,
+    DiagnosticsRenderer diagnosticsRenderer
 )
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
         var result = await ProcessConfigs(settings, ct);
+        diagnosticsRenderer.Report();
         await notify.SendNotification(result != ExitStatus.Failed);
         return result;
     }
@@ -80,8 +82,10 @@ internal class SyncProcessor(
         {
             try
             {
-                using var scope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
-                eventCollector.SetInstance(config.InstanceName);
+                using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(
+                    config
+                );
+                using var instanceScope = syncScopeFactory.SetInstance(config.InstanceName);
 
                 console.WriteLine(
                     $"""
@@ -93,15 +97,14 @@ internal class SyncProcessor(
                     """
                 );
 
-                var (plan, diagnostics) = scope.PlanBuilder.Build();
-                scope.DiagnosticsReporter.Report(diagnostics);
+                var plan = configScope.PlanBuilder.Build();
 
-                if (!diagnostics.ShouldProceed)
+                if (eventStorage.HasInstanceErrors(config.InstanceName))
                 {
                     continue;
                 }
 
-                await scope.Pipelines.Execute(settings, plan, ct);
+                await configScope.Pipelines.Execute(settings, plan, ct);
             }
             catch (Exception e)
             {

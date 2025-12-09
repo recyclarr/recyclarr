@@ -1,9 +1,7 @@
 namespace Recyclarr.Sync.Events;
 
-public interface ISyncEventCollector
+public interface ISyncEventPublisher
 {
-    void SetInstance(string? instanceName);
-    void SetPipeline(PipelineType? pipeline);
     void AddError(string message, Exception? exception = null);
     void AddWarning(string message);
     void AddDeprecation(string message);

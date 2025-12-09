@@ -47,7 +47,7 @@ internal class PipelineAutofacModule : Module
     private static void RegisterPlan(ContainerBuilder builder)
     {
         builder.RegisterType<PlanBuilder>();
-        builder.RegisterType<DiagnosticsReporter>();
+        builder.RegisterType<DiagnosticsRenderer>();
 
         // ORDER HERE IS IMPORTANT!
         // CF must run before QP (QP references CFs from plan)

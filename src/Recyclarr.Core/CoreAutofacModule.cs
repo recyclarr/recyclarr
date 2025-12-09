@@ -270,6 +270,10 @@ public class CoreAutofacModule : Module
     private static void RegisterSyncEvents(ContainerBuilder builder)
     {
         builder.RegisterType<SyncEventStorage>().SingleInstance();
-        builder.RegisterType<SyncEventCollector>().As<ISyncEventCollector>().SingleInstance();
+        builder
+            .RegisterType<SyncEventCollector>()
+            .As<ISyncScopeFactory>()
+            .As<ISyncEventPublisher>()
+            .SingleInstance();
     }
 }

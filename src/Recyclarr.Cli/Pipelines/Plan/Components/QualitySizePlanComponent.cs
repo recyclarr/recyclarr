@@ -1,6 +1,7 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Events;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -12,7 +13,7 @@ internal class QualitySizePlanComponent(
     ILogger log
 ) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, PlanDiagnostics diagnostics)
+    public void Process(PipelinePlan plan, ISyncEventPublisher events)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
@@ -21,14 +22,14 @@ internal class QualitySizePlanComponent(
             return;
         }
 
-        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, diagnostics);
+        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, events);
 
         var guideSizeData = GetQualitySizesForService()
             .LastOrDefault(x => x.Type.EqualsIgnoreCase(configSizeData.Type));
 
         if (guideSizeData is null)
         {
-            diagnostics.AddError(
+            events.AddError(
                 $"The specified quality definition type does not exist: {configSizeData.Type}"
             );
             return;
@@ -45,7 +46,7 @@ internal class QualitySizePlanComponent(
             .ToList();
 
         // Validate min ≤ preferred ≤ max ordering for each quality
-        if (plannedQualities.Any(quality => !ValidateQualitySizeOrder(quality, diagnostics)))
+        if (plannedQualities.Any(quality => !ValidateQualitySizeOrder(quality, events)))
         {
             return;
         }
@@ -55,7 +56,7 @@ internal class QualitySizePlanComponent(
         {
             if (!guideSizeData.Qualities.Any(x => x.Quality.EqualsIgnoreCase(configQuality.Name)))
             {
-                diagnostics.AddError(
+                events.AddError(
                     $"Quality '{configQuality.Name}' does not exist in the guide for type '{configSizeData.Type}'"
                 );
             }
@@ -69,15 +70,15 @@ internal class QualitySizePlanComponent(
         };
     }
 
-    private static decimal? ClampPreferredRatio(decimal? ratio, PlanDiagnostics diagnostics)
+    private static decimal? ClampPreferredRatio(decimal? ratio, ISyncEventPublisher events)
     {
         if (ratio is not (< 0 or > 1))
         {
             return ratio;
         }
 
-        var clamped = Math.Clamp(ratio.Value, 0, 1);
-        diagnostics.AddWarning(
+        var clamped = Math.Clamp(ratio.Value, min: 0, max: 1);
+        events.AddWarning(
             $"preferred_ratio of {ratio} is out of range (0.0-1.0), clamped to {clamped}"
         );
         return clamped;
@@ -136,13 +137,13 @@ internal class QualitySizePlanComponent(
 
     private static bool ValidateQualitySizeOrder(
         PlannedQualityItem quality,
-        PlanDiagnostics diagnostics
+        ISyncEventPublisher events
     )
     {
         // preferred null = unlimited, so min is always ≤ preferred when preferred is unlimited
         if (quality.Preferred is not null && quality.Min > quality.Preferred)
         {
-            diagnostics.AddError(
+            events.AddError(
                 $"Quality '{quality.Quality}': min ({quality.Min}) cannot be greater than preferred ({quality.Preferred})"
             );
             return false;
@@ -152,7 +153,7 @@ internal class QualitySizePlanComponent(
         // But if preferred is unlimited (null) and max is not, that's invalid
         if (quality.Preferred is null && quality.Max is not null)
         {
-            diagnostics.AddError(
+            events.AddError(
                 $"Quality '{quality.Quality}': preferred (unlimited) cannot be greater than max ({quality.Max})"
             );
             return false;
@@ -164,7 +165,7 @@ internal class QualitySizePlanComponent(
             && quality.Preferred > quality.Max
         )
         {
-            diagnostics.AddError(
+            events.AddError(
                 $"Quality '{quality.Quality}': preferred ({quality.Preferred}) cannot be greater than max ({quality.Max})"
             );
             return false;

@@ -2,7 +2,7 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector eventCollector)
+internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher eventPublisher)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
@@ -10,7 +10,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
 
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
-            eventCollector.AddWarning(
+            eventPublisher.AddWarning(
                 $"Custom Format with name {guideCf.Name} (Trash ID: {guideCf.TrashId}) will be skipped "
                     + $"because another CF already exists with that name (ID: {conflictingId}). To fix the "
                     + "conflict, delete or rename the CF with the mentioned name"
@@ -72,7 +72,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
             log.Information("All custom formats are already up to date!");
         }
 
-        eventCollector.AddCompletionCount(totalCount);
+        eventPublisher.AddCompletionCount(totalCount);
 
         // Logging is done (and shared with) in CustomFormatPreviewPhase
     }

@@ -17,15 +17,17 @@ internal sealed class SyncEventCollectorTest
         var storage = new SyncEventStorage();
         var collector = CreateCollector(storage);
 
-        collector.SetInstance("sonarr-main");
-        collector.AddError("error 1");
+        using (collector.SetInstance("sonarr-main"))
+        {
+            collector.AddError("error 1");
+        }
 
-        collector.SetInstance("radarr-4k");
-        collector.AddError("error 2");
+        using (collector.SetInstance("radarr-4k"))
+        {
+            collector.AddError("error 2");
+        }
 
-        var sonarrErrors = storage
-            .Events.OfType<DiagnosticEvent>()
-            .Where(e => e.InstanceName == "sonarr-main");
+        var sonarrErrors = storage.Diagnostics.Where(e => e.InstanceName == "sonarr-main");
 
         sonarrErrors.Should().ContainSingle().Which.Message.Should().Be("error 1");
     }
@@ -36,17 +38,20 @@ internal sealed class SyncEventCollectorTest
         var storage = new SyncEventStorage();
         var collector = CreateCollector(storage);
 
-        collector.SetInstance("sonarr-main");
+        using (collector.SetInstance("sonarr-main"))
+        {
+            using (collector.SetPipeline(PipelineType.CustomFormat))
+            {
+                collector.AddCompletionCount(185);
+            }
 
-        collector.SetPipeline(PipelineType.CustomFormat);
-        collector.AddCompletionCount(185);
+            using (collector.SetPipeline(PipelineType.QualityProfile))
+            {
+                collector.AddCompletionCount(5);
+            }
+        }
 
-        collector.SetPipeline(PipelineType.QualityProfile);
-        collector.AddCompletionCount(5);
-
-        var cfEvent = storage
-            .Events.OfType<CompletionEvent>()
-            .Single(e => e.Pipeline == PipelineType.CustomFormat);
+        var cfEvent = storage.Completions.Single(e => e.Pipeline == PipelineType.CustomFormat);
 
         cfEvent.Count.Should().Be(185);
         cfEvent.InstanceName.Should().Be("sonarr-main");
@@ -58,15 +63,19 @@ internal sealed class SyncEventCollectorTest
         var storage = new SyncEventStorage();
         var collector = CreateCollector(storage);
 
-        collector.SetInstance("instance-1");
-        collector.SetPipeline(PipelineType.CustomFormat);
-        collector.AddWarning("first warning");
+        using (collector.SetInstance("instance-1"))
+        using (collector.SetPipeline(PipelineType.CustomFormat))
+        {
+            collector.AddWarning("first warning");
+        }
 
-        collector.SetInstance("instance-2");
-        collector.SetPipeline(PipelineType.QualitySize);
-        collector.AddWarning("second warning");
+        using (collector.SetInstance("instance-2"))
+        using (collector.SetPipeline(PipelineType.QualitySize))
+        {
+            collector.AddWarning("second warning");
+        }
 
-        var firstEvent = storage.Events.OfType<DiagnosticEvent>().First();
+        var firstEvent = storage.Diagnostics[0];
         firstEvent.InstanceName.Should().Be("instance-1");
         firstEvent.Pipeline.Should().Be(PipelineType.CustomFormat);
         firstEvent.Message.Should().Be("first warning");
@@ -78,17 +87,17 @@ internal sealed class SyncEventCollectorTest
         var storage = new SyncEventStorage();
         var collector = CreateCollector(storage);
 
-        collector.SetInstance("test");
-        collector.SetPipeline(PipelineType.MediaNaming);
+        using (collector.SetInstance("test"))
+        using (collector.SetPipeline(PipelineType.MediaNaming))
+        {
+            collector.AddError("an error");
+            collector.AddWarning("a warning");
+            collector.AddDeprecation("a deprecation");
+        }
 
-        collector.AddError("an error");
-        collector.AddWarning("a warning");
-        collector.AddDeprecation("a deprecation");
-
-        storage.Events.Should().HaveCount(3);
+        storage.Diagnostics.Should().HaveCount(3);
         storage
-            .Events.OfType<DiagnosticEvent>()
-            .Select(e => e.Type)
+            .Diagnostics.Select(e => e.Type)
             .Should()
             .BeEquivalentTo([
                 DiagnosticType.Error,
@@ -108,6 +117,43 @@ internal sealed class SyncEventCollectorTest
 
         storage.Clear();
 
-        storage.Events.Should().BeEmpty();
+        storage.Diagnostics.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Scoped_context_clears_instance_on_dispose()
+    {
+        var storage = new SyncEventStorage();
+        var collector = CreateCollector(storage);
+
+        using (collector.SetInstance("test-instance"))
+        {
+            collector.AddWarning("inside scope");
+        }
+
+        collector.AddWarning("outside scope");
+
+        storage.Diagnostics[0].InstanceName.Should().Be("test-instance");
+        storage.Diagnostics[1].InstanceName.Should().BeNull();
+    }
+
+    [Test]
+    public void Scoped_context_clears_pipeline_on_dispose()
+    {
+        var storage = new SyncEventStorage();
+        var collector = CreateCollector(storage);
+
+        using (collector.SetInstance("test"))
+        {
+            using (collector.SetPipeline(PipelineType.CustomFormat))
+            {
+                collector.AddWarning("inside pipeline scope");
+            }
+
+            collector.AddWarning("outside pipeline scope");
+        }
+
+        storage.Diagnostics[0].Pipeline.Should().Be(PipelineType.CustomFormat);
+        storage.Diagnostics[1].Pipeline.Should().BeNull();
     }
 }
