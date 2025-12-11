@@ -60,7 +60,7 @@ jobs:
         if: |
           github.event.pull_request.head.repo.full_name == github.repository ||
           github.event_name != 'pull_request'
-        uses: JetBrains/qodana-action@8d427a3995aede61f5d65005f6ab24cab989d81e # v2025.2.3
+        uses: JetBrains/qodana-action@99ec27a55aaaf5ba2fd7e5816e66231caed7a72a # v2025.2.4
         with:
           upload-result: true
           # Only save cache on default branch to prevent cache storage explosion.
