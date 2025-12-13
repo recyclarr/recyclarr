@@ -7,13 +7,13 @@ public class SyncEventCollector(ILogger log, SyncEventStorage storage)
     private string? _currentInstance;
     private PipelineType? _currentPipeline;
 
-    public IDisposable SetInstance(string? instanceName)
+    public IDisposable SetInstance(string instanceName)
     {
         _currentInstance = instanceName;
         return new ContextScope(() => _currentInstance = null);
     }
 
-    public IDisposable SetPipeline(PipelineType? pipeline)
+    public IDisposable SetPipeline(PipelineType pipeline)
     {
         _currentPipeline = pipeline;
         return new ContextScope(() => _currentPipeline = null);
