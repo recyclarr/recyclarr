@@ -92,13 +92,42 @@ To start these services:
 ./scripts/Docker-Debug.ps1
 ```
 
-This runs `docker compose up -d --pull always` to start services in detached mode with the latest images.
+This runs `docker compose up -d --pull always` to start services in detached mode with the latest
+images.
 
 Service endpoints are mapped to:
 
 - Radarr develop: <http://localhost:7890>
 - Sonarr develop: <http://localhost:8990>
 - Apprise: <http://localhost:8000>
+
+### Apprise Notification Testing
+
+To test Recyclarr notifications locally:
+
+1. Create a configuration file in `docker/debugging/apprise/` named `{key}.cfg` (e.g.,
+   `discord.cfg`)
+
+1. Add your notification URL in [Apprise format][apprise_url]:
+
+   ```txt
+   discord://WEBHOOK_ID/WEBHOOK_TOKEN
+   ```
+
+1. Configure `~/.config/recyclarr/settings.yml`:
+
+   ```yaml
+   notifications:
+     apprise:
+       mode: stateful
+       base_url: http://localhost:8000
+       key: discord
+   ```
+
+The `key` must match the filename (without `.cfg`). The `docker/debugging/` directory is gitignored,
+so your webhook credentials stay local.
+
+[apprise_url]: https://github.com/caronc/apprise/wiki#notification-services
 
 ### Recyclarr Container
 
