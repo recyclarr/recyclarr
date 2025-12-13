@@ -56,7 +56,7 @@ body:
       label: Recyclarr Log File(s)
       placeholder: Drag & Drop your Recyclarr log file(s) here.
       description: >
-        Attach one or more [log files](https://recyclarr.dev/wiki/troubleshooting#obtaining-debug-logs)
+        Attach one or more [log files](https://recyclarr.dev/guide/troubleshooting/#obtaining-debug-logs)
         that are relevant to the issue. Due to the size of these files, I do not recommend pasting
         it here.
   - type: textarea
@@ -65,7 +65,7 @@ body:
       label: Configuration YAML
       render: YAML
       description: >
-        Provide your [redacted](https://recyclarr.dev/wiki/troubleshooting/#redact-config)
+        Provide your [redacted](https://recyclarr.dev/guide/troubleshooting/#redact-config)
         configuration YAML here (e.g. `recyclarr.yml`).
   - type: textarea
     attributes:

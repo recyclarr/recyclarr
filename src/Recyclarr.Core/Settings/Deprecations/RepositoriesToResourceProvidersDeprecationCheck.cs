@@ -20,7 +20,7 @@ internal class RepositoriesToResourceProvidersDeprecationCheck(ILogger log)
         log.Warning(
             "DEPRECATED: The `repositories` setting is deprecated and will be removed in a future version. "
                 + "Please migrate to the new `resource_providers` format. "
-                + "See: <https://recyclarr.dev/wiki/upgrade-guide/v8.0/#resource-providers>"
+                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#resource-providers>"
         );
 
         var newProviders = new List<ResourceProvider>(settings.ResourceProviders);

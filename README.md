@@ -14,7 +14,7 @@ guides](https://trash-guides.info/) to your Sonarr/Radarr instances.
 Recyclarr supports Radarr and Sonarr (v4 and higher only). The following information can be synced
 to these services from the TRaSH Guides. For a more detailed features list, see the [Features] page.
 
-[Features]: https://recyclarr.dev/wiki/features/
+[Features]: https://recyclarr.dev/guide/features/
 
 - Quality Profiles, including qualities and quality groups
 - Custom Formats, including scores (from guide or manual)
@@ -25,15 +25,15 @@ to these services from the TRaSH Guides. For a more detailed features list, see 
 
 [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://recyclarr.dev/)
 
-Main documentation is located in [the wiki](https://recyclarr.dev/wiki). Links provided below for
+Main documentation is located at [recyclarr.dev](https://recyclarr.dev/). Links provided below for
 some main topics.
 
-- [Installation](https://recyclarr.dev/wiki/installation/)
-- [Command Line Reference](https://recyclarr.dev/wiki/cli/)
-- [Configuration Reference](https://recyclarr.dev/wiki/yaml/config-reference/)
-- [Settings Reference](https://recyclarr.dev/wiki/yaml/settings-reference/)
-- [Troubleshooting](https://recyclarr.dev/wiki/troubleshooting/help/)
-- [Upgrade Guides](https://recyclarr.dev/wiki/upgrade-guide/)
+- [Installation](https://recyclarr.dev/guide/installation/)
+- [Command Line Reference](https://recyclarr.dev/cli/)
+- [Configuration Reference](https://recyclarr.dev/reference/configuration/)
+- [Settings Reference](https://recyclarr.dev/reference/settings/)
+- [Troubleshooting](https://recyclarr.dev/guide/troubleshooting/)
+- [Upgrade Guides](https://recyclarr.dev/guide/upgrade-guide/)
 
 ## Getting Support
 

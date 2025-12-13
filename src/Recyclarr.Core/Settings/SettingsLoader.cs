@@ -62,7 +62,7 @@ public class SettingsLoader(
 
             # Edit this file to customize the behavior of Recyclarr beyond its defaults
             # For the settings file reference guide, visit the link to the wiki below:
-            # https://recyclarr.dev/wiki/yaml/settings-reference/
+            # https://recyclarr.dev/reference/settings/
             """;
 
         var settingsFile = paths.AppDataDirectory.File("settings.yml");

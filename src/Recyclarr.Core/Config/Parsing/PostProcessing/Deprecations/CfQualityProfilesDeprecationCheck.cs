@@ -16,7 +16,7 @@ public class CfQualityProfilesDeprecationCheck(ISyncEventCollector eventCollecto
         eventCollector.AddDeprecation(
             "The `quality_profiles` element under `custom_formats` nodes was "
                 + "detected in your config. This has been renamed to `assign_scores_to`. "
-                + "See: <https://recyclarr.dev/wiki/upgrade-guide/v8.0/#assign-scores-to>"
+                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#assign-scores-to>"
         );
 
         // CustomFormats is checked for null in the CheckIfNeeded() method, which is called first.

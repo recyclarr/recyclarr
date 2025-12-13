@@ -270,7 +270,7 @@ Breaking changes format (required for any release with breaking changes):
 This release contains **BREAKING CHANGES**. See the [vX.0 Upgrade Guide][breakingX] for required
 changes you may need to make.
 
-[breakingX]: https://recyclarr.dev/wiki/upgrade-guide/vX.0/
+[breakingX]: https://recyclarr.dev/guide/upgrade-guide/vX.0/
 
 ### Changed
 

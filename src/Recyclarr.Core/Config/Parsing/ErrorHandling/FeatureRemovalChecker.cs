@@ -18,7 +18,7 @@ public sealed class FeatureRemovalChecker : INodeTypeResolver
             throw new FeatureRemovalException(
                 "Found array-style list of instances instead of named-style. "
                     + "Array-style lists of Sonarr/Radarr instances are not supported.",
-                "https://recyclarr.dev/wiki/upgrade-guide/v5.0/#instances-must-now-be-named"
+                "https://recyclarr.dev/guide/upgrade-guide/v5.0/#instances-must-now-be-named"
             );
         }
 
