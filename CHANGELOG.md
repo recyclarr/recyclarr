@@ -4,8 +4,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -17,10 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Installation: Homebrew is now supported on macOS and Linux. See the
-  [installation docs][homebrew] for details.
+- Installation: Homebrew is now supported on macOS and Linux. See the [installation docs][homebrew]
+  for details.
 
-[homebrew]: https://recyclarr.dev/guide/installation/manual-install#homebrew-macos--linux
+[homebrew]: https://recyclarr.dev/guide/installation/package-managers/#homebrew
 
 ### Fixed
 
@@ -137,7 +137,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   major release. See the [upgrade guide][qp_rename] for details.
 - Quality Definition: Improved information about sync result in console output.
 
-[qp_rename]: https://recyclarr.dev/wiki/upgrade-guide/v8.0/#assign-scores-to
+[qp_rename]: https://recyclarr.dev/guide/upgrade-guide/v8.0/#assign-scores-to
 
 ### Fixed
 
@@ -176,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This release contains **BREAKING CHANGES**. See the [v7.0 Upgrade Guide][breaking7] for required
 changes you may need to make.
 
-[breaking7]: https://recyclarr.dev/wiki/upgrade-guide/v7.0/
+[breaking7]: https://recyclarr.dev/guide/upgrade-guide/v7.0/
 
 ### Added
 
@@ -232,7 +232,7 @@ changes you may need to make.
 This release contains **BREAKING CHANGES**. See the [v6.0 Upgrade Guide][breaking6] for required
 changes you may need to make.
 
-[breaking6]: https://recyclarr.dev/wiki/upgrade-guide/v6.0/
+[breaking6]: https://recyclarr.dev/guide/upgrade-guide/v6.0/
 
 ### Added
 
@@ -277,7 +277,7 @@ changes you may need to make.
   override the full list in your configuration file. There is no longer any combination. See [the
   docs][qualitiesmerge] for more details.
 
-[qualitiesmerge]: https://recyclarr.dev/wiki/behavior/include/#managing-qualities
+[qualitiesmerge]: https://recyclarr.dev/reference/configuration/include/#managing-qualities
 
 ## [5.4.1] - 2023-09-12
 
@@ -309,8 +309,8 @@ changes you may need to make.
 - Error out when duplicate instance names are used.
 - Print score instead of object in duplicate score detection warning
 
-[includes]: https://recyclarr.dev/wiki/yaml/config-reference/include/
-[listoption]: http://recyclarr.dev/wiki/cli/config/list/templates/#include
+[includes]: https://recyclarr.dev/reference/configuration/include/
+[listoption]: https://recyclarr.dev/cli/config/list/templates/#include
 
 ## [5.3.1] - 2023-08-21
 
@@ -348,9 +348,9 @@ changes you may need to make.
   an error and the program will exit. To use multiple config templates against a single instance of
   Radarr or Sonarr, you need to manually merge those config files. See [this page][configmerge].
 
-[configmerge]: https://recyclarr.dev/wiki/yaml/config-examples/#merge-single-instance
-[except]: https://recyclarr.dev/wiki/yaml/config-reference/#qp-reset-unmatched-scores
-[resetdeprecate]: https://recyclarr.dev/wiki/upgrade-guide/v6.0/#breaking-changes
+[configmerge]: https://recyclarr.dev/reference/config-examples/#merge-single-instance
+[except]: https://recyclarr.dev/reference/configuration/#qp-reset-unmatched-scores
+[resetdeprecate]: https://recyclarr.dev/guide/upgrade-guide/v6.0/#breaking-changes
 
 ## [5.2.1] - 2023-08-07
 
@@ -431,7 +431,7 @@ changes you may need to make.
 This release contains **BREAKING CHANGES**. See the [v5.0 Upgrade Guide][breaking5] for required
 changes you may need to make.
 
-[breaking5]: https://recyclarr.dev/wiki/upgrade-guide/v5.0
+[breaking5]: https://recyclarr.dev/guide/upgrade-guide/v5.0/
 
 ### Added
 
@@ -492,10 +492,10 @@ changes you may need to make.
   deprecation warning. In a future release, the default will change from `true` to `false`. To
   prepare for that, users must explicitly state what behavior they want to avoid unwanted behavior
   in the future. Read more on the [upgrade
-  guide](https://recyclarr.dev/wiki/upgrade-guide/v5.0#replace-existing-custom-formats).
+  guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#replace-existing-custom-formats/).
 - `reset_unmatched_scores` is being moved to the `quality_profiles` section; a deprecation message
   will be logged until it is moved. Read more on the [upgrade
-  guide](https://recyclarr.dev/wiki/upgrade-guide/v5.0#reset-unmatched-scores).
+  guide](https://recyclarr.dev/guide/upgrade-guide/v5.0/#reset-unmatched-scores/).
 
 ### Fixed
 
@@ -604,7 +604,7 @@ changes you may need to make.
 This release contains **BREAKING CHANGES**. See the [v4.0 Upgrade Guide][breaking4] for required
 changes you need to make.
 
-[breaking4]: https://recyclarr.dev/wiki/upgrade-guide/v4.0
+[breaking4]: https://recyclarr.dev/guide/upgrade-guide/v4.0/
 
 ### Changed
 
@@ -674,9 +674,9 @@ changes you need to make.
 - Added more instructions, fixed broken links, and simplified the way you uncomment optional parts
   of the YAML in the starter `recyclarr.yml` template generated by the `create-config` subcommand.
 
-[breaking3]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v3.0
-[yaml-config]: https://recyclarr.dev/wiki/file-structure#directory-configs
-[secrets]: https://recyclarr.dev/wiki/reference/secrets-reference
+[breaking3]: https://recyclarr.dev/guide/upgrade-guide/v3.0/
+[yaml-config]: https://recyclarr.dev/guide/file-structure/#directory-configs
+[secrets]: https://recyclarr.dev/reference/secrets/
 
 ## [2.6.1] - 2022-10-15
 
@@ -731,7 +731,7 @@ changes you need to make.
 [CVE-2019-0981]: https://avd.aquasec.com/nvd/cve-2019-0981
 [CVE-2019-0820]: https://avd.aquasec.com/nvd/cve-2019-0820
 [CVE-2019-0657]: https://avd.aquasec.com/nvd/cve-2019-0657
-[Settings Reference]: https://recyclarr.dev/wiki/reference/settings-reference
+[Settings Reference]: https://recyclarr.dev/reference/settings/
 
 ## [2.4.1] - 2022-08-26
 
@@ -813,7 +813,7 @@ changes you need to make.
 - The `create-config` subcommand now accepts YAML files again (it was taking a directory before,
   which was wrong).
 
-[Docker]: https://recyclarr.dev/wiki/installation/docker
+[Docker]: https://recyclarr.dev/guide/installation/docker/
 
 ## [2.1.2] - 2022-05-29
 
@@ -854,7 +854,7 @@ changes you need to make.
   of a straight move. This is designed to fail less in cases such as `recyclarr` directory already
   existing.
 
-[appdata]: https://recyclarr.dev/wiki/file-structure
+[appdata]: https://recyclarr.dev/guide/file-structure/
 
 ## [2.0.2] - 2022-05-20
 
@@ -896,9 +896,9 @@ make.
 - [Migration System] that is responsible for performing one-time upgrade tasks as needed.
 
 [#17]: https://github.com/recyclarr/recyclarr/issues/17
-[Upgrade Guide]: https://recyclarr.dev/wiki/upgrade-guide/upgrade-guide-v2.0
+[Upgrade Guide]: https://recyclarr.dev/guide/upgrade-guide/v2.0/
 [sonarrjson]: https://github.com/TRaSH-/Guides/tree/master/docs/json/sonarr
-[Migration System]: https://recyclarr.dev/wiki/migration
+[Migration System]: https://recyclarr.dev/cli/migrate/
 
 ## [1.8.2] - 2022-03-06
 
@@ -944,7 +944,7 @@ make.
 - Sometimes the "Requesting and parsing guide markdown" step would appear stuck and fail after
   several minutes. Many changes have been made to try to alleviate this.
 
-[setref]: https://recyclarr.dev/wiki/reference/settings-reference
+[setref]: https://recyclarr.dev/reference/settings/
 [#20]: https://github.com/recyclarr/recyclarr/issues/20
 
 ## [1.6.6] - 2021-10-30
@@ -1037,8 +1037,7 @@ make.
 
 - Invalid cache data files no longer cause the program to exit. An error is printed and the
   application continues as if there was no cache at all.
-- Fix a bug that resulted in certain custom formats not having their scores set in quality
-  profiles.
+- Fix a bug that resulted in certain custom formats not having their scores set in quality profiles.
 - Fixed an issue where multiple instance configuration was not working.
 
 ### Changed
@@ -1089,7 +1088,7 @@ make.
 - New configuration for Sonarr release profiles that allows all optional terms to be synced. Look
   for `filter` in the [Configuration Reference] for more details.
 
-[Configuration Reference]: https://recyclarr.dev/wiki/reference/config-reference
+[Configuration Reference]: https://recyclarr.dev/reference/configuration/
 
 ## [1.2.0] - 2021-04-19
 
