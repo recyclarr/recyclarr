@@ -25,6 +25,11 @@
 
 **Purpose**: Validate critical user workflows end-to-end with real external services.
 
+**Running E2E Tests**:
+
+- **MANDATORY**: Use `./scripts/Run-E2ETests.ps1` - NEVER run `dotnet test` directly for E2E tests
+- The script outputs a log file path; use `rg` to search logs without rerunning tests
+
 **Scope**:
 
 - Full `recyclarr sync` execution against containerized Sonarr/Radarr

@@ -243,8 +243,13 @@ internal sealed class RecyclarrSyncTests
 
     private static async Task LogOutput(BufferedCommandResult result)
     {
-        await TestContext.Out.WriteLineAsync($"Recyclarr stdout:\n{result.StandardOutput}");
-        await TestContext.Out.WriteLineAsync($"Recyclarr stderr:\n{result.StandardError}");
+        var testName = TestContext.CurrentContext.Test.Name;
+        await TestContext.Out.WriteLineAsync(
+            $"=== [{testName}] Recyclarr stdout ===\n{result.StandardOutput}"
+        );
+        await TestContext.Out.WriteLineAsync(
+            $"=== [{testName}] Recyclarr stderr ===\n{result.StandardError}"
+        );
     }
 
     private static async Task VerifySonarrState(CancellationToken ct)

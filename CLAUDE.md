@@ -128,9 +128,9 @@ Patterns:
 End to End Tests:
 
 - Default to skipped and tagged: `[TestFixture(Category = "E2E"), Explicit]`
-- Run explicitly with `dotnet test --filter` (required because of `Explicit`)
-- When you run them, pipe stdout+stderr to a file in `/tmp` so you can `rg` logs without rerunning
-- No `-v` option is to be used when you're piping to a file
+- **MANDATORY**: Run E2E tests via `./scripts/Run-E2ETests.ps1` which automatically pipes logs to a
+  file for you - NEVER use `dotnet test` directly, and NEVER use `tee` with it.
+- The script outputs a log file path; use `rg` to search logs without rerunning tests
 - Add durable debug logs when existing ones don't explain failures; keep them concise and useful
   long-term, not noisy or disposable.
 
@@ -173,7 +173,8 @@ Some key files and directories:
 - Use minimal verbosity for build/test commands to show only warnings and errors: `dotnet build -v m
   --no-incremental` and `dotnet test -v m --no-incremental`. Informational logs consume valuable
   context. When verbose output is needed for debugging, pipe to a log file (`dotnet test -v d 2>&1 >
-  /tmp/test.log`) and read from it with targeted searches (`rg "pattern" /tmp/test.log`).
+  /tmp/test.log`) (do NOT use `tee`) and read from it with targeted searches (`rg "pattern"
+  /tmp/test.log`).
 
 ## Scripts
 
