@@ -27,9 +27,11 @@ ij_javascript_array_initializer_right_brace_on_new_line = false
 
 [*.cs]
 
-# Require named arguments for literal values (booleans, numbers, null)
-resharper_arguments_literal = named
-resharper_arguments_skip_single = true
+# Don't have an opinion about named args; allow situational usage
+resharper_arguments_style_literal_highlighting = none
+resharper_arguments_style_string_literal_highlighting = none
+resharper_arguments_style_named_expression_highlighting = none
+resharper_arguments_style_other_highlighting = none
 
 # Resharper/Rider specific updates to make it respect rules used by CSharpier
 resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
