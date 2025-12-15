@@ -13,6 +13,13 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         var plannedCfs = context.Plan.CustomFormats;
         var transactions = new CustomFormatTransactionData();
 
+        // Build lookups for O(1) access
+        var serviceCfsById = context.ApiFetchOutput.ToDictionary(cf => cf.Id);
+        var serviceCfsByName = context.ApiFetchOutput.ToLookup(
+            cf => cf.Name,
+            StringComparer.OrdinalIgnoreCase
+        );
+
         foreach (var planned in plannedCfs)
         {
             var guideCf = planned.Resource;
@@ -22,27 +29,21 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
                 guideCf.Name
             );
 
-            guideCf.Id = context.Cache.FindId(guideCf) ?? 0;
+            var cachedId = context.Cache.FindId(guideCf);
 
-            var serviceCf = FindServiceCfByName(context.ApiFetchOutput, guideCf.Name);
-            if (serviceCf is not null)
+            if (cachedId.HasValue)
             {
-                ProcessExistingCf(guideCf, serviceCf, transactions);
-                continue;
-            }
-
-            serviceCf = FindServiceCfById(context.ApiFetchOutput, guideCf.Id);
-            if (serviceCf is not null)
-            {
-                // We do not use AddUpdatedCustomFormat() here because it's impossible for the CFs
-                // to be identical if we got to this point. Reason: We reach this code if the names
-                // are not the same. At the very least, this means the name needs to be updated in
-                // the service.
-                transactions.UpdatedCustomFormats.Add(guideCf);
+                ProcessCachedCf(
+                    guideCf,
+                    cachedId.Value,
+                    serviceCfsById,
+                    serviceCfsByName,
+                    transactions
+                );
             }
             else
             {
-                transactions.NewCustomFormats.Add(guideCf);
+                ProcessUncachedCf(guideCf, serviceCfsByName, transactions);
             }
         }
 
@@ -55,7 +56,7 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
                     .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
                     // Also, that cache-only CF must exist in the service (otherwise there is
                     // nothing to delete)
-                    .Where(map => context.ApiFetchOutput.Any(cf => cf.Id == map.ServiceId))
+                    .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
             );
         }
 
@@ -63,49 +64,89 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
         return Task.FromResult(PipelineFlow.Continue);
     }
 
-    private void ProcessExistingCf(
+    private void ProcessCachedCf(
         CustomFormatResource guideCf,
-        CustomFormatResource serviceCf,
+        int cachedId,
+        Dictionary<int, CustomFormatResource> serviceCfsById,
+        ILookup<string, CustomFormatResource> serviceCfsByName,
         CustomFormatTransactionData transactions
     )
     {
-        if (config.ReplaceExistingCustomFormats)
+        if (serviceCfsById.TryGetValue(cachedId, out var serviceCf))
         {
-            // replace:
-            // - Use the ID from the service, not the cache, and do an update
-            if (guideCf.Id != serviceCf.Id)
+            // ID-first: Found by cached ID - update regardless of name
+            guideCf.Id = cachedId;
+
+            if (!serviceCf.Name.EqualsIgnoreCase(guideCf.Name))
             {
                 log.Debug(
-                    "Format IDs for CF {Name} did not match which indicates a manually-created CF is "
-                        + "replaced, or that the cache is out of sync with the service ({GuideId} != {ServiceId})",
+                    "CF {TrashId} will be renamed from '{ServiceName}' to '{GuideName}'",
+                    guideCf.TrashId,
                     serviceCf.Name,
-                    guideCf.Id,
-                    serviceCf.Id
+                    guideCf.Name
                 );
-
-                guideCf.Id = serviceCf.Id;
             }
 
-            AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
+            AddUpdatedOrUnchanged(guideCf, serviceCf, transactions);
         }
         else
         {
-            // NO replace:
-            // - ids must match (can't rename another cf to the same name), otherwise error
-            if (guideCf.Id != serviceCf.Id)
-            {
-                transactions.ConflictingCustomFormats.Add(
-                    new ConflictingCustomFormat(guideCf, serviceCf.Id)
-                );
-            }
-            else
-            {
-                AddUpdatedCustomFormat(guideCf, serviceCf, transactions);
-            }
+            // Stale cache: cached ID no longer exists in service
+            log.Debug(
+                "Cached service ID {CachedId} for CF {TrashId} no longer exists in service",
+                cachedId,
+                guideCf.TrashId
+            );
+
+            // Check for name collision before creating
+            ProcessNameCollision(guideCf, serviceCfsByName, transactions);
         }
     }
 
-    private static void AddUpdatedCustomFormat(
+    private static void ProcessUncachedCf(
+        CustomFormatResource guideCf,
+        ILookup<string, CustomFormatResource> serviceCfsByName,
+        CustomFormatTransactionData transactions
+    )
+    {
+        ProcessNameCollision(guideCf, serviceCfsByName, transactions);
+    }
+
+    private static void ProcessNameCollision(
+        CustomFormatResource guideCf,
+        ILookup<string, CustomFormatResource> serviceCfsByName,
+        CustomFormatTransactionData transactions
+    )
+    {
+        var nameMatches = serviceCfsByName[guideCf.Name].ToList();
+
+        switch (nameMatches.Count)
+        {
+            case 0:
+                // No collision - safe to create
+                transactions.NewCustomFormats.Add(guideCf);
+                break;
+
+            case 1:
+                // Single match - conflict (user must run cache rebuild --adopt)
+                transactions.ConflictingCustomFormats.Add(
+                    new ConflictingCustomFormat(guideCf, nameMatches[0].Id)
+                );
+                break;
+
+            default:
+                // Multiple matches - ambiguous
+                transactions.AmbiguousCustomFormats.Add(
+                    new AmbiguousMatch(
+                        guideCf.Name,
+                        nameMatches.Select(cf => (cf.Name, cf.Id)).ToList()
+                    )
+                );
+                break;
+        }
+    }
+
+    private static void AddUpdatedOrUnchanged(
         CustomFormatResource guideCf,
         CustomFormatResource serviceCf,
         CustomFormatTransactionData transactions
@@ -148,21 +189,5 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
             && a.Name == b.Name
             && a.IncludeCustomFormatWhenRenaming == b.IncludeCustomFormatWhenRenaming
             && specsEqual;
-    }
-
-    private static CustomFormatResource? FindServiceCfByName(
-        IEnumerable<CustomFormatResource> serviceCfs,
-        string cfName
-    )
-    {
-        return serviceCfs.FirstOrDefault(rcf => cfName.EqualsIgnoreCase(rcf.Name));
-    }
-
-    private static CustomFormatResource? FindServiceCfById(
-        IEnumerable<CustomFormatResource> serviceCfs,
-        int cfId
-    )
-    {
-        return serviceCfs.FirstOrDefault(rcf => cfId == rcf.Id);
     }
 }

@@ -17,36 +17,27 @@ public class TrashIdCache<TCacheObject>(TCacheObject cacheObject) : BaseCache(ca
         return cacheObject.Mappings.Find(m => m.TrashId == trashId)?.ServiceId;
     }
 
-    protected void RemoveStale(IEnumerable<int> validServiceIds)
-    {
-        var validIds = validServiceIds.ToHashSet();
-
-        cacheObject.Mappings.RemoveAll(m => m.ServiceId == 0 || !validIds.Contains(m.ServiceId));
-
-        // Clean up duplicate IDs - keep first occurrence, remove the rest.
-        // Duplicates can occur from edge cases and corrupt subsequent transaction processing.
-        var duplicatesToRemove = cacheObject
-            .Mappings.GroupBy(m => m.ServiceId)
-            .Where(g => g.Count() > 1)
-            .SelectMany(g => g.Skip(1))
-            .ToList();
-
-        cacheObject.Mappings.RemoveAll(duplicatesToRemove.Contains);
-    }
-
     [SuppressMessage(
         "ReSharper",
         "UnusedParameter.Local",
         Justification = "LINQ l/r variables double as documentation"
     )]
-    protected void Update(IEnumerable<TrashIdMapping> syncedMappings, IEnumerable<int> deletedIds)
+    protected void Update(
+        IEnumerable<TrashIdMapping> syncedMappings,
+        IEnumerable<int> deletedIds,
+        IEnumerable<int> validServiceIds
+    )
     {
-        // Assumes RemoveStale() was called first, so Mappings contains only valid existing entries.
+        var validIds = validServiceIds.ToHashSet();
         var deleted = deletedIds.ToHashSet();
 
-        var result = cacheObject
-            .Mappings.DistinctBy(m => m.ServiceId)
+        // Filter to valid entries: must exist in service, not be zero, and not be deleted
+        var existingMappings = cacheObject
+            .Mappings.Where(m => m.ServiceId != 0 && validIds.Contains(m.ServiceId))
             .Where(m => !deleted.Contains(m.ServiceId))
+            .DistinctBy(m => m.ServiceId);
+
+        var result = existingMappings
             .FullOuterHashJoin(
                 syncedMappings,
                 l => l.ServiceId,

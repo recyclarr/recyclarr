@@ -16,7 +16,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
+  reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
 - Quality Sizes: Preview now highlights items that will be updated (bold) versus unchanged (dimmed).
+
+### Deprecated
+
+- Config: The `replace_existing_custom_formats` option no longer has any effect. Use
+  `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
 
 ## [7.5.2] - 2025-11-30
 

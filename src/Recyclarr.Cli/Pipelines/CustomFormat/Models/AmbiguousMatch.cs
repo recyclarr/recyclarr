@@ -1,4 +1,4 @@
-namespace Recyclarr.Cli.Processors.CacheRebuild;
+namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 
 internal record AmbiguousMatch(
     string GuideName,

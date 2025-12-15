@@ -15,12 +15,10 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject)
         return FindId(cf.TrashId);
     }
 
-    public void RemoveStale(IEnumerable<CustomFormatResource> serviceCfs)
-    {
-        RemoveStale(serviceCfs.Select(cf => cf.Id));
-    }
-
-    public void Update(CustomFormatTransactionData transactions)
+    public void Update(
+        CustomFormatTransactionData transactions,
+        IEnumerable<CustomFormatResource> serviceCfs
+    )
     {
         var syncedMappings = transactions
             .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
@@ -28,7 +26,8 @@ internal class CustomFormatCache(CustomFormatCacheObject cacheObject)
             .Select(cf => new TrashIdMapping(cf.TrashId, cf.Name, cf.Id));
 
         var deletedIds = transactions.DeletedCustomFormats.Select(cf => cf.ServiceId);
+        var validServiceIds = serviceCfs.Select(cf => cf.Id);
 
-        Update(syncedMappings, deletedIds);
+        Update(syncedMappings, deletedIds, validServiceIds);
     }
 }

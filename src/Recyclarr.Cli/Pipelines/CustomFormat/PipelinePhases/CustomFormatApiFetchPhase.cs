@@ -18,7 +18,6 @@ internal class CustomFormatApiFetchPhase(
         context.Cache = cachePersister.Load();
         var result = await api.GetCustomFormats(ct);
         context.ApiFetchOutput.AddRange(result);
-        context.Cache.RemoveStale(result);
         return PipelineFlow.Continue;
     }
 }

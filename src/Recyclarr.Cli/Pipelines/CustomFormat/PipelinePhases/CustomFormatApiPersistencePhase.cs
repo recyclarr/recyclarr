@@ -15,6 +15,12 @@ internal class CustomFormatApiPersistencePhase(
         CancellationToken ct
     )
     {
+        var hasBlockingErrors = cfLogger.LogTransactions(context);
+        if (hasBlockingErrors)
+        {
+            return PipelineFlow.Terminate;
+        }
+
         var transactions = context.TransactionOutput;
 
         foreach (var cf in transactions.NewCustomFormats)
@@ -36,10 +42,9 @@ internal class CustomFormatApiPersistencePhase(
             await api.DeleteCustomFormat(map.ServiceId, ct);
         }
 
-        context.Cache.Update(transactions);
+        context.Cache.Update(transactions, context.ApiFetchOutput);
         cachePersister.Save(context.Cache);
 
-        cfLogger.LogTransactions(context);
         return PipelineFlow.Continue;
     }
 }

@@ -2,6 +2,7 @@ using System.Globalization;
 using Recyclarr.Cache;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;

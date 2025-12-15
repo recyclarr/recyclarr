@@ -10,6 +10,7 @@ internal record CustomFormatTransactionData
     public Collection<CustomFormatResource> NewCustomFormats { get; } = [];
     public Collection<CustomFormatResource> UpdatedCustomFormats { get; } = [];
     public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = [];
+    public Collection<AmbiguousMatch> AmbiguousCustomFormats { get; } = [];
     public Collection<CustomFormatResource> UnchangedCustomFormats { get; } = [];
 
     public int TotalCustomFormatChanges =>

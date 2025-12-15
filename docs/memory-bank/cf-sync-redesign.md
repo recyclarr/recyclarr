@@ -3,7 +3,7 @@
 ## Status
 
 Phase 1: COMPLETE - `recyclarr cache rebuild` command with UX improvements
-Phase 2: Not started (sync pipeline simplification)
+Phase 2: COMPLETE - ID-first matching in sync pipeline
 
 ## Phase 1 Implementation
 
@@ -105,6 +105,21 @@ Why this matters:
 - Preserve non-configured cache entries (for sync deletion)
 - Remove stale entries (service CF no longer exists)
 
+## Future Enhancement: Cache Rebuild Filtering
+
+**Status:** Not started - revisit later
+
+Cache rebuild currently processes ALL configured CFs. Add filtering options:
+
+1. **By trash ID** - `--trash-id <id>` (repeatable) to target specific CFs
+2. **By state category** - `--state <state>` to filter by `CfCacheState` (e.g., only process
+   `Corrected` or `NotInService` entries)
+
+**Context:** During Phase 2 planning, discovered that cache rebuild's name-first matching can
+"correct" a cache entry away from a valid ID when the service CF was renamed. Filtering would let
+users selectively rebuild specific entries without affecting others that may be correct but have
+name mismatches.
+
 ## Background
 
 Issue #672 revealed a fundamental design flaw in CF matching logic. User had two CFs with case-variant
@@ -182,19 +197,29 @@ CLI options:
 - `-p`/`--preview`: Show what would change without saving
 - Output via `IAnsiConsole` only (no Serilog for display)
 
-### Phase 2: Sync Pipeline Simplification (future)
+### Phase 2: Sync Pipeline Simplification (COMPLETE)
 
-Switch to ID-first matching:
+Implemented ID-first matching in `CustomFormatTransactionPhase`:
 
-1. **ID match** (from cache) -> update (regardless of name)
-2. **No ID** -> name exists in service? -> error. No name? -> create
+**Algorithm:**
+1. Cache entry exists + service CF with that ID exists → UPDATE (regardless of name)
+2. Cache entry exists + service CF deleted (stale cache) → check name collision → CREATE or ERROR
+3. No cache entry + name exists in service → ERROR (suggests `cache rebuild --adopt`)
+4. No cache entry + name doesn't exist → CREATE
 
-Additional changes:
-- Keep case-insensitive for name conflict detection
-- Detect multiple case-variant matches as error (ambiguous)
-- Pre-check rename conflicts before API call
-- Remove/simplify `replace_existing_custom_formats` adoption behavior
-- Let users run `cache rebuild` for explicit adoption
+**Files modified:**
+- `src/Recyclarr.Cli/Pipelines/CustomFormat/PipelinePhases/CustomFormatTransactionPhase.cs` - ID-first algorithm
+- `src/Recyclarr.Cli/Pipelines/CustomFormat/Models/AmbiguousMatch.cs` - moved from CacheRebuild (shared)
+- `src/Recyclarr.Cli/Pipelines/CustomFormat/Models/CustomFormatTransactionData.cs` - added AmbiguousCustomFormats
+- `src/Recyclarr.Cli/Pipelines/CustomFormat/CustomFormatTransactionLogger.cs` - error messages for conflicts/ambiguous
+- `src/Recyclarr.Core/Config/Parsing/PostProcessing/Deprecations/ReplaceExistingCfsDeprecationCheck.cs` - deprecation
+- `src/Recyclarr.Core/CoreAutofacModule.cs` - registered deprecation check
+
+**Behavioral changes:**
+- `replace_existing_custom_formats` is now deprecated and a no-op
+- Name collisions without cache entry produce errors instead of silent adoption
+- Ambiguous matches (multiple case-variants) detected and reported
+- Uses O(1) lookups (Dictionary/Lookup) instead of O(n) FirstOrDefault
 
 ## Key Files
 

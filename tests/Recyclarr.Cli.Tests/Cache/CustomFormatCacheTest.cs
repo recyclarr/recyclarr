@@ -17,8 +17,16 @@ internal sealed class CustomFormatCacheTest
             UnchangedCustomFormats = { NewCf.Data("four", "4", 4) },
         };
 
+        var serviceCfs = new[]
+        {
+            NewCf.Data("one", "1", 1),
+            NewCf.Data("two", "2", 2),
+            NewCf.Data("three", "3", 3),
+            NewCf.Data("four", "4", 4),
+        };
+
         var cache = CfCache.New();
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -39,12 +47,20 @@ internal sealed class CustomFormatCacheTest
             DeletedCustomFormats = { new TrashIdMapping("3", "three", 3) },
         };
 
+        // Note: ID 3 is being deleted, so it's not in serviceCfs
+        var serviceCfs = new[]
+        {
+            NewCf.Data("one", "1", 1),
+            NewCf.Data("two", "2", 2),
+            NewCf.Data("four", "4", 4),
+        };
+
         var cache = CfCache.New(
             new TrashIdMapping("3", "three", 3),
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -67,7 +83,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.RemoveStale(serviceCfs);
+        cache.Update(new CustomFormatTransactionData(), serviceCfs);
 
         cache
             .Mappings.Should()
@@ -83,9 +99,11 @@ internal sealed class CustomFormatCacheTest
             UpdatedCustomFormats = { NewCf.Data("two", "2", 2) },
         };
 
+        var serviceCfs = new[] { NewCf.Data("one", "1", 1), NewCf.Data("two", "2", 2) };
+
         var cache = CfCache.New();
 
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -102,6 +120,14 @@ internal sealed class CustomFormatCacheTest
             UnchangedCustomFormats = { NewCf.Data("four_new", "4", 4) },
         };
 
+        var serviceCfs = new[]
+        {
+            NewCf.Data("one_new", "1", 1),
+            NewCf.Data("two_new", "2", 2),
+            NewCf.Data("three_new", "3", 3),
+            NewCf.Data("four_new", "4", 4),
+        };
+
         var cache = CfCache.New(
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("2", "two", 2),
@@ -109,7 +135,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -126,6 +152,14 @@ internal sealed class CustomFormatCacheTest
     {
         var transactions = new CustomFormatTransactionData();
 
+        var serviceCfs = new[]
+        {
+            NewCf.Data("one", "1", 1),
+            NewCf.Data("two", "2", 2),
+            NewCf.Data("three", "3", 3),
+            NewCf.Data("four", "4", 4),
+        };
+
         var cache = CfCache.New(
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("12", "one2", 1),
@@ -134,7 +168,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -151,6 +185,14 @@ internal sealed class CustomFormatCacheTest
     {
         var transactions = new CustomFormatTransactionData();
 
+        var serviceCfs = new[]
+        {
+            NewCf.Data("one", "1", 1),
+            NewCf.Data("two", "2", 2),
+            NewCf.Data("three", "3", 3),
+            NewCf.Data("four", "4", 4),
+        };
+
         var cache = CfCache.New(
             new TrashIdMapping("1", "one", 1),
             new TrashIdMapping("3", "three", 3),
@@ -158,7 +200,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("2", "two", 2)
         );
 
-        cache.Update(transactions);
+        cache.Update(transactions, serviceCfs);
 
         cache
             .Mappings.Should()
@@ -191,7 +233,7 @@ internal sealed class CustomFormatCacheTest
         };
 
         // Act
-        cache.RemoveStale(serviceCfs);
+        cache.Update(new CustomFormatTransactionData(), serviceCfs);
 
         // Assert: Should have exactly one mapping for each unique CustomFormatId
         cache

@@ -4,17 +4,39 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
 internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector eventCollector)
 {
-    public void LogTransactions(CustomFormatPipelineContext context)
+    public bool LogTransactions(CustomFormatPipelineContext context)
     {
         var transactions = context.TransactionOutput;
 
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
-            eventCollector.AddWarning(
-                $"Custom Format with name {guideCf.Name} (Trash ID: {guideCf.TrashId}) will be skipped "
-                    + $"because another CF already exists with that name (ID: {conflictingId}). To fix the "
-                    + "conflict, delete or rename the CF with the mentioned name"
+            eventCollector.AddError(
+                $"Custom Format '{guideCf.Name}' (Trash ID: {guideCf.TrashId}) cannot be synced "
+                    + $"because another CF already exists with that name (ID: {conflictingId}). "
+                    + "To adopt the existing CF, run: recyclarr cache rebuild --adopt"
             );
+        }
+
+        foreach (var ambiguous in transactions.AmbiguousCustomFormats)
+        {
+            var matchList = string.Join(
+                ", ",
+                ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
+            );
+            eventCollector.AddError(
+                $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
+                    + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
+                    + "then run: recyclarr cache rebuild"
+            );
+        }
+
+        var hasBlockingErrors =
+            transactions.ConflictingCustomFormats.Count > 0
+            || transactions.AmbiguousCustomFormats.Count > 0;
+
+        if (hasBlockingErrors)
+        {
+            return true;
         }
 
         var created = transactions.NewCustomFormats;
@@ -74,6 +96,6 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
 
         eventCollector.AddCompletionCount(totalCount);
 
-        // Logging is done (and shared with) in CustomFormatPreviewPhase
+        return false;
     }
 }

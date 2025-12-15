@@ -25,7 +25,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Add_new_cf()
+    public async Task Create_new_cf_when_no_cache_and_no_name_match()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -48,7 +48,70 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Update_cf_by_matching_name()
+    public async Task Conflict_when_no_cache_and_single_name_match()
+    {
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var guideCf = NewCf.Data("one", "cf1");
+
+        var context = new CustomFormatPipelineContext
+        {
+            Cache = CfCache.New(),
+            ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 5 }],
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(
+                new CustomFormatTransactionData
+                {
+                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 5) },
+                }
+            );
+    }
+
+    [Test]
+    public async Task Ambiguous_when_no_cache_and_multiple_name_matches()
+    {
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var guideCf = NewCf.Data("HULU", "cf1");
+
+        var context = new CustomFormatPipelineContext
+        {
+            Cache = CfCache.New(),
+            ApiFetchOutput =
+            [
+                new CustomFormatResource { Name = "HULU", Id = 10 },
+                new CustomFormatResource { Name = "Hulu", Id = 20 },
+            ],
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(
+                new CustomFormatTransactionData
+                {
+                    AmbiguousCustomFormats =
+                    {
+                        new AmbiguousMatch("HULU", [("HULU", 10), ("Hulu", 20)]),
+                    },
+                }
+            );
+    }
+
+    [Test]
+    public async Task Update_cf_by_cached_id_regardless_of_name()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -56,15 +119,15 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var guideCf = new CustomFormatResource
         {
-            Name = "one",
+            Name = "guide-name",
             TrashId = "cf1",
             IncludeCustomFormatWhenRenaming = true,
         };
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatResource { Name = "one" }],
+            Cache = CfCache.New(new TrashIdMapping("cf1", "old-name", 2)),
+            ApiFetchOutput = [new CustomFormatResource { Name = "service-name", Id = 2 }],
             Plan = CreatePlan(guideCf),
         };
 
@@ -77,7 +140,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     UpdatedCustomFormats =
                     {
-                        NewCf.Data("one", "cf1") with
+                        NewCf.Data("guide-name", "cf1", 2) with
                         {
                             IncludeCustomFormatWhenRenaming = true,
                         },
@@ -87,254 +150,12 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Update_cf_by_matching_id_different_names()
+    public async Task Unchanged_cf_when_cached_id_matches_and_content_same()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
-        var guideCf = new CustomFormatResource
-        {
-            Name = "different1",
-            TrashId = "cf1",
-            IncludeCustomFormatWhenRenaming = true,
-        };
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "", 2)),
-            ApiFetchOutput = [new CustomFormatResource { Name = "different2", Id = 2 }],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    UpdatedCustomFormats =
-                    {
-                        NewCf.Data("different1", "cf1", 2) with
-                        {
-                            IncludeCustomFormatWhenRenaming = true,
-                        },
-                    },
-                }
-            );
-    }
-
-    [Test]
-    public async Task Update_cf_by_matching_id_same_names()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-
-        var guideCf = new CustomFormatResource
-        {
-            Name = "different1",
-            TrashId = "cf1",
-            IncludeCustomFormatWhenRenaming = true,
-        };
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatResource { Name = "different1", Id = 2 }],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    UpdatedCustomFormats =
-                    {
-                        NewCf.Data("different1", "cf1", 2) with
-                        {
-                            IncludeCustomFormatWhenRenaming = true,
-                        },
-                    },
-                }
-            );
-    }
-
-    [Test]
-    public async Task Conflicting_cf_when_new_cf_has_name_of_existing()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = false,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-        var guideCf = NewCf.Data("one", "cf1");
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(),
-            ApiFetchOutput =
-            [
-                new CustomFormatResource { Name = "one", Id = 2 },
-                new CustomFormatResource { Name = "two", Id = 1 },
-            ],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 2) },
-                }
-            );
-    }
-
-    [Test]
-    public async Task Conflicting_cf_when_cached_cf_has_name_of_existing()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = false,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-        var guideCf = NewCf.Data("one", "cf1");
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
-            ApiFetchOutput =
-            [
-                new CustomFormatResource { Name = "one", Id = 2 },
-                new CustomFormatResource { Name = "two", Id = 1 },
-            ],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 2) },
-                }
-            );
-    }
-
-    [Test]
-    public async Task Updated_cf_with_matching_name_and_id()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = false,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-
-        var guideCf = new CustomFormatResource
-        {
-            Name = "one",
-            TrashId = "cf1",
-            IncludeCustomFormatWhenRenaming = true,
-        };
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
-            ApiFetchOutput =
-            [
-                new CustomFormatResource { Name = "two", Id = 2 },
-                new CustomFormatResource { Name = "one", Id = 1 },
-            ],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    UpdatedCustomFormats =
-                    {
-                        NewCf.Data("one", "cf1", 1) with
-                        {
-                            IncludeCustomFormatWhenRenaming = true,
-                        },
-                    },
-                }
-            );
-    }
-
-    [Test]
-    public async Task Unchanged_cfs_with_replace_enabled()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-        var guideCf = NewCf.Data("one", "cf1");
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(),
-            ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 1 }],
-            Plan = CreatePlan(guideCf),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData { UnchangedCustomFormats = { guideCf } }
-            );
-    }
-
-    [Test]
-    public async Task Unchanged_cfs_without_replace()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = false,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
         var guideCf = NewCf.Data("one", "cf1");
 
         var context = new CustomFormatPipelineContext
@@ -350,6 +171,57 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             .TransactionOutput.Should()
             .BeEquivalentTo(
                 new CustomFormatTransactionData { UnchangedCustomFormats = { guideCf } }
+            );
+    }
+
+    [Test]
+    public async Task Create_new_cf_when_stale_cache_and_no_name_collision()
+    {
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var guideCf = NewCf.Data("two", "cf2");
+
+        var context = new CustomFormatPipelineContext
+        {
+            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 200)), // ID 200 doesn't exist
+            ApiFetchOutput = [], // Empty service
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(new CustomFormatTransactionData { NewCustomFormats = { guideCf } });
+    }
+
+    [Test]
+    public async Task Conflict_when_stale_cache_and_name_collision()
+    {
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var guideCf = NewCf.Data("existing", "cf1");
+
+        var context = new CustomFormatPipelineContext
+        {
+            Cache = CfCache.New(new TrashIdMapping("cf1", "existing", 999)), // ID 999 deleted
+            ApiFetchOutput = [new CustomFormatResource { Name = "existing", Id = 5 }], // Different CF
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.Should()
+            .BeEquivalentTo(
+                new CustomFormatTransactionData
+                {
+                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 5) },
+                }
             );
     }
 
@@ -414,7 +286,12 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     public async Task Do_not_delete_cfs_in_config()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        using var scope = scopeFactory.Start<TestConfigurationScope>(
+            NewConfig.Radarr() with
+            {
+                DeleteOldCustomFormats = true,
+            }
+        );
 
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -422,7 +299,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         {
             Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
-            Plan = CreatePlan(NewCf.Data("two", "cf2", 2)),
+            Plan = CreatePlan(NewCf.Data("two", "cf2")),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -431,51 +308,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Add_new_cf_when_in_cache_but_not_in_service()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 200)),
-            ApiFetchOutput = [],
-            Plan = CreatePlan(NewCf.Data("two", "cf2", 2)),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    NewCustomFormats =
-                    {
-                        new CustomFormatResource
-                        {
-                            Name = "two",
-                            TrashId = "cf2",
-                            Id = 200,
-                        },
-                    },
-                }
-            );
-    }
-
-    [Test]
     public async Task Unchanged_when_specifications_match()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var specs = new CustomFormatSpecificationData[]
@@ -506,7 +342,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -521,13 +357,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     public async Task Updated_when_specification_differs()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var guideCf = new CustomFormatResource
@@ -562,7 +392,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -577,13 +407,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     public async Task Updated_when_specification_count_differs()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var guideCf = new CustomFormatResource
@@ -606,7 +430,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -620,13 +444,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     public async Task Unchanged_when_spec_order_differs()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var guideCf = new CustomFormatResource
@@ -653,7 +471,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -668,13 +486,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     public async Task Unchanged_when_service_has_extra_fields()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                ReplaceExistingCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var guideCf = new CustomFormatResource
@@ -713,7 +525,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
