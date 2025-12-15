@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -11,10 +10,9 @@ internal sealed class EnumDescriptionAttribute<TEnum> : DescriptionAttribute
 {
     public override string Description { get; }
 
-    [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
     public EnumDescriptionAttribute(string description)
     {
-        var enumNames = Enum.GetNames(typeof(TEnum)).Select(x => x.ToLowerInvariant());
+        var enumNames = Enum.GetNames(typeof(TEnum)).Select(StringCaseConverter.ToKebabCase);
 
         var str = new StringBuilder(description.Trim());
         str.Append(

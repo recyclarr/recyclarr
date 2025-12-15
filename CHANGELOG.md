@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats to
+  service custom formats by name.
+
 ### Changed
 
 - Quality Sizes: Preview now highlights items that will be updated (bold) versus unchanged (dimmed).

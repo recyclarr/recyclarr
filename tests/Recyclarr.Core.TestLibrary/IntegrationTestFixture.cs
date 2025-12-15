@@ -65,7 +65,10 @@ public abstract class IntegrationTestFixture : IDisposable
 
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 
-        builder.RegisterMockFor<IEnvironment>();
+        builder.RegisterMockFor<IEnvironment>(m =>
+        {
+            m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
+        });
         builder.RegisterMockFor<IGitRepository>();
         builder.RegisterMockFor<IGitRepositoryFactory>();
         builder.RegisterMockFor<IServiceInformation>(m =>

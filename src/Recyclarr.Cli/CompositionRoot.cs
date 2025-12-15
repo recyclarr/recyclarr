@@ -9,6 +9,7 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Processors.CacheRebuild;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.ErrorHandling;
@@ -63,6 +64,10 @@ internal static class CompositionRoot
 
         // Delete
         builder.RegisterType<DeleteCustomFormatsProcessor>().As<IDeleteCustomFormatsProcessor>();
+
+        // Cache
+        builder.RegisterType<CacheRebuildProcessor>();
+        builder.RegisterType<CacheRebuildInstanceProcessor>();
 
         builder
             .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))

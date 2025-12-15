@@ -55,6 +55,20 @@ internal static class CliSetup
                 delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
             }
         );
+
+        cli.AddBranch(
+            "cache",
+            cache =>
+            {
+                cache.SetDescription("Cache management operations");
+                cache
+                    .AddCommand<CacheRebuildCommand>("rebuild")
+                    .WithExample("cache", "rebuild")
+                    .WithExample("cache", "rebuild", "custom-formats")
+                    .WithExample("cache", "rebuild", "-i", "instance1", "-i", "instance2")
+                    .WithExample("cache", "rebuild", "custom-formats", "--preview");
+            }
+        );
     }
 
     public static async Task<int> Run(ILifetimeScope scope, IEnumerable<string> args)
