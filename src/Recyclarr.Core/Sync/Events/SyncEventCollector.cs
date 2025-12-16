@@ -1,13 +1,23 @@
 namespace Recyclarr.Sync.Events;
 
-public class SyncEventCollector(ILogger log, SyncEventStorage storage) : ISyncEventCollector
+public class SyncEventCollector(ILogger log, SyncEventStorage storage)
+    : ISyncScopeFactory,
+        ISyncEventPublisher
 {
     private string? _currentInstance;
     private PipelineType? _currentPipeline;
 
-    public void SetInstance(string? instanceName) => _currentInstance = instanceName;
+    public IDisposable SetInstance(string instanceName)
+    {
+        _currentInstance = instanceName;
+        return new ContextScope(() => _currentInstance = null);
+    }
 
-    public void SetPipeline(PipelineType? pipeline) => _currentPipeline = pipeline;
+    public IDisposable SetPipeline(PipelineType pipeline)
+    {
+        _currentPipeline = pipeline;
+        return new ContextScope(() => _currentPipeline = null);
+    }
 
     public void AddError(string message, Exception? exception = null)
     {
@@ -40,4 +50,9 @@ public class SyncEventCollector(ILogger log, SyncEventStorage storage) : ISyncEv
 
     public void AddCompletionCount(int count) =>
         storage.Add(new CompletionEvent(_currentInstance, _currentPipeline, count));
+
+    private sealed class ContextScope(Action onDispose) : IDisposable
+    {
+        public void Dispose() => onDispose();
+    }
 }

@@ -2,7 +2,7 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 
-public class CfQualityProfilesDeprecationCheck(ISyncEventCollector eventCollector)
+public class CfQualityProfilesDeprecationCheck(ISyncEventPublisher eventPublisher)
     : IConfigDeprecationCheck
 {
     public bool CheckIfNeeded(ServiceConfigYaml include)
@@ -13,7 +13,7 @@ public class CfQualityProfilesDeprecationCheck(ISyncEventCollector eventCollecto
 
     public ServiceConfigYaml Transform(ServiceConfigYaml include)
     {
-        eventCollector.AddDeprecation(
+        eventPublisher.AddDeprecation(
             "The `quality_profiles` element under `custom_formats` nodes was "
                 + "detected in your config. This has been renamed to `assign_scores_to`. "
                 + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#assign-scores-to>"

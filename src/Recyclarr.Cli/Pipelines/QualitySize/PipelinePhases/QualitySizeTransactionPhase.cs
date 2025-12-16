@@ -5,7 +5,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizeTransactionPhase(ILogger log, ISyncEventCollector eventCollector)
+internal class QualitySizeTransactionPhase(ILogger log, ISyncEventPublisher eventPublisher)
     : IPipelinePhase<QualitySizePipelineContext>
 {
     public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
@@ -27,7 +27,7 @@ internal class QualitySizeTransactionPhase(ILogger log, ISyncEventCollector even
             );
             if (serverEntry == null)
             {
-                eventCollector.AddWarning(
+                eventPublisher.AddWarning(
                     $"Server lacks quality definition for {plannedQuality.Quality}; it will be skipped"
                 );
                 continue;

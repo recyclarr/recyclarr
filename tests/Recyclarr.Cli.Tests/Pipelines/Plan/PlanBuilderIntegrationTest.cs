@@ -8,6 +8,7 @@ using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.Sync.Events;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
@@ -52,6 +53,15 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         registry.Register<RadarrQualitySizeResource>([Fs.FileInfo.New(path)]);
     }
 
+    private static bool HasErrors(SyncEventStorage storage) =>
+        storage.Diagnostics.Any(e => e.Type == DiagnosticType.Error);
+
+    private static IEnumerable<string> GetWarnings(SyncEventStorage storage) =>
+        storage.Diagnostics.Where(e => e.Type == DiagnosticType.Warning).Select(e => e.Message);
+
+    private static IEnumerable<string> GetErrors(SyncEventStorage storage) =>
+        storage.Diagnostics.Where(e => e.Type == DiagnosticType.Error).Select(e => e.Message);
+
     [Test]
     public void Build_with_complete_config_produces_valid_plan()
     {
@@ -65,12 +75,13 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(2);
         plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("cf1", "cf2");
-        diagnostics.ShouldProceed.Should().BeTrue();
+        HasErrors(storage).Should().BeFalse();
     }
 
     [Test]
@@ -86,11 +97,12 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(1);
-        diagnostics.InvalidTrashIds.Should().Contain("invalid-cf");
+        GetWarnings(storage).Should().Contain(w => w.Contains("invalid-cf"));
     }
 
     [Test]
@@ -101,11 +113,12 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.CustomFormats.Should().BeEmpty();
-        diagnostics.ShouldProceed.Should().BeTrue();
+        HasErrors(storage).Should().BeFalse();
     }
 
     [Test]
@@ -121,13 +134,14 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.QualitySizes.Should().NotBeNull();
         plan.QualitySizes.Type.Should().Be("movie");
         plan.QualitySizes.Qualities.Should().HaveCount(2);
-        diagnostics.ShouldProceed.Should().BeTrue();
+        HasErrors(storage).Should().BeFalse();
     }
 
     [Test]
@@ -141,11 +155,12 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.QualitySizesAvailable.Should().BeFalse();
-        diagnostics.Errors.Should().Contain(e => e.Contains("nonexistent"));
+        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent"));
     }
 
     [Test]
@@ -160,7 +175,7 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
             Name = "Test Profile",
             Config = new QualityProfileConfig { Name = "Test Profile" },
             ShouldCreate = false,
-            CfScores = [new PlannedCfScore(cf, 100)],
+            CfScores = [new PlannedCfScore(cf, Score: 100)],
         };
         plan.AddQualityProfile(qp);
 
@@ -205,12 +220,12 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (plan, diagnostics) = sut.Build();
+        var plan = sut.Build();
 
         plan.MediaNaming.Should().NotBeNull();
-        diagnostics.InvalidNamingFormats.Should().BeEmpty();
-        diagnostics.ShouldProceed.Should().BeTrue();
+        HasErrors(storage).Should().BeFalse();
     }
 
     [Test]
@@ -230,18 +245,17 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (_, diagnostics) = sut.Build();
+        sut.Build();
 
-        diagnostics.InvalidNamingFormats.Should().ContainSingle();
-        diagnostics.InvalidNamingFormats.First().ConfigValue.Should().Be("nonexistent");
+        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent"));
     }
 
     [Test]
-    public void Build_with_invalid_media_naming_does_not_block_other_pipelines()
+    public void Build_with_invalid_media_naming_blocks_sync()
     {
-        // Invalid media naming should only affect media naming pipeline,
-        // not block other pipelines (CF, QP, QualitySize)
+        // Invalid media naming reports an error, which blocks sync
         SetupMediaNamingGuideData();
 
         var config = NewConfig.Radarr() with
@@ -256,10 +270,10 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
 
-        var (_, diagnostics) = sut.Build();
+        sut.Build();
 
-        diagnostics.InvalidNamingFormats.Should().NotBeEmpty();
-        diagnostics.ShouldProceed.Should().BeTrue();
+        HasErrors(storage).Should().BeTrue();
     }
 }

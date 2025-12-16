@@ -82,7 +82,7 @@ public sealed class NotificationService(
 
         // Group by instance, with [no instance] first, then named instances alphabetically
         var eventsByInstance = eventStorage
-            .Events.GroupBy(e => e.InstanceName ?? NoInstance)
+            .AllEvents.GroupBy(e => e.InstanceName ?? NoInstance)
             .OrderBy(g => g.Key == NoInstance ? 0 : 1)
             .ThenBy(g => g.Key);
 

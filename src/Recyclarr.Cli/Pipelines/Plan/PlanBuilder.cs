@@ -1,18 +1,23 @@
+using Recyclarr.Sync.Events;
+
 namespace Recyclarr.Cli.Pipelines.Plan;
 
-internal class PlanBuilder(IOrderedEnumerable<IPlanComponent> components, ILogger log)
+internal class PlanBuilder(
+    IOrderedEnumerable<IPlanComponent> components,
+    ISyncEventPublisher eventPublisher,
+    ILogger log
+)
 {
-    public (PipelinePlan Plan, PlanDiagnostics Diagnostics) Build()
+    public PipelinePlan Build()
     {
         var plan = new PipelinePlan();
-        var diagnostics = new PlanDiagnostics(log);
 
         foreach (var component in components)
         {
             log.Debug("Running plan component: {Component}", component.GetType().Name);
-            component.Process(plan, diagnostics);
+            component.Process(plan, eventPublisher);
         }
 
-        return (plan, diagnostics);
+        return plan;
     }
 }

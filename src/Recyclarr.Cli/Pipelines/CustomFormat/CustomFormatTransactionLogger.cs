@@ -2,7 +2,7 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector eventCollector)
+internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher eventPublisher)
 {
     public bool LogTransactions(CustomFormatPipelineContext context)
     {
@@ -10,7 +10,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
 
         foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
         {
-            eventCollector.AddError(
+            eventPublisher.AddError(
                 $"Custom Format '{guideCf.Name}' (Trash ID: {guideCf.TrashId}) cannot be synced "
                     + $"because another CF already exists with that name (ID: {conflictingId}). "
                     + "To adopt the existing CF, run: recyclarr cache rebuild --adopt"
@@ -23,7 +23,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
                 ", ",
                 ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
             );
-            eventCollector.AddError(
+            eventPublisher.AddError(
                 $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
                     + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
                     + "then run: recyclarr cache rebuild"
@@ -94,7 +94,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventCollector ev
             log.Information("All custom formats are already up to date!");
         }
 
-        eventCollector.AddCompletionCount(totalCount);
+        eventPublisher.AddCompletionCount(totalCount);
 
         return false;
     }

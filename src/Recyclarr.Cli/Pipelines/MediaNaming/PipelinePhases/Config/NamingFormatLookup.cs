@@ -1,7 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+
+internal record InvalidNamingEntry(string Type, string ConfigValue);
 
 internal class NamingFormatLookup
 {
@@ -14,7 +15,7 @@ internal class NamingFormatLookup
         string errorDescription
     )
     {
-        return ObtainFormat(guideFormats, configFormatKey, null, errorDescription);
+        return ObtainFormat(guideFormats, configFormatKey, keySuffix: null, errorDescription);
     }
 
     [SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase")]
@@ -39,7 +40,7 @@ internal class NamingFormatLookup
         if (keySuffix is not null)
         {
             // Put the more specific key first
-            keys.Insert(0, lowerKey + keySuffix);
+            keys.Insert(index: 0, lowerKey + keySuffix);
         }
 
         foreach (var k in keys)

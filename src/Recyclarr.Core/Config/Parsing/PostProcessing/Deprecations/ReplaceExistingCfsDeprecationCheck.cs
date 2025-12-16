@@ -2,7 +2,7 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 
-public class ReplaceExistingCfsDeprecationCheck(ISyncEventCollector eventCollector)
+public class ReplaceExistingCfsDeprecationCheck(ISyncEventPublisher eventPublisher)
     : IConfigDeprecationCheck
 {
     public bool CheckIfNeeded(ServiceConfigYaml include)
@@ -12,7 +12,7 @@ public class ReplaceExistingCfsDeprecationCheck(ISyncEventCollector eventCollect
 
     public ServiceConfigYaml Transform(ServiceConfigYaml include)
     {
-        eventCollector.AddDeprecation(
+        eventPublisher.AddDeprecation(
             "The `replace_existing_custom_formats` option is deprecated and no longer has any effect. "
                 + "To adopt existing CFs, run: recyclarr cache rebuild --adopt. "
                 + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed>"

@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
-using Recyclarr.Cli.Pipelines.Plan;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 
