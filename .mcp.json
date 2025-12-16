@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "ms-learn": {
+    "linear": {
       "type": "http",
-      "url": "https://learn.microsoft.com/api/mcp"
+      "url": "https://mcp.linear.app/mcp"
     }
   }
 }

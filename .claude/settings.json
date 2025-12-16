@@ -6,7 +6,8 @@
       "Bash(dotnet csharpier:*)",
       "Bash(dotnet run:*)",
       "Bash(dotnet test:*)",
-      "Bash(dotnet tool list:*)"
+      "Bash(dotnet tool list:*)",
+      "mcp__linear__*"
     ],
     "deny": [],
     "ask": []
