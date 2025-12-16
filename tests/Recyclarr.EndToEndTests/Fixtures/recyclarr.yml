@@ -104,4 +104,4 @@ radarr:
       folder: default
       movie:
         rename: true
-        standard: default
+        standard: standard
