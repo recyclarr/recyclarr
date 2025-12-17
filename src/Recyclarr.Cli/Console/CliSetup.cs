@@ -81,7 +81,6 @@ internal static class CliSetup
 #endif
 
             config.ConfigureConsole(scope.Resolve<IAnsiConsole>());
-            config.SetInterceptor(scope.Resolve<ICommandInterceptor>());
             config.PropagateExceptions();
             config.UseStrictParsing();
 
