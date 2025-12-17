@@ -1,26 +1,10 @@
 using Recyclarr.Logging;
-using Recyclarr.Platform;
-using Serilog.Core;
-using Serilog.Templates;
-using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-internal class LoggerFactory(IEnvironment env, LoggingLevelSwitch levelSwitch)
+internal class LoggerFactory
 {
-    public ILogger Logger { get; private set; } =
-        LogSetup
-            .BaseConfiguration()
-            .WriteTo.Console(BuildExpressionTemplate(env), levelSwitch: levelSwitch)
-            .CreateLogger();
-
-    private static ExpressionTemplate BuildExpressionTemplate(IEnvironment env)
-    {
-        var template = "[{@l:u3}] " + LogSetup.BaseTemplate;
-
-        var raw = !string.IsNullOrEmpty(env.GetEnvironmentVariable("NO_COLOR"));
-        return new ExpressionTemplate(template, theme: raw ? null : TemplateTheme.Code);
-    }
+    public ILogger Logger { get; private set; } = LogSetup.BaseConfiguration().CreateLogger();
 
     public void AddLogConfiguration(IEnumerable<ILogConfigurator> configurators)
     {

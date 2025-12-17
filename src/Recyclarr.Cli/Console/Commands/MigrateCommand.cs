@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors;
 using Spectre.Console;
@@ -24,7 +25,8 @@ internal class MigrateCommand(IAnsiConsole console, MigrationExecutor migration)
     {
         try
         {
-            migration.PerformAllMigrationSteps(settings.Debug);
+            // TODO: REC-18 will remove this input argument
+            migration.PerformAllMigrationSteps(settings.LogLevel.Value == CliLogLevel.Debug);
             console.WriteLine("All migration steps completed");
             return (int)ExitStatus.Succeeded;
         }

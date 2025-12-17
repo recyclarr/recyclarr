@@ -2,23 +2,38 @@ using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Logging;
 using Serilog.Core;
-using Serilog.Events;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Console.Setup;
 
 internal class LoggerSetupTask(
+    ILogger log,
     LoggingLevelSwitch loggingLevelSwitch,
     LoggerFactory loggerFactory,
-    IEnumerable<ILogConfigurator> logConfigurators
+    ConsoleLogSinkConfigurator consoleLogSinkConfigurator,
+    IList<ILogConfigurator> logConfigurators,
+    IAnsiConsole console
 ) : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)
     {
-        loggingLevelSwitch.MinimumLevel = cmd.Debug switch
+        // Accept obsolete Debug property usage here for backward compatibility.
+        // Remove this call and pragma before next major (v8) version is released.
+#pragma warning disable CS0618
+        if (cmd.Debug)
+#pragma warning restore CS0618
         {
-            true => LogEventLevel.Debug,
-            _ => LogEventLevel.Information,
-        };
+            log.Warning("The -d/--debug option is deprecated. Use '--log debug' instead");
+        }
+
+        loggingLevelSwitch.MinimumLevel = cmd.LogLevel.Value.ToLogEventLevel();
+
+        if (cmd.LogLevel.IsSet)
+        {
+            // Log mode: Enable Serilog console output, disable IAnsiConsole output
+            logConfigurators.Add(consoleLogSinkConfigurator);
+            console.Profile.Out = new AnsiConsoleOutput(TextWriter.Null);
+        }
 
         loggerFactory.AddLogConfiguration(logConfigurators);
     }

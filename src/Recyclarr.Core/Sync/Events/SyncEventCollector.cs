@@ -1,3 +1,6 @@
+using Recyclarr.Logging;
+using Serilog.Context;
+
 namespace Recyclarr.Sync.Events;
 
 public class SyncEventCollector(ILogger log, SyncEventStorage storage)
@@ -10,7 +13,12 @@ public class SyncEventCollector(ILogger log, SyncEventStorage storage)
     public IDisposable SetInstance(string instanceName)
     {
         _currentInstance = instanceName;
-        return new ContextScope(() => _currentInstance = null);
+        var logContext = LogContext.PushProperty(LogProperty.Scope, instanceName);
+        return new ContextScope(() =>
+        {
+            _currentInstance = null;
+            logContext.Dispose();
+        });
     }
 
     public IDisposable SetPipeline(PipelineType pipeline)

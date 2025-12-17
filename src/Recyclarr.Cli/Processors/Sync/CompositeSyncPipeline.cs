@@ -20,7 +20,11 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
-        log.Debug("Processing {Server} server {Name}", config.ServiceType, config.InstanceName);
+        log.Information(
+            "Processing {Server} server {Name}",
+            config.ServiceType,
+            config.InstanceName
+        );
 
         await enforcer.Check(config, ct);
 

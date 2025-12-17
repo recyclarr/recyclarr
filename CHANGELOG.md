@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
+  (default), `warn`.
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats to
   service custom formats by name.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
@@ -23,6 +25,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Deprecated
 
+- CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use
   `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
 

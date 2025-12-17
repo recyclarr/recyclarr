@@ -90,6 +90,7 @@ internal static class CompositionRoot
     {
         // Log Configurators
         builder.RegisterType<FileLogSinkConfigurator>().As<ILogConfigurator>();
+        builder.RegisterType<ConsoleLogSinkConfigurator>();
 
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<LoggerFactory>().SingleInstance();
