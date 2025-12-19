@@ -1,13 +1,15 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Sync.Events;
+using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 internal class QualityProfileLogger(
     ILogger log,
     ValidationLogger validationLogger,
-    ISyncEventPublisher eventPublisher
+    ISyncEventPublisher eventPublisher,
+    IProgressSource progressSource
 )
 {
     public void LogTransactionNotices(QualityProfilePipelineContext context)
@@ -132,6 +134,6 @@ internal class QualityProfileLogger(
             log.Information("All quality profiles are up to date!");
         }
 
-        eventPublisher.AddCompletionCount(changedProfiles.Count);
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, changedProfiles.Count);
     }
 }

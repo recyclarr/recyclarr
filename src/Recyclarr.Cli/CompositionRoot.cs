@@ -14,6 +14,7 @@ using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Filtering;
@@ -56,6 +57,7 @@ internal static class CompositionRoot
 
         // Sync
         builder.RegisterType<SyncProcessor>();
+        builder.RegisterType<SyncProgressRenderer>();
 
         // Configuration
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();

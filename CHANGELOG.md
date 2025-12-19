@@ -16,6 +16,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats to
   service custom formats by name.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
+- Sync: Live progress display showing real-time status of all instances and pipelines during sync.
 
 ### Changed
 

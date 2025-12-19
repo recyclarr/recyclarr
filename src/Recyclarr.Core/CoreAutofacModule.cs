@@ -28,7 +28,9 @@ using Recyclarr.ServarrApi.System;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
+using Recyclarr.Sync.Progress;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
@@ -271,10 +273,8 @@ public class CoreAutofacModule : Module
     private static void RegisterSyncEvents(ContainerBuilder builder)
     {
         builder.RegisterType<SyncEventStorage>().SingleInstance();
-        builder
-            .RegisterType<SyncEventCollector>()
-            .As<ISyncScopeFactory>()
-            .As<ISyncEventPublisher>()
-            .SingleInstance();
+        builder.RegisterType<SyncContextSource>().As<ISyncContextSource>().SingleInstance();
+        builder.RegisterType<ProgressSource>().As<IProgressSource>().SingleInstance();
+        builder.RegisterType<SyncEventCollector>().As<ISyncEventPublisher>().SingleInstance();
     }
 }

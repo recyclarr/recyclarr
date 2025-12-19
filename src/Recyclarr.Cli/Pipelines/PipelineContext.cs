@@ -8,6 +8,7 @@ internal abstract class PipelineContext
 {
     public abstract string PipelineDescription { get; }
     public abstract PipelineType PipelineType { get; }
+    public virtual bool ShouldSkip => false;
 
     // Set from `GenericSyncPipeline.Execute()`. Not able to make this `required` because of the
     // `new()` constraint.

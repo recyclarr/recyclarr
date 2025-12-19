@@ -14,6 +14,7 @@ internal class QualitySizePipelineContext : PipelineContext
 {
     public override string PipelineDescription => "Quality Definition";
     public override PipelineType PipelineType => PipelineType.QualitySize;
+    public override bool ShouldSkip => !Plan.QualitySizesAvailable;
 
     public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
     public QualityItemLimits Limits { get; set; } = null!;

@@ -8,6 +8,7 @@ using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
+using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Notifications;
 
@@ -16,6 +17,7 @@ public sealed class NotificationService(
     IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettings<NotificationSettings> settings,
     SyncEventStorage eventStorage,
+    IProgressSource progressSource,
     VerbosityOptions verbosity
 )
 {
@@ -24,7 +26,6 @@ public sealed class NotificationService(
 
     public async Task SendNotification(bool succeeded)
     {
-        // If the user didn't configure notifications, exit early and do nothing.
         if (_settings is null)
         {
             log.Debug(
@@ -79,25 +80,39 @@ public sealed class NotificationService(
     private string BuildNotificationBody()
     {
         var body = new StringBuilder();
+        var snapshot = progressSource.Current;
 
-        // Group by instance, with [no instance] first, then named instances alphabetically
-        var eventsByInstance = eventStorage
-            .AllEvents.GroupBy(e => e.InstanceName ?? NoInstance)
-            .OrderBy(g => g.Key == NoInstance ? 0 : 1)
-            .ThenBy(g => g.Key);
+        // Handle diagnostics without an instance (general errors)
+        var generalDiagnostics = eventStorage
+            .Diagnostics.Where(e => e.InstanceName is null)
+            .ToList();
 
-        foreach (var instanceGroup in eventsByInstance)
+        if (generalDiagnostics.Count > 0)
         {
-            RenderInstanceEvents(body, instanceGroup.Key, instanceGroup);
+            RenderSection(body, NoInstance, null, generalDiagnostics);
+        }
+
+        // Render each instance from progress snapshot
+        foreach (var instance in snapshot.Instances.OrderBy(i => i.Name))
+        {
+            var instanceDiagnostics = eventStorage
+                .Diagnostics.Where(e =>
+                    e.InstanceName?.Equals(instance.Name, StringComparison.OrdinalIgnoreCase)
+                    == true
+                )
+                .ToList();
+
+            RenderSection(body, instance.Name, instance, instanceDiagnostics);
         }
 
         return body.ToString();
     }
 
-    private void RenderInstanceEvents(
+    private void RenderSection(
         StringBuilder body,
         string instanceName,
-        IEnumerable<SyncEvent> events
+        InstanceSnapshot? progressInstance,
+        IReadOnlyList<DiagnosticEvent> diagnostics
     )
     {
         if (instanceName == NoInstance)
@@ -111,28 +126,44 @@ public sealed class NotificationService(
 
         body.AppendLine();
 
-        var eventList = events.ToList();
-
-        // Render completion counts (Information category)
-        var completionEvents = eventList.OfType<CompletionEvent>().ToList();
-        if (completionEvents.Count > 0 && verbosity.SendInfo)
+        // Render completion counts from progress snapshot (Information category)
+        if (progressInstance is not null && verbosity.SendInfo)
         {
-            body.AppendLine("Information:");
-            body.AppendLine();
-            foreach (var evt in completionEvents)
-            {
-                var description = GetPipelineDescription(evt.Pipeline);
-                body.AppendLine(CultureInfo.InvariantCulture, $"- {description}: {evt.Count}");
-            }
+            var pipelineResults = Enum.GetValues<PipelineType>()
+                .Select(pt =>
+                    (
+                        Type: pt,
+                        Result: progressInstance.Value.Pipelines.TryGetValue(pt, out var r)
+                            ? r
+                            : (PipelineSnapshot?)null
+                    )
+                )
+                .Where(x =>
+                    x.Result is not null
+                    && x.Result.Value.Status == PipelineProgressStatus.Succeeded
+                    && x.Result.Value.Count.HasValue
+                )
+                .ToList();
 
-            body.AppendLine();
+            if (pipelineResults.Count > 0)
+            {
+                body.AppendLine("Information:");
+                body.AppendLine();
+                foreach (var (pipelineType, result) in pipelineResults)
+                {
+                    var description = GetPipelineDescription(pipelineType);
+                    body.AppendLine(
+                        CultureInfo.InvariantCulture,
+                        $"- {description}: {result!.Value.Count}"
+                    );
+                }
+
+                body.AppendLine();
+            }
         }
 
         // Render errors
-        var errors = eventList
-            .OfType<DiagnosticEvent>()
-            .Where(e => e.Type == DiagnosticType.Error)
-            .ToList();
+        var errors = diagnostics.Where(e => e.Type == DiagnosticType.Error).ToList();
         if (errors.Count > 0)
         {
             body.AppendLine("Errors:");
@@ -146,8 +177,7 @@ public sealed class NotificationService(
         }
 
         // Render warnings (including deprecations)
-        var warnings = eventList
-            .OfType<DiagnosticEvent>()
+        var warnings = diagnostics
             .Where(e => e.Type is DiagnosticType.Warning or DiagnosticType.Deprecation)
             .ToList();
         if (warnings.Count > 0)
@@ -164,7 +194,7 @@ public sealed class NotificationService(
         }
     }
 
-    private static string GetPipelineDescription(PipelineType? pipeline)
+    private static string GetPipelineDescription(PipelineType pipeline)
     {
         return pipeline switch
         {

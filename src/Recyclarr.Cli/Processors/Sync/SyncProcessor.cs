@@ -4,12 +4,14 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Processors.ErrorHandling;
+using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
-using Spectre.Console;
+using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
@@ -22,40 +24,61 @@ internal class SyncBasedConfigurationScope(ILifetimeScope scope) : Configuration
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 internal class SyncProcessor(
-    IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
     ConsoleExceptionHandler exceptionHandler,
     NotificationService notify,
-    ISyncScopeFactory syncScopeFactory,
+    ISyncContextSource contextSource,
     SyncEventStorage eventStorage,
-    DiagnosticsRenderer diagnosticsRenderer
+    DiagnosticsRenderer diagnosticsRenderer,
+    IProgressSource progressSource,
+    SyncProgressRenderer progressRenderer
 )
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
-        var result = await ProcessConfigs(settings, ct);
+        var configs = LoadConfigs(settings);
+        foreach (var config in configs)
+        {
+            // All instances are added up front (as opposed to lazily) to support showing
+            // the full list of instances in the UI in a pending state before processing begins.
+            progressSource.AddInstance(config.InstanceName);
+        }
+
+        var result = ExitStatus.Succeeded;
+        await progressRenderer.RenderProgressAsync(
+            async () => result = await ProcessConfigs(settings, configs, ct),
+            ct
+        );
+
         diagnosticsRenderer.Report();
         await notify.SendNotification(result != ExitStatus.Failed);
         return result;
     }
 
-    private async Task<ExitStatus> ProcessConfigs(ISyncSettings settings, CancellationToken ct)
+    private List<IServiceConfiguration> LoadConfigs(ISyncSettings settings)
     {
-        eventStorage.Clear();
-
-        bool failureDetected;
-        try
-        {
-            var configs = configRegistry.FindAndLoadConfigs(
+        return configRegistry
+            .FindAndLoadConfigs(
                 new ConfigFilterCriteria
                 {
                     ManualConfigFiles = settings.Configs,
                     Instances = settings.Instances ?? [],
                     Service = settings.Service,
                 }
-            );
+            )
+            .ToList();
+    }
 
+    private async Task<ExitStatus> ProcessConfigs(
+        ISyncSettings settings,
+        IReadOnlyCollection<IServiceConfiguration> configs,
+        CancellationToken ct
+    )
+    {
+        bool failureDetected;
+        try
+        {
             failureDetected = await ProcessService(settings, configs, ct);
         }
         catch (Exception e)
@@ -82,38 +105,33 @@ internal class SyncProcessor(
 
         foreach (var config in configs)
         {
+            contextSource.SetInstance(config.InstanceName);
+            progressSource.SetInstanceStatus(InstanceProgressStatus.Running);
+
             try
             {
                 using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(
                     config
-                );
-                using var instanceScope = syncScopeFactory.SetInstance(config.InstanceName);
-
-                console.WriteLine(
-                    $"""
-
-                    ===========================================
-                    Processing {config.ServiceType} Server: [{config.InstanceName}]
-                    ===========================================
-
-                    """
                 );
 
                 var plan = configScope.PlanBuilder.Build();
 
                 if (eventStorage.HasInstanceErrors(config.InstanceName))
                 {
+                    progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
                     failureDetected = true;
                     continue;
                 }
 
                 await configScope.Pipelines.Execute(settings, plan, ct);
+                progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
             }
             catch (Exception e)
             {
+                progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
+
                 if (!await exceptionHandler.HandleException(e))
                 {
-                    // This means we didn't handle the exception; rethrow it.
                     throw;
                 }
 

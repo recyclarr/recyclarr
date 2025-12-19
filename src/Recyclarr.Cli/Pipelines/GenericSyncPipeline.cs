@@ -1,12 +1,14 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines;
 
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
-    ISyncScopeFactory syncScopeFactory,
+    ISyncContextSource contextSource,
+    IProgressSource progressSource,
     IOrderedEnumerable<IPipelinePhase<TContext>> phases
 ) : ISyncPipeline
     where TContext : PipelineContext, new()
@@ -16,15 +18,22 @@ internal class GenericSyncPipeline<TContext>(
         var context = new TContext { SyncSettings = settings, Plan = plan };
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
 
-        using (syncScopeFactory.SetPipeline(context.PipelineType))
+        contextSource.SetPipeline(context.PipelineType);
+
+        if (context.ShouldSkip)
         {
-            foreach (var phase in phases)
+            progressSource.SetPipelineStatus(PipelineProgressStatus.Skipped);
+            return;
+        }
+
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Running);
+
+        foreach (var phase in phases)
+        {
+            var flow = await phase.Execute(context, ct);
+            if (flow == PipelineFlow.Terminate)
             {
-                var flow = await phase.Execute(context, ct);
-                if (flow == PipelineFlow.Terminate)
-                {
-                    break;
-                }
+                break;
             }
         }
     }

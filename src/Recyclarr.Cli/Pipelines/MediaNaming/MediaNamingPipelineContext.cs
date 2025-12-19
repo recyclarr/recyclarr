@@ -7,6 +7,7 @@ internal class MediaNamingPipelineContext : PipelineContext
 {
     public override string PipelineDescription => "Media Naming";
     public override PipelineType PipelineType => PipelineType.MediaNaming;
+    public override bool ShouldSkip => !Plan.MediaNamingAvailable;
 
     public MediaNamingDto ApiFetchOutput { get; set; } = null!;
     public MediaNamingDto TransactionOutput { get; set; } = null!;

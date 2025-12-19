@@ -1,8 +1,13 @@
 using Recyclarr.Sync.Events;
+using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher eventPublisher)
+internal class CustomFormatTransactionLogger(
+    ILogger log,
+    ISyncEventPublisher eventPublisher,
+    IProgressSource progressSource
+)
 {
     public bool LogTransactions(CustomFormatPipelineContext context)
     {
@@ -94,7 +99,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
             log.Information("All custom formats are already up to date!");
         }
 
-        eventPublisher.AddCompletionCount(totalCount);
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalCount);
 
         return false;
     }
