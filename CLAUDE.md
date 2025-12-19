@@ -82,6 +82,8 @@ Required Idioms:
 - `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
 - Avoid interface pollution: not every service class must have an interface. Add interfaces when
   justified (e.g. testability, more than one implementation)
+- Local functions go after `return`/`continue` statements; add explicit `return;` or `continue;` if
+  needed to separate main logic from local function definitions
 
 ### Testing Requirements
 
