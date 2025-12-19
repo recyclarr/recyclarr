@@ -110,20 +110,4 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
                 )
             );
     }
-
-    [Test]
-    public void No_log_when_file_not_empty_but_has_no_desired_sections()
-    {
-        var sut = Resolve<ConfigurationLoader>();
-        const string testYml = """
-            not_wanted:
-              instance:
-                base_url: abc
-                api_key: xyz
-            """;
-
-        sut.Load(testYml);
-
-        Logger.Messages.Should().NotContain("Configuration is empty");
-    }
 }

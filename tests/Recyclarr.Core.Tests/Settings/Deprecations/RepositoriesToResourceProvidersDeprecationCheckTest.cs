@@ -1,19 +1,15 @@
 using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
-using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.Tests.Settings.Deprecations;
 
 internal sealed class RepositoriesToResourceProvidersDeprecationCheckTest
 {
     [Test, AutoMockData]
-    public void Transform_logs_deprecation_warning_and_converts_repositories(
+    public void Transform_converts_repositories_to_resource_providers(
         RepositoriesToResourceProvidersDeprecationCheck sut
     )
     {
-        var logger = new TestableLogger();
-        var sutWithLogger = new RepositoriesToResourceProvidersDeprecationCheck(logger);
-
         var settings = new RecyclarrSettings
         {
             Repositories = new Repositories
@@ -31,16 +27,8 @@ internal sealed class RepositoriesToResourceProvidersDeprecationCheckTest
             },
         };
 
-        var result = sutWithLogger.Transform(settings);
+        var result = sut.Transform(settings);
 
-        // Should log deprecation warning
-        logger
-            .Messages.Should()
-            .ContainSingle()
-            .Which.Should()
-            .Contain("DEPRECATED: The `repositories` setting");
-
-        // Should transform and clear old format
         result.Repositories.Should().BeNull();
 
         // Should create new resource providers

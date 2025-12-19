@@ -4,4 +4,7 @@
     <ProjectReference Include="..\Recyclarr.Core.TestLibrary\Recyclarr.Core.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Remove="Serilog.Sinks.NUnit" />
+  </ItemGroup>
 </Project>

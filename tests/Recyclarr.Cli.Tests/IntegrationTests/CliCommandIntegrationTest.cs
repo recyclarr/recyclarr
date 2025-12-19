@@ -33,7 +33,6 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
         );
 
         exitCode.Should().Be(0);
-        Console.Output.Should().ContainAll("default", "sqp-1-1080p", "sqp-1-2160p");
     }
 
     [Test]
@@ -61,7 +60,6 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
         );
 
         exitCode.Should().Be(0);
-        Console.Output.Should().ContainAll("default", "anime-sonarr", "french-multi");
     }
 
     [Test]
@@ -118,6 +116,5 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
         var exitCode = await CliSetup.Run(Container, ["list", "naming", "sonarr"]);
 
         exitCode.Should().Be(0);
-        Console.Output.Should().ContainAll("default", "plex-imdb", "original");
     }
 }

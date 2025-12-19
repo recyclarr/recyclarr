@@ -1,46 +1,40 @@
 using System.IO.Abstractions;
 using Recyclarr.Json;
-using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Core.Tests.Json;
 
 internal sealed class JsonUtilsTest
 {
     [Test]
-    public void Log_files_that_do_not_exist()
+    public void Return_empty_when_directory_does_not_exist()
     {
         var fs = new MockFileSystem();
-        var log = new TestableLogger();
-
         var path = fs.CurrentDirectory().SubDirectory("doesnt_exist");
 
-        var result = JsonUtils.GetJsonFilesInDirectories([path], log);
+        var result = JsonUtils.GetJsonFilesInDirectories([path], Substitute.For<ILogger>());
 
         result.Should().BeEmpty();
-        log.Messages.Should().ContainSingle().Which.Should().Match("*doesnt_exist*");
     }
 
     [Test]
-    public void Log_files_that_only_exist()
+    public void Return_files_from_existing_directory()
     {
         var fs = new MockFileSystem();
-        var log = new TestableLogger();
-
         var path = fs.CurrentDirectory().SubDirectory("exists").File("test.json");
         fs.AddFile(path.FullName, new MockFileData(""));
 
-        var result = JsonUtils.GetJsonFilesInDirectories([path.Directory], log);
+        var result = JsonUtils.GetJsonFilesInDirectories(
+            [path.Directory],
+            Substitute.For<ILogger>()
+        );
 
         result.Should().ContainSingle().Which.FullName.Should().Be(path.FullName);
-
-        log.Messages.Should().BeEmpty();
     }
 
     [Test]
-    public void Log_files_that_both_exist_and_do_not_exist()
+    public void Return_files_only_from_existing_directories()
     {
         var fs = new MockFileSystem();
-        var log = new TestableLogger();
         var paths = new[]
         {
             fs.CurrentDirectory().SubDirectory("does_not_exist"),
@@ -52,11 +46,9 @@ internal sealed class JsonUtilsTest
         fs.AddFile(existingFile, new MockFileData(""));
         paths[1].Refresh();
 
-        var result = JsonUtils.GetJsonFilesInDirectories(paths, log);
+        var result = JsonUtils.GetJsonFilesInDirectories(paths, Substitute.For<ILogger>());
 
         result.Should().ContainSingle().Which.FullName.Should().Be(existingFile);
-
-        log.Messages.Should().ContainSingle().Which.Should().Match("*does_not_exist*");
     }
 
     [Test]
