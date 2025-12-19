@@ -13,7 +13,6 @@ using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.VersionControl;
 using Serilog;
 using Spectre.Console;
-using Spectre.Console.Testing;
 
 namespace Recyclarr.Core.TestLibrary;
 
@@ -22,8 +21,6 @@ public abstract class IntegrationTestFixture : IDisposable
     private readonly Lazy<ILifetimeScope> _container;
     protected ILifetimeScope Container => _container.Value;
     protected MockFileSystem Fs { get; }
-    protected TestConsole Console { get; } = new();
-    protected TestableLogger Logger { get; } = new();
     protected IAppPaths Paths => Resolve<IAppPaths>();
 
     protected IntegrationTestFixture()
@@ -60,9 +57,9 @@ public abstract class IntegrationTestFixture : IDisposable
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
-        builder.RegisterInstance(Console).As<IAnsiConsole>();
-        builder.RegisterInstance(Logger).As<ILogger>();
 
+        builder.Register(_ => NUnitAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
+        builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 
         builder.RegisterMockFor<IEnvironment>(m =>
@@ -94,12 +91,6 @@ public abstract class IntegrationTestFixture : IDisposable
         appDataSetup.SetAppDataDirectoryOverride(
             Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName
         );
-    }
-
-    [TearDown]
-    public void Teardown()
-    {
-        System.Console.Write(Console.Output);
     }
 
     protected T Resolve<T>()

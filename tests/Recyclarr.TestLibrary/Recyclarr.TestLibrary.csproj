@@ -6,8 +6,13 @@
     <PackageReference Include="AutoFixture.NUnit4" />
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="NSubstitute" />
-    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.TextWriter" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Serilog">
+      <HintPath>..\..\..\..\.nuget\packages\serilog\4.3.0\lib\net9.0\Serilog.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

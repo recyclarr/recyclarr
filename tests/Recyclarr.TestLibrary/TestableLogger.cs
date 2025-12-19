@@ -1,4 +1,5 @@
 using System.Globalization;
+using NUnit.Framework;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -8,29 +9,13 @@ namespace Recyclarr.TestLibrary;
 [UsedImplicitly]
 public sealed class TestableLogger : ILogger
 {
-    private readonly Logger _log;
-    private readonly List<string> _messages = [];
-
-    public TestableLogger()
-    {
-        _log = new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Verbose)
-            .WriteTo.Sink(
-                new DelegateSink(x => _messages.Add(x.RenderMessage(CultureInfo.InvariantCulture)))
-            )
-            .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
-            .CreateLogger();
-    }
+    private readonly Logger _log = new LoggerConfiguration()
+        .MinimumLevel.Is(LogEventLevel.Verbose)
+        .WriteTo.TextWriter(TestContext.Out, formatProvider: CultureInfo.InvariantCulture)
+        .CreateLogger();
 
     public void Write(LogEvent logEvent)
     {
         _log.Write(logEvent);
-    }
-
-    public IEnumerable<string> Messages => _messages;
-
-    private sealed class DelegateSink(Action<LogEvent> write) : ILogEventSink
-    {
-        public void Emit(LogEvent logEvent) => write(logEvent);
     }
 }
