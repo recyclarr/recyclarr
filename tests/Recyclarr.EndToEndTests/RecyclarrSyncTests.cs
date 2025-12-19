@@ -262,7 +262,7 @@ internal sealed class RecyclarrSyncTests
         customFormats
             .Select(cf => cf.Name)
             .Should()
-            .BeEquivalentTo(["Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom"]);
+            .BeEquivalentTo("Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom");
 
         var qualityDefs = await _sonarr.GetQualityDefinitions(ct);
         var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
@@ -284,7 +284,7 @@ internal sealed class RecyclarrSyncTests
         customFormats
             .Select(cf => cf.Name)
             .Should()
-            .BeEquivalentTo([
+            .BeEquivalentTo(
                 "Hybrid-OVERRIDE",
                 "Remaster",
                 "4K Remaster",
@@ -292,8 +292,8 @@ internal sealed class RecyclarrSyncTests
                 "Masters of Cinema",
                 "Vinegar Syndrome",
                 "Special Edition",
-                "E2E-TestFormat",
-            ]);
+                "E2E-TestFormat"
+            );
 
         var qualityDefs = await _radarr.GetQualityDefinitions(ct);
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");

@@ -48,7 +48,7 @@ public static class FileSystemExtensions
 
         foreach (var subdirectory in directory.EnumerateDirectories())
         {
-            DeleteReadOnlyDirectory(subdirectory);
+            subdirectory.DeleteReadOnlyDirectory();
         }
 
         foreach (var fileInfo in directory.EnumerateFiles())

@@ -70,7 +70,8 @@ public class ConfigurationLoader(
         {
             return configs
                     ?.Where(x => x.Value is not null)
-                    .Select(kvp => new LoadedConfigYaml(kvp.Key, serviceType, kvp.Value!)) ?? [];
+                    .Select(kvp => new LoadedConfigYaml(kvp.Key, serviceType, kvp.Value!))
+                ?? [];
         }
     }
 }
