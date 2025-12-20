@@ -11,6 +11,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Quality Profiles: Support for `trash_id` to sync TRaSH Guide quality profile definitions. When
+  specified, qualities, custom formats, scores, and language are automatically configured from the
+  guide, significantly reducing YAML complexity.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
   (default), `warn`.
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats
