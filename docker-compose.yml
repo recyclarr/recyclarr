@@ -1,10 +1,22 @@
 name: recyclarr
 
+x-radarr: &radarr
+  image: ghcr.io/home-operations/radarr:rolling
+  environment:
+    TZ: America/Chicago
+    RADARR__AUTH__APIKEY: testkey
+
+x-sonarr: &sonarr
+  image: ghcr.io/home-operations/sonarr:rolling
+  environment:
+    TZ: America/Chicago
+    SONARR__AUTH__APIKEY: testkey
+
 volumes:
-  radarr_stable:
-  radarr_develop:
-  sonarr_stable:
-  sonarr_develop:
+  radarr_develop1:
+  radarr_develop2:
+  sonarr_develop1:
+  sonarr_develop2:
 
 services:
   recyclarr:
@@ -25,33 +37,35 @@ services:
       CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
 
-  radarr_develop:
-    image: ghcr.io/home-operations/radarr:rolling
+  radarr_develop1:
+    <<: *radarr
     ports: [7890:7878]
-    volumes:
-      - radarr_develop:/config
-    environment:
-      - TZ=America/Chicago
-      - RADARR__AUTH__APIKEY=testkey
+    volumes: [radarr_develop1:/config]
 
-  sonarr_develop:
-    image: ghcr.io/home-operations/sonarr:rolling
+  radarr_develop2:
+    <<: *radarr
+    ports: [7891:7878]
+    volumes: [radarr_develop2:/config]
+
+  sonarr_develop1:
+    <<: *sonarr
     ports: [8990:8989]
-    volumes:
-      - sonarr_develop:/config
-    environment:
-      - TZ=America/Chicago
-      - SONARR__AUTH__APIKEY=testkey
+    volumes: [sonarr_develop1:/config]
+
+  sonarr_develop2:
+    <<: *sonarr
+    ports: [8991:8989]
+    volumes: [sonarr_develop2:/config]
 
   sqlite:
     image: keinos/sqlite3
     profiles: [manual]
     entrypoint: [sqlite3]
     volumes:
-      - sonarr_develop:/sonarr/develop
-      - sonarr_stable:/sonarr/stable
-      - radarr_develop:/radarr/develop
-      - radarr_stable:/radarr/stable
+      - radarr_develop1:/radarr/develop1
+      - radarr_develop2:/radarr/develop2
+      - sonarr_develop1:/sonarr/develop1
+      - sonarr_develop2:/sonarr/develop2
 
   # http://localhost:8000
   apprise:
@@ -64,7 +78,7 @@ services:
     volumes:
       - ./docker/debugging/apprise:/config
     environment:
-      - TZ=America/Chicago
-      - APPRISE_DEFAULT_THEM=dark
-      - APPRISE_STATEFUL_MODE=simple
-      - DEBUG=yes
+      TZ: America/Chicago
+      APPRISE_DEFAULT_THEM: dark
+      APPRISE_STATEFUL_MODE: simple
+      DEBUG: yes
