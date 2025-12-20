@@ -11,7 +11,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
     "CA2227:Collection properties should be read only",
     Justification = "POCO"
 )]
-internal record CustomFormatCacheObject() : CacheObject(1), ITrashIdCacheObject
+internal record CustomFormatCacheObject : CacheObject, ITrashIdCacheObject
 {
     [JsonPropertyName("trash_id_mappings")]
     public List<TrashIdMapping> Mappings { get; set; } = [];

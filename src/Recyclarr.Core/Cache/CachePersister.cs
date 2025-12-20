@@ -1,14 +1,12 @@
 using System.Text.Json;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Config.Models;
 using Recyclarr.Json;
 
 namespace Recyclarr.Cache;
 
 public abstract class CachePersister<TCacheObject, TCache>(
     ILogger log,
-    ICacheStoragePath storagePath,
-    IServiceConfiguration config
+    ICacheStoragePath storagePath
 ) : ICachePersister<TCache>
     where TCacheObject : CacheObject, new()
     where TCache : BaseCache
@@ -22,11 +20,6 @@ public abstract class CachePersister<TCacheObject, TCache>(
         {
             log.Debug("{CacheName} does not exist; proceeding without it", CacheName);
             cacheData = new TCacheObject();
-        }
-
-        if (cacheData.Version != cacheData.LatestVersion)
-        {
-            cacheData = HandleVersionMismatch(cacheData);
         }
 
         return CreateCache(cacheData);
@@ -60,8 +53,6 @@ public abstract class CachePersister<TCacheObject, TCache>(
         var path = storagePath.CalculatePath<TCacheObject>();
         log.Debug("Saving {CacheName} to path {Path}", CacheName, path);
 
-        cache.CacheObject.InstanceName = config.InstanceName; // Always set, in case the instance name changed
-
         path.CreateParentDirectory();
 
         using var stream = path.Create();
@@ -70,15 +61,4 @@ public abstract class CachePersister<TCacheObject, TCache>(
 
     protected abstract string CacheName { get; }
     protected abstract TCache CreateCache(TCacheObject cacheObject);
-
-    // Default method to handle version mismatches
-    protected virtual TCacheObject HandleVersionMismatch(TCacheObject cacheData)
-    {
-        log.Information(
-            "Cache version mismatch ({OldVersion} vs {LatestVersion}); ignoring cache data",
-            cacheData.Version,
-            cacheData.LatestVersion
-        );
-        throw new CacheException("Version mismatch");
-    }
 }
