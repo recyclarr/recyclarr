@@ -46,10 +46,17 @@ internal class SyncProcessor(
         }
 
         var result = ExitStatus.Succeeded;
-        await progressRenderer.RenderProgressAsync(
-            async () => result = await ProcessConfigs(settings, configs, ct),
-            ct
-        );
+        if (settings.Preview)
+        {
+            result = await ProcessConfigs(settings, configs, ct);
+        }
+        else
+        {
+            await progressRenderer.RenderProgressAsync(
+                async () => result = await ProcessConfigs(settings, configs, ct),
+                ct
+            );
+        }
 
         diagnosticsRenderer.Report();
         await notify.SendNotification(result != ExitStatus.Failed);
