@@ -1,0 +1,33 @@
+{
+  "trash_id": "e2e00000000000000000000000000002",
+  "name": "E2E-GuideSonarrProfile",
+  "trash_description": "E2E test quality profile for Sonarr guide-synced QP testing",
+  "group": 1,
+  "upgradeAllowed": true,
+  "cutoff": "Bluray-1080p",
+  "minFormatScore": 0,
+  "cutoffFormatScore": 10000,
+  "minUpgradeFormatScore": 75,
+  "language": "Original",
+  "items": [
+    { "name": "Unknown", "allowed": false },
+    { "name": "SDTV", "allowed": false },
+    { "name": "DVD", "allowed": false },
+    { "name": "HDTV-720p", "allowed": false },
+    {
+      "name": "WEB 720p",
+      "allowed": false,
+      "items": ["WEBDL-720p", "WEBRip-720p"]
+    },
+    { "name": "Bluray-720p", "allowed": false },
+    { "name": "HDTV-1080p", "allowed": true },
+    {
+      "name": "WEB 1080p",
+      "allowed": true,
+      "items": ["WEBDL-1080p", "WEBRip-1080p"]
+    },
+    { "name": "Bluray-1080p", "allowed": true },
+    { "name": "Raw-HD", "allowed": false }
+  ],
+  "formatItems": {}
+}

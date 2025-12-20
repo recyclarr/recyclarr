@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync.Events;
@@ -6,46 +7,45 @@ using Recyclarr.TrashGuide;
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class CustomFormatPlanComponent(
-    CustomFormatResourceQuery guide,
+    ConfiguredCustomFormatProvider cfProvider,
+    CustomFormatResourceQuery cfQuery,
     IServiceConfiguration config
 ) : IPlanComponent
 {
     public void Process(PipelinePlan plan, ISyncEventPublisher events)
     {
-        var customFormats = GetCustomFormatsForService();
+        var cfResources = GetCfResourcesForService()
+            .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Match custom formats in the YAML config to those in the guide, by Trash ID
-        // Conservative approach: only CFs in the guide that are specified in the config
-        var processedCfs = config
-            .CustomFormats.SelectMany(x => x.TrashIds)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .GroupJoin(
-                customFormats,
-                x => x,
-                x => x.TrashId,
-                (id, cf) => (Id: id, CustomFormats: cf)
-            )
-            .ToLookup(x => x.CustomFormats.Any());
+        // Flatten configs into (TrashId, AssignScoresTo) pairs, then group by TrashId
+        var configuredCfs = cfProvider
+            .GetAll()
+            .SelectMany(cfg => cfg.TrashIds.Select(id => (TrashId: id, cfg.AssignScoresTo)))
+            .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Track invalid trash_ids in diagnostics
-        foreach (var invalid in processedCfs[false])
+        foreach (var group in configuredCfs)
         {
-            events.AddWarning($"Invalid trash_id: {invalid.Id}");
-        }
+            if (!cfResources.TryGetValue(group.Key, out var resource))
+            {
+                events.AddWarning($"Invalid trash_id: {group.Key}");
+                continue;
+            }
 
-        // Add matched CFs to plan
-        foreach (var cf in processedCfs[true].SelectMany(x => x.CustomFormats))
-        {
-            plan.AddCustomFormat(new PlannedCustomFormat(cf));
+            plan.AddCustomFormat(
+                new PlannedCustomFormat(resource)
+                {
+                    AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
+                }
+            );
         }
     }
 
-    private IEnumerable<CustomFormatResource> GetCustomFormatsForService()
+    private IReadOnlyList<CustomFormatResource> GetCfResourcesForService()
     {
         return config.ServiceType switch
         {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
+            SupportedServices.Radarr => cfQuery.GetRadarr(),
+            SupportedServices.Sonarr => cfQuery.GetSonarr(),
             _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
         };
     }

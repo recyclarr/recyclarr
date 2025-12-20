@@ -76,6 +76,7 @@ public record ResetUnmatchedScoresConfig
 
 public record QualityProfileConfig
 {
+    public string? TrashId { get; init; }
     public string Name { get; init; } = "";
     public bool? UpgradeAllowed { get; init; }
     public string? UpgradeUntilQuality { get; init; }

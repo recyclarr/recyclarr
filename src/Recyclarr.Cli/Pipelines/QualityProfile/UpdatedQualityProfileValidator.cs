@@ -14,6 +14,7 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
             .Custom(ValidateCutoff!)
             .When(x => x.ProfileConfig.Config.UpgradeUntilQuality is not null);
 
+        // Qualities are consolidated in Plan phase (from config or guide resource)
         RuleFor(x => x.ProfileConfig.Config.Qualities)
             .NotEmpty()
             .When(x => x.UpdateReason == QualityProfileUpdateReason.New)

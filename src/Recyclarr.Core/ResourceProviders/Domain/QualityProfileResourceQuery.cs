@@ -30,7 +30,7 @@ public class QualityProfileResourceQuery(
         var files = registry.Get<TResource>();
         log.Debug("QualityProfile: Found {Count} quality profile files in registry", files.Count);
 
-        var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Metadata);
+        var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
         return loaded
             .Select(tuple => tuple.Resource)

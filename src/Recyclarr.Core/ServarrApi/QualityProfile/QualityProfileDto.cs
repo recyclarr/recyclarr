@@ -63,6 +63,12 @@ public record QualityProfileDto
         }
     } = [];
 
+    public ProfileLanguageDto? Language
+    {
+        get;
+        init => DtoUtil.SetIfNotNull(ref field, value);
+    }
+
     [UsedImplicitly, JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
 }
@@ -105,4 +111,11 @@ public record ProfileItemQualityDto
 
     [UsedImplicitly, JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = new();
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record ProfileLanguageDto
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
 }

@@ -6,4 +6,5 @@ public interface IQualityProfileApiService
     Task UpdateQualityProfile(QualityProfileDto profile, CancellationToken ct);
     Task<QualityProfileDto> GetSchema(CancellationToken ct);
     Task CreateQualityProfile(QualityProfileDto profile, CancellationToken ct);
+    Task<IList<ProfileLanguageDto>> GetLanguages(CancellationToken ct);
 }

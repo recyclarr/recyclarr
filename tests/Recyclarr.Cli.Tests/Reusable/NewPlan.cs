@@ -56,13 +56,38 @@ internal static class NewPlan
         params PlannedCfScore[] scores
     )
     {
+        return Qp(config, shouldCreate, null, scores);
+    }
+
+    public static PlannedQualityProfile Qp(
+        QualityProfileConfig config,
+        QualityProfileResource resource,
+        params PlannedCfScore[] scores
+    )
+    {
+        return Qp(config, true, resource, scores);
+    }
+
+    public static PlannedQualityProfile Qp(
+        QualityProfileConfig config,
+        bool shouldCreate,
+        QualityProfileResource? resource,
+        params PlannedCfScore[] scores
+    )
+    {
         return new PlannedQualityProfile
         {
-            Name = config.Name,
+            Name = resource?.Name ?? config.Name,
             Config = config,
             ShouldCreate = shouldCreate,
+            Resource = resource,
             CfScores = scores.ToList(),
         };
+    }
+
+    public static QualityProfileResource QpResource(string trashId, string name)
+    {
+        return new QualityProfileResource { TrashId = trashId, Name = name };
     }
 
     public static PlannedQualitySizes Qs(string type, params PlannedQualityItem[] qualities)

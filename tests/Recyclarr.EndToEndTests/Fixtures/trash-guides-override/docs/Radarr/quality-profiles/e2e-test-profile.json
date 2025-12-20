@@ -1,0 +1,60 @@
+{
+  "trash_id": "e2e00000000000000000000000000001",
+  "name": "E2E-GuideProfile",
+  "trash_description": "E2E test quality profile for guide-synced QP testing",
+  "group": 1,
+  "upgradeAllowed": true,
+  "cutoff": "Bluray-1080p",
+  "minFormatScore": 0,
+  "cutoffFormatScore": 10000,
+  "minUpgradeFormatScore": 50,
+  "language": "English",
+  "items": [
+    { "name": "Unknown", "allowed": false },
+    { "name": "WORKPRINT", "allowed": false },
+    { "name": "CAM", "allowed": false },
+    { "name": "TELESYNC", "allowed": false },
+    { "name": "TELECINE", "allowed": false },
+    { "name": "REGIONAL", "allowed": false },
+    { "name": "DVDSCR", "allowed": false },
+    { "name": "SDTV", "allowed": false },
+    { "name": "DVD", "allowed": false },
+    { "name": "DVD-R", "allowed": false },
+    {
+      "name": "WEB 480p",
+      "allowed": false,
+      "items": ["WEBDL-480p", "WEBRip-480p"]
+    },
+    { "name": "Bluray-480p", "allowed": false },
+    { "name": "Bluray-576p", "allowed": false },
+    { "name": "HDTV-720p", "allowed": false },
+    {
+      "name": "WEB 720p",
+      "allowed": false,
+      "items": ["WEBDL-720p", "WEBRip-720p"]
+    },
+    { "name": "Bluray-720p", "allowed": false },
+    { "name": "HDTV-1080p", "allowed": true },
+    {
+      "name": "WEB 1080p",
+      "allowed": true,
+      "items": ["WEBDL-1080p", "WEBRip-1080p"]
+    },
+    { "name": "Bluray-1080p", "allowed": true },
+    { "name": "Remux-1080p", "allowed": false },
+    { "name": "HDTV-2160p", "allowed": false },
+    {
+      "name": "WEB 2160p",
+      "allowed": false,
+      "items": ["WEBDL-2160p", "WEBRip-2160p"]
+    },
+    { "name": "Bluray-2160p", "allowed": false },
+    { "name": "Remux-2160p", "allowed": false },
+    { "name": "BR-DISK", "allowed": false },
+    { "name": "Raw-HD", "allowed": false }
+  ],
+  "formatItems": {
+    "Repack/Proper": "e7718d7a3ce595f289bfee26adc178f5",
+    "LQ": "90a6f9a284dff5103f6346090e6280c8"
+  }
+}

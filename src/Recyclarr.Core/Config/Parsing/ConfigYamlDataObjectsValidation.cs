@@ -116,9 +116,8 @@ public class QualityProfileConfigYamlValidator : AbstractValidator<QualityProfil
         RuleFor(x => x.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage(x =>
-                $"For profile {x.Name}, 'name' is required for root-level 'quality_profiles' elements"
-            );
+            .When(x => string.IsNullOrEmpty(x.TrashId))
+            .WithMessage("'name' is required when 'trash_id' is not specified");
 
         RuleFor(x => x.Upgrade)
             .SetNonNullableValidator(x => new QualityProfileFormatUpgradeYamlValidator(x));

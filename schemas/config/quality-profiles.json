@@ -7,11 +7,15 @@
   "items": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["name"],
+    "anyOf": [{ "required": ["name"] }, { "required": ["trash_id"] }],
     "properties": {
+      "trash_id": {
+        "type": "string",
+        "description": "The trash_id of a quality profile from the TRaSH Guides. When specified, the profile is managed via cache and supports rename tracking."
+      },
       "name": {
         "type": "string",
-        "description": "The name of the quality profile to which settings should apply."
+        "description": "The name of the quality profile. For guide-backed profiles (with trash_id), this overrides the guide name. For user-defined profiles, this is the profile identity."
       },
       "reset_unmatched_scores": {
         "type": "object",

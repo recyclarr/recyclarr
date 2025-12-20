@@ -43,4 +43,11 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
 
         profile.Id = response.Id;
     }
+
+    public async Task<IList<ProfileLanguageDto>> GetLanguages(CancellationToken ct)
+    {
+        return await service
+            .Request("language")
+            .GetJsonAsync<IList<ProfileLanguageDto>>(cancellationToken: ct);
+    }
 }

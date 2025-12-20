@@ -1,5 +1,7 @@
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
@@ -21,6 +23,13 @@ internal sealed class QualityProfileTransactionPhaseTest
         return plan;
     }
 
+    private static QualityProfileCache CreateCache(params TrashIdMapping[] mappings)
+    {
+        var cacheObject = new QualityProfileCacheObject();
+        cacheObject.Mappings.AddRange(mappings);
+        return new QualityProfileCache(cacheObject);
+    }
+
     [Test, AutoMockData]
     public async Task Non_existent_profile_names_mixed_with_valid_profiles(
         QualityProfileTransactionPhase sut
@@ -34,7 +43,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(invalidProfile, validProfile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -85,10 +95,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(newProfile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
-            {
-                Schema = schema,
-            },
+            ApiFetchOutput = NewQp.ServiceData(dtos, schema: schema),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -165,7 +173,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -212,7 +221,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = new PipelinePlan(),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -255,7 +265,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -312,7 +323,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -375,7 +387,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -438,7 +451,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -501,7 +515,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto()),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -540,9 +555,9 @@ internal sealed class QualityProfileTransactionPhaseTest
         var context = new QualityProfilePipelineContext
         {
             Plan = CreatePlan(profile),
-            ApiFetchOutput = new QualityProfileServiceData(dtos, new QualityProfileDto())
-            {
-                Schema = new QualityProfileDto
+            ApiFetchOutput = NewQp.ServiceData(
+                dtos,
+                schema: new QualityProfileDto
                 {
                     Items =
                     [
@@ -559,8 +574,9 @@ internal sealed class QualityProfileTransactionPhaseTest
                             Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
                         },
                     ],
-                },
-            },
+                }
+            ),
+            Cache = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -585,5 +601,214 @@ internal sealed class QualityProfileTransactionPhaseTest
                     Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
                 },
             ]);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_with_cache_hit_updates_existing(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Guide Profile");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Guide Profile", TrashId = "trash-id-1" },
+            resource
+        );
+
+        var serviceDto = new QualityProfileDto { Id = 42, Name = "Guide Profile" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([serviceDto]),
+            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 42)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Profile matched by cached ID should be processed as Changed (update existing)
+        var allProfiles = context
+            .TransactionOutput.ChangedProfiles.Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allProfiles.Should().ContainSingle();
+        allProfiles[0].Profile.UpdateReason.Should().Be(QualityProfileUpdateReason.Changed);
+        allProfiles[0].Profile.ProfileDto.Id.Should().Be(42);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_with_cache_hit_renames_when_name_differs(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "New Guide Name");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "New Guide Name", TrashId = "trash-id-1" },
+            resource
+        );
+
+        var serviceDto = new QualityProfileDto { Id = 42, Name = "Old Service Name" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([serviceDto]),
+            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Old Service Name", 42)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Profile matched by ID should be updated (will trigger rename)
+        var allProfiles = context
+            .TransactionOutput.ChangedProfiles.Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allProfiles.Should().ContainSingle().Which.Profile.ProfileDto.Id.Should().Be(42);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_with_stale_cache_falls_back_to_name_collision(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Guide Profile");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Guide Profile", TrashId = "trash-id-1" },
+            resource
+        );
+
+        // Cached ID 999 doesn't exist in service, but a profile with matching name does
+        var serviceDtoWithName = new QualityProfileDto { Id = 50, Name = "Guide Profile" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoWithName]),
+            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 999)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Stale cache + name match for guide profile = conflict (needs cache rebuild --adopt)
+        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
+        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(50);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_no_cache_name_exists_creates_conflict(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Existing Profile");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Existing Profile", TrashId = "trash-id-1" },
+            resource
+        );
+
+        var existingDto = new QualityProfileDto { Id = 100, Name = "Existing Profile" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([existingDto]),
+            Cache = CreateCache(), // No cache entries
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
+        context.TransactionOutput.ConflictingProfiles[0].PlannedProfile.Should().Be(profile);
+        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(100);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_no_cache_no_match_creates_new(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Brand New Profile");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "Brand New Profile",
+                TrashId = "trash-id-1",
+                Qualities = [new QualityProfileQualityConfig { Name = "quality1", Enabled = true }],
+            },
+            resource
+        );
+
+        var schema = new QualityProfileDto
+        {
+            Items =
+            [
+                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+            ],
+        };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([], schema: schema),
+            Cache = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.ChangedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdateReason.Should()
+            .Be(QualityProfileUpdateReason.New);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_multiple_name_matches_creates_ambiguous(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Duplicate Name");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Duplicate Name", TrashId = "trash-id-1" },
+            resource
+        );
+
+        // Two profiles with the same name (case-insensitive)
+        var dto1 = new QualityProfileDto { Id = 1, Name = "Duplicate Name" };
+        var dto2 = new QualityProfileDto { Id = 2, Name = "duplicate name" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([dto1, dto2]),
+            Cache = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.AmbiguousProfiles.Should().ContainSingle();
+        context.TransactionOutput.AmbiguousProfiles[0].PlannedProfile.Should().Be(profile);
+        context.TransactionOutput.AmbiguousProfiles[0].ServiceMatches.Should().HaveCount(2);
+    }
+
+    [Test, AutoMockData]
+    public async Task Guide_profile_no_match_with_should_create_false_adds_to_nonexistent(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var resource = NewPlan.QpResource("trash-id-1", "Missing Profile");
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig { Name = "Missing Profile", TrashId = "trash-id-1" },
+            false, // ShouldCreate = false
+            resource
+        );
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData([]),
+            Cache = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.NonExistentProfiles.Should().ContainSingle();
+        context.TransactionOutput.NonExistentProfiles.Should().Contain("Missing Profile");
     }
 }

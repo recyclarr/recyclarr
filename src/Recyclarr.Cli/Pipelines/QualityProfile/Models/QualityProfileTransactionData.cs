@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using FluentValidation.Results;
 
@@ -15,4 +16,8 @@ internal record QualityProfileTransactionData
     public ICollection<InvalidProfileData> InvalidProfiles { get; init; } = [];
     public ICollection<ProfileWithStats> UnchangedProfiles { get; set; } = [];
     public ICollection<ProfileWithStats> ChangedProfiles { get; set; } = [];
+
+    // Error cases for guide-backed profiles only (those with trash_id)
+    public Collection<ConflictingQualityProfile> ConflictingProfiles { get; } = [];
+    public Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
 }

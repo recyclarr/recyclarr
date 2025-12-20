@@ -3,12 +3,14 @@
     "radarr": {
       "custom_formats": ["docs/Radarr/Custom Formats"],
       "qualities": [],
-      "naming": []
+      "naming": [],
+      "quality_profiles": ["docs/Radarr/quality-profiles"]
     },
     "sonarr": {
       "custom_formats": [],
       "qualities": [],
-      "naming": []
+      "naming": [],
+      "quality_profiles": ["docs/Sonarr/quality-profiles"]
     }
   }
 }

@@ -1,3 +1,5 @@
+using Recyclarr.Cache;
+using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
@@ -5,6 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiPersistencePhase(
     IQualityProfileApiService api,
+    ICachePersister<QualityProfileCache> cachePersister,
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
@@ -22,6 +25,8 @@ internal class QualityProfileApiPersistencePhase(
             {
                 case QualityProfileUpdateReason.New:
                     await api.CreateQualityProfile(dto, ct);
+                    // After creation, dto.Id is set by the API service
+                    profile.ProfileDto.Id = dto.Id;
                     break;
 
                 case QualityProfileUpdateReason.Changed:
@@ -34,6 +39,9 @@ internal class QualityProfileApiPersistencePhase(
                     );
             }
         }
+
+        context.Cache.Update(context.TransactionOutput, context.ApiFetchOutput.Profiles);
+        cachePersister.Save(context.Cache);
 
         logger.LogPersistenceResults(context);
         return PipelineFlow.Continue;

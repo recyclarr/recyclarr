@@ -68,7 +68,16 @@ internal sealed class FauxCustomFormat
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-internal sealed record FauxQualityProfile(int Id, string Name, int MinUpgradeFormatScore);
+internal sealed record FauxQualityProfile(
+    int Id,
+    string Name,
+    int MinUpgradeFormatScore,
+    bool UpgradeAllowed,
+    FauxProfileLanguage? Language
+);
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+internal sealed record FauxProfileLanguage(int Id, string Name);
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 internal sealed record FauxQualityDefinition(

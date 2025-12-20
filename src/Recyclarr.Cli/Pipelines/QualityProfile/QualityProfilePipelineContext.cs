@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync;
 
@@ -10,4 +11,5 @@ internal class QualityProfilePipelineContext : PipelineContext
 
     public QualityProfileServiceData ApiFetchOutput { get; set; } = null!;
     public QualityProfileTransactionData TransactionOutput { get; set; } = null!;
+    public QualityProfileCache Cache { get; set; } = null!;
 }

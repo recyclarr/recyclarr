@@ -10,6 +10,7 @@ using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
@@ -88,6 +89,9 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
+        builder
+            .RegisterType<QualityProfileCachePersister>()
+            .As<ICachePersister<QualityProfileCache>>();
 
         builder
             .RegisterTypes(
@@ -128,6 +132,7 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterCustomFormat(ContainerBuilder builder)
     {
+        builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
         builder.RegisterType<CustomFormatDataLister>();
         builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
         builder.RegisterType<CustomFormatTransactionLogger>();

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.QualityProfile;
+using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
@@ -77,4 +78,10 @@ internal static class NewQp
     {
         return QualityConfig(itemName, enabled) with { Qualities = nestedItems };
     }
+
+    public static QualityProfileServiceData ServiceData(
+        IReadOnlyList<QualityProfileDto>? profiles = null,
+        QualityProfileDto? schema = null,
+        IReadOnlyList<ProfileLanguageDto>? languages = null
+    ) => new(profiles ?? [], schema ?? new(), languages ?? []);
 }

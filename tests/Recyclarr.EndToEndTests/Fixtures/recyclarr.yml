@@ -10,6 +10,7 @@ sonarr:
     api_key: !env_var SONARR_API_KEY
 
     quality_profiles:
+      # User-defined quality profile (backward compat)
       - name: HD-1080p
         reset_unmatched_scores:
           enabled: true
@@ -27,6 +28,11 @@ sonarr:
               - WEBDL-1080p
               - WEBRip-1080p
           - name: HDTV-1080p
+
+      # Guide-synced quality profile with config overrides
+      - trash_id: e2e00000000000000000000000000002
+        name: E2E-SonarrGuideOverride
+        min_upgrade_format_score: 150
 
     custom_formats:
       - trash_ids:
@@ -53,6 +59,7 @@ radarr:
     api_key: !env_var RADARR_API_KEY
 
     quality_profiles:
+      # User-defined quality profile (backward compat)
       - name: HD-1080p
         reset_unmatched_scores:
           enabled: true
@@ -73,6 +80,13 @@ radarr:
               - WEBDL-1080p
               - WEBRip-1080p
           - name: HDTV-1080p
+
+      # Guide-synced quality profile with config overrides
+      - trash_id: e2e00000000000000000000000000001
+        name: E2E-RadarrGuideOverride
+        min_upgrade_format_score: 250
+        upgrade:
+          allowed: false
 
     custom_formats:
       - trash_ids:

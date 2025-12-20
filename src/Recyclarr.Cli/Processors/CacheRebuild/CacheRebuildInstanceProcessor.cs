@@ -1,6 +1,7 @@
 using System.Globalization;
 using Recyclarr.Cache;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Config.Models;
@@ -18,7 +19,8 @@ internal class CacheRebuildInstanceProcessor(
     ICustomFormatApiService customFormatApi,
     ICachePersister<CustomFormatCache> cachePersister,
     ICacheStoragePath cacheStoragePath,
-    CustomFormatResourceQuery guideQuery
+    ConfiguredCustomFormatProvider cfProvider,
+    CustomFormatResourceQuery cfQuery
 )
 {
     // State configuration: (SortPriority, FormattedDisplay)
@@ -66,12 +68,14 @@ internal class CacheRebuildInstanceProcessor(
         var serviceIdSet = serviceCfs.Select(cf => cf.Id).ToHashSet();
         log.Debug("Fetched {Count} custom formats from service", serviceCfs.Count);
 
-        var configuredTrashIds = config
-            .CustomFormats.SelectMany(x => x.TrashIds)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+        // Get consolidated trash_ids from all configs, then resolve to resources
+        var configuredTrashIds = cfProvider
+            .GetAll()
+            .SelectMany(cfg => cfg.TrashIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var allGuideCfs = GetGuideCfsForService(config.ServiceType);
+        var allGuideCfs = GetGuideCfsForService();
         var configuredGuideCfs = allGuideCfs
             .Where(cf => configuredTrashIds.Contains(cf.TrashId))
             .ToList();
@@ -126,16 +130,6 @@ internal class CacheRebuildInstanceProcessor(
         }
 
         return true;
-    }
-
-    private IReadOnlyList<CustomFormatResource> GetGuideCfsForService(SupportedServices serviceType)
-    {
-        return serviceType switch
-        {
-            SupportedServices.Radarr => guideQuery.GetRadarr(),
-            SupportedServices.Sonarr => guideQuery.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {serviceType}"),
-        };
     }
 
     private static (
@@ -498,5 +492,15 @@ internal class CacheRebuildInstanceProcessor(
         var cacheObject = new CustomFormatCacheObject { Mappings = matches };
         var cache = new CustomFormatCache(cacheObject);
         cachePersister.Save(cache);
+    }
+
+    private IReadOnlyList<CustomFormatResource> GetGuideCfsForService()
+    {
+        return config.ServiceType switch
+        {
+            SupportedServices.Radarr => cfQuery.GetRadarr(),
+            SupportedServices.Sonarr => cfQuery.GetSonarr(),
+            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
+        };
     }
 }

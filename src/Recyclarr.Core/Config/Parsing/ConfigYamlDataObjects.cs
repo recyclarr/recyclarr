@@ -64,6 +64,7 @@ public record ResetUnmatchedScoresConfigYaml
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileConfigYaml
 {
+    public string? TrashId { get; init; }
     public string? Name { get; init; }
     public ResetUnmatchedScoresConfigYaml? ResetUnmatchedScores { get; init; }
     public QualityProfileFormatUpgradeYaml? Upgrade { get; init; }

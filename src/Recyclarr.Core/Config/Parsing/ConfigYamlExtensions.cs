@@ -73,6 +73,7 @@ internal static class ConfigYamlExtensions
     {
         return new QualityProfileConfig
         {
+            TrashId = yaml.TrashId,
             Name = yaml.Name ?? "",
             UpgradeAllowed = yaml.Upgrade?.Allowed,
             UpgradeUntilQuality = yaml.Upgrade?.UntilQuality,

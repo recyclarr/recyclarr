@@ -1,4 +1,5 @@
 using Recyclarr.Config.Models;
+using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.Plan;
 
@@ -13,6 +14,9 @@ internal class PlannedQualityProfile
 
     // Config overrides from user YAML
     public required QualityProfileConfig Config { get; init; }
+
+    // Guide resource (when trash_id is specified). Null for user-defined profiles.
+    public QualityProfileResource? Resource { get; init; }
 
     // CF scores: resolved from score_set or explicit config
     public IList<PlannedCfScore> CfScores { get; init; } = [];

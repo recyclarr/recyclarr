@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Recyclarr.ResourceProviders.Domain;
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
@@ -11,10 +13,17 @@ public record QualityProfileQualityItem
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record QualityProfileResource
 {
+    [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = "";
+
     public string Name { get; init; } = "";
+
+    [JsonPropertyName("trash_description")]
     public string TrashDescription { get; init; } = "";
+
+    [JsonPropertyName("trash_score_set")]
     public string TrashScoreSet { get; init; } = "";
+
     public int Group { get; init; }
     public bool UpgradeAllowed { get; init; }
     public string Cutoff { get; init; } = "";

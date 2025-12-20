@@ -161,6 +161,8 @@ internal sealed class RecyclarrSyncTests
                     "Vinegar Syndrome",
                     "Special Edition",
                     "E2E-TestFormat",
+                    "Repack/Proper",
+                    "LQ",
                 ],
                 "CFs should be unchanged after re-sync"
             );
@@ -255,8 +257,22 @@ internal sealed class RecyclarrSyncTests
     private static async Task VerifySonarrState(CancellationToken ct)
     {
         var profiles = await _sonarr.GetQualityProfiles(ct);
+
+        // User-defined quality profile
         profiles.Select(p => p.Name).Should().Contain("HD-1080p");
         profiles.First(p => p.Name == "HD-1080p").MinUpgradeFormatScore.Should().Be(100);
+
+        // Guide-synced quality profile with config overrides
+        var guideSonarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-SonarrGuideOverride");
+        guideSonarrProfile
+            .Should()
+            .NotBeNull("guide-synced profile should exist with overridden name");
+        guideSonarrProfile
+            .MinUpgradeFormatScore.Should()
+            .Be(150, "config override should take precedence");
+        guideSonarrProfile
+            .UpgradeAllowed.Should()
+            .BeTrue("guide value should be preserved when not overridden");
 
         var customFormats = await _sonarr.GetCustomFormats(ct);
         customFormats
@@ -277,14 +293,32 @@ internal sealed class RecyclarrSyncTests
     private static async Task VerifyRadarrState(CancellationToken ct)
     {
         var profiles = await _radarr.GetQualityProfiles(ct);
+
+        // User-defined quality profile
         profiles.Select(p => p.Name).Should().Contain("HD-1080p");
         profiles.First(p => p.Name == "HD-1080p").MinUpgradeFormatScore.Should().Be(200);
+
+        // Guide-synced quality profile with config overrides
+        var guideRadarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-RadarrGuideOverride");
+        guideRadarrProfile
+            .Should()
+            .NotBeNull("guide-synced profile should exist with overridden name");
+        guideRadarrProfile
+            .MinUpgradeFormatScore.Should()
+            .Be(250, "config override should take precedence");
+        guideRadarrProfile
+            .UpgradeAllowed.Should()
+            .BeFalse("config override should take precedence over guide value");
+        guideRadarrProfile
+            .Language?.Name.Should()
+            .Be("English", "language from guide resource should be applied");
 
         var customFormats = await _radarr.GetCustomFormats(ct);
         customFormats
             .Select(cf => cf.Name)
             .Should()
             .BeEquivalentTo(
+                // From YAML custom_formats section
                 "Hybrid-OVERRIDE",
                 "Remaster",
                 "4K Remaster",
@@ -292,7 +326,11 @@ internal sealed class RecyclarrSyncTests
                 "Masters of Cinema",
                 "Vinegar Syndrome",
                 "Special Edition",
-                "E2E-TestFormat"
+                "E2E-TestFormat",
+                // From QP formatItems (not in YAML custom_formats, synced via guide QP)
+                // Source: hd-bluray-web.json formatItems
+                "Repack/Proper",
+                "LQ"
             );
 
         var qualityDefs = await _radarr.GetQualityDefinitions(ct);
