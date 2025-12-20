@@ -11,6 +11,14 @@ internal class QualitySizePreviewPhase(IAnsiConsole console, ISyncContextSource 
     {
         RenderTitle(context);
 
+        var changedItems = context.TransactionOutput.Where(x => x.IsDifferent).ToList();
+
+        if (changedItems.Count == 0)
+        {
+            Console.MarkupLine("[dim]No changes[/]");
+            return;
+        }
+
         var limits = context.Limits;
         var table = new Table();
         table.AddColumn("[bold]Quality[/]");
@@ -18,18 +26,15 @@ internal class QualitySizePreviewPhase(IAnsiConsole console, ISyncContextSource 
         table.AddColumn("[bold]Max[/]");
         table.AddColumn("[bold]Preferred[/]");
 
-        foreach (var item in context.TransactionOutput)
+        foreach (var item in changedItems)
         {
-            var style = item.IsDifferent ? "bold " : "dim ";
             table.AddRow(
-                $"[{style}dodgerblue1]{item.Quality}[/]",
-                $"[{style}default]{item.Min.ToString(CultureInfo.InvariantCulture)}[/]",
-                $"[{style}default]{FormatWithLimit(item.Max, limits.MaxLimit)}[/]",
-                $"[{style}default]{FormatWithLimit(item.Preferred, limits.PreferredLimit)}[/]"
+                $"[dodgerblue1]{item.Quality}[/]",
+                item.Min.ToString(CultureInfo.InvariantCulture),
+                FormatWithLimit(item.Max, limits.MaxLimit),
+                FormatWithLimit(item.Preferred, limits.PreferredLimit)
             );
         }
-
-        table.Caption("[grey]Bold items will be updated[/]");
 
         Console.Write(table);
     }

@@ -13,6 +13,12 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console, ISyncContextSour
     {
         RenderTitle(context);
 
+        if (context.TransactionOutput.ChangedProfiles.Count == 0)
+        {
+            Console.MarkupLine("[dim]No changes[/]");
+            return;
+        }
+
         foreach (var profile in context.TransactionOutput.ChangedProfiles.Select(x => x.Profile))
         {
             var profileTree = new Tree(
