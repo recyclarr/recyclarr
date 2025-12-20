@@ -13,8 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
   (default), `warn`.
-- CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats to
-  service custom formats by name.
+- CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats
+  to service custom formats by name.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.
 
@@ -22,13 +22,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
   reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
+- Sync: Preview mode now shows instance name in section headers and a visual separator between
+  instances, making multi-instance output easier to navigate.
+- Custom Formats: Preview now displays a table with action, name, and trash ID columns instead of
+  log-style output.
 - Quality Sizes: Preview now highlights items that will be updated (bold) versus unchanged (dimmed).
 
 ### Deprecated
 
 - CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
-- Config: The `replace_existing_custom_formats` option no longer has any effect. Use
-  `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
+- Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
+  cache rebuild --adopt` to adopt manually-created custom formats.
 
 ## [7.5.2] - 2025-11-30
 

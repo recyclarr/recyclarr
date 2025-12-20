@@ -1,16 +1,17 @@
 using System.Globalization;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Sync;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-internal class QualityProfilePreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<QualityProfilePipelineContext>
+internal class QualityProfilePreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
+    : PreviewPipelinePhase<QualityProfilePipelineContext>(console, contextSource)
 {
     protected override void RenderPreview(QualityProfilePipelineContext context)
     {
-        var tree = new Tree("Quality Profile Changes [red](Preview)[/]");
+        RenderTitle(context);
 
         foreach (var profile in context.TransactionOutput.ChangedProfiles.Select(x => x.Profile))
         {
@@ -34,12 +35,9 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
                 new Rows(new Markup("[b]Score Updates[/]"), SetupScoreTable(profile))
             );
 
-            tree.AddNode(profileTree);
+            Console.Write(profileTree);
+            Console.WriteLine();
         }
-
-        console.WriteLine();
-        console.Write(tree);
-        console.WriteLine();
     }
 
     private static Table SetupProfileTable(UpdatedQualityProfile profile)

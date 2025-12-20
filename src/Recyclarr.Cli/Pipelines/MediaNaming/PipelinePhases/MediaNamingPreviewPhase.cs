@@ -1,18 +1,19 @@
 using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-internal class MediaNamingPreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<MediaNamingPipelineContext>
+internal class MediaNamingPreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
+    : PreviewPipelinePhase<MediaNamingPipelineContext>(console, contextSource)
 {
     private Table? _table;
 
     protected override void RenderPreview(MediaNamingPipelineContext context)
     {
-        _table = new Table()
-            .Title("Media Naming [red](Preview)[/]")
-            .AddColumns("[b]Field[/]", "[b]Value[/]");
+        RenderTitle(context);
+
+        _table = new Table().AddColumns("[b]Field[/]", "[b]Value[/]");
 
         switch (context.TransactionOutput)
         {
@@ -28,8 +29,7 @@ internal class MediaNamingPreviewPhase(IAnsiConsole console)
                 throw new ArgumentException("Config type not supported in media naming preview");
         }
 
-        console.WriteLine();
-        console.Write(_table);
+        Console.Write(_table);
     }
 
     private void AddRow(string field, object? value)

@@ -3,11 +3,13 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 internal class CompositeSyncPipeline(
     ILogger log,
+    IAnsiConsole console,
     IOrderedEnumerable<ISyncPipeline> pipelines,
     IEnumerable<IPipelineCache> caches,
     ServiceAgnosticCapabilityEnforcer enforcer,
@@ -20,6 +22,12 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
+        if (settings.Preview)
+        {
+            console.WriteLine();
+            console.Write(new Rule($"[bold]{config.InstanceName}[/]").LeftJustified());
+        }
+
         log.Information(
             "Processing {Server} server {Name}",
             config.ServiceType,

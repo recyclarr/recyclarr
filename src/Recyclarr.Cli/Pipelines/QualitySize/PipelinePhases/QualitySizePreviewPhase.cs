@@ -1,17 +1,18 @@
 using System.Globalization;
+using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizePreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<QualitySizePipelineContext>
+internal class QualitySizePreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
+    : PreviewPipelinePhase<QualitySizePipelineContext>(console, contextSource)
 {
     protected override void RenderPreview(QualitySizePipelineContext context)
     {
+        RenderTitle(context);
+
         var limits = context.Limits;
         var table = new Table();
-
-        table.Title("Quality Sizes [red](Preview)[/]");
         table.AddColumn("[bold]Quality[/]");
         table.AddColumn("[bold]Min[/]");
         table.AddColumn("[bold]Max[/]");
@@ -30,8 +31,7 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
 
         table.Caption("[grey]Bold items will be updated[/]");
 
-        console.WriteLine();
-        console.Write(table);
+        Console.Write(table);
     }
 
     private static string FormatWithLimit(decimal value, decimal limit)
