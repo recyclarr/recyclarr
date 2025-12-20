@@ -437,18 +437,54 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
             .BeEquivalentTo(new { TrashId = "trash-id-1", ServiceId = 10 });
     }
 
+    [Test]
+    public async Task Rebuild_loads_cache_with_legacy_field_names()
+    {
+        SetupRadarrConfig("test-instance", "trash-id-1");
+        SetupGuideCfs("radarr", ("trash-id-1", "Test CF"));
+        SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Test CF" });
+
+        // Legacy cache format (pre-v8.0) with old field names
+        const string legacyCache = """
+            {
+              "version": 1,
+              "trash_id_mappings": [{
+                "trash_id": "trash-id-1",
+                "custom_format_name": "Test CF",
+                "custom_format_id": 10
+              }]
+            }
+            """;
+        SetupExistingCacheRaw("radarr", legacyCache);
+
+        var exitCode = await CliSetup.Run(Container, ["cache", "rebuild", "-i", "test-instance"]);
+
+        exitCode.Should().Be(0);
+
+        // Cache should be unchanged (already correct)
+        var cacheFile = GetCacheFilePath("radarr");
+        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cache = JsonSerializer.Deserialize<CustomFormatCacheObject>(
+            cacheContent,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
+
+        cache!.Mappings.Should().BeEquivalentTo([new { TrashId = "trash-id-1", ServiceId = 10 }]);
+    }
+
     private void SetupExistingCache(string serviceType, CustomFormatCacheObject cacheObj)
     {
-        // Need to create cache in the correct path
-        // Path format: {appdata}/cache/{service}/{hash}/custom-format-cache.json
-        // Hash is computed from instance config - for test, use a fixed hash
+        var cacheJson = JsonSerializer.Serialize(cacheObj, GlobalJsonSerializerSettings.Recyclarr);
+        SetupExistingCacheRaw(serviceType, cacheJson);
+    }
+
+    private void SetupExistingCacheRaw(string serviceType, string cacheJson)
+    {
         var cacheDir = Paths
             .CacheDirectory.SubDirectory(serviceType.ToLowerInvariant())
             .SubDirectory("8247e13ec45dc17b"); // Hash from test config
 
         Fs.Directory.CreateDirectory(cacheDir.FullName);
-
-        var cacheJson = JsonSerializer.Serialize(cacheObj, GlobalJsonSerializerSettings.Recyclarr);
         Fs.AddFile(cacheDir.File("custom-format-cache.json"), new MockFileData(cacheJson));
     }
 

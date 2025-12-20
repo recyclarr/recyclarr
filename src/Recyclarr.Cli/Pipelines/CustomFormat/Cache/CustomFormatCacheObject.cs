@@ -13,8 +13,6 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 )]
 internal record CustomFormatCacheObject() : CacheObject(1), ITrashIdCacheObject
 {
-    // JsonPropertyName preserves backward compatibility with existing cache files
-    // that use "TrashIdMappings" as the JSON key
-    [JsonPropertyName("TrashIdMappings")]
+    [JsonPropertyName("trash_id_mappings")]
     public List<TrashIdMapping> Mappings { get; set; } = [];
 }
