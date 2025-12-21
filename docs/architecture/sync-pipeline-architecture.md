@@ -36,43 +36,46 @@ transparent. This choice prioritizes comprehension over architectural visibility
 **Dependency Management**: Sequential execution prevents reference errors (Quality Profiles need
 existing Custom Format IDs) but sacrifices potential parallelization.
 
-## Five-Phase Processing Model
+## Processing Model
 
 Each sync category follows an identical pattern that separates concerns and enables comprehensive
-error collection:
+error collection. Processing happens in two stages:
 
-**1. Config Phase (Offline Validation)** → **2. ApiFetch Phase (Server State Retrieval)** → **3.
-Transaction Phase (Planning & Server Validation)** → **4. Preview Phase (Conditional Display)** →
-**5. ApiPersistence Phase (Server Modification)**
+**Plan Phase** (pre-pipeline) → **Pipeline Phases**: ApiFetch → Transaction → Preview →
+ApiPersistence
 
-### Why These Phases
+### Plan Phase (Pre-Pipeline)
 
-**Phase 1 - Config**: Many errors stem from configuration mistakes. Validating against TRaSH Guides
-data early catches invalid TrashIds, malformed syntax, and resource provider conflicts before any
-server interaction.
+The Plan phase validates configuration against TRaSH Guides data, catching invalid TrashIds and
+resource conflicts before any server interaction. Plan components execute sequentially because some
+depend on others (QP planning reads from the CF plan to build score assignments). The output is a
+`PipelinePlan` consumed by subsequent phases.
 
-**Phase 2 - ApiFetch**: Server state is non-deterministic and changes independently. Fresh data is
-required for accurate comparison and change planning.
+### Pipeline Phases
 
-**Phase 3 - Transaction**: This is where complexity lives. Server-side validation requires runtime
-checks against current state. Change planning must handle naming conflicts, dependency validation,
-and update-vs-create decisions.
+**ApiFetch**: Server state is non-deterministic and changes independently. Fresh data is required
+for accurate comparison and change planning.
 
-**Phase 4 - Preview**: Users need to understand planned changes before committing, especially in
-production. This implements dry-run by terminating the pipeline after displaying the transaction
-plan.
+**Transaction**: This is where complexity lives. Server-side validation requires runtime checks
+against current state. Change planning must handle naming conflicts, dependency validation, and
+update-vs-create decisions.
 
-**Phase 5 - ApiPersistence**: Execute changes with proper error handling and cache maintenance. All
-validation is complete, so this focuses on execution reliability.
+**Preview**: Users need to understand planned changes before committing, especially in production.
+This implements dry-run by terminating the pipeline after displaying the transaction plan.
+
+**ApiPersistence**: Execute changes with proper error handling and cache maintenance. All validation
+is complete, so this focuses on execution reliability.
 
 ### Error Collection Strategy
 
 The "collect and report later" pattern categorizes errors by source and timing:
 
-- **Configuration Errors** (Phase 1): Invalid TrashIds, malformed YAML, resource provider conflicts
-- **Server Validation Errors** (Phase 3): Naming conflicts, missing dependencies, API constraint
-  violations
-- **Runtime Errors** (Phase 5): Network issues, authentication failures, service unavailability
+- **Configuration Errors** (Plan phase): Invalid TrashIds, malformed YAML, resource provider
+  conflicts
+- **Server Validation Errors** (Transaction phase): Naming conflicts, missing dependencies, API
+  constraint violations
+- **Runtime Errors** (ApiPersistence phase): Network issues, authentication failures, service
+  unavailability
 
 **Context Objects**: Strongly-typed contexts carry all data and errors between phases, providing
 complete audit trails without direct phase communication.
@@ -150,13 +153,13 @@ auditability and error prevention.
 
 ### Extensibility Model
 
-**Adding New Sync Categories**: Implement the five-phase pattern with category-specific context and
-phases.
+**Adding New Sync Categories**: Implement a plan component (`IPlanComponent`) and the four pipeline
+phases with category-specific context.
 
 **Handling Service Differences**: Use dependency injection for service-specific implementations
 rather than duplicating entire processing paths.
 
-**Phase Pattern Flexibility**: The five-phase model works well for current needs but may require
+**Phase Pattern Flexibility**: The current model works well for existing needs but may require
 adaptation for future sync types with different processing requirements.
 
 ## Conclusion
@@ -170,7 +173,7 @@ user experience through comprehensive error reporting.
 
 - **Category-first structure** eliminates service duplication while handling differences through
   targeted injection
-- **Five-phase pattern** separates concerns effectively and enables comprehensive validation
+- **Plan + pipeline phases** separates concerns effectively and enables comprehensive validation
 - **Context-driven communication** provides auditability and error accumulation without tight
   coupling
 - **User-centric error reporting** translates technical complexity into actionable YAML-focused

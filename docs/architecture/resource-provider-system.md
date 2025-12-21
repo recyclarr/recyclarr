@@ -1,5 +1,8 @@
 # Resource Provider System Architecture
 
+> For service dispatch pattern rationale, see
+> [ADR-001](../decisions/001-resource-query-service-dispatch.md).
+
 ## Executive Summary
 
 The Resource Provider System enables users to specify custom data sources for Recyclarr while
