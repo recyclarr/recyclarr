@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Processors.ErrorHandling;
+using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Spectre.Console;
@@ -21,7 +21,7 @@ internal class CacheRebuildProcessor(
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory scopeFactory,
-    ConsoleExceptionHandler exceptionHandler
+    ExceptionHandler exceptionHandler
 )
 {
     public async Task<ExitStatus> Process(ICacheRebuildSettings settings, CancellationToken ct)
@@ -63,7 +63,7 @@ internal class CacheRebuildProcessor(
             }
             catch (Exception e)
             {
-                if (!await exceptionHandler.HandleException(e))
+                if (!await exceptionHandler.TryHandleAsync(e))
                 {
                     throw;
                 }

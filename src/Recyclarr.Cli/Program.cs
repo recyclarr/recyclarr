@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console;
+using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Processors;
-using Recyclarr.Cli.Processors.ErrorHandling;
 
 namespace Recyclarr.Cli;
 
@@ -25,10 +25,10 @@ internal static class Program
         }
         catch (Exception e)
         {
-            var log = scope.Resolve<ILogger>();
-            var exceptionHandler = scope.Resolve<ConsoleExceptionHandler>();
-            if (!await exceptionHandler.HandleException(e))
+            var exceptionHandler = scope.Resolve<ExceptionHandler>();
+            if (!await exceptionHandler.TryHandleAsync(e))
             {
+                var log = scope.Resolve<ILogger>();
                 log.Error(e, "Exiting due to fatal error");
             }
 

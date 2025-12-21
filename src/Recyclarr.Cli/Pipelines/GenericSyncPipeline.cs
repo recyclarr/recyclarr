@@ -28,13 +28,21 @@ internal class GenericSyncPipeline<TContext>(
 
         progressSource.SetPipelineStatus(PipelineProgressStatus.Running);
 
-        foreach (var phase in phases)
+        try
         {
-            var flow = await phase.Execute(context, ct);
-            if (flow == PipelineFlow.Terminate)
+            foreach (var phase in phases)
             {
-                break;
+                var flow = await phase.Execute(context, ct);
+                if (flow == PipelineFlow.Terminate)
+                {
+                    break;
+                }
             }
+        }
+        catch
+        {
+            progressSource.SetPipelineStatus(PipelineProgressStatus.Failed);
+            throw;
         }
     }
 }

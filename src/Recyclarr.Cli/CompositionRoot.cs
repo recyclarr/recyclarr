@@ -5,6 +5,8 @@ using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
+using Recyclarr.Cli.ErrorHandling;
+using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
@@ -12,7 +14,6 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Processors.CacheRebuild;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
-using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
@@ -52,8 +53,7 @@ internal static class CompositionRoot
 
     private static void RegisterServiceProcessors(ContainerBuilder builder)
     {
-        builder.RegisterType<ConsoleExceptionHandler>();
-        builder.RegisterType<FlurlHttpExceptionHandler>();
+        RegisterErrorHandling(builder);
 
         // Sync
         builder.RegisterType<SyncProcessor>();
@@ -75,6 +75,24 @@ internal static class CompositionRoot
             .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
             .As<IConfigCreator>()
             .OrderByRegistration();
+    }
+
+    private static void RegisterErrorHandling(ContainerBuilder builder)
+    {
+        // Exception strategies (dispatch)
+        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ServiceExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
+
+        // Output strategies (routing)
+        builder.RegisterType<LogOnlyOutputStrategy>();
+        builder.RegisterType<SyncEventOutputStrategy>();
+
+        // Handler (orchestrator)
+        builder.RegisterType<ExceptionHandler>();
     }
 
     private static void RegisterMigrations(ContainerBuilder builder)

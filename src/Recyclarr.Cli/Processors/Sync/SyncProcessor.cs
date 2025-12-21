@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Cli.Processors.ErrorHandling;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
@@ -26,7 +26,8 @@ internal class SyncBasedConfigurationScope(ILifetimeScope scope) : Configuration
 internal class SyncProcessor(
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
-    ConsoleExceptionHandler exceptionHandler,
+    ExceptionHandler exceptionHandler,
+    SyncEventOutputStrategy syncEventOutput,
     NotificationService notify,
     ISyncContextSource contextSource,
     SyncEventStorage eventStorage,
@@ -90,9 +91,8 @@ internal class SyncProcessor(
         }
         catch (Exception e)
         {
-            if (!await exceptionHandler.HandleException(e))
+            if (!await exceptionHandler.TryHandleAsync(e, syncEventOutput))
             {
-                // This means we didn't handle the exception; rethrow it.
                 throw;
             }
 
@@ -137,7 +137,7 @@ internal class SyncProcessor(
             {
                 progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
 
-                if (!await exceptionHandler.HandleException(e))
+                if (!await exceptionHandler.TryHandleAsync(e, syncEventOutput))
                 {
                     throw;
                 }
