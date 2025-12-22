@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiPersistencePhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCache> cachePersister,
+    ICachePersister<CustomFormatCacheObject> cachePersister,
     CustomFormatTransactionLogger cfLogger
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
@@ -42,7 +42,7 @@ internal class CustomFormatApiPersistencePhase(
             await api.DeleteCustomFormat(map.ServiceId, ct);
         }
 
-        context.Cache.Update(transactions, context.ApiFetchOutput);
+        context.Cache.Update(context);
         cachePersister.Save(context.Cache);
 
         return PipelineFlow.Continue;

@@ -91,7 +91,7 @@ internal class PipelineAutofacModule : Module
         builder.RegisterType<QualityProfileLogger>();
         builder
             .RegisterType<QualityProfileCachePersister>()
-            .As<ICachePersister<QualityProfileCache>>();
+            .As<ICachePersister<QualityProfileCacheObject>>();
 
         builder
             .RegisterTypes(
@@ -134,7 +134,9 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
         builder.RegisterType<CustomFormatDataLister>();
-        builder.RegisterType<CustomFormatCachePersister>().As<ICachePersister<CustomFormatCache>>();
+        builder
+            .RegisterType<CustomFormatCachePersister>()
+            .As<ICachePersister<CustomFormatCacheObject>>();
         builder.RegisterType<CustomFormatTransactionLogger>();
 
         builder

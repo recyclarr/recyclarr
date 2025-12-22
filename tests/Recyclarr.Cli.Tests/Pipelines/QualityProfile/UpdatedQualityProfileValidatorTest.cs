@@ -1,6 +1,5 @@
 using FluentValidation.TestHelper;
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -25,9 +24,8 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo3", 0, 200, FormatScoreUpdateReason.NoChange),
                 NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset),
             ],
-            ProfileDto = new QualityProfileDto { Name = "ProfileName" },
+            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
             ProfileConfig = NewPlan.Qp(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.Changed,
         };
 
         var validator = new UpdatedQualityProfileValidator();
@@ -60,7 +58,6 @@ internal sealed class UpdatedQualityProfileValidatorTest
             UpdatedQualities = new UpdatedQualities { InvalidQualityNames = ["foo1"] },
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewPlan.Qp(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();
@@ -80,7 +77,6 @@ internal sealed class UpdatedQualityProfileValidatorTest
         {
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewPlan.Qp(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();
@@ -103,7 +99,6 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 Items = [NewQp.QualityDto(1, "disabled_quality", false)],
             },
             ProfileConfig = NewPlan.Qp(profileConfig),
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var validator = new UpdatedQualityProfileValidator();

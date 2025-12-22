@@ -26,7 +26,7 @@ internal sealed class CustomFormatCacheTest
         };
 
         var cache = CfCache.New();
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -60,7 +60,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -83,7 +83,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(new CustomFormatTransactionData(), serviceCfs);
+        cache.Update(new CustomFormatTransactionData().ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -103,7 +103,7 @@ internal sealed class CustomFormatCacheTest
 
         var cache = CfCache.New();
 
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -135,7 +135,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -168,7 +168,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("4", "four", 4)
         );
 
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -200,7 +200,7 @@ internal sealed class CustomFormatCacheTest
             new TrashIdMapping("2", "two", 2)
         );
 
-        cache.Update(transactions, serviceCfs);
+        cache.Update(transactions.ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
@@ -233,7 +233,7 @@ internal sealed class CustomFormatCacheTest
         };
 
         // Act
-        cache.Update(new CustomFormatTransactionData(), serviceCfs);
+        cache.Update(new CustomFormatTransactionData().ToSyncSource(serviceCfs));
 
         // Assert: Should have exactly one mapping for each unique CustomFormatId
         cache

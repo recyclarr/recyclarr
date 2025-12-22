@@ -1,4 +1,5 @@
 using System.Globalization;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
@@ -10,18 +11,18 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 internal class UpdatedProfileBuilder
 {
     private readonly ILogger _log;
-    private readonly QualityProfileCache _cache;
+    private readonly TrashIdCache<QualityProfileCacheObject> _cache;
     private readonly QualityProfileTransactionData _transactions;
     private readonly Dictionary<int, QualityProfileDto> _serviceDtosById;
     private readonly ILookup<string, QualityProfileDto> _serviceDtosByName;
     private readonly QualityProfileDto _schema;
     private readonly IReadOnlyList<ProfileLanguageDto> _languages;
-    private readonly List<UpdatedQualityProfile> _updatedProfiles = [];
+    private readonly List<UpdatedQualityProfile> _existingProfiles = [];
 
     public UpdatedProfileBuilder(
         ILogger log,
         QualityProfileServiceData serviceData,
-        QualityProfileCache cache,
+        TrashIdCache<QualityProfileCacheObject> cache,
         QualityProfileTransactionData transactions
     )
     {
@@ -40,6 +41,10 @@ internal class UpdatedProfileBuilder
         );
     }
 
+    /// <summary>
+    /// Processes planned profiles. New profiles are added directly to transactions.NewProfiles.
+    /// Returns only existing profiles that need stats calculation and change detection.
+    /// </summary>
     public List<UpdatedQualityProfile> BuildFrom(IEnumerable<PlannedQualityProfile> plannedProfiles)
     {
         foreach (var planned in plannedProfiles)
@@ -54,13 +59,13 @@ internal class UpdatedProfileBuilder
             }
         }
 
-        return _updatedProfiles;
+        return _existingProfiles;
     }
 
     private void ProcessGuideBackedProfile(PlannedQualityProfile planned)
     {
         var trashId = planned.Resource!.TrashId;
-        var cachedId = _cache.FindIdByTrashId(trashId);
+        var cachedId = trashId is null ? null : _cache.FindId(trashId);
 
         _log.Debug(
             "Process transaction for guide QP {TrashId} ({Name}), cached ID: {CachedId}",
@@ -94,8 +99,7 @@ internal class UpdatedProfileBuilder
             }
 
             var missingQualities = FixupMissingQualities(serviceDto);
-            AddUpdatedProfile(planned, serviceDto, QualityProfileUpdateReason.Changed);
-            _updatedProfiles[^1].MissingQualities = missingQualities;
+            AddExistingProfile(planned, serviceDto, missingQualities);
         }
         else
         {
@@ -123,7 +127,7 @@ internal class UpdatedProfileBuilder
             case 0:
                 if (planned.ShouldCreate)
                 {
-                    AddUpdatedProfile(planned, _schema, QualityProfileUpdateReason.New);
+                    AddNewProfile(planned);
                 }
                 else
                 {
@@ -142,8 +146,7 @@ internal class UpdatedProfileBuilder
                 {
                     var serviceDto = nameMatches[0];
                     var missingQualities = FixupMissingQualities(serviceDto);
-                    AddUpdatedProfile(planned, serviceDto, QualityProfileUpdateReason.Changed);
-                    _updatedProfiles[^1].MissingQualities = missingQualities;
+                    AddExistingProfile(planned, serviceDto, missingQualities);
                 }
                 break;
 
@@ -167,7 +170,7 @@ internal class UpdatedProfileBuilder
             case 0:
                 if (planned.ShouldCreate)
                 {
-                    AddUpdatedProfile(planned, _schema, QualityProfileUpdateReason.New);
+                    AddNewProfile(planned);
                 }
                 else
                 {
@@ -178,8 +181,7 @@ internal class UpdatedProfileBuilder
             case 1:
                 var serviceDto = nameMatches[0];
                 var missingQualities = FixupMissingQualities(serviceDto);
-                AddUpdatedProfile(planned, serviceDto, QualityProfileUpdateReason.Changed);
-                _updatedProfiles[^1].MissingQualities = missingQualities;
+                AddExistingProfile(planned, serviceDto, missingQualities);
                 break;
 
             default:
@@ -193,21 +195,35 @@ internal class UpdatedProfileBuilder
         }
     }
 
-    private void AddUpdatedProfile(
+    private void AddNewProfile(PlannedQualityProfile planned)
+    {
+        var organizer = new QualityItemOrganizer();
+        _transactions.NewProfiles.Add(
+            new UpdatedQualityProfile
+            {
+                ProfileConfig = planned,
+                ProfileDto = _schema,
+                Languages = _languages,
+                UpdatedQualities = organizer.OrganizeItems(_schema, planned.Config),
+            }
+        );
+    }
+
+    private void AddExistingProfile(
         PlannedQualityProfile planned,
         QualityProfileDto dto,
-        QualityProfileUpdateReason reason
+        IReadOnlyCollection<string> missingQualities
     )
     {
         var organizer = new QualityItemOrganizer();
-        _updatedProfiles.Add(
+        _existingProfiles.Add(
             new UpdatedQualityProfile
             {
                 ProfileConfig = planned,
                 ProfileDto = dto,
-                UpdateReason = reason,
                 Languages = _languages,
                 UpdatedQualities = organizer.OrganizeItems(dto, planned.Config),
+                MissingQualities = missingQualities,
             }
         );
     }

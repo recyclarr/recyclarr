@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -15,7 +14,6 @@ internal sealed class UpdatedQualityProfileTest
         {
             ProfileDto = new QualityProfileDto { Name = "dto_name" },
             ProfileConfig = NewPlan.Qp("config_name"),
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         profile.ProfileName.Should().Be("dto_name");
@@ -28,7 +26,6 @@ internal sealed class UpdatedQualityProfileTest
         {
             ProfileDto = new QualityProfileDto(),
             ProfileConfig = NewPlan.Qp("config_name"),
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         profile.ProfileName.Should().Be("config_name");
@@ -74,7 +71,6 @@ internal sealed class UpdatedQualityProfileTest
                     ),
                 },
             },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var result = profile.BuildUpdatedDto();
@@ -128,7 +124,6 @@ internal sealed class UpdatedQualityProfileTest
                     ),
                 },
             },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var result = profile.BuildUpdatedDto();
@@ -144,7 +139,6 @@ internal sealed class UpdatedQualityProfileTest
             ProfileDto = new QualityProfileDto { Name = "" },
             ProfileConfig = NewPlan.Qp("config_name"),
             UpdatedQualities = new UpdatedQualities { Items = [new ProfileItemDto()] },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var dto = profile.BuildUpdatedDto();
@@ -186,7 +180,6 @@ internal sealed class UpdatedQualityProfileTest
                     ),
                 },
             },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var dto = profile.BuildUpdatedDto();
@@ -228,7 +221,6 @@ internal sealed class UpdatedQualityProfileTest
                     ),
                 },
             },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var dto = profile.BuildUpdatedDto();
@@ -270,7 +262,6 @@ internal sealed class UpdatedQualityProfileTest
                     ),
                 },
             },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var dto = profile.BuildUpdatedDto();
@@ -299,7 +290,6 @@ internal sealed class UpdatedQualityProfileTest
                 }
             ),
             UpdatedQualities = new UpdatedQualities { NumWantedItems = 0 },
-            UpdateReason = QualityProfileUpdateReason.New,
         };
 
         var dto = profile.BuildUpdatedDto();

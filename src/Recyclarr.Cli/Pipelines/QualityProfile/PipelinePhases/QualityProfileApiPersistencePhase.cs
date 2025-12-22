@@ -1,13 +1,12 @@
 using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiPersistencePhase(
     IQualityProfileApiService api,
-    ICachePersister<QualityProfileCache> cachePersister,
+    ICachePersister<QualityProfileCacheObject> cachePersister,
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
@@ -16,31 +15,22 @@ internal class QualityProfileApiPersistencePhase(
         CancellationToken ct
     )
     {
-        var changedProfiles = context.TransactionOutput.ChangedProfiles;
-        foreach (var profile in changedProfiles.Select(x => x.Profile))
+        var transactions = context.TransactionOutput;
+
+        // Create new profiles
+        foreach (var profile in transactions.NewProfiles)
         {
-            var dto = profile.BuildUpdatedDto();
-
-            switch (profile.UpdateReason)
-            {
-                case QualityProfileUpdateReason.New:
-                    await api.CreateQualityProfile(dto, ct);
-                    // After creation, dto.Id is set by the API service
-                    profile.ProfileDto.Id = dto.Id;
-                    break;
-
-                case QualityProfileUpdateReason.Changed:
-                    await api.UpdateQualityProfile(dto, ct);
-                    break;
-
-                default:
-                    throw new InvalidOperationException(
-                        $"Unsupported UpdateReason: {profile.UpdateReason}"
-                    );
-            }
+            profile.ProfileDto = await api.CreateQualityProfile(profile.BuildUpdatedDto(), ct);
         }
 
-        context.Cache.Update(context.TransactionOutput, context.ApiFetchOutput.Profiles);
+        // Update existing profiles with changes
+        foreach (var profileWithStats in transactions.UpdatedProfiles)
+        {
+            var dto = profileWithStats.Profile.BuildUpdatedDto();
+            await api.UpdateQualityProfile(dto, ct);
+        }
+
+        context.Cache.Update(context);
         cachePersister.Save(context.Cache);
 
         logger.LogPersistenceResults(context);

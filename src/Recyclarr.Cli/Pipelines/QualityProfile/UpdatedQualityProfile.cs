@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
@@ -13,9 +12,8 @@ internal record UpdatedQualities
 
 internal record UpdatedQualityProfile
 {
-    public required QualityProfileDto ProfileDto { get; init; }
+    public required QualityProfileDto ProfileDto { get; set; }
     public required PlannedQualityProfile ProfileConfig { get; init; }
-    public required QualityProfileUpdateReason UpdateReason { get; set; }
     public IReadOnlyList<ProfileLanguageDto> Languages { get; init; } = [];
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();

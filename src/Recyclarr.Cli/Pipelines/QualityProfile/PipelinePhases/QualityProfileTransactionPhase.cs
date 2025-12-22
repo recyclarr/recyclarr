@@ -1,4 +1,6 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
@@ -19,44 +21,59 @@ internal class QualityProfileTransactionPhase(
     {
         var transactions = new QualityProfileTransactionData();
 
-        var updatedProfiles = BuildUpdatedProfiles(
+        // Build profiles: new profiles go directly to transactions.NewProfiles,
+        // existing profiles are returned for change detection
+        var existingProfiles = BuildExistingProfiles(
             transactions,
             context.Plan.QualityProfiles,
             context.ApiFetchOutput,
             context.Cache
         );
-        UpdateProfileScores(updatedProfiles);
 
-        updatedProfiles = ValidateProfiles(updatedProfiles, transactions.InvalidProfiles);
+        // Process new profiles: update scores, validate (remove invalid from collection)
+        UpdateProfileScores(transactions.NewProfiles);
+        RemoveInvalidProfiles(transactions.NewProfiles, transactions.InvalidProfiles);
 
-        AssignProfiles(transactions, updatedProfiles);
+        // Process existing profiles: update scores, validate, then split by changes
+        UpdateProfileScores(existingProfiles);
+        existingProfiles = FilterValidProfiles(existingProfiles, transactions.InvalidProfiles);
+        AssignExistingProfiles(transactions, existingProfiles);
+
         context.TransactionOutput = transactions;
 
         logger.LogTransactionNotices(context);
         return Task.FromResult(PipelineFlow.Continue);
     }
 
-    private void AssignProfiles(
+    private void AssignExistingProfiles(
         QualityProfileTransactionData transactions,
-        IEnumerable<UpdatedQualityProfile> updatedProfiles
+        IEnumerable<UpdatedQualityProfile> existingProfiles
     )
     {
-        var profilesWithStats = updatedProfiles
-            .Select(statCalculator.Calculate)
-            .ToLookup(x => x.HasChanges);
+        foreach (var profile in existingProfiles)
+        {
+            var stats = statCalculator.Calculate(profile);
+            var hasChanges = stats.ProfileChanged || stats.ScoresChanged || stats.QualitiesChanged;
 
-        transactions.UnchangedProfiles = profilesWithStats[false].ToList();
-        transactions.ChangedProfiles = profilesWithStats[true].ToList();
+            if (hasChanges)
+            {
+                transactions.UpdatedProfiles.Add(stats);
+            }
+            else
+            {
+                transactions.UnchangedProfiles.Add(profile);
+            }
+        }
     }
 
-    private static List<UpdatedQualityProfile> ValidateProfiles(
-        IEnumerable<UpdatedQualityProfile> transactions,
-        ICollection<InvalidProfileData> invalidProfiles
+    private static List<UpdatedQualityProfile> FilterValidProfiles(
+        IEnumerable<UpdatedQualityProfile> profiles,
+        Collection<InvalidProfileData> invalidProfiles
     )
     {
         var validator = new UpdatedQualityProfileValidator();
 
-        return transactions
+        return profiles
             .IsValid(
                 validator,
                 (errors, profile) => invalidProfiles.Add(new InvalidProfileData(profile, errors))
@@ -64,11 +81,31 @@ internal class QualityProfileTransactionPhase(
             .ToList();
     }
 
-    private List<UpdatedQualityProfile> BuildUpdatedProfiles(
+    private static void RemoveInvalidProfiles(
+        Collection<UpdatedQualityProfile> profiles,
+        Collection<InvalidProfileData> invalidProfiles
+    )
+    {
+        var validator = new UpdatedQualityProfileValidator();
+        var validProfiles = profiles
+            .IsValid(
+                validator,
+                (errors, profile) => invalidProfiles.Add(new InvalidProfileData(profile, errors))
+            )
+            .ToList();
+
+        profiles.Clear();
+        foreach (var profile in validProfiles)
+        {
+            profiles.Add(profile);
+        }
+    }
+
+    private List<UpdatedQualityProfile> BuildExistingProfiles(
         QualityProfileTransactionData transactions,
         IEnumerable<PlannedQualityProfile> plannedProfiles,
         QualityProfileServiceData serviceData,
-        QualityProfileCache cache
+        TrashIdCache<QualityProfileCacheObject> cache
     )
     {
         var builder = new UpdatedProfileBuilder(log, serviceData, cache, transactions);

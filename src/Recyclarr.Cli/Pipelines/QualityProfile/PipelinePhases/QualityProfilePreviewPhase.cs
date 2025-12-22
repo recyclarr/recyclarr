@@ -13,37 +13,50 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console, ISyncContextSour
     {
         RenderTitle(context);
 
-        if (context.TransactionOutput.ChangedProfiles.Count == 0)
+        var transactions = context.TransactionOutput;
+        var totalChanges = transactions.NewProfiles.Count + transactions.UpdatedProfiles.Count;
+
+        if (totalChanges == 0)
         {
             Console.MarkupLine("[dim]No changes[/]");
             return;
         }
 
-        foreach (var profile in context.TransactionOutput.ChangedProfiles.Select(x => x.Profile))
+        // Render new profiles
+        foreach (var profile in transactions.NewProfiles)
         {
-            var profileTree = new Tree(
-                Markup.FromInterpolated(
-                    CultureInfo.InvariantCulture,
-                    $"[yellow]{profile.ProfileName}[/] (Change Reason: [green]{profile.UpdateReason}[/])"
-                )
-            );
-
-            profileTree.AddNode(
-                new Rows(new Markup("[b]Profile Updates[/]"), SetupProfileTable(profile))
-            );
-
-            if (profile.ProfileConfig.Config.Qualities.Count != 0)
-            {
-                profileTree.AddNode(SetupQualityItemTable(profile));
-            }
-
-            profileTree.AddNode(
-                new Rows(new Markup("[b]Score Updates[/]"), SetupScoreTable(profile))
-            );
-
-            Console.Write(profileTree);
-            Console.WriteLine();
+            RenderProfileTree(profile, "New");
         }
+
+        // Render updated profiles
+        foreach (var profileWithStats in transactions.UpdatedProfiles)
+        {
+            RenderProfileTree(profileWithStats.Profile, "Changed");
+        }
+    }
+
+    private void RenderProfileTree(UpdatedQualityProfile profile, string changeReason)
+    {
+        var profileTree = new Tree(
+            Markup.FromInterpolated(
+                CultureInfo.InvariantCulture,
+                $"[yellow]{profile.ProfileName}[/] (Change Reason: [green]{changeReason}[/])"
+            )
+        );
+
+        profileTree.AddNode(
+            new Rows(new Markup("[b]Profile Updates[/]"), SetupProfileTable(profile))
+        );
+
+        if (profile.ProfileConfig.Config.Qualities.Count != 0)
+        {
+            profileTree.AddNode(SetupQualityItemTable(profile));
+        }
+
+        profileTree.AddNode(new Rows(new Markup("[b]Score Updates[/]"), SetupScoreTable(profile)));
+
+        Console.Write(profileTree);
+        Console.WriteLine();
     }
 
     private static Table SetupProfileTable(UpdatedQualityProfile profile)

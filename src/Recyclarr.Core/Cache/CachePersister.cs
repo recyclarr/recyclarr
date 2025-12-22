@@ -4,16 +4,13 @@ using Recyclarr.Json;
 
 namespace Recyclarr.Cache;
 
-public abstract class CachePersister<TCacheObject, TCache>(
-    ILogger log,
-    ICacheStoragePath storagePath
-) : ICachePersister<TCache>
-    where TCacheObject : CacheObject, new()
-    where TCache : BaseCache
+public abstract class CachePersister<TCacheObject>(ILogger log, ICacheStoragePath storagePath)
+    : ICachePersister<TCacheObject>
+    where TCacheObject : CacheObject, ITrashIdCacheObject, new()
 {
     private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
 
-    public TCache Load()
+    public TrashIdCache<TCacheObject> Load()
     {
         var cacheData = LoadFromJson();
         if (cacheData == null)
@@ -22,7 +19,7 @@ public abstract class CachePersister<TCacheObject, TCache>(
             cacheData = new TCacheObject();
         }
 
-        return CreateCache(cacheData);
+        return new TrashIdCache<TCacheObject>(cacheData);
     }
 
     private TCacheObject? LoadFromJson()
@@ -48,7 +45,7 @@ public abstract class CachePersister<TCacheObject, TCache>(
         return null;
     }
 
-    public void Save(TCache cache)
+    public void Save(TrashIdCache<TCacheObject> cache)
     {
         var path = storagePath.CalculatePath<TCacheObject>();
         log.Debug("Saving {CacheName} to path {Path}", CacheName, path);
@@ -60,5 +57,4 @@ public abstract class CachePersister<TCacheObject, TCache>(
     }
 
     protected abstract string CacheName { get; }
-    protected abstract TCache CreateCache(TCacheObject cacheObject);
 }

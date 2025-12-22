@@ -4,12 +4,11 @@ using Recyclarr.Cache;
 namespace Recyclarr.Core.Tests.Cache;
 
 [CacheObjectName("test-cache")]
-internal sealed record TestCacheObject : CacheObject
+internal sealed record TestCacheObject : CacheObject, ITrashIdCacheObject
 {
     public string? ExtraData { [UsedImplicitly] get; init; }
+    public List<TrashIdMapping> Mappings { get; init; } = [];
 }
-
-internal sealed class TestCache(TestCacheObject cacheObject) : BaseCache(cacheObject);
 
 // This class exists because AutoFixture does not use NSubstitute's ForPartsOf()
 // See: https://github.com/AutoFixture/AutoFixture/issues/1355
@@ -19,14 +18,9 @@ internal sealed class TestCache(TestCacheObject cacheObject) : BaseCache(cacheOb
     Justification = "Created by AutoFixture"
 )]
 internal sealed class TestCachePersister(ILogger log, ICacheStoragePath storagePath)
-    : CachePersister<TestCacheObject, TestCache>(log, storagePath)
+    : CachePersister<TestCacheObject>(log, storagePath)
 {
     protected override string CacheName => "Test Cache";
-
-    protected override TestCache CreateCache(TestCacheObject cacheObject)
-    {
-        return new TestCache(cacheObject);
-    }
 }
 
 internal sealed class CachePersisterTest

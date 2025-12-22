@@ -35,13 +35,16 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
         await Request(profile.Id).PutJsonAsync(profile.ReverseItems(), cancellationToken: ct);
     }
 
-    public async Task CreateQualityProfile(QualityProfileDto profile, CancellationToken ct)
+    public async Task<QualityProfileDto> CreateQualityProfile(
+        QualityProfileDto profile,
+        CancellationToken ct
+    )
     {
         var response = await Request()
             .PostJsonAsync(profile.ReverseItems(), cancellationToken: ct)
             .ReceiveJson<QualityProfileDto>();
 
-        profile.Id = response.Id;
+        return response.ReverseItems();
     }
 
     public async Task<IList<ProfileLanguageDto>> GetLanguages(CancellationToken ct)

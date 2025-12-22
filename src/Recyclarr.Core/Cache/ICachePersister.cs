@@ -1,7 +1,8 @@
 namespace Recyclarr.Cache;
 
-public interface ICachePersister<TCache>
+public interface ICachePersister<TCacheObject>
+    where TCacheObject : CacheObject, ITrashIdCacheObject
 {
-    TCache Load();
-    void Save(TCache cache);
+    TrashIdCache<TCacheObject> Load();
+    void Save(TrashIdCache<TCacheObject> cache);
 }

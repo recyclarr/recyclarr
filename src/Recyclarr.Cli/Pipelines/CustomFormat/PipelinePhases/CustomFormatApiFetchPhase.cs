@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiFetchPhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCache> cachePersister
+    ICachePersister<CustomFormatCacheObject> cachePersister
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
     public async Task<PipelineFlow> Execute(

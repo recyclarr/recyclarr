@@ -17,7 +17,7 @@ internal class CacheRebuildInstanceProcessor(
     IAnsiConsole console,
     IServiceConfiguration config,
     ICustomFormatApiService customFormatApi,
-    ICachePersister<CustomFormatCache> cachePersister,
+    ICachePersister<CustomFormatCacheObject> cachePersister,
     ICacheStoragePath cacheStoragePath,
     ConfiguredCustomFormatProvider cfProvider,
     CustomFormatResourceQuery cfQuery
@@ -490,7 +490,7 @@ internal class CacheRebuildInstanceProcessor(
         log.Debug("Saving rebuilt cache with {Count} mappings", matches.Count);
 
         var cacheObject = new CustomFormatCacheObject { Mappings = matches };
-        var cache = new CustomFormatCache(cacheObject);
+        var cache = new TrashIdCache<CustomFormatCacheObject>(cacheObject);
         cachePersister.Save(cache);
     }
 

@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using FluentValidation.Results;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Models;
@@ -9,15 +8,18 @@ internal record InvalidProfileData(
     IReadOnlyCollection<ValidationFailure> Errors
 );
 
-[SuppressMessage("Usage", "CA2227:Collection properties should be read only")]
 internal record QualityProfileTransactionData
 {
-    public ICollection<string> NonExistentProfiles { get; init; } = [];
-    public ICollection<InvalidProfileData> InvalidProfiles { get; init; } = [];
-    public ICollection<ProfileWithStats> UnchangedProfiles { get; set; } = [];
-    public ICollection<ProfileWithStats> ChangedProfiles { get; set; } = [];
+    // Success cases - collection membership indicates the "reason"
+    public Collection<UpdatedQualityProfile> NewProfiles { get; } = [];
+    public Collection<ProfileWithStats> UpdatedProfiles { get; } = [];
+    public Collection<UpdatedQualityProfile> UnchangedProfiles { get; } = [];
 
-    // Error cases for guide-backed profiles only (those with trash_id)
+    // Warning/info cases
+    public Collection<string> NonExistentProfiles { get; } = [];
+
+    // Error cases
+    public Collection<InvalidProfileData> InvalidProfiles { get; } = [];
     public Collection<ConflictingQualityProfile> ConflictingProfiles { get; } = [];
     public Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
 }

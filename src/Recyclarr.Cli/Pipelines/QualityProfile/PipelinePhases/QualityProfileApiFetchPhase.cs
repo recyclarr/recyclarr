@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiFetchPhase(
     IQualityProfileApiService api,
-    ICachePersister<QualityProfileCache> cachePersister
+    ICachePersister<QualityProfileCacheObject> cachePersister
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
     public async Task<PipelineFlow> Execute(

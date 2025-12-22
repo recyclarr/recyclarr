@@ -1,5 +1,4 @@
 using FluentValidation;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
@@ -15,9 +14,10 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
             .When(x => x.ProfileConfig.Config.UpgradeUntilQuality is not null);
 
         // Qualities are consolidated in Plan phase (from config or guide resource)
+        // New profiles (those with no service ID) require qualities to be specified
         RuleFor(x => x.ProfileConfig.Config.Qualities)
             .NotEmpty()
-            .When(x => x.UpdateReason == QualityProfileUpdateReason.New)
+            .When(x => x.ProfileDto.Id is null)
             .WithMessage("`qualities` is required when creating profiles for the first time");
     }
 

@@ -152,3 +152,59 @@ not silent data corruption.
 
 **Scoped Ownership**: Cache only tracks what the user configures (directly or via QP formatItems).
 Unconfigured resources remain untouched.
+
+## Implementation
+
+### Class Structure
+
+```txt
+ICacheSyncSource (interface in Core)
+  ├── SyncedMappings: IEnumerable<TrashIdMapping>  // New + Updated + Unchanged resources
+  ├── DeletedIds: IEnumerable<int>                  // Service IDs to remove from cache
+  └── ValidServiceIds: IEnumerable<int>             // All IDs currently in service
+
+TrashIdCache<TCacheObject> (concrete class in Core)
+  ├── Mappings: IReadOnlyList<TrashIdMapping>
+  ├── FindId(string trashId): int?
+  └── Update(ICacheSyncSource source): void
+
+ICachePersister<TCacheObject> (interface in Core)
+  ├── Load(): TrashIdCache<TCacheObject>
+  └── Save(TrashIdCache<TCacheObject> cache): void
+
+CachePersister<TCacheObject> (abstract base in Core)
+  └── Requires: abstract CacheName property for logging
+
+CustomFormatCachePersister : CachePersister<CustomFormatCacheObject>
+QualityProfileCachePersister : CachePersister<QualityProfileCacheObject>
+```
+
+### ICacheSyncSource Integration
+
+Pipeline context objects implement `ICacheSyncSource` directly because they already aggregate
+`TransactionOutput` and `ApiFetchOutput`. This provides a clean interface for cache updates:
+
+```csharp
+// In persistence phase:
+cache.Update(context);  // context implements ICacheSyncSource
+cachePersister.Save(cache);
+```
+
+**CF Implementation**: `SyncedMappings` combines New/Updated/Unchanged CFs. `DeletedIds` comes from
+`DeletedCustomFormats`.
+
+**QP Implementation**: `SyncedMappings` combines New/Updated/Unchanged profiles (filtering to those
+with trash_id). `DeletedIds` is empty (QP has no delete feature).
+
+### Cache Update Semantics
+
+The `TrashIdCache.Update()` method merges synced mappings with existing cache state:
+
+1. Filter existing mappings to valid entries (exist in service, not deleted)
+2. Full outer join with synced mappings on service ID
+3. Keep existing entries not in user config (supports delete feature)
+4. Add new mappings from user config
+5. Update existing mappings with current trash_id/name
+
+This produces a cache that tracks service state, not config state. Entries persist as long as the
+service resource exists, enabling the delete feature to clean up resources removed from config.

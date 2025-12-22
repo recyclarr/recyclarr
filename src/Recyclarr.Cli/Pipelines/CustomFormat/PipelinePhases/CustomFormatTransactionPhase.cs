@@ -29,7 +29,7 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
                 guideCf.Name
             );
 
-            var cachedId = context.Cache.FindId(guideCf);
+            var cachedId = context.Cache.FindId(guideCf.TrashId);
 
             if (cachedId.HasValue)
             {

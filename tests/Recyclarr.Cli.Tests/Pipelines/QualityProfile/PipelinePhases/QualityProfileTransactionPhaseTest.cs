@@ -23,11 +23,13 @@ internal sealed class QualityProfileTransactionPhaseTest
         return plan;
     }
 
-    private static QualityProfileCache CreateCache(params TrashIdMapping[] mappings)
+    private static TrashIdCache<QualityProfileCacheObject> CreateCache(
+        params TrashIdMapping[] mappings
+    )
     {
         var cacheObject = new QualityProfileCacheObject();
         cacheObject.Mappings.AddRange(mappings);
-        return new QualityProfileCache(cacheObject);
+        return new TrashIdCache<QualityProfileCacheObject>(cacheObject);
     }
 
     [Test, AutoMockData]
@@ -35,7 +37,10 @@ internal sealed class QualityProfileTransactionPhaseTest
         QualityProfileTransactionPhase sut
     )
     {
-        var dtos = new[] { new QualityProfileDto { Name = "profile1" } };
+        var dtos = new[]
+        {
+            new QualityProfileDto { Id = 1, Name = "profile1" },
+        };
 
         var invalidProfile = NewPlan.Qp("invalid_profile_name", false);
         var validProfile = NewPlan.Qp("profile1");
@@ -50,24 +55,14 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.Should()
+            .TransactionOutput.NonExistentProfiles.Should()
+            .BeEquivalentTo("invalid_profile_name");
+        context
+            .TransactionOutput.UnchangedProfiles.Should()
+            .ContainSingle()
+            .Which.Should()
             .BeEquivalentTo(
-                new QualityProfileTransactionData
-                {
-                    NonExistentProfiles = ["invalid_profile_name"],
-                    UnchangedProfiles = new List<ProfileWithStats>
-                    {
-                        new()
-                        {
-                            Profile = new UpdatedQualityProfile
-                            {
-                                ProfileConfig = validProfile,
-                                ProfileDto = dtos[0],
-                                UpdateReason = QualityProfileUpdateReason.Changed,
-                            },
-                        },
-                    },
-                }
+                new UpdatedQualityProfile { ProfileConfig = validProfile, ProfileDto = dtos[0] }
             );
     }
 
@@ -102,37 +97,25 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.Should()
+            .TransactionOutput.NewProfiles.Should()
+            .ContainSingle()
+            .Which.Should()
             .BeEquivalentTo(
-                new QualityProfileTransactionData
+                new UpdatedQualityProfile
                 {
-                    ChangedProfiles = new List<ProfileWithStats>
+                    ProfileConfig = newProfile,
+                    ProfileDto = schema,
+                    UpdatedQualities = new UpdatedQualities
                     {
-                        new()
-                        {
-                            QualitiesChanged = true,
-                            Profile = new UpdatedQualityProfile
+                        NumWantedItems = 1,
+                        Items =
+                        [
+                            new ProfileItemDto
                             {
-                                ProfileConfig = newProfile,
-                                ProfileDto = schema,
-                                UpdateReason = QualityProfileUpdateReason.New,
-                                UpdatedQualities = new UpdatedQualities
-                                {
-                                    NumWantedItems = 1,
-                                    Items =
-                                    [
-                                        new ProfileItemDto
-                                        {
-                                            Allowed = true,
-                                            Quality = new ProfileItemQualityDto
-                                            {
-                                                Name = "quality1",
-                                            },
-                                        },
-                                    ],
-                                },
+                                Allowed = true,
+                                Quality = new ProfileItemQualityDto { Name = "quality1" },
                             },
-                        },
+                        ],
                     },
                 }
             );
@@ -145,6 +128,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -180,7 +164,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.ChangedProfiles.Should()
+            .TransactionOutput.UpdatedProfiles.Should()
             .ContainSingle()
             .Which.Profile.UpdatedScores.Should()
             .BeEquivalentTo(
@@ -237,6 +221,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -274,7 +259,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         context
             .TransactionOutput.UnchangedProfiles.Should()
             .ContainSingle()
-            .Which.Profile.UpdatedScores.Should()
+            .Which.UpdatedScores.Should()
             .BeEquivalentTo(
                 [
                     NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.NoChange),
@@ -291,6 +276,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -330,7 +316,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.ChangedProfiles.Should()
+            .TransactionOutput.UpdatedProfiles.Should()
             .ContainSingle()
             .Which.Profile.UpdatedScores.Should()
             .BeEquivalentTo(
@@ -351,6 +337,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -394,7 +381,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.ChangedProfiles.Should()
+            .TransactionOutput.UpdatedProfiles.Should()
             .ContainSingle()
             .Which.Profile.UpdatedScores.Should()
             .BeEquivalentTo(
@@ -415,6 +402,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -458,7 +446,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.ChangedProfiles.Should()
+            .TransactionOutput.UpdatedProfiles.Should()
             .ContainSingle()
             .Which.Profile.UpdatedScores.Should()
             .BeEquivalentTo(
@@ -481,6 +469,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
@@ -522,7 +511,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context
-            .TransactionOutput.ChangedProfiles.Should()
+            .TransactionOutput.UpdatedProfiles.Should()
             .ContainSingle()
             .Which.Profile.InvalidExceptCfNames.Should()
             .BeEquivalentTo("cf50");
@@ -535,6 +524,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             new QualityProfileDto
             {
+                Id = 1,
                 Name = "profile1",
                 Items =
                 [
@@ -581,7 +571,7 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        var profiles = context.TransactionOutput.ChangedProfiles;
+        var profiles = context.TransactionOutput.UpdatedProfiles;
         profiles.Should().ContainSingle();
         profiles.First().Profile.MissingQualities.Should().BeEquivalentTo("Three");
         profiles
@@ -625,13 +615,13 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        // Profile matched by cached ID should be processed as Changed (update existing)
-        var allProfiles = context
-            .TransactionOutput.ChangedProfiles.Concat(context.TransactionOutput.UnchangedProfiles)
+        // Profile matched by cached ID should be processed as update (not new)
+        context.TransactionOutput.NewProfiles.Should().BeEmpty();
+        var allUpdated = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allProfiles.Should().ContainSingle();
-        allProfiles[0].Profile.UpdateReason.Should().Be(QualityProfileUpdateReason.Changed);
-        allProfiles[0].Profile.ProfileDto.Id.Should().Be(42);
+        allUpdated.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
     }
 
     [Test, AutoMockData]
@@ -657,10 +647,11 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         // Profile matched by ID should be updated (will trigger rename)
-        var allProfiles = context
-            .TransactionOutput.ChangedProfiles.Concat(context.TransactionOutput.UnchangedProfiles)
+        var allUpdated = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allProfiles.Should().ContainSingle().Which.Profile.ProfileDto.Id.Should().Be(42);
+        allUpdated.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
     }
 
     [Test, AutoMockData]
@@ -751,11 +742,7 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context
-            .TransactionOutput.ChangedProfiles.Should()
-            .ContainSingle()
-            .Which.Profile.UpdateReason.Should()
-            .Be(QualityProfileUpdateReason.New);
+        context.TransactionOutput.NewProfiles.Should().ContainSingle();
     }
 
     [Test, AutoMockData]

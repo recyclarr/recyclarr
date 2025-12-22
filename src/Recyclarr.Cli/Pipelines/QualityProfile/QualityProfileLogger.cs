@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
@@ -41,90 +40,94 @@ internal class QualityProfileLogger(
             validationLogger.LogTotalErrorCount("Profile validation");
         }
 
-        foreach (var profile in transactions.ChangedProfiles.Select(x => x.Profile))
+        // Log warnings for new profiles
+        foreach (var profile in transactions.NewProfiles)
         {
-            var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
-            if (invalidQualityNames.Count != 0)
-            {
-                eventPublisher.AddWarning(
-                    $"Quality profile '{profile.ProfileName}' references invalid quality names: "
-                        + string.Join(", ", invalidQualityNames)
-                );
-            }
+            LogProfileWarnings(profile);
+        }
 
-            var invalidCfExceptNames = profile.InvalidExceptCfNames;
-            if (invalidCfExceptNames.Count != 0)
-            {
-                eventPublisher.AddWarning(
-                    $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
-                        + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}"
-                );
-            }
+        // Log warnings for updated profiles
+        foreach (var profileWithStats in transactions.UpdatedProfiles)
+        {
+            LogProfileWarnings(profileWithStats.Profile);
+        }
+    }
 
-            var missingQualities = profile.MissingQualities;
-            if (missingQualities.Count != 0)
-            {
-                log.Information(
-                    "Recyclarr detected that the following required qualities are missing from profile "
-                        + "'{ProfileName}' and will re-add them: {QualityNames}",
-                    profile.ProfileName,
-                    missingQualities
-                );
-            }
+    private void LogProfileWarnings(UpdatedQualityProfile profile)
+    {
+        var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
+        if (invalidQualityNames.Count != 0)
+        {
+            eventPublisher.AddWarning(
+                $"Quality profile '{profile.ProfileName}' references invalid quality names: "
+                    + string.Join(", ", invalidQualityNames)
+            );
+        }
+
+        var invalidCfExceptNames = profile.InvalidExceptCfNames;
+        if (invalidCfExceptNames.Count != 0)
+        {
+            eventPublisher.AddWarning(
+                $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
+                    + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}"
+            );
+        }
+
+        var missingQualities = profile.MissingQualities;
+        if (missingQualities.Count != 0)
+        {
+            log.Information(
+                "Recyclarr detected that the following required qualities are missing from profile "
+                    + "'{ProfileName}' and will re-add them: {QualityNames}",
+                profile.ProfileName,
+                missingQualities
+            );
         }
     }
 
     public void LogPersistenceResults(QualityProfilePipelineContext context)
     {
-        var changedProfiles = context.TransactionOutput.ChangedProfiles;
+        var transactions = context.TransactionOutput;
 
         // Profiles without changes get logged
-        var unchangedProfiles = context.TransactionOutput.UnchangedProfiles;
-        if (unchangedProfiles.Count != 0)
+        if (transactions.UnchangedProfiles.Count != 0)
         {
             log.Debug(
                 "These profiles have no changes and will not be persisted: {Profiles}",
-                unchangedProfiles.Select(x => x.Profile.ProfileName)
+                transactions.UnchangedProfiles.Select(x => x.ProfileName)
             );
         }
 
-        var createdProfiles = changedProfiles
-            .Where(x => x.Profile.UpdateReason == QualityProfileUpdateReason.New)
-            .Select(x => x.Profile.ProfileName)
-            .ToList();
-
-        if (createdProfiles.Count > 0)
+        // Log created profiles
+        if (transactions.NewProfiles.Count > 0)
         {
             log.Information(
                 "Created {Count} Profiles: {Names}",
-                createdProfiles.Count,
-                createdProfiles
+                transactions.NewProfiles.Count,
+                transactions.NewProfiles.Select(x => x.ProfileName)
             );
         }
 
-        var updatedProfiles = changedProfiles
-            .Where(x => x.Profile.UpdateReason == QualityProfileUpdateReason.Changed)
-            .Select(x => x.Profile.ProfileName)
-            .ToList();
-
-        if (updatedProfiles.Count > 0)
+        // Log updated profiles
+        if (transactions.UpdatedProfiles.Count > 0)
         {
             log.Information(
                 "Updated {Count} Profiles: {Names}",
-                updatedProfiles.Count,
-                updatedProfiles
+                transactions.UpdatedProfiles.Count,
+                transactions.UpdatedProfiles.Select(x => x.Profile.ProfileName)
             );
         }
 
-        if (changedProfiles.Count != 0)
+        var totalChanged = transactions.NewProfiles.Count + transactions.UpdatedProfiles.Count;
+        if (totalChanged != 0)
         {
-            var numQuality = changedProfiles.Count(x => x.QualitiesChanged);
-            var numScores = changedProfiles.Count(x => x.ScoresChanged);
+            var numQuality = transactions.UpdatedProfiles.Count(x => x.QualitiesChanged);
+            var numScores = transactions.UpdatedProfiles.Count(x => x.ScoresChanged);
 
             log.Information(
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and "
                     + "{NumScores} contain updated scores",
-                changedProfiles.Count,
+                totalChanged,
                 numQuality,
                 numScores
             );
@@ -134,6 +137,6 @@ internal class QualityProfileLogger(
             log.Information("All quality profiles are up to date!");
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, changedProfiles.Count);
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalChanged);
     }
 }

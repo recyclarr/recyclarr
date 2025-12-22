@@ -3,18 +3,22 @@ using System.Diagnostics.CodeAnalysis;
 namespace Recyclarr.Cache;
 
 /// <summary>
-/// Generic base class for caches that map TRaSH Guides trash_ids to Sonarr/Radarr service IDs.
+/// Generic cache that maps TRaSH Guides trash_ids to Sonarr/Radarr service IDs.
 /// Provides shared logic for finding, updating, and cleaning up mappings.
-/// Subclasses (CustomFormatCache, QualityProfileCache) provide type-specific adapters.
 /// </summary>
 public class TrashIdCache<TCacheObject>(TCacheObject cacheObject) : BaseCache(cacheObject)
     where TCacheObject : CacheObject, ITrashIdCacheObject
 {
     public IReadOnlyList<TrashIdMapping> Mappings => cacheObject.Mappings;
 
-    protected int? FindId(string trashId)
+    public int? FindId(string trashId)
     {
         return cacheObject.Mappings.Find(m => m.TrashId == trashId)?.ServiceId;
+    }
+
+    public void Update(ICacheSyncSource source)
+    {
+        Update(source.SyncedMappings, source.DeletedIds, source.ValidServiceIds);
     }
 
     [SuppressMessage(
@@ -22,7 +26,7 @@ public class TrashIdCache<TCacheObject>(TCacheObject cacheObject) : BaseCache(ca
         "UnusedParameter.Local",
         Justification = "LINQ l/r variables double as documentation"
     )]
-    protected void Update(
+    private void Update(
         IEnumerable<TrashIdMapping> syncedMappings,
         IEnumerable<int> deletedIds,
         IEnumerable<int> validServiceIds
