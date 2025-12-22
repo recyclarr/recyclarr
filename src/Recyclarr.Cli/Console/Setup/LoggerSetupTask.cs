@@ -23,7 +23,10 @@ internal class LoggerSetupTask(
         if (cmd.Debug)
 #pragma warning restore CS0618
         {
-            log.Warning("The -d/--debug option is deprecated. Use '--log debug' instead");
+            log.Warning(
+                "The -d/--debug option is deprecated. Use '--log debug' instead. "
+                    + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#debug-removed>"
+            );
         }
 
         loggingLevelSwitch.MinimumLevel = cmd.LogLevel.Value.ToLogEventLevel();
