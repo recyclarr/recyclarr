@@ -221,4 +221,57 @@ internal sealed class MergeQualityProfilesTest
                 }
             );
     }
+
+    [Test]
+    public void Profiles_with_same_trash_id_merge_regardless_of_name()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml
+                {
+                    TrashId = "profile-123",
+                    Name = "Old Profile Name",
+                    MinFormatScore = 100,
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml
+                {
+                    TrashId = "profile-123",
+                    Name = "New Profile Name",
+                    ScoreSet = "default",
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        // Profiles should merge by trash_id, with right values taking precedence
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
+                {
+                    QualityProfiles =
+                    [
+                        new QualityProfileConfigYaml
+                        {
+                            TrashId = "profile-123",
+                            Name = "Old Profile Name",
+                            MinFormatScore = 100,
+                            ScoreSet = "default",
+                        },
+                    ],
+                }
+            );
+    }
 }

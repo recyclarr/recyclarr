@@ -134,8 +134,8 @@ public abstract class ServiceConfigMerger<T>
             {
                 return a1.FullOuterHashJoin(
                         b1,
-                        x => x.Name,
-                        x => x.Name,
+                        x => x.TrashId ?? x.Name,
+                        x => x.TrashId ?? x.Name,
                         l => l,
                         r => r,
                         MergeQualityProfile,
