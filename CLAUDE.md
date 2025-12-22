@@ -81,8 +81,8 @@ Required Idioms:
   suppression.
 - LINQ method chaining over loops
 - LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
-- Named arguments for boolean literals and consecutive same-type parameters to clarify intent
-  (e.g., `new Options(SendInfo: false, SendEmpty: true)` not `new Options(false, true)`)
+- Named arguments for boolean literals and consecutive same-type parameters to clarify intent (e.g.,
+  `new Options(SendInfo: false, SendEmpty: true)` not `new Options(false, true)`)
 - `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
 - Avoid interface pollution: not every service class must have an interface. Add interfaces when
   justified (e.g. testability, more than one implementation)
@@ -300,6 +300,19 @@ changes you may need to make.
 - `ILogger.Warning()`: Non-critical issues (e.g. deprecations)
 - `ILogger.Error()`: Critical failures (usually results in application stopping)
 - Some user-facing logs still use Serilogs; this is legacy and will eventually be phased out.
+
+## Sync Philosophy
+
+**All sync operations must be deterministic and atomic.**
+
+- **Errors** indicate configuration problems that would cause non-deterministic or partial sync.
+  Errors are collected during validation and skip only the relevant pipeline, not the entire sync.
+  Recyclarr preserves previous (service-side) sync state to avoid unintentional behavior from
+  partial syncs.
+- **Warnings** indicate deprecations or non-critical informational messages that don't affect sync
+  determinism.
+- Use `ISyncEventPublisher.AddError()` for configuration validation failures
+- Use `ISyncEventPublisher.AddWarning()` only for deprecations and informational messages
 
 ## Recyclarr Runtime Behavior
 
