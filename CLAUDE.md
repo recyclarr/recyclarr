@@ -222,7 +222,12 @@ Use these mappings for non-src files:
 
 ### Source Code Classification (`src/**`)
 
-For `src/**` files, CHANGELOG determines commit type:
+For `src/**` files, CHANGELOG determines commit type.
+
+**Decision heuristic:** Before choosing `feat` or `fix`, ask: "If I released this commit alone,
+would users notice any difference in behavior?" If no, use `refactor`. Multi-commit features should
+use `refactor` for infrastructure commits and `feat` only for the commit that enables the
+user-observable capability.
 
 - **CHANGELOG required** (user-observable change):
   - `feat:` → CHANGELOG "Added" (new user capability)
