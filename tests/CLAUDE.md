@@ -133,7 +133,8 @@ tests/
 **Preferred Patterns**:
 
 - `result.Should().BeEquivalentTo(expected)`: Deep object comparison (prefer over multiple property
-  assertions)
+  assertions). Prefer strongly typed objects unless that requires specifying properties out of scope
+  for the test; in that case, use anonymous types.
 - `result.Select(x => x.Property).Should().BeEquivalentTo(expected)`: Property-based collection
   comparison
 - `act.Should().Throw<ExceptionType>().WithMessage("pattern")`: Exceptions
@@ -144,6 +145,18 @@ tests/
 
 - `result.Where(x => condition).Should().BeEquivalentTo(expected)`: Filtered comparisons
 - `result.Should().NotBeNull().And.BeOfType<Type>()`: Chained assertions
+
+**Dictionary Assertions**:
+
+- `dict.Should().ContainKey(key).WhoseValue.Should()...`: Safe key access with chained assertions
+- Avoid `dict[key]!` or `dict![key]!` - use `ContainKey().WhoseValue` instead
+
+**Anti-Patterns to Avoid**:
+
+- Null-forgiving indexer access (`dict!["key"]!`) - use `ContainKey().WhoseValue` instead
+- Redundant count checks before equivalence assertions (e.g., `HaveCount()` + `BeEquivalentTo()`)
+- Multiple assertions on same subject instead of `.And` chaining
+- Overly granular assertions when a single `BeEquivalentTo()` suffices
 
 **NSubstitute Verification**:
 
