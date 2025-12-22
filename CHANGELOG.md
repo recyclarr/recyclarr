@@ -14,6 +14,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Quality Profiles: Support for `trash_id` to sync TRaSH Guide quality profile definitions. When
   specified, qualities, custom formats, scores, and language are automatically configured from the
   guide, significantly reducing YAML complexity.
+- Custom Formats: Support for `custom_format_groups` to sync TRaSH Guide CF groups. Groups bundle
+  related custom formats with automatic profile assignment based on guide recommendations.
+- Custom Formats: `assign_scores_to` now accepts `trash_id` as an alternative to `name` for
+  referencing guide-backed quality profiles.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
   (default), `warn`.
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats
@@ -29,7 +33,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   instances, making multi-instance output easier to navigate.
 - Custom Formats: Preview now displays a table with action, name, and trash ID columns instead of
   log-style output.
-- Quality Sizes: Preview now highlights items that will be updated (bold) versus unchanged (dimmed).
+- Quality Sizes: Preview now only displays items that will be changed.
 
 ### Deprecated
 
