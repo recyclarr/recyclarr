@@ -142,7 +142,7 @@ internal sealed class YamlConfigValidatorTest
     }
 
     [Test]
-    public void Validation_failure_when_quality_profile_name_empty()
+    public void Validation_failure_when_assign_scores_to_missing_name_and_trash_id()
     {
         var config = new ServiceConfigYaml
         {
@@ -153,7 +153,7 @@ internal sealed class YamlConfigValidatorTest
                 new()
                 {
                     TrashIds = new List<string> { "valid" },
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "" } },
+                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() },
                 },
             },
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
@@ -163,8 +163,7 @@ internal sealed class YamlConfigValidatorTest
         var result = validator.TestValidate(config);
 
         result.ShouldHaveValidationErrorFor(
-            FirstCf
-                + $"{nameof(CustomFormatConfig.AssignScoresTo)}[0].{nameof(AssignScoresToConfig.Name)}"
+            FirstCf + $"{nameof(CustomFormatConfig.AssignScoresTo)}[0]"
         );
     }
 

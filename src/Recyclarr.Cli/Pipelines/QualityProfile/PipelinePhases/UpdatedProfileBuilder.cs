@@ -65,7 +65,7 @@ internal class UpdatedProfileBuilder
     private void ProcessGuideBackedProfile(PlannedQualityProfile planned)
     {
         var trashId = planned.Resource!.TrashId;
-        var cachedId = trashId is null ? null : _cache.FindId(trashId);
+        var cachedId = _cache.FindId(trashId);
 
         _log.Debug(
             "Process transaction for guide QP {TrashId} ({Name}), cached ID: {CachedId}",

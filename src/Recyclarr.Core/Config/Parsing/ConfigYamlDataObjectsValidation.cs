@@ -54,9 +54,11 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
 {
     public QualityScoreConfigYamlValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .WithMessage("'name' is required for elements under 'quality_profiles'");
+        RuleFor(x => x)
+            .Must(x => !string.IsNullOrEmpty(x.Name) || !string.IsNullOrEmpty(x.TrashId))
+            .WithMessage(
+                "Either 'name' or 'trash_id' is required for elements under 'assign_scores_to'"
+            );
     }
 }
 

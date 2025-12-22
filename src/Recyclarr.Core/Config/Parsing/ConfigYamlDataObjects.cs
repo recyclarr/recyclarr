@@ -9,6 +9,7 @@ namespace Recyclarr.Config.Parsing;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualityScoreConfigYaml
 {
+    public string? TrashId { get; init; }
     public string? Name { get; init; }
     public int? Score { get; init; }
 }

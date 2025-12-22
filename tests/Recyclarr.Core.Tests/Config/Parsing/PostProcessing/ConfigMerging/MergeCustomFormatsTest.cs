@@ -171,4 +171,71 @@ internal sealed class MergeCustomFormatsTest
                 }
             );
     }
+
+    [Test]
+    public void Profiles_matched_by_trash_id_deduplicate_correctly()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1", "cf2"],
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { TrashId = "profile-123", Score = 100 },
+                    ],
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1", "cf3"],
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { TrashId = "profile-123", Score = 200 },
+                    ],
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        // cf1 is in both, so it should be removed from left (right wins)
+        // cf2 is only in left, so it should remain
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
+                {
+                    CustomFormats =
+                    [
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { TrashId = "profile-123", Score = 100 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf1", "cf3"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { TrashId = "profile-123", Score = 200 },
+                            ],
+                        },
+                    ],
+                }
+            );
+    }
 }

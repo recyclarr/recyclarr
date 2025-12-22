@@ -48,10 +48,14 @@ public abstract class ServiceConfigMerger<T>
     }
 
     private sealed record FlattenedCfs(
+        string? ProfileTrashId,
         string? ProfileName,
         int? Score,
         IReadOnlyCollection<string> TrashIds
-    );
+    )
+    {
+        public string? ProfileKey => ProfileTrashId ?? ProfileName;
+    }
 
     private static IReadOnlyCollection<CustomFormatConfigYaml> MergeCustomFormats(
         IReadOnlyCollection<CustomFormatConfigYaml> a,
@@ -67,7 +71,7 @@ public abstract class ServiceConfigMerger<T>
                 (
                     A: x,
                     B: flattenedB
-                        .Where(y => y.ProfileName.EqualsIgnoreCase(x.ProfileName)) // Ignore score
+                        .Where(y => y.ProfileKey.EqualsIgnoreCase(x.ProfileKey)) // Ignore score
                         .SelectMany(y => y.TrashIds)
                         .Distinct(StringComparer.InvariantCultureIgnoreCase)
                         .ToList()
@@ -79,10 +83,15 @@ public abstract class ServiceConfigMerger<T>
                 TrashIds = x
                     .A.TrashIds.Except(x.B, StringComparer.InvariantCultureIgnoreCase)
                     .ToList(),
-                AssignScoresTo = x.A.ProfileName is not null
+                AssignScoresTo = x.A.ProfileKey is not null
                     ? new[]
                     {
-                        new QualityScoreConfigYaml { Name = x.A.ProfileName, Score = x.A.Score },
+                        new QualityScoreConfigYaml
+                        {
+                            TrashId = x.A.ProfileTrashId,
+                            Name = x.A.ProfileName,
+                            Score = x.A.Score,
+                        },
                     }
                     : null,
             })
@@ -95,15 +104,17 @@ public abstract class ServiceConfigMerger<T>
                 .SelectMany(x =>
                     x is { AssignScoresTo.Count: > 0 }
                         ? x.AssignScoresTo.Select(y => new FlattenedCfs(
+                            y.TrashId,
                             y.Name,
                             y.Score,
                             x.TrashIds!
                         ))
-                        : [new FlattenedCfs(null, null, x.TrashIds!)]
+                        : [new FlattenedCfs(null, null, null, x.TrashIds!)]
                 )
-                .GroupBy(x => (Name: x.ProfileName, x.Score))
+                .GroupBy(x => (x.ProfileTrashId, x.ProfileName, x.Score))
                 .Select(x => new FlattenedCfs(
-                    x.Key.Name,
+                    x.Key.ProfileTrashId,
+                    x.Key.ProfileName,
                     x.Key.Score,
                     x.SelectMany(y => y.TrashIds).ToList()
                 ))

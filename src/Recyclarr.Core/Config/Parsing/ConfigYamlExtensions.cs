@@ -7,7 +7,12 @@ internal static class ConfigYamlExtensions
 {
     private static AssignScoresToConfig ToAssignScoresToConfig(this QualityScoreConfigYaml yaml)
     {
-        return new AssignScoresToConfig { Name = yaml.Name ?? "", Score = yaml.Score };
+        return new AssignScoresToConfig
+        {
+            TrashId = yaml.TrashId,
+            Name = yaml.Name ?? "",
+            Score = yaml.Score,
+        };
     }
 
     private static CustomFormatConfig ToCustomFormatConfig(this CustomFormatConfigYaml yaml)

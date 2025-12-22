@@ -33,6 +33,7 @@ public record CustomFormatConfig
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record AssignScoresToConfig
 {
+    public string? TrashId { get; init; }
     public string Name { get; init; } = "";
     public int? Score { get; init; }
 }

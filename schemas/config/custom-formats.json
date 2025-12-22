@@ -22,9 +22,13 @@
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",
         "items": {
           "properties": {
+            "trash_id": {
+              "type": "string",
+              "description": "The trash_id of a guide-backed quality profile."
+            },
             "name": {
               "type": "string",
-              "description": "The name of one of the quality profiles in Radarr."
+              "description": "The name of one of the quality profiles."
             },
             "score": {
               "type": "integer",
