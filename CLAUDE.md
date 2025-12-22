@@ -130,6 +130,8 @@ Patterns:
 - Static registration methods in modules
 - `RegisterType<Impl>().As<IInterface>()`
 - Lifecycle: `SingleInstance()`, `InstancePerLifetimeScope()`
+- AVOID absolute paths in `MockFileSystem` tests (platform-incompatible). Use `IDirectoryInfo` and
+  `IFileInfo` extension methods: `Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")`
 
 End to End Tests:
 
