@@ -196,4 +196,75 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                 }
             );
     }
+
+    [Test]
+    public void Merge_custom_format_groups_by_trash_id()
+    {
+        var sut = Resolve<IncludePostProcessor>();
+
+        var includePath = Fs.CurrentDirectory().File("include.yml");
+        Fs.AddFile(
+            includePath,
+            new MockFileData(
+                """
+                custom_format_groups:
+                  - trash_id: group-1
+                    assign_scores_to:
+                      - trash_id: profile-from-include
+                    exclude:
+                      - cf-excluded-by-include
+                  - trash_id: group-2
+                    exclude:
+                      - cf-only-in-include
+                """
+            )
+        );
+
+        var config = new RootConfigYaml
+        {
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
+            {
+                ["service1"] = new()
+                {
+                    BaseUrl = "http://localhost",
+                    ApiKey = "key",
+                    CustomFormatGroups =
+                    [
+                        new CustomFormatGroupConfigYaml
+                        {
+                            TrashId = "group-1",
+                            AssignScoresTo =
+                            [
+                                new CfGroupAssignScoresToConfigYaml
+                                {
+                                    TrashId = "profile-from-config",
+                                },
+                            ],
+                            Exclude = ["cf-excluded-by-config"],
+                        },
+                    ],
+                    Include = [new ConfigYamlInclude { Config = includePath.FullName }],
+                },
+            },
+        };
+
+        var result = sut.Process(config);
+
+        result
+            .Radarr.Should()
+            .ContainKey("service1")
+            .WhoseValue!.CustomFormatGroups.Should()
+            .BeEquivalentTo(
+                new CustomFormatGroupConfigYaml[]
+                {
+                    new()
+                    {
+                        TrashId = "group-1",
+                        AssignScoresTo = [new() { TrashId = "profile-from-config" }],
+                        Exclude = ["cf-excluded-by-config"],
+                    },
+                    new() { TrashId = "group-2", Exclude = ["cf-only-in-include"] },
+                }
+            );
+    }
 }

@@ -60,6 +60,9 @@
         "custom_formats": {
           "$ref": "config/custom-formats.json"
         },
+        "custom_format_groups": {
+          "$ref": "config/custom-format-groups.json"
+        },
         "include": {
           "$ref": "config/includes.json"
         },
@@ -96,6 +99,9 @@
         },
         "custom_formats": {
           "$ref": "config/custom-formats.json"
+        },
+        "custom_format_groups": {
+          "$ref": "config/custom-format-groups.json"
         },
         "include": {
           "$ref": "config/includes.json"

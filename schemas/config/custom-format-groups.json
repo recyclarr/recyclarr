@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/custom-format-groups.json",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "A custom format group from the TRaSH Guides. Groups bundle related custom formats together with recommended settings.",
+    "required": ["trash_id"],
+    "properties": {
+      "trash_id": {
+        "type": "string",
+        "description": "The trash_id of a custom format group from the TRaSH Guides."
+      },
+      "assign_scores_to": {
+        "type": ["null", "array"],
+        "description": "One or more quality profiles to assign scores to. If omitted, uses all guide-backed profiles.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "trash_id": {
+              "type": "string",
+              "description": "The trash_id of a guide-backed quality profile."
+            }
+          }
+        }
+      },
+      "exclude": {
+        "type": ["null", "array"],
+        "description": "A list of custom format trash_ids to exclude from this group.",
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

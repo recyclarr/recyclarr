@@ -34,8 +34,6 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 **Test:** Existing tests pass + new test for TrashId-based assignment
 
-**Commit:** `feat(config): Add trash_id support to assign_scores_to`
-
 ---
 
 ## Commit 2: Update quality_profiles merge key [DONE]
@@ -47,8 +45,6 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 - `src/Recyclarr.Core/Config/Parsing/PostProcessing/ConfigMerging/ServiceConfigMerger.cs` - Line ~124
 
 **Test:** New merge test verifying profiles join by trash_id when present
-
-**Commit:** `refactor(config): Use composite key for quality_profiles merge`
 
 ---
 
@@ -67,11 +63,9 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 **Test:** Unit test parsing CF group YAML into models
 
-**Commit:** `refactor(config): Add custom_format_groups configuration models`
-
 ---
 
-## Commit 4: CF Groups schema + merge logic
+## Commit 4: CF Groups schema + merge logic [DONE]
 
 **Scope:** JSON schema validation and include merge semantics.
 
@@ -84,8 +78,6 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 **Merge Semantics:** Join by `trash_id`, Replace for `exclude` and `assign_scores_to`
 
 **Test:** Merge tests (join by trash_id, replace semantics)
-
-**Commit:** `feat(config): Add custom_format_groups schema and merge logic`
 
 ---
 
@@ -109,8 +101,6 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 **Test:** Integration test verifying CF groups resolve to planned CFs
 
-**Commit:** `feat(sync): Resolve custom_format_groups to custom formats`
-
 ---
 
 ## Commit 6: CF Groups validation
@@ -131,8 +121,6 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 5. Invalid profile trash_id in assign_scores_to
 
 **Test:** Validation tests for each error scenario
-
-**Commit:** `feat(config): Add custom_format_groups validation`
 
 ---
 

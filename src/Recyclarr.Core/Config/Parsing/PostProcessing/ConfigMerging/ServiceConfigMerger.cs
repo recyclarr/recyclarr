@@ -27,6 +27,11 @@ public abstract class ServiceConfigMerger<T>
         return a with
         {
             CustomFormats = Combine(a.CustomFormats, b.CustomFormats, MergeCustomFormats),
+            CustomFormatGroups = Combine(
+                a.CustomFormatGroups,
+                b.CustomFormatGroups,
+                MergeCustomFormatGroups
+            ),
             QualityProfiles = MergeQualityProfiles(a.QualityProfiles, b.QualityProfiles),
             QualityDefinition = Combine(
                 a.QualityDefinition,
@@ -120,6 +125,28 @@ public abstract class ServiceConfigMerger<T>
                 ))
                 .ToList();
         }
+    }
+
+    private static IReadOnlyCollection<CustomFormatGroupConfigYaml> MergeCustomFormatGroups(
+        IReadOnlyCollection<CustomFormatGroupConfigYaml> a,
+        IReadOnlyCollection<CustomFormatGroupConfigYaml> b
+    )
+    {
+        return a.FullOuterHashJoin(
+                b,
+                x => x.TrashId,
+                x => x.TrashId,
+                l => l,
+                r => r,
+                (l, r) =>
+                    l with
+                    {
+                        AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
+                        Exclude = r.Exclude ?? l.Exclude,
+                    },
+                StringComparer.InvariantCultureIgnoreCase
+            )
+            .ToList();
     }
 
     private static IReadOnlyCollection<QualityProfileConfigYaml>? MergeQualityProfiles(
