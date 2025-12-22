@@ -39,6 +39,12 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
             .When(x => x.QualityProfiles != null)
             .WithName("quality_profiles")
             .ForEach(x => x.SetValidator(new QualityProfileConfigYamlValidator()));
+
+        RuleFor(x => x.CustomFormatGroups)
+            .NotEmpty()
+            .When(x => x.CustomFormatGroups is not null)
+            .ForEach(x => x.SetValidator(new CustomFormatGroupConfigYamlValidator()))
+            .WithName("custom_format_groups");
     }
 }
 
@@ -59,6 +65,16 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
             .WithMessage(
                 "Either 'name' or 'trash_id' is required for elements under 'assign_scores_to'"
             );
+    }
+}
+
+public class CustomFormatGroupConfigYamlValidator : AbstractValidator<CustomFormatGroupConfigYaml>
+{
+    public CustomFormatGroupConfigYamlValidator()
+    {
+        RuleFor(x => x.TrashId)
+            .NotEmpty()
+            .WithMessage("'trash_id' is required for custom_format_groups entries");
     }
 }
 

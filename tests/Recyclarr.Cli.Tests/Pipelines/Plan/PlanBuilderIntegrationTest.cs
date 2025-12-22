@@ -822,7 +822,7 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Build_with_invalid_cf_group_trash_id_skips_group()
+    public void Build_with_invalid_cf_group_trash_id_reports_error()
     {
         SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
 
@@ -840,9 +840,9 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
 
         var plan = sut.Build();
 
-        // No CFs in plan (group was skipped)
+        // No CFs in plan (group was skipped due to error)
         plan.CustomFormats.Should().BeEmpty();
-        HasErrors(storage).Should().BeFalse();
+        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent-group"));
     }
 
     [Test]
@@ -907,5 +907,168 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         // No CFs in plan (all excluded)
         plan.CustomFormats.Should().BeEmpty();
         HasErrors(storage).Should().BeFalse();
+    }
+
+    [Test]
+    public void Build_with_cf_group_excluded_required_cf_reports_error()
+    {
+        SetupCustomFormatWithScores("Required CF", "required-cf", ("default", 100));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        // Setup group with a required CF
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "required-cf",
+                    Name = "Required CF",
+                    Required = true,
+                },
+            ]
+        );
+
+        // Config excludes the required CF
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups =
+            [
+                new CustomFormatGroupConfig { TrashId = "test-group", Exclude = ["required-cf"] },
+            ],
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
+
+        sut.Build();
+
+        GetErrors(storage)
+            .Should()
+            .Contain(e => e.Contains("required-cf") && e.Contains("required"));
+    }
+
+    [Test]
+    public void Build_with_cf_group_invalid_exclude_trash_id_reports_error()
+    {
+        SetupCustomFormatWithScores("Valid CF", "valid-cf", ("default", 100));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [new CfGroupCustomFormat { TrashId = "valid-cf", Name = "Valid CF" }]
+        );
+
+        // Config excludes a CF that doesn't exist in the group
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups =
+            [
+                new CustomFormatGroupConfig
+                {
+                    TrashId = "test-group",
+                    Exclude = ["nonexistent-cf"],
+                },
+            ],
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
+
+        sut.Build();
+
+        GetErrors(storage)
+            .Should()
+            .Contain(e => e.Contains("nonexistent-cf") && e.Contains("Invalid CF trash_id"));
+    }
+
+    [Test]
+    public void Build_with_cf_group_profile_excluded_by_guide_reports_error()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("excluded-qp", "Excluded Profile", ("HDTV-1080p", true, null));
+
+        // Group excludes the profile via guide's quality_profiles.exclude
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            new Dictionary<string, string> { ["Excluded Profile"] = "excluded-qp" }
+        );
+
+        // User explicitly assigns to the excluded profile
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups =
+            [
+                new CustomFormatGroupConfig
+                {
+                    TrashId = "test-group",
+                    AssignScoresTo = [new CfGroupAssignScoresToConfig { TrashId = "excluded-qp" }],
+                },
+            ],
+            QualityProfiles = [new QualityProfileConfig { TrashId = "excluded-qp" }],
+        };
+
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
+
+        sut.Build();
+
+        GetErrors(storage)
+            .Should()
+            .Contain(e => e.Contains("excluded-qp") && e.Contains("excluded by this group"));
+    }
+
+    [Test]
+    public void Build_with_cf_group_invalid_assign_scores_to_trash_id_reports_error()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("valid-qp", "Valid Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }]
+        );
+
+        // User assigns to a profile that doesn't exist
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups =
+            [
+                new CustomFormatGroupConfig
+                {
+                    TrashId = "test-group",
+                    AssignScoresTo =
+                    [
+                        new CfGroupAssignScoresToConfig { TrashId = "nonexistent-profile" },
+                    ],
+                },
+            ],
+            QualityProfiles = [new QualityProfileConfig { TrashId = "valid-qp" }],
+        };
+
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
+
+        sut.Build();
+
+        GetErrors(storage)
+            .Should()
+            .Contain(e =>
+                e.Contains("nonexistent-profile") && e.Contains("Invalid profile trash_id")
+            );
     }
 }

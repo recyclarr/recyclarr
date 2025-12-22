@@ -111,7 +111,7 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 ---
 
-## Commit 6: CF Groups validation
+## Commit 6: CF Groups validation [DONE]
 
 **Scope:** Validate CF group configuration against guide resources.
 

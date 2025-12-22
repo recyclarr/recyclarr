@@ -1,5 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -7,6 +8,7 @@ internal class ConfiguredCustomFormatProvider(
     IServiceConfiguration config,
     QualityProfileResourceQuery qpQuery,
     CfGroupResourceQuery cfGroupQuery,
+    ISyncEventPublisher events,
     ILogger log
 )
 {
@@ -55,12 +57,24 @@ internal class ConfiguredCustomFormatProvider(
             // Resolve group trash_id to guide resource
             if (!cfGroupResources.TryGetValue(groupConfig.TrashId, out var groupResource))
             {
-                log.Debug("CF group {TrashId} not found in guide resources", groupConfig.TrashId);
+                events.AddError($"Invalid custom format group trash_id: {groupConfig.TrashId}");
+                continue;
+            }
+
+            // Validate exclude list
+            if (!ValidateExcludeList(groupConfig, groupResource))
+            {
                 continue;
             }
 
             // Determine which profiles this group's CFs should be assigned to
             var assignScoresTo = DetermineProfiles(groupConfig, groupResource, qpResources);
+            if (assignScoresTo is null)
+            {
+                // Validation errors occurred, skip this group
+                continue;
+            }
+
             if (assignScoresTo.Count == 0)
             {
                 log.Debug("CF group {TrashId} has no profiles to assign to", groupConfig.TrashId);
@@ -89,10 +103,51 @@ internal class ConfiguredCustomFormatProvider(
         }
     }
 
+    /// Validates the exclude list for a CF group. Returns true if valid, false if errors found.
+    private bool ValidateExcludeList(
+        CustomFormatGroupConfig groupConfig,
+        CfGroupResource groupResource
+    )
+    {
+        var groupCfTrashIds = groupResource
+            .CustomFormats.Select(cf => cf.TrashId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var hasErrors = false;
+
+        foreach (var excludeId in groupConfig.Exclude)
+        {
+            // Check if the excluded trash_id exists in this group
+            if (!groupCfTrashIds.Contains(excludeId))
+            {
+                events.AddError(
+                    $"CF group '{groupConfig.TrashId}': Invalid CF trash_id in exclude: {excludeId}"
+                );
+                hasErrors = true;
+                continue;
+            }
+
+            // Check if the excluded CF is marked as required
+            var cf = groupResource.CustomFormats.First(c =>
+                c.TrashId.Equals(excludeId, StringComparison.OrdinalIgnoreCase)
+            );
+            if (cf.Required)
+            {
+                events.AddError(
+                    $"CF group '{groupConfig.TrashId}': Cannot exclude required CF '{excludeId}'"
+                );
+                hasErrors = true;
+            }
+        }
+
+        return !hasErrors;
+    }
+
     /// Returns the list of profiles to assign this group's CFs to. If the user specified
-    /// explicit assign_scores_to entries, uses those (filtered by guide exclusions). Otherwise,
-    /// uses all guide-backed quality profiles from the config (also filtered by guide exclusions).
-    private List<AssignScoresToConfig> DetermineProfiles(
+    /// explicit assign_scores_to entries, validates and uses those. Otherwise, uses all
+    /// guide-backed quality profiles from the config (filtered by guide exclusions).
+    /// Returns null if validation errors occurred for explicit profiles.
+    private List<AssignScoresToConfig>? DetermineProfiles(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
         Dictionary<string, QualityProfileResource> qpResources
@@ -106,17 +161,8 @@ internal class ConfiguredCustomFormatProvider(
 
         if (groupConfig.AssignScoresTo.Count > 0)
         {
-            // Explicit: user specified profiles, filtered by guide exclusions
-            // Resolve trash_id to profile name via guide resources
-            return groupConfig
-                .AssignScoresTo.Where(score => !excludedProfiles.Contains(score.TrashId))
-                .Where(score => qpResources.ContainsKey(score.TrashId))
-                .Select(score => new AssignScoresToConfig
-                {
-                    TrashId = score.TrashId,
-                    Name = qpResources[score.TrashId].Name,
-                })
-                .ToList();
+            // Explicit: user specified profiles - validate each one
+            return ValidateExplicitProfiles(groupConfig, excludedProfiles, qpResources);
         }
 
         // Implicit: all guide-backed profiles in user's config, filtered by guide exclusions
@@ -131,5 +177,45 @@ internal class ConfiguredCustomFormatProvider(
                 Name = !string.IsNullOrEmpty(qp.Name) ? qp.Name : qpResources[qp.TrashId!].Name,
             })
             .ToList();
+    }
+
+    /// Validates explicit assign_scores_to profiles. Returns null if errors found.
+    private List<AssignScoresToConfig>? ValidateExplicitProfiles(
+        CustomFormatGroupConfig groupConfig,
+        HashSet<string> excludedProfiles,
+        Dictionary<string, QualityProfileResource> qpResources
+    )
+    {
+        var hasErrors = false;
+        var result = new List<AssignScoresToConfig>();
+
+        foreach (var score in groupConfig.AssignScoresTo)
+        {
+            // Check if profile trash_id exists
+            if (!qpResources.TryGetValue(score.TrashId, out var qpResource))
+            {
+                events.AddError(
+                    $"CF group '{groupConfig.TrashId}': Invalid profile trash_id in assign_scores_to: {score.TrashId}"
+                );
+                hasErrors = true;
+                continue;
+            }
+
+            // Check if profile is excluded by guide
+            if (excludedProfiles.Contains(score.TrashId))
+            {
+                events.AddError(
+                    $"CF group '{groupConfig.TrashId}': Profile '{score.TrashId}' is excluded by this group's guide definition"
+                );
+                hasErrors = true;
+                continue;
+            }
+
+            result.Add(
+                new AssignScoresToConfig { TrashId = score.TrashId, Name = qpResource.Name }
+            );
+        }
+
+        return hasErrors ? null : result;
     }
 }

@@ -257,4 +257,17 @@ internal sealed class ConfigYamlDataObjectsValidationTest
 
         result.ShouldNotHaveAnyValidationErrors();
     }
+
+    [Test]
+    public void Custom_format_group_trash_id_required()
+    {
+        var data = new CustomFormatGroupConfigYaml();
+
+        var validator = new CustomFormatGroupConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.TrashId)
+            .WithErrorMessage("'trash_id' is required for custom_format_groups entries");
+    }
 }
