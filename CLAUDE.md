@@ -24,11 +24,15 @@
 - Reuse/extend existing implementations - zero duplication tolerance
 - CRITICAL: Follow SOLID, DRY, YAGNI principles
 - .NET 10.0 + nullable reference types
-- DO NOT use XML documentation for ANY types.
-- NO VERBOSE/USELESS C# COMMENTS. C# comments are code too, and thus incur a maintenance cost. They
-  must have value. Focus on documenting the WHY, not WHAT code does. Preference for self-documenting
-  code: Self-describing variable, class, function names, etc. DO add comments for non-obvious design
-  decisions (e.g., backward compat attributes, complex algorithms).
+- Comment guidelines (implements global "comments must earn their place"). Examples:
+  - LINQ chains (3+ operations): Brief comment stating transformation goal
+  - Conditional blocks with non-obvious purpose: One-line comment (e.g., `// Explicit: user
+    specified`)
+  - Private methods: Block comment if name + parameters don't make purpose self-evident
+  - Early returns/continues: Include reason if not obvious from context
+  - Complex algorithms: Comment explaining approach at top, not line-by-line
+  - General: Any code where a reader would pause and wonder "why?" or "what's happening here?"
+  - NEVER: XML doc comments, commented-out code, restating what code literally does
 - Zero warnings/analysis issues
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
   polymorphism tradeoffs for discussion rather than defaulting to enums.
