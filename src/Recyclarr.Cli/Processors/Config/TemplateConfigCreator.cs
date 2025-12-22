@@ -3,7 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ConfigTemplates;
 using Recyclarr.Platform;
-using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Processors.Config;
 
@@ -23,8 +23,8 @@ internal class TemplateConfigCreator(
         log.Debug("Creating config from templates: {Templates}", settings.Templates);
 
         var allTemplates = templates
-            .GetRadarr()
-            .Concat<ConfigTemplateResource>(templates.GetSonarr());
+            .Get(SupportedServices.Radarr)
+            .Concat(templates.Get(SupportedServices.Sonarr));
 
         var matchingTemplateData = allTemplates
             .IntersectBy(

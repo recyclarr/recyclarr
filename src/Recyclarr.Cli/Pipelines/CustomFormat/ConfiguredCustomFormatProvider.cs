@@ -1,6 +1,5 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -11,7 +10,8 @@ internal class ConfiguredCustomFormatProvider(
 {
     public IEnumerable<CustomFormatConfig> GetAll()
     {
-        var qpResources = GetQpResourcesForService()
+        var qpResources = qpQuery
+            .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
         // Synthesize CustomFormatConfig from QP formatItems
@@ -34,15 +34,5 @@ internal class ConfiguredCustomFormatProvider(
             });
 
         return config.CustomFormats.Concat(fromFormatItems);
-    }
-
-    private IReadOnlyList<QualityProfileResource> GetQpResourcesForService()
-    {
-        return config.ServiceType switch
-        {
-            SupportedServices.Radarr => qpQuery.GetRadarr(),
-            SupportedServices.Sonarr => qpQuery.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
-        };
     }
 }

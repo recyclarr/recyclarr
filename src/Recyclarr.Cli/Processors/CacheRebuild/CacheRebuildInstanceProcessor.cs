@@ -7,7 +7,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
-using Recyclarr.TrashGuide;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.CacheRebuild;
@@ -75,7 +74,7 @@ internal class CacheRebuildInstanceProcessor(
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var allGuideCfs = GetGuideCfsForService();
+        var allGuideCfs = cfQuery.Get(config.ServiceType);
         var configuredGuideCfs = allGuideCfs
             .Where(cf => configuredTrashIds.Contains(cf.TrashId))
             .ToList();
@@ -492,15 +491,5 @@ internal class CacheRebuildInstanceProcessor(
         var cacheObject = new CustomFormatCacheObject { Mappings = matches };
         var cache = new TrashIdCache<CustomFormatCacheObject>(cacheObject);
         cachePersister.Save(cache);
-    }
-
-    private IReadOnlyList<CustomFormatResource> GetGuideCfsForService()
-    {
-        return config.ServiceType switch
-        {
-            SupportedServices.Radarr => cfQuery.GetRadarr(),
-            SupportedServices.Sonarr => cfQuery.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
-        };
     }
 }

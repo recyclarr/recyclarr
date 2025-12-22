@@ -34,12 +34,7 @@ internal class CustomFormatDataLister(IAnsiConsole console, CustomFormatResource
             console.WriteLine();
         }
 
-        IEnumerable<CustomFormatResource> customFormats = serviceType switch
-        {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
-        };
+        var customFormats = guide.Get(serviceType);
 
         var scoreSets = customFormats
             .SelectMany(x => x.TrashScores.Keys)
@@ -61,12 +56,7 @@ internal class CustomFormatDataLister(IAnsiConsole console, CustomFormatResource
             console.WriteLine();
         }
 
-        IEnumerable<CustomFormatResource> customFormats = serviceType switch
-        {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
-        };
+        var customFormats = guide.Get(serviceType);
 
         var categories = customFormats
             .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))

@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
@@ -10,33 +11,35 @@ public class QualitySizeResourceQuery(
     ILogger log
 )
 {
-    public IReadOnlyList<RadarrQualitySizeResource> GetRadarr()
+    public IReadOnlyList<QualitySizeResource> Get(SupportedServices serviceType)
     {
-        log.Debug("QualitySize: Querying Radarr quality sizes");
-        var result = GetQualitySizes<RadarrQualitySizeResource>();
-        log.Debug("QualitySize: Retrieved {Count} Radarr quality size definitions", result.Count);
-        return result;
+        return serviceType switch
+        {
+            SupportedServices.Radarr => GetQualitySizes<RadarrQualitySizeResource>(serviceType),
+            SupportedServices.Sonarr => GetQualitySizes<SonarrQualitySizeResource>(serviceType),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
     }
 
-    public IReadOnlyList<SonarrQualitySizeResource> GetSonarr()
-    {
-        log.Debug("QualitySize: Querying Sonarr quality sizes");
-        var result = GetQualitySizes<SonarrQualitySizeResource>();
-        log.Debug("QualitySize: Retrieved {Count} Sonarr quality size definitions", result.Count);
-        return result;
-    }
-
-    private List<TResource> GetQualitySizes<TResource>()
+    private List<TResource> GetQualitySizes<TResource>(SupportedServices serviceType)
         where TResource : QualitySizeResource
     {
+        log.Debug("QualitySize: Querying {Service} quality sizes", serviceType);
         var files = registry.Get<TResource>();
         log.Debug("QualitySize: Found {Count} quality size files in registry", files.Count);
 
-        return loader
+        var result = loader
             .Load<TResource>(files, GlobalJsonSerializerSettings.Guide)
             .Select(tuple => tuple.Resource)
             .GroupBy(x => x.Type, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.Last())
             .ToList();
+
+        log.Debug(
+            "QualitySize: Retrieved {Count} {Service} quality size definitions",
+            result.Count,
+            serviceType
+        );
+        return result;
     }
 }

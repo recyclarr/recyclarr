@@ -2,7 +2,6 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync.Events;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
@@ -32,7 +31,8 @@ internal class QualityProfilePlanComponent(
         }
 
         // Load guide resources and build lookup by TrashId
-        var guideResources = GetQualityProfilesForService()
+        var guideResources = guide
+            .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
         // Build profile-CF pairs from plan's CustomFormats (which includes both config CFs and QP formatItems)
@@ -198,16 +198,6 @@ internal class QualityProfilePlanComponent(
         return result with
         {
             Qualities = convertedQualities,
-        };
-    }
-
-    private IEnumerable<QualityProfileResource> GetQualityProfilesForService()
-    {
-        return config.ServiceType switch
-        {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
         };
     }
 }

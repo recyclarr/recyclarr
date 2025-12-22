@@ -29,13 +29,13 @@ internal class ConfigListTemplateProcessor(
         var empty = new Markup("");
 
         var sonarrIncludes = includesService
-            .GetSonarr()
+            .Get(SupportedServices.Sonarr)
             .Where(x => !x.Hidden)
             .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
             .ToList();
 
         var radarrIncludes = includesService
-            .GetRadarr()
+            .Get(SupportedServices.Radarr)
             .Where(x => !x.Hidden)
             .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
             .ToList();
@@ -59,13 +59,13 @@ internal class ConfigListTemplateProcessor(
         var empty = new Markup("");
 
         var sonarrTemplates = templatesService
-            .GetSonarr()
+            .Get(SupportedServices.Sonarr)
             .Where(x => !x.Hidden)
             .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
             .ToList();
 
         var radarrTemplates = templatesService
-            .GetRadarr()
+            .Get(SupportedServices.Radarr)
             .Where(x => !x.Hidden)
             .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
             .ToList();

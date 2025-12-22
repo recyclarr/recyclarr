@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ConfigTemplates;
-using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
@@ -17,12 +16,7 @@ public class TemplateIncludeProcessor(ConfigIncludesResourceQuery includes) : II
             throw new YamlIncludeException("`template` property is required.");
         }
 
-        IEnumerable<ConfigIncludeResource> includesForService = serviceType switch
-        {
-            SupportedServices.Radarr => includes.GetRadarr(),
-            SupportedServices.Sonarr => includes.GetSonarr(),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
-        };
+        var includesForService = includes.Get(serviceType);
 
         var includePath = includesForService.LastOrDefault(x =>
             x.Id.EqualsIgnoreCase(include.Template)

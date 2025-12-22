@@ -4,8 +4,8 @@ namespace Recyclarr.ResourceProviders.Domain;
 
 public record ConfigIncludeResource
 {
-    public required string Id { get; init; }
-    public required IFileInfo TemplateFile { get; init; }
+    public string Id { get; init; } = "";
+    public IFileInfo TemplateFile { get; init; } = null!;
     public bool Hidden { get; init; }
 }
 

@@ -10,12 +10,7 @@ internal class QualitySizeDataLister(IAnsiConsole console, QualitySizeResourceQu
     {
         console.WriteLine("\nList of Quality Definition types in the TRaSH Guides:\n");
 
-        IEnumerable<QualitySizeResource> qualitySizes = serviceType switch
-        {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
-            _ => throw new ArgumentOutOfRangeException(nameof(serviceType)),
-        };
+        var qualitySizes = guide.Get(serviceType);
 
         qualitySizes.Select(x => x.Type).ForEach(x => console.WriteLine($"  - {x}"));
 

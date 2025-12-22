@@ -2,7 +2,6 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync.Events;
-using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
@@ -24,7 +23,8 @@ internal class QualitySizePlanComponent(
 
         var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, events);
 
-        var guideSizeData = GetQualitySizesForService()
+        var guideSizeData = guide
+            .Get(config.ServiceType)
             .LastOrDefault(x => x.Type.EqualsIgnoreCase(configSizeData.Type));
 
         if (guideSizeData is null)
@@ -122,16 +122,6 @@ internal class QualitySizePlanComponent(
             QualitySizeValue.Unlimited => null, // null = unlimited
             null => guideValue, // No override, use guide value
             _ => guideValue,
-        };
-    }
-
-    private IEnumerable<QualitySizeResource> GetQualitySizesForService()
-    {
-        return config.ServiceType switch
-        {
-            SupportedServices.Radarr => guide.GetRadarr(),
-            SupportedServices.Sonarr => guide.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
         };
     }
 

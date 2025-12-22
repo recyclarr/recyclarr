@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
@@ -10,32 +11,32 @@ public class CfGroupResourceQuery(
     ILogger log
 )
 {
-    public IReadOnlyList<RadarrCfGroupResource> GetRadarr()
+    public IReadOnlyList<CfGroupResource> Get(SupportedServices serviceType)
     {
-        var result = GetCfGroups<RadarrCfGroupResource>();
-        log.Debug("CfGroup: Retrieved {Count} Radarr CF groups", result.Count);
-        return result;
+        return serviceType switch
+        {
+            SupportedServices.Radarr => GetCfGroups<RadarrCfGroupResource>(serviceType),
+            SupportedServices.Sonarr => GetCfGroups<SonarrCfGroupResource>(serviceType),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
     }
 
-    public IReadOnlyList<SonarrCfGroupResource> GetSonarr()
-    {
-        var result = GetCfGroups<SonarrCfGroupResource>();
-        log.Debug("CfGroup: Retrieved {Count} Sonarr CF groups", result.Count);
-        return result;
-    }
-
-    private List<TResource> GetCfGroups<TResource>()
+    private List<TResource> GetCfGroups<TResource>(SupportedServices serviceType)
         where TResource : CfGroupResource
     {
+        log.Debug("CfGroup: Querying {Service} CF groups", serviceType);
         var files = registry.Get<TResource>();
         log.Debug("CfGroup: Found {Count} CF group files in registry", files.Count);
 
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Metadata);
 
-        return loaded
+        var result = loaded
             .Select(tuple => tuple.Resource)
             .GroupBy(g => g.TrashId)
             .Select(g => g.Last())
             .ToList();
+
+        log.Debug("CfGroup: Retrieved {Count} {Service} CF groups", result.Count, serviceType);
+        return result;
     }
 }

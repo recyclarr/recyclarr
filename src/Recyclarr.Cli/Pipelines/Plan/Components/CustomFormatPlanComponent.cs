@@ -2,7 +2,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync.Events;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
@@ -14,7 +13,8 @@ internal class CustomFormatPlanComponent(
 {
     public void Process(PipelinePlan plan, ISyncEventPublisher events)
     {
-        var cfResources = GetCfResourcesForService()
+        var cfResources = cfQuery
+            .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
         // Flatten configs into (TrashId, AssignScoresTo) pairs, then group by TrashId
@@ -38,15 +38,5 @@ internal class CustomFormatPlanComponent(
                 }
             );
         }
-    }
-
-    private IReadOnlyList<CustomFormatResource> GetCfResourcesForService()
-    {
-        return config.ServiceType switch
-        {
-            SupportedServices.Radarr => cfQuery.GetRadarr(),
-            SupportedServices.Sonarr => cfQuery.GetSonarr(),
-            _ => throw new InvalidOperationException($"Unknown service type: {config.ServiceType}"),
-        };
     }
 }

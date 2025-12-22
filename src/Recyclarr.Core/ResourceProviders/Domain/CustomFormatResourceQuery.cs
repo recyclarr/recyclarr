@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ResourceProviders.Domain;
@@ -13,37 +14,38 @@ public class CustomFormatResourceQuery(
     ILogger log
 )
 {
-    public IReadOnlyList<RadarrCustomFormatResource> GetRadarr()
+    public IReadOnlyList<CustomFormatResource> Get(SupportedServices serviceType)
     {
-        log.Debug("CustomFormat: Querying Radarr custom formats");
-        var result = GetCustomFormats<RadarrCustomFormatResource>(categoryQuery.GetRadarr());
-        log.Debug("CustomFormat: Retrieved {Count} Radarr custom formats", result.Count);
-        return result;
+        return serviceType switch
+        {
+            SupportedServices.Radarr => GetCustomFormats<RadarrCustomFormatResource>(serviceType),
+            SupportedServices.Sonarr => GetCustomFormats<SonarrCustomFormatResource>(serviceType),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
     }
 
-    public IReadOnlyList<SonarrCustomFormatResource> GetSonarr()
-    {
-        log.Debug("CustomFormat: Querying Sonarr custom formats");
-        var result = GetCustomFormats<SonarrCustomFormatResource>(categoryQuery.GetSonarr());
-        log.Debug("CustomFormat: Retrieved {Count} Sonarr custom formats", result.Count);
-        return result;
-    }
-
-    private List<TResource> GetCustomFormats<TResource>(
-        IReadOnlyCollection<CustomFormatCategoryItem> categories
-    )
+    private List<TResource> GetCustomFormats<TResource>(SupportedServices serviceType)
         where TResource : CustomFormatResource
     {
+        log.Debug("CustomFormat: Querying {Service} custom formats", serviceType);
         var files = registry.Get<TResource>();
         log.Debug("CustomFormat: Found {Count} CF files in registry", files.Count);
 
+        var categories = categoryQuery.Get(serviceType);
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
-        return loaded
+        var result = loaded
             .Select(tuple => AssignCategory(tuple, categories))
             .GroupBy(cf => cf.TrashId)
             .Select(g => g.Last())
             .ToList();
+
+        log.Debug(
+            "CustomFormat: Retrieved {Count} {Service} custom formats",
+            result.Count,
+            serviceType
+        );
+        return result;
     }
 
     private static TResource AssignCategory<TResource>(

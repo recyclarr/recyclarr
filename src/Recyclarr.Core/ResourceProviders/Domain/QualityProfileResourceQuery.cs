@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
@@ -10,32 +11,40 @@ public class QualityProfileResourceQuery(
     ILogger log
 )
 {
-    public IReadOnlyList<RadarrQualityProfileResource> GetRadarr()
+    public IReadOnlyList<QualityProfileResource> Get(SupportedServices serviceType)
     {
-        var result = GetQualityProfiles<RadarrQualityProfileResource>();
-        log.Debug("QualityProfile: Retrieved {Count} Radarr quality profiles", result.Count);
-        return result;
+        return serviceType switch
+        {
+            SupportedServices.Radarr => GetQualityProfiles<RadarrQualityProfileResource>(
+                serviceType
+            ),
+            SupportedServices.Sonarr => GetQualityProfiles<SonarrQualityProfileResource>(
+                serviceType
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(serviceType), serviceType, null),
+        };
     }
 
-    public IReadOnlyList<SonarrQualityProfileResource> GetSonarr()
-    {
-        var result = GetQualityProfiles<SonarrQualityProfileResource>();
-        log.Debug("QualityProfile: Retrieved {Count} Sonarr quality profiles", result.Count);
-        return result;
-    }
-
-    private List<TResource> GetQualityProfiles<TResource>()
+    private List<TResource> GetQualityProfiles<TResource>(SupportedServices serviceType)
         where TResource : QualityProfileResource
     {
+        log.Debug("QualityProfile: Querying {Service} quality profiles", serviceType);
         var files = registry.Get<TResource>();
         log.Debug("QualityProfile: Found {Count} quality profile files in registry", files.Count);
 
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
-        return loaded
+        var result = loaded
             .Select(tuple => tuple.Resource)
             .GroupBy(g => g.TrashId)
             .Select(g => g.Last())
             .ToList();
+
+        log.Debug(
+            "QualityProfile: Retrieved {Count} {Service} quality profiles",
+            result.Count,
+            serviceType
+        );
+        return result;
     }
 }
