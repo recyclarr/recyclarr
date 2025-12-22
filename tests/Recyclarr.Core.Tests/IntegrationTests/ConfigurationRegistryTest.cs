@@ -64,4 +64,54 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
 
         act.Should().ThrowExactly<InvalidConfigurationFilesException>();
     }
+
+    [Test]
+    public void Parse_custom_format_groups()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: test-key
+                    custom_format_groups:
+                      - trash_id: anime-web-tier-01
+                        assign_scores_to:
+                          - trash_id: profile-trash-id-1
+                          - trash_id: profile-trash-id-2
+                        exclude:
+                          - cf-to-exclude-1
+                          - cf-to-exclude-2
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result
+            .Should()
+            .ContainSingle()
+            .Which.CustomFormatGroups.Should()
+            .BeEquivalentTo(
+                new[]
+                {
+                    new
+                    {
+                        TrashId = "anime-web-tier-01",
+                        AssignScoresTo = new[]
+                        {
+                            new { TrashId = "profile-trash-id-1" },
+                            new { TrashId = "profile-trash-id-2" },
+                        },
+                        Exclude = new[] { "cf-to-exclude-1", "cf-to-exclude-2" },
+                    },
+                }
+            );
+    }
 }

@@ -22,6 +22,20 @@ public record CustomFormatConfigYaml
     public IReadOnlyCollection<QualityScoreConfigYaml>? QualityProfiles { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record CfGroupAssignScoresToConfigYaml
+{
+    public string? TrashId { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record CustomFormatGroupConfigYaml
+{
+    public string? TrashId { get; init; }
+    public IReadOnlyCollection<CfGroupAssignScoresToConfigYaml>? AssignScoresTo { get; init; }
+    public IReadOnlyCollection<string>? Exclude { get; init; }
+}
+
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeItemConfigYaml
 {
@@ -88,6 +102,7 @@ public record ServiceConfigYaml
     public bool? ReplaceExistingCustomFormats { get; init; }
 
     public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; init; }
+    public IReadOnlyCollection<CustomFormatGroupConfigYaml>? CustomFormatGroups { get; init; }
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
     public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; init; }
     public IReadOnlyCollection<IYamlInclude>? Include { get; init; }

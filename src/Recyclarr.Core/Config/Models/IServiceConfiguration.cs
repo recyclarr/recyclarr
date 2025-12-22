@@ -12,6 +12,7 @@ public interface IServiceConfiguration
     string ApiKey { get; }
     bool DeleteOldCustomFormats { get; }
     ICollection<CustomFormatConfig> CustomFormats { get; }
+    ICollection<CustomFormatGroupConfig> CustomFormatGroups { get; }
     QualityDefinitionConfig? QualityDefinition { get; }
     IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; }
     bool ReplaceExistingCustomFormats { get; }

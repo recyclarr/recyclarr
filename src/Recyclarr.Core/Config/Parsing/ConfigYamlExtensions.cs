@@ -25,6 +25,26 @@ internal static class ConfigYamlExtensions
         };
     }
 
+    private static CfGroupAssignScoresToConfig ToCfGroupAssignScoresToConfig(
+        this CfGroupAssignScoresToConfigYaml yaml
+    )
+    {
+        return new CfGroupAssignScoresToConfig { TrashId = yaml.TrashId ?? "" };
+    }
+
+    private static CustomFormatGroupConfig ToCustomFormatGroupConfig(
+        this CustomFormatGroupConfigYaml yaml
+    )
+    {
+        return new CustomFormatGroupConfig
+        {
+            TrashId = yaml.TrashId ?? "",
+            AssignScoresTo =
+                yaml.AssignScoresTo?.Select(x => x.ToCfGroupAssignScoresToConfig()).ToList() ?? [],
+            Exclude = yaml.Exclude?.ToList() ?? [],
+        };
+    }
+
     private static QualityDefinitionItemConfig ToQualityDefinitionItemConfig(
         this QualitySizeItemConfigYaml yaml
     )
@@ -152,6 +172,8 @@ internal static class ConfigYamlExtensions
             ReplaceExistingCustomFormats = yaml.ReplaceExistingCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
+            CustomFormatGroups =
+                yaml.CustomFormatGroups?.Select(x => x.ToCustomFormatGroupConfig()).ToList() ?? [],
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
@@ -175,6 +197,8 @@ internal static class ConfigYamlExtensions
             ReplaceExistingCustomFormats = yaml.ReplaceExistingCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
+            CustomFormatGroups =
+                yaml.CustomFormatGroups?.Select(x => x.ToCustomFormatGroupConfig()).ToList() ?? [],
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],

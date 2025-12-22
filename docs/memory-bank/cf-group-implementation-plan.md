@@ -52,7 +52,7 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 ---
 
-## Commit 3: CF Groups config models + YAML parsing
+## Commit 3: CF Groups config models + YAML parsing [DONE]
 
 **Scope:** Add domain and YAML models for CF group configuration.
 
@@ -67,7 +67,7 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 **Test:** Unit test parsing CF group YAML into models
 
-**Commit:** `feat(config): Add custom_format_groups configuration models`
+**Commit:** `refactor(config): Add custom_format_groups configuration models`
 
 ---
 
