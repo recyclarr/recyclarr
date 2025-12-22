@@ -81,16 +81,23 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 
 ---
 
-## Commit 5: CF Groups provider integration
+## Commit 5: CF Groups provider integration [DONE]
 
 **Scope:** Resolve CF groups to CustomFormatConfig entries.
 
 **Files:**
 
 - `src/Recyclarr.Cli/Pipelines/CustomFormat/ConfiguredCustomFormatProvider.cs`
-  - Add `CfGroupResourceQuery` dependency
-  - Add `FromCfGroups()` method
+  - Add `CfGroupResourceQuery` and `ILogger` dependencies
+  - Add `FromCfGroups()` method with debug logging
+  - Add `DetermineProfiles()` helper for explicit/implicit assignment
   - Update `GetAll()` to include third source
+- `tests/Recyclarr.Cli.Tests/Pipelines/Plan/PlanBuilderIntegrationTest.cs`
+  - Add `SetupCfGroupGuideData()` helper
+  - Add 6 integration tests covering all CF group scenarios
+- `tests/Recyclarr.Core.TestLibrary/MockFileSystemExtensions.cs`
+  - Renamed from `MockFileSystemYamlExtensions`
+  - Add `AddJsonFile()` extension method
 
 **Resolution Logic:**
 
@@ -98,8 +105,9 @@ Design doc: `docs/memory-bank/cf-group-support.md`
 2. Filter CFs by `exclude` list
 3. Determine profiles: explicit `assign_scores_to` OR all guide-backed profiles
 4. Respect group's JSON `quality_profiles.exclude`
+5. Resolve profile trash_ids to names for plan component compatibility
 
-**Test:** Integration test verifying CF groups resolve to planned CFs
+**Test:** 6 integration tests with 100% coverage on provider
 
 ---
 
