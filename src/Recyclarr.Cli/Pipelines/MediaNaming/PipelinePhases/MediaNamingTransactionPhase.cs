@@ -7,11 +7,6 @@ internal class MediaNamingTransactionPhase : IPipelinePhase<MediaNamingPipelineC
 {
     public Task<PipelineFlow> Execute(MediaNamingPipelineContext context, CancellationToken ct)
     {
-        if (!context.Plan.MediaNamingAvailable)
-        {
-            return Task.FromResult(PipelineFlow.Terminate);
-        }
-
         var planned = context.Plan.MediaNaming;
         context.TransactionOutput = context.ApiFetchOutput switch
         {

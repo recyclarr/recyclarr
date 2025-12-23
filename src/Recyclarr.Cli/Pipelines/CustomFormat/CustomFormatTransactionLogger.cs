@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
@@ -9,41 +10,23 @@ internal class CustomFormatTransactionLogger(
     IProgressSource progressSource
 )
 {
-    public bool LogTransactions(CustomFormatPipelineContext context)
+    public void LogTransactions(CustomFormatPipelineContext context)
     {
         var transactions = context.TransactionOutput;
 
-        foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
-        {
-            eventPublisher.AddError(
-                $"Custom Format '{guideCf.Name}' (Trash ID: {guideCf.TrashId}) cannot be synced "
-                    + $"because another CF already exists with that name (ID: {conflictingId}). "
-                    + "To adopt the existing CF, run: recyclarr cache rebuild --adopt"
-            );
-        }
-
-        foreach (var ambiguous in transactions.AmbiguousCustomFormats)
-        {
-            var matchList = string.Join(
-                ", ",
-                ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
-            );
-            eventPublisher.AddError(
-                $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
-                    + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
-                    + "then run: recyclarr cache rebuild"
-            );
-        }
-
-        var hasBlockingErrors =
-            transactions.ConflictingCustomFormats.Count > 0
-            || transactions.AmbiguousCustomFormats.Count > 0;
-
+        var hasBlockingErrors = LogDiagnostics(transactions);
         if (hasBlockingErrors)
         {
-            return true;
+            throw new PipelineInterruptException();
         }
 
+        var totalCount = LogResults(transactions);
+
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalCount);
+    }
+
+    private int LogResults(CustomFormatTransactionData transactions)
+    {
         var created = transactions.NewCustomFormats;
         if (created.Count > 0)
         {
@@ -99,8 +82,36 @@ internal class CustomFormatTransactionLogger(
             log.Information("All custom formats are already up to date!");
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalCount);
+        return totalCount;
+    }
 
-        return false;
+    private bool LogDiagnostics(CustomFormatTransactionData transactions)
+    {
+        foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
+        {
+            eventPublisher.AddError(
+                $"Custom Format '{guideCf.Name}' (Trash ID: {guideCf.TrashId}) cannot be synced "
+                    + $"because another CF already exists with that name (ID: {conflictingId}). "
+                    + "To adopt the existing CF, run: recyclarr cache rebuild --adopt"
+            );
+        }
+
+        foreach (var ambiguous in transactions.AmbiguousCustomFormats)
+        {
+            var matchList = string.Join(
+                ", ",
+                ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
+            );
+            eventPublisher.AddError(
+                $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
+                    + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
+                    + "then run: recyclarr cache rebuild"
+            );
+        }
+
+        var hasBlockingErrors =
+            transactions.ConflictingCustomFormats.Count > 0
+            || transactions.AmbiguousCustomFormats.Count > 0;
+        return hasBlockingErrors;
     }
 }

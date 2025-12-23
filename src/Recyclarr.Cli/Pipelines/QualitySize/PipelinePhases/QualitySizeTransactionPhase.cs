@@ -10,11 +10,6 @@ internal class QualitySizeTransactionPhase(ILogger log, ISyncEventPublisher even
 {
     public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
     {
-        if (!context.Plan.QualitySizesAvailable)
-        {
-            return Task.FromResult(PipelineFlow.Terminate);
-        }
-
         var planned = context.Plan.QualitySizes;
         var limits = context.Limits;
         var serverQuality = context.ApiFetchOutput;

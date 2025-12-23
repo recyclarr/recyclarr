@@ -133,6 +133,11 @@ internal class SyncProcessor(
                 await configScope.Pipelines.Execute(settings, plan, ct);
                 progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
             }
+            catch (PipelineInterruptException)
+            {
+                progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
+                failureDetected = true;
+            }
             catch (Exception e)
             {
                 progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);

@@ -15,11 +15,7 @@ internal class CustomFormatApiPersistencePhase(
         CancellationToken ct
     )
     {
-        var hasBlockingErrors = cfLogger.LogTransactions(context);
-        if (hasBlockingErrors)
-        {
-            return PipelineFlow.Terminate;
-        }
+        cfLogger.LogTransactions(context);
 
         var transactions = context.TransactionOutput;
 
