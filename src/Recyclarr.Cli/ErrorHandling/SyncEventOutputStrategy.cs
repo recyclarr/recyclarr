@@ -4,8 +4,8 @@ namespace Recyclarr.Cli.ErrorHandling;
 
 internal class SyncEventOutputStrategy(ISyncEventPublisher publisher) : IErrorOutputStrategy
 {
-    public void WriteError(string message, Exception? exception = null)
+    public void WriteError(string message)
     {
-        publisher.AddError(message, exception);
+        publisher.AddError(message);
     }
 }

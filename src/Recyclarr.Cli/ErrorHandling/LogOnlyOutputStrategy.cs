@@ -2,8 +2,8 @@ namespace Recyclarr.Cli.ErrorHandling;
 
 internal class LogOnlyOutputStrategy(ILogger log) : IErrorOutputStrategy
 {
-    public void WriteError(string message, Exception? exception = null)
+    public void WriteError(string message)
     {
-        log.Error(exception, "{Message}", message);
+        log.Error("{Message}", message);
     }
 }

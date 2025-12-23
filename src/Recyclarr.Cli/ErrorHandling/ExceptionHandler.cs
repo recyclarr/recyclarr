@@ -26,7 +26,7 @@ internal class ExceptionHandler(
             var outputStrategy = output ?? defaultOutput;
             foreach (var message in messages)
             {
-                outputStrategy.WriteError(message, actualException);
+                outputStrategy.WriteError(message);
             }
 
             return true;

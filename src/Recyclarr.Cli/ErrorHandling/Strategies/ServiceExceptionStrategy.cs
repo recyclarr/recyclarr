@@ -8,14 +8,14 @@ internal class ServiceExceptionStrategy : IExceptionStrategy
 {
     public Task<IReadOnlyList<string>?> HandleAsync(Exception exception)
     {
-        if (
+        return
             exception
-            is not (ServiceIncompatibilityException or CommandException or CommandRuntimeException)
-        )
-        {
-            return Task.FromResult<IReadOnlyList<string>?>(null);
-        }
-
-        return Task.FromResult<IReadOnlyList<string>?>([exception.Message]);
+                is not (
+                    ServiceIncompatibilityException
+                    or CommandException
+                    or CommandRuntimeException
+                )
+            ? Task.FromResult<IReadOnlyList<string>?>(null)
+            : Task.FromResult<IReadOnlyList<string>?>([exception.Message]);
     }
 }

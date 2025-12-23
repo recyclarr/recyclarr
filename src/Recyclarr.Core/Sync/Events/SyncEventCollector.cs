@@ -37,9 +37,9 @@ internal class SyncEventCollector : ISyncEventPublisher, IDisposable
         _context = context;
     }
 
-    public void AddError(string message, Exception? exception = null)
+    public void AddError(string message)
     {
-        _log.Error(exception, "{Message}", message);
+        _log.Error("{Message}", message);
         _storage.Add(
             new DiagnosticEvent(
                 _context.InstanceName,
