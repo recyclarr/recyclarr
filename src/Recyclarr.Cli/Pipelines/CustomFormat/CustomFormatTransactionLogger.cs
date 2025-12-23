@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
@@ -87,14 +88,7 @@ internal class CustomFormatTransactionLogger(
 
     private bool LogDiagnostics(CustomFormatTransactionData transactions)
     {
-        foreach (var (guideCf, conflictingId) in transactions.ConflictingCustomFormats)
-        {
-            eventPublisher.AddError(
-                $"Custom Format '{guideCf.Name}' (Trash ID: {guideCf.TrashId}) cannot be synced "
-                    + $"because another CF already exists with that name (ID: {conflictingId}). "
-                    + "To adopt the existing CF, run: recyclarr cache rebuild --adopt"
-            );
-        }
+        LogConflictingCustomFormats(transactions.ConflictingCustomFormats);
 
         foreach (var ambiguous in transactions.AmbiguousCustomFormats)
         {
@@ -113,5 +107,38 @@ internal class CustomFormatTransactionLogger(
             transactions.ConflictingCustomFormats.Count > 0
             || transactions.AmbiguousCustomFormats.Count > 0;
         return hasBlockingErrors;
+    }
+
+    private void LogConflictingCustomFormats(Collection<ConflictingCustomFormat> conflicts)
+    {
+        if (conflicts.Count == 0)
+        {
+            return;
+        }
+
+        const int maxExamples = 3;
+        var examples = string.Join(
+            ", ",
+            conflicts.Select(x => x.GuideCf.Name).Order().Take(maxExamples).Select(n => $"'{n}'")
+        );
+
+        var remainingCount = conflicts.Count - maxExamples;
+        var suffix = remainingCount > 0 ? $", and {remainingCount} more" : "";
+
+        eventPublisher.AddError(
+            $"{conflicts.Count} Custom Formats cannot be synced because CFs with matching names "
+                + $"already exist (e.g., {examples}{suffix}). "
+                + "To adopt existing CFs, run: `recyclarr cache rebuild --adopt`"
+        );
+
+        log.Debug(
+            "Conflicting Custom Formats: {@Conflicts}",
+            conflicts.Select(x => new
+            {
+                x.GuideCf.Name,
+                x.GuideCf.TrashId,
+                ServiceId = x.ConflictingId,
+            })
+        );
     }
 }
