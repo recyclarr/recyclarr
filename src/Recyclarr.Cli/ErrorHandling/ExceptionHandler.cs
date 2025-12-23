@@ -4,7 +4,7 @@ namespace Recyclarr.Cli.ErrorHandling;
 
 internal class ExceptionHandler(
     IEnumerable<IExceptionStrategy> strategies,
-    LogOnlyOutputStrategy defaultOutput
+    FatalErrorOutputStrategy defaultOutput
 )
 {
     public async Task<bool> TryHandleAsync(Exception exception, IErrorOutputStrategy? output = null)

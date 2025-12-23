@@ -3,6 +3,7 @@ using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Processors;
+using Spectre.Console;
 
 namespace Recyclarr.Cli;
 
@@ -29,7 +30,9 @@ internal static class Program
             if (!await exceptionHandler.TryHandleAsync(e))
             {
                 var log = scope.Resolve<ILogger>();
+                var console = scope.Resolve<IAnsiConsole>();
                 log.Error(e, "Exiting due to fatal error");
+                console.MarkupLine($"[red]Fatal error:[/] {Markup.Escape(e.Message)}");
             }
 
             return (int)ExitStatus.Failed;

@@ -88,7 +88,7 @@ internal static class CompositionRoot
         builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
 
         // Output strategies (routing)
-        builder.RegisterType<LogOnlyOutputStrategy>();
+        builder.RegisterType<FatalErrorOutputStrategy>();
         builder.RegisterType<SyncEventOutputStrategy>();
 
         // Handler (orchestrator)
