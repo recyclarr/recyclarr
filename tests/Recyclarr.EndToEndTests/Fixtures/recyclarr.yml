@@ -34,6 +34,9 @@ sonarr:
         name: E2E-SonarrGuideOverride
         min_upgrade_format_score: 150
 
+      # Guide-only profile (tests pure inheritance - no config overrides)
+      - trash_id: e2e00000000000000000000000000003
+
     custom_formats:
       - trash_ids:
           # A few commonly available formats for E2E testing
@@ -41,8 +44,14 @@ sonarr:
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
           - 00000000000000000000000000000002 # E2E-SonarrCustom
+          - 00000000000000000000000000000007 # E2E-SonarrOverride (tests local override)
         assign_scores_to:
-          - name: HD-1080p
+          # Tests assign_scores_to with trash_id (instead of name)
+          - trash_id: e2e00000000000000000000000000002
+
+    # CF groups - tests implicit profile assignment (no assign_scores_to)
+    custom_format_groups:
+      - trash_id: e2e00000000000000000000000000010
 
     # Quality definition with explicit overrides (tests numeric values)
     quality_definition:
@@ -101,6 +110,12 @@ radarr:
           - 00000000000000000000000000000001 # E2E-TestFormat
         assign_scores_to:
           - name: HD-1080p
+
+    # CF groups - tests explicit profile assignment with trash_id
+    custom_format_groups:
+      - trash_id: e2e00000000000000000000000000011
+        assign_scores_to:
+          - trash_id: e2e00000000000000000000000000001
 
     # Quality definition with unlimited values and guide defaults
     quality_definition:

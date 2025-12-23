@@ -1,0 +1,35 @@
+{
+  "trash_id": "e2e00000000000000000000000000003",
+  "trash_score_set": "default",
+  "name": "E2E-GuideOnlyProfile",
+  "trash_description": "E2E test profile for testing pure guide inheritance (no config overrides)",
+  "group": 1,
+  "upgradeAllowed": true,
+  "cutoff": "WEB 1080p",
+  "minFormatScore": 10,
+  "cutoffFormatScore": 5000,
+  "minUpgradeFormatScore": 25,
+  "items": [
+    { "name": "Unknown", "allowed": false },
+    { "name": "SDTV", "allowed": false },
+    { "name": "DVD", "allowed": false },
+    { "name": "HDTV-720p", "allowed": false },
+    {
+      "name": "WEB 720p",
+      "allowed": false,
+      "items": ["WEBDL-720p", "WEBRip-720p"]
+    },
+    { "name": "Bluray-720p", "allowed": false },
+    { "name": "HDTV-1080p", "allowed": true },
+    {
+      "name": "WEB 1080p",
+      "allowed": true,
+      "items": ["WEBDL-1080p", "WEBRip-1080p"]
+    },
+    { "name": "Bluray-1080p", "allowed": true },
+    { "name": "Raw-HD", "allowed": false }
+  ],
+  "formatItems": {
+    "E2E-GroupCF1": "00000000000000000000000000000003"
+  }
+}

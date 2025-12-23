@@ -143,7 +143,15 @@ internal sealed class RecyclarrSyncTests
             .Select(cf => cf.Name)
             .Should()
             .BeEquivalentTo(
-                ["Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom"],
+                [
+                    "Bad Dual Groups",
+                    "No-RlsGroup",
+                    "Obfuscated",
+                    "E2E-SonarrCustom",
+                    "E2E-SonarrOverride",
+                    "E2E-GroupCF1",
+                    "E2E-GroupCF2",
+                ],
                 "CFs should be unchanged after re-sync"
             );
 
@@ -163,6 +171,8 @@ internal sealed class RecyclarrSyncTests
                     "E2E-TestFormat",
                     "Repack/Proper",
                     "LQ",
+                    "E2E-GroupCF1",
+                    "E2E-GroupCF2",
                 ],
                 "CFs should be unchanged after re-sync"
             );
@@ -274,11 +284,30 @@ internal sealed class RecyclarrSyncTests
             .UpgradeAllowed.Should()
             .BeTrue("guide value should be preserved when not overridden");
 
+        // Guide-only profile (tests pure inheritance - no config overrides)
+        var guideOnlyProfile = profiles.FirstOrDefault(p => p.Name == "E2E-GuideOnlyProfile");
+        guideOnlyProfile.Should().NotBeNull("guide-only profile should exist with guide name");
+        guideOnlyProfile
+            .MinUpgradeFormatScore.Should()
+            .Be(25, "guide value should be used when no config override");
+        guideOnlyProfile.MinFormatScore.Should().Be(10, "guide minFormatScore should be inherited");
+        guideOnlyProfile.UpgradeAllowed.Should().BeTrue("guide upgradeAllowed should be inherited");
+
         var customFormats = await _sonarr.GetCustomFormats(ct);
         customFormats
             .Select(cf => cf.Name)
             .Should()
-            .BeEquivalentTo("Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom");
+            .BeEquivalentTo(
+                // From YAML custom_formats section
+                "Bad Dual Groups",
+                "No-RlsGroup",
+                "Obfuscated",
+                "E2E-SonarrCustom",
+                "E2E-SonarrOverride",
+                // From CF group (implicit assignment to all guide-backed profiles)
+                "E2E-GroupCF1",
+                "E2E-GroupCF2"
+            );
 
         var qualityDefs = await _sonarr.GetQualityDefinitions(ct);
         var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
@@ -328,9 +357,11 @@ internal sealed class RecyclarrSyncTests
                 "Special Edition",
                 "E2E-TestFormat",
                 // From QP formatItems (not in YAML custom_formats, synced via guide QP)
-                // Source: hd-bluray-web.json formatItems
                 "Repack/Proper",
-                "LQ"
+                "LQ",
+                // From CF group (explicit assignment to guide profile)
+                "E2E-GroupCF1",
+                "E2E-GroupCF2"
             );
 
         var qualityDefs = await _radarr.GetQualityDefinitions(ct);

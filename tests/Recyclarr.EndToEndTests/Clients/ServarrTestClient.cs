@@ -71,6 +71,7 @@ internal sealed class FauxCustomFormat
 internal sealed record FauxQualityProfile(
     int Id,
     string Name,
+    int MinFormatScore,
     int MinUpgradeFormatScore,
     bool UpgradeAllowed,
     FauxProfileLanguage? Language

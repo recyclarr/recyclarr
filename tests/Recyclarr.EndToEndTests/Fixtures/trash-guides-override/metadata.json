@@ -1,15 +1,18 @@
 {
+  "$schema": "https://raw.githubusercontent.com/TRaSH-Guides/Guides/refs/heads/master/metadata.schema.json",
   "json_paths": {
     "radarr": {
-      "custom_formats": ["docs/Radarr/Custom Formats"],
+      "custom_formats": ["docs/Radarr/cf"],
       "qualities": [],
       "naming": [],
+      "custom_format_groups": ["docs/Radarr/cf-groups"],
       "quality_profiles": ["docs/Radarr/quality-profiles"]
     },
     "sonarr": {
-      "custom_formats": [],
+      "custom_formats": ["docs/Sonarr/cf"],
       "qualities": [],
       "naming": [],
+      "custom_format_groups": ["docs/Sonarr/cf-groups"],
       "quality_profiles": ["docs/Sonarr/quality-profiles"]
     }
   }

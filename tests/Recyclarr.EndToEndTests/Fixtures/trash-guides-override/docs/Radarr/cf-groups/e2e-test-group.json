@@ -1,0 +1,23 @@
+{
+  "trash_id": "e2e00000000000000000000000000011",
+  "name": "E2E-TestGroup",
+  "trash_description": "E2E test CF group for testing explicit profile assignment",
+  "default": "false",
+  "custom_formats": [
+    {
+      "name": "E2E-GroupCF1",
+      "trash_id": "00000000000000000000000000000005",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "E2E-GroupCF2",
+      "trash_id": "00000000000000000000000000000006",
+      "required": false,
+      "default": true
+    }
+  ],
+  "quality_profiles": {
+    "exclude": {}
+  }
+}

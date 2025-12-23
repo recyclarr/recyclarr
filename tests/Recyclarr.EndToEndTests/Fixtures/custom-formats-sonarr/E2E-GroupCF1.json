@@ -1,0 +1,19 @@
+{
+  "trash_id": "00000000000000000000000000000003",
+  "trash_scores": {
+    "default": 100
+  },
+  "name": "E2E-GroupCF1",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "name": "E2E Group CF1",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": false,
+      "fields": {
+        "value": "e2e-group-cf1"
+      }
+    }
+  ]
+}
