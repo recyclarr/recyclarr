@@ -12,6 +12,7 @@ public record GitResourceProvider : ResourceProvider
 {
     public required Uri CloneUrl { get; init; }
     public string Reference { get; init; } = "master";
+    public int Depth { get; init; }
 }
 
 public record LocalResourceProvider : ResourceProvider

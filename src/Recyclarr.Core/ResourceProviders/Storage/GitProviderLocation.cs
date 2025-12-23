@@ -35,6 +35,7 @@ public class GitProviderLocation(
                     CloneUrl = config.CloneUrl,
                     Reference = config.Reference,
                     Path = cachePath,
+                    Depth = config.Depth,
                 },
                 ct
             );

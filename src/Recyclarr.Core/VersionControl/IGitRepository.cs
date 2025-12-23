@@ -9,10 +9,8 @@ namespace Recyclarr.VersionControl;
 )]
 public interface IGitRepository : IDisposable
 {
-    Task ForceCheckout(CancellationToken token, string branch);
-    Task Fetch(CancellationToken token, string remote = "origin");
+    Task Fetch(CancellationToken token, Uri cloneUrl, string reference, int depth = 0);
     Task ResetHard(CancellationToken token, string toBranchOrSha1);
-    Task SetRemote(CancellationToken token, string name, Uri newUrl);
-    Task Clone(CancellationToken token, Uri cloneUrl, string? branch = null, int depth = 0);
+    Task Clone(CancellationToken token, Uri cloneUrl, string reference, int depth = 0);
     Task Status(CancellationToken token);
 }

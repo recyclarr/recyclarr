@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.VersionControl;
 
@@ -6,11 +5,6 @@ namespace Recyclarr.Repo;
 
 public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) : IRepoUpdater
 {
-    private static bool IsCommitSha1(string reference)
-    {
-        return Regex.IsMatch(reference, @"^[0-9a-f]{7,40}$", RegexOptions.IgnoreCase);
-    }
-
     public async Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
         // Assume failure until it succeeds, to simplify the catch handlers.
@@ -47,19 +41,20 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
     {
         var cloneUrl = repositorySource.CloneUrl;
         var reference = repositorySource.Reference;
+        var depth = repositorySource.Depth;
 
-        log.Debug("Using Reference & Clone URL: {Reference}, {Url}", reference, cloneUrl);
+        log.Debug("Using URL: {Url}, Ref: {Reference}, Depth: {Depth}", cloneUrl, reference, depth);
 
         using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
             cloneUrl,
             repositorySource.Path,
+            reference,
+            depth,
             token
         );
-        await repo.ForceCheckout(token, reference);
-
         try
         {
-            await repo.Fetch(token);
+            await repo.Fetch(token, cloneUrl, reference, depth);
         }
         catch (GitCmdException e)
         {
@@ -70,7 +65,6 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
             );
         }
 
-        var resetTarget = IsCommitSha1(reference) ? reference : $"origin/{reference}";
-        await repo.ResetHard(token, resetTarget);
+        await repo.ResetHard(token, "FETCH_HEAD");
     }
 }

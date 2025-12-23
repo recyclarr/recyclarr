@@ -4,12 +4,13 @@ namespace Recyclarr.VersionControl;
 
 public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositoryFactory
 {
-    // A few hand-picked files that should exist in a .git directory.
     private static readonly string[] ValidGitPaths = [".git/config", ".git/index", ".git/HEAD"];
 
     public async Task<IGitRepository> CreateAndCloneIfNeeded(
         Uri repoUrl,
         IDirectoryInfo repoPath,
+        string reference,
+        int depth,
         CancellationToken token
     )
     {
@@ -17,12 +18,16 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
 
         if (!repoPath.Exists)
         {
-            log.Debug("Cloning repository to {RepoPath}", repoPath.FullName);
-            await repo.Clone(token, repoUrl);
+            log.Debug(
+                "Cloning repository to {RepoPath} with depth {Depth}",
+                repoPath.FullName,
+                depth
+            );
+            await repo.Clone(token, repoUrl, reference, depth);
         }
         else
         {
-            // First check if the `.git` directory is present and intact. We used to just do a `git status` here, but
+            // Check if the `.git` directory is present and intact. We used to just do a `git status` here, but
             // this sometimes has a false positive if our repo directory is inside another repository.
             if (ValidGitPaths.Select(repoPath.File).Any(x => !x.Exists))
             {
@@ -33,9 +38,6 @@ public class GitRepositoryFactory(ILogger log, IGitPath gitPath) : IGitRepositor
             // be thrown. That exception will propagate up and result in a re-clone.
             await repo.Status(token);
         }
-
-        await repo.SetRemote(token, "origin", repoUrl);
-        log.Debug("Remote 'origin' set to {Url}", repoUrl);
 
         return repo;
     }

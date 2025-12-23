@@ -26,7 +26,6 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         var output = new StringBuilder();
         var error = new StringBuilder();
 
-        log.Debug("Using working directory: {Dir}", workDir.FullName);
         workDir.Create();
 
         var cli = Cli.Wrap(gitPath.Path)
@@ -51,14 +50,16 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         // Nothing to do here
     }
 
-    public async Task ForceCheckout(CancellationToken token, string branch)
+    public async Task Fetch(CancellationToken token, Uri cloneUrl, string reference, int depth = 0)
     {
-        await RunGitCmd(token, "checkout", "-f", branch);
-    }
+        var args = new List<string> { "fetch" };
+        if (depth != 0)
+        {
+            args.AddRange(["--depth", depth.ToString(CultureInfo.InvariantCulture)]);
+        }
 
-    public async Task Fetch(CancellationToken token, string remote = "origin")
-    {
-        await RunGitCmd(token, "fetch", remote);
+        args.AddRange([cloneUrl.ToString(), reference]);
+        await RunGitCmd(token, args);
     }
 
     public async Task Status(CancellationToken token)
@@ -71,30 +72,20 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
     }
 
-    public async Task SetRemote(CancellationToken token, string name, Uri newUrl)
+    public async Task Clone(CancellationToken token, Uri cloneUrl, string reference, int depth = 0)
     {
-        await RunGitCmd(token, "remote", "set-url", name, newUrl.ToString());
-    }
+        // Use init + fetch approach for uniform handling of branches and SHAs with depth
+        await RunGitCmd(token, "init");
 
-    public async Task Clone(
-        CancellationToken token,
-        Uri cloneUrl,
-        string? branch = null,
-        int depth = 0
-    )
-    {
-        var args = new List<string> { "clone" };
-        if (branch is not null)
-        {
-            args.AddRange(["-b", branch]);
-        }
-
+        var args = new List<string> { "fetch" };
         if (depth != 0)
         {
             args.AddRange(["--depth", depth.ToString(CultureInfo.InvariantCulture)]);
         }
 
-        args.AddRange([cloneUrl.ToString(), "."]);
+        args.AddRange([cloneUrl.ToString(), reference]);
         await RunGitCmd(token, args);
+
+        await RunGitCmd(token, "reset", "--hard", "FETCH_HEAD");
     }
 }
