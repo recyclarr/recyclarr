@@ -20,6 +20,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   referencing guide-backed quality profiles.
 - Settings: Git resource providers now support `depth` option for shallow clones, reducing clone
   time and disk usage.
+- Settings: Local resource providers now support relative paths, resolved against the app data
+  directory.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
   (default), `warn`.
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured custom formats

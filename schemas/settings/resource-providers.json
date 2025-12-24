@@ -84,7 +84,7 @@
             "path": {
               "type": "string",
               "title": "Local directory path",
-              "description": "For trash-guides/config-templates: directory containing metadata.json. For custom-formats: flat directory of CF JSON files."
+              "description": "For trash-guides/config-templates: directory containing metadata.json. For custom-formats: flat directory of CF JSON files. Relative paths are resolved against the app data directory."
             }
           }
         }

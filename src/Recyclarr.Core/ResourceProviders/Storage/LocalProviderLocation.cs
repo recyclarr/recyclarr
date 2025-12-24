@@ -1,10 +1,14 @@
 using System.IO.Abstractions;
+using Recyclarr.Platform;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Storage;
 
-public class LocalProviderLocation(LocalResourceProvider config, IFileSystem fileSystem)
-    : IProviderLocation
+public class LocalProviderLocation(
+    LocalResourceProvider config,
+    IFileSystem fileSystem,
+    IAppPaths appPaths
+) : IProviderLocation
 {
     public delegate LocalProviderLocation Factory(LocalResourceProvider config);
 
@@ -15,7 +19,7 @@ public class LocalProviderLocation(LocalResourceProvider config, IFileSystem fil
     {
         progress?.Report(new ProviderProgress(config.Type, config.Name, ProviderStatus.Processing));
 
-        var path = fileSystem.DirectoryInfo.New(config.Path);
+        var path = ResolvePath(config.Path);
 
         if (!path.Exists)
         {
@@ -32,5 +36,15 @@ public class LocalProviderLocation(LocalResourceProvider config, IFileSystem fil
 
         progress?.Report(new ProviderProgress(config.Type, config.Name, ProviderStatus.Completed));
         return Task.FromResult<IReadOnlyCollection<IDirectoryInfo>>([path]);
+    }
+
+    private IDirectoryInfo ResolvePath(string path)
+    {
+        if (fileSystem.Path.IsPathRooted(path))
+        {
+            return fileSystem.DirectoryInfo.New(path);
+        }
+
+        return appPaths.AppDataDirectory.SubDirectory(path);
     }
 }
