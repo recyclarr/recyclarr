@@ -10,7 +10,25 @@ internal sealed class NonExistentInstancesFilterResultRenderer
     protected override IRenderable RenderResults(NonExistentInstancesFilterResult filterResult)
     {
         var tree = new Tree("[orange1]Non-Existent Instances[/]");
-        tree.AddNodes(filterResult.NonExistentInstances);
+
+        foreach (var instance in filterResult.NonExistentInstances)
+        {
+            tree.AddNode($"[white]{instance}[/]");
+        }
+
+        if (filterResult.AvailableInstances.Count > 0)
+        {
+            var availableNode = tree.AddNode("[dim]Available instances:[/]");
+            foreach (var available in filterResult.AvailableInstances)
+            {
+                availableNode.AddNode($"[cornflowerblue]{available}[/]");
+            }
+        }
+        else
+        {
+            tree.AddNode("[dim]No instances are configured.[/]");
+        }
+
         return tree;
     }
 }

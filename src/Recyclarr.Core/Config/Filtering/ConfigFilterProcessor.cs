@@ -9,10 +9,11 @@ public class ConfigFilterProcessor(
 {
     public IReadOnlyCollection<LoadedConfigYaml> FilterAndRender(
         ConfigFilterCriteria criteria,
-        IReadOnlyCollection<LoadedConfigYaml> configs
+        IReadOnlyCollection<LoadedConfigYaml> configs,
+        IReadOnlyCollection<string> allAvailableInstances
     )
     {
-        var context = new FilterContext();
+        var context = new FilterContext { AllAvailableInstances = allAvailableInstances };
 
         var filteredConfigs = filters.Aggregate(
             configs,

@@ -47,12 +47,21 @@ public class ConfigurationRegistry(
         ConfigFilterCriteria filterCriteria
     )
     {
-        var loadedConfigs = configs
-            .SelectMany(loader.Load)
-            .Where(filterCriteria.InstanceMatchesCriteria)
+        var allLoadedConfigs = configs.SelectMany(loader.Load).ToList();
+
+        // Extract all instance names before filtering for better error messages
+        var allInstanceNames = allLoadedConfigs
+            .Select(x => x.InstanceName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var filteredConfigs = filterProcessor.FilterAndRender(filterCriteria, loadedConfigs);
+        var loadedConfigs = allLoadedConfigs.Where(filterCriteria.InstanceMatchesCriteria).ToList();
+
+        var filteredConfigs = filterProcessor.FilterAndRender(
+            filterCriteria,
+            loadedConfigs,
+            allInstanceNames
+        );
 
         return filteredConfigs
             .Select(x =>

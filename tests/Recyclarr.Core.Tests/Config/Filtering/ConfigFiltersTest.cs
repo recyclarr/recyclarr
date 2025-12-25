@@ -81,7 +81,7 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
     {
         var sut = Resolve<NonExistentInstancesFilter>();
 
-        var context = new FilterContext();
+        var context = new FilterContext { AllAvailableInstances = ["instance1", "instance2"] };
         LoadedConfigYaml[] yaml =
         [
             new(
@@ -99,16 +99,40 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
 
         result.Should().BeEquivalentTo(yaml);
 
-        var subject = context
+        var filterResult = context
             .Results.Should()
             .ContainSingle()
             .Which.Should()
             .BeOfType<NonExistentInstancesFilterResult>()
-            .Which.NonExistentInstances.Should()
-            .ContainSingle()
             .Subject;
 
-        subject.Should().Be("instance_non_existent");
+        filterResult.NonExistentInstances.Should().BeEquivalentTo("instance_non_existent");
+        filterResult.AvailableInstances.Should().BeEquivalentTo("instance1", "instance2");
+    }
+
+    [Test]
+    public void No_result_when_all_requested_instances_exist()
+    {
+        var sut = Resolve<NonExistentInstancesFilter>();
+
+        var context = new FilterContext { AllAvailableInstances = ["instance1"] };
+        LoadedConfigYaml[] yaml =
+        [
+            new(
+                "instance1",
+                SupportedServices.Radarr,
+                new RadarrConfigYaml { BaseUrl = "http://myradarr.domain.com" }
+            ),
+        ];
+
+        var result = sut.Filter(
+            new ConfigFilterCriteria { Instances = ["instance1"] },
+            yaml,
+            context
+        );
+
+        result.Should().BeEquivalentTo(yaml);
+        context.Results.Should().BeEmpty();
     }
 
     [Test]
