@@ -6,7 +6,6 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
-using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
 using Spectre.Console;
@@ -29,9 +28,16 @@ internal class DeleteCustomFormatsProcessor(
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
-        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(
-            GetTargetConfig(settings)
+        var configs = configRegistry.FindAndLoadConfigs(
+            new ConfigFilterCriteria { Instances = [settings.InstanceName] }
         );
+
+        if (configs.Count != 1)
+        {
+            return;
+        }
+
+        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(configs.Single());
 
         var cfs = await ObtainCustomFormats(scope.CustomFormatApi, ct);
 
@@ -223,27 +229,5 @@ internal class DeleteCustomFormatsProcessor(
 
         console.Write(grid);
         console.WriteLine();
-    }
-
-    private IServiceConfiguration GetTargetConfig(IDeleteCustomFormatSettings settings)
-    {
-        var configs = configRegistry.FindAndLoadConfigs(
-            new ConfigFilterCriteria { Instances = [settings.InstanceName] }
-        );
-
-        switch (configs.Count)
-        {
-            case 0:
-                throw new ArgumentException(
-                    $"No configuration found with name: {settings.InstanceName}"
-                );
-
-            case > 1:
-                throw new ArgumentException(
-                    $"More than one instance found with this name: {settings.InstanceName}"
-                );
-        }
-
-        return configs.Single();
     }
 }
