@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Autofac;
@@ -24,7 +25,7 @@ internal class DeleteCustomFormatsProcessor(
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory scopeFactory
-) : IDeleteCustomFormatsProcessor
+)
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
@@ -81,6 +82,9 @@ internal class DeleteCustomFormatsProcessor(
         ICollection<CustomFormatResource> cfs
     )
     {
+        ConcurrentBag<string> successNames = [];
+        ConcurrentBag<string> failedNames = [];
+
         await console
             .Progress()
             .StartAsync(async ctx =>
@@ -96,11 +100,11 @@ internal class DeleteCustomFormatsProcessor(
                         try
                         {
                             await api.DeleteCustomFormat(cf.Id, token);
-                            log.Debug("Deleted {Name}", cf.Name);
+                            successNames.Add(cf.Name);
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
-                            log.Debug(e, "Failed to delete CF");
+                            failedNames.Add(cf.Name);
                             console.WriteLine($"Failed to delete CF: {cf.Name}");
                         }
 
@@ -108,6 +112,36 @@ internal class DeleteCustomFormatsProcessor(
                     }
                 );
             });
+
+        if (!successNames.IsEmpty)
+        {
+            log.Debug("Deleted custom formats: {@Names}", successNames);
+        }
+
+        if (!failedNames.IsEmpty)
+        {
+            log.Error("Failed to delete custom formats: {@Names}", failedNames);
+        }
+
+        // Print summary to console
+        if (failedNames.IsEmpty)
+        {
+            console.MarkupLineInterpolated(
+                $"[green]Deleted {successNames.Count} custom formats[/]"
+            );
+        }
+        else if (successNames.IsEmpty)
+        {
+            console.MarkupLineInterpolated(
+                $"[red]Failed to delete all {failedNames.Count} custom formats[/]"
+            );
+        }
+        else
+        {
+            console.MarkupLineInterpolated(
+                $"[yellow]Deleted {successNames.Count} custom formats ({failedNames.Count} failed)[/]"
+            );
+        }
     }
 
     private async Task<IList<CustomFormatResource>> ObtainCustomFormats(

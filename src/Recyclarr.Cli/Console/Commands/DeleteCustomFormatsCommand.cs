@@ -9,7 +9,7 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Delete things from services like Radarr and Sonarr")]
 [UsedImplicitly]
-internal class DeleteCustomFormatsCommand(IDeleteCustomFormatsProcessor processor)
+internal class DeleteCustomFormatsCommand(DeleteCustomFormatsProcessor processor)
     : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]

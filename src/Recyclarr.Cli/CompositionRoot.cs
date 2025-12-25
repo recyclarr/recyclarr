@@ -65,7 +65,7 @@ internal static class CompositionRoot
         builder.RegisterType<ConfigListTemplateProcessor>();
 
         // Delete
-        builder.RegisterType<DeleteCustomFormatsProcessor>().As<IDeleteCustomFormatsProcessor>();
+        builder.RegisterType<DeleteCustomFormatsProcessor>();
 
         // Cache
         builder.RegisterType<CacheRebuildProcessor>();
