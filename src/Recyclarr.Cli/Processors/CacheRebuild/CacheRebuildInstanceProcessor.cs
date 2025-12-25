@@ -44,6 +44,12 @@ internal class CacheRebuildInstanceProcessor(
 
     public async Task<bool> ProcessAsync(ICacheRebuildSettings settings, CancellationToken ct)
     {
+        log.Information(
+            "Rebuilding cache for {ServiceType} instance {InstanceName}",
+            config.ServiceType,
+            config.InstanceName
+        );
+
         console.WriteLine();
         console.Write(
             new Rule($"[bold]{config.ServiceType}: {config.InstanceName}[/]").LeftJustified()
@@ -108,12 +114,17 @@ internal class CacheRebuildInstanceProcessor(
 
         if (ambiguous.Count > 0)
         {
+            log.Warning(
+                "Cache rebuild failed: {Count} ambiguous custom format names detected",
+                ambiguous.Count
+            );
             ReportAmbiguousErrors(ambiguous);
             return false;
         }
 
         if (settings.Preview)
         {
+            log.Information("Cache rebuild preview completed (no changes saved)");
             console.MarkupLine("[yellow]Preview mode - no changes saved.[/]");
             return true;
         }
@@ -121,10 +132,17 @@ internal class CacheRebuildInstanceProcessor(
         if (result.Stats.HasChanges)
         {
             SaveCache(result.Mappings);
+            log.Information(
+                "Cache rebuilt: {Adopted} adopted, {Corrected} corrected, {Removed} removed",
+                result.Stats.Adopted,
+                result.Stats.Corrected,
+                result.Stats.Removed
+            );
             console.MarkupLine($"[green]Cache saved with {result.Stats.TotalEntries} entries.[/]");
         }
         else
         {
+            log.Information("Cache unchanged ({Count} entries)", result.Stats.TotalEntries);
             console.MarkupLine($"[dim]Cache unchanged ({result.Stats.TotalEntries} entries).[/]");
         }
 
