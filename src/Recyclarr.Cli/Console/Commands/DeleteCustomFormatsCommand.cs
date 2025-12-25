@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
 using Spectre.Console.Cli;
@@ -9,8 +11,11 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Delete things from services like Radarr and Sonarr")]
 [UsedImplicitly]
-internal class DeleteCustomFormatsCommand(DeleteCustomFormatsProcessor processor)
-    : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
+internal class DeleteCustomFormatsCommand(
+    ProviderProgressHandler providerProgressHandler,
+    DeleteCustomFormatsProcessor processor,
+    RecyclarrConsoleSettings consoleSettings
+) : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage(
@@ -51,6 +56,9 @@ internal class DeleteCustomFormatsCommand(DeleteCustomFormatsProcessor processor
         CancellationToken ct
     )
     {
+        var outputSettings = consoleSettings.GetOutputSettings(settings);
+        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+
         await processor.Process(settings, ct);
         return (int)ExitStatus.Succeeded;
     }

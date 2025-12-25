@@ -45,6 +45,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
   cache rebuild --adopt` to adopt manually-created custom formats.
 
+### Fixed
+
+- CLI: `delete custom-formats` command failed when config used include templates.
+
 ## [7.5.2] - 2025-11-30
 
 ### Added
