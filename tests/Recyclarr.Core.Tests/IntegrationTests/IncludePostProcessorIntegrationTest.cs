@@ -260,7 +260,10 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                     new()
                     {
                         TrashId = "group-1",
-                        AssignScoresTo = [new() { TrashId = "profile-from-config" }],
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfigYaml { TrashId = "profile-from-config" },
+                        ],
                         Exclude = ["cf-excluded-by-config"],
                     },
                     new() { TrashId = "group-2", Exclude = ["cf-only-in-include"] },

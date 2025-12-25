@@ -83,5 +83,5 @@ internal static class NewQp
         IReadOnlyList<QualityProfileDto>? profiles = null,
         QualityProfileDto? schema = null,
         IReadOnlyList<ProfileLanguageDto>? languages = null
-    ) => new(profiles ?? [], schema ?? new(), languages ?? []);
+    ) => new(profiles ?? [], schema ?? new QualityProfileDto(), languages ?? []);
 }
