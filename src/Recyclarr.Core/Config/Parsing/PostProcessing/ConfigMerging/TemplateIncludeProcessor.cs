@@ -25,7 +25,7 @@ public class TemplateIncludeProcessor(ConfigIncludesResourceQuery includes) : II
         if (includePath is null)
         {
             throw new YamlIncludeException(
-                $"For service type '{serviceType}', unable to find config include with name '{include.Template}'"
+                $"Unable to find include template with name '{include.Template}'"
             );
         }
 

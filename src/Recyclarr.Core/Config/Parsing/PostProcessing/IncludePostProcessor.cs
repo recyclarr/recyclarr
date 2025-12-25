@@ -69,27 +69,34 @@ public sealed class IncludePostProcessor(
                 continue;
             }
 
-            // Combine all includes together first
-            var aggregateInclude = config
-                .Include.Select(x =>
-                {
-                    var include = LoadYamlInclude<T>(x, serviceType);
-                    return deprecations.CheckAndTransform(include);
-                })
-                .Aggregate(new T(), merger.Merge!);
+            try
+            {
+                // Combine all includes together first
+                var aggregateInclude = config
+                    .Include.Select(x =>
+                    {
+                        var include = LoadYamlInclude<T>(x, serviceType);
+                        return deprecations.CheckAndTransform(include);
+                    })
+                    .Aggregate(new T(), merger.Merge!);
 
-            // Merge the config into the aggregated includes so that root config values overwrite included values.
-            mergedConfigs.Add(
-                key,
-                merger.Merge(aggregateInclude, config) with
-                {
-                    BaseUrl = config.BaseUrl,
-                    ApiKey = config.ApiKey,
+                // Merge the config into the aggregated includes so that root config values overwrite included values.
+                mergedConfigs.Add(
+                    key,
+                    merger.Merge(aggregateInclude, config) with
+                    {
+                        BaseUrl = config.BaseUrl,
+                        ApiKey = config.ApiKey,
 
-                    // No reason to keep these around anymore now that they have been merged
-                    Include = null,
-                }
-            );
+                        // No reason to keep these around anymore now that they have been merged
+                        Include = null,
+                    }
+                );
+            }
+            catch (YamlIncludeException e)
+            {
+                throw new YamlIncludeException($"Instance '{key}': {e.Message}");
+            }
         }
 
         return mergedConfigs;
