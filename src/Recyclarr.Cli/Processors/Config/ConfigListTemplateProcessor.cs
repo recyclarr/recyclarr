@@ -7,6 +7,7 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Config;
 
 internal class ConfigListTemplateProcessor(
+    ILogger log,
     IAnsiConsole console,
     ConfigTemplatesResourceQuery templatesService,
     ConfigIncludesResourceQuery includesService
@@ -25,55 +26,87 @@ internal class ConfigListTemplateProcessor(
 
     private void ListIncludes()
     {
-        var table = new Table();
-        var empty = new Markup("");
-
-        var sonarrIncludes = includesService
+        var sonarrIds = includesService
             .Get(SupportedServices.Sonarr)
             .Where(x => !x.Hidden)
-            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+            .Select(x => x.Id)
             .ToList();
 
-        var radarrIncludes = includesService
+        var radarrIds = includesService
             .Get(SupportedServices.Radarr)
             .Where(x => !x.Hidden)
-            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+            .Select(x => x.Id)
             .ToList();
 
-        table.AddColumn(SupportedServices.Sonarr.ToString());
-        table.AddColumn(SupportedServices.Radarr.ToString());
+        log.Information(
+            "Found {SonarrCount} Sonarr and {RadarrCount} Radarr includes",
+            sonarrIds.Count,
+            radarrIds.Count
+        );
 
-        var items = sonarrIncludes.ZipLongest(radarrIncludes, (s, r) => (s ?? empty, r ?? empty));
+        log.Debug("Sonarr includes: {@Includes}", sonarrIds);
+        log.Debug("Radarr includes: {@Includes}", radarrIds);
 
-        foreach (var (s, r) in items)
-        {
-            table.AddRow(s, r);
-        }
+        console.WriteLine();
+        console.WriteLine("Reusable include templates:");
+        console.WriteLine();
 
-        console.Write(table);
+        WriteTable(sonarrIds, radarrIds);
+
+        console.WriteLine();
+        console.WriteLine("Use these with the `include` property in your config files.");
     }
 
     private void ListTemplates()
     {
+        var sonarrIds = templatesService
+            .Get(SupportedServices.Sonarr)
+            .Where(x => !x.Hidden)
+            .Select(x => x.Id)
+            .ToList();
+
+        var radarrIds = templatesService
+            .Get(SupportedServices.Radarr)
+            .Where(x => !x.Hidden)
+            .Select(x => x.Id)
+            .ToList();
+
+        log.Information(
+            "Found {SonarrCount} Sonarr and {RadarrCount} Radarr templates",
+            sonarrIds.Count,
+            radarrIds.Count
+        );
+
+        log.Debug("Sonarr templates: {@Templates}", sonarrIds);
+        log.Debug("Radarr templates: {@Templates}", radarrIds);
+
+        console.WriteLine();
+        console.WriteLine("Configuration templates:");
+        console.WriteLine();
+
+        WriteTable(sonarrIds, radarrIds);
+
+        console.WriteLine();
+        console.WriteLine("Use these with `recyclarr config create -t <template>`.");
+    }
+
+    private void WriteTable(IReadOnlyList<string> sonarrIds, IReadOnlyList<string> radarrIds)
+    {
         var table = new Table();
         var empty = new Markup("");
 
-        var sonarrTemplates = templatesService
-            .Get(SupportedServices.Sonarr)
-            .Where(x => !x.Hidden)
-            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+        var sonarrMarkup = sonarrIds
+            .Select(id => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{id}[/]"))
             .ToList();
 
-        var radarrTemplates = templatesService
-            .Get(SupportedServices.Radarr)
-            .Where(x => !x.Hidden)
-            .Select(x => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{x.Id}[/]"))
+        var radarrMarkup = radarrIds
+            .Select(id => Markup.FromInterpolated(CultureInfo.InvariantCulture, $"[blue]{id}[/]"))
             .ToList();
 
         table.AddColumn(SupportedServices.Sonarr.ToString());
         table.AddColumn(SupportedServices.Radarr.ToString());
 
-        var items = sonarrTemplates.ZipLongest(radarrTemplates, (s, r) => (s ?? empty, r ?? empty));
+        var items = sonarrMarkup.ZipLongest(radarrMarkup, (s, r) => (s ?? empty, r ?? empty));
 
         foreach (var (s, r) in items)
         {

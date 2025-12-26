@@ -10,6 +10,7 @@ using Spectre.Console.Rendering;
 namespace Recyclarr.Cli.Processors.Config;
 
 internal class ConfigListLocalProcessor(
+    ILogger log,
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
     IAppPaths paths
@@ -17,12 +18,31 @@ internal class ConfigListLocalProcessor(
 {
     public void Process()
     {
-        var tree = new Tree(paths.AppDataDirectory.ToString()!);
-        var allConfigs = configRegistry
-            .FindAndLoadConfigs()
-            .ToLookup(x => MakeRelative(x.YamlPath));
+        var allConfigs = configRegistry.FindAndLoadConfigs().ToList();
+        var configsByFile = allConfigs.ToLookup(x => MakeRelative(x.YamlPath));
 
-        foreach (var pair in allConfigs)
+        var radarrCount = allConfigs.Count(x => x.ServiceType == SupportedServices.Radarr);
+        var sonarrCount = allConfigs.Count(x => x.ServiceType == SupportedServices.Sonarr);
+
+        log.Information(
+            "Found {FileCount} config files with {RadarrCount} Radarr and {SonarrCount} Sonarr instances",
+            configsByFile.Count,
+            radarrCount,
+            sonarrCount
+        );
+
+        log.Debug(
+            "Local configs: {@Configs}",
+            allConfigs.Select(x => new { x.InstanceName, Service = x.ServiceType.ToString() })
+        );
+
+        console.WriteLine();
+        console.WriteLine("Local configuration files:");
+        console.WriteLine();
+
+        var tree = new Tree(paths.AppDataDirectory.ToString()!);
+
+        foreach (var pair in configsByFile)
         {
             var path = pair.Key;
             var configs = pair.ToList();
@@ -47,7 +67,6 @@ internal class ConfigListLocalProcessor(
             tree.AddNode(configTree);
         }
 
-        console.WriteLine();
         console.Write(tree);
     }
 
