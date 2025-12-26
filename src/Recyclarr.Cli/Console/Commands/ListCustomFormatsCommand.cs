@@ -33,7 +33,7 @@ internal class ListCustomFormatsCommand(
         [Description(
             "Instead of listing custom formats, list the score sets all custom formats are part of."
         )]
-        public bool ScoreSets { get; init; } = false;
+        public bool ScoreSets { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(
@@ -44,7 +44,7 @@ internal class ListCustomFormatsCommand(
     {
         var outputSettings = consoleSettings.GetOutputSettings(settings);
         await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
-        lister.List(outputSettings, settings);
+        lister.List(settings);
         return (int)ExitStatus.Succeeded;
     }
 }

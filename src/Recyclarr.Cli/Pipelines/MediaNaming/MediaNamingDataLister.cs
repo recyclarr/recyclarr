@@ -6,7 +6,11 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
-internal class MediaNamingDataLister(IAnsiConsole console, MediaNamingResourceQuery guide)
+internal class MediaNamingDataLister(
+    ILogger log,
+    IAnsiConsole console,
+    MediaNamingResourceQuery guide
+)
 {
     public void ListNaming(SupportedServices serviceType)
     {
@@ -27,6 +31,12 @@ internal class MediaNamingDataLister(IAnsiConsole console, MediaNamingResourceQu
 
     private void ListRadarrNaming(RadarrMediaNamingResource guideData)
     {
+        log.Debug(
+            "Listing Radarr naming formats: {FolderCount} folder, {FileCount} file",
+            guideData.Folder.Count,
+            guideData.File.Count
+        );
+
         console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 
         console.WriteLine();
@@ -37,6 +47,16 @@ internal class MediaNamingDataLister(IAnsiConsole console, MediaNamingResourceQu
 
     private void ListSonarrNaming(SonarrMediaNamingResource guideData)
     {
+        log.Debug(
+            "Listing Sonarr naming formats: {SeasonCount} season, {SeriesCount} series, "
+                + "{StandardCount} standard, {DailyCount} daily, {AnimeCount} anime",
+            guideData.Season.Count,
+            guideData.Series.Count,
+            guideData.Episodes.Standard.Count,
+            guideData.Episodes.Daily.Count,
+            guideData.Episodes.Anime.Count
+        );
+
         console.MarkupLine("Media Naming Formats [red](Preview)[/]");
 
         console.WriteLine();
