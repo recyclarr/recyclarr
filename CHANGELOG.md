@@ -48,6 +48,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - CLI: `delete custom-formats` command failed when config used include templates.
+- CLI: `config create --template` incorrectly logged "Replacing existing file" when creating new
+  files.
 
 ## [7.5.2] - 2025-11-30
 

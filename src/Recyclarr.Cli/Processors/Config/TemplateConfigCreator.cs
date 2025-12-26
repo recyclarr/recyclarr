@@ -55,8 +55,9 @@ internal class TemplateConfigCreator(
     private void CopyTemplate(IFileInfo templateFile, ICreateConfigSettings settings)
     {
         var destinationFile = paths.ConfigsDirectory.File(templateFile.Name);
+        var alreadyExists = destinationFile.Exists;
 
-        if (destinationFile.Exists && !settings.Force)
+        if (alreadyExists && !settings.Force)
         {
             throw new FileExistsException(destinationFile.FullName);
         }
@@ -65,7 +66,7 @@ internal class TemplateConfigCreator(
         templateFile.CopyTo(destinationFile.FullName, true);
 
         // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-        if (destinationFile.Exists)
+        if (alreadyExists)
         {
             log.Information("Replacing existing file: {Path}", destinationFile);
         }
