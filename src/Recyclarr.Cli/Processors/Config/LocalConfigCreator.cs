@@ -3,11 +3,13 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;
 
 internal class LocalConfigCreator(
     ILogger log,
+    IAnsiConsole console,
     IAppPaths paths,
     IFileSystem fs,
     IResourceDataReader resources
@@ -36,5 +38,6 @@ internal class LocalConfigCreator(
         stream.Write(ymlData);
 
         log.Information("Created configuration at: {Path}", configFile.FullName);
+        console.MarkupLineInterpolated($"[green]Created:[/] {configFile.FullName}");
     }
 }

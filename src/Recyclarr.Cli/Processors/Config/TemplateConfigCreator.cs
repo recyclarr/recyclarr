@@ -4,11 +4,13 @@ using Recyclarr.Common.Extensions;
 using Recyclarr.ConfigTemplates;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Config;
 
 internal class TemplateConfigCreator(
     ILogger log,
+    IAnsiConsole console,
     ConfigTemplatesResourceQuery templates,
     IAppPaths paths
 ) : IConfigCreator
@@ -65,14 +67,15 @@ internal class TemplateConfigCreator(
         destinationFile.CreateParentDirectory();
         templateFile.CopyTo(destinationFile.FullName, true);
 
-        // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
         if (alreadyExists)
         {
             log.Information("Replacing existing file: {Path}", destinationFile);
+            console.MarkupLineInterpolated($"[yellow]Replaced:[/] {destinationFile.FullName}");
         }
         else
         {
             log.Information("Created configuration file: {Path}", destinationFile);
+            console.MarkupLineInterpolated($"[green]Created:[/] {destinationFile.FullName}");
         }
     }
 }

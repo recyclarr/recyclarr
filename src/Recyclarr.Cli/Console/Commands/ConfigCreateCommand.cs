@@ -5,6 +5,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -13,6 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("Create a starter configuration file.")]
 internal class ConfigCreateCommand(
     ILogger log,
+    IAnsiConsole console,
     IConfigCreationProcessor processor,
     ProviderProgressHandler providerProgressHandler,
     RecyclarrConsoleSettings consoleSettings
@@ -67,6 +69,10 @@ internal class ConfigCreateCommand(
                     + "delete/move the existing file and run this command again",
                 e.AttemptedPath
             );
+            console.MarkupLineInterpolated(
+                $"[red]Error:[/] File already exists: {e.AttemptedPath}"
+            );
+            console.MarkupLine("[dim]Use -f/--force to replace, or choose a different path.[/]");
         }
 
         return (int)ExitStatus.Failed;
