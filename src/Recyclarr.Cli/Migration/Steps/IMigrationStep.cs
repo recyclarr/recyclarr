@@ -1,5 +1,3 @@
-using Spectre.Console;
-
 namespace Recyclarr.Cli.Migration.Steps;
 
 internal interface IMigrationStep
@@ -34,9 +32,6 @@ internal interface IMigrationStep
     /// <summary>
     /// Execute the logic necessary for this migration step.
     /// </summary>
-    /// <param name="console">
-    /// Use the console to print additional debug diagnostics. If this parameter is null, that means those
-    /// diagnostics should not be printed.
-    /// </param>
-    void Execute(IAnsiConsole? console);
+    /// <param name="log">Logger for debug diagnostics during migration execution.</param>
+    void Execute(ILogger log);
 }

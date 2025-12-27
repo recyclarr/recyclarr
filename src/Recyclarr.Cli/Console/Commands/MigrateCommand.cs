@@ -1,20 +1,16 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Text;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-#pragma warning disable CS8765
-
 namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Perform migration steps that may be needed between versions")]
-internal class MigrateCommand(IAnsiConsole console, MigrationExecutor migration)
+[SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
+internal class MigrateCommand(IAnsiConsole console, ILogger log, MigrationExecutor migration)
     : Command<MigrateCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -25,39 +21,37 @@ internal class MigrateCommand(IAnsiConsole console, MigrationExecutor migration)
     {
         try
         {
-            // TODO: REC-18 will remove this input argument
-            migration.PerformAllMigrationSteps(settings.LogLevel.Value == CliLogLevel.Debug);
-            console.WriteLine("All migration steps completed");
+            migration.PerformAllMigrationSteps();
+            log.Information("All migration steps completed");
+            console.MarkupLine("[green]All migration steps completed[/]");
             return (int)ExitStatus.Succeeded;
         }
         catch (MigrationException e)
         {
-            var msg = new StringBuilder();
-            msg.AppendLine("Fatal exception during migration step. Details are below.\n");
-            msg.AppendLine(
-                CultureInfo.InvariantCulture,
-                $"Step That Failed:  {e.OperationDescription}"
-            );
-            msg.AppendLine(
-                CultureInfo.InvariantCulture,
-                $"Failure Reason:    {e.OriginalException.Message}"
+            log.Warning(
+                e.OriginalException,
+                "Migration step failed: {Step}",
+                e.OperationDescription
             );
 
-            // ReSharper disable once InvertIf
+            console.MarkupLine("[red]Error:[/] Fatal exception during migration step");
+            console.MarkupLineInterpolated($"[dim]Step:[/] {e.OperationDescription}");
+            console.MarkupLineInterpolated($"[dim]Reason:[/] {e.OriginalException.Message}");
+
             if (e.Remediation.Count != 0)
             {
-                msg.AppendLine("\nPossible remediation steps:");
+                console.WriteLine();
+                console.MarkupLine("[dim]Possible remediation steps:[/]");
                 foreach (var remedy in e.Remediation)
                 {
-                    msg.AppendLine(CultureInfo.InvariantCulture, $" - {remedy}");
+                    console.MarkupLineInterpolated($"  - {remedy}");
                 }
             }
-
-            console.Write(msg.ToString());
         }
         catch (RequiredMigrationException ex)
         {
-            console.WriteLine($"ERROR: {ex.Message}");
+            log.Error("Required migrations did not pass");
+            console.MarkupLineInterpolated($"[red]Error:[/] {ex.Message}");
         }
 
         return (int)ExitStatus.Failed;

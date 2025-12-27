@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;
 
@@ -23,9 +22,9 @@ internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
         return RepoDir.Exists;
     }
 
-    public void Execute(IAnsiConsole? console)
+    public void Execute(ILogger log)
     {
         RepoDir.RecursivelyDeleteReadOnly();
-        console?.WriteLine($"Deleted repo dir: {RepoDir.FullName}");
+        log.Information("Deleted repo dir: {RepoDir}", RepoDir.FullName);
     }
 }

@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Migration.Steps;
 
@@ -33,10 +32,14 @@ internal class MoveOsxAppDataDotnet8(
         return runtimeInfo.IsPlatformOsx() && OldAppDataDir.Exists;
     }
 
-    public void Execute(IAnsiConsole? console)
+    public void Execute(ILogger log)
     {
         NewAppDataDir.Create();
         OldAppDataDir.MoveTo(NewAppDataDir.FullName);
-        console?.WriteLine($"Moved app settings dir from '{OldAppDataDir}' to '{NewAppDataDir}'");
+        log.Information(
+            "Moved app settings dir from {OldDir} to {NewDir}",
+            OldAppDataDir,
+            NewAppDataDir
+        );
     }
 }

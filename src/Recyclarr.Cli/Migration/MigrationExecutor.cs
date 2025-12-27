@@ -5,10 +5,11 @@ namespace Recyclarr.Cli.Migration;
 
 internal class MigrationExecutor(
     IOrderedEnumerable<IMigrationStep> migrationSteps,
-    IAnsiConsole console
+    IAnsiConsole console,
+    ILogger log
 )
 {
-    public void PerformAllMigrationSteps(bool withDiagnostics)
+    public void PerformAllMigrationSteps()
     {
         foreach (var step in migrationSteps)
         {
@@ -17,19 +18,23 @@ internal class MigrationExecutor(
             // CheckIfNeeded() to work properly!
             if (!step.CheckIfNeeded())
             {
+                log.Debug("Migration step not needed: {Description}", step.Description);
                 continue;
             }
 
+            log.Debug("Executing migration step: {Description}", step.Description);
+
             try
             {
-                step.Execute(withDiagnostics ? console : null);
+                step.Execute(log);
             }
             catch (Exception e) when (e is not MigrationException)
             {
                 throw new MigrationException(e, step.Description, step.Remediation);
             }
 
-            console.WriteLine($"Migrate: {step.Description}");
+            log.Information("Migration step completed: {Description}", step.Description);
+            console.MarkupLineInterpolated($"[dim]Migrate:[/] {step.Description}");
         }
     }
 
@@ -38,23 +43,42 @@ internal class MigrationExecutor(
         var neededMigrationSteps = migrationSteps.Where(x => x.CheckIfNeeded()).ToList();
         if (neededMigrationSteps.Count == 0)
         {
+            log.Debug("No migrations needed");
             return;
         }
 
-        var wereAnyRequired = false;
+        log.Debug("Found {Count} migration(s) needed", neededMigrationSteps.Count);
 
         foreach (var step in neededMigrationSteps)
         {
             var requiredText = step.Required ? "Required" : "Not Required";
-            console.WriteLine($"Migration Needed ({requiredText}): {step.Description}");
-            wereAnyRequired |= step.Required;
+            log.Information(
+                "Migration needed ({Required}): {Description}",
+                requiredText,
+                step.Description
+            );
+
+            if (step.Required)
+            {
+                console.MarkupLineInterpolated(
+                    $"[yellow]Migration Needed (Required):[/] {step.Description}"
+                );
+            }
+            else
+            {
+                console.MarkupLineInterpolated(
+                    $"[dim]Migration Needed (Not Required):[/] {step.Description}"
+                );
+            }
         }
 
-        console.WriteLine(
-            "\nRun the `migrate` subcommand to perform the above migration steps automatically\n"
+        console.WriteLine();
+        console.MarkupLine(
+            "[dim]Run the[/] [blue]migrate[/] [dim]subcommand to perform the above migration steps automatically[/]"
         );
+        console.WriteLine();
 
-        if (wereAnyRequired)
+        if (neededMigrationSteps.Exists(x => x.Required))
         {
             throw new RequiredMigrationException();
         }

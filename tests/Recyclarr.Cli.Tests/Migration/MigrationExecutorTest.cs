@@ -12,36 +12,39 @@ internal sealed class MigrationExecutorTest
     public void Step_not_executed_if_check_returns_false()
     {
         using var console = new TestConsole();
+        var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
 
         step.CheckIfNeeded().Returns(false);
 
-        executor.PerformAllMigrationSteps(false);
+        executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.DidNotReceive().Execute(null);
+        step.DidNotReceive().Execute(Arg.Any<ILogger>());
     }
 
     [Test]
     public void Step_executed_if_check_returns_true()
     {
         using var console = new TestConsole();
+        var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
 
         step.CheckIfNeeded().Returns(true);
 
-        executor.PerformAllMigrationSteps(false);
+        executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.Received().Execute(null);
+        step.Received().Execute(Arg.Any<ILogger>());
     }
 
     [Test]
     public void Steps_executed_in_ascending_order()
     {
         using var console = new TestConsole();
+        var log = Substitute.For<ILogger>();
 
         var steps = new[]
         {
@@ -50,9 +53,9 @@ internal sealed class MigrationExecutorTest
             Substitute.For<IMigrationStep>(),
         };
 
-        var executor = new MigrationExecutor(steps.AsOrdered(), console);
+        var executor = new MigrationExecutor(steps.AsOrdered(), console, log);
 
-        executor.PerformAllMigrationSteps(false);
+        executor.PerformAllMigrationSteps();
 
         Received.InOrder(() =>
         {
@@ -66,13 +69,14 @@ internal sealed class MigrationExecutorTest
     public void Exception_converted_to_migration_exception()
     {
         using var console = new TestConsole();
+        var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(null)).Throw(new ArgumentException("test message"));
+        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(new ArgumentException("test message"));
 
-        var act = () => executor.PerformAllMigrationSteps(false);
+        var act = () => executor.PerformAllMigrationSteps();
 
         act.Should()
             .Throw<MigrationException>()
@@ -89,14 +93,15 @@ internal sealed class MigrationExecutorTest
     public void Migration_exceptions_are_not_converted()
     {
         using var console = new TestConsole();
+        var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console);
+        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
         var exception = new MigrationException(new ArgumentException(), "a", ["b"]);
 
         step.CheckIfNeeded().Returns(true);
-        step.When(x => x.Execute(null)).Throw(exception);
+        step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(exception);
 
-        var act = () => executor.PerformAllMigrationSteps(false);
+        var act = () => executor.PerformAllMigrationSteps();
 
         act.Should().Throw<MigrationException>().Which.Should().Be(exception);
     }
