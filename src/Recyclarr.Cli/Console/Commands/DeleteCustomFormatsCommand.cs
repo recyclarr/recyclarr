@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
 using Spectre.Console.Cli;
@@ -13,8 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [UsedImplicitly]
 internal class DeleteCustomFormatsCommand(
     ProviderProgressHandler providerProgressHandler,
-    DeleteCustomFormatsProcessor processor,
-    RecyclarrConsoleSettings consoleSettings
+    DeleteCustomFormatsProcessor processor
 ) : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -56,8 +54,7 @@ internal class DeleteCustomFormatsCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
 
         await processor.Process(settings, ct);
         return (int)ExitStatus.Succeeded;

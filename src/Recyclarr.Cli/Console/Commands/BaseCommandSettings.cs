@@ -35,9 +35,8 @@ internal class BaseCommandSettings : CommandSettings
     public string? AppData { get; init; }
 
     [CommandOption("--raw")]
-    [Description(
-        "Omit any boilerplate text or colored formatting. This option primarily exists for scripts."
-    )]
+    [Description("DEPRECATED: Use NO_COLOR=1 environment variable instead")]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+    [Obsolete("Use NO_COLOR environment variable instead")]
     public bool? Raw { get; init; }
 }

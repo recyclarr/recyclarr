@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Spectre.Console;
@@ -16,8 +15,7 @@ internal class ConfigCreateCommand(
     ILogger log,
     IAnsiConsole console,
     IConfigCreationProcessor processor,
-    ProviderProgressHandler providerProgressHandler,
-    RecyclarrConsoleSettings consoleSettings
+    ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -56,8 +54,7 @@ internal class ConfigCreateCommand(
     {
         try
         {
-            var outputSettings = consoleSettings.GetOutputSettings(settings);
-            await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+            await providerProgressHandler.InitializeProvidersAsync(ct);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

@@ -42,6 +42,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 
 - CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
+- CLI: The `--raw` option is deprecated and has no effect. Use the `NO_COLOR=1` environment variable
+  instead.
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
   cache rebuild --adopt` to adopt manually-created custom formats.
 

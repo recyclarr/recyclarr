@@ -17,17 +17,26 @@ internal class LoggerSetupTask(
 {
     public void OnStart(BaseCommandSettings cmd)
     {
-        // Accept obsolete Debug property usage here for backward compatibility.
-        // Remove this call and pragma before next major (v8) version is released.
+        // Accept obsolete Debug and Raw property usage here for backward compatibility.
+        // Remove these calls and pragmas before next major (v8) version is released.
 #pragma warning disable CS0618
         if (cmd.Debug)
-#pragma warning restore CS0618
         {
             log.Warning(
                 "The -d/--debug option is deprecated. Use '--log debug' instead. "
                     + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#debug-removed>"
             );
         }
+
+        if (cmd.Raw == true)
+        {
+            log.Warning(
+                "The --raw option is deprecated and has no effect. "
+                    + "Use NO_COLOR=1 environment variable instead. "
+                    + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#raw-removed>"
+            );
+        }
+#pragma warning restore CS0618
 
         loggingLevelSwitch.MinimumLevel = cmd.LogLevel.Value.ToLogEventLevel();
 

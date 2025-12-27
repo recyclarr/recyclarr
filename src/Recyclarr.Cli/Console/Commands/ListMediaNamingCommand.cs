@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Processors;
 using Recyclarr.TrashGuide;
@@ -13,8 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List media naming formats in the guide for a particular service.")]
 internal class ListMediaNamingCommand(
     MediaNamingDataLister lister,
-    ProviderProgressHandler providerProgressHandler,
-    RecyclarrConsoleSettings consoleSettings
+    ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ListMediaNamingCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -33,8 +31,7 @@ internal class ListMediaNamingCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
         lister.ListNaming(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

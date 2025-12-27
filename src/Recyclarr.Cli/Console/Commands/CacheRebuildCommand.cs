@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.CacheRebuild;
 using Spectre.Console.Cli;
@@ -14,8 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class CacheRebuildCommand(
     MigrationExecutor migration,
     ProviderProgressHandler providerProgressHandler,
-    CacheRebuildProcessor processor,
-    RecyclarrConsoleSettings consoleSettings
+    CacheRebuildProcessor processor
 ) : AsyncCommand<CacheRebuildCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -68,8 +66,7 @@ internal class CacheRebuildCommand(
     {
         migration.CheckNeededMigrations();
 
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
 
         return (int)await processor.Process(settings, ct);
     }

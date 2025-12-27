@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Spectre.Console.Cli;
@@ -13,8 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List local configuration files.")]
 internal class ConfigListTemplatesCommand(
     ConfigListTemplateProcessor processor,
-    ProviderProgressHandler providerProgressHandler,
-    RecyclarrConsoleSettings consoleSettings
+    ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ConfigListTemplatesCommand.CliSettings>
 {
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
@@ -34,8 +32,7 @@ internal class ConfigListTemplatesCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

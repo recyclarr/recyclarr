@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Processors;
 using Recyclarr.TrashGuide;
@@ -16,8 +15,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List custom formats in the guide for a particular service.")]
 internal class ListCustomFormatsCommand(
     CustomFormatDataLister lister,
-    ProviderProgressHandler providerProgressHandler,
-    RecyclarrConsoleSettings consoleSettings
+    ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ListCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -42,8 +40,7 @@ internal class ListCustomFormatsCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
         lister.List(settings);
         return (int)ExitStatus.Succeeded;
     }

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Processors;
 using Recyclarr.TrashGuide;
@@ -14,8 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("List quality definitions in the guide for a particular service.")]
 internal class ListQualitiesCommand(
     QualitySizeDataLister lister,
-    ProviderProgressHandler providerProgressHandler,
-    RecyclarrConsoleSettings consoleSettings
+    ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ListQualitiesCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -34,8 +32,7 @@ internal class ListQualitiesCommand(
         CancellationToken ct
     )
     {
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
         lister.ListQualities(settings.Service);
         return (int)ExitStatus.Succeeded;
     }

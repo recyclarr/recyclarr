@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.TrashGuide;
@@ -15,8 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class SyncCommand(
     MigrationExecutor migration,
     ProviderProgressHandler providerProgressHandler,
-    SyncProcessor syncProcessor,
-    RecyclarrConsoleSettings consoleSettings
+    SyncProcessor syncProcessor
 ) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -64,8 +62,7 @@ internal class SyncCommand(
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        var outputSettings = consoleSettings.GetOutputSettings(settings);
-        await providerProgressHandler.InitializeProvidersAsync(outputSettings, ct);
+        await providerProgressHandler.InitializeProvidersAsync(ct);
 
         return (int)await syncProcessor.Process(settings, ct);
     }

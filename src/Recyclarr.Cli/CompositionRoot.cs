@@ -138,7 +138,6 @@ internal static class CompositionRoot
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
-        builder.RegisterType<RecyclarrConsoleSettings>();
         builder.RegisterType<ProviderProgressHandler>();
     }
 
