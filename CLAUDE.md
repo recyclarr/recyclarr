@@ -208,14 +208,15 @@ Use these mappings for non-src files:
 
 For `src/**` files, CHANGELOG determines commit type.
 
-**Decision heuristic:** Before choosing `feat` or `fix`, ask: "If I released this commit alone,
-would users notice any difference in behavior?" If no, use `refactor`. Multi-commit features should
-use `refactor` for infrastructure commits and `feat` only for the commit that enables the
-user-observable capability.
+**Decision heuristic:** Before choosing `feat` or `fix`, ask: "Would this warrant a line in the
+changelog that non-technical users would understand and care about?" If no, use `refactor`. Internal
+behavior changes (error handling, orchestration, edge case fixes) that users wouldn't notice or
+describe in their own words are `refactor`, not `fix`. Multi-commit features should use `refactor`
+for infrastructure commits and `feat` only for the commit that enables the user-facing capability.
 
-- **CHANGELOG required** (user-observable change):
+- **CHANGELOG required** (user-facing change):
   - `feat:` → CHANGELOG "Added" (new user capability)
-  - `fix:` → CHANGELOG "Fixed" (bug correction)
+  - `fix:` → CHANGELOG "Fixed" (bug users would report)
   - `feat!:` / `fix!:` → CHANGELOG "Removed/Changed" (breaking change)
   - `perf:` → CHANGELOG "Changed" (significant performance improvement)
 - **No CHANGELOG** (internal change):
