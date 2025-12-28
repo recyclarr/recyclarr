@@ -91,56 +91,34 @@ Required Idioms:
 
 ### Testing Requirements
 
-Core Mandates:
+Test behavior, not implementation. Focus on meaningful business logic coverage.
 
-- **Tests must verify BEHAVIOR, not implementation detail!**
-- ALWAYS start by writing a high level integration test that fails first (red) for the "happy path",
-  then implement until it passes (green). Based on code coverage, consider other integration tests
-  for failure or edge cases. Continue to validate code coverage (lines of code covered, NOT
-  percentage statistics) after every integration test is added. If an integration test cannot
-  exercise a significant area of code, only then should you consider a unit test (highest level of
-  granularity).
-- Avoid long-lived super granular unit tests with heavy mocking, even if you find this pattern in
-  the existing code.
-- Use fine-grained unit tests as disposable tools during RCA or initial implementation to pin down
-  defects or edge cases, then delete the ones that no longer add durable value. Keep only tests that
-  materially harden behavior.
-- For regressions, first capture the failure with an integration test. If the bug resists
-  integration-level reproduction, use a temporary fine-grained test to isolate it, then remove it
-  once fixed unless it materially improves regression safety.
-- Focus on high level integration tests that verify large chunks of the system. These are less
-  brittle and result in more meaningful tests.
-- Utilize hexagonal architecture (ports and adapters) methodology when writing tests: Stubs for
-  external dependencies at a high level, with real objects in the center.
-- NEVER make a class or method `virtual` just to enable mocking with NSubstitute. If you encounter a
-  test that attempts to mock a concrete type and fails, STOP and evaluate: Is the mock even
-  necessary? Should you use the real object instead? Is the test verifying behavior or
-  implementation details? Is the test even valid? The answer is almost always to restructure the
-  test or use real objects, not to modify production code for testability.
-- Integration test fixtures MUST derive from one of the base test fixture classes:
-  - `IntegrationTestFixture`: Integration tests for the Recyclarr.Core library.
-  - `CliIntegrationTestFixture`: Integration tests for the Recyclarr.Cli library.
-- NEVER remove valid coverage from a test as a solution to test failures!
+**Integration-First TDD Workflow:**
 
-Patterns:
+1. Write a failing integration test for the happy path (red)
+2. Implement until it passes (green)
+3. Check coverage; add integration tests for uncovered edge cases
+4. Use unit tests only when integration tests cannot reach specific code paths
 
-- NUnit: `[Test]`, `internal sealed class {Name}Test`
-- NSubstitute + AutoFixture + **AwesomeAssertions** (NOT FluentAssertions)
-- `Freeze<T>()`, `Should().BeEquivalentTo()`
-- Static registration methods in modules
-- `RegisterType<Impl>().As<IInterface>()`
-- Lifecycle: `SingleInstance()`, `InstancePerLifetimeScope()`
-- AVOID absolute paths in `MockFileSystem` tests (platform-incompatible). Use `IDirectoryInfo` and
-  `IFileInfo` extension methods: `Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")`
+**What NOT to Test** (low-value coverage):
 
-End to End Tests:
+- Console output, log messages, or UI formatting
+- Auto-properties, DTOs, and simple data containers
+- Implementation details that could change without affecting behavior
 
-- Default to skipped and tagged: `[TestFixture(Category = "E2E"), Explicit]`
-- **MANDATORY**: Run E2E tests via `./scripts/Run-E2ETests.ps1` which automatically pipes logs to a
-  file for you - NEVER use `dotnet test` directly, and NEVER use `tee` with it.
-- The script outputs a log file path; use `rg` to search logs without rerunning tests
-- Add durable debug logs when existing ones don't explain failures; keep them concise and useful
-  long-term, not noisy or disposable.
+**Mandates:**
+
+- Integration fixtures MUST inherit `IntegrationTestFixture` or `CliIntegrationFixture`
+- NEVER make classes/methods `virtual` just for mocking - restructure the test instead
+- NEVER remove valid coverage as a solution to test failures
+- Hexagonal architecture: stub external dependencies, use real objects for business logic
+- Fine-grained unit tests are disposable tools for RCA; keep only those that harden behavior
+
+**Stack:** NUnit 4 + NSubstitute + AutoFixture + AwesomeAssertions (NOT FluentAssertions)
+
+**E2E Tests:** Run via `./scripts/Run-E2ETests.ps1` only (never `dotnet test` directly).
+
+See `tests/CLAUDE.md` for detailed patterns, assertions, and infrastructure.
 
 ## Backward Compatibility
 
