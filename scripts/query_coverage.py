@@ -58,13 +58,13 @@ def format_line_ranges(lines: list[int]) -> str:
 
 
 def get_file_coverage(
-    data: dict[str, dict[int, int]], pattern: str | None, include_lines: bool
+    data: dict[str, dict[int, int]], patterns: list[str] | None, include_lines: bool
 ) -> list[dict]:
-    """Calculate coverage stats for files matching pattern."""
+    """Calculate coverage stats for files matching any of the patterns."""
     results = []
 
     for path, lines in data.items():
-        if pattern and pattern.lower() not in path.lower():
+        if patterns and not any(p.lower() in path.lower() for p in patterns):
             continue
         if not lines:
             continue
@@ -96,12 +96,12 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     files_parser = subparsers.add_parser("files", help="Coverage % for matching files")
-    files_parser.add_argument("pattern", help="Substring to match in file paths")
+    files_parser.add_argument("patterns", nargs="+", help="Substrings to match in file paths")
     files_parser.add_argument("-f", "--first", type=int, help="Return first N results")
     files_parser.add_argument("-l", "--last", type=int, help="Return last N results")
 
     uncovered_parser = subparsers.add_parser("uncovered", help="Same as files + line numbers")
-    uncovered_parser.add_argument("pattern", help="Substring to match in file paths")
+    uncovered_parser.add_argument("patterns", nargs="+", help="Substrings to match in file paths")
     uncovered_parser.add_argument("-f", "--first", type=int, help="Return first N results")
     uncovered_parser.add_argument("-l", "--last", type=int, help="Return last N results")
 
@@ -112,7 +112,7 @@ def main():
     coverage = get_coverage_data()
 
     if args.command == "files":
-        results = get_file_coverage(coverage, args.pattern, include_lines=False)
+        results = get_file_coverage(coverage, args.patterns, include_lines=False)
         if args.first:
             results = results[: args.first]
         if args.last:
@@ -120,7 +120,7 @@ def main():
         print_results(results, include_lines=False)
 
     elif args.command == "uncovered":
-        results = get_file_coverage(coverage, args.pattern, include_lines=True)
+        results = get_file_coverage(coverage, args.patterns, include_lines=True)
         if args.first:
             results = results[: args.first]
         if args.last:
