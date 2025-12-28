@@ -164,7 +164,7 @@ Some key files and directories:
 
 ## Scripts
 
-All scripts under `scripts/`:
+All scripts are under `scripts/`:
 
 **Development and Testing:**
 
@@ -183,6 +183,9 @@ All scripts under `scripts/`:
 - `Docker-Recyclarr.ps1`: Run Recyclarr in a container (equivalent to `docker compose run`). Rarely
   used; auto-starts `Docker-Debug.ps1` if needed.
   - Usage: `./scripts/Docker-Recyclarr.ps1 sync`
+- `query_issues.py`: Query Qodana issues from GitHub code scanning API.
+  - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
+  - Output: `path:line:severity:rule:message`
 
 **ONLY for human use (AI must never run these):**
 
