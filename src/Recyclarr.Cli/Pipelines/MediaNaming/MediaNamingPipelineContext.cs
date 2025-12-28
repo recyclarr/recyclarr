@@ -3,10 +3,12 @@ using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
-internal class MediaNamingPipelineContext : PipelineContext
+internal class MediaNamingPipelineContext : PipelineContext, IPipelineMetadata
 {
+    public static PipelineType PipelineType => PipelineType.MediaNaming;
+    public static IReadOnlyList<PipelineType> Dependencies => [];
+
     public override string PipelineDescription => "Media Naming";
-    public override PipelineType PipelineType => PipelineType.MediaNaming;
     public override bool ShouldSkip => !Plan.MediaNamingAvailable;
 
     public MediaNamingDto ApiFetchOutput { get; set; } = null!;

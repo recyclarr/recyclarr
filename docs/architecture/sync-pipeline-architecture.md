@@ -25,16 +25,53 @@ eliminates this duplication while handling service differences through targeted 
 
 ## Architecture Overview
 
-The system processes four sync categories sequentially within each server instance:
+The system processes four sync categories within each server instance, with execution order derived
+from explicit dependency declarations:
 
-1. **Custom Formats** (foundation) → 2. **Quality Profiles** (depends on CFs) → 3. **Quality
-   Definitions** (independent) → 4. **Media Naming** (independent)
+1. **Custom Formats** (foundation, no dependencies)
+2. **Quality Profiles** (depends on Custom Formats)
+3. **Quality Definitions** (independent)
+4. **Media Naming** (independent)
 
 **User Experience**: Users see clear per-server processing markers, but pipeline internals remain
 transparent. This choice prioritizes comprehension over architectural visibility.
 
-**Dependency Management**: Sequential execution prevents reference errors (Quality Profiles need
-existing Custom Format IDs) but sacrifices potential parallelization.
+**Dependency Management**: Each pipeline declares its dependencies via `IPipelineMetadata`. The
+orchestrator (`CompositeSyncPipeline`) uses topological sort to determine execution order,
+ensuring dependencies run before dependents. When a pipeline fails, only its dependents are
+skipped - independent pipelines continue running.
+
+### Pipeline Metadata and Orchestration
+
+Pipelines expose static metadata through `IPipelineMetadata`:
+
+```csharp
+internal interface IPipelineMetadata
+{
+    static abstract PipelineType PipelineType { get; }
+    static abstract IReadOnlyList<PipelineType> Dependencies { get; }
+}
+```
+
+Context types implement this interface with their dependency declarations:
+
+```csharp
+// QualityProfilePipelineContext declares dependency on CustomFormat
+public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
+```
+
+`GenericSyncPipeline<TContext>` bridges static metadata to instance properties on `ISyncPipeline`,
+enabling the orchestrator to access dependencies without knowing concrete types.
+
+### Failure Cascade Behavior
+
+Pipeline execution returns `PipelineResult` (Completed or Failed). The orchestrator tracks failures
+and skips pipelines whose dependencies failed:
+
+- **CF fails** → QP skipped (depends on CF), QS and MN continue (independent)
+- **QS fails** → All others continue (nothing depends on QS)
+
+This selective cascade prevents partial syncs while maximizing useful work completed.
 
 ## Processing Model
 
@@ -142,11 +179,17 @@ objects.
 
 ### Conscious Compromises
 
-**Reliability Over Performance**: Sequential processing simplifies error handling and debugging at
-the cost of potential parallelization opportunities.
+**Explicit Dependencies Over Implicit Ordering**: Dependencies are declared on context types via
+`IPipelineMetadata` rather than relying on registration order. This adds some ceremony but makes
+the dependency graph explicit and self-documenting.
+
+**Selective Cascade Over All-or-Nothing**: When a pipeline fails, only dependent pipelines are
+skipped. This maximizes useful work but means users may see partial results requiring multiple
+sync attempts.
 
 **Transparency vs. Simplicity**: Users have limited visibility into pipeline internals, prioritizing
-comprehension over detailed progress reporting.
+comprehension over detailed progress reporting. Skipped pipelines show as "--" in progress without
+explicit explanation (errors from the failed dependency explain the root cause).
 
 **Safety Over Speed**: Strongly-typed contexts and comprehensive validation add overhead but provide
 auditability and error prevention.
@@ -154,7 +197,8 @@ auditability and error prevention.
 ### Extensibility Model
 
 **Adding New Sync Categories**: Implement a plan component (`IPlanComponent`) and the four pipeline
-phases with category-specific context.
+phases with category-specific context. Declare dependencies in `IPipelineMetadata` - the
+orchestrator handles ordering automatically via topological sort.
 
 **Handling Service Differences**: Use dependency injection for service-specific implementations
 rather than duplicating entire processing paths.

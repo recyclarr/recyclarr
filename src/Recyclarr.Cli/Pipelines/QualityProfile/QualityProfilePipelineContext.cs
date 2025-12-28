@@ -5,10 +5,12 @@ using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-internal class QualityProfilePipelineContext : PipelineContext, ICacheSyncSource
+internal class QualityProfilePipelineContext : PipelineContext, ICacheSyncSource, IPipelineMetadata
 {
+    public static PipelineType PipelineType => PipelineType.QualityProfile;
+    public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
+
     public override string PipelineDescription => "Quality Profile";
-    public override PipelineType PipelineType => PipelineType.QualityProfile;
 
     public QualityProfileServiceData ApiFetchOutput { get; set; } = null!;
     public QualityProfileTransactionData TransactionOutput { get; set; } = null!;

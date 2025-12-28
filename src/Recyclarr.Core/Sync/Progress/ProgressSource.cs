@@ -53,9 +53,19 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
             return;
         }
 
+        UpdatePipelineSnapshot(ctx.InstanceName, ctx.Pipeline.Value, status, count);
+    }
+
+    private void UpdatePipelineSnapshot(
+        string instanceName,
+        PipelineType pipeline,
+        PipelineProgressStatus status,
+        int? count
+    )
+    {
         var snapshot = _subject.Value;
         var index = snapshot.Instances.FindIndex(i =>
-            i.Name.Equals(ctx.InstanceName, StringComparison.OrdinalIgnoreCase)
+            i.Name.Equals(instanceName, StringComparison.OrdinalIgnoreCase)
         );
         if (index < 0)
         {
@@ -64,7 +74,7 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
 
         var instance = snapshot.Instances[index];
         var pipelineSnapshot = new PipelineSnapshot(status, count);
-        var updatedPipelines = instance.Pipelines.SetItem(ctx.Pipeline.Value, pipelineSnapshot);
+        var updatedPipelines = instance.Pipelines.SetItem(pipeline, pipelineSnapshot);
         var updated = instance with { Pipelines = updatedPipelines };
         _subject.OnNext(
             new ProgressSnapshot(Instances: snapshot.Instances.SetItem(index, updated))

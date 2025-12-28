@@ -25,18 +25,18 @@ internal class PipelineAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterComposite<CompositeSyncPipeline, ISyncPipeline>();
+        builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
+
+        // Execution order is derived from pipeline dependencies via topological sort in
+        // CompositeSyncPipeline, not registration order. See IPipelineMetadata.Dependencies.
         builder
             .RegisterTypes(
-                // ORDER HERE IS IMPORTANT!
-                // There are indirect dependencies between pipelines.
                 typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
                 typeof(GenericSyncPipeline<MediaNamingPipelineContext>)
             )
-            .As<ISyncPipeline>()
-            .OrderByRegistration();
+            .As<ISyncPipeline>();
 
         RegisterPlan(builder);
         RegisterQualityProfile(builder);

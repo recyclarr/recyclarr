@@ -6,10 +6,12 @@ using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatPipelineContext : PipelineContext, ICacheSyncSource
+internal class CustomFormatPipelineContext : PipelineContext, ICacheSyncSource, IPipelineMetadata
 {
+    public static PipelineType PipelineType => PipelineType.CustomFormat;
+    public static IReadOnlyList<PipelineType> Dependencies => [];
+
     public override string PipelineDescription => "Custom Format";
-    public override PipelineType PipelineType => PipelineType.CustomFormat;
 
     public IList<CustomFormatResource> ApiFetchOutput { get; init; } = [];
     public CustomFormatTransactionData TransactionOutput { get; set; } = null!;

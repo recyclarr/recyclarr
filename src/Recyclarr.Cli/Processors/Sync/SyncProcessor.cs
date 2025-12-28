@@ -19,7 +19,7 @@ namespace Recyclarr.Cli.Processors.Sync;
 internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
     public PlanBuilder PlanBuilder { get; } = scope.Resolve<PlanBuilder>();
-    public ISyncPipeline Pipelines { get; } = scope.Resolve<ISyncPipeline>();
+    public IPipelineExecutor Pipelines { get; } = scope.Resolve<IPipelineExecutor>();
 }
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
@@ -130,13 +130,16 @@ internal class SyncProcessor(
                     continue;
                 }
 
-                await configScope.Pipelines.Execute(settings, plan, ct);
-                progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
-            }
-            catch (PipelineInterruptException)
-            {
-                progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
-                failureDetected = true;
+                var result = await configScope.Pipelines.Execute(settings, plan, ct);
+                if (result == PipelineResult.Failed)
+                {
+                    progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
+                    failureDetected = true;
+                }
+                else
+                {
+                    progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
+                }
             }
             catch (Exception e)
             {
