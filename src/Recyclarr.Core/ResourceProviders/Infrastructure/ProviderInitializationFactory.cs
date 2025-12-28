@@ -27,7 +27,7 @@ public class ProviderInitializationFactory(
             .ToList();
 
         progress?.Report(
-            new ProviderProgress("", "", ProviderStatus.Starting, TotalProviders: providers.Count)
+            new ProviderProgress("", ProviderStatus.Starting, TotalProviders: providers.Count)
         );
 
         var activePaths = new List<IDirectoryInfo>();
@@ -55,7 +55,7 @@ public class ProviderInitializationFactory(
             catch (Exception e)
             {
                 progress?.Report(
-                    new ProviderProgress(config.Type, config.Name, ProviderStatus.Failed, e.Message)
+                    new ProviderProgress(config.Name, ProviderStatus.Failed, e.Message)
                 );
                 throw;
             }

@@ -24,7 +24,7 @@ public class GitProviderLocation(
             .SubDirectory("git")
             .SubDirectory(config.Name);
 
-        progress?.Report(new ProviderProgress(config.Type, config.Name, ProviderStatus.Processing));
+        progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Processing));
 
         try
         {
@@ -40,17 +40,13 @@ public class GitProviderLocation(
                 ct
             );
 
-            progress?.Report(
-                new ProviderProgress(config.Type, config.Name, ProviderStatus.Completed)
-            );
+            progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Completed));
             return [cachePath];
         }
         catch (Exception e)
         {
             log.Error(e, "Git provider {Name} failed initialization", config.Name);
-            progress?.Report(
-                new ProviderProgress(config.Type, config.Name, ProviderStatus.Failed, e.Message)
-            );
+            progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Failed, e.Message));
             throw;
         }
     }

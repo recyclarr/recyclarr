@@ -68,23 +68,29 @@ internal sealed class FauxCustomFormat
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-internal sealed record FauxQualityProfile(
-    int Id,
-    string Name,
-    int MinFormatScore,
-    int MinUpgradeFormatScore,
-    bool UpgradeAllowed,
-    FauxProfileLanguage? Language
-);
+internal sealed record FauxQualityProfile
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+    public int MinFormatScore { get; init; }
+    public int MinUpgradeFormatScore { get; init; }
+    public bool UpgradeAllowed { get; init; }
+    public FauxProfileLanguage? Language { get; init; }
+}
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-internal sealed record FauxProfileLanguage(int Id, string Name);
+internal sealed record FauxProfileLanguage
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+}
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-internal sealed record FauxQualityDefinition(
-    int Id,
-    string Title,
-    decimal MinSize,
-    decimal? MaxSize,
-    decimal? PreferredSize
-);
+internal sealed record FauxQualityDefinition
+{
+    public int Id { get; init; }
+    public string Title { get; init; } = "";
+    public decimal MinSize { get; init; }
+    public decimal? MaxSize { get; init; }
+    public decimal? PreferredSize { get; init; }
+}

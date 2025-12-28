@@ -17,7 +17,7 @@ public class LocalProviderLocation(
         CancellationToken ct
     )
     {
-        progress?.Report(new ProviderProgress(config.Type, config.Name, ProviderStatus.Processing));
+        progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Processing));
 
         var path = ResolvePath(config.Path);
 
@@ -25,7 +25,6 @@ public class LocalProviderLocation(
         {
             progress?.Report(
                 new ProviderProgress(
-                    config.Type,
                     config.Name,
                     ProviderStatus.Failed,
                     $"Path does not exist: {config.Path}"
@@ -34,7 +33,7 @@ public class LocalProviderLocation(
             return Task.FromResult<IReadOnlyCollection<IDirectoryInfo>>([]);
         }
 
-        progress?.Report(new ProviderProgress(config.Type, config.Name, ProviderStatus.Completed));
+        progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Completed));
         return Task.FromResult<IReadOnlyCollection<IDirectoryInfo>>([path]);
     }
 

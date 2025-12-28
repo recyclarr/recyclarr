@@ -31,6 +31,7 @@ internal class ListCustomFormatsCommand(
         [Description(
             "Instead of listing custom formats, list the score sets all custom formats are part of."
         )]
+        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public bool ScoreSets { get; init; }
     }
 
