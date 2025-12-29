@@ -38,9 +38,6 @@ internal class MediaNamingApiPersistencePhase(
             log.Information("Media naming is up to date!");
         }
 
-        progressSource.SetPipelineStatus(
-            PipelineProgressStatus.Succeeded,
-            differences.Count != 0 ? 1 : 0
-        );
+        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

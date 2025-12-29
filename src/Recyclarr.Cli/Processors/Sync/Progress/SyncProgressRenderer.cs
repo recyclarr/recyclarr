@@ -22,8 +22,7 @@ internal class SyncProgressRenderer : IDisposable
     public async Task RenderProgressAsync(Func<Task> syncAction, CancellationToken ct)
     {
         _console.MarkupLine(
-            "[grey]Legend:[/] [green]✓[/] ok [grey]·[/] [red]✗[/] failed [grey]·[/] "
-                + "[red]-[/] error [grey]·[/] [grey]--[/] skipped"
+            "[grey]Legend:[/] [green]✓[/] ok [grey]·[/] [red]✗[/] failed [grey]·[/] [grey]--[/] skipped"
         );
         _console.WriteLine();
 

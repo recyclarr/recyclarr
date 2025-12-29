@@ -109,10 +109,12 @@ internal class ProgressTableBuilder
                 PipelineProgressStatus.Pending => (spinnerFrame, "grey"),
                 PipelineProgressStatus.Running => (spinnerFrame, "yellow"),
                 PipelineProgressStatus.Succeeded => (
-                    result.Value.Count?.ToString(CultureInfo.InvariantCulture) ?? "ok",
+                    result.Value.Count > 0
+                        ? result.Value.Count.Value.ToString(CultureInfo.InvariantCulture)
+                        : "✓",
                     "green"
                 ),
-                PipelineProgressStatus.Failed => ("-", "red"),
+                PipelineProgressStatus.Failed => ("✗", "red"),
                 PipelineProgressStatus.Skipped => ("--", "grey"),
                 _ => ("?", "white"),
             };
