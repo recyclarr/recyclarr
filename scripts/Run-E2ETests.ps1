@@ -9,4 +9,13 @@ dotnet test Recyclarr.slnx `
     --logger "console;verbosity=normal" `
     -v q 2>&1 > $logFile
 
-Write-Output $logFile
+$exitCode = $LASTEXITCODE
+
+if ($exitCode -eq 0) {
+    Write-Host "E2E tests PASSED" -ForegroundColor Green
+} else {
+    Write-Host "E2E tests FAILED" -ForegroundColor Red
+}
+
+Write-Output "Log file: $logFile"
+exit $exitCode
