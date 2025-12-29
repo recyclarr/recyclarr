@@ -52,8 +52,14 @@ delete unwanted profiles.
 - **Conflicting** - guide-backed profiles with name collision (suggest `--adopt`)
 - **Ambiguous** - multiple name matches
 
-## Future Work
+## Cache Rebuild States
 
-**REC-22**: Cache rebuild command support for Quality Profiles.
+QP cache rebuild produces these states:
+
+**Changes**: Added, Adopted, Corrected, Removed
+
+**Informational**: NotInService, Unchanged, Preserved, Ambiguous
+
+## Future Work
 
 **REC-26**: Full language configuration in YAML (currently passthrough only).

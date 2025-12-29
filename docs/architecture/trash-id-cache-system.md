@@ -153,6 +153,27 @@ not silent data corruption.
 **Scoped Ownership**: Cache only tracks what the user configures (directly or via QP formatItems).
 Unconfigured resources remain untouched.
 
+## Cache Invariants
+
+**Unique Service IDs**: Each service_id must appear in at most one cache entry. Two trash_ids
+mapping to the same service_id is invalid - it implies two different guide resources own the same
+service resource, which is impossible.
+
+**Immutable Trash IDs**: Trash IDs are stable identifiers from TRaSH Guides. They never change once
+assigned to a custom format or quality profile definition.
+
+## Responsibility Split: Sync vs Cache Rebuild
+
+The sync pipeline and cache rebuild command have distinct responsibilities:
+
+**Sync Pipeline**: Simple and picky. Assumes the cache is valid. If it detects cache inconsistency
+(e.g., duplicate service IDs causing conflicting update+delete), it errors and tells the user to run
+`cache rebuild`. Sync does NOT attempt to fix cache problems.
+
+**Cache Rebuild**: The repair tool. Reconstructs cache from current config + service state.
+Deduplicates by service ID (keeps config-backed entry, discards orphans). Produces a clean,
+consistent cache.
+
 ## Implementation
 
 ### Class Structure
