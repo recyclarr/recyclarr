@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+
+# E2E Test Configuration - Delete Toggle Disabled
+# This config has "Obfuscated" CF removed and delete_old_custom_formats: false
+# Used to verify orphaned CFs are preserved when delete toggle is off
+
+sonarr:
+  sonarr_main:
+    base_url: !env_var SONARR_URL
+    api_key: !env_var SONARR_API_KEY
+    delete_old_custom_formats: false
+
+    quality_profiles:
+      - name: HD-1080p
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: Bluray-1080p
+          until_score: 10000
+        min_format_score: 0
+        min_upgrade_format_score: 100
+        quality_sort: top
+        qualities:
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
+          - name: HDTV-1080p
+
+      - trash_id: e2e00000000000000000000000000002
+        name: E2E-SonarrGuideOverride
+        min_upgrade_format_score: 150
+
+      - trash_id: e2e00000000000000000000000000003
+
+    custom_formats:
+      - trash_ids:
+          - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
+          - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
+          # NOTE: Obfuscated (e1a997ddb54e3ecbfe06341ad323c458) intentionally removed
+          - "00000000000000000000000000000002" # E2E-SonarrCustom
+          - "00000000000000000000000000000007" # E2E-SonarrOverride
+        assign_scores_to:
+          - trash_id: e2e00000000000000000000000000002
+
+    custom_format_groups:
+      - trash_id: e2e00000000000000000000000000010
+
+    quality_definition:
+      type: series
+      qualities:
+        - name: HDTV-1080p
+          min: 5
+          max: 50
+          preferred: 30
+
+radarr:
+  radarr_main:
+    base_url: !env_var RADARR_URL
+    api_key: !env_var RADARR_API_KEY
+
+    quality_profiles:
+      - name: HD-1080p
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: Bluray-1080p
+          until_score: 10000
+        min_format_score: 0
+        min_upgrade_format_score: 200
+        quality_sort: top
+        qualities:
+          - name: Bluray-1080p
+            qualities:
+              - Bluray-1080p
+              - Remux-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
+          - name: HDTV-1080p
+
+      - trash_id: e2e00000000000000000000000000001
+        name: E2E-RadarrGuideOverride
+        min_upgrade_format_score: 250
+        upgrade:
+          allowed: false
+
+    custom_formats:
+      - trash_ids:
+          - 0f12c086e289cf966fa5948eac571f44 # Hybrid
+          - 570bc9ebecd92723d2d21500f4be314c # Remaster
+          - eca37840c13c6ef2dd0262b141a5482f # 4K Remaster
+          - e0c07d59beb37348e975a930d5e50319 # Criterion Collection
+          - 9d27d9d2181838f76dee150882bdc58c # Masters of Cinema
+          - db9b4c4b53d312a3ca5f1378f6440fc9 # Vinegar Syndrome
+          - 957d0f44b592285f26449575e8b1167e # Special Edition
+          - "00000000000000000000000000000001" # E2E-TestFormat
+        assign_scores_to:
+          - name: HD-1080p
+
+    custom_format_groups:
+      - trash_id: e2e00000000000000000000000000011
+        assign_scores_to:
+          - trash_id: e2e00000000000000000000000000001
+
+    quality_definition:
+      type: movie
+      qualities:
+        - name: Bluray-1080p
+          max: unlimited
+          preferred: unlimited
+        - name: HDTV-1080p
+          min: 0
+          max: 100
+          preferred: 50
+
+    media_naming:
+      folder: default
+      movie:
+        rename: true
+        standard: standard

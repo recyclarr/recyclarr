@@ -10,19 +10,25 @@ using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests.CacheRebuild;
 
 internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
 {
-    private ICustomFormatApiService _apiService = null!;
+    private ICustomFormatApiService _cfApiService = null!;
+    private IQualityProfileApiService _qpApiService = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
-        _apiService = Substitute.For<ICustomFormatApiService>();
-        builder.RegisterInstance(_apiService).As<ICustomFormatApiService>();
+        _cfApiService = Substitute.For<ICustomFormatApiService>();
+        builder.RegisterInstance(_cfApiService).As<ICustomFormatApiService>();
+
+        _qpApiService = Substitute.For<IQualityProfileApiService>();
+        _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns([]);
+        builder.RegisterInstance(_qpApiService).As<IQualityProfileApiService>();
     }
 
     private void SetupGuideCfs(string serviceType, params (string TrashId, string Name)[] cfs)
@@ -72,7 +78,7 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
 
     private void SetupServiceCfs(params CustomFormatResource[] cfs)
     {
-        _apiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
+        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
     }
 
     [Test]
@@ -505,5 +511,46 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
         }
 
         return Fs.Path.Combine(subdirs[0], "custom-format-cache.json");
+    }
+
+    [Test]
+    public async Task Rebuild_discards_orphan_when_service_id_claimed_by_adopted_entry()
+    {
+        // Scenario: User manually edited cache, changing trash_id from 'real-id' to 'orphan-id'.
+        // Cache rebuild should adopt the correct mapping and discard the orphan.
+        // This tests cache deduplication by service ID.
+        SetupRadarrConfig("test-instance", "real-trash-id");
+        SetupGuideCfs("radarr", ("real-trash-id", "BR-DISK"));
+        SetupServiceCfs(new CustomFormatResource { Id = 1, Name = "BR-DISK" });
+
+        // Existing cache has orphaned entry (trash_id was manually changed)
+        var existingCache = new CustomFormatCacheObject
+        {
+            Mappings = [new TrashIdMapping("orphan-trash-id", "BR-DISK", ServiceId: 1)],
+        };
+        SetupExistingCache("radarr", existingCache);
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["cache", "rebuild", "-i", "test-instance", "--adopt"]
+        );
+
+        exitCode.Should().Be(0);
+
+        // Cache should contain ONLY the adopted entry, NOT the orphan
+        // (orphan discarded because its service ID is claimed by the adopted entry)
+        var cacheFile = GetCacheFilePath("radarr");
+        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cache = JsonSerializer.Deserialize<CustomFormatCacheObject>(
+            cacheContent,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
+
+        cache.Should().NotBeNull();
+        cache!
+            .Mappings.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeEquivalentTo(new { TrashId = "real-trash-id", ServiceId = 1 });
     }
 }

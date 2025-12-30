@@ -226,16 +226,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Deleted_cfs_when_enabled()
+    public async Task Deleted_cfs_populated_for_orphaned_cache_entries()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                DeleteOldCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
@@ -258,41 +252,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task No_deleted_cfs_when_disabled()
+    public async Task Deleted_cfs_excludes_cfs_in_config()
     {
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                DeleteOldCustomFormats = false,
-            }
-        );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
-
-        var context = new CustomFormatPipelineContext
-        {
-            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
-            ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
-            Plan = new PipelinePlan(), // Empty plan
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context.TransactionOutput.Should().BeEquivalentTo(new CustomFormatTransactionData());
-    }
-
-    [Test]
-    public async Task Do_not_delete_cfs_in_config()
-    {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            NewConfig.Radarr() with
-            {
-                DeleteOldCustomFormats = true,
-            }
-        );
-
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
@@ -534,5 +497,42 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Error_when_cache_has_duplicate_service_id_for_deletion_and_update()
+    {
+        // Scenario: Cache corruption results in two trash_ids mapping to the same service ID.
+        // One is in config (would be unchanged), one is orphaned (would be deleted).
+        // Expected: Sync detects the conflict and reports an error, telling user to run cache rebuild.
+        // Sync should NOT silently delete a CF that's also being updated.
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(
+            NewConfig.Radarr() with
+            {
+                DeleteOldCustomFormats = true,
+            }
+        );
+
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var context = new CustomFormatPipelineContext
+        {
+            Cache = CfCache.New(
+                new TrashIdMapping("real-trash-id", "BR-DISK", 1), // In config
+                new TrashIdMapping("orphan-trash-id", "BR-DISK", 1) // Orphaned, same service ID
+            ),
+            ApiFetchOutput = [new CustomFormatResource { Name = "BR-DISK", Id = 1 }],
+            Plan = CreatePlan(NewCf.Data("BR-DISK", "real-trash-id")),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Sync should detect the conflict and NOT proceed with the conflicting deletion
+        context.TransactionOutput.DeletedCustomFormats.Should().BeEmpty();
+        // The valid CF should still be processed normally
+        context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
+        // Sync should report the cache inconsistency as an error
+        context.TransactionOutput.InvalidCacheEntries.Should().ContainSingle();
     }
 }

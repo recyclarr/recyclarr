@@ -21,6 +21,7 @@ internal sealed class RecyclarrSyncTests
     private static string _recyclarrBinaryPath = string.Empty;
     private static IDirectoryInfo _tempAppDataDir = null!;
     private static string _configPath = string.Empty;
+    private static string _configPathDeleteDisabled = string.Empty;
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
@@ -43,6 +44,12 @@ internal sealed class RecyclarrSyncTests
             TestContext.CurrentContext.TestDirectory,
             "Fixtures",
             "recyclarr.yml"
+        );
+
+        _configPathDeleteDisabled = Path.Combine(
+            TestContext.CurrentContext.TestDirectory,
+            "Fixtures",
+            "recyclarr-delete-disabled.yml"
         );
 
         await SetUpFixtures(ct);
@@ -116,7 +123,7 @@ internal sealed class RecyclarrSyncTests
 
     [Test, Order(1)]
     [CancelAfter(60_000)]
-    public async Task InitialSync_CreatesExpectedState(CancellationToken ct)
+    public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
         var result = await RunRecyclarrSync(ct);
         await LogOutput(result);
@@ -132,7 +139,7 @@ internal sealed class RecyclarrSyncTests
 
     [Test, Order(2)]
     [CancelAfter(60_000)]
-    public async Task ReSync_IsIdempotent(CancellationToken ct)
+    public async Task Order2_resync_is_idempotent(CancellationToken ct)
     {
         var result = await RunRecyclarrSync(ct);
         await LogOutput(result);
@@ -180,7 +187,7 @@ internal sealed class RecyclarrSyncTests
 
     [Test, Order(3)]
     [CancelAfter(60_000)]
-    public async Task ReSync_RestoresRenamedCustomFormat(CancellationToken ct)
+    public async Task Order3_resync_restores_renamed_custom_format(CancellationToken ct)
     {
         // Rename a CF directly in Sonarr (simulates manual edit or service-side change)
         var sonarrCfs = await _sonarr.GetCustomFormats(ct);
@@ -209,7 +216,7 @@ internal sealed class RecyclarrSyncTests
 
     [Test, Order(4)]
     [CancelAfter(60_000)]
-    public async Task ReSync_RecreatesDeletedCustomFormat(CancellationToken ct)
+    public async Task Order4_resync_recreates_deleted_custom_format(CancellationToken ct)
     {
         // Delete a CF directly in Sonarr (simulates accidental deletion)
         var sonarrCfs = await _sonarr.GetCustomFormats(ct);
@@ -232,10 +239,33 @@ internal sealed class RecyclarrSyncTests
             .Contain(cf => cf.Name == "Bad Dual Groups", "deleted CF should be recreated");
     }
 
-    private static async Task<BufferedCommandResult> RunRecyclarrSync(CancellationToken ct)
+    [Test, Order(5)]
+    [CancelAfter(60_000)]
+    public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
+    {
+        // Run sync with alternate config that has Obfuscated removed and delete_old_custom_formats: false
+        var result = await RunRecyclarrSync(ct, _configPathDeleteDisabled);
+        await LogOutput(result);
+        result.ExitCode.Should().Be(0, "sync should succeed with delete disabled");
+
+        // Verify Obfuscated still exists even though it's not in the config
+        // This proves the delete toggle prevents deletion of orphaned CFs
+        var sonarrCfs = await _sonarr.GetCustomFormats(ct);
+        sonarrCfs
+            .Should()
+            .Contain(
+                cf => cf.Name == "Obfuscated",
+                "orphaned CF should be preserved when delete_old_custom_formats is false"
+            );
+    }
+
+    private static async Task<BufferedCommandResult> RunRecyclarrSync(
+        CancellationToken ct,
+        string? configPath = null
+    )
     {
         return await Cli.Wrap(_recyclarrBinaryPath)
-            .WithArguments(["sync", "--debug", "--config", _configPath])
+            .WithArguments(["sync", "--debug", "--config", configPath ?? _configPath])
             .WithEnvironmentVariables(env =>
                 env.Set(
                         "SONARR_URL",
