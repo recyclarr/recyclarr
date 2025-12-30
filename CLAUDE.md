@@ -171,8 +171,8 @@ All scripts are under `scripts/`:
 - `test_coverage.py`: Run tests with code coverage. Outputs JSON coverage file paths.
   - Usage: `./scripts/test_coverage.py`
 - `query_coverage.py`: Query coverage results (AI-optimized output).
-  - `./scripts/query_coverage.py files <substring> [-f N] [-l N]` - Coverage % for matching files
-  - `./scripts/query_coverage.py uncovered <substring>` - Same but includes uncovered line numbers
+  - `./scripts/query_coverage.py files <pattern>... [-f N] [-l N]` - Coverage % for matching files
+  - `./scripts/query_coverage.py uncovered <pattern>...` - Same but includes uncovered line numbers
   - `./scripts/query_coverage.py lowest [N]` - N files with lowest coverage (default: 10)
   - Output format: `path:pct:covered/total[:uncovered_lines]`
   - If this script lacks needed functionality, extend it rather than using raw jq/grep. This script
