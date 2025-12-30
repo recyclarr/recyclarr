@@ -6,4 +6,5 @@ namespace Recyclarr.Cli.Console.Helpers;
 internal enum CacheableResourceType
 {
     CustomFormats,
+    QualityProfiles,
 }

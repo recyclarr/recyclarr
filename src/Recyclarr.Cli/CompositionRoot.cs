@@ -70,6 +70,8 @@ internal static class CompositionRoot
         // Cache
         builder.RegisterType<CacheRebuildProcessor>();
         builder.RegisterType<CacheRebuildInstanceProcessor>();
+        builder.RegisterType<CustomFormatResourceAdapter>().As<IResourceAdapter>();
+        builder.RegisterType<QualityProfileResourceAdapter>().As<IResourceAdapter>();
 
         builder
             .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
