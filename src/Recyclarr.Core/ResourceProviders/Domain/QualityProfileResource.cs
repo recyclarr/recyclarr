@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Recyclarr.Cache;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
@@ -11,7 +12,7 @@ public record QualityProfileQualityItem
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-public record QualityProfileResource
+public record QualityProfileResource : IGuideResource
 {
     [JsonPropertyName("trash_id")]
     public string TrashId { get; init; } = "";

@@ -1,11 +1,16 @@
 using System.Text.Json.Serialization;
+using Recyclarr.Cache;
 
 namespace Recyclarr.ServarrApi.QualityProfile;
 
 [UsedImplicitly]
-public record QualityProfileDto
+public record QualityProfileDto : IServiceResource
 {
     public int? Id { get; set; }
+
+    // Explicit interface implementation - only valid for profiles fetched from service (which always have Id)
+    int IServiceResource.Id =>
+        Id ?? throw new InvalidOperationException("QualityProfileDto.Id is null");
 
     public string Name
     {

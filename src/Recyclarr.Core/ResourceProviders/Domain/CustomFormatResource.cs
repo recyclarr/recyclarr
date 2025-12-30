@@ -1,10 +1,11 @@
 using System.Text.Json.Serialization;
+using Recyclarr.Cache;
 using Recyclarr.Json;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
-public record CustomFormatResource
+public record CustomFormatResource : IGuideResource, IServiceResource
 {
     [JsonIgnore]
     public string? Category { get; init; }
