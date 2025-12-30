@@ -4,6 +4,7 @@ using Autofac;
 using Recyclarr.Cache;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
@@ -24,6 +25,7 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
         base.RegisterStubsAndMocks(builder);
 
         _cfApiService = Substitute.For<ICustomFormatApiService>();
+        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns([]);
         builder.RegisterInstance(_cfApiService).As<ICustomFormatApiService>();
 
         _qpApiService = Substitute.For<IQualityProfileApiService>();
@@ -496,7 +498,17 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
 
     private string GetCacheFilePath(string serviceType)
     {
-        // Cache path is: {appdata}/cache/{service}/{hash}/custom-format-cache.json
+        return GetCacheFilePath(serviceType, "custom-format-cache.json");
+    }
+
+    private string GetQpCacheFilePath(string serviceType)
+    {
+        return GetCacheFilePath(serviceType, "quality-profile-cache.json");
+    }
+
+    private string GetCacheFilePath(string serviceType, string cacheFileName)
+    {
+        // Cache path is: {appdata}/cache/{service}/{hash}/{cacheFileName}
         var cacheDir = Paths.CacheDirectory.SubDirectory(serviceType.ToLowerInvariant());
 
         if (!Fs.Directory.Exists(cacheDir.FullName))
@@ -510,7 +522,7 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
             return string.Empty;
         }
 
-        return Fs.Path.Combine(subdirs[0], "custom-format-cache.json");
+        return Fs.Path.Combine(subdirs[0], cacheFileName);
     }
 
     [Test]
@@ -552,5 +564,147 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(new { TrashId = "real-trash-id", ServiceId = 1 });
+    }
+
+    // ----- Quality Profile Tests -----
+
+    private void SetupGuideQps(string serviceType, params (string TrashId, string Name)[] qps)
+    {
+        var qpDir = Paths
+            .ReposDirectory.SubDirectory("trash-guides")
+            .SubDirectory("git")
+            .SubDirectory("official")
+            .SubDirectory("docs")
+            .SubDirectory("json")
+            .SubDirectory(serviceType.ToLowerInvariant())
+            .SubDirectory("quality-profiles");
+
+        foreach (var (trashId, name) in qps)
+        {
+            var qpJson = $$"""
+                {
+                    "trash_id": "{{trashId}}",
+                    "name": "{{name}}",
+                    "upgradeAllowed": true,
+                    "cutoff": "Bluray-1080p",
+                    "items": []
+                }
+                """;
+            Fs.AddFile(qpDir.File($"{trashId}.json"), new MockFileData(qpJson));
+        }
+    }
+
+    private void SetupServiceQps(params QualityProfileDto[] qps)
+    {
+        _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns(qps.ToList());
+    }
+
+    private void SetupRadarrConfigWithQps(
+        string instanceName,
+        params (string TrashId, string? Name)[] qps
+    )
+    {
+        var config = new RootConfigYaml
+        {
+            Radarr = new Dictionary<string, RadarrConfigYaml?>
+            {
+                [instanceName] = new()
+                {
+                    BaseUrl = "http://localhost:7878",
+                    ApiKey = "test-api-key",
+                    QualityProfiles = qps.Select(qp => new QualityProfileConfigYaml
+                        {
+                            TrashId = qp.TrashId,
+                            Name = qp.Name,
+                        })
+                        .ToList(),
+                },
+            },
+        };
+        Fs.AddYamlFile(Paths.ConfigsDirectory.File("config.yml"), config);
+    }
+
+    [Test]
+    public async Task Rebuild_quality_profiles_by_name_case_insensitive()
+    {
+        SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null), ("qp-trash-id-2", null));
+        SetupGuideQps(
+            "radarr",
+            ("qp-trash-id-1", "HD-1080p Profile"),
+            ("qp-trash-id-2", "UHD-2160p Profile")
+        );
+        SetupServiceQps(
+            new QualityProfileDto { Id = 10, Name = "HD-1080p Profile" },
+            new QualityProfileDto { Id = 20, Name = "uhd-2160p profile" } // Different case
+        );
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["cache", "rebuild", "quality-profiles", "-i", "test-instance", "--adopt"]
+        );
+
+        exitCode.Should().Be(0);
+
+        var cacheFile = GetQpCacheFilePath("radarr");
+        Fs.File.Exists(cacheFile).Should().BeTrue();
+
+        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cache = JsonSerializer.Deserialize<QualityProfileCacheObject>(
+            cacheContent,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
+
+        cache.Should().NotBeNull();
+        cache!
+            .Mappings.Should()
+            .BeEquivalentTo(
+                new[]
+                {
+                    new { TrashId = "qp-trash-id-1", ServiceId = 10 },
+                    new { TrashId = "qp-trash-id-2", ServiceId = 20 },
+                }
+            );
+    }
+
+    [Test]
+    public async Task Rebuild_quality_profiles_without_adopt_skips_uncached()
+    {
+        SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null));
+        SetupGuideQps("radarr", ("qp-trash-id-1", "Test Profile"));
+        SetupServiceQps(new QualityProfileDto { Id = 10, Name = "Test Profile" });
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["cache", "rebuild", "quality-profiles", "-i", "test-instance"]
+        );
+
+        exitCode.Should().Be(0);
+
+        // Without --adopt, no QP cache file should be created
+        var cacheFile = GetQpCacheFilePath("radarr");
+        cacheFile.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Rebuild_quality_profiles_detects_ambiguous_names()
+    {
+        SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null));
+        SetupGuideQps("radarr", ("qp-trash-id-1", "Ambiguous Profile"));
+        SetupServiceQps(
+            new QualityProfileDto { Id = 10, Name = "Ambiguous Profile" },
+            new QualityProfileDto { Id = 20, Name = "ambiguous profile" },
+            new QualityProfileDto { Id = 30, Name = "AMBIGUOUS PROFILE" }
+        );
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["cache", "rebuild", "quality-profiles", "-i", "test-instance"]
+        );
+
+        exitCode.Should().Be(1);
+
+        // No cache file created due to ambiguity
+        var cacheFile = GetQpCacheFilePath("radarr");
+        cacheFile.Should().BeEmpty();
     }
 }
