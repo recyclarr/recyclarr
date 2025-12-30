@@ -1,6 +1,6 @@
 namespace Recyclarr.Cli.Processors.CacheRebuild;
 
-internal enum CfCacheState
+internal enum CacheRebuildState
 {
     // Cache changes (actions taken)
     Adopted,

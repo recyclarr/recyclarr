@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Config;
@@ -26,14 +25,6 @@ internal class CacheRebuildProcessor(
 {
     public async Task<ExitStatus> Process(ICacheRebuildSettings settings, CancellationToken ct)
     {
-        // Resource filter: null means "all", otherwise filter to specific type
-        // Currently only CustomFormats is implemented
-        if (!ShouldRebuildCustomFormats(settings.Resource))
-        {
-            console.MarkupLine("[yellow]No matching resource types to rebuild.[/]");
-            return ExitStatus.Succeeded;
-        }
-
         var configs = configRegistry.FindAndLoadConfigs(
             new ConfigFilterCriteria { Instances = settings.Instances ?? [] }
         );
@@ -80,11 +71,5 @@ internal class CacheRebuildProcessor(
         );
 
         return failed > 0 ? ExitStatus.Failed : ExitStatus.Succeeded;
-    }
-
-    private static bool ShouldRebuildCustomFormats(CacheableResourceType? filter)
-    {
-        // null = all resource types, or explicit CustomFormats
-        return filter is null or CacheableResourceType.CustomFormats;
     }
 }

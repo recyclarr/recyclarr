@@ -1,9 +1,10 @@
 namespace Recyclarr.Cli.Processors.CacheRebuild;
 
-internal record CfCacheDetail(
+internal record CacheRebuildDetail(
     string Name,
     string TrashId,
+    string? CachedTrashId,
     int? ServiceId,
     int? CachedServiceId,
-    CfCacheState State
+    CacheRebuildState State
 );

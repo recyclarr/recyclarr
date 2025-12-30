@@ -1,12 +1,8 @@
 using System.Globalization;
 using Recyclarr.Cache;
+using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Config.Models;
-using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.CacheRebuild;
@@ -15,32 +11,43 @@ internal class CacheRebuildInstanceProcessor(
     ILogger log,
     IAnsiConsole console,
     IServiceConfiguration config,
-    ICustomFormatApiService customFormatApi,
-    ICachePersister<CustomFormatCacheObject> cachePersister,
-    ICacheStoragePath cacheStoragePath,
-    ConfiguredCustomFormatProvider cfProvider,
-    CustomFormatResourceQuery cfQuery
+    IEnumerable<IResourceAdapter> adapters
 )
 {
-    // State configuration: (SortPriority, FormattedDisplay)
-    // Priority: lower = more interesting, shown first in verbose output
-    private static readonly Dictionary<CfCacheState, (int Priority, string Format)> StateConfig =
-        new()
-        {
-            // Error (prevents cache from being saved)
-            [CfCacheState.Ambiguous] = (0, "[red]Ambiguous[/]"),
+    // State configuration: (SortPriority, Color, Label, Hint)
+    private static readonly Dictionary<CacheRebuildState, StateDisplayConfig> StateConfig = new()
+    {
+        // Error (prevents cache from being saved)
+        [CacheRebuildState.Ambiguous] = new StateDisplayConfig(0, Color.Red, "Ambiguous", null),
 
-            // Cache modifications (changes that will be saved)
-            [CfCacheState.Corrected] = (1, "[yellow]Corrected[/]"),
-            [CfCacheState.Removed] = (2, "[maroon]Removed[/]"),
-            [CfCacheState.Adopted] = (3, "[green]Adopted[/]"),
+        // Cache modifications (changes that will be saved)
+        [CacheRebuildState.Corrected] = new StateDisplayConfig(1, Color.Yellow, "Corrected", null),
+        [CacheRebuildState.Removed] = new StateDisplayConfig(2, Color.Maroon, "Removed", null),
+        [CacheRebuildState.Adopted] = new StateDisplayConfig(3, Color.Green, "Adopted", null),
 
-            // Informational (no cache modification)
-            [CfCacheState.Skipped] = (4, "[yellow]Skipped[/]"),
-            [CfCacheState.NotInService] = (5, "[blue]Not in service[/]"),
-            [CfCacheState.Preserved] = (6, "[dim]Preserved[/]"),
-            [CfCacheState.Unchanged] = (7, "[dim]Unchanged[/]"),
-        };
+        // Informational (no cache modification)
+        [CacheRebuildState.Skipped] = new StateDisplayConfig(
+            4,
+            Color.Yellow,
+            "Skipped",
+            "use --adopt to add"
+        ),
+        [CacheRebuildState.NotInService] = new StateDisplayConfig(
+            5,
+            Color.Blue,
+            "Not in service",
+            "will be created on sync"
+        ),
+        [CacheRebuildState.Preserved] = new StateDisplayConfig(
+            6,
+            Color.Grey,
+            "Preserved",
+            "kept for sync deletion"
+        ),
+        [CacheRebuildState.Unchanged] = new StateDisplayConfig(7, Color.Grey, "Unchanged", null),
+    };
+
+    private sealed record StateDisplayConfig(int Priority, Color Color, string Label, string? Hint);
 
     public async Task<bool> ProcessAsync(ICacheRebuildSettings settings, CancellationToken ct)
     {
@@ -56,130 +63,127 @@ internal class CacheRebuildInstanceProcessor(
         );
         console.WriteLine();
 
-        var existingCache = cachePersister.Load();
-        var existingMappings = existingCache.Mappings.ToDictionary(m => m.TrashId);
-        log.Debug("Loaded existing cache with {Count} entries", existingMappings.Count);
+        var allSucceeded = true;
+        var filteredAdapters = adapters.Where(a =>
+            settings.Resource is null || a.ResourceType == settings.Resource
+        );
 
-        IList<CustomFormatResource> serviceCfs = [];
+        foreach (var adapter in filteredAdapters)
+        {
+            var success = await ProcessAdapterAsync(adapter, settings, ct);
+            if (!success)
+            {
+                allSucceeded = false;
+            }
+        }
+
+        if (settings.Preview)
+        {
+            console.MarkupLine("[yellow]Preview mode - no changes saved.[/]");
+        }
+
+        return allSucceeded;
+    }
+
+    private async Task<bool> ProcessAdapterAsync(
+        IResourceAdapter adapter,
+        ICacheRebuildSettings settings,
+        CancellationToken ct
+    )
+    {
+        var existingMappings = adapter.LoadExistingMappings();
+        log.Debug(
+            "Loaded existing {ResourceType} cache with {Count} entries",
+            adapter.ResourceTypeName,
+            existingMappings.Count
+        );
+
+        IReadOnlyList<IServiceResource> serviceResources = [];
         await console
             .Status()
             .StartAsync(
-                "Fetching custom formats from service...",
+                $"Fetching {adapter.ResourceTypeName} from service...",
                 async _ =>
                 {
-                    serviceCfs = await customFormatApi.GetCustomFormats(ct);
+                    serviceResources = await adapter.FetchServiceResourcesAsync(ct);
                 }
             );
-        var serviceIdSet = serviceCfs.Select(cf => cf.Id).ToHashSet();
-        log.Debug("Fetched {Count} custom formats from service", serviceCfs.Count);
+        var serviceIdSet = serviceResources.Select(r => r.Id).ToHashSet();
+        log.Debug(
+            "Fetched {Count} {ResourceType} from service",
+            serviceResources.Count,
+            adapter.ResourceTypeName
+        );
 
-        // Get consolidated trash_ids from all configs, then resolve to resources
-        var configuredTrashIds = cfProvider
-            .GetAll()
-            .SelectMany(cfg => cfg.TrashIds)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var configuredGuideResources = adapter.GetConfiguredGuideResources();
 
-        var allGuideCfs = cfQuery.Get(config.ServiceType);
-        var configuredGuideCfs = allGuideCfs
-            .Where(cf => configuredTrashIds.Contains(cf.TrashId))
-            .ToList();
-
-        console.MarkupLine($"[dim]Configured: {configuredGuideCfs.Count} custom formats[/]");
-        console.WriteLine();
-
-        if (settings.Verbose)
+        // Skip empty resource types (no configured resources and no existing cache)
+        if (configuredGuideResources.Count == 0 && existingMappings.Count == 0)
         {
-            var cachePath = cacheStoragePath.CalculatePath<CustomFormatCacheObject>();
-            console.MarkupLine($"[dim]Cache file: {Markup.Escape(cachePath.FullName)}[/]");
-            console.WriteLine();
+            if (settings.Verbose)
+            {
+                console.MarkupLine(
+                    $"[dim]No {adapter.ResourceTypeName} configured (cache: {Markup.Escape(adapter.GetCacheFilePath())})[/]"
+                );
+                console.WriteLine();
+            }
+
+            return true;
         }
 
-        var (matches, ambiguous) = MatchCustomFormats(configuredGuideCfs, serviceCfs);
+        var matchResult = TrashIdCacheMatcher.Match(configuredGuideResources, serviceResources);
         var result = BuildNewCache(
             settings,
             existingMappings,
-            matches,
-            ambiguous,
-            configuredGuideCfs,
+            matchResult.Matches.ToList(),
+            matchResult.Ambiguous.ToList(),
+            configuredGuideResources,
             serviceIdSet
         );
 
-        ReportResults(result.Stats, ambiguous);
+        RenderResultTree(adapter, settings, result, configuredGuideResources.Count);
 
-        if (settings.Verbose)
-        {
-            ReportVerboseDetails(result.Details);
-        }
-
-        if (ambiguous.Count > 0)
+        if (matchResult.Ambiguous.Count > 0)
         {
             log.Warning(
-                "Cache rebuild failed: {Count} ambiguous custom format names detected",
-                ambiguous.Count
+                "Cache rebuild failed: {Count} ambiguous {ResourceType} names detected",
+                matchResult.Ambiguous.Count,
+                adapter.ResourceTypeName
             );
-            ReportAmbiguousErrors(ambiguous);
+            ReportAmbiguousErrors(adapter, matchResult.Ambiguous);
             return false;
         }
 
         if (settings.Preview)
         {
-            log.Information("Cache rebuild preview completed (no changes saved)");
-            console.MarkupLine("[yellow]Preview mode - no changes saved.[/]");
             return true;
         }
 
         if (result.Stats.HasChanges)
         {
-            SaveCache(result.Mappings);
+            adapter.SaveMappings(result.Mappings);
             log.Information(
-                "Cache rebuilt: {Adopted} adopted, {Corrected} corrected, {Removed} removed",
+                "{ResourceType} cache rebuilt: {Adopted} adopted, {Corrected} corrected, {Removed} removed",
+                adapter.ResourceTypeName,
                 result.Stats.Adopted,
                 result.Stats.Corrected,
                 result.Stats.Removed
             );
             console.MarkupLine($"[green]Cache saved with {result.Stats.TotalEntries} entries.[/]");
+            console.WriteLine();
         }
         else
         {
-            log.Information("Cache unchanged ({Count} entries)", result.Stats.TotalEntries);
+            log.Information(
+                "{ResourceType} cache unchanged ({Count} entries)",
+                adapter.ResourceTypeName,
+                result.Stats.TotalEntries
+            );
             console.MarkupLine($"[dim]Cache unchanged ({result.Stats.TotalEntries} entries).[/]");
+            console.WriteLine();
         }
 
         return true;
-    }
-
-    private static (
-        List<TrashIdMapping> Matches,
-        List<AmbiguousMatch> Ambiguous
-    ) MatchCustomFormats(
-        IReadOnlyList<CustomFormatResource> configuredGuideCfs,
-        IList<CustomFormatResource> serviceCfs
-    )
-    {
-        var matches = new List<TrashIdMapping>();
-        var ambiguous = new List<AmbiguousMatch>();
-        var serviceCfsByName = serviceCfs.ToLookup(cf => cf.Name, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var guideCf in configuredGuideCfs)
-        {
-            var nameMatches = serviceCfsByName[guideCf.Name].Select(s => (s.Name, s.Id)).ToList();
-
-            switch (nameMatches.Count)
-            {
-                case 1:
-                    matches.Add(
-                        new TrashIdMapping(guideCf.TrashId, guideCf.Name, nameMatches[0].Id)
-                    );
-                    break;
-                case > 1:
-                    ambiguous.Add(new AmbiguousMatch(guideCf.Name, nameMatches));
-                    break;
-                // case 0: "new" - no match in service, will be created on sync
-            }
-        }
-
-        return (matches, ambiguous);
     }
 
     private static CacheRebuildResult BuildNewCache(
@@ -187,7 +191,7 @@ internal class CacheRebuildInstanceProcessor(
         Dictionary<string, TrashIdMapping> existingMappings,
         List<TrashIdMapping> matches,
         List<AmbiguousMatch> ambiguous,
-        List<CustomFormatResource> configuredGuideCfs,
+        IReadOnlyList<IGuideResource> configuredGuideResources,
         HashSet<int> serviceIdSet
     )
     {
@@ -198,13 +202,26 @@ internal class CacheRebuildInstanceProcessor(
         var ambiguousNames = ambiguous
             .Select(a => a.GuideName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var configuredTrashIds = configuredGuideCfs
-            .Select(cf => cf.TrashId)
+        var configuredTrashIds = configuredGuideResources
+            .Select(r => r.TrashId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var matchResults = ProcessMatches(settings, matches, existingMappings, stats);
+        // Build lookup of orphan entries by service ID (entries not in current config)
+        var orphansByServiceId = existingMappings
+            .Values.Where(e => !configuredTrashIds.Contains(e.TrashId))
+            .GroupBy(e => e.ServiceId)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var (matchResults, correctedServiceIds) = ProcessMatches(
+            settings,
+            matches,
+            existingMappings,
+            orphansByServiceId,
+            stats
+        );
+
         var unmatchedDetails = BuildUnmatchedDetails(
-            configuredGuideCfs,
+            configuredGuideResources,
             matchedTrashIds,
             ambiguousNames,
             stats
@@ -213,12 +230,13 @@ internal class CacheRebuildInstanceProcessor(
             existingMappings,
             configuredTrashIds,
             serviceIdSet,
+            correctedServiceIds,
             stats
         );
 
         // Only include mappings for states that should be cached (exclude Skipped)
         var mappings = matchResults
-            .Where(r => r.Detail.State != CfCacheState.Skipped)
+            .Where(r => r.Detail.State != CacheRebuildState.Skipped)
             .Select(r => r.Mapping)
             .Concat(preserved.Select(r => r.Mapping))
             .ToList();
@@ -233,125 +251,173 @@ internal class CacheRebuildInstanceProcessor(
         return new CacheRebuildResult(mappings, stats.ToStats(), details);
     }
 
-    private static List<(TrashIdMapping Mapping, CfCacheDetail Detail)> ProcessMatches(
+    private static (
+        List<(TrashIdMapping Mapping, CacheRebuildDetail Detail)> Results,
+        HashSet<int> CorrectedServiceIds
+    ) ProcessMatches(
         ICacheRebuildSettings settings,
         List<TrashIdMapping> matches,
         Dictionary<string, TrashIdMapping> existingMappings,
+        Dictionary<int, TrashIdMapping> orphansByServiceId,
         StatsAccumulator stats
     )
     {
-        return matches
+        var correctedServiceIds = new HashSet<int>();
+        var results = matches
             .Select(match =>
             {
                 existingMappings.TryGetValue(match.TrashId, out var existing);
-                var state = ClassifyMatchState(settings, existing, match, stats);
-                var detail = new CfCacheDetail(
+                orphansByServiceId.TryGetValue(match.ServiceId, out var orphan);
+
+                var (state, cachedTrashId, cachedServiceId) = ClassifyMatchState(
+                    settings,
+                    existing,
+                    orphan,
+                    match,
+                    stats
+                );
+
+                // Track service IDs that were corrected (trash_id fix from orphan)
+                if (state == CacheRebuildState.Corrected && orphan is not null)
+                {
+                    correctedServiceIds.Add(match.ServiceId);
+                }
+
+                var detail = new CacheRebuildDetail(
                     match.Name,
                     match.TrashId,
+                    cachedTrashId,
                     match.ServiceId,
-                    existing?.ServiceId,
+                    cachedServiceId,
                     state
                 );
                 return (match, detail);
             })
             .ToList();
+
+        return (results, correctedServiceIds);
     }
 
-    private static CfCacheState ClassifyMatchState(
+    private static (
+        CacheRebuildState State,
+        string? CachedTrashId,
+        int? CachedServiceId
+    ) ClassifyMatchState(
         ICacheRebuildSettings settings,
         TrashIdMapping? existing,
+        TrashIdMapping? orphan,
         TrashIdMapping match,
         StatsAccumulator stats
     )
     {
-        if (existing is null)
+        if (existing is not null)
         {
-            // No cache entry exists - only adopt if --adopt flag is set
-            if (settings.Adopt)
+            // Cache entry exists for this trash_id
+            if (existing.ServiceId == match.ServiceId)
             {
-                stats.RecordAdopted();
-                return CfCacheState.Adopted;
+                stats.RecordUnchanged();
+                return (CacheRebuildState.Unchanged, null, null);
             }
 
-            stats.RecordSkipped();
-            return CfCacheState.Skipped;
+            // Service ID changed - correct it
+            stats.RecordCorrected();
+            return (CacheRebuildState.Corrected, null, existing.ServiceId);
         }
 
-        if (existing.ServiceId == match.ServiceId)
+        // No cache entry for this trash_id - check if an orphan owns this service ID
+        if (orphan is not null)
         {
-            stats.RecordUnchanged();
-            return CfCacheState.Unchanged;
+            // Orphan owns this service ID - correct the trash_id (regardless of --adopt)
+            stats.RecordCorrected();
+            return (CacheRebuildState.Corrected, orphan.TrashId, null);
         }
 
-        stats.RecordCorrected();
-        return CfCacheState.Corrected;
+        // No cache entry at all - adopt or skip
+        if (settings.Adopt)
+        {
+            stats.RecordAdopted();
+            return (CacheRebuildState.Adopted, null, null);
+        }
+
+        stats.RecordSkipped();
+        return (CacheRebuildState.Skipped, null, null);
     }
 
-    private static IEnumerable<CfCacheDetail> BuildUnmatchedDetails(
-        List<CustomFormatResource> configuredGuideCfs,
+    private static IEnumerable<CacheRebuildDetail> BuildUnmatchedDetails(
+        IReadOnlyList<IGuideResource> configuredGuideResources,
         HashSet<string> matchedTrashIds,
         HashSet<string> ambiguousNames,
         StatsAccumulator stats
     )
     {
-        return configuredGuideCfs
-            .Where(cf => !matchedTrashIds.Contains(cf.TrashId))
-            .Select(cf =>
+        return configuredGuideResources
+            .Where(r => !matchedTrashIds.Contains(r.TrashId))
+            .Select(r =>
             {
-                var isAmbiguous = ambiguousNames.Contains(cf.Name);
+                var isAmbiguous = ambiguousNames.Contains(r.Name);
                 if (!isAmbiguous)
                 {
                     stats.RecordNotInService();
                 }
 
-                return new CfCacheDetail(
-                    cf.Name,
-                    cf.TrashId,
+                return new CacheRebuildDetail(
+                    r.Name,
+                    r.TrashId,
+                    CachedTrashId: null,
                     ServiceId: null,
                     CachedServiceId: null,
-                    isAmbiguous ? CfCacheState.Ambiguous : CfCacheState.NotInService
+                    isAmbiguous ? CacheRebuildState.Ambiguous : CacheRebuildState.NotInService
                 );
             });
     }
 
     private static (
-        List<(TrashIdMapping Mapping, CfCacheDetail Detail)> Preserved,
-        List<CfCacheDetail> Removed
+        List<(TrashIdMapping Mapping, CacheRebuildDetail Detail)> Preserved,
+        List<CacheRebuildDetail> Removed
     ) ProcessNonConfiguredEntries(
         Dictionary<string, TrashIdMapping> existingMappings,
         HashSet<string> configuredTrashIds,
         HashSet<int> serviceIdSet,
+        HashSet<int> correctedServiceIds,
         StatsAccumulator stats
     )
     {
-        var preserved = new List<(TrashIdMapping Mapping, CfCacheDetail Detail)>();
-        var removed = new List<CfCacheDetail>();
+        var preserved = new List<(TrashIdMapping Mapping, CacheRebuildDetail Detail)>();
+        var removed = new List<CacheRebuildDetail>();
 
         foreach (
             var entry in existingMappings.Values.Where(e => !configuredTrashIds.Contains(e.TrashId))
         )
         {
+            // Service ID was corrected (trash_id fixed) - already handled in ProcessMatches
+            if (correctedServiceIds.Contains(entry.ServiceId))
+            {
+                continue;
+            }
+
             if (serviceIdSet.Contains(entry.ServiceId))
             {
                 stats.RecordPreserved();
-                var detail = new CfCacheDetail(
+                var detail = new CacheRebuildDetail(
                     entry.Name,
                     entry.TrashId,
+                    CachedTrashId: null,
                     entry.ServiceId,
-                    entry.ServiceId, // Cached ID same as current - no change
-                    CfCacheState.Preserved
+                    entry.ServiceId,
+                    CacheRebuildState.Preserved
                 );
                 preserved.Add((entry, detail));
             }
             else
             {
                 stats.RecordRemoved();
-                var detail = new CfCacheDetail(
+                var detail = new CacheRebuildDetail(
                     entry.Name,
                     entry.TrashId,
-                    ServiceId: null, // Service CF no longer exists
-                    entry.ServiceId, // Was cached with this ID
-                    CfCacheState.Removed
+                    CachedTrashId: null,
+                    ServiceId: null,
+                    entry.ServiceId,
+                    CacheRebuildState.Removed
                 );
                 removed.Add(detail);
             }
@@ -360,124 +426,127 @@ internal class CacheRebuildInstanceProcessor(
         return (preserved, removed);
     }
 
-    private void ReportResults(CacheRebuildStats stats, List<AmbiguousMatch> ambiguous)
+    private void RenderResultTree(
+        IResourceAdapter adapter,
+        ICacheRebuildSettings settings,
+        CacheRebuildResult result,
+        int configuredCount
+    )
     {
-        // Changes section
-        console.MarkupLine("[bold underline]Changes[/]");
-        if (stats.HasChanges)
+        // Build resource type label with count
+        var resourceLabel = $"[bold]{adapter.ResourceTypeName}[/] [dim]({configuredCount})[/]";
+        var tree = new Tree(resourceLabel).Style(Style.Plain);
+
+        // Group details by state
+        var groupedByState = result
+            .Details.GroupBy(d => d.State)
+            .OrderBy(g => GetStatePriority(g.Key))
+            .ToList();
+
+        foreach (var stateGroup in groupedByState)
         {
-            var changesGrid = new Grid().AddColumn().AddColumn();
-            if (stats.Adopted > 0)
-            {
-                changesGrid.AddRow("[green]Adopted:[/]", $"{stats.Adopted}");
-            }
+            var stateConfig = GetStateConfig(stateGroup.Key);
+            var count = stateGroup.Count();
 
-            if (stats.Corrected > 0)
-            {
-                changesGrid.AddRow("[yellow]Corrected:[/]", $"{stats.Corrected}");
-            }
+            // Build state label with count and optional hint
+            var stateLabel = stateConfig.Hint is not null
+                ? $"[{stateConfig.Color}]{stateConfig.Label}[/] [dim]({count} - {stateConfig.Hint})[/]"
+                : $"[{stateConfig.Color}]{stateConfig.Label}[/] [dim]({count})[/]";
 
-            if (stats.Removed > 0)
-            {
-                changesGrid.AddRow("[maroon]Removed:[/]", $"{stats.Removed}");
-            }
+            var stateNode = tree.AddNode(stateLabel);
 
-            console.Write(changesGrid);
+            // In verbose mode, add individual items under each state
+            if (settings.Verbose)
+            {
+                foreach (
+                    var detail in stateGroup.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
+                )
+                {
+                    var itemLabel = FormatDetailNode(detail, stateConfig.Color);
+                    stateNode.AddNode(itemLabel);
+                }
+            }
         }
-        else
-        {
-            console.MarkupLine("[dim]None - cache already correct[/]");
-        }
 
+        console.Write(tree);
         console.WriteLine();
 
-        // Summary section
-        console.MarkupLine("[bold underline]Summary[/]");
-        var summaryGrid = new Grid().AddColumn().AddColumn();
-
-        if (stats.Skipped > 0)
+        // Show cache file path in verbose mode
+        if (settings.Verbose)
         {
-            summaryGrid.AddRow("[yellow]Skipped:[/]", $"{stats.Skipped} (use --adopt to add)");
+            console.MarkupLine($"[dim]Cache: {Markup.Escape(adapter.GetCacheFilePath())}[/]");
+            console.WriteLine();
         }
-
-        if (stats.Unchanged > 0)
-        {
-            summaryGrid.AddRow("[dim]Unchanged:[/]", $"{stats.Unchanged}");
-        }
-
-        if (stats.NotInService > 0)
-        {
-            summaryGrid.AddRow(
-                "[dim]Not in service:[/]",
-                $"{stats.NotInService} (will be created on sync)"
-            );
-        }
-
-        if (stats.Preserved > 0)
-        {
-            summaryGrid.AddRow("[dim]Preserved:[/]", $"{stats.Preserved} (kept for sync deletion)");
-        }
-
-        if (ambiguous.Count > 0)
-        {
-            summaryGrid.AddRow("[red]Ambiguous:[/]", $"{ambiguous.Count}");
-        }
-
-        console.Write(summaryGrid);
-        console.WriteLine();
     }
 
-    private void ReportVerboseDetails(List<CfCacheDetail> details)
+    private static string FormatDetailNode(CacheRebuildDetail detail, Color stateColor)
     {
-        var table = new Table()
-            .AddColumn("Name")
-            .AddColumn("Trash ID")
-            .AddColumn("Service ID")
-            .AddColumn("State")
-            .BorderColor(Color.Grey);
-
-        foreach (
-            var detail in details
-                .OrderBy(d => GetStatePriority(d.State))
-                .ThenBy(d => d.Name, StringComparer.OrdinalIgnoreCase)
-        )
-        {
-            var serviceIdText = FormatServiceId(detail);
-            var stateText = FormatState(detail.State);
-            table.AddRow(Markup.Escape(detail.Name), detail.TrashId, serviceIdText, stateText);
-        }
-
-        console.Write(table);
-        console.WriteLine();
+        var mapping = FormatMapping(detail);
+        var name = Markup.Escape(detail.Name);
+        return $"[{stateColor}]{name}[/] [dim]{mapping}[/]";
     }
 
-    private static string FormatServiceId(CfCacheDetail detail)
+    private static string FormatMapping(CacheRebuildDetail detail)
     {
-        var hasServiceId = detail.ServiceId.HasValue;
-        var hasCachedId = detail.CachedServiceId.HasValue;
+        var trashIdPart = FormatTrashIdPart(detail.TrashId, detail.CachedTrashId);
+        var serviceIdPart = FormatServiceIdPart(detail.ServiceId, detail.CachedServiceId);
 
-        return (hasServiceId, hasCachedId) switch
+        return (serviceIdPart, trashIdPart) switch
         {
-            (false, false) => "[dim]-[/]",
-            (false, true) => $"[dim]{detail.CachedServiceId}[/]", // Removed: was cached, now gone
-            (true, false) => detail.ServiceId!.Value.ToString(CultureInfo.InvariantCulture),
-            (true, true) when detail.ServiceId == detail.CachedServiceId =>
-                detail.ServiceId!.Value.ToString(CultureInfo.InvariantCulture),
-            (true, true) => // Corrected: cached ID differs from service ID
-            $"[dim]{detail.CachedServiceId}[/] [yellow]→[/] {detail.ServiceId}",
+            (null, _) => $"({trashIdPart})",
+            (_, _) => $"({trashIdPart} -> {serviceIdPart})",
         };
     }
 
-    private static int GetStatePriority(CfCacheState state) =>
+    private static string FormatTrashIdPart(string trashId, string? cachedTrashId)
+    {
+        var truncated = TruncateTrashId(trashId);
+
+        if (cachedTrashId is null)
+        {
+            return truncated;
+        }
+
+        // Trash ID correction: show [oldId → newId]
+        var cachedTruncated = TruncateTrashId(cachedTrashId);
+        return $"[[[strikethrough]{cachedTruncated}[/] -> {truncated}]]";
+    }
+
+    private static string? FormatServiceIdPart(int? serviceId, int? cachedServiceId)
+    {
+        return (serviceId, cachedServiceId) switch
+        {
+            (null, null) => null,
+            (null, { } cached) => $"[[[strikethrough]{cached}[/]]]",
+            ({ } svcId, null) => svcId.ToString(CultureInfo.InvariantCulture),
+            ({ } svcId, { } cached) when svcId == cached => svcId.ToString(
+                CultureInfo.InvariantCulture
+            ),
+            ({ } svcId, { } cached) => $"[[[strikethrough]{cached}[/] -> {svcId}]]",
+        };
+    }
+
+    private static string TruncateTrashId(string trashId)
+    {
+        const int maxLength = 8;
+        return trashId.Length > maxLength ? trashId[..maxLength] + "..." : trashId;
+    }
+
+    private static int GetStatePriority(CacheRebuildState state) =>
         StateConfig.TryGetValue(state, out var cfg) ? cfg.Priority : 99;
 
-    private static string FormatState(CfCacheState state) =>
-        StateConfig.TryGetValue(state, out var cfg) ? cfg.Format : state.ToString();
+    private static StateDisplayConfig GetStateConfig(CacheRebuildState state) =>
+        StateConfig.TryGetValue(state, out var cfg)
+            ? cfg
+            : new StateDisplayConfig(99, Color.White, state.ToString(), null);
 
-    private void ReportAmbiguousErrors(List<AmbiguousMatch> ambiguous)
+    private void ReportAmbiguousErrors(
+        IResourceAdapter adapter,
+        IReadOnlyList<AmbiguousMatch> ambiguous
+    )
     {
         var table = new Table()
-            .AddColumn("Guide CF")
+            .AddColumn("Guide Resource")
             .AddColumn("Service Matches")
             .BorderColor(Color.Red);
 
@@ -491,23 +560,14 @@ internal class CacheRebuildInstanceProcessor(
         }
 
         var panel = new Panel(table)
-            .Header("[red]Ambiguous Custom Format Names[/]")
+            .Header($"[red]Ambiguous {adapter.ResourceTypeName} Names[/]")
             .BorderColor(Color.Red);
 
         console.Write(panel);
         console.WriteLine();
         console.MarkupLine(
-            $"[dim]Resolution: Delete or rename duplicate CFs in {config.ServiceType}, then retry.[/]"
+            $"[dim]Resolution: Delete or rename duplicates in {config.ServiceType}, then retry.[/]"
         );
-        console.MarkupLine("[red]Cache NOT saved for this instance.[/]");
-    }
-
-    private void SaveCache(List<TrashIdMapping> matches)
-    {
-        log.Debug("Saving rebuilt cache with {Count} mappings", matches.Count);
-
-        var cacheObject = new CustomFormatCacheObject { Mappings = matches };
-        var cache = new TrashIdCache<CustomFormatCacheObject>(cacheObject);
-        cachePersister.Save(cache);
+        console.MarkupLine("[red]Cache NOT saved for this resource type.[/]");
     }
 }
