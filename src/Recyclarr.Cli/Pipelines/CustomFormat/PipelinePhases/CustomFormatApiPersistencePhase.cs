@@ -1,5 +1,6 @@
 using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
@@ -7,7 +8,8 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 internal class CustomFormatApiPersistencePhase(
     ICustomFormatApiService api,
     ICachePersister<CustomFormatCacheObject> cachePersister,
-    CustomFormatTransactionLogger cfLogger
+    CustomFormatTransactionLogger cfLogger,
+    IServiceConfiguration config
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -33,9 +35,12 @@ internal class CustomFormatApiPersistencePhase(
             await api.UpdateCustomFormat(dto, ct);
         }
 
-        foreach (var map in transactions.DeletedCustomFormats)
+        if (config.DeleteOldCustomFormats)
         {
-            await api.DeleteCustomFormat(map.ServiceId, ct);
+            foreach (var map in transactions.DeletedCustomFormats)
+            {
+                await api.DeleteCustomFormat(map.ServiceId, ct);
+            }
         }
 
         context.Cache.Update(context);

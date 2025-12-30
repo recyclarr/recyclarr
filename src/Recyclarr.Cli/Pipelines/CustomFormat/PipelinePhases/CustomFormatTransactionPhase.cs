@@ -1,11 +1,11 @@
+using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
-using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration config)
+internal class CustomFormatTransactionPhase(ILogger log)
     : IPipelinePhase<CustomFormatPipelineContext>
 {
     public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
@@ -47,17 +47,33 @@ internal class CustomFormatTransactionPhase(ILogger log, IServiceConfiguration c
             }
         }
 
-        if (config.DeleteOldCustomFormats)
+        // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
+        var deletionCandidates = context
+            .Cache.Mappings
+            // Custom format must be in the cache but NOT in the user's config
+            .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
+            // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
+            .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
+            .ToList();
+
+        // Build set of service IDs that are being actively managed (updated or unchanged)
+        var managedServiceIds = transactions
+            .UpdatedCustomFormats.Concat(transactions.UnchangedCustomFormats)
+            .Select(cf => cf.Id)
+            .ToHashSet();
+
+        // Separate valid deletions from invalid cache entries (duplicate service IDs)
+        foreach (var candidate in deletionCandidates)
         {
-            transactions.DeletedCustomFormats.AddRange(
-                context
-                    .Cache.Mappings
-                    // Custom format must be in the cache but NOT in the user's config
-                    .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
-                    // Also, that cache-only CF must exist in the service (otherwise there is
-                    // nothing to delete)
-                    .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
-            );
+            if (managedServiceIds.Contains(candidate.ServiceId))
+            {
+                // Cache inconsistency: service ID is claimed by both a managed CF and an orphan
+                transactions.InvalidCacheEntries.Add(candidate);
+            }
+            else
+            {
+                transactions.DeletedCustomFormats.Add(candidate);
+            }
         }
 
         context.TransactionOutput = transactions;

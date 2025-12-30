@@ -12,6 +12,7 @@ internal record CustomFormatTransactionData
     public Collection<ConflictingCustomFormat> ConflictingCustomFormats { get; } = [];
     public Collection<AmbiguousMatch> AmbiguousCustomFormats { get; } = [];
     public Collection<CustomFormatResource> UnchangedCustomFormats { get; } = [];
+    public Collection<TrashIdMapping> InvalidCacheEntries { get; } = [];
 
     public int TotalCustomFormatChanges =>
         NewCustomFormats.Count + UpdatedCustomFormats.Count + DeletedCustomFormats.Count;
