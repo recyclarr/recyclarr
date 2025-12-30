@@ -1,6 +1,5 @@
 using System.Globalization;
 using Recyclarr.Cache;
-using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config.Models;
 using Spectre.Console;
