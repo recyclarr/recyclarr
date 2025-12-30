@@ -117,6 +117,17 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 6. **Write adhoc granular tests** - Isolate suspected areas; remove when done
 7. **Check test isolation** - Run alone (`--filter`) vs. suite to detect state leakage
 
+## Test Framing
+
+Tests serve as documentation. Choose framing based on what the test documents:
+
+- **Positive tests** (expected behavior): Lead with what SHOULD happen, then verify absence of
+  unintended side effects
+- **Negative tests** (error conditions): Assert the error/rejection IS raised; essential for
+  validating error paths
+
+Both are equally important. The distinction is about clarity, not preference.
+
 ## Anti-Patterns
 
 - Over-mocking or mocking business logic
