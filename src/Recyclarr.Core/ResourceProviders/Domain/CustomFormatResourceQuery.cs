@@ -1,16 +1,13 @@
 using System.IO.Abstractions;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.TrashGuide;
-using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ResourceProviders.Domain;
 
 public class CustomFormatResourceQuery(
     ResourceRegistry<IFileInfo> registry,
     JsonResourceLoader loader,
-    CategoryResourceQuery categoryQuery,
     ILogger log
 )
 {
@@ -31,11 +28,10 @@ public class CustomFormatResourceQuery(
         var files = registry.Get<TResource>();
         log.Debug("CustomFormat: Found {Count} CF files in registry", files.Count);
 
-        var categories = categoryQuery.Get(serviceType);
         var loaded = loader.Load<TResource>(files, GlobalJsonSerializerSettings.Guide);
 
         var result = loaded
-            .Select(tuple => AssignCategory(tuple, categories))
+            .Select(tuple => tuple.Resource with { SourceFile = tuple.SourceFile })
             .GroupBy(cf => cf.TrashId)
             .Select(g => g.Last())
             .ToList();
@@ -46,23 +42,5 @@ public class CustomFormatResourceQuery(
             serviceType
         );
         return result;
-    }
-
-    private static TResource AssignCategory<TResource>(
-        (TResource Resource, IFileInfo SourceFile) tuple,
-        IEnumerable<CustomFormatCategoryItem> categories
-    )
-        where TResource : CustomFormatResource
-    {
-        var (cf, sourceFile) = tuple;
-        var match = categories.FirstOrDefault(cat =>
-            cat.CfName.EqualsIgnoreCase(cf.Name)
-            || cat.CfAnchor.EqualsIgnoreCase(Path.GetFileNameWithoutExtension(sourceFile.Name))
-        );
-
-        return cf with
-        {
-            Category = match?.CategoryName,
-        };
     }
 }

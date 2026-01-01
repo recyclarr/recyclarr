@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
 
@@ -8,7 +7,7 @@ namespace Recyclarr.Cli.Pipelines.CustomFormat;
 internal class CustomFormatDataLister(
     ILogger log,
     IAnsiConsole console,
-    CustomFormatResourceQuery guide
+    CategorizedCustomFormatProvider provider
 )
 {
     public void List(IListCustomFormatSettings settings)
@@ -32,10 +31,10 @@ internal class CustomFormatDataLister(
 
         console.WriteLine();
 
-        var customFormats = guide.Get(serviceType);
+        var customFormats = provider.Get(serviceType);
 
         var scoreSets = customFormats
-            .SelectMany(x => x.TrashScores.Keys)
+            .SelectMany(x => x.Resource.TrashScores.Keys)
             .Distinct(StringComparer.InvariantCultureIgnoreCase)
             .Order(StringComparer.InvariantCultureIgnoreCase)
             .ToList();
@@ -54,11 +53,11 @@ internal class CustomFormatDataLister(
         console.WriteLine("List of Custom Formats in the TRaSH Guides:");
         console.WriteLine();
 
-        var customFormats = guide.Get(serviceType);
+        var customFormats = provider.Get(serviceType);
 
         var categories = customFormats
-            .Where(x => !string.IsNullOrWhiteSpace(x.TrashId))
-            .OrderBy(x => x.Name)
+            .Where(x => !string.IsNullOrWhiteSpace(x.Resource.TrashId))
+            .OrderBy(x => x.Resource.Name)
             .ToLookup(x => x.Category)
             .OrderBy(x => x.Key)
             .ToList();
@@ -79,7 +78,7 @@ internal class CustomFormatDataLister(
 
             foreach (var cf in cat)
             {
-                console.WriteLine($"          - {cf.TrashId} # {cf.Name}");
+                console.WriteLine($"          - {cf.Resource.TrashId} # {cf.Resource.Name}");
             }
 
             console.WriteLine();

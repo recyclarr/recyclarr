@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Text.Json.Serialization;
 using Recyclarr.Cache;
 using Recyclarr.Json;
@@ -8,7 +9,7 @@ namespace Recyclarr.ResourceProviders.Domain;
 public record CustomFormatResource : IGuideResource, IServiceResource
 {
     [JsonIgnore]
-    public string? Category { get; init; }
+    public IFileInfo? SourceFile { get; init; }
 
     [JsonPropertyName("trash_id")]
     [JsonNoSerialize]
