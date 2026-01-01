@@ -32,8 +32,7 @@ internal class CustomFormatResourceAdapter(
     {
         var configuredTrashIds = cfProvider
             .GetAll()
-            .SelectMany(cfg => cfg.TrashIds)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(entry => entry.TrashId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var allGuideCfs = cfQuery.Get(config.ServiceType);

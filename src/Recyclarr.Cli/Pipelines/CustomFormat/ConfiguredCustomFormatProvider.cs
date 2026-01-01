@@ -12,39 +12,63 @@ internal class ConfiguredCustomFormatProvider(
     ILogger log
 )
 {
-    public IEnumerable<CustomFormatConfig> GetAll()
+    public IEnumerable<ConfiguredCfEntry> GetAll()
     {
         var qpResources = qpQuery
             .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Synthesize CustomFormatConfig from QP formatItems
-        var fromFormatItems = config
-            .QualityProfiles.Where(qp => qp.TrashId is not null)
-            .Select(qp => (Config: qp, Resource: qpResources.GetValueOrDefault(qp.TrashId!)))
-            .Where(x => x.Resource?.FormatItems.Count > 0)
-            .Select(x => new CustomFormatConfig
+        // From flat custom_formats (GroupName = null)
+        foreach (var cfg in config.CustomFormats)
+        {
+            foreach (var trashId in cfg.TrashIds)
             {
-                TrashIds = x.Resource!.FormatItems.Values.ToList(),
-                AssignScoresTo =
-                [
-                    new AssignScoresToConfig
-                    {
-                        Name = !string.IsNullOrEmpty(x.Config.Name)
-                            ? x.Config.Name
-                            : x.Resource!.Name,
-                    },
-                ],
-            });
+                yield return new ConfiguredCfEntry(trashId, cfg.AssignScoresTo, null);
+            }
+        }
 
-        var fromCfGroups = FromCfGroups(qpResources);
+        // From QP formatItems (GroupName = null)
+        foreach (var entry in FromFormatItems(qpResources))
+        {
+            yield return entry;
+        }
 
-        return config.CustomFormats.Concat(fromFormatItems).Concat(fromCfGroups);
+        // From CF groups (GroupName = group name)
+        foreach (var entry in FromCfGroups(qpResources))
+        {
+            yield return entry;
+        }
     }
 
-    /// Resolves CF group configs to CustomFormatConfig entries by looking up guide resources,
-    /// filtering CFs by exclude list, and determining which profiles to assign scores to.
-    private IEnumerable<CustomFormatConfig> FromCfGroups(
+    private IEnumerable<ConfiguredCfEntry> FromFormatItems(
+        Dictionary<string, QualityProfileResource> qpResources
+    )
+    {
+        var qpWithFormatItems = config
+            .QualityProfiles.Where(qp => qp.TrashId is not null)
+            .Select(qp => (Config: qp, Resource: qpResources.GetValueOrDefault(qp.TrashId!)))
+            .Where(x => x.Resource?.FormatItems.Count > 0);
+
+        foreach (var (qpConfig, qpResource) in qpWithFormatItems)
+        {
+            var assignScoresTo = new List<AssignScoresToConfig>
+            {
+                new()
+                {
+                    Name = !string.IsNullOrEmpty(qpConfig.Name) ? qpConfig.Name : qpResource!.Name,
+                },
+            };
+
+            foreach (var trashId in qpResource!.FormatItems.Values)
+            {
+                yield return new ConfiguredCfEntry(trashId, assignScoresTo, null);
+            }
+        }
+    }
+
+    // Resolves CF group configs to ConfiguredCfEntry entries by looking up guide resources,
+    // filtering CFs by exclude list, and determining which profiles to assign scores to.
+    private IEnumerable<ConfiguredCfEntry> FromCfGroups(
         Dictionary<string, QualityProfileResource> qpResources
     )
     {
@@ -81,29 +105,28 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Filter out excluded CFs from the group's CF list
+            // Filter out excluded CFs and yield individual entries
             var cfTrashIds = groupResource
                 .CustomFormats.Where(cf =>
                     !groupConfig.Exclude.Contains(cf.TrashId, StringComparer.OrdinalIgnoreCase)
                 )
-                .Select(cf => cf.TrashId)
-                .ToList();
+                .Select(cf => cf.TrashId);
 
-            if (cfTrashIds.Count == 0)
+            var hasEntries = false;
+            foreach (var trashId in cfTrashIds)
             {
-                log.Debug("CF group {TrashId} has no CFs after exclusions", groupConfig.TrashId);
-                continue;
+                hasEntries = true;
+                yield return new ConfiguredCfEntry(trashId, assignScoresTo, groupResource.Name);
             }
 
-            yield return new CustomFormatConfig
+            if (!hasEntries)
             {
-                TrashIds = cfTrashIds,
-                AssignScoresTo = assignScoresTo,
-            };
+                log.Debug("CF group {TrashId} has no CFs after exclusions", groupConfig.TrashId);
+            }
         }
     }
 
-    /// Validates the exclude list for a CF group. Returns true if valid, false if errors found.
+    // Validates the exclude list for a CF group. Returns true if valid, false if errors found.
     private bool ValidateExcludeList(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource
@@ -143,10 +166,10 @@ internal class ConfiguredCustomFormatProvider(
         return !hasErrors;
     }
 
-    /// Returns the list of profiles to assign this group's CFs to. If the user specified
-    /// explicit assign_scores_to entries, validates and uses those. Otherwise, uses all
-    /// guide-backed quality profiles from the config (filtered by guide exclusions).
-    /// Returns null if validation errors occurred for explicit profiles.
+    // Returns the list of profiles to assign this group's CFs to. If the user specified
+    // explicit assign_scores_to entries, validates and uses those. Otherwise, uses all
+    // guide-backed quality profiles from the config (filtered by guide exclusions).
+    // Returns null if validation errors occurred for explicit profiles.
     private List<AssignScoresToConfig>? DetermineProfiles(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
@@ -179,7 +202,7 @@ internal class ConfiguredCustomFormatProvider(
             .ToList();
     }
 
-    /// Validates explicit assign_scores_to profiles. Returns null if errors found.
+    // Validates explicit assign_scores_to profiles. Returns null if errors found.
     private List<AssignScoresToConfig>? ValidateExplicitProfiles(
         CustomFormatGroupConfig groupConfig,
         HashSet<string> excludedProfiles,

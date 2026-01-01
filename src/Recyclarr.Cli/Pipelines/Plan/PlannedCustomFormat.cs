@@ -7,4 +7,5 @@ internal class PlannedCustomFormat(CustomFormatResource resource)
 {
     public CustomFormatResource Resource { get; } = resource;
     public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
+    public string? GroupName { get; init; }
 }

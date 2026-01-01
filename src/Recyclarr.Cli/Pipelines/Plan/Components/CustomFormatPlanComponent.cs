@@ -17,10 +17,9 @@ internal class CustomFormatPlanComponent(
             .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Flatten configs into (TrashId, AssignScoresTo) pairs, then group by TrashId
+        // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
             .GetAll()
-            .SelectMany(cfg => cfg.TrashIds.Select(id => (TrashId: id, cfg.AssignScoresTo)))
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)
@@ -35,6 +34,7 @@ internal class CustomFormatPlanComponent(
                 new PlannedCustomFormat(resource)
                 {
                     AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
+                    GroupName = group.First().GroupName,
                 }
             );
         }
