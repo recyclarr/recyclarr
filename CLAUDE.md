@@ -198,35 +198,35 @@ All scripts are under `scripts/`:
 
 ## Commits and Changelog
 
-### Path-Based Classification (deterministic)
+Use this priority order (highest to lowest) to determine commit type:
 
-Use these mappings for non-src files:
+### Tier 1: User-Facing (require CHANGELOG)
+
+Ask: "Would this warrant a CHANGELOG line that non-technical users would understand and care about?"
+
+- `feat:` / `feat!:` → CHANGELOG "Added" / "Removed/Changed" (new capability / breaking)
+- `fix:` / `fix!:` → CHANGELOG "Fixed" / "Removed/Changed" (bug users would report / breaking)
+- `perf:` → CHANGELOG "Changed" (significant performance improvement)
+
+Multi-commit features: use `refactor` for infrastructure commits, `feat` only for the commit that
+enables the user-facing capability.
+
+### Tier 2: Path-Based (no CHANGELOG)
+
+If Tier 1 doesn't apply, match file paths:
 
 - `test:` → `tests/**`
-- `ci:` → `.github/**`, `ci/**`, `scripts/**`
-- `build:` → `*.props`, `*.csproj`, `*.slnx`, `Directory.*`, `.config/dotnet-tools.json`
-- `chore:` → `.renovate/*`, `renovate.json5`, `.editorconfig`, `.vscode/*`, `schemas/*`, linter
-  configs
-- `docs:` → `docs/**`, top-level `*.md` (except `CHANGELOG.md`)
+- `ci:` → `.github/**`, `ci/**`
+- `build:` → `*.props`, `*.csproj`, `*.slnx`, `.config/dotnet-tools.json`
+- `docs:` → `docs/**`, `*.md` (including `CHANGELOG.md` if committed alone)
 
-### Source Code Classification (`src/**`)
+### Tier 3: Catch-All (no CHANGELOG)
 
-For `src/**` files, CHANGELOG determines commit type.
+If neither Tier 1 nor Tier 2 applies:
 
-**Decision heuristic:** Before choosing `feat` or `fix`, ask: "Would this warrant a line in the
-changelog that non-technical users would understand and care about?" If no, use `refactor`. Internal
-behavior changes (error handling, orchestration, edge case fixes) that users wouldn't notice or
-describe in their own words are `refactor`, not `fix`. Multi-commit features should use `refactor`
-for infrastructure commits and `feat` only for the commit that enables the user-facing capability.
-
-- **CHANGELOG required** (user-facing change):
-  - `feat:` → CHANGELOG "Added" (new user capability)
-  - `fix:` → CHANGELOG "Fixed" (bug users would report)
-  - `feat!:` / `fix!:` → CHANGELOG "Removed/Changed" (breaking change)
-  - `perf:` → CHANGELOG "Changed" (significant performance improvement)
-- **No CHANGELOG** (internal change):
-  - `refactor:` → Internal restructuring, new infrastructure for future features, code
-    reorganization. If users cannot observe it, use refactor.
+- `refactor:` → C# changes in `src/**` (internal restructuring, code reorganization)
+- `chore:` → All other non-C# changes (`scripts/**`, `.renovate/*`, `renovate.json5`,
+  `.editorconfig`, `.vscode/*`, `schemas/*`, linter configs, etc.)
 
 ### Scopes
 
