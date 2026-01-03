@@ -559,7 +559,7 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
         );
 
         cache.Should().NotBeNull();
-        cache!
+        cache
             .Mappings.Should()
             .ContainSingle()
             .Which.Should()
@@ -655,7 +655,7 @@ internal sealed class CacheRebuildIntegrationTest : CliIntegrationFixture
         );
 
         cache.Should().NotBeNull();
-        cache!
+        cache
             .Mappings.Should()
             .BeEquivalentTo(
                 new[]
