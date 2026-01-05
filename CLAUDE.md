@@ -133,10 +133,15 @@ See `tests/CLAUDE.md` for detailed patterns, assertions, and infrastructure.
 
 - `src/`: All C# source code
 - `tests/`: All C# unit and integration tests
-- `ci/`: contains scripts and other utilities utilized by github workflows
-- `.github/`: contains actions and workflows for Github
-- `docs`: Documentation for `architecture`, `decisions` (ADRs), `reference` (external info),
-  `memory-bank` (working memory for AI use)
+- `ci/`: Scripts and utilities for GitHub workflows
+- `.github/`: GitHub actions and workflows
+- `docs/`: Documentation
+  - `architecture/`: Current system design (what is)
+  - `decisions/`: MADR-based decision records
+    - `architecture/`: Technical implementation decisions (ADRs)
+    - `product/`: Strategic and upstream-driven decisions (PDRs)
+  - `reference/`: External reference materials (Discord summaries, upstream docs)
+  - `memory-bank/`: AI working memory
 
 Some key files and directories:
 

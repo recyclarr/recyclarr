@@ -1,68 +1,35 @@
 # Documentation Directory Guide
 
-## Directory Structure
+## Directories
 
-### architecture/
+- `architecture/` - Current system design (what is, not alternatives)
+- `decisions/` - MADR-based decision records
+  - `architecture/` - ADRs: technical implementation (how)
+  - `product/` - PDRs: strategic/upstream-driven (what/why)
+- `reference/` - External materials (Discord summaries, upstream docs)
+- `memory-bank/` - AI working memory
 
-Authoritative documentation of current system design. These documents describe **what is**, not what
-was considered or rejected.
+## Decision Records
 
-- Describes current implementation reality
-- Updated when architecture changes
-- No historical alternatives or rejected ideas
+**MANDATORY**: Read the relevant `TEMPLATE.md` before creating or editing ANY decision document.
 
-### decisions/
+- ADR template: `decisions/architecture/TEMPLATE.md`
+- PDR template: `decisions/product/TEMPLATE.md`
 
-Architecture Decision Records (ADRs) capturing significant design choices and their rationale. These
-documents explain **why** we chose a particular approach, including alternatives considered.
+Naming: `NNN-kebab-case-title.md` (sequential per category)
 
-- Preserves decision context for future maintainers
-- Documents rejected alternatives to prevent re-litigation
-- Numbered sequentially (001, 002, etc.)
+### When to Create
 
-### reference/
+**ADR** - Implementation choices, patterns, internal tradeoffs:
 
-External reference materials, research notes, and supporting documentation not authored for this
-project but useful for context.
+- Choosing between implementation approaches
+- Establishing patterns affecting multiple components
+- Making tradeoffs with long-term maintenance implications
 
-## ADR Template
+**PDR** - Upstream changes, feature scope, external drivers:
 
-ADRs must follow this structure:
+- Responding to upstream schema or API changes
+- Deciding feature scope or priorities
+- Tracking external decisions that drive Recyclarr development
 
-```markdown
-# ADR-NNN: [Short Decision Title]
-
-## Status
-
-[Accepted | Superseded by ADR-NNN | Deprecated]
-
-## Context
-
-[What is the issue? What forces are at play? 2-4 sentences describing the problem space.]
-
-## Decision
-
-[What is the change being proposed? State the decision clearly and concisely.]
-
-## Rationale
-
-[Why this decision? Bullet points explaining the reasoning.]
-
-## Alternatives Considered
-
-[What other options were evaluated? Why were they rejected? Use subsections for each
-alternative with brief explanation.]
-
-## Consequences
-
-[What are the implications? Both positive tradeoffs accepted and negative impacts to be aware
-of.]
-```
-
-### ADR Naming Convention
-
-Files: `NNN-kebab-case-title.md` (e.g., `001-resource-query-service-dispatch.md`)
-
-### ADR Numbering
-
-Use the next sequential number. Check existing files in `decisions/` before creating.
+PDRs require `upstream:` frontmatter linking to the external driver (issue, PR, Discord thread).
