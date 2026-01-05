@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --info)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet csharpier:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet tool list:*)",
+      "mcp__linear__*"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledPlugins": {
+    "recyclarr@rcdailey-plugins": true
+  }
+}
