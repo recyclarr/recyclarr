@@ -157,4 +157,10 @@ sync when users select conflicting custom formats.
 - TRaSH CF Groups documentation:
   <https://github.com/TRaSH-Guides/Guides/blob/master/CONTRIBUTING.md#cf-groups>
 - Profile Groups PR: <https://github.com/TRaSH-Guides/Guides/pull/2561>
-- [Product decision](../decisions/product/001-trash-guides-schema-migration-2025.md)
+
+Product decisions:
+
+- [PDR-001: CF Groups Exclude to Include](../decisions/product/001-cf-groups-exclude-to-include.md)
+- [PDR-002: Quality Profile Ordering](../decisions/product/002-quality-profile-ordering.md)
+- [PDR-003: CF Conflicts Metadata](../decisions/product/003-cf-conflicts-metadata.md)
+- [PDR-004: Profile Groups](../decisions/product/004-profile-groups.md)

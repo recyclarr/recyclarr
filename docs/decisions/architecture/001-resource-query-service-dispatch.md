@@ -1,9 +1,7 @@
----
-status: accepted
-date: 2025-01-04
----
-
 # ADR-001: Resource Query Service Dispatch Pattern
+
+- **Status:** Accepted
+- **Date:** 2025-11-27
 
 ## Context and Problem Statement
 

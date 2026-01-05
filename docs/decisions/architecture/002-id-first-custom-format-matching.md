@@ -1,9 +1,7 @@
----
-status: accepted
-date: 2025-01-04
----
-
 # ADR-002: ID-First Custom Format Matching
+
+- **Status:** Accepted
+- **Date:** 2025-12-15
 
 ## Context and Problem Statement
 

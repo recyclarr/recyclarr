@@ -16,7 +16,33 @@
 - ADR template: `decisions/architecture/TEMPLATE.md`
 - PDR template: `decisions/product/TEMPLATE.md`
 
+**One decision per record.** Do not bundle multiple decisions into a single ADR/PDR. Each decision
+should be independently trackable, referenceable, and supersedable.
+
+**Relevant perspective.** TRaSH Guides is the authoritative upstream; Recyclarr is a downstream
+consumer. PDRs document Recyclarr's response to guide decisions. Focus on:
+
+- Recyclarr implementation impact
+- User experience improvements
+- TRaSH Guides maintainer/contributor benefits (upstream health benefits all consumers)
+
+Exclude references to other sync tools - they're peers responding to the same upstream, not relevant
+to Recyclarr's decisions.
+
 Naming: `NNN-kebab-case-title.md` (sequential per category)
+
+### Status Values
+
+- `proposed` - Under consideration, not yet decided
+- `accepted` - Decision made and finalized
+- `deprecated` - No longer applies (context changed)
+- `superseded by {ADR,PDR}-NNN` - Replaced by another decision
+
+For accepted decisions with pending implementation details, use `accepted` and note the pending
+aspects in the document body.
+
+**Date accuracy**: Use the date the decision was made, not when documented. For existing decisions,
+verify against git history (`git log --format="%ai" <commit> -1`).
 
 ### When to Create
 

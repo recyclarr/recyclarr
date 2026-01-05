@@ -1,10 +1,8 @@
----
-status: {proposed | accepted | deprecated | superseded by PDR-NNN}
-date: YYYY-MM-DD
-upstream: {link to TRaSH Guides issue/PR, Discord thread, or external driver}
----
-
 # PDR-NNN: {short title of decision}
+
+- **Status:** {proposed | accepted | deprecated | superseded by PDR-NNN}
+- **Date:** YYYY-MM-DD
+- **Upstream:** {link to TRaSH Guides issue/PR, Discord thread, or external driver}
 
 ## Context
 

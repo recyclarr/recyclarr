@@ -1,9 +1,7 @@
----
-status: {proposed | accepted | deprecated | superseded by ADR-NNN}
-date: YYYY-MM-DD
----
-
 # ADR-NNN: {short title of problem and solution}
+
+- **Status:** {proposed | accepted | deprecated | superseded by ADR-NNN}
+- **Date:** YYYY-MM-DD
 
 ## Context and Problem Statement
 
