@@ -22,6 +22,8 @@ internal static class CliSetup
             {
                 list.SetDescription("List information from the guide");
                 list.AddCommand<ListCustomFormatsCommand>("custom-formats");
+                list.AddCommand<ListCustomFormatGroupsCommand>("custom-format-groups");
+                list.AddCommand<ListScoreSetsCommand>("score-sets");
                 list.AddCommand<ListQualitiesCommand>("qualities");
                 list.AddCommand<ListMediaNamingCommand>("naming");
             }

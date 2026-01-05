@@ -26,6 +26,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (default), `warn`.
 - CLI: New `cache rebuild` command to rebuild cache mappings by matching configured resources
   (custom formats, quality profiles) to service resources by name.
+- CLI: New `list custom-format-groups` command to discover available CF group trash_ids.
+- CLI: New `list score-sets` command to list available score sets for custom formats.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.
 
@@ -43,6 +45,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
 - CLI: The `--raw` option is deprecated and has no effect. Use the `NO_COLOR=1` environment variable
+  instead.
+- CLI: The `--score-sets` option on `list custom-formats` is deprecated. Use `list score-sets`
   instead.
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
   cache rebuild --adopt` to adopt manually-created custom formats.

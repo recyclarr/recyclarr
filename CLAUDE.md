@@ -281,14 +281,40 @@ changes you may need to make.
 
 ## Logging and Console Output
 
-- Diagnostic information uses `ILogger` from serilog (facilitated via DI)
-- User-facing messages use `IAnsiConsole` (facilitated via DI)
+The `--log` flag controls which output channel is visible to users:
+
+- `--log` **omitted**: IAnsiConsole -> console (visible); ILogger -> file only
+- `--log [level]`: IAnsiConsole -> void (hidden); ILogger -> file + console
+- Levels: debug, info (default), warn
+
+Output channel usage:
+
+- `IAnsiConsole`: User-facing output (progress, results, prompts). Visible by default.
+- `ILogger`: Diagnostic information. Always written to log files; visible on console only with --log.
 - NEVER use `Console.WriteLine`
-- `ILogger.Debug()`: Diagnostics (requires `-d|--debug`)
-- `ILogger.Information()`: User status (use sparingly)
-- `ILogger.Warning()`: Non-critical issues (e.g. deprecations)
-- `ILogger.Error()`: Critical failures (usually results in application stopping)
-- Some user-facing logs still use Serilogs; this is legacy and will eventually be phased out.
+
+ILogger levels:
+
+- `Debug()`: Verbose diagnostics (requires `--log debug`)
+- `Information()`: Status updates
+- `Warning()`: Non-critical issues, deprecations
+- `Error()`: Critical failures
+
+Dual-output pattern (required for user-visible information):
+
+- Sync command: Use `ISyncEventPublisher` methods which handle both channels automatically via the
+  diagnostics system (`SyncEventStorage`, `DiagnosticsRenderer`).
+- Other commands: Must output to both channels manually:
+
+```csharp
+// User-visible information
+console.WriteLine(message);
+log.Information(message);
+
+// Deprecations
+console.MarkupLine("[darkorange bold][[DEPRECATED]][/] " + message);
+log.Warning(message);
+```
 
 ## Sync Philosophy
 

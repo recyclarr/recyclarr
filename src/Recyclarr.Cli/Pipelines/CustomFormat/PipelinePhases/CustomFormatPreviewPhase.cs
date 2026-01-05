@@ -1,6 +1,5 @@
 using Recyclarr.Sync;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
