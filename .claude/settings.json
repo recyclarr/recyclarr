@@ -7,7 +7,7 @@
       "Bash(dotnet run:*)",
       "Bash(dotnet test:*)",
       "Bash(dotnet tool list:*)",
-      "mcp__linear__*"
+      "mcp__plugin_recyclarr_linear__*"
     ],
     "deny": [],
     "ask": []
