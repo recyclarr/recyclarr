@@ -21,7 +21,7 @@ internal class ListScoreSetsCommand(
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    internal class CliSettings : BaseCommandSettings
+    internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
@@ -37,13 +37,6 @@ internal class ListScoreSetsCommand(
     {
         await providerProgressHandler.InitializeProvidersAsync(ct);
 
-        console.WriteLine(
-            "\nThe following score sets are available. Use these with the `score_set` property in any "
-                + "quality profile defined under the top-level `quality_profiles` list."
-        );
-
-        console.WriteLine();
-
         var customFormats = provider.Get(settings.Service);
 
         var scoreSets = customFormats
@@ -55,11 +48,47 @@ internal class ListScoreSetsCommand(
         log.Debug("Found {Count} score sets for {Service}", scoreSets.Count, settings.Service);
         log.Information("Score sets: {@ScoreSets}", scoreSets);
 
-        foreach (var set in scoreSets)
+        if (settings.Raw)
         {
-            console.WriteLine($"  - {set}");
+            OutputRaw(scoreSets);
+        }
+        else
+        {
+            OutputTable(scoreSets);
         }
 
         return (int)ExitStatus.Succeeded;
+    }
+
+    private void OutputRaw(IReadOnlyCollection<string> scoreSets)
+    {
+        foreach (var set in scoreSets)
+        {
+            console.WriteLine(set);
+        }
+    }
+
+    private void OutputTable(IReadOnlyCollection<string> scoreSets)
+    {
+        var table = new Table().AddColumn("Score Set Name");
+        var alternatingColors = new[] { "white", "paleturquoise4" };
+        var colorIndex = 0;
+
+        foreach (var set in scoreSets)
+        {
+            var color = alternatingColors[colorIndex];
+            table.AddRow($"[{color}]{Markup.Escape(set)}[/]");
+            colorIndex = 1 - colorIndex;
+        }
+
+        console.WriteLine();
+        console.MarkupLine("[orange3]Available Score Sets[/]");
+        console.WriteLine();
+        console.Write(table);
+        console.WriteLine();
+        console.WriteLine(
+            "Use these with the `score_set` property in any quality profile defined under "
+                + "the top-level `quality_profiles` list."
+        );
     }
 }

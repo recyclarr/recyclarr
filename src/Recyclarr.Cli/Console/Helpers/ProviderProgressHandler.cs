@@ -4,12 +4,16 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
-internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializationFactory factory)
+internal class ProviderProgressHandler(
+    IAnsiConsole console,
+    ProviderInitializationFactory factory,
+    ProgressFactory progressFactory
+)
 {
     public async Task InitializeProvidersAsync(CancellationToken ct)
     {
-        await console
-            .Progress()
+        await progressFactory
+            .Create()
             .AutoClear(false)
             .Columns(
                 new TaskDescriptionColumn(),

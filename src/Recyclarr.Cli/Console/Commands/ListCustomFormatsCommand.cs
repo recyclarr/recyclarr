@@ -22,7 +22,7 @@ internal class ListCustomFormatsCommand(
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    internal class CliSettings : BaseCommandSettings
+    internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
@@ -52,11 +52,11 @@ internal class ListCustomFormatsCommand(
 
             console.MarkupLine($"[darkorange bold][[DEPRECATED]][/] {deprecationMessage}");
             log.Warning(deprecationMessage);
-            ListScoreSets(settings.Service);
+            ListScoreSets(settings);
         }
         else
         {
-            ListCustomFormats(settings.Service);
+            ListCustomFormats(settings);
         }
 
         return (int)ExitStatus.Succeeded;
@@ -64,16 +64,9 @@ internal class ListCustomFormatsCommand(
 
     // TODO: Remove this method when --score-sets is removed. This logic is duplicated in
     // ListScoreSetsCommand.cs for the new 'list score-sets' command.
-    private void ListScoreSets(SupportedServices serviceType)
+    private void ListScoreSets(CliSettings settings)
     {
-        console.WriteLine(
-            "\nThe following score sets are available. Use these with the `score_set` property in any "
-                + "quality profile defined under the top-level `quality_profiles` list."
-        );
-
-        console.WriteLine();
-
-        var customFormats = provider.Get(serviceType);
+        var customFormats = provider.Get(settings.Service);
 
         var scoreSets = customFormats
             .SelectMany(x => x.Resource.TrashScores.Keys)
@@ -81,59 +74,120 @@ internal class ListCustomFormatsCommand(
             .Order(StringComparer.InvariantCultureIgnoreCase)
             .ToList();
 
-        log.Debug("Found {Count} score sets for {Service}", scoreSets.Count, serviceType);
+        log.Debug("Found {Count} score sets for {Service}", scoreSets.Count, settings.Service);
         log.Information("Score sets: {@ScoreSets}", scoreSets);
 
-        foreach (var set in scoreSets)
+        if (settings.Raw)
         {
-            console.WriteLine($"  - {set}");
+            OutputScoreSetsRaw(scoreSets);
+        }
+        else
+        {
+            OutputScoreSetsTable(scoreSets);
         }
     }
 
-    private void ListCustomFormats(SupportedServices serviceType)
+    private void OutputScoreSetsRaw(IReadOnlyCollection<string> scoreSets)
     {
-        console.WriteLine();
-        console.WriteLine("List of Custom Formats in the TRaSH Guides:");
-        console.WriteLine();
-
-        var customFormats = provider.Get(serviceType);
-
-        var categories = customFormats
-            .Where(x => !string.IsNullOrWhiteSpace(x.Resource.TrashId))
-            .OrderBy(x => x.Resource.Name)
-            .ToLookup(x => x.Category)
-            .OrderBy(x => x.Key)
-            .ToList();
-
-        log.Debug(
-            "Found {Count} custom formats in {CategoryCount} categories for {Service}",
-            customFormats.Count,
-            categories.Count,
-            serviceType
-        );
-        log.Information(
-            "Custom formats: {@CustomFormats}",
-            customFormats.Select(cf => cf.Resource.TrashId)
-        );
-
-        // Indentation matches YAML config structure for direct copy-paste into trash_ids
-        foreach (var cat in categories)
+        foreach (var set in scoreSets)
         {
-            var title = cat.Key is not null ? $"{cat.Key}" : "[No Category]";
+            console.WriteLine(set);
+        }
+    }
 
-            console.WriteLine($"          # {title}");
+    private void OutputScoreSetsTable(IReadOnlyCollection<string> scoreSets)
+    {
+        var table = new Table().AddColumn("Score Set Name");
+        var alternatingColors = new[] { "white", "paleturquoise4" };
+        var colorIndex = 0;
 
-            foreach (var cf in cat)
-            {
-                console.WriteLine($"          - {cf.Resource.TrashId} # {cf.Resource.Name}");
-            }
-
-            console.WriteLine();
+        foreach (var set in scoreSets)
+        {
+            var color = alternatingColors[colorIndex];
+            table.AddRow($"[{color}]{Markup.Escape(set)}[/]");
+            colorIndex = 1 - colorIndex;
         }
 
+        console.WriteLine();
+        console.Write(table);
+        console.WriteLine();
         console.WriteLine(
-            "The above Custom Formats are in YAML format and ready to be copied & pasted "
-                + "under the `trash_ids:` property."
+            "Use these with the `score_set` property in any quality profile defined under "
+                + "the top-level `quality_profiles` list."
+        );
+    }
+
+    private void ListCustomFormats(CliSettings settings)
+    {
+        var customFormats = provider.Get(settings.Service);
+
+        var items = customFormats
+            .Where(x => !string.IsNullOrWhiteSpace(x.Resource.TrashId))
+            .OrderBy(x => x.Category)
+            .ThenBy(x => x.Resource.Name)
+            .ToList();
+
+        log.Debug("Found {Count} custom formats for {Service}", items.Count, settings.Service);
+        log.Information(
+            "Custom formats: {@CustomFormats}",
+            items.Select(cf => cf.Resource.TrashId)
+        );
+
+        if (settings.Raw)
+        {
+            OutputCustomFormatsRaw(items);
+        }
+        else
+        {
+            OutputCustomFormatsTable(items);
+        }
+    }
+
+    private void OutputCustomFormatsRaw(IReadOnlyCollection<CategorizedCustomFormat> items)
+    {
+        foreach (var cf in items)
+        {
+            var category = cf.Category ?? "";
+            console.WriteLine($"{cf.Resource.TrashId}\t{cf.Resource.Name}\t{category}");
+        }
+    }
+
+    private void OutputCustomFormatsTable(IReadOnlyCollection<CategorizedCustomFormat> items)
+    {
+        var byCategory = items.GroupBy(cf => cf.Category ?? "[No Category]").OrderBy(g => g.Key);
+
+        console.WriteLine();
+
+        var maxNameLen = items.Max(cf => cf.Resource.Name.Length);
+
+        foreach (var group in byCategory)
+        {
+            var table = new Table()
+                .AddColumn(new TableColumn("Name").Width(maxNameLen))
+                .AddColumn("Trash ID")
+                .HideHeaders()
+                .Border(TableBorder.None);
+
+            var rowIndex = 0;
+            foreach (var cf in group)
+            {
+                var color = rowIndex++ % 2 == 0 ? "white" : "grey";
+                table.AddRow(
+                    $"[{color}]{cf.Resource.Name.EscapeMarkup()}[/]",
+                    $"[{color}]{cf.Resource.TrashId}[/]"
+                );
+            }
+
+            var panel = new Panel(table)
+                .Header($"[orange3]{group.Key.EscapeMarkup()}[/]")
+                .BorderColor(Color.Grey);
+
+            console.Write(panel);
+        }
+
+        console.WriteLine();
+        console.WriteLine(
+            "Copy the Trash ID values to use with the `trash_ids:` property in your config."
         );
     }
 }

@@ -33,10 +33,4 @@ internal class BaseCommandSettings : CommandSettings
     [Description("Custom path to the application data directory")]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     public string? AppData { get; init; }
-
-    [CommandOption("--raw")]
-    [Description("DEPRECATED: Use NO_COLOR=1 environment variable instead")]
-    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-    [Obsolete("Use NO_COLOR environment variable instead")]
-    public bool? Raw { get; init; }
 }

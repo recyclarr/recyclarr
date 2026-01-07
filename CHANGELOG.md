@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+This release contains **BREAKING CHANGES**. See the [v8.0 Upgrade Guide][breaking8] for required
+changes you may need to make.
+
+[breaking8]: https://recyclarr.dev/guide/upgrade-guide/v8.0/
+
 ### Added
 
 - Quality Profiles: Support for `trash_id` to sync TRaSH Guide quality profile definitions. When
@@ -28,11 +33,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (custom formats, quality profiles) to service resources by name.
 - CLI: New `list custom-format-groups` command to discover available CF group trash_ids.
 - CLI: New `list score-sets` command to list available score sets for custom formats.
+- CLI: New `--raw` option for list commands outputs TSV format for scripting.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.
 
 ### Changed
 
+- CLI: **BREAKING** List commands now display formatted tables instead of plain text. Use `--raw`
+  for the previous behavior (now TSV format for scripting).
+- CLI: **BREAKING** The global `--raw` option has been removed. It is now specific to list commands.
 - Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
   reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
 - Sync: Preview mode now shows instance name in section headers and a visual separator between
@@ -44,8 +53,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 
 - CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
-- CLI: The `--raw` option is deprecated and has no effect. Use the `NO_COLOR=1` environment variable
-  instead.
 - CLI: The `--score-sets` option on `list custom-formats` is deprecated. Use `list score-sets`
   instead.
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr

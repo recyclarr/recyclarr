@@ -133,6 +133,7 @@ internal static class CompositionRoot
         builder
             .RegisterTypes(
                 typeof(AppDataDirSetupTask), // This must be first; ILogger creation depends on IAppPaths
+                typeof(ConsoleSetupTask), // Must run before LoggerSetupTask (handles console redirect)
                 typeof(LoggerSetupTask),
                 typeof(ProgramInformationDisplayTask),
                 typeof(JanitorCleanupTask)
@@ -140,6 +141,7 @@ internal static class CompositionRoot
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
+        builder.RegisterType<ProgressFactory>().SingleInstance();
         builder.RegisterType<ProviderProgressHandler>();
     }
 

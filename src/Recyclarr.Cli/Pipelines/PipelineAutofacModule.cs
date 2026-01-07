@@ -65,8 +65,6 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterMediaNaming(ContainerBuilder builder)
     {
-        builder.RegisterType<MediaNamingDataLister>();
-
         builder
             .RegisterType<RadarrMediaNamingConfigPhase>()
             .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Radarr);
@@ -106,8 +104,6 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterQualitySize(ContainerBuilder builder)
     {
-        builder.RegisterType<QualitySizeDataLister>();
-
         // Setup factory for creation of concrete IQualityItemLimits types
         builder.RegisterType<QualityItemLimitFactory>().As<IQualityItemLimitFactory>();
         builder

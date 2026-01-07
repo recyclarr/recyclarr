@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors;
 using Recyclarr.ResourceProviders.Domain;
@@ -21,7 +22,7 @@ internal class ListCustomFormatGroupsCommand(
 {
     [UsedImplicitly]
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
-    internal class CliSettings : BaseCommandSettings
+    internal class CliSettings : ListCommandSettings
     {
         [CommandArgument(0, "<service_type>")]
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
@@ -37,10 +38,6 @@ internal class ListCustomFormatGroupsCommand(
     {
         await providerProgressHandler.InitializeProvidersAsync(ct);
 
-        console.WriteLine();
-        console.WriteLine("List of Custom Format Groups in the TRaSH Guides:");
-        console.WriteLine();
-
         var groups = cfGroupQuery.Get(settings.Service).OrderBy(g => g.Name).ToList();
 
         log.Debug(
@@ -50,19 +47,52 @@ internal class ListCustomFormatGroupsCommand(
         );
         log.Information("Custom format groups: {@Groups}", groups.Select(g => g.TrashId));
 
-        // Indentation matches YAML config structure for direct copy-paste into custom_format_groups
+        if (settings.Raw)
+        {
+            OutputRaw(groups);
+        }
+        else
+        {
+            OutputTable(groups);
+        }
+
+        return (int)ExitStatus.Succeeded;
+    }
+
+    private void OutputRaw(IReadOnlyCollection<CfGroupResource> groups)
+    {
         foreach (var group in groups)
         {
-            var cfCount = group.CustomFormats.Count;
-            console.WriteLine($"          - {group.TrashId} # {group.Name} ({cfCount} CFs)");
+            var cfCount = group.CustomFormats.Count.ToString(CultureInfo.InvariantCulture);
+            console.WriteLine($"{group.TrashId}\t{group.Name}\t{cfCount}");
+        }
+    }
+
+    private void OutputTable(IReadOnlyCollection<CfGroupResource> groups)
+    {
+        var table = new Table().AddColumns("Name", "Trash ID", "CF Count");
+        var alternatingColors = new[] { "white", "paleturquoise4" };
+        var colorIndex = 0;
+
+        foreach (var group in groups)
+        {
+            var color = alternatingColors[colorIndex];
+            var cfCount = group.CustomFormats.Count.ToString(CultureInfo.InvariantCulture);
+            table.AddRow(
+                $"[{color}]{Markup.Escape(group.Name)}[/]",
+                $"[{color}]{Markup.Escape(group.TrashId)}[/]",
+                $"[{color}]{cfCount}[/]"
+            );
+            colorIndex = 1 - colorIndex;
         }
 
         console.WriteLine();
+        console.MarkupLine("[orange3]Custom Format Groups in the TRaSH Guides[/]");
+        console.WriteLine();
+        console.Write(table);
+        console.WriteLine();
         console.WriteLine(
-            "The above Custom Format Groups are in YAML format and ready to be copied & pasted "
-                + "under the `custom_format_groups:` property."
+            "Copy the Trash ID values to use with the `custom_format_groups:` property in your config."
         );
-
-        return (int)ExitStatus.Succeeded;
     }
 }
