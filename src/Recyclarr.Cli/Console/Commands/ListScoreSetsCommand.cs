@@ -9,7 +9,6 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-#pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List score sets available for custom formats.")]
 internal class ListScoreSetsCommand(

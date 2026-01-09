@@ -7,8 +7,6 @@ using Recyclarr.TrashGuide;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-#pragma warning disable CS8765
-
 namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]

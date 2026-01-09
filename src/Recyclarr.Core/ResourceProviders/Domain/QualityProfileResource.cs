@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Recyclarr.Cache;
 
@@ -12,6 +13,11 @@ public record QualityProfileQualityItem
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+[SuppressMessage(
+    "Design",
+    "CA1056:URI properties should not be strings",
+    Justification = "JSON DTO with optional URL field"
+)]
 public record QualityProfileResource : IGuideResource
 {
     [JsonPropertyName("trash_id")]
@@ -19,8 +25,8 @@ public record QualityProfileResource : IGuideResource
 
     public string Name { get; init; } = "";
 
-    [JsonPropertyName("trash_description")]
-    public string TrashDescription { get; init; } = "";
+    [JsonPropertyName("trash_url")]
+    public string TrashUrl { get; init; } = "";
 
     [JsonPropertyName("trash_score_set")]
     public string TrashScoreSet { get; init; } = "";

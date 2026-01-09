@@ -33,6 +33,7 @@ changes you may need to make.
   (custom formats, quality profiles) to service resources by name.
 - CLI: New `list custom-format-groups` command to discover available CF group trash_ids.
 - CLI: New `list score-sets` command to list available score sets for custom formats.
+- CLI: New `list quality-profiles` command to discover available quality profile trash_ids.
 - CLI: New `--raw` option for list commands outputs TSV format for scripting.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.

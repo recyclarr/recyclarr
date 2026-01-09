@@ -25,6 +25,7 @@ internal static class CliSetup
                 list.AddCommand<ListCustomFormatGroupsCommand>("custom-format-groups");
                 list.AddCommand<ListScoreSetsCommand>("score-sets");
                 list.AddCommand<ListQualitiesCommand>("qualities");
+                list.AddCommand<ListQualityProfilesCommand>("quality-profiles");
                 list.AddCommand<ListMediaNamingCommand>("naming");
             }
         );

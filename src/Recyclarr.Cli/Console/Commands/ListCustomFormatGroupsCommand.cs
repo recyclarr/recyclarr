@@ -10,7 +10,6 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-#pragma warning disable CS8765
 [UsedImplicitly]
 [Description("List custom format groups available in the guide.")]
 internal class ListCustomFormatGroupsCommand(
