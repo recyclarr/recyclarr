@@ -1,25 +1,18 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
 using CliWrap;
 
 namespace Recyclarr.VersionControl;
 
-[SuppressMessage(
-    "Design",
-    "CA1068:CancellationToken parameters must come last",
-    Justification = "Doesn't mix well with `params` (which has to be at the end)"
-)]
 public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir)
     : IGitRepository
 {
     private Task RunGitCmd(CancellationToken token, params string[] args)
     {
-        return RunGitCmd(token, (ICollection<string>)args);
+        return RunGitCmd(args, token);
     }
 
-    private async Task RunGitCmd(CancellationToken token, ICollection<string> args)
+    private async Task RunGitCmd(ICollection<string> args, CancellationToken token)
     {
         log.Debug("Executing git command with args: {Args}", args);
 
@@ -50,16 +43,26 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         // Nothing to do here
     }
 
-    public async Task Fetch(CancellationToken token, Uri cloneUrl, string reference, int depth = 0)
+    public async Task Init(CancellationToken token)
+    {
+        await RunGitCmd(token, "init");
+    }
+
+    public async Task Fetch(
+        Uri cloneUrl,
+        string reference,
+        CancellationToken token,
+        IReadOnlyList<string>? extraArgs = null
+    )
     {
         var args = new List<string> { "fetch" };
-        if (depth != 0)
+        if (extraArgs is not null)
         {
-            args.AddRange(["--depth", depth.ToString(CultureInfo.InvariantCulture)]);
+            args.AddRange(extraArgs);
         }
 
         args.AddRange([cloneUrl.ToString(), reference]);
-        await RunGitCmd(token, args);
+        await RunGitCmd(args, token);
     }
 
     public async Task Status(CancellationToken token)
@@ -67,25 +70,8 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         await RunGitCmd(token, "status");
     }
 
-    public async Task ResetHard(CancellationToken token, string toBranchOrSha1)
+    public async Task ResetHard(string toBranchOrSha1, CancellationToken token)
     {
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
-    }
-
-    public async Task Clone(CancellationToken token, Uri cloneUrl, string reference, int depth = 0)
-    {
-        // Use init + fetch approach for uniform handling of branches and SHAs with depth
-        await RunGitCmd(token, "init");
-
-        var args = new List<string> { "fetch" };
-        if (depth != 0)
-        {
-            args.AddRange(["--depth", depth.ToString(CultureInfo.InvariantCulture)]);
-        }
-
-        args.AddRange([cloneUrl.ToString(), reference]);
-        await RunGitCmd(token, args);
-
-        await RunGitCmd(token, "reset", "--hard", "FETCH_HEAD");
     }
 }

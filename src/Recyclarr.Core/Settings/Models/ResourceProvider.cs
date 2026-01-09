@@ -14,7 +14,6 @@ public record GitResourceProvider : ResourceProvider
 {
     public required Uri CloneUrl { get; init; }
     public string Reference { get; init; } = "master";
-    public int Depth { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

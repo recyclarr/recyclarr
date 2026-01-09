@@ -21,7 +21,7 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
             Name = "official",
             Type = "config-templates",
             CloneUrl = new Uri("https://github.com/recyclarr/config-templates.git"),
-            Reference = "master",
+            Reference = "master", // Explicit: matches upstream default branch
         };
 
         var myProviders = providers.Where(p => p.Type == Type);

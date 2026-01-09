@@ -8,14 +8,12 @@ resource_providers:
     clone_url: https://github.com/TRaSH-Guides/Guides.git
     reference: 376139d7739674911e9534a3d638cd21ccd5bce8
     replace_default: true
-    depth: 1
   # Official config-templates at pinned SHA (replaces default)
   - name: config-templates-pinned
     type: config-templates
     clone_url: https://github.com/recyclarr/config-templates.git
     reference: dd49e8697c8bed32f7d1f4bcf1f12b8ccbedd776
     replace_default: true
-    depth: 1
   # Local Sonarr custom formats (supplements official)
   - name: sonarr-cfs-local
     type: custom-formats

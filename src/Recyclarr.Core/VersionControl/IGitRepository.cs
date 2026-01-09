@@ -1,16 +1,14 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Recyclarr.VersionControl;
 
-[SuppressMessage(
-    "Design",
-    "CA1068:CancellationToken parameters must come last",
-    Justification = "Doesn't mix well with `params` (which has to be at the end)"
-)]
 public interface IGitRepository : IDisposable
 {
-    Task Fetch(CancellationToken token, Uri cloneUrl, string reference, int depth = 0);
-    Task ResetHard(CancellationToken token, string toBranchOrSha1);
-    Task Clone(CancellationToken token, Uri cloneUrl, string reference, int depth = 0);
+    Task Init(CancellationToken token);
+    Task Fetch(
+        Uri cloneUrl,
+        string reference,
+        CancellationToken token,
+        IReadOnlyList<string>? extraArgs = null
+    );
+    Task ResetHard(string toBranchOrSha1, CancellationToken token);
     Task Status(CancellationToken token);
 }

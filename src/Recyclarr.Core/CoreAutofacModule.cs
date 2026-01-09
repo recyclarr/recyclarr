@@ -267,7 +267,7 @@ public class CoreAutofacModule : Module
 
     private static void RegisterVersionControl(ContainerBuilder builder)
     {
-        builder.RegisterType<GitRepositoryFactory>().As<IGitRepositoryFactory>();
+        builder.RegisterType<GitRepository>().As<IGitRepository>();
     }
 
     private static void RegisterSyncEvents(ContainerBuilder builder)

@@ -57,13 +57,6 @@
               "type": "string",
               "title": "Branch name, tag, or SHA1 commit hash to check out",
               "default": "master"
-            },
-            "depth": {
-              "type": "integer",
-              "title": "Shallow clone depth",
-              "description": "Number of commits to include in shallow clone. 0 or omitted means full clone.",
-              "minimum": 0,
-              "default": 0
             }
           }
         }

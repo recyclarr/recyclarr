@@ -111,10 +111,6 @@ public class GitResourceProviderValidator : AbstractValidator<GitResourceProvide
             .NotNull()
             .Must(uri => uri.IsAbsoluteUri && uri.Scheme is "http" or "https")
             .WithMessage(x => $"Provider '{x.Name}': clone_url must be a valid HTTP/HTTPS URL");
-
-        RuleFor(x => x.Depth)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage(x => $"Provider '{x.Name}': depth must be 0 or greater");
     }
 }
 

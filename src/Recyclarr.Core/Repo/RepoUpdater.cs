@@ -1,10 +1,14 @@
+using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.VersionControl;
 
 namespace Recyclarr.Repo;
 
-public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) : IRepoUpdater
+public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoFactory)
+    : IRepoUpdater
 {
+    private static readonly string[] ValidGitPaths = [".git/config", ".git/index", ".git/HEAD"];
+
     public async Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
         // Assume failure until it succeeds, to simplify the catch handlers.
@@ -41,20 +45,26 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
     {
         var cloneUrl = repositorySource.CloneUrl;
         var reference = repositorySource.Reference;
-        var depth = repositorySource.Depth;
+        var repoPath = repositorySource.Path;
 
-        log.Debug("Using URL: {Url}, Ref: {Reference}, Depth: {Depth}", cloneUrl, reference, depth);
+        log.Debug("Using URL: {Url}, Ref: {Reference}", cloneUrl, reference);
 
-        using var repo = await repositoryFactory.CreateAndCloneIfNeeded(
-            cloneUrl,
-            repositorySource.Path,
-            reference,
-            depth,
-            token
-        );
+        using var repo = repoFactory(repoPath);
+
+        if (!repoPath.Exists)
+        {
+            log.Debug("Initializing new repository at {RepoPath}", repoPath.FullName);
+            await repo.Init(token);
+        }
+        else
+        {
+            ValidateGitDirectory(repoPath);
+            await repo.Status(token);
+        }
+
         try
         {
-            await repo.Fetch(token, cloneUrl, reference, depth);
+            await repo.Fetch(cloneUrl, reference, token, ["--depth", "1"]);
         }
         catch (GitCmdException e)
         {
@@ -65,6 +75,14 @@ public class RepoUpdater(ILogger log, IGitRepositoryFactory repositoryFactory) :
             );
         }
 
-        await repo.ResetHard(token, "FETCH_HEAD");
+        await repo.ResetHard("FETCH_HEAD", token);
+    }
+
+    private static void ValidateGitDirectory(IDirectoryInfo repoPath)
+    {
+        if (ValidGitPaths.Select(repoPath.File).Any(x => !x.Exists))
+        {
+            throw new InvalidGitRepoException("A `.git` directory or its files are missing");
+        }
     }
 }

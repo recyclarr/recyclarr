@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using Autofac.Extras.Ordering;
@@ -67,7 +67,6 @@ public abstract class IntegrationTestFixture : IDisposable
             m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
         });
         builder.RegisterMockFor<IGitRepository>();
-        builder.RegisterMockFor<IGitRepositoryFactory>();
         builder.RegisterMockFor<IServiceInformation>(m =>
         {
             // By default, choose some extremely high number so that all the newest features are enabled.

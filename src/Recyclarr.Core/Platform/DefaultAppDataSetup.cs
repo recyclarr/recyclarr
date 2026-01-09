@@ -17,7 +17,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         var paths = new AppPaths(fs.DirectoryInfo.New(appDir));
 
         // Initialize other directories used throughout the application
-        // Do not initialize the repo directory here; the GitRepositoryFactory handles that later.
+        // Do not initialize the repo directory here; the RepoUpdater handles that later.
         paths.CacheDirectory.Create();
         paths.LogDirectory.Create();
         paths.ConfigsDirectory.Create();

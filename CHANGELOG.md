@@ -23,8 +23,6 @@ changes you may need to make.
   related custom formats with automatic profile assignment based on guide recommendations.
 - Custom Formats: `assign_scores_to` now accepts `trash_id` as an alternative to `name` for
   referencing guide-backed quality profiles.
-- Settings: Git resource providers now support `depth` option for shallow clones, reducing clone
-  time and disk usage.
 - Settings: Local resource providers now support relative paths, resolved against the app data
   directory.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
