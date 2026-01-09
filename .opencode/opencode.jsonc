@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/sse"
+    }
+  },
+  "formatter": {
+    "csharpier": {
+      "command": ["dotnet", "csharpier", "$FILE"],
+      "extensions": [".cs"]
+    }
+  }
+}
