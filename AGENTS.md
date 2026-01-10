@@ -279,6 +279,16 @@ changes you may need to make.
 - **BREAKING**: Description of breaking change
 ```
 
+Removed features wording depends on whether deprecation was in a prior release:
+
+```bash
+git log --oneline --diff-filter=A -- "path/to/deprecation" | tail -1
+git tag --contains <sha> | grep -E '^v[0-9]'
+```
+
+- **Tags exist**: "The deprecated `X` has been removed."
+- **No tags**: "The `X` option has been removed. Use `Y` instead."
+
 ## Logging and Console Output
 
 The `--log` flag controls which output channel is visible to users:
