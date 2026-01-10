@@ -11,7 +11,7 @@ Local workspace clone at `guides/` (relative to workspace root).
 
 All JSON resources are under `docs/json/`:
 
-```
+```txt
 docs/json/
   radarr/
     cf/                    # Custom format JSONs (one per CF)
