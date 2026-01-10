@@ -51,11 +51,10 @@ changes you may need to make.
   log-style output.
 - Quality Sizes: Preview now only displays items that will be changed.
 
-### Deprecated
+### Removed
 
-- CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
-- Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
-  cache rebuild --adopt` to adopt manually-created custom formats.
+- Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use
+  `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
 
 ### Fixed
 

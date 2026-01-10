@@ -46,9 +46,6 @@ public abstract class ServiceConfigMerger<T>
             ),
 
             DeleteOldCustomFormats = b.DeleteOldCustomFormats ?? a.DeleteOldCustomFormats,
-
-            ReplaceExistingCustomFormats =
-                b.ReplaceExistingCustomFormats ?? a.ReplaceExistingCustomFormats,
         };
     }
 

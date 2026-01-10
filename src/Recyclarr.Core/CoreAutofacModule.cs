@@ -134,8 +134,7 @@ public class CoreAutofacModule : Module
         builder
             .RegisterTypes(
                 // Order-sensitive!
-                typeof(CfQualityProfilesDeprecationCheck),
-                typeof(ReplaceExistingCfsDeprecationCheck)
+                typeof(CfQualityProfilesDeprecationCheck)
             )
             .As<IConfigDeprecationCheck>()
             .OrderByRegistration();

@@ -169,7 +169,6 @@ internal static class ConfigYamlExtensions
             BaseUrl = ParseUri(yaml.BaseUrl),
             ApiKey = yaml.ApiKey ?? "",
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
-            ReplaceExistingCustomFormats = yaml.ReplaceExistingCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
             CustomFormatGroups =
@@ -194,7 +193,6 @@ internal static class ConfigYamlExtensions
             BaseUrl = ParseUri(yaml.BaseUrl),
             ApiKey = yaml.ApiKey ?? "",
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
-            ReplaceExistingCustomFormats = yaml.ReplaceExistingCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
             CustomFormatGroups =

@@ -15,5 +15,4 @@ public interface IServiceConfiguration
     ICollection<CustomFormatGroupConfig> CustomFormatGroups { get; }
     QualityDefinitionConfig? QualityDefinition { get; }
     IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; }
-    bool ReplaceExistingCustomFormats { get; }
 }

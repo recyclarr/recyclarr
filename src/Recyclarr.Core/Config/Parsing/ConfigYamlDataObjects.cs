@@ -99,7 +99,6 @@ public record ServiceConfigYaml
     public string? BaseUrl { get; init; }
 
     public bool? DeleteOldCustomFormats { get; init; }
-    public bool? ReplaceExistingCustomFormats { get; init; }
 
     public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; init; }
     public IReadOnlyCollection<CustomFormatGroupConfigYaml>? CustomFormatGroups { get; init; }

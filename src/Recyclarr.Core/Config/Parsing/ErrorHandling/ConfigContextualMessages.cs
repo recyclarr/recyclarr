@@ -47,6 +47,18 @@ public static class ConfigContextualMessages
                 + "See: <https://recyclarr.dev/guide/upgrade-guide/v7.0/#sonarr-removed>";
         }
 
+        if (
+            msg.Contains(
+                "Property 'replace_existing_custom_formats' not found on type",
+                StringComparison.Ordinal
+            )
+        )
+        {
+            return "The `replace_existing_custom_formats` option has been removed. "
+                + "Use `recyclarr cache rebuild --adopt` to adopt manually-created custom formats. "
+                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed>";
+        }
+
         return null;
     }
 }
