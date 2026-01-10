@@ -18,4 +18,5 @@ if ($exitCode -eq 0) {
 }
 
 Write-Output "Log file: $logFile"
+Write-Output "The file is LARGE. Search it with rg; do not read the whole file!"
 exit $exitCode
