@@ -56,7 +56,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" PrivateAssets="all" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.0.1" PrivateAssets="all" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.54.0" PrivateAssets="all" />
-    <PackageVersion Include="Testcontainers" Version="4.9.0" PrivateAssets="all" />
+    <PackageVersion Include="Testcontainers" Version="4.10.0" PrivateAssets="all" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.0" PrivateAssets="all" />
   </ItemGroup>
   <!-- Following found during vulerabilities Code Scan  -->
