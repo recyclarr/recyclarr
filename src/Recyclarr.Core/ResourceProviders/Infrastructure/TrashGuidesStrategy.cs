@@ -12,7 +12,7 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
 {
     public string Type => "trash-guides";
 
-    public IReadOnlyList<string> DefaultReferences => ["master"];
+    public IReadOnlyList<string> DefaultReferences => ["master", "main"];
 
     public IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers

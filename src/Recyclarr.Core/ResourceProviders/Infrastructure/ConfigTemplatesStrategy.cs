@@ -12,7 +12,8 @@ public class ConfigTemplatesStrategy(ResourceRegistry<TemplateMetadata> registry
 {
     public string Type => "config-templates";
 
-    public IReadOnlyList<string> DefaultReferences => [$"v{GitVersionInformation.Major}", "master"];
+    public IReadOnlyList<string> DefaultReferences =>
+        [$"v{GitVersionInformation.Major}", "master", "main"];
 
     public IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers

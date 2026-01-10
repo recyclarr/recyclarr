@@ -35,6 +35,7 @@ changes you may need to make.
 - CLI: New `--raw` option for list commands outputs TSV format for scripting.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.
+- Settings: Git resource providers now support both `main` and `master` as default branches.
 
 ### Changed
 

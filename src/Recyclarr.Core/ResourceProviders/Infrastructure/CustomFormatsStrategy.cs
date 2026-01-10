@@ -8,7 +8,7 @@ public class CustomFormatsStrategy(ResourceRegistry<IFileInfo> registry) : IProv
 {
     public string Type => "custom-formats";
 
-    public IReadOnlyList<string> DefaultReferences => ["master"];
+    public IReadOnlyList<string> DefaultReferences => ["master", "main"];
 
     public IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers
