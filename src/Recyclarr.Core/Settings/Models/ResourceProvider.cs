@@ -13,7 +13,7 @@ public abstract record ResourceProvider
 public record GitResourceProvider : ResourceProvider
 {
     public required Uri CloneUrl { get; init; }
-    public string Reference { get; init; } = "master";
+    public string? Reference { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

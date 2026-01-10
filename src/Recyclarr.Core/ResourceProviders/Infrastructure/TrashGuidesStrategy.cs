@@ -12,6 +12,8 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
 {
     public string Type => "trash-guides";
 
+    public IReadOnlyList<string> DefaultReferences => ["master"];
+
     public IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers
     )
@@ -21,7 +23,6 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
             Name = "official",
             Type = "trash-guides",
             CloneUrl = new Uri("https://github.com/TRaSH-Guides/Guides.git"),
-            Reference = "master", // Explicit: matches upstream default branch
         };
 
         var myProviders = providers.Where(p => p.Type == Type);

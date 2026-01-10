@@ -1,18 +1,23 @@
 using System.IO.Abstractions;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.ResourceProviders.Storage;
 
 public class GitProviderLocation(
     GitResourceProvider config,
+    IProviderTypeStrategy strategy,
     IAppPaths appPaths,
     IRepoUpdater updater,
     ILogger log
 ) : IProviderLocation
 {
-    public delegate GitProviderLocation Factory(GitResourceProvider config);
+    public delegate GitProviderLocation Factory(
+        GitResourceProvider config,
+        IProviderTypeStrategy strategy
+    );
 
     public async Task<IReadOnlyCollection<IDirectoryInfo>> InitializeAsync(
         IProgress<ProviderProgress>? progress,
@@ -26,6 +31,10 @@ public class GitProviderLocation(
 
         progress?.Report(new ProviderProgress(config.Name, ProviderStatus.Processing));
 
+        var references = config.Reference is not null
+            ? [config.Reference]
+            : strategy.DefaultReferences;
+
         try
         {
             await updater.UpdateRepo(
@@ -33,7 +42,7 @@ public class GitProviderLocation(
                 {
                     Name = config.Name,
                     CloneUrl = config.CloneUrl,
-                    Reference = config.Reference,
+                    References = references,
                     Path = cachePath,
                 },
                 ct

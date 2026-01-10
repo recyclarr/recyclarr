@@ -7,6 +7,8 @@ public interface IProviderTypeStrategy
 {
     string Type { get; }
 
+    IReadOnlyList<string> DefaultReferences { get; }
+
     IReadOnlyCollection<ResourceProvider> GetInitialProviders(
         IReadOnlyCollection<ResourceProvider> providers
     );

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
       <RootNamespace>Recyclarr</RootNamespace>
@@ -11,6 +11,7 @@
       <PackageReference Include="FluentValidation" />
       <PackageReference Include="Flurl" />
       <PackageReference Include="Flurl.Http" />
+      <PackageReference Include="GitVersion.MsBuild" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="SuperLinq" />

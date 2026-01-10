@@ -8,10 +8,7 @@
     <PackageReference Include="Autofac" />
     <PackageReference Include="Autofac.Extras.AggregateService" />
     <PackageReference Include="Autofac.Extras.Ordering" />
-    <PackageReference Include="GitVersion.MsBuild">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="GitVersion.MsBuild" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Expressions" />
     <PackageReference Include="Serilog.Sinks.Console" />

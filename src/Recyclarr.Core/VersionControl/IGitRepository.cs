@@ -5,7 +5,7 @@ public interface IGitRepository : IDisposable
     Task Init(CancellationToken token);
     Task Fetch(
         Uri cloneUrl,
-        string reference,
+        IReadOnlyList<string> references,
         CancellationToken token,
         IReadOnlyList<string>? extraArgs = null
     );

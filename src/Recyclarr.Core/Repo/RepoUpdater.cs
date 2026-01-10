@@ -44,10 +44,10 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
     )
     {
         var cloneUrl = repositorySource.CloneUrl;
-        var reference = repositorySource.Reference;
+        var references = repositorySource.References;
         var repoPath = repositorySource.Path;
 
-        log.Debug("Using URL: {Url}, Ref: {Reference}", cloneUrl, reference);
+        log.Debug("Using URL: {Url}, Refs: {@References}", cloneUrl, references);
 
         using var repo = repoFactory(repoPath);
 
@@ -64,14 +64,14 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
 
         try
         {
-            await repo.Fetch(cloneUrl, reference, token, ["--depth", "1"]);
+            await repo.Fetch(cloneUrl, references, token, ["--depth", "1"]);
         }
-        catch (GitCmdException e)
+        catch (AggregateException e)
         {
             log.Warning(
                 e,
-                "Non-zero exit code {ExitCode} while running git fetch (will proceed with existing files)",
-                e.ExitCode
+                "All references failed to fetch (will proceed with existing files): {@References}",
+                references
             );
         }
 

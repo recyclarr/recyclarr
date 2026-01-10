@@ -50,9 +50,40 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
 
     public async Task Fetch(
         Uri cloneUrl,
-        string reference,
+        IReadOnlyList<string> references,
         CancellationToken token,
         IReadOnlyList<string>? extraArgs = null
+    )
+    {
+        List<GitCmdException> errors = [];
+
+        foreach (var reference in references)
+        {
+            try
+            {
+                log.Debug("Attempting to fetch reference: {Reference}", reference);
+                await FetchReference(cloneUrl, reference, extraArgs, token);
+                log.Debug("Successfully fetched reference: {Reference}", reference);
+                return;
+            }
+            catch (GitCmdException e)
+            {
+                log.Debug("Failed to fetch reference {Reference}: {Error}", reference, e.Message);
+                errors.Add(e);
+            }
+        }
+
+        throw new AggregateException(
+            $"All references failed to fetch: [{string.Join(", ", references)}]",
+            errors
+        );
+    }
+
+    private async Task FetchReference(
+        Uri cloneUrl,
+        string reference,
+        IReadOnlyList<string>? extraArgs,
+        CancellationToken token
     )
     {
         var args = new List<string> { "fetch" };

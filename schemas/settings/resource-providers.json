@@ -56,7 +56,7 @@
             "reference": {
               "type": "string",
               "title": "Branch name, tag, or SHA1 commit hash to check out",
-              "default": "master"
+              "description": "If omitted, config-templates providers use version-aware fallback (v{major} then master); other types default to master."
             }
           }
         }

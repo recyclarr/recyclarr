@@ -40,13 +40,14 @@ public class ProviderInitializationFactory(
                 config.Type
             );
 
+            var strategy = strategyByType[config.Type];
+
             try
             {
-                var location = CreateLocation(config);
+                var location = CreateLocation(config, strategy);
                 var roots = await location.InitializeAsync(progress, ct);
                 activePaths.AddRange(roots);
 
-                var strategy = strategyByType[config.Type];
                 foreach (var root in roots)
                 {
                     strategy.MapResourcePaths(config, root);
@@ -64,11 +65,14 @@ public class ProviderInitializationFactory(
         cleanup.CleanupOrphans(activePaths);
     }
 
-    private IProviderLocation CreateLocation(ResourceProvider config)
+    private IProviderLocation CreateLocation(
+        ResourceProvider config,
+        IProviderTypeStrategy strategy
+    )
     {
         return config switch
         {
-            GitResourceProvider git => createGitLocation(git),
+            GitResourceProvider git => createGitLocation(git, strategy),
             LocalResourceProvider local => createLocalLocation(local),
             _ => throw new InvalidOperationException(
                 $"Unknown provider type: {config.GetType().Name}"
