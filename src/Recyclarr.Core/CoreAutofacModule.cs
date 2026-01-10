@@ -134,13 +134,6 @@ public class CoreAutofacModule : Module
 
         // Settings Deprecations
         builder.RegisterType<SettingsDeprecations>();
-        builder
-            .RegisterTypes(
-                // Order-sensitive!
-                typeof(RepositoriesToResourceProvidersDeprecationCheck)
-            )
-            .As<ISettingsDeprecationCheck>()
-            .OrderByRegistration();
 
         // These validators are required by IncludePostProcessor
         builder.RegisterType<RadarrConfigYamlValidator>().As<IValidator>();

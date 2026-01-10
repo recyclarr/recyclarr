@@ -19,15 +19,26 @@ public static class SettingsContextualMessages
 
         if (
             msg.Contains(
-                "Property 'repository' not found on type "
-                    + $"'{typeof(RecyclarrSettings).FullName}'",
+                $"Property 'repositories' not found on type '{typeof(RecyclarrSettings).FullName}'",
                 StringComparison.Ordinal
             )
         )
         {
-            return "Usage of 'repository' setting is no "
-                + "longer supported. Use 'trash_guides' under 'repositories' instead."
-                + "See: <https://recyclarr.dev/guide/upgrade-guide/v5.0/#settings-repository-changes>";
+            return "The 'repositories' setting has been removed. "
+                + "Use 'resource_providers' instead. "
+                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#resource-providers>";
+        }
+
+        if (
+            msg.Contains(
+                $"Property 'repository' not found on type '{typeof(RecyclarrSettings).FullName}'",
+                StringComparison.Ordinal
+            )
+        )
+        {
+            return "The 'repository' setting has been removed. "
+                + "Use 'resource_providers' instead. "
+                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#resource-providers>";
         }
 
         return null;
