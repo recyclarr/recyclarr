@@ -55,6 +55,8 @@ changes you may need to make.
 
 - Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use
   `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
+- Config: **BREAKING** The deprecated `quality_profiles` element under `custom_formats` has been
+  removed.
 
 ### Fixed
 

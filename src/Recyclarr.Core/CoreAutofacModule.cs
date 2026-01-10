@@ -131,13 +131,6 @@ public class CoreAutofacModule : Module
 
         // Config Deprecations
         builder.RegisterType<ConfigDeprecations>();
-        builder
-            .RegisterTypes(
-                // Order-sensitive!
-                typeof(CfQualityProfilesDeprecationCheck)
-            )
-            .As<IConfigDeprecationCheck>()
-            .OrderByRegistration();
 
         // Settings Deprecations
         builder.RegisterType<SettingsDeprecations>();
