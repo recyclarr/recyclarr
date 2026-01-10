@@ -68,6 +68,7 @@ internal class ListQualityProfilesCommand(
     {
         console.WriteLine();
         console.MarkupLine($"[orange3]Quality Profiles in the TRaSH Guides ({service})[/]");
+        console.MarkupLine("[dim]Tip: Click profile names to open the guide page.[/]");
         console.WriteLine();
 
         var table = new Table().RoundedBorder().ShowRowSeparators();
