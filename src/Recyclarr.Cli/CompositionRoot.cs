@@ -103,7 +103,7 @@ internal static class CompositionRoot
 
         // Migration Steps
         builder
-            .RegisterTypes(typeof(MoveOsxAppDataDotnet8), typeof(DeleteRepoDirMigrationStep))
+            .RegisterTypes(typeof(DeleteRepoDirMigrationStep))
             .As<IMigrationStep>()
             .OrderByRegistration();
     }

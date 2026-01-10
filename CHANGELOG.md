@@ -61,6 +61,8 @@ changes you may need to make.
   include files to the `includes` directory.
 - Settings: **BREAKING** The deprecated `repositories` setting has been removed. Use
   `resource_providers` instead.
+- Migrate: **BREAKING** macOS users upgrading from versions prior to v6.0 must manually move app
+  data from `~/.config/recyclarr` to `~/Library/Application Support/recyclarr`.
 
 ### Fixed
 
