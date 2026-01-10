@@ -12,23 +12,6 @@ internal class BaseCommandSettings : CommandSettings
     [DefaultValue(CliLogLevel.Info)]
     public FlagValue<CliLogLevel> LogLevel { get; init; } = null!;
 
-    [CommandOption("-d|--debug")]
-    [Description("DEPRECATED: Use '--log debug' instead")]
-    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-    [Obsolete("Use LogLevel instead")]
-    public bool Debug
-    {
-        get;
-        init
-        {
-            field = value;
-            if (value)
-            {
-                LogLevel = new FlagValue<CliLogLevel> { IsSet = true, Value = CliLogLevel.Debug };
-            }
-        }
-    }
-
     [CommandOption("--app-data")]
     [Description("Custom path to the application data directory")]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
