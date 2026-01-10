@@ -118,7 +118,7 @@ Test behavior, not implementation. Focus on meaningful business logic coverage.
 
 **E2E Tests:** Run via `./scripts/Run-E2ETests.ps1` only (never `dotnet test` directly).
 
-See `tests/CLAUDE.md` for detailed patterns, assertions, and infrastructure.
+**Skill:** Load `testing` skill before writing or modifying test code.
 
 ## Backward Compatibility
 
