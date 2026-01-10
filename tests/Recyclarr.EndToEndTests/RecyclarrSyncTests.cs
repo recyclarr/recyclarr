@@ -265,7 +265,7 @@ internal sealed class RecyclarrSyncTests
     )
     {
         return await Cli.Wrap(_recyclarrBinaryPath)
-            .WithArguments(["sync", "--debug", "--config", configPath ?? _configPath])
+            .WithArguments(["sync", "--log", "debug", "--config", configPath ?? _configPath])
             .WithEnvironmentVariables(env =>
                 env.Set(
                         "SONARR_URL",
