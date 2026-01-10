@@ -57,6 +57,8 @@ changes you may need to make.
   `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
 - Config: **BREAKING** The deprecated `quality_profiles` element under `custom_formats` has been
   removed.
+- Config: **BREAKING** Include templates in the `configs` directory are no longer supported. Move
+  include files to the `includes` directory.
 - Settings: **BREAKING** The deprecated `repositories` setting has been removed. Use
   `resource_providers` instead.
 
