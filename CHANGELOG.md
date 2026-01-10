@@ -41,6 +41,8 @@ changes you may need to make.
 - CLI: **BREAKING** List commands now display formatted tables instead of plain text. Use `--raw`
   for the previous behavior (now TSV format for scripting).
 - CLI: **BREAKING** The global `--raw` option has been removed. It is now specific to list commands.
+- CLI: **BREAKING** The `--score-sets` option on `list custom-formats` has been removed. Use
+  `list score-sets` instead.
 - Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
   reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
 - Sync: Preview mode now shows instance name in section headers and a visual separator between
@@ -52,8 +54,6 @@ changes you may need to make.
 ### Deprecated
 
 - CLI: The `-d|--debug` option is deprecated. Use `--log debug` instead.
-- CLI: The `--score-sets` option on `list custom-formats` is deprecated. Use `list score-sets`
-  instead.
 - Config: The `replace_existing_custom_formats` option no longer has any effect. Use `recyclarr
   cache rebuild --adopt` to adopt manually-created custom formats.
 

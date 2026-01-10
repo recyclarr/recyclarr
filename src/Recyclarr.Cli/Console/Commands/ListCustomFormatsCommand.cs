@@ -26,11 +26,6 @@ internal class ListCustomFormatsCommand(
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
-
-        [CommandOption("--score-sets")]
-        [Description("[DEPRECATED] Use 'list score-sets' instead.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public bool ScoreSets { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(
@@ -40,79 +35,8 @@ internal class ListCustomFormatsCommand(
     )
     {
         await providerProgressHandler.InitializeProvidersAsync(ct);
-
-        if (settings.ScoreSets)
-        {
-            const string deprecationMessage =
-                "The '--score-sets' option is deprecated and will be removed in a future version. "
-                + "Use 'recyclarr list score-sets' instead. "
-                + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#score-sets-command";
-
-            console.MarkupLine($"[darkorange bold][[DEPRECATED]][/] {deprecationMessage}");
-            log.Warning(deprecationMessage);
-            ListScoreSets(settings);
-        }
-        else
-        {
-            ListCustomFormats(settings);
-        }
-
+        ListCustomFormats(settings);
         return (int)ExitStatus.Succeeded;
-    }
-
-    // TODO: Remove this method when --score-sets is removed. This logic is duplicated in
-    // ListScoreSetsCommand.cs for the new 'list score-sets' command.
-    private void ListScoreSets(CliSettings settings)
-    {
-        var customFormats = provider.Get(settings.Service);
-
-        var scoreSets = customFormats
-            .SelectMany(x => x.Resource.TrashScores.Keys)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .Order(StringComparer.InvariantCultureIgnoreCase)
-            .ToList();
-
-        log.Debug("Found {Count} score sets for {Service}", scoreSets.Count, settings.Service);
-        log.Information("Score sets: {@ScoreSets}", scoreSets);
-
-        if (settings.Raw)
-        {
-            OutputScoreSetsRaw(scoreSets);
-        }
-        else
-        {
-            OutputScoreSetsTable(scoreSets);
-        }
-    }
-
-    private void OutputScoreSetsRaw(IReadOnlyCollection<string> scoreSets)
-    {
-        foreach (var set in scoreSets)
-        {
-            console.WriteLine(set);
-        }
-    }
-
-    private void OutputScoreSetsTable(IReadOnlyCollection<string> scoreSets)
-    {
-        var table = new Table().AddColumn("Score Set Name");
-        var alternatingColors = new[] { "white", "paleturquoise4" };
-        var colorIndex = 0;
-
-        foreach (var set in scoreSets)
-        {
-            var color = alternatingColors[colorIndex];
-            table.AddRow($"[{color}]{Markup.Escape(set)}[/]");
-            colorIndex = 1 - colorIndex;
-        }
-
-        console.WriteLine();
-        console.Write(table);
-        console.WriteLine();
-        console.WriteLine(
-            "Use these with the `score_set` property in any quality profile defined under "
-                + "the top-level `quality_profiles` list."
-        );
     }
 
     private void ListCustomFormats(CliSettings settings)
