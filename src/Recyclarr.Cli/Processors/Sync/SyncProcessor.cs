@@ -84,21 +84,7 @@ internal class SyncProcessor(
         CancellationToken ct
     )
     {
-        bool failureDetected;
-        try
-        {
-            failureDetected = await ProcessService(settings, configs, ct);
-        }
-        catch (Exception e)
-        {
-            if (!await exceptionHandler.TryHandleAsync(e, syncEventOutput))
-            {
-                throw;
-            }
-
-            failureDetected = true;
-        }
-
+        var failureDetected = await ProcessService(settings, configs, ct);
         return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 
