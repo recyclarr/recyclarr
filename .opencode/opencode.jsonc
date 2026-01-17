@@ -12,5 +12,11 @@
       "command": ["dotnet", "csharpier", "$FILE"],
       "extensions": [".cs"]
     }
+  },
+  "permission": {
+    // Fine tune linear tools in context
+    "*linear_*": "deny",
+    "*linear_*_comment*": "allow",
+    "*linear_*_issue*": "allow",
   }
 }
