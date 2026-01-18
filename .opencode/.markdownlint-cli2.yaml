@@ -1,3 +1,5 @@
 config:
   first-line-heading: false
-  no-inline-html: false
+  no-inline-html:
+    allowed_elements:
+      - br

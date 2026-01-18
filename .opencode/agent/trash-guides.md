@@ -1,6 +1,14 @@
 ---
-name: trash-guides
-description: Navigate TRaSH Guides local workspace clone for custom formats, quality profiles, naming, and quality sizes
+description: Navigate TRaSH Guides for custom formats, quality profiles, naming, and quality sizes
+mode: subagent
+model: anthropic/claude-haiku-4-5
+permission:
+  "*": deny
+  read: allow
+  grep: allow
+  glob: allow
+  list: allow
+  bash: allow
 ---
 
 # TRaSH Guides Repository

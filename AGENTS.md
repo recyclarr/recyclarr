@@ -5,8 +5,8 @@
 ## Project Context
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
-- Components: Cli (entry) → Core (logic) → TrashGuide/ServarrApi (integrations)
-- Pipeline: `GenericSyncPipeline<TContext>` - Config → Fetch → Transaction → Persist → Preview
+- Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
+- Pipeline: `GenericSyncPipeline<TContext>` - Config -> Fetch -> Transaction -> Persist -> Preview
 - DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
   gets its own Autofac Module to keep DI registration modular.
 - Config: YAML + `schemas/config-schema.json` validation
@@ -39,86 +39,14 @@
 - When registering types as themselves in Autofac, `RegisterType<>()` already registers "as self",
   so don't use `.AsSelf()`; it is redundant.
 
-### C# Requirements
+## Skills
 
-Language Features:
+Load skills for procedural knowledge:
 
-- File-scoped namespaces: `namespace Recyclarr.Core;`
-- Primary constructors: `class Service(IDep dep, ILogger logger)`
-- Collection expressions (MANDATORY): `[]`, `[item]`, `[..spread]`. NEVER use `new[]`, `new
-  List<T>()`, `Array.Empty<T>()`. For type inference, prefer `[new T { }, new T { }]` over casts;
-  use `T[] x = [...]` only when simpler forms fail.
-- Records for DTOs, `init` setters
-- Pattern matching: `is not null`, switch expressions
-- Spread operator for collections: `[..first, ..second]`
-
-C# 14 Features (.NET 10):
-
-- `field` keyword: `public string Name { get; set => field = value ?? throw; } = "";`
-- Extension blocks: `extension(T src) { public bool IsEmpty => !src.Any(); }` (properties + statics)
-- Null-conditional assignment: `obj?.Prop = value;` (RHS evaluated only if obj not null)
-- Lambda modifiers without types: `(text, out result) => int.TryParse(text, out result)`
-- Migration: Use new syntax for new code; opportunistically refactor existing code when revisiting
-
-Required Idioms:
-
-- Use `internal` for implementation classes (CLI apps, service implementations)
-- Use `public` only for genuine external APIs
-- Concrete classes implementing public interfaces should be `internal`
-- Records for data models. Favor immutability where reasonable. Use immutable collections along with
-  it (e.g. `IReadOnlyCollection`, `IReadOnlyDictionary`).
-- System.Text.Json: Use `JsonSerializerOptions` for convention/style settings applied uniformly.
-  Reserve attributes (`[JsonPropertyName]`, etc.) for special cases only. Check for existing options
-  configuration before creating new instances.
-- `[UsedImplicitly]`: Mark runtime-used members (deserialization, reflection, DI). Cheat sheet:
-  - `[UsedImplicitly]` - type instantiated implicitly (DI, empty marker records)
-  - `[UsedImplicitly(ImplicitUseKindFlags.Assign)]` - properties set via deserialization
-  - `[UsedImplicitly(..., ImplicitUseTargetFlags.WithMembers)]` - applies to type AND all members
-  - Common: `[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]` for
-    DTOs/records deserialized from JSON/YAML
-- Suppressing warnings: NEVER use `#pragma warning disable`. Use `[SuppressMessage]` with
-  `Justification` on class/method level. Prefer class-level when multiple members need same
-  suppression.
-- LINQ method chaining over loops
-- LINQ method syntax only; NEVER use query syntax (from/where/select keywords)
-- Named arguments for boolean literals and consecutive same-type parameters to clarify intent (e.g.,
-  `new Options(SendInfo: false, SendEmpty: true)` not `new Options(false, true)`)
-- `ValueTask` for hot paths, `CancellationToken` everywhere (use `ct` for variable name)
-- Avoid interface pollution: not every service class must have an interface. Add interfaces when
-  justified (e.g. testability, more than one implementation)
-- Local functions go after `return`/`continue` statements; add explicit `return;` or `continue;` if
-  needed to separate main logic from local function definitions
-
-### Testing Requirements
-
-Test behavior, not implementation. Focus on meaningful business logic coverage.
-
-**Integration-First TDD Workflow:**
-
-1. Write a failing integration test for the happy path (red)
-2. Implement until it passes (green)
-3. Check coverage; add integration tests for uncovered edge cases
-4. Use unit tests only when integration tests cannot reach specific code paths
-
-**What NOT to Test** (low-value coverage):
-
-- Console output, log messages, or UI formatting
-- Auto-properties, DTOs, and simple data containers
-- Implementation details that could change without affecting behavior
-
-**Mandates:**
-
-- Integration fixtures MUST inherit `IntegrationTestFixture` or `CliIntegrationFixture`
-- NEVER make classes/methods `virtual` just for mocking - restructure the test instead
-- NEVER remove valid coverage as a solution to test failures
-- Hexagonal architecture: stub external dependencies, use real objects for business logic
-- Fine-grained unit tests are disposable tools for RCA; keep only those that harden behavior
-
-**Stack:** NUnit 4 + NSubstitute + AutoFixture + AwesomeAssertions (NOT FluentAssertions)
-
-**E2E Tests:** Run via `./scripts/Run-E2ETests.ps1` only (never `dotnet test` directly).
-
-**Skill:** Load `testing` skill before writing or modifying test code.
+- `csharp-coding` - C# 14/.NET 10 patterns and idioms
+- `testing` - Integration-first TDD workflow
+- `changelog` - CHANGELOG format and conventions
+- `decisions` - Creating ADRs and PDRs in `docs/decisions/`
 
 ## Backward Compatibility
 
@@ -128,6 +56,51 @@ Test behavior, not implementation. Focus on meaningful business logic coverage.
 - DEPRECATIONS: Removed or deprecated features need helpful user-facing diagnostics. Look at
   existing patterns in the code base for this BEFORE you make a modification. Follow these existing
   patterns.
+
+## Sync Philosophy
+
+All sync operations must be deterministic and atomic.
+
+- **Errors** indicate configuration problems that would cause non-deterministic or partial sync.
+  Errors are collected during validation and skip only the relevant pipeline, not the entire sync.
+  Recyclarr preserves previous (service-side) sync state to avoid unintentional behavior from
+  partial syncs.
+- **Warnings** indicate deprecations or non-critical informational messages that don't affect sync
+  determinism.
+- Use `ISyncEventPublisher.AddError()` for configuration validation failures
+- Use `ISyncEventPublisher.AddWarning()` only for deprecations and informational messages
+
+## Console and Logging Output
+
+The `--log` flag controls which output channel is visible to users:
+
+- `--log` **omitted**: IAnsiConsole -> console (visible); ILogger -> file only
+- `--log [level]`: IAnsiConsole -> void (hidden); ILogger -> file + console
+
+Output channel usage:
+
+- `IAnsiConsole`: User-facing output (progress, results, prompts). Visible by default.
+- `ILogger`: Diagnostic information. Always written to log files; visible on console only with
+  --log.
+- NEVER use `Console.WriteLine`
+
+### Dual Output Pattern
+
+User-visible information must go to both console and log:
+
+- Sync command: Use `ISyncEventPublisher` methods which handle both channels automatically via the
+  diagnostics system (`SyncEventStorage`, `DiagnosticsRenderer`).
+- Other commands: Must output to both channels manually:
+
+```csharp
+// User-visible information
+console.WriteLine(message);
+log.Information(message);
+
+// Deprecations
+console.MarkupLine("[darkorange bold][[DEPRECATED]][/] " + message);
+log.Warning(message);
+```
 
 ## Repository Structure
 
@@ -209,9 +182,9 @@ Use this priority order (highest to lowest) to determine commit type:
 
 Ask: "Would this warrant a CHANGELOG line that non-technical users would understand and care about?"
 
-- `feat:` / `feat!:` → CHANGELOG "Added" / "Removed/Changed" (new capability / breaking)
-- `fix:` / `fix!:` → CHANGELOG "Fixed" / "Removed/Changed" (bug users would report / breaking)
-- `perf:` → CHANGELOG "Changed" (significant performance improvement)
+- `feat:` / `feat!:` -> CHANGELOG "Added" / "Removed/Changed" (new capability / breaking)
+- `fix:` / `fix!:` -> CHANGELOG "Fixed" / "Removed/Changed" (bug users would report / breaking)
+- `perf:` -> CHANGELOG "Changed" (significant performance improvement)
 
 Multi-commit features: use `refactor` for infrastructure commits, `feat` only for the commit that
 enables the user-facing capability.
@@ -220,124 +193,32 @@ enables the user-facing capability.
 
 If Tier 1 doesn't apply, match file paths:
 
-- `test:` → `tests/**`
-- `ci:` → `.github/**`, `ci/**`
-- `build:` → `*.props`, `*.csproj`, `*.slnx`, `.config/dotnet-tools.json`
-- `docs:` → `docs/**`, `*.md` (including `CHANGELOG.md` if committed alone)
+- `test:` -> `tests/**`
+- `ci:` -> `.github/**`, `ci/**`
+- `build:` -> `*.props`, `*.csproj`, `*.slnx`, `.config/dotnet-tools.json`
+- `docs:` -> `docs/**`, `*.md` (including `CHANGELOG.md` if committed alone)
 
 ### Tier 3: Catch-All (no CHANGELOG)
 
 If neither Tier 1 nor Tier 2 applies:
 
-- `refactor:` → C# changes in `src/**` (internal restructuring, code reorganization)
-- `chore:` → All other non-C# changes (`scripts/**`, `.renovate/*`, `renovate.json5`,
+- `refactor:` -> C# changes in `src/**` (internal restructuring, code reorganization)
+- `chore:` -> All other non-C# changes (`scripts/**`, `.renovate/*`, `renovate.json5`,
   `.editorconfig`, `.vscode/*`, `schemas/*`, linter configs, etc.)
 
 ### Scopes
 
 Derive scope from primary file path:
 
-- `src/*/Pipelines/*` → `(sync)`
-- `src/*/Config/*` → `(config)`
-- `src/*/Console/Commands/*` → `(cli)`
-- `src/*/Cache/*` → `(cache)`
-- `schemas/*` → `(yaml)`
+- `src/*/Pipelines/*` -> `(sync)`
+- `src/*/Config/*` -> `(config)`
+- `src/*/Console/Commands/*` -> `(cli)`
+- `src/*/Cache/*` -> `(cache)`
+- `schemas/*` -> `(yaml)`
 
 ### CHANGELOG Format
 
-File: `CHANGELOG.md` (keepachangelog.com format)
-
-Section order: Added, Changed, Deprecated, Removed, Fixed, Security
-
-Entry format: `- Scope: Description`
-
-```md
-### Fixed
-
-- Sync: Crash while processing quality profiles
-```
-
-Rules:
-
-- Audience is non-technical end users
-- One line per change
-- Entries under "Fixed" should not start with "Fixed"
-- New entries go under `[Unreleased]` section near the top of the file
-
-Breaking changes format (required for any release with breaking changes):
-
-```md
-## [X.0.0] - YYYY-MM-DD
-
-This release contains **BREAKING CHANGES**. See the [vX.0 Upgrade Guide][breakingX] for required
-changes you may need to make.
-
-[breakingX]: https://recyclarr.dev/guide/upgrade-guide/vX.0/
-
-### Changed
-
-- **BREAKING**: Description of breaking change
-```
-
-Removed features wording depends on whether deprecation was in a prior release:
-
-```bash
-git log --oneline --diff-filter=A -- "path/to/deprecation" | tail -1
-git tag --contains <sha> | grep -E '^v[0-9]'
-```
-
-- **Tags exist**: "The deprecated `X` has been removed."
-- **No tags**: "The `X` option has been removed. Use `Y` instead."
-
-## Logging and Console Output
-
-The `--log` flag controls which output channel is visible to users:
-
-- `--log` **omitted**: IAnsiConsole -> console (visible); ILogger -> file only
-- `--log [level]`: IAnsiConsole -> void (hidden); ILogger -> file + console
-- Levels: debug, info (default), warn
-
-Output channel usage:
-
-- `IAnsiConsole`: User-facing output (progress, results, prompts). Visible by default.
-- `ILogger`: Diagnostic information. Always written to log files; visible on console only with --log.
-- NEVER use `Console.WriteLine`
-
-ILogger levels:
-
-- `Debug()`: Verbose diagnostics (requires `--log debug`)
-- `Information()`: Status updates
-- `Warning()`: Non-critical issues, deprecations
-- `Error()`: Critical failures
-
-Dual-output pattern (required for user-visible information):
-
-- Sync command: Use `ISyncEventPublisher` methods which handle both channels automatically via the
-  diagnostics system (`SyncEventStorage`, `DiagnosticsRenderer`).
-- Other commands: Must output to both channels manually:
-
-```csharp
-// User-visible information
-console.WriteLine(message);
-log.Information(message);
-
-// Deprecations
-console.MarkupLine("[darkorange bold][[DEPRECATED]][/] " + message);
-log.Warning(message);
-```
-
-## Sync Philosophy
-
-**All sync operations must be deterministic and atomic.**
-
-- **Errors** indicate configuration problems that would cause non-deterministic or partial sync.
-  Errors are collected during validation and skip only the relevant pipeline, not the entire sync.
-  Recyclarr preserves previous (service-side) sync state to avoid unintentional behavior from
-  partial syncs.
-- **Warnings** indicate deprecations or non-critical informational messages that don't affect sync
-  determinism.
-- Use `ISyncEventPublisher.AddError()` for configuration validation failures
-- Use `ISyncEventPublisher.AddWarning()` only for deprecations and informational messages
+Load the `changelog` skill for detailed CHANGELOG format and conventions.
 
 ## Memory Bank
 

@@ -1,10 +1,14 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["../AGENTS.md"],
+  "agent": {
+    "build": { "disable": true },
+    "plan": { "disable": true }
+  },
   "mcp": {
     "linear": {
       "type": "remote",
-      "url": "https://mcp.linear.app/sse"
+      "url": "https://mcp.linear.app/mcp"
     }
   },
   "formatter": {
@@ -18,5 +22,5 @@
     "*linear_*": "deny",
     "*linear_*_comment*": "allow",
     "*linear_*_issue*": "allow",
-  }
+  },
 }
