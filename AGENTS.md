@@ -166,6 +166,7 @@ All scripts are under `scripts/`:
 - `query_issues.py`: Query Qodana issues from GitHub code scanning API.
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
   - Output: `path:line:severity:rule:message`
+- `Run-E2ETests.ps1`: Run E2E tests (`Docker-Debug.ps1` required)
 
 **ONLY for human use (AI must never run these):**
 
