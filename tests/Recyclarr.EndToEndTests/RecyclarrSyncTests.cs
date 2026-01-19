@@ -57,8 +57,7 @@ internal sealed class RecyclarrSyncTests
         var repositoryRoot = GetRepositoryRoot();
         var cliProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Cli");
 
-        _sonarrContainer = new ContainerBuilder()
-            .WithImage("linuxserver/sonarr:latest")
+        _sonarrContainer = new ContainerBuilder("linuxserver/sonarr:latest")
             .WithPortBinding(8989, true)
             .WithEnvironment("SONARR__AUTH__APIKEY", apiKey)
             .WithTmpfsMount("/config")
@@ -68,8 +67,7 @@ internal sealed class RecyclarrSyncTests
             .WithCleanUp(true)
             .Build();
 
-        _radarrContainer = new ContainerBuilder()
-            .WithImage("linuxserver/radarr:latest")
+        _radarrContainer = new ContainerBuilder("linuxserver/radarr:latest")
             .WithPortBinding(7878, true)
             .WithEnvironment("RADARR__AUTH__APIKEY", apiKey)
             .WithTmpfsMount("/config")
