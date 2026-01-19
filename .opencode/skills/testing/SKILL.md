@@ -5,22 +5,31 @@ description: Testing patterns, infrastructure, fixtures, and debugging for unit,
 
 # Testing Patterns and Infrastructure
 
+## Technical Stack
+
+- NUnit 4 test framework
+- NSubstitute for mocking
+- AutoFixture for test data generation
+- AwesomeAssertions for fluent assertions (NOT FluentAssertions)
+
 ## Test Pyramid
 
 - **E2E**: Critical user workflows against real services (Testcontainers)
 - **Integration**: Complete workflows with mocked externals (Git, HTTP, filesystem)
 - **Unit**: Edge cases integration cannot reach
 
-## Directory Structure
+## Integration-First TDD Workflow
 
-```txt
-tests/
-  Recyclarr.EndToEndTests/
-  Recyclarr.Core.Tests/IntegrationTests/
-  Recyclarr.Cli.Tests/IntegrationTests/
-  Recyclarr.TestLibrary/
-  Recyclarr.Core.TestLibrary/
-```
+1. Write a failing integration test for the happy path (red)
+2. Implement until it passes (green)
+3. Check coverage; add integration tests for uncovered edge cases
+4. Use unit tests only when integration tests cannot reach specific code paths
+
+## What NOT to Test
+
+- Console output, log messages, UI formatting
+- Auto-properties, DTOs, simple data containers
+- Implementation details that could change without affecting behavior
 
 ## Naming
 
@@ -131,6 +140,22 @@ Both are equally important. The distinction is about clarity, not preference.
 - Duplicate coverage for same logical paths
 - Production code added solely for testing
 - Unexplained magic constants
+
+## Running Tests
+
+```bash
+# Unit and integration tests
+dotnet test -v m
+
+# Specific test project
+dotnet test -v m tests/Recyclarr.Cli.Tests/
+
+# Single test by name
+dotnet test -v m --filter "FullyQualifiedName~TestMethodName"
+
+# E2E tests (requires Docker services)
+./scripts/Run-E2ETests.ps1
+```
 
 ---
 

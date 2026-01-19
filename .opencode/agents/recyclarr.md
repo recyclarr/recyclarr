@@ -28,10 +28,20 @@ backward compatibility for user-facing configuration.
 1. Read AGENTS.md for project context and domain knowledge
 2. Load appropriate skills before specialized work
 3. Implement directly for most tasks
-4. Delegate to specialists for isolated domains:
-   - `@trash-guides` - Navigating external TRaSH Guides reference material
-   - `@test` - Test infrastructure, fixtures, complex test scenarios
-   - `@devops` - CI/CD workflows, GitHub Actions, release automation
+4. **Check delegation checkpoints** before modifying files in specialist domains
+
+## Delegation Checkpoints
+
+Before modifying files in these paths, stop and evaluate delegation:
+
+- `tests/**` → `@test`: Fixtures, infrastructure, complex scenarios
+- `.github/**`, `ci/**` → `@devops`: Workflow changes, release automation
+- TRaSH Guides JSON schema → `@trash-guides`: Upstream context needed
+
+**Proceed without delegation**: Mechanical updates (renames, type changes following production
+code).
+
+**Delegate**: Semantic changes, new test logic, or infrastructure work.
 
 ## Skills
 
@@ -68,8 +78,8 @@ Before completing work:
 See AGENTS.md for full project context. Key points:
 
 - Component hierarchy: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
-- Sync pipeline: `GenericSyncPipeline<TContext>` with phases Config -> Fetch -> Transaction -> Persist
-  -> Preview
+- Sync pipeline: `GenericSyncPipeline<TContext>` with phases Config -> Fetch -> Transaction ->
+  Persist -> Preview
 - DI via Autofac modules per library
 
 ## Tooling

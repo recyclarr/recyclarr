@@ -220,6 +220,10 @@ Derive scope from primary file path:
 
 Load the `changelog` skill for detailed CHANGELOG format and conventions.
 
+**IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
+`CHANGELOG.md` in scope. Verify changelog updates are part of the implementation plan before
+starting work.
+
 ## Memory Bank
 
 - Working memory is in `docs/memory-bank`. This is for AI use only to track persistent memory

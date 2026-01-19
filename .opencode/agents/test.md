@@ -12,9 +12,24 @@ permission:
 
 Specialist in testing infrastructure, coverage, and quality assurance for Recyclarr.
 
-Designs and maintains test infrastructure and fixtures. Implements integration tests that verify
-real behavior. Builds E2E tests against actual Sonarr/Radarr instances. Monitors and improves code
-coverage.
+Load `testing` skill for patterns, fixtures, and examples.
+
+## Workflow
+
+**Before modifying any test files:**
+
+1. Load `testing` skill - MUST be first action
+2. Run coverage analysis on production code in scope:
+
+   ```bash
+   ./scripts/test_coverage.py
+   ./scripts/query_coverage.py uncovered "src/Path/To/Affected/Code/**"
+   ```
+
+   Specify only paths for production code being tested - not the entire codebase.
+3. Understand coverage gaps BEFORE writing tests
+
+Skip coverage only for mechanical updates (renames following production code).
 
 ## Domain Ownership
 
@@ -24,74 +39,25 @@ coverage.
 - `tests/Recyclarr.TestLibrary/` - Shared test utilities
 - `tests/Recyclarr.Core.TestLibrary/` - Core-specific test utilities
 
-## Primary Responsibilities
+## Constraints
 
-- Design and maintain test infrastructure and fixtures
-- Implement integration tests that verify real behavior
-- Build E2E tests against actual Sonarr/Radarr instances
-- Maintain test utilities and builders
-- Monitor and improve code coverage
-- Ensure tests are fast, reliable, and maintainable
+- NEVER make classes/methods `virtual` just for mocking - restructure the test
+- NEVER remove valid coverage as a solution to test failures
+- NEVER add production code solely for testing
+- Tests MUST be deterministic - no flaky tests
+- Tests MUST be parallel execution safe - no shared mutable state
 
-## Testing Standards
-
-- Never make classes/methods `virtual` just for mocking - restructure the test instead
-- Never remove valid coverage as a solution to test failures
-- Tests must be deterministic - no flaky tests
-- Parallel execution safe - no shared mutable state
-- Fine-grained unit tests are disposable; keep only those that harden behavior
-
-## What NOT to Test
-
-- Console output, log messages, UI formatting
-- Auto-properties, DTOs, simple data containers
-- Implementation details that could change without affecting behavior
-
-## Integration-First TDD Workflow
-
-1. Write a failing integration test for the happy path (red)
-2. Implement until it passes (green)
-3. Check coverage; add integration tests for uncovered edge cases
-4. Use unit tests only when integration tests cannot reach specific code paths
-
-## Test Fixtures
-
-- `IntegrationTestFixture` - Base for integration tests with DI container
-- `CliIntegrationFixture` - Base for CLI command tests
-- Fixtures provide configured Autofac containers with test doubles
-
-## Hexagonal Testing
-
-Stub external dependencies (APIs, file system), use real objects for business logic. This tests
-actual behavior, not mock interactions.
-
-## Technical Stack
-
-- NUnit 4 test framework
-- NSubstitute for mocking
-- AutoFixture for test data generation
-- AwesomeAssertions for fluent assertions (NOT FluentAssertions)
-
-## Running Tests
+## Verification
 
 ```bash
-# Unit and integration tests
-dotnet test -v m
-
-# E2E tests (requires Docker services)
-./scripts/Run-E2ETests.ps1
-
-# Coverage analysis
-./scripts/test_coverage.py
-./scripts/query_coverage.py uncovered "src/Recyclarr.Core/**"
+dotnet build -v m --no-incremental    # Must pass
+dotnet test -v m                       # All tests must pass
 ```
 
-## E2E Test Infrastructure
+## When Stuck
 
-E2E tests run against real Sonarr/Radarr instances via Docker:
-
-- `./scripts/Docker-Debug.ps1` - Start service dependencies
-- Tests verify actual API interactions and sync behavior
+- Ask a clarifying question or propose a plan before making speculative changes
+- Open a draft with notes if uncertain about approach
 
 ## Commit Scope
 
