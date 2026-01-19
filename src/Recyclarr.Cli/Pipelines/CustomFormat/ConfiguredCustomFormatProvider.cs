@@ -167,8 +167,8 @@ internal class ConfiguredCustomFormatProvider(
     }
 
     // Returns the list of profiles to assign this group's CFs to. If the user specified
-    // explicit assign_scores_to entries, validates and uses those. Otherwise, uses all
-    // guide-backed quality profiles from the config (filtered by guide exclusions).
+    // explicit assign_scores_to entries, validates and uses those. Otherwise, uses
+    // guide-backed quality profiles from the config that are in the group's include list.
     // Returns null if validation errors occurred for explicit profiles.
     private List<AssignScoresToConfig>? DetermineProfiles(
         CustomFormatGroupConfig groupConfig,
@@ -176,24 +176,24 @@ internal class ConfiguredCustomFormatProvider(
         Dictionary<string, QualityProfileResource> qpResources
     )
     {
-        // Build set of profile trash_ids excluded by the guide for this group
-        var excludedProfiles = new HashSet<string>(
-            groupResource.QualityProfiles.Exclude.Values,
+        // Build set of profile trash_ids included by the guide for this group
+        var includedProfiles = new HashSet<string>(
+            groupResource.QualityProfiles.Include.Values,
             StringComparer.OrdinalIgnoreCase
         );
 
         if (groupConfig.AssignScoresTo.Count > 0)
         {
             // Explicit: user specified profiles - validate each one
-            return ValidateExplicitProfiles(groupConfig, excludedProfiles, qpResources);
+            return ValidateExplicitProfiles(groupConfig, includedProfiles, qpResources);
         }
 
-        // Implicit: all guide-backed profiles in user's config, filtered by guide exclusions
+        // Implicit: guide-backed profiles in user's config that are in the include list
         // Use config name if set, otherwise fall back to guide resource name
         return config
             .QualityProfiles.Where(qp => qp.TrashId is not null)
             .Where(qp => qpResources.ContainsKey(qp.TrashId!))
-            .Where(qp => !excludedProfiles.Contains(qp.TrashId!))
+            .Where(qp => includedProfiles.Contains(qp.TrashId!))
             .Select(qp => new AssignScoresToConfig
             {
                 TrashId = qp.TrashId,
@@ -205,7 +205,7 @@ internal class ConfiguredCustomFormatProvider(
     // Validates explicit assign_scores_to profiles. Returns null if errors found.
     private List<AssignScoresToConfig>? ValidateExplicitProfiles(
         CustomFormatGroupConfig groupConfig,
-        HashSet<string> excludedProfiles,
+        HashSet<string> includedProfiles,
         Dictionary<string, QualityProfileResource> qpResources
     )
     {
@@ -224,11 +224,11 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Check if profile is excluded by guide
-            if (excludedProfiles.Contains(score.TrashId))
+            // Check if profile is in the guide's include list
+            if (!includedProfiles.Contains(score.TrashId))
             {
                 events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Profile '{score.TrashId}' is excluded by this group's guide definition"
+                    $"CF group '{groupConfig.TrashId}': Profile '{score.TrashId}' is not in this group's include list"
                 );
                 hasErrors = true;
                 continue;

@@ -18,6 +18,9 @@
     }
   ],
   "quality_profiles": {
-    "exclude": {}
+    "include": {
+      "E2E-GuideSonarrProfile": "e2e00000000000000000000000000002",
+      "E2E-GuideOnlyProfile": "e2e00000000000000000000000000003"
+    }
   }
 }

@@ -33,7 +33,7 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
                     }
                 ],
                 "quality_profiles": {
-                    "exclude": {
+                    "include": {
                         "HD Bluray + WEB": "d1d67249d3890e49bc12e275d989a7e9",
                         "SQP-1 (1080p)": "0896c29d74de619df168d23b98104b22"
                     }
@@ -80,13 +80,13 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
                 },
             ]);
 
-        group.QualityProfiles.Exclude.Should().HaveCount(2);
+        group.QualityProfiles.Include.Should().HaveCount(2);
         group
-            .QualityProfiles.Exclude["HD Bluray + WEB"]
+            .QualityProfiles.Include["HD Bluray + WEB"]
             .Should()
             .Be("d1d67249d3890e49bc12e275d989a7e9");
         group
-            .QualityProfiles.Exclude["SQP-1 (1080p)"]
+            .QualityProfiles.Include["SQP-1 (1080p)"]
             .Should()
             .Be("0896c29d74de619df168d23b98104b22");
     }
@@ -101,7 +101,7 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
                 "name": "First Group",
                 "trash_id": "duplicate-id",
                 "custom_formats": [],
-                "quality_profiles": { "exclude": {} }
+                "quality_profiles": { "include": {} }
             }
             """;
 
@@ -110,7 +110,7 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
                 "name": "Second Group (should win)",
                 "trash_id": "duplicate-id",
                 "custom_formats": [],
-                "quality_profiles": { "exclude": {} }
+                "quality_profiles": { "include": {} }
             }
             """;
 

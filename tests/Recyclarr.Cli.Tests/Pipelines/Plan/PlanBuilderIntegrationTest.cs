@@ -633,7 +633,7 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         string trashId,
         string name,
         IReadOnlyCollection<CfGroupCustomFormat> customFormats,
-        IReadOnlyDictionary<string, string>? profileExclusions = null
+        IReadOnlyDictionary<string, string>? profileInclusions = null
     )
     {
         var registry = Resolve<ResourceRegistry<IFileInfo>>();
@@ -642,9 +642,9 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
             TrashId = trashId,
             Name = name,
             CustomFormats = customFormats,
-            QualityProfiles = new CfGroupProfileExclusions
+            QualityProfiles = new CfGroupProfiles
             {
-                Exclude = profileExclusions ?? new Dictionary<string, string>(),
+                Include = profileInclusions ?? new Dictionary<string, string>(),
             },
         };
         var file = Fs.CurrentDirectory()
@@ -664,14 +664,15 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         // Setup guide QP that the config references
         SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
 
-        // Setup CF group with those CFs
+        // Setup CF group with those CFs - include list specifies which profiles receive the group
         SetupCfGroupGuideData(
             "audio-group",
             "Audio Formats",
             [
                 new CfGroupCustomFormat { TrashId = "truehd-cf", Name = "TrueHD" },
                 new CfGroupCustomFormat { TrashId = "dtsx-cf", Name = "DTS-X" },
-            ]
+            ],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" }
         );
 
         // Config with CF group and guide-backed QP (implicit assignment)
@@ -710,7 +711,12 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }]
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            new Dictionary<string, string>
+            {
+                ["Profile A"] = "profile-a",
+                ["Profile B"] = "profile-b",
+            }
         );
 
         // Config with explicit assign_scores_to targeting only profile-a
@@ -758,7 +764,8 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
             [
                 new CfGroupCustomFormat { TrashId = "keep-cf", Name = "Keep CF" },
                 new CfGroupCustomFormat { TrashId = "exclude-cf", Name = "Exclude CF" },
-            ]
+            ],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
         );
 
         // Config excludes one CF from the group
@@ -782,21 +789,21 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Build_with_cf_group_guide_profile_exclusion_filters_profiles()
+    public void Build_with_cf_group_guide_profile_inclusion_filters_profiles()
     {
         SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
         SetupQualityProfileGuideData("allowed-qp", "Allowed Profile", ("HDTV-1080p", true, null));
         SetupQualityProfileGuideData("excluded-qp", "Excluded Profile", ("HDTV-1080p", true, null));
 
-        // Group excludes excluded-qp via guide's quality_profiles.exclude
+        // Group's include list only contains allowed-qp, NOT excluded-qp
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
             [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
-            new Dictionary<string, string> { ["Excluded Profile"] = "excluded-qp" }
+            new Dictionary<string, string> { ["Allowed Profile"] = "allowed-qp" }
         );
 
-        // Config has both profiles, but group excludes one
+        // Config has both profiles, but group only includes one
         var config = NewConfig.Radarr() with
         {
             CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "test-group" }],
@@ -813,7 +820,7 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
 
         var plan = sut.Build();
 
-        // CF should only be assigned to allowed-qp
+        // CF should only be assigned to allowed-qp (not in include list means no assignment)
         var allowedProfile = plan.QualityProfiles.Single(p => p.Name == "Allowed Profile");
         var excludedProfile = plan.QualityProfiles.Single(p => p.Name == "Excluded Profile");
 
@@ -884,7 +891,8 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }]
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
         );
 
         // Config excludes all CFs from the group
@@ -926,7 +934,8 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
                     Name = "Required CF",
                     Required = true,
                 },
-            ]
+            ],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
         );
 
         // Config excludes the required CF
@@ -960,7 +969,8 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
-            [new CfGroupCustomFormat { TrashId = "valid-cf", Name = "Valid CF" }]
+            [new CfGroupCustomFormat { TrashId = "valid-cf", Name = "Valid CF" }],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
         );
 
         // Config excludes a CF that doesn't exist in the group
@@ -990,20 +1000,25 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
-    public void Build_with_cf_group_profile_excluded_by_guide_reports_error()
+    public void Build_with_cf_group_profile_not_in_include_list_reports_error()
     {
         SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
-        SetupQualityProfileGuideData("excluded-qp", "Excluded Profile", ("HDTV-1080p", true, null));
+        SetupQualityProfileGuideData(
+            "not-included-qp",
+            "Not Included Profile",
+            ("HDTV-1080p", true, null)
+        );
+        SetupQualityProfileGuideData("other-qp", "Other Profile", ("HDTV-1080p", true, null));
 
-        // Group excludes the profile via guide's quality_profiles.exclude
+        // Group's include list does NOT contain not-included-qp
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
             [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
-            new Dictionary<string, string> { ["Excluded Profile"] = "excluded-qp" }
+            new Dictionary<string, string> { ["Other Profile"] = "other-qp" }
         );
 
-        // User explicitly assigns to the excluded profile
+        // User explicitly assigns to a profile not in the include list
         var config = NewConfig.Radarr() with
         {
             CustomFormatGroups =
@@ -1011,10 +1026,13 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
                 new CustomFormatGroupConfig
                 {
                     TrashId = "test-group",
-                    AssignScoresTo = [new CfGroupAssignScoresToConfig { TrashId = "excluded-qp" }],
+                    AssignScoresTo =
+                    [
+                        new CfGroupAssignScoresToConfig { TrashId = "not-included-qp" },
+                    ],
                 },
             ],
-            QualityProfiles = [new QualityProfileConfig { TrashId = "excluded-qp" }],
+            QualityProfiles = [new QualityProfileConfig { TrashId = "not-included-qp" }],
         };
 
         var scopeFactory = Resolve<ConfigurationScopeFactory>();
@@ -1026,7 +1044,9 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
 
         GetErrors(storage)
             .Should()
-            .Contain(e => e.Contains("excluded-qp") && e.Contains("excluded by this group"));
+            .Contain(e =>
+                e.Contains("not-included-qp") && e.Contains("not in this group's include list")
+            );
     }
 
     [Test]
@@ -1038,7 +1058,8 @@ internal sealed class PlanBuilderIntegrationTest : CliIntegrationFixture
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }]
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            new Dictionary<string, string> { ["Valid Profile"] = "valid-qp" }
         );
 
         // User assigns to a profile that doesn't exist

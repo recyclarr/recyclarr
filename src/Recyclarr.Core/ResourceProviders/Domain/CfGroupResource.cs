@@ -10,9 +10,9 @@ public record CfGroupCustomFormat
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-public record CfGroupProfileExclusions
+public record CfGroupProfiles
 {
-    public IReadOnlyDictionary<string, string> Exclude { get; init; } =
+    public IReadOnlyDictionary<string, string> Include { get; init; } =
         new Dictionary<string, string>();
 }
 
@@ -24,7 +24,7 @@ public record CfGroupResource
     public string TrashDescription { get; init; } = "";
     public string Default { get; init; } = "";
     public IReadOnlyCollection<CfGroupCustomFormat> CustomFormats { get; init; } = [];
-    public CfGroupProfileExclusions QualityProfiles { get; init; } = new();
+    public CfGroupProfiles QualityProfiles { get; init; } = new();
 }
 
 [UsedImplicitly]
