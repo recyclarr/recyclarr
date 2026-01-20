@@ -12,6 +12,13 @@ permission:
     explore: allow
     test: allow
     devops: allow
+  edit:
+    # require 'test' agent
+    tests/**: deny
+
+    # require 'devops' agent
+    .github/**: deny
+    ci/**: deny
 ---
 
 # Recyclarr
