@@ -35,27 +35,50 @@ backward compatibility for user-facing configuration.
 1. Read AGENTS.md for project context and domain knowledge
 2. Load appropriate skills before specialized work
 3. Implement directly for most tasks
-4. **Check delegation checkpoints** before modifying files in specialist domains
+4. **Delegate to specialist agents** for their domains (see Delegation section)
 
-## Delegation Checkpoints
+## Delegation
 
-Before modifying files in these paths, stop and evaluate delegation:
+Subagents own their domains completely. When delegating, pass the FULL task—not partial work.
 
-- `tests/**` → `@test`: Fixtures, infrastructure, complex scenarios
-- `.github/**`, `ci/**` → `@devops`: Workflow changes, release automation
-- TRaSH Guides JSON schema → `@trash-guides`: Upstream context needed
+### When to Delegate
 
-**Proceed without delegation**: Mechanical updates (renames, type changes following production
-code).
+| Domain                | Agent           | Delegate                                  |
+|-----------------------|-----------------|-------------------------------------------|
+| `tests/**`            | `@test`         | All test changes (mechanical or semantic) |
+| `.github/**`, `ci/**` | `@devops`       | Workflow changes, release automation      |
+| TRaSH Guides context  | `@trash-guides` | Upstream schema questions, guide behavior |
 
-**Delegate**: Semantic changes, new test logic, or infrastructure work.
+### How to Delegate
+
+Provide structured context in your delegation prompt:
+
+- **Objective**: Clear statement of what needs to be done
+- **Scope**: Which files/code areas are affected
+- **Type**: `mechanical` (renames following production code) or `semantic` (new logic)
+- **Context**: Background the agent needs (what changed, why)
+
+Example delegation:
+
+> - **Objective**: Update tests for Exclude→Select property rename in CF groups.
+> - **Scope**: All tests referencing `CustomFormatGroupConfig.Exclude` or `exclude:` in YAML.
+> - **Type**: mechanical
+> - **Context**: Production code changed `Exclude` property to `Select` in ServiceConfiguration.cs,
+>   ConfigYamlDataObjects.cs, and related files. This implements opt-in semantics per PDR-005.
+
+### After Delegation
+
+- **Trust the subagent's return report** - they verify build/test before returning
+- **DO NOT re-run build/test yourself** - that duplicates their work
+- **If they report failure**, address the specific issue they identified
+- **Continue your work** using their summary as confirmation
 
 ## Skills
 
 Load before relevant work:
 
 - `csharp-coding` - Before writing C# code
-- `testing` - Before writing tests
+- `testing` - Before writing tests (only when not delegating to @test)
 - `changelog` - Before updating CHANGELOG.md
 - `decisions` - Before creating ADRs/PDRs
 
@@ -74,11 +97,16 @@ Load before relevant work:
 
 ## Quality Gates
 
-Before completing work:
+**For work done directly** (production code, docs, configs):
 
 - Run `dotnet build -v m --no-incremental` - must succeed with no warnings
 - Run `dotnet test -v m` for affected test projects
 - Run `pre-commit run <files>` on all changed files
+
+**For delegated work**:
+
+- Subagent handles verification - trust their exit report
+- Only re-verify if they report a problem you need to investigate
 
 ## Architecture Knowledge
 

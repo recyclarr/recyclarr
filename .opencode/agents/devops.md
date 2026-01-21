@@ -31,13 +31,12 @@ Implements code quality checks and automates release processes.
 - Optimize build performance and caching
 - Manage secrets and environment configuration
 
-## Workflow Standards
+## Constraints
 
-- Workflows should fail fast on errors
-- Cache aggressively but invalidate correctly
+- NEVER commit or run any mutating git commands - coordinator handles commits
+- NEVER run human-only scripts (see below)
 - Secrets never in logs or artifacts
-- Reproducible builds across environments
-- Clear workflow naming and documentation
+- Workflows should fail fast on errors
 
 ## Scripts Restrictions
 
@@ -46,6 +45,12 @@ Never run these scripts (human-only):
 - `Prepare-Release.ps1` - Initiate release
 - `Install-Tooling.ps1` - Install local tools
 - `Update-Gitignore.ps1` - Update gitignore
+
+## Workflow Standards
+
+- Cache aggressively but invalidate correctly
+- Reproducible builds across environments
+- Clear workflow naming and documentation
 
 ## Reusable Workflows
 
@@ -106,7 +111,3 @@ CI handles:
 - Docker for containerization
 - GitHub Actions runners (ubuntu-latest primary)
 - Qodana for static analysis
-
-## Commit Scope
-
-Use `ci:` for workflow changes, `build:` for build configuration changes.

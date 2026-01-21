@@ -13,7 +13,12 @@ permission:
 
 # TRaSH Guides Repository
 
-Local workspace clone at `guides/` (relative to workspace root).
+Local workspace clone at `guides/` (relative to workspace root). Read-only research agent.
+
+## Constraints
+
+- NEVER commit or run any mutating git commands - coordinator handles commits
+- NEVER modify files in the guides repository - it's an upstream reference
 
 ## Directory Structure
 
