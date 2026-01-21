@@ -83,9 +83,9 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
                         assign_scores_to:
                           - trash_id: profile-trash-id-1
                           - trash_id: profile-trash-id-2
-                        exclude:
-                          - cf-to-exclude-1
-                          - cf-to-exclude-2
+                        select:
+                          - cf-to-select-1
+                          - cf-to-select-2
                 """
             )
         );
@@ -109,7 +109,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
                             new { TrashId = "profile-trash-id-1" },
                             new { TrashId = "profile-trash-id-2" },
                         },
-                        Exclude = new[] { "cf-to-exclude-1", "cf-to-exclude-2" },
+                        Select = new[] { "cf-to-select-1", "cf-to-select-2" },
                     },
                 }
             );

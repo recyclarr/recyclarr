@@ -139,7 +139,7 @@ public abstract class ServiceConfigMerger<T>
                     l with
                     {
                         AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
-                        Exclude = r.Exclude ?? l.Exclude,
+                        Select = r.Select ?? l.Select,
                     },
                 StringComparer.InvariantCultureIgnoreCase
             )

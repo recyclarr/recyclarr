@@ -27,9 +27,9 @@
           }
         }
       },
-      "exclude": {
+      "select": {
         "type": ["null", "array"],
-        "description": "A list of custom format trash_ids to exclude from this group.",
+        "description": "Specific optional custom formats to include. Replaces defaults; required CFs are always included.",
         "uniqueItems": true,
         "items": {
           "type": "string"

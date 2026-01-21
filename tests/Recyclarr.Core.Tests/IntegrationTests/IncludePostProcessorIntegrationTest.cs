@@ -211,10 +211,10 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                   - trash_id: group-1
                     assign_scores_to:
                       - trash_id: profile-from-include
-                    exclude:
-                      - cf-excluded-by-include
+                    select:
+                      - cf-selected-by-include
                   - trash_id: group-2
-                    exclude:
+                    select:
                       - cf-only-in-include
                 """
             )
@@ -240,7 +240,7 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                                     TrashId = "profile-from-config",
                                 },
                             ],
-                            Exclude = ["cf-excluded-by-config"],
+                            Select = ["cf-selected-by-config"],
                         },
                     ],
                     Include = [new ConfigYamlInclude { Config = includePath.FullName }],
@@ -264,9 +264,9 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                         [
                             new CfGroupAssignScoresToConfigYaml { TrashId = "profile-from-config" },
                         ],
-                        Exclude = ["cf-excluded-by-config"],
+                        Select = ["cf-selected-by-config"],
                     },
-                    new() { TrashId = "group-2", Exclude = ["cf-only-in-include"] },
+                    new() { TrashId = "group-2", Select = ["cf-only-in-include"] },
                 }
             );
     }

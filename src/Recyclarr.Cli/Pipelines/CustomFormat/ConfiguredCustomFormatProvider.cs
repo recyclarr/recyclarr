@@ -66,8 +66,8 @@ internal class ConfiguredCustomFormatProvider(
         }
     }
 
-    // Resolves CF group configs to ConfiguredCfEntry entries by looking up guide resources,
-    // filtering CFs by exclude list, and determining which profiles to assign scores to.
+    // Resolves CF group configs to ConfiguredCfEntry entries using opt-in semantics:
+    // required CFs are always included, default CFs unless overridden by select.
     private IEnumerable<ConfiguredCfEntry> FromCfGroups(
         Dictionary<string, QualityProfileResource> qpResources
     )
@@ -85,8 +85,8 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Validate exclude list
-            if (!ValidateExcludeList(groupConfig, groupResource))
+            // Validate select list
+            if (!ValidateSelectList(groupConfig, groupResource))
             {
                 continue;
             }
@@ -105,12 +105,8 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Filter out excluded CFs and yield individual entries
-            var cfTrashIds = groupResource
-                .CustomFormats.Where(cf =>
-                    !groupConfig.Exclude.Contains(cf.TrashId, StringComparer.OrdinalIgnoreCase)
-                )
-                .Select(cf => cf.TrashId);
+            // Resolve CFs using opt-in semantics
+            var cfTrashIds = ResolveCfsForGroup(groupConfig, groupResource);
 
             var hasEntries = false;
             foreach (var trashId in cfTrashIds)
@@ -121,13 +117,57 @@ internal class ConfiguredCustomFormatProvider(
 
             if (!hasEntries)
             {
-                log.Debug("CF group {TrashId} has no CFs after exclusions", groupConfig.TrashId);
+                log.Debug(
+                    "CF group {TrashId} has no CFs after applying opt-in semantics",
+                    groupConfig.TrashId
+                );
             }
         }
     }
 
-    // Validates the exclude list for a CF group. Returns true if valid, false if errors found.
-    private bool ValidateExcludeList(
+    // Resolves which CFs to include using opt-in semantics:
+    // - Always include required CFs
+    // - If select is empty: include default CFs
+    // - If select is non-empty: include only selected CFs (replaces defaults)
+    private static IEnumerable<string> ResolveCfsForGroup(
+        CustomFormatGroupConfig groupConfig,
+        CfGroupResource groupResource
+    )
+    {
+        var selectedSet = groupConfig.Select.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var hasSelections = selectedSet.Count > 0;
+
+        foreach (var cf in groupResource.CustomFormats)
+        {
+            // Required CFs are always included
+            if (cf.Required)
+            {
+                yield return cf.TrashId;
+                continue;
+            }
+
+            // Optional CFs: check select list or fall back to defaults
+            if (hasSelections)
+            {
+                // User specified selections - only include if selected
+                if (selectedSet.Contains(cf.TrashId))
+                {
+                    yield return cf.TrashId;
+                }
+            }
+            else
+            {
+                // No selections - include defaults
+                if (cf.Default)
+                {
+                    yield return cf.TrashId;
+                }
+            }
+        }
+    }
+
+    // Validates the select list for a CF group. Returns true if valid, false if errors found.
+    private bool ValidateSelectList(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource
     )
@@ -138,28 +178,27 @@ internal class ConfiguredCustomFormatProvider(
 
         var hasErrors = false;
 
-        foreach (var excludeId in groupConfig.Exclude)
+        foreach (var selectId in groupConfig.Select)
         {
-            // Check if the excluded trash_id exists in this group
-            if (!groupCfTrashIds.Contains(excludeId))
+            // Check if the selected trash_id exists in this group
+            if (!groupCfTrashIds.Contains(selectId))
             {
                 events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Invalid CF trash_id in exclude: {excludeId}"
+                    $"CF group '{groupConfig.TrashId}': Invalid CF trash_id in select: {selectId}"
                 );
                 hasErrors = true;
                 continue;
             }
 
-            // Check if the excluded CF is marked as required
+            // Warn if selecting a required CF (redundant but allowed)
             var cf = groupResource.CustomFormats.First(c =>
-                c.TrashId.Equals(excludeId, StringComparison.OrdinalIgnoreCase)
+                c.TrashId.Equals(selectId, StringComparison.OrdinalIgnoreCase)
             );
             if (cf.Required)
             {
-                events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Cannot exclude required CF '{excludeId}'"
+                events.AddWarning(
+                    $"CF group '{groupConfig.TrashId}': Selecting required CF '{selectId}' is redundant (required CFs are always included)"
                 );
-                hasErrors = true;
             }
         }
 

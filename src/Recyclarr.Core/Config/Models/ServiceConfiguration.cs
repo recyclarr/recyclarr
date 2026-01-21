@@ -49,7 +49,7 @@ public record CustomFormatGroupConfig
 {
     public string TrashId { get; init; } = "";
     public ICollection<CfGroupAssignScoresToConfig> AssignScoresTo { get; init; } = [];
-    public ICollection<string> Exclude { get; init; } = [];
+    public ICollection<string> Select { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
