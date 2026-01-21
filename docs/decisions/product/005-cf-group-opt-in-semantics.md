@@ -7,9 +7,9 @@
 ## Context
 
 TRaSH Guides CF Groups use `required` and `default` flags on individual custom formats to indicate
-sync behavior. The original Recyclarr implementation included ALL CFs in a group by default,
-requiring users to use `exclude` to remove unwanted CFs. This did not match TRaSH's intended
-semantics.
+sync behavior. During initial design, an `exclude`-based approach was considered where users would
+get ALL CFs in a group by default and remove unwanted ones. However, this did not match TRaSH's
+intended semantics.
 
 TRaSH clarified the intended behavior via Discord with annotated screenshots:
 
@@ -77,9 +77,8 @@ Validation rules:
 
 ## Affected Areas
 
-- Config: `custom_format_groups[].select` added, `exclude` removed
+- Config: `custom_format_groups[].select` property for optional CF selection
 - Commands: None
-- Migration: Required - existing configs using `exclude` must convert to `select`
 
 ## Consequences
 
