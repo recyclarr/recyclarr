@@ -31,6 +31,11 @@
       "description": "If enabled, custom formats that you remove from your YAML configuration OR that are removed from the guide will be deleted from your Radarr instance.",
       "default": false
     },
+    "replace_existing_custom_formats": {
+      "type": "boolean",
+      "description": "If enabled, custom formats matching the guide are always synced to the service, replacing any existing CFs with the same name, whether you created them or not",
+      "default": false
+    },
     "radarr_instance": {
       "type": "object",
       "additionalProperties": false,
@@ -96,6 +101,9 @@
         },
         "delete_old_custom_formats": {
           "$ref": "#/$defs/delete_old_custom_formats"
+        },
+        "replace_existing_custom_formats": {
+          "$ref": "#/$defs/replace_existing_custom_formats"
         },
         "custom_formats": {
           "$ref": "config/custom-formats.json"
