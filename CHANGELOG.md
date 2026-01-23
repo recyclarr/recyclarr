@@ -22,7 +22,7 @@ changes you may need to make.
 - Custom Formats: Support for `custom_format_groups` to sync TRaSH Guide CF groups. Groups bundle
   related custom formats with automatic profile assignment based on guide recommendations.
 - Custom Formats: `assign_scores_to` now accepts `trash_id` as an alternative to `name` for
-  referencing guide-backed quality profiles.
+  referencing guide-backed quality profiles (#251).
 - Settings: Local resource providers now support relative paths, resolved against the app data
   directory.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
