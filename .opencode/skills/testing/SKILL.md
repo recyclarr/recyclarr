@@ -1,6 +1,8 @@
 ---
 name: testing
-description: Testing patterns, infrastructure, fixtures, and debugging for unit, integration, and E2E tests
+description: >
+  Testing patterns, infrastructure, and fixtures for Recyclarr. Covers unit, integration, and E2E
+  tests, coverage analysis scripts, debugging test failures, and test utilities.
 ---
 
 # Testing Patterns and Infrastructure
@@ -22,7 +24,7 @@ description: Testing patterns, infrastructure, fixtures, and debugging for unit,
 
 1. Write a failing integration test for the happy path (red)
 2. Implement until it passes (green)
-3. Check coverage; add integration tests for uncovered edge cases
+3. Check coverage (see Coverage Analysis section); add integration tests for uncovered edge cases
 4. Use unit tests only when integration tests cannot reach specific code paths
 
 ## What NOT to Test
@@ -156,6 +158,37 @@ dotnet test -v m --filter "FullyQualifiedName~TestMethodName"
 # E2E tests (requires Docker services)
 ./scripts/Run-E2ETests.ps1
 ```
+
+## Coverage Analysis
+
+Use coverage analysis to identify gaps before writing tests.
+
+1. Generate coverage data:
+
+   ```bash
+   ./scripts/test_coverage.py
+   ```
+
+   CRITICAL: Must succeed before querying. Investigate failures - coverage data is invalid on
+   failure.
+
+2. Query coverage for files in scope:
+
+   ```bash
+   # Coverage % for matching files
+   ./scripts/query_coverage.py files "src/Path/To/Code/**"
+
+   # Same but includes uncovered line numbers
+   ./scripts/query_coverage.py uncovered "src/Path/To/Code/**"
+
+   # Find N files with lowest coverage
+   ./scripts/query_coverage.py lowest 10
+   ```
+
+   Output format: `path:pct:covered/total[:uncovered_lines]`
+
+Run coverage BEFORE writing tests to understand gaps. Target uncovered lines, don't duplicate
+existing coverage.
 
 ---
 

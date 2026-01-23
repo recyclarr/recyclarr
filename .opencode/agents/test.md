@@ -1,5 +1,8 @@
 ---
-description: Test specialist for testing infrastructure and quality assurance
+description: >
+  Test specialist for Recyclarr testing infrastructure and quality assurance. Use when writing or
+  modifying tests, improving coverage, debugging test failures, updating E2E fixtures, or working
+  in tests/** directories.
 mode: subagent
 permission:
   skill:
@@ -34,7 +37,9 @@ Notes: [any issues, decisions made, or follow-up items]
 
 1. All requested changes are complete
 2. `dotnet build -v m --no-incremental` passes with 0 warnings/errors
-3. `dotnet test -v m` passes with 0 failures
+3. Tests pass:
+   - Unit/integration: `dotnet test -v m` with 0 failures
+   - E2E tests: `./scripts/Run-E2ETests.ps1` passes (if E2E work was done)
 
 If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
 
@@ -49,7 +54,7 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 
 **For `semantic` tasks** (new test logic, coverage improvements):
 
-1. Load `testing` skill - MUST be first action
+1. Load `testing` skill for patterns and infrastructure guidance
 2. Run coverage analysis on production code in scope:
 
    ```bash
@@ -60,6 +65,20 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 3. Understand coverage gaps BEFORE writing tests
 4. Implement tests following patterns from skill
 5. Run build and test verification
+6. Return with summary
+
+**For E2E tests** (tests in `Recyclarr.EndToEndTests`):
+
+1. Load `testing` skill - has E2E patterns, fixture structure, and resource provider details
+2. Start Docker services if not running: `./scripts/Docker-Debug.ps1`
+3. Run E2E tests via script (NEVER use `dotnet test` directly for E2E):
+
+   ```bash
+   ./scripts/Run-E2ETests.ps1
+   ```
+
+4. On failure, search the log file with `rg` - do NOT read the full log
+5. Update fixtures in `tests/Recyclarr.EndToEndTests/Fixtures/` as needed
 6. Return with summary
 
 ## Domain Ownership

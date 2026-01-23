@@ -153,27 +153,13 @@ All scripts are under `scripts/`:
 
 **Development and Testing:**
 
-- `test_coverage.py`: Run tests with code coverage. Outputs JSON coverage file paths.
-  - Usage: `./scripts/test_coverage.py`
-  - CRITICAL: Must succeed before running `query_coverage.py`. Investigate failures before
-    proceeding - coverage data is invalid on failure.
-- `query_coverage.py`: Query coverage results (AI-optimized output).
-  - `./scripts/query_coverage.py files <pattern>... [-f N] [-l N]` - Coverage % for matching files
-  - `./scripts/query_coverage.py uncovered <pattern>...` - Same but includes uncovered line numbers
-  - `./scripts/query_coverage.py lowest [N]` - N files with lowest coverage (default: 10)
-  - Output format: `path:pct:covered/total[:uncovered_lines]`
-  - If this script lacks needed functionality, extend it rather than using raw jq/grep. This script
-    must remain the single source for coverage analysis.
-- `Docker-Debug.ps1`: Start external service dependencies (Sonarr, Radarr, Apprise) via docker
-  compose. Use when debugging locally or testing integration scenarios.
-  - Usage: `./scripts/Docker-Debug.ps1`
-- `Docker-Recyclarr.ps1`: Run Recyclarr in a container (equivalent to `docker compose run`). Rarely
-  used; auto-starts `Docker-Debug.ps1` if needed.
-  - Usage: `./scripts/Docker-Recyclarr.ps1 sync`
-- `query_issues.py`: Query Qodana issues from GitHub code scanning API.
+- `test_coverage.py`: Run tests with code coverage (see `testing` skill for workflow)
+- `query_coverage.py`: Query coverage results (see `testing` skill for usage)
+- `Run-E2ETests.ps1`: Run E2E tests (see `testing` skill for workflow)
+- `Docker-Debug.ps1`: Start Docker services (Sonarr, Radarr, Apprise) for local debugging/E2E tests
+- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts Docker-Debug if needed
+- `query_issues.py`: Query Qodana issues from GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
-  - Output: `path:line:severity:rule:message`
-- `Run-E2ETests.ps1`: Run E2E tests (`Docker-Debug.ps1` required)
 
 **ONLY for human use (AI must never run these):**
 
