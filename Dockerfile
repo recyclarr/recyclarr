@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.21-labs
-
 # Following Microsoft's pattern shown here:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/dotnetapp/Dockerfile.alpine
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
@@ -11,9 +9,6 @@ WORKDIR /source
 
 # copy csproj and restore as distinct layers. Typically, packages change less often than code, so
 # this cached layer is expected to be reused in the majority of cases.
-#
-# NOTE: --parents requires dockerfile version 1.7-labs since it isn't released yet. More info here:
-# https://docs.docker.com/build/dockerfile/release-notes/#170
 COPY --link --parents *.props src/*/*.csproj ./
 RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH
 
