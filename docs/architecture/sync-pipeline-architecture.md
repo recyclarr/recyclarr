@@ -71,7 +71,27 @@ and skips pipelines whose dependencies failed:
 - **CF fails** → QP skipped (depends on CF), QS and MN continue (independent)
 - **QS fails** → All others continue (nothing depends on QS)
 
-This selective cascade prevents partial syncs while maximizing useful work completed.
+### Sync Atomicity
+
+Pipelines fall into two categories based on dependency relationships:
+
+**Independent Pipelines** (Quality Profiles, Quality Sizes, Media Naming):
+
+- No other pipeline depends on these resources
+- Individual items can sync independently within the pipeline
+- If item A fails validation, item B can still sync
+- Partial sync is acceptable because each item is self-contained
+
+**Dependent Pipelines** (Custom Formats):
+
+- Other pipelines depend on these (QP uses CFs for scoring)
+- ALL items must sync successfully or the entire pipeline fails
+- Partial sync would cause silent, non-deterministic behavior (incomplete CFs → incorrect QP scoring)
+- Pipeline failure cascades to skip dependent pipelines
+
+This distinction ensures deterministic behavior: users get exactly what they configured for each
+independent resource, while dependent resources enforce all-or-nothing semantics to prevent
+downstream corruption.
 
 ## Processing Model
 
@@ -183,9 +203,9 @@ objects.
 `IPipelineMetadata` rather than relying on registration order. This adds some ceremony but makes
 the dependency graph explicit and self-documenting.
 
-**Selective Cascade Over All-or-Nothing**: When a pipeline fails, only dependent pipelines are
-skipped. This maximizes useful work but means users may see partial results requiring multiple
-sync attempts.
+**Selective Cascade**: When a dependent pipeline (CF) fails, its dependents (QP) are skipped while
+independent pipelines continue. This reflects the atomicity model: independent resources can sync
+partially, while dependent resources enforce all-or-nothing to prevent downstream corruption.
 
 **Transparency vs. Simplicity**: Users have limited visibility into pipeline internals, prioritizing
 comprehension over detailed progress reporting. Skipped pipelines show as "--" in progress without

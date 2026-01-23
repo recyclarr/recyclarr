@@ -59,16 +59,23 @@ Load skills for procedural knowledge:
 
 ## Sync Philosophy
 
-All sync operations must be deterministic and atomic.
+All sync operations must be deterministic.
 
-- **Errors** indicate configuration problems that would cause non-deterministic or partial sync.
-  Errors are collected during validation and skip only the relevant pipeline, not the entire sync.
-  Recyclarr preserves previous (service-side) sync state to avoid unintentional behavior from
-  partial syncs.
-- **Warnings** indicate deprecations or non-critical informational messages that don't affect sync
-  determinism.
-- Use `ISyncEventPublisher.AddError()` for configuration validation failures
-- Use `ISyncEventPublisher.AddWarning()` only for deprecations and informational messages
+**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming):
+
+- Items sync independently; partial sync within pipeline is acceptable
+- Invalid items are skipped with errors; valid items proceed
+
+**Dependent pipelines** (Custom Formats):
+
+- All items must sync or the entire pipeline fails
+- Failure cascades to skip dependent pipelines (CF failure → QP skipped)
+- Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
+
+**Diagnostics:**
+
+- `AddError()`: Issues that cause items or pipelines to be skipped
+- `AddWarning()`: Deprecations and informational messages only
 
 ## Console and Logging Output
 
