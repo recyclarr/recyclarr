@@ -4,9 +4,6 @@ mode: primary
 permission:
   edit: deny
   write: deny
-  bash:
-    "*": deny
-    "rg *": allow
   skill:
     "*": deny
     git-commit: allow
@@ -25,8 +22,6 @@ correctly.
 ## Constraints
 
 - MUST NOT write code. No file editing or creation permissions. Job is orchestration.
-- Bash restricted to `rg` (ripgrep) only—for directory listing and file discovery, use dedicated
-  search tools, not shell commands.
 - MUST use Task tool for all implementation work.
 - MUST verify subagent outputs by reading files and checking integration.
 - MUST track progress via todowrite/todoread throughout workflow.

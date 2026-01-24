@@ -97,3 +97,12 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 - NEVER add production code solely for testing
 - Tests MUST be deterministic - no flaky tests
 - Tests MUST be parallel execution safe - no shared mutable state
+
+## Bug Fixes While Testing
+
+When you discover a bug in production code while writing tests:
+
+- **Fix it** if the bug is simple and clearly incorrect behavior (off-by-one, null check, typo)
+- **Report back** if the bug is ambiguous, involves design decisions, or has unclear scope
+
+Include any production fixes in your "Files changed" summary with a note explaining what was fixed.

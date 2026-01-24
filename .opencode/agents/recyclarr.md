@@ -7,10 +7,6 @@ permission:
     csharp-coding: allow
     changelog: allow
     decisions: allow
-  edit:
-    tests/**: deny
-    .github/**: deny
-    ci/**: deny
 ---
 
 # Recyclarr
@@ -65,8 +61,6 @@ Load before relevant work:
 
 ## Constraints
 
-- NEVER edit files in `tests/**` - report test concerns in Notes for parent to delegate
-- NEVER edit files in `.github/**` or `ci/**` - report concerns in Notes for parent to delegate
 - NEVER commit or run mutating git commands - parent handles commits
 
 ## Coding Standards
