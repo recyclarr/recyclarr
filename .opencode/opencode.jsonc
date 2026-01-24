@@ -13,7 +13,7 @@
   },
   "formatter": {
     "csharpier": {
-      "command": ["dotnet", "csharpier", "$FILE"],
+      "command": ["dotnet", "csharpier", "format", "$FILE"],
       "extensions": [".cs"]
     }
   },
