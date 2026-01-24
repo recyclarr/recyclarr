@@ -20,6 +20,7 @@ to these services from the TRaSH Guides. For a more detailed features list, see 
 - Custom Formats, including scores (from guide or manual)
 - Quality Definitions (file sizes)
 - Media Naming Formats
+- Media Management (Propers/Repacks)
 
 ## Read the Documentation
 

@@ -7,7 +7,7 @@ because later components depend on earlier ones.
 ## Execution Order
 
 ```txt
-CF Plan Component → QP Plan Component → Quality Size Plan Component → Media Naming Plan Component
+CF Plan Component → QP Plan Component → Quality Size Plan Component → Media Naming Plan Component → Media Management Plan Component
 ```
 
 The CF and QP components have a direct dependency: QP planning reads from the CF plan to build score
@@ -70,7 +70,7 @@ profile is created. Implicit profiles:
 - Have no guide resource
 - Are marked as "should not create" (only update if exists)
 
-## Quality Size and Media Naming Planning
+## Quality Size, Media Naming, and Media Management Planning
 
 These components have simpler planning:
 
@@ -79,7 +79,9 @@ calculations.
 
 **Media Naming**: Validates naming format references exist in guides for the service type.
 
-Neither depends on other plan components.
+**Media Management**: Validates propers/repacks mode configuration.
+
+None of these depend on other plan components.
 
 ## Error Collection
 

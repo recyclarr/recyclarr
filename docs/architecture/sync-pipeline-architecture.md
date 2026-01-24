@@ -32,6 +32,7 @@ from explicit dependency declarations:
 2. **Quality Profiles** (depends on Custom Formats)
 3. **Quality Definitions** (independent)
 4. **Media Naming** (independent)
+5. **Media Management** (independent)
 
 **User Experience**: Users see clear per-server processing markers, but pipeline internals remain
 transparent. This choice prioritizes comprehension over architectural visibility.
@@ -68,14 +69,14 @@ enabling the orchestrator to access dependencies without knowing concrete types.
 Pipeline execution returns `PipelineResult` (Completed or Failed). The orchestrator tracks failures
 and skips pipelines whose dependencies failed:
 
-- **CF fails** → QP skipped (depends on CF), QS and MN continue (independent)
+- **CF fails** → QP skipped (depends on CF), QS, MN, and MM continue (independent)
 - **QS fails** → All others continue (nothing depends on QS)
 
 ### Sync Atomicity
 
 Pipelines fall into two categories based on dependency relationships:
 
-**Independent Pipelines** (Quality Profiles, Quality Sizes, Media Naming):
+**Independent Pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
 - No other pipeline depends on these resources
 - Individual items can sync independently within the pipeline

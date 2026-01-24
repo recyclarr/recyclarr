@@ -78,7 +78,7 @@ Load skills for procedural knowledge:
 
 All sync operations must be deterministic.
 
-**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming):
+**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
 - Items sync independently; partial sync within pipeline is acceptable
 - Invalid items are skipped with errors; valid items proceed
