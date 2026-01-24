@@ -13,7 +13,7 @@ public abstract record ServiceConfiguration : IServiceConfiguration
     public string ApiKey { get; init; } = "";
 
     public ICollection<CustomFormatConfig> CustomFormats { get; init; } = [];
-    public ICollection<CustomFormatGroupConfig> CustomFormatGroups { get; init; } = [];
+    public CustomFormatGroupsConfig CustomFormatGroups { get; init; } = new();
 
     public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
 
@@ -52,6 +52,13 @@ public record CustomFormatGroupConfig
     public string TrashId { get; init; } = "";
     public ICollection<CfGroupAssignScoresToConfig> AssignScoresTo { get; init; } = [];
     public ICollection<string> Select { get; init; } = [];
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record CustomFormatGroupsConfig
+{
+    public ICollection<string> Skip { get; init; } = [];
+    public ICollection<CustomFormatGroupConfig> Add { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

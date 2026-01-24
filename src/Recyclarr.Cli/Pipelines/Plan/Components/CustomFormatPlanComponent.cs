@@ -30,11 +30,16 @@ internal class CustomFormatPlanComponent(
                 continue;
             }
 
+            // Use the first entry's source info (same CF may appear multiple times,
+            // but the source from the first occurrence is representative)
+            var first = group.First();
             plan.AddCustomFormat(
                 new PlannedCustomFormat(resource)
                 {
                     AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
-                    GroupName = group.First().GroupName,
+                    GroupName = first.GroupName,
+                    Source = first.Source,
+                    InclusionReason = first.InclusionReason,
                 }
             );
         }

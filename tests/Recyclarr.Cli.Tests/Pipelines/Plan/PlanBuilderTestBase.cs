@@ -137,7 +137,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         string trashId,
         string name,
         IReadOnlyCollection<CfGroupCustomFormat> customFormats,
-        IReadOnlyDictionary<string, string>? profileInclusions = null
+        IReadOnlyDictionary<string, string>? profileInclusions = null,
+        bool isDefault = false
     )
     {
         var registry = Resolve<ResourceRegistry<IFileInfo>>();
@@ -145,6 +146,7 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         {
             TrashId = trashId,
             Name = name,
+            Default = isDefault ? "true" : "",
             CustomFormats = customFormats,
             QualityProfiles = new CfGroupProfiles
             {

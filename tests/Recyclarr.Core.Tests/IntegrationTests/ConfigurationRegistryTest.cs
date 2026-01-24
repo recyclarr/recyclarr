@@ -79,13 +79,16 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
                     base_url: http://localhost:7878
                     api_key: test-key
                     custom_format_groups:
-                      - trash_id: anime-web-tier-01
-                        assign_scores_to:
-                          - trash_id: profile-trash-id-1
-                          - trash_id: profile-trash-id-2
-                        select:
-                          - cf-to-select-1
-                          - cf-to-select-2
+                      skip:
+                        - group-to-skip
+                      add:
+                        - trash_id: anime-web-tier-01
+                          assign_scores_to:
+                            - trash_id: profile-trash-id-1
+                            - trash_id: profile-trash-id-2
+                          select:
+                            - cf-to-select-1
+                            - cf-to-select-2
                 """
             )
         );
@@ -94,10 +97,11 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
         );
 
-        result
-            .Should()
-            .ContainSingle()
-            .Which.CustomFormatGroups.Should()
+        var groups = result.Should().ContainSingle().Which.CustomFormatGroups;
+
+        groups.Skip.Should().BeEquivalentTo("group-to-skip");
+        groups
+            .Add.Should()
             .BeEquivalentTo(
                 new[]
                 {

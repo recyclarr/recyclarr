@@ -21,8 +21,10 @@ changes you may need to make.
 - Quality Profiles: Support for `trash_id` to sync TRaSH Guide quality profile definitions. When
   specified, qualities, custom formats, scores, and language are automatically configured from the
   guide, significantly reducing YAML complexity.
-- Custom Formats: Support for `custom_format_groups` to sync TRaSH Guide CF groups. Groups bundle
-  related custom formats with automatic profile assignment based on guide recommendations.
+- Custom Formats: Support for `custom_format_groups` to sync TRaSH Guide CF groups. Groups marked
+  `default: true` are automatically synced when using a guide-backed quality profile. Use
+  `custom_format_groups.skip` to opt-out or `custom_format_groups.add` to opt-in to non-default
+  groups.
 - Custom Formats: `assign_scores_to` now accepts `trash_id` as an alternative to `name` for
   referencing guide-backed quality profiles (#251).
 - Settings: Local resource providers now support relative paths, resolved against the app data

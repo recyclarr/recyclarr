@@ -41,10 +41,20 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
             .ForEach(x => x.SetValidator(new QualityProfileConfigYamlValidator()));
 
         RuleFor(x => x.CustomFormatGroups)
-            .NotEmpty()
-            .When(x => x.CustomFormatGroups is not null)
-            .ForEach(x => x.SetValidator(new CustomFormatGroupConfigYamlValidator()))
+            .SetNonNullableValidator(new CustomFormatGroupsConfigYamlValidator())
             .WithName("custom_format_groups");
+    }
+}
+
+public class CustomFormatGroupsConfigYamlValidator : AbstractValidator<CustomFormatGroupsConfigYaml>
+{
+    public CustomFormatGroupsConfigYamlValidator()
+    {
+        RuleFor(x => x.Add)
+            .NotEmpty()
+            .When(x => x.Add is not null)
+            .ForEach(x => x.SetValidator(new CustomFormatGroupConfigYamlValidator()))
+            .WithName("add");
     }
 }
 

@@ -46,6 +46,17 @@ internal static class ConfigYamlExtensions
         };
     }
 
+    private static CustomFormatGroupsConfig ToCustomFormatGroupsConfig(
+        this CustomFormatGroupsConfigYaml? yaml
+    )
+    {
+        return new CustomFormatGroupsConfig
+        {
+            Skip = yaml?.Skip?.ToList() ?? [],
+            Add = yaml?.Add?.Select(x => x.ToCustomFormatGroupConfig()).ToList() ?? [],
+        };
+    }
+
     private static QualityDefinitionItemConfig ToQualityDefinitionItemConfig(
         this QualitySizeItemConfigYaml yaml
     )
@@ -194,8 +205,7 @@ internal static class ConfigYamlExtensions
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
-            CustomFormatGroups =
-                yaml.CustomFormatGroups?.Select(x => x.ToCustomFormatGroupConfig()).ToList() ?? [],
+            CustomFormatGroups = yaml.CustomFormatGroups.ToCustomFormatGroupsConfig(),
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
@@ -219,8 +229,7 @@ internal static class ConfigYamlExtensions
             DeleteOldCustomFormats = yaml.DeleteOldCustomFormats ?? false,
             CustomFormats =
                 yaml.CustomFormats?.Select(x => x.ToCustomFormatConfig()).ToList() ?? [],
-            CustomFormatGroups =
-                yaml.CustomFormatGroups?.Select(x => x.ToCustomFormatGroupConfig()).ToList() ?? [],
+            CustomFormatGroups = yaml.CustomFormatGroups.ToCustomFormatGroupsConfig(),
             QualityDefinition = yaml.QualityDefinition?.ToQualityDefinitionConfig(),
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],

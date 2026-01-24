@@ -43,7 +43,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config with CF group and guide-backed QP (implicit assignment)
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "audio-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "audio-group" }],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
@@ -95,14 +98,20 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config with explicit assign_scores_to targeting only profile-a
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig
-                {
-                    TrashId = "test-group",
-                    AssignScoresTo = [new CfGroupAssignScoresToConfig { TrashId = "profile-a" }],
-                },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { TrashId = "profile-a" },
+                        ],
+                    },
+                ],
+            },
             QualityProfiles =
             [
                 new QualityProfileConfig { TrashId = "profile-a" },
@@ -155,10 +164,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config uses select to override defaults - only cf1 should be included
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig { TrashId = "test-group", Select = ["cf1"] },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group", Select = ["cf1"] }],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -198,7 +207,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config has both profiles, but group only includes one
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            },
             QualityProfiles =
             [
                 new QualityProfileConfig { TrashId = "allowed-qp" },
@@ -228,7 +240,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config references non-existent group
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "nonexistent-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "nonexistent-group" }],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -258,7 +273,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config with CF group but no guide-backed profiles (user-defined only)
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            },
             QualityProfiles = [new QualityProfileConfig { Name = "User Profile" }],
         };
 
@@ -291,7 +309,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config does NOT select any CFs (no select list = use defaults, but there are none)
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -332,10 +353,17 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // This is allowed but logs a warning (not a sync-blocking diagnostic)
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig { TrashId = "test-group", Select = ["required-cf"] },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        Select = ["required-cf"],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -387,10 +415,17 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config: Select = ["optional-cf"] - only optional CF selected, not default
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig { TrashId = "test-group", Select = ["optional-cf"] },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        Select = ["optional-cf"],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -441,7 +476,10 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config: No select list (empty) - use baseline behavior
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group" }],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -483,10 +521,17 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config: Select = ["required-cf"] - redundant selection
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig { TrashId = "test-group", Select = ["required-cf"] },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        Select = ["required-cf"],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -522,10 +567,17 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // Config excludes a CF that doesn't exist in the group
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig { TrashId = "test-group", Select = ["nonexistent-cf"] },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        Select = ["nonexistent-cf"],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
@@ -563,17 +615,20 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // User explicitly assigns to a profile not in the include list
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig
-                {
-                    TrashId = "test-group",
-                    AssignScoresTo =
-                    [
-                        new CfGroupAssignScoresToConfig { TrashId = "not-included-qp" },
-                    ],
-                },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { TrashId = "not-included-qp" },
+                        ],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "not-included-qp" }],
         };
 
@@ -607,17 +662,20 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // User assigns to a profile that doesn't exist
         var config = NewConfig.Radarr() with
         {
-            CustomFormatGroups =
-            [
-                new CustomFormatGroupConfig
-                {
-                    TrashId = "test-group",
-                    AssignScoresTo =
-                    [
-                        new CfGroupAssignScoresToConfig { TrashId = "nonexistent-profile" },
-                    ],
-                },
-            ],
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { TrashId = "nonexistent-profile" },
+                        ],
+                    },
+                ],
+            },
             QualityProfiles = [new QualityProfileConfig { TrashId = "valid-qp" }],
         };
 

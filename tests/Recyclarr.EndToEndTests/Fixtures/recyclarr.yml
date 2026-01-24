@@ -51,7 +51,8 @@ sonarr:
 
     # CF groups - tests implicit profile assignment (no assign_scores_to)
     custom_format_groups:
-      - trash_id: e2e00000000000000000000000000010
+      add:
+        - trash_id: e2e00000000000000000000000000010
 
     # Quality definition with explicit overrides (tests numeric values)
     quality_definition:
@@ -117,9 +118,10 @@ radarr:
 
     # CF groups - tests explicit profile assignment with trash_id
     custom_format_groups:
-      - trash_id: e2e00000000000000000000000000011
-        assign_scores_to:
-          - trash_id: e2e00000000000000000000000000001
+      add:
+        - trash_id: e2e00000000000000000000000000011
+          assign_scores_to:
+            - trash_id: e2e00000000000000000000000000001
 
     # Quality definition with unlimited values and guide defaults
     quality_definition:

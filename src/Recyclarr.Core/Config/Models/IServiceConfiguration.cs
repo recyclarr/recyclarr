@@ -13,7 +13,7 @@ public interface IServiceConfiguration
     bool DeleteOldCustomFormats { get; }
     MediaManagementConfig MediaManagement { get; }
     ICollection<CustomFormatConfig> CustomFormats { get; }
-    ICollection<CustomFormatGroupConfig> CustomFormatGroups { get; }
+    CustomFormatGroupsConfig CustomFormatGroups { get; }
     QualityDefinitionConfig? QualityDefinition { get; }
     IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; }
 }

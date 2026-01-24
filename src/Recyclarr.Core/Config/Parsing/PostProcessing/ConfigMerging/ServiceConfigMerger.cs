@@ -133,26 +133,56 @@ public abstract class ServiceConfigMerger<T>
         }
     }
 
-    private static IReadOnlyCollection<CustomFormatGroupConfigYaml> MergeCustomFormatGroups(
-        IReadOnlyCollection<CustomFormatGroupConfigYaml> a,
-        IReadOnlyCollection<CustomFormatGroupConfigYaml> b
+    private static CustomFormatGroupsConfigYaml MergeCustomFormatGroups(
+        CustomFormatGroupsConfigYaml a,
+        CustomFormatGroupsConfigYaml b
     )
     {
-        return a.FullOuterHashJoin(
+        return new CustomFormatGroupsConfigYaml
+        {
+            Skip = MergeSkipList(a.Skip, b.Skip),
+            Add = MergeAddList(a.Add, b.Add),
+        };
+
+        static IReadOnlyCollection<string>? MergeSkipList(
+            IReadOnlyCollection<string>? a,
+            IReadOnlyCollection<string>? b
+        )
+        {
+            return Combine(
+                a,
                 b,
-                x => x.TrashId,
-                x => x.TrashId,
-                l => l,
-                r => r,
-                (l, r) =>
-                    l with
-                    {
-                        AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
-                        Select = r.Select ?? l.Select,
-                    },
-                StringComparer.InvariantCultureIgnoreCase
-            )
-            .ToList();
+                (a1, b1) =>
+                    a1.Concat(b1).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList()
+            );
+        }
+
+        static IReadOnlyCollection<CustomFormatGroupConfigYaml>? MergeAddList(
+            IReadOnlyCollection<CustomFormatGroupConfigYaml>? a,
+            IReadOnlyCollection<CustomFormatGroupConfigYaml>? b
+        )
+        {
+            return Combine(
+                a,
+                b,
+                (a1, b1) =>
+                    a1.FullOuterHashJoin(
+                            b1,
+                            x => x.TrashId,
+                            x => x.TrashId,
+                            l => l,
+                            r => r,
+                            (l, r) =>
+                                l with
+                                {
+                                    AssignScoresTo = r.AssignScoresTo ?? l.AssignScoresTo,
+                                    Select = r.Select ?? l.Select,
+                                },
+                            StringComparer.InvariantCultureIgnoreCase
+                        )
+                        .ToList()
+            );
+        }
     }
 
     private static IReadOnlyCollection<QualityProfileConfigYaml>? MergeQualityProfiles(

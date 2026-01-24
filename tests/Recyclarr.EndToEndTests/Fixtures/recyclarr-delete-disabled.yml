@@ -46,7 +46,8 @@ sonarr:
           - trash_id: e2e00000000000000000000000000002
 
     custom_format_groups:
-      - trash_id: e2e00000000000000000000000000010
+      add:
+        - trash_id: e2e00000000000000000000000000010
 
     quality_definition:
       type: series
@@ -103,9 +104,10 @@ radarr:
           - name: HD-1080p
 
     custom_format_groups:
-      - trash_id: e2e00000000000000000000000000011
-        assign_scores_to:
-          - trash_id: e2e00000000000000000000000000001
+      add:
+        - trash_id: e2e00000000000000000000000000011
+          assign_scores_to:
+            - trash_id: e2e00000000000000000000000000001
 
     quality_definition:
       type: movie

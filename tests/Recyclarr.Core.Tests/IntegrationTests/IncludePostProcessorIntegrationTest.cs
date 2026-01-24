@@ -208,14 +208,15 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
             new MockFileData(
                 """
                 custom_format_groups:
-                  - trash_id: group-1
-                    assign_scores_to:
-                      - trash_id: profile-from-include
-                    select:
-                      - cf-selected-by-include
-                  - trash_id: group-2
-                    select:
-                      - cf-only-in-include
+                  add:
+                    - trash_id: group-1
+                      assign_scores_to:
+                        - trash_id: profile-from-include
+                      select:
+                        - cf-selected-by-include
+                    - trash_id: group-2
+                      select:
+                        - cf-only-in-include
                 """
             )
         );
@@ -228,21 +229,24 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
                 {
                     BaseUrl = "http://localhost",
                     ApiKey = "key",
-                    CustomFormatGroups =
-                    [
-                        new CustomFormatGroupConfigYaml
-                        {
-                            TrashId = "group-1",
-                            AssignScoresTo =
-                            [
-                                new CfGroupAssignScoresToConfigYaml
-                                {
-                                    TrashId = "profile-from-config",
-                                },
-                            ],
-                            Select = ["cf-selected-by-config"],
-                        },
-                    ],
+                    CustomFormatGroups = new CustomFormatGroupsConfigYaml
+                    {
+                        Add =
+                        [
+                            new CustomFormatGroupConfigYaml
+                            {
+                                TrashId = "group-1",
+                                AssignScoresTo =
+                                [
+                                    new CfGroupAssignScoresToConfigYaml
+                                    {
+                                        TrashId = "profile-from-config",
+                                    },
+                                ],
+                                Select = ["cf-selected-by-config"],
+                            },
+                        ],
+                    },
                     Include = [new ConfigYamlInclude { Config = includePath.FullName }],
                 },
             },
@@ -253,7 +257,7 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
         result
             .Radarr.Should()
             .ContainKey("service1")
-            .WhoseValue!.CustomFormatGroups.Should()
+            .WhoseValue!.CustomFormatGroups!.Add.Should()
             .BeEquivalentTo(
                 new CustomFormatGroupConfigYaml[]
                 {

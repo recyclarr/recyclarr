@@ -35,6 +35,13 @@ public record CustomFormatGroupConfigYaml
     public IReadOnlyCollection<string>? Select { get; init; }
 }
 
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record CustomFormatGroupsConfigYaml
+{
+    public IReadOnlyCollection<string>? Skip { get; init; }
+    public IReadOnlyCollection<CustomFormatGroupConfigYaml>? Add { get; init; }
+}
+
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record QualitySizeItemConfigYaml
 {
@@ -105,7 +112,7 @@ public record ServiceConfigYaml
     public bool? DeleteOldCustomFormats { get; init; }
 
     public IReadOnlyCollection<CustomFormatConfigYaml>? CustomFormats { get; init; }
-    public IReadOnlyCollection<CustomFormatGroupConfigYaml>? CustomFormatGroups { get; init; }
+    public CustomFormatGroupsConfigYaml? CustomFormatGroups { get; init; }
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
     public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; init; }
     public IReadOnlyCollection<IYamlInclude>? Include { get; init; }
