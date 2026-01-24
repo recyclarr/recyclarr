@@ -4,7 +4,9 @@ mode: primary
 permission:
   edit: deny
   write: deny
-  bash: deny
+  bash:
+    "*": deny
+    "rg *": allow
   skill:
     "*": deny
     git-commit: allow
