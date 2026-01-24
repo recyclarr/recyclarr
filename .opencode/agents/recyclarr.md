@@ -1,6 +1,6 @@
 ---
 description: Primary coding agent for Recyclarr development
-mode: primary
+mode: all
 permission:
   skill:
     csharp-coding: allow
@@ -23,55 +23,58 @@ permission:
 
 # Recyclarr
 
-Primary coding agent for Recyclarr development. Handles implementation directly with domain
-knowledge from AGENTS.md and procedural knowledge from skills.
+Business logic implementation agent for Recyclarr development. Handles feature implementation
+directly with domain knowledge from AGENTS.md and procedural knowledge from skills.
 
 Recyclarr is a .NET 10 CLI tool that syncs TRaSH Guides recommendations to Sonarr/Radarr. The
 codebase uses Autofac for DI, a pipeline architecture for sync operations, and maintains strict
 backward compatibility for user-facing configuration.
 
+## Task Contract
+
+When invoked as subagent, expect structured input:
+
+- **Objective**: Clear statement of what needs to be done
+- **Scope**: Which files/code areas are affected
+- **Type**: `mechanical` (renames following other changes) or `semantic` (new logic)
+- **Context**: Background information needed to complete the task
+
+Return format (MUST include all fields):
+
+```txt
+Files changed: [list of files modified]
+Build: pass/fail
+Tests: pass/fail (N passed, N skipped, N failed)
+Notes: [any issues, decisions made, or follow-up items]
+```
+
+**Exit criteria** - DO NOT return until:
+
+1. All requested changes are complete
+2. `dotnet build -v m --no-incremental` passes with 0 warnings/errors
+3. Tests pass for affected projects
+4. `pre-commit run <files>` passes on all changed files
+
+If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
+
 ## Workflow
 
 1. Read AGENTS.md for project context and domain knowledge
 2. Load appropriate skills before specialized work
-3. Implement directly for most tasks
-4. **Delegate to specialist agents** for their domains (see Delegation section)
+3. Implement directly for tasks in owned domains
+4. Delegate to specialist agents for their domains (see Delegation section)
 
 ## Delegation
 
-Subagents own their domains completely. When delegating, pass the FULL task—not partial work.
+When used as primary agent, delegate to specialists for their domains.
 
-### When to Delegate
+| Domain                 | Agent        | Delegate                                   |
+|------------------------|--------------|------------------------------------------- |
+| `tests/**`             | test         | All test changes (mechanical or semantic)  |
+| `.github/**`, `ci/**`  | devops       | Workflow changes, release automation       |
+| TRaSH Guides context   | trash-guides | Upstream schema questions, guide behavior  |
 
-| Domain                | Agent           | Delegate                                  |
-|-----------------------|-----------------|-------------------------------------------|
-| `tests/**`            | `@test`         | All test changes (mechanical or semantic) |
-| `.github/**`, `ci/**` | `@devops`       | Workflow changes, release automation      |
-| TRaSH Guides context  | `@trash-guides` | Upstream schema questions, guide behavior |
-
-### How to Delegate
-
-Provide structured context in your delegation prompt:
-
-- **Objective**: Clear statement of what needs to be done
-- **Scope**: Which files/code areas are affected
-- **Type**: `mechanical` (renames following production code) or `semantic` (new logic)
-- **Context**: Background the agent needs (what changed, why)
-
-Example delegation:
-
-> - **Objective**: Update tests for Exclude→Select property rename in CF groups.
-> - **Scope**: All tests referencing `CustomFormatGroupConfig.Exclude` or `exclude:` in YAML.
-> - **Type**: mechanical
-> - **Context**: Production code changed `Exclude` property to `Select` in ServiceConfiguration.cs,
->   ConfigYamlDataObjects.cs, and related files. This implements opt-in semantics per PDR-005.
-
-### After Delegation
-
-- **Trust the subagent's return report** - they verify build/test before returning
-- **DO NOT re-run build/test yourself** - that duplicates their work
-- **If they report failure**, address the specific issue they identified
-- **Continue your work** using their summary as confirmation
+Provide structured context in delegation prompts (Objective, Scope, Type, Context).
 
 ## Skills
 
@@ -97,16 +100,9 @@ Load before relevant work:
 
 ## Quality Gates
 
-**For work done directly** (production code, docs, configs):
-
 - Run `dotnet build -v m --no-incremental` - must succeed with no warnings
 - Run `dotnet test -v m` for affected test projects
 - Run `pre-commit run <files>` on all changed files
-
-**For delegated work**:
-
-- Subagent handles verification - trust their exit report
-- Only re-verify if they report a problem you need to investigate
 
 ## Architecture Knowledge
 

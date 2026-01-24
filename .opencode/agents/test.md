@@ -17,9 +17,9 @@ Specialist in testing infrastructure, coverage, and quality assurance for Recycl
 
 ## Task Contract
 
-When invoked, expect to receive:
+When invoked as subagent, expect structured input:
 
-- **Objective**: What needs to be done
+- **Objective**: Clear statement of what needs to be done
 - **Scope**: Which files/code areas are affected
 - **Type**: `mechanical` (renames following production code) or `semantic` (new logic/coverage)
 - **Context**: Background information needed to complete the task

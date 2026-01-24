@@ -2,6 +2,23 @@
 
 .NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr.
 
+## Agent Architecture
+
+Recyclarr uses an orchestrator-based agent model:
+
+- **orchestrator** (default): Plans, delegates, verifies. No direct implementation permissions.
+- **recyclarr**: Business logic implementation. Use directly via `@recyclarr` for simple tasks.
+- **test**: Testing specialist. Owns `tests/**` directory.
+- **devops**: CI/CD specialist. Owns `.github/**`, `ci/**`.
+- **trash-guides**: TRaSH Guides research (read-only).
+
+Built-in subagent `explore` available for reconnaissance.
+
+Skills provide procedural knowledge loaded on demand:
+
+- `csharp-coding`, `testing`, `changelog`, `decisions` - Used by recyclarr agent
+- `git-commit`, `gh-pr-review` - Used by orchestrator for coordination
+
 ## Project Context
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
