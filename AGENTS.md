@@ -1,4 +1,4 @@
-# Recyclarr Development Guide
+# AGENTS
 
 .NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr.
 
@@ -6,18 +6,20 @@
 
 Recyclarr uses an orchestrator-based agent model:
 
-- **orchestrator** (default): Plans, delegates, verifies. No direct implementation permissions.
 - **recyclarr**: Business logic implementation. Use directly via `@recyclarr` for simple tasks.
 - **test**: Testing specialist. Owns `tests/**` directory.
 - **devops**: CI/CD specialist. Owns `.github/**`, `ci/**`.
 - **trash-guides**: TRaSH Guides research (read-only).
 
-Built-in subagent `explore` available for reconnaissance.
+## Skills
 
-Skills provide procedural knowledge loaded on demand:
+ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on domain area:
 
-- `csharp-coding`, `testing`, `changelog`, `decisions` - Used by recyclarr agent
-- `git-commit`, `gh-pr-review` - Used by orchestrator for coordination
+- `csharp-coding` - C# 14/.NET 10 patterns and idioms
+- `testing` - Any test related work (e.g. code coverage, running and editing tests, end to end
+  tests)
+- `changelog` - When updating CHANGELOG.md for format and conventions
+- `decisions` - Creating ADRs and PDRs in `docs/decisions/`
 
 ## Project Context
 
@@ -56,15 +58,6 @@ Skills provide procedural knowledge loaded on demand:
 - When registering types as themselves in Autofac, `RegisterType<>()` already registers "as self",
   so don't use `.AsSelf()`; it is redundant.
 
-## Skills
-
-Load skills for procedural knowledge:
-
-- `csharp-coding` - C# 14/.NET 10 patterns and idioms
-- `testing` - Integration-first TDD workflow
-- `changelog` - CHANGELOG format and conventions
-- `decisions` - Creating ADRs and PDRs in `docs/decisions/`
-
 ## Backward Compatibility
 
 - **CODE**: No backward compatibility required - refactor freely
@@ -73,6 +66,8 @@ Load skills for procedural knowledge:
 - DEPRECATIONS: Removed or deprecated features need helpful user-facing diagnostics. Look at
   existing patterns in the code base for this BEFORE you make a modification. Follow these existing
   patterns.
+- **EXCEPTION**: Backward compatibility *NOT REQUIRED* if modifying unreleased functionality (use
+  git logs since latest tag to determine; also check `[Unreleased]` section of `CHANGELOG.md`)
 
 ## Sync Philosophy
 
@@ -132,6 +127,7 @@ log.Warning(message);
 - `tests/`: All C# unit and integration tests
 - `ci/`: Scripts and utilities for GitHub workflows
 - `.github/`: GitHub actions and workflows
+- `scripts/`: Convenience scripts
 - `docs/`: Documentation
   - `architecture/`: Current system design (what is)
   - `decisions/`: MADR-based decision records
@@ -164,15 +160,13 @@ Some key files and directories:
   /tmp/test.log`) (do NOT use `tee`) and read from it with targeted searches (`rg "pattern"
   /tmp/test.log`).
 
-## Scripts
-
-All scripts are under `scripts/`:
-
 **Development and Testing:**
 
-- `test_coverage.py`: Run tests with code coverage (see `testing` skill for workflow)
-- `query_coverage.py`: Query coverage results (see `testing` skill for usage)
-- `Run-E2ETests.ps1`: Run E2E tests (see `testing` skill for workflow)
+All under `./scripts`. MUST use `testing` skill for test-related work.
+
+- `test_coverage.py`: Run tests with code coverage
+- `query_coverage.py`: Query coverage results
+- `Run-E2ETests.ps1`: Run E2E tests
 - `Docker-Debug.ps1`: Start Docker services (Sonarr, Radarr, Apprise) for local debugging/E2E tests
 - `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts Docker-Debug if needed
 - `query_issues.py`: Query Qodana issues from GitHub code scanning API
@@ -229,19 +223,8 @@ Derive scope from primary file path:
 
 ### CHANGELOG Format
 
-Load the `changelog` skill for detailed CHANGELOG format and conventions.
+MUST load the `changelog` skill for detailed CHANGELOG format and conventions.
 
 **IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
 `CHANGELOG.md` in scope. Verify changelog updates are part of the implementation plan before
 starting work.
-
-## Memory Bank
-
-- Working memory is in `docs/memory-bank`. This is for AI use only to track persistent memory
-  between working sessions. Use `ls docs/memory-bank` at the start of a session or task to see
-  what's available.
-- You will freely read from, update/modify, create, and delete these memories as you see fit. These
-  memory bank files are entirely AI-managed.
-- Memory bank files should be small, single-topic units. Avoid monolithic memory bank files.
-  Instead, focus on decomposing memories into reusable chunks (multiple files). These are easier to
-  organize and load in isolation based on information AI needs for a given task.
