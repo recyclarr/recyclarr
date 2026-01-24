@@ -350,7 +350,7 @@ internal sealed class RecyclarrSyncTests
         var mediaManagement = await _sonarr.GetMediaManagement(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be("DoNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
+            .Be("doNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
     }
 
     private static async Task VerifyRadarrState(CancellationToken ct)
