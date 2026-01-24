@@ -4,7 +4,6 @@ mode: subagent
 permission:
   skill:
     "*": deny
-    changelog: allow
 ---
 
 # DevOps Agent

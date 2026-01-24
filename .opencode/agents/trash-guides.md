@@ -3,12 +3,11 @@ description: Navigate TRaSH Guides for custom formats, quality profiles, naming,
 mode: subagent
 model: anthropic/claude-haiku-4-5
 permission:
-  "*": deny
-  read: allow
-  grep: allow
-  glob: allow
-  list: allow
-  bash: allow
+  edit: deny
+  write: deny
+  bash:
+    "*": deny
+    "rg *": allow
 ---
 
 # TRaSH Guides Repository
@@ -17,8 +16,7 @@ Local workspace clone at `guides/` (relative to workspace root). Read-only resea
 
 ## Constraints
 
-- NEVER commit or run any mutating git commands - coordinator handles commits
-- NEVER modify files in the guides repository - it's an upstream reference
+- Read-only agent - cannot modify files or run shell commands
 
 ## Directory Structure
 
@@ -48,27 +46,7 @@ configs (or vice versa).
 
 ## Common Operations
 
-Find a custom format by trash_id:
-
-```bash
-rg "trash_id_value" guides/docs/json/radarr/cf/
-rg "trash_id_value" guides/docs/json/sonarr/cf/
-```
-
-List all quality profiles for a service:
-
-```bash
-ls guides/docs/json/sonarr/quality-profiles/
-```
-
-Search for a CF by name:
-
-```bash
-rg -l "DV HDR10" guides/docs/json/radarr/cf/
-```
-
-Check git history for removed/renamed CFs:
-
-```bash
-git -C guides log --all -p -S "trash_id_value" -- docs/json/
-```
+- Find custom format by trash_id: `rg "trash_id" guides/docs/json/{radarr,sonarr}/cf/`
+- List quality profiles: enumerate `guides/docs/json/{service}/quality-profiles/`
+- Search CF by name: `rg -l "CF Name" guides/docs/json/radarr/cf/`
+- Git history searches: report back to parent agent (requires git)

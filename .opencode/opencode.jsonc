@@ -3,8 +3,7 @@
   "instructions": ["../AGENTS.md"],
   "default_agent": "orchestrator",
   "agent": {
-    "build": { "disable": true },
-    "plan": { "disable": true }
+    "plan": { "disable": true },
   },
   "mcp": {
     "linear": {
