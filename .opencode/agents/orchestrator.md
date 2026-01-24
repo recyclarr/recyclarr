@@ -6,7 +6,6 @@ permission:
   write: deny
   skill:
     "*": deny
-    git-commit: allow
     gh-pr-review: allow
   task:
     "*": allow
@@ -35,6 +34,7 @@ correctly.
 | devops       | CI/CD          | Workflows, scripts, .github/**, ci/**  |
 | trash-guides | TRaSH Guides   | Upstream schema questions (read-only)  |
 | explore      | Reconnaissance | Quick codebase discovery               |
+| commit       | Git operations | Creating commits after verified work   |
 
 ## Dispatching Subagents
 
@@ -72,7 +72,7 @@ Trust subagent build/test reports. DO NOT re-run verification they already perfo
 
 Orchestrator handles directly (not delegated):
 
-- **Commits**: Load git-commit skill, perform commit after subagent work verified
+- **Commits**: Use commit agent to create commits after subagent work verified
 - **PR reviews**: Load gh-pr-review skill for GitHub PR operations
 - **Progress tracking**: Maintain todo list across multi-agent workflows
 - **Cross-cutting synthesis**: Combine results from multiple subagents
