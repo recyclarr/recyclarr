@@ -26,13 +26,21 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         ValidationContext<UpdatedQualityProfile> context
     )
     {
-        var scores = context.InstanceToValidate.UpdatedScores;
-        var totalScores = scores.Select(x => x.NewScore).Where(x => x > 0).Sum();
-        if (totalScores < minScore)
+        if (minScore is not > 0)
+        {
+            return;
+        }
+
+        var scores = context.InstanceToValidate.UpdatedScores.Select(x => x.NewScore).ToList();
+        var totalPositiveScores = scores.Where(x => x > 0).Sum();
+        var maxScore = scores.Count > 0 ? scores.Max() : 0;
+
+        // Match Sonarr's validation: fail only if both sum AND max are below minimum
+        if (totalPositiveScores < minScore && maxScore < minScore)
         {
             context.AddFailure(
                 $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
-                    + $"positive scores is {totalScores}"
+                    + $"positive scores is {totalPositiveScores} and no single score meets the minimum"
             );
         }
     }

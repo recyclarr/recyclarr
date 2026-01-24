@@ -1,4 +1,3 @@
-using Recyclarr.Common.FluentValidation;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
@@ -6,7 +5,6 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 internal class QualityProfileLogger(
     ILogger log,
-    ValidationLogger validationLogger,
     ISyncEventPublisher eventPublisher,
     IProgressSource progressSource
 )
@@ -25,19 +23,12 @@ internal class QualityProfileLogger(
             );
         }
 
-        if (transactions.InvalidProfiles.Count > 0)
+        foreach (var (profile, errors) in transactions.InvalidProfiles)
         {
-            eventPublisher.AddWarning(
-                "The following validation errors occurred for one or more quality profiles. "
-                    + "These profiles will *not* be synced"
-            );
-
-            foreach (var (profile, errors) in transactions.InvalidProfiles)
+            foreach (var error in errors)
             {
-                validationLogger.LogValidationErrors(errors, $"Profile '{profile.ProfileName}'");
+                eventPublisher.AddWarning($"Profile '{profile.ProfileName}': {error.ErrorMessage}");
             }
-
-            validationLogger.LogTotalErrorCount("Profile validation");
         }
 
         // Log warnings for new profiles

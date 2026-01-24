@@ -8,10 +8,15 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
 internal sealed class UpdatedQualityProfileValidatorTest
 {
-    [TestCase(399, true)]
-    [TestCase(400, true)]
-    [TestCase(401, false)]
-    public void Min_score_never_satisfied(int minScore, bool expectSatisfied)
+    // Sum of positive scores is 400: 100 + 200 + 100 = 400, max single score is 200
+    // Fails if BOTH sum < min AND max < min
+    [TestCase(199, true)] // sum(400) >= min, max(200) >= min -> pass
+    [TestCase(200, true)] // sum(400) >= min, max(200) >= min -> pass
+    [TestCase(201, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
+    [TestCase(400, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
+    [TestCase(401, false)] // sum(400) < min, max(200) < min -> fail
+    [TestCase(500, false)] // sum(400) < min, max(200) < min -> fail
+    public void Min_score_validation_considers_both_sum_and_max(int minScore, bool expectSatisfied)
     {
         var profileConfig = new QualityProfileConfig { MinFormatScore = minScore };
 
@@ -43,9 +48,53 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore)
                 .WithErrorMessage(
                     $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
-                        + $"positive scores is {expectedTotalScore}"
+                        + $"positive scores is {expectedTotalScore} and no single score meets the minimum"
                 );
         }
+    }
+
+    [TestCase(null)]
+    [TestCase(0)]
+    [TestCase(-10)]
+    public void Min_score_skipped_when_null_or_non_positive(int? minScore)
+    {
+        var profileConfig = new QualityProfileConfig { MinFormatScore = minScore };
+
+        var updatedProfile = new UpdatedQualityProfile
+        {
+            UpdatedScores = [], // Empty scores would fail validation otherwise
+            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
+            ProfileConfig = NewPlan.Qp(profileConfig),
+        };
+
+        var validator = new UpdatedQualityProfileValidator();
+        var result = validator.TestValidate(updatedProfile);
+
+        // Should not fail on MinFormatScore (may fail on other rules)
+        result.ShouldNotHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore);
+    }
+
+    [Test]
+    public void Min_score_with_empty_scores_and_positive_min_fails()
+    {
+        var profileConfig = new QualityProfileConfig { MinFormatScore = 100 };
+
+        var updatedProfile = new UpdatedQualityProfile
+        {
+            UpdatedScores = [],
+            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
+            ProfileConfig = NewPlan.Qp(profileConfig),
+        };
+
+        var validator = new UpdatedQualityProfileValidator();
+        var result = validator.TestValidate(updatedProfile);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore)
+            .WithErrorMessage(
+                "Minimum Custom Format Score of 100 can never be satisfied because the total of all "
+                    + "positive scores is 0 and no single score meets the minimum"
+            );
     }
 
     [Test]
