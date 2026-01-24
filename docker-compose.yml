@@ -5,12 +5,16 @@ x-radarr: &radarr
   environment:
     TZ: America/Chicago
     RADARR__AUTH__APIKEY: testkey
+    RADARR__AUTH__METHOD: Forms
+    RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
 
 x-sonarr: &sonarr
   image: ghcr.io/home-operations/sonarr:rolling
   environment:
     TZ: America/Chicago
     SONARR__AUTH__APIKEY: testkey
+    SONARR__AUTH__METHOD: Forms
+    SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
 
 volumes:
   radarr_develop1:
