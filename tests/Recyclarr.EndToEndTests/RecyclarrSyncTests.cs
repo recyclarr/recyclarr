@@ -415,7 +415,7 @@ internal sealed class RecyclarrSyncTests
         var mediaManagement = await _radarr.GetMediaManagement(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be("DoNotPrefer", "propers_and_repacks should be set to do_not_prefer");
+            .Be("doNotPrefer", "propers_and_repacks should be set to do_not_prefer");
     }
 
     private static async Task WaitForQualityDefinitionUpdates(CancellationToken ct)
