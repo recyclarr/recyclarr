@@ -16,6 +16,8 @@ changes you may need to make.
 
 ### Added
 
+- Media Management: New `media_management` configuration section with `propers_and_repacks` setting
+  to control how Sonarr/Radarr handles Propers and Repacks (#225).
 - Quality Profiles: Support for `trash_id` to sync TRaSH Guide quality profile definitions. When
   specified, qualities, custom formats, scores, and language are automatically configured from the
   guide, significantly reducing YAML complexity.

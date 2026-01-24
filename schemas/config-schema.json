@@ -68,6 +68,9 @@
         },
         "media_naming": {
           "$ref": "config/media-naming-radarr.json"
+        },
+        "media_management": {
+          "$ref": "config/media-management.json"
         }
       }
     },
@@ -108,6 +111,9 @@
         },
         "media_naming": {
           "$ref": "config/media-naming-sonarr.json"
+        },
+        "media_management": {
+          "$ref": "config/media-management.json"
         }
       }
     }

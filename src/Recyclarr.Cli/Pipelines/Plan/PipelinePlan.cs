@@ -34,6 +34,18 @@ internal class PipelinePlan
         set => _mediaNaming = value;
     }
 
+    private PlannedMediaManagement? _mediaManagement;
+    public bool MediaManagementAvailable => _mediaManagement is not null;
+    public PlannedMediaManagement MediaManagement
+    {
+        get =>
+            _mediaManagement
+            ?? throw new InvalidOperationException(
+                "MediaManagement accessed but media_management not configured"
+            );
+        set => _mediaManagement = value;
+    }
+
     public IReadOnlyCollection<PlannedCustomFormat> CustomFormats => _customFormats.Values;
     public IReadOnlyCollection<PlannedQualityProfile> QualityProfiles => _qualityProfiles.Values;
 

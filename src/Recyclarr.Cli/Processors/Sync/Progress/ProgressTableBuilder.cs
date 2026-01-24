@@ -41,6 +41,7 @@ internal class ProgressTableBuilder
         table.AddColumn(new TableColumn(new Markup("[blue]Quality\nProfiles[/]")).RightAligned());
         table.AddColumn(new TableColumn(new Markup("[blue]Quality\nSizes[/]")).RightAligned());
         table.AddColumn(new TableColumn(new Markup("[blue]Media\nNaming[/]")).RightAligned());
+        table.AddColumn(new TableColumn(new Markup("[blue]Media\nMgmt[/]")).RightAligned());
 
         foreach (var instance in snapshot.Instances)
         {
@@ -73,7 +74,8 @@ internal class ProgressTableBuilder
             FormatPipeline(PipelineType.CustomFormat),
             FormatPipeline(PipelineType.QualityProfile),
             FormatPipeline(PipelineType.QualitySize),
-            FormatPipeline(PipelineType.MediaNaming)
+            FormatPipeline(PipelineType.MediaNaming),
+            FormatPipeline(PipelineType.MediaManagement)
         );
         return;
 

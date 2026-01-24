@@ -4,6 +4,8 @@ using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+using Recyclarr.Cli.Pipelines.MediaManagement;
+using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
@@ -34,7 +36,8 @@ internal class PipelineAutofacModule : Module
                 typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<MediaNamingPipelineContext>)
+                typeof(GenericSyncPipeline<MediaNamingPipelineContext>),
+                typeof(GenericSyncPipeline<MediaManagementPipelineContext>)
             )
             .As<ISyncPipeline>();
 
@@ -43,6 +46,7 @@ internal class PipelineAutofacModule : Module
         RegisterQualitySize(builder);
         RegisterCustomFormat(builder);
         RegisterMediaNaming(builder);
+        RegisterMediaManagement(builder);
     }
 
     private static void RegisterPlan(ContainerBuilder builder)
@@ -57,7 +61,8 @@ internal class PipelineAutofacModule : Module
                 typeof(CustomFormatPlanComponent),
                 typeof(QualityProfilePlanComponent),
                 typeof(QualitySizePlanComponent),
-                typeof(MediaNamingPlanComponent)
+                typeof(MediaNamingPlanComponent),
+                typeof(MediaManagementPlanComponent)
             )
             .As<IPlanComponent>()
             .OrderByRegistration();
@@ -141,6 +146,19 @@ internal class PipelineAutofacModule : Module
                 typeof(CustomFormatTransactionPhase),
                 typeof(CustomFormatPreviewPhase),
                 typeof(CustomFormatApiPersistencePhase)
+            )
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
+    }
+
+    private static void RegisterMediaManagement(ContainerBuilder builder)
+    {
+        builder
+            .RegisterTypes(
+                typeof(MediaManagementApiFetchPhase),
+                typeof(MediaManagementTransactionPhase),
+                typeof(MediaManagementPreviewPhase),
+                typeof(MediaManagementApiPersistencePhase)
             )
             .AsImplementedInterfaces()
             .OrderByRegistration();

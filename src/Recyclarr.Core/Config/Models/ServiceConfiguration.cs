@@ -17,6 +17,8 @@ public abstract record ServiceConfiguration : IServiceConfiguration
 
     public bool DeleteOldCustomFormats { get; [UsedImplicitly] init; }
 
+    public MediaManagementConfig MediaManagement { get; init; } = new();
+
     public QualityDefinitionConfig? QualityDefinition { get; init; }
 
     public IReadOnlyCollection<QualityProfileConfig> QualityProfiles { get; init; } = [];

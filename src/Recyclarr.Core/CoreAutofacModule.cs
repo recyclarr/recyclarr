@@ -21,6 +21,7 @@ using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.ServarrApi;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.ServarrApi.MediaManagement;
 using Recyclarr.ServarrApi.MediaNaming;
 using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -219,6 +220,10 @@ public class CoreAutofacModule : Module
         builder
             .RegisterType<MediaNamingApiService>()
             .As<IMediaNamingApiService>()
+            .InstancePerLifetimeScope();
+        builder
+            .RegisterType<MediaManagementApiService>()
+            .As<IMediaManagementApiService>()
             .InstancePerLifetimeScope();
     }
 

@@ -345,6 +345,12 @@ internal sealed class RecyclarrSyncTests
 
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
         bluray1080P.MinSize.Should().Be(50.4m);
+
+        // Media management settings
+        var mediaManagement = await _sonarr.GetMediaManagement(ct);
+        mediaManagement
+            .DownloadPropersAndRepacks.Should()
+            .Be("DoNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
     }
 
     private static async Task VerifyRadarrState(CancellationToken ct)
@@ -404,6 +410,12 @@ internal sealed class RecyclarrSyncTests
 
         var webdl1080P = qualityDefs.First(q => q.Title == "WEBDL-1080p");
         webdl1080P.MinSize.Should().Be(12.5m);
+
+        // Media management settings
+        var mediaManagement = await _radarr.GetMediaManagement(ct);
+        mediaManagement
+            .DownloadPropersAndRepacks.Should()
+            .Be("DoNotPrefer", "propers_and_repacks should be set to do_not_prefer");
     }
 
     private static async Task WaitForQualityDefinitionUpdates(CancellationToken ct)

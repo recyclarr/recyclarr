@@ -46,6 +46,15 @@ public abstract class ServiceConfigMerger<T>
             ),
 
             DeleteOldCustomFormats = b.DeleteOldCustomFormats ?? a.DeleteOldCustomFormats,
+            MediaManagement = Combine(
+                a.MediaManagement,
+                b.MediaManagement,
+                (a1, b1) =>
+                    a1 with
+                    {
+                        PropersAndRepacks = b1.PropersAndRepacks ?? a1.PropersAndRepacks,
+                    }
+            ),
         };
     }
 

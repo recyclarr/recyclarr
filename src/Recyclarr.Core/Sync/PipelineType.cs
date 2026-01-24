@@ -6,4 +6,5 @@ public enum PipelineType
     QualityProfile,
     QualitySize,
     MediaNaming,
+    MediaManagement,
 }

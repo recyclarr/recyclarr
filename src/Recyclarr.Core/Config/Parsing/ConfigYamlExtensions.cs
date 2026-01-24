@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Models;
+using YamlDotNet.Core;
 
 namespace Recyclarr.Config.Parsing;
 
@@ -156,6 +157,28 @@ internal static class ConfigYamlExtensions
         };
     }
 
+    private static PropersAndRepacksMode? ParsePropersAndRepacks(string? value)
+    {
+        return value?.ToLowerInvariant() switch
+        {
+            "prefer_and_upgrade" => PropersAndRepacksMode.PreferAndUpgrade,
+            "do_not_upgrade" => PropersAndRepacksMode.DoNotUpgrade,
+            "do_not_prefer" => PropersAndRepacksMode.DoNotPrefer,
+            null => null,
+            _ => throw new YamlException($"Invalid propers_and_repacks value: '{value}'"),
+        };
+    }
+
+    private static MediaManagementConfig ToMediaManagementConfig(
+        this MediaManagementConfigYaml? yaml
+    )
+    {
+        return new MediaManagementConfig
+        {
+            PropersAndRepacks = ParsePropersAndRepacks(yaml?.PropersAndRepacks),
+        };
+    }
+
     public static IServiceConfiguration ToRadarrConfiguration(
         this RadarrConfigYaml yaml,
         string instanceName,
@@ -177,6 +200,7 @@ internal static class ConfigYamlExtensions
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
             MediaNaming = yaml.MediaNaming.ToRadarrMediaNamingConfig(),
+            MediaManagement = yaml.MediaManagement.ToMediaManagementConfig(),
         };
     }
 
@@ -201,6 +225,7 @@ internal static class ConfigYamlExtensions
             QualityProfiles =
                 yaml.QualityProfiles?.Select(x => x.ToQualityProfileConfig()).ToList() ?? [],
             MediaNaming = yaml.MediaNaming.ToSonarrMediaNamingConfig(),
+            MediaManagement = yaml.MediaManagement.ToMediaManagementConfig(),
         };
     }
 

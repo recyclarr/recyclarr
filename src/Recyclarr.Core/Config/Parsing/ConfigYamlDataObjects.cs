@@ -90,6 +90,11 @@ public record QualityProfileConfigYaml
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+public record MediaManagementConfigYaml
+{
+    public string? PropersAndRepacks { get; init; }
+}
+
 public record ServiceConfigYaml
 {
     public string? ApiKey { get; init; }
@@ -104,6 +109,7 @@ public record ServiceConfigYaml
     public QualitySizeConfigYaml? QualityDefinition { get; init; }
     public IReadOnlyCollection<QualityProfileConfigYaml>? QualityProfiles { get; init; }
     public IReadOnlyCollection<IYamlInclude>? Include { get; init; }
+    public MediaManagementConfigYaml? MediaManagement { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

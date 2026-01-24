@@ -62,6 +62,10 @@ sonarr:
           max: 50
           preferred: 30
 
+    # Media management settings
+    media_management:
+      propers_and_repacks: do_not_upgrade
+
 radarr:
   radarr_main:
     base_url: !env_var RADARR_URL
@@ -134,3 +138,7 @@ radarr:
       movie:
         rename: true
         standard: standard
+
+    # Media management settings
+    media_management:
+      propers_and_repacks: do_not_prefer

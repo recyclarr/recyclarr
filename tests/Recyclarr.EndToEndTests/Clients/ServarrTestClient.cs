@@ -55,6 +55,14 @@ internal sealed class ServarrTestClient(string baseUrl, string apiKey)
             .WithHeader("X-Api-Key", apiKey)
             .GetJsonAsync<List<FauxQualityDefinition>>(cancellationToken: ct);
     }
+
+    public async Task<FauxMediaManagement> GetMediaManagement(CancellationToken ct = default)
+    {
+        return await baseUrl
+            .AppendPathSegment("api/v3/config/mediamanagement")
+            .WithHeader("X-Api-Key", apiKey)
+            .GetJsonAsync<FauxMediaManagement>(cancellationToken: ct);
+    }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
@@ -93,4 +101,11 @@ internal sealed record FauxQualityDefinition
     public decimal MinSize { get; init; }
     public decimal? MaxSize { get; init; }
     public decimal? PreferredSize { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+internal sealed record FauxMediaManagement
+{
+    public int Id { get; init; }
+    public string DownloadPropersAndRepacks { get; init; } = "";
 }

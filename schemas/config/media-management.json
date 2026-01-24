@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "propers_and_repacks": {
+      "type": "string",
+      "enum": ["prefer_and_upgrade", "do_not_upgrade", "do_not_prefer"],
+      "description": "How to handle Propers and Repacks. Set to 'do_not_prefer' when using Custom Formats for repack/proper handling."
+    }
+  }
+}

@@ -11,6 +11,7 @@ public interface IServiceConfiguration
     Uri BaseUrl { get; }
     string ApiKey { get; }
     bool DeleteOldCustomFormats { get; }
+    MediaManagementConfig MediaManagement { get; }
     ICollection<CustomFormatConfig> CustomFormats { get; }
     ICollection<CustomFormatGroupConfig> CustomFormatGroups { get; }
     QualityDefinitionConfig? QualityDefinition { get; }
