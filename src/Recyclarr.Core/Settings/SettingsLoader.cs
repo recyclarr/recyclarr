@@ -58,7 +58,7 @@ public class SettingsLoader(
     private IFileInfo CreateDefaultSettingsFile()
     {
         const string fileData = """
-            # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
+            # yaml-language-server: $schema=https://schemas.recyclarr.dev/latest/settings-schema.json
 
             # Edit this file to customize the behavior of Recyclarr beyond its defaults
             # For the settings file reference guide, visit the link to the wiki below:

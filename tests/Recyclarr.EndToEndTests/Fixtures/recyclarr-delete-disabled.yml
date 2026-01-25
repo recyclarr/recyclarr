@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
-
 # E2E Test Configuration - Delete Toggle Disabled
 # This config has "Obfuscated" CF removed and delete_old_custom_formats: false
 # Used to verify orphaned CFs are preserved when delete toggle is off

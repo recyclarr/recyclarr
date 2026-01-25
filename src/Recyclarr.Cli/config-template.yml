@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
+# yaml-language-server: $schema=https://schemas.recyclarr.dev/latest/config-schema.json
 
 # An empty starter config to use with Recyclarr. Update the values below as needed for your
 # instance. You will be required to update the `api_key` and `base_url` for each instance you want

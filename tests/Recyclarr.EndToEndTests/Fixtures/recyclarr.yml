@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
-
 # E2E Test Configuration
 # This configuration is designed to test all major recyclarr sync features
 # URLs and API keys are replaced at runtime with actual container values

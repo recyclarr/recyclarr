@@ -1,5 +1,3 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings-schema.json
-
 # E2E test resource providers - official sources pinned to stable SHAs
 resource_providers:
   # Official trash-guides at pinned SHA (replaces default)
