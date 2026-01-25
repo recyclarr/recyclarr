@@ -562,7 +562,10 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# End of https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider
+
 # Local mise config (machine-specific)
 mise.local.toml
 
-# End of https://www.toptal.com/developers/gitignore/api/archives,windows,macos,csharp,rider
+# Schema deployment build output
+schemas-dist/

@@ -1,2 +1,5 @@
 [env]
 RECYCLARR_APP_DATA = "../dev-configs/appdata"
+
+[tools]
+wrangler = "latest"

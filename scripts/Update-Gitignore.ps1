@@ -20,3 +20,13 @@ gig archives,windows,macos,csharp,rider
 $(Get-Content $gitIgnorePath) `
     -replace '^\.idea', '**/.idea' `
 | Set-Content -Path $gitIgnorePath
+
+# Append local additions
+@"
+
+# Local mise config (machine-specific)
+mise.local.toml
+
+# Schema deployment build output
+schemas-dist/
+"@ | Add-Content -Path $gitIgnorePath
