@@ -7,7 +7,7 @@ internal sealed class NondeterministicValueConverterTest
 {
     private JsonSerializerOptions _options = default!;
 
-    [SetUp]
+    [Before(Test)]
     public void Setup()
     {
         _options = new JsonSerializerOptions

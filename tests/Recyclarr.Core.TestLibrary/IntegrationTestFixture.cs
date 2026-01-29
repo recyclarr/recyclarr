@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
@@ -58,7 +57,7 @@ public abstract class IntegrationTestFixture : IDisposable
     {
         builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
 
-        builder.Register(_ => NUnitAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
+        builder.Register(_ => TestAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 
@@ -83,7 +82,7 @@ public abstract class IntegrationTestFixture : IDisposable
         );
     }
 
-    [SetUp]
+    [Before(Test)]
     public void Setup()
     {
         var appDataSetup = Resolve<DefaultAppDataSetup>();

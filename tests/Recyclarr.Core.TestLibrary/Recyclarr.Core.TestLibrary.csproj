@@ -4,8 +4,9 @@
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" />
+
     <PackageReference Include="Serilog" />
     <PackageReference Include="Spectre.Console.Testing" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 </Project>
