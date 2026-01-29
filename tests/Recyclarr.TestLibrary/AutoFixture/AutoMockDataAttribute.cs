@@ -21,8 +21,12 @@ public sealed class AutoMockDataAttribute : UntypedDataSourceGeneratorAttribute
     {
         var fixture = NSubstituteFixture.Create();
 
-        // Extract ParameterInfo from MembersToGenerate for [Frozen] processing
         var parameters = GetParameters(dataGeneratorMetadata);
+
+        // Apply [CustomizeWith] and other CustomizeAttribute-derived customizations first
+        ApplyCustomizeAttributes(fixture, parameters);
+
+        // Then apply [Frozen] customizations
         ApplyFrozenCustomizations(fixture, parameters);
 
         var context = new SpecimenContext(fixture);
@@ -37,6 +41,18 @@ public sealed class AutoMockDataAttribute : UntypedDataSourceGeneratorAttribute
             .MembersToGenerate.OfType<ParameterMetadata>()
             .Select(p => p.ReflectionInfo)
             .ToArray();
+    }
+
+    private static void ApplyCustomizeAttributes(IFixture fixture, ParameterInfo[] parameters)
+    {
+        foreach (var param in parameters)
+        {
+            foreach (var attr in param.GetCustomAttributes<CustomizeAttribute>())
+            {
+                var customization = attr.GetCustomization(param);
+                customization?.Customize(fixture);
+            }
+        }
     }
 
     private static void ApplyFrozenCustomizations(IFixture fixture, ParameterInfo[] parameters)
@@ -90,6 +106,12 @@ public sealed class AutoMockDataAttribute : UntypedDataSourceGeneratorAttribute
 
     private static object CreateSpecimen(IMemberMetadata member, SpecimenContext context)
     {
+        // For test method parameters, resolve by ParameterInfo to support [Frozen] matching
+        if (member is ParameterMetadata paramMeta && paramMeta.ReflectionInfo is ParameterInfo pi)
+        {
+            return context.Resolve(pi);
+        }
+
         var type = member switch
         {
             PropertyMetadata prop => prop.Type,
