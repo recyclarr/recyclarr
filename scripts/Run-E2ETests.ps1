@@ -4,10 +4,11 @@
 
 $logFile = "/tmp/e2e-tests.log"
 
-dotnet test Recyclarr.slnx `
-    --filter "Category=E2E" `
-    --logger "console;verbosity=normal" `
-    -v q 2>&1 > $logFile
+# E2E tests are excluded from discovery by default; enable via MSBuild property
+dotnet test --project tests/Recyclarr.EndToEndTests `
+    -p:IsTestingPlatformApplication=true `
+    -- --disable-logo `
+    2>&1 > $logFile
 
 $exitCode = $LASTEXITCODE
 

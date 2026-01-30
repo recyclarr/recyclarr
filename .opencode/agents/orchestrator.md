@@ -119,7 +119,7 @@ Understanding for correct routing—not for implementation:
 - .NET 10 CLI tool using Autofac for DI
 - Pipeline architecture: Config -> Fetch -> Transaction -> Persist -> Preview
 - Spectre.Console for CLI framework
-- NUnit 4 + NSubstitute + AutoFixture for testing
+- TUnit + NSubstitute + AutoFixture for testing
 - GitHub Actions for CI/CD
 
 Use this knowledge to ask clarifying questions and validate routing—not to code.

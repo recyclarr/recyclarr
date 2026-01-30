@@ -6,35 +6,35 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);TestResults\*\**</DefaultItemExcludes>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsTestProject>true</IsTestProject>
+    <IsTestingPlatformApplication>true</IsTestingPlatformApplication>
+  </PropertyGroup>
+
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <!-- Packages that apply to all tests -->
     <PackageReference Include="AgileObjects.ReadableExpressions" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" />
-    <PackageReference Include="AutoFixture.NUnit4" />
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="AwesomeAssertions.Analyzers" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="NSubstitute.Analyzers.CSharp" />
-    <PackageReference Include="NUnit" />
-    <PackageReference Include="NUnit.Analyzers" />
-    <PackageReference Include="NUnit3TestAdapter" />
-    <PackageReference Include="Serilog.Sinks.NUnit" />
     <PackageReference Include="Spectre.Console.Testing" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-    <Using Include="AutoFixture.NUnit4" />
     <Using Include="AwesomeAssertions" />
     <Using Include="NSubstitute" />
-    <Using Include="NUnit.Framework" />
     <Using Include="Serilog" />
     <Using Include="System.IO.Abstractions.TestingHelpers" />
+    <Using Include="TUnit.Core" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,17 +44,5 @@
   <ItemGroup>
     <!-- For NSubstitute -->
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- From https://github.com/dotnet/msbuild/pull/6285 -->
-    <AssemblyAttribute Include="NUnit.Framework.ParallelizableAttribute">
-      <_Parameter1>NUnit.Framework.ParallelScope.All</_Parameter1>
-      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="NUnit.Framework.FixtureLifeCycleAttribute">
-      <_Parameter1>NUnit.Framework.LifeCycle.InstancePerTestCase</_Parameter1>
-      <_Parameter1_IsLiteral>true</_Parameter1_IsLiteral>
-    </AssemblyAttribute>
   </ItemGroup>
 </Project>

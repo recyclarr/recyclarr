@@ -10,12 +10,13 @@ internal sealed class UpdatedQualityProfileValidatorTest
 {
     // Sum of positive scores is 400: 100 + 200 + 100 = 400, max single score is 200
     // Fails if BOTH sum < min AND max < min
-    [TestCase(199, true)] // sum(400) >= min, max(200) >= min -> pass
-    [TestCase(200, true)] // sum(400) >= min, max(200) >= min -> pass
-    [TestCase(201, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
-    [TestCase(400, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
-    [TestCase(401, false)] // sum(400) < min, max(200) < min -> fail
-    [TestCase(500, false)] // sum(400) < min, max(200) < min -> fail
+    [Test]
+    [Arguments(199, true)] // sum(400) >= min, max(200) >= min -> pass
+    [Arguments(200, true)] // sum(400) >= min, max(200) >= min -> pass
+    [Arguments(201, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
+    [Arguments(400, true)] // sum(400) >= min, max(200) < min -> pass (sum satisfies)
+    [Arguments(401, false)] // sum(400) < min, max(200) < min -> fail
+    [Arguments(500, false)] // sum(400) < min, max(200) < min -> fail
     public void Min_score_validation_considers_both_sum_and_max(int minScore, bool expectSatisfied)
     {
         var profileConfig = new QualityProfileConfig { MinFormatScore = minScore };
@@ -53,9 +54,10 @@ internal sealed class UpdatedQualityProfileValidatorTest
         }
     }
 
-    [TestCase(null)]
-    [TestCase(0)]
-    [TestCase(-10)]
+    [Test]
+    [Arguments(null)]
+    [Arguments(0)]
+    [Arguments(-10)]
     public void Min_score_skipped_when_null_or_non_positive(int? minScore)
     {
         var profileConfig = new QualityProfileConfig { MinFormatScore = minScore };

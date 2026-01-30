@@ -5,8 +5,9 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.Api;
 
 internal sealed class QualityProfileDtoTest
 {
-    [TestCase(null, false)]
-    [TestCase(true, true)]
+    [Test]
+    [Arguments(null, false)]
+    [Arguments(true, true)]
     public void Upgrade_allowed_set_behavior(bool? value, bool? expected)
     {
         var dto = new QualityProfileDto { UpgradeAllowed = false };
@@ -16,8 +17,9 @@ internal sealed class QualityProfileDtoTest
         result.UpgradeAllowed.Should().Be(expected);
     }
 
-    [TestCase(null, 10)]
-    [TestCase(20, 20)]
+    [Test]
+    [Arguments(null, 10)]
+    [Arguments(20, 20)]
     public void Min_format_score_set_behavior(int? value, int? expected)
     {
         var dto = new QualityProfileDto { MinFormatScore = 10 };
@@ -27,8 +29,9 @@ internal sealed class QualityProfileDtoTest
         result.MinFormatScore.Should().Be(expected);
     }
 
-    [TestCase(null, 10)]
-    [TestCase(20, 20)]
+    [Test]
+    [Arguments(null, 10)]
+    [Arguments(20, 20)]
     public void Min_format_upgrade_score_set_behavior(int? value, int? expected)
     {
         var dto = new QualityProfileDto { MinUpgradeFormatScore = 10 };
@@ -38,8 +41,9 @@ internal sealed class QualityProfileDtoTest
         result.MinUpgradeFormatScore.Should().Be(expected);
     }
 
-    [TestCase(null, 10)]
-    [TestCase(20, 20)]
+    [Test]
+    [Arguments(null, 10)]
+    [Arguments(20, 20)]
     public void Cutoff_set_behavior(int? value, int? expected)
     {
         var dto = new QualityProfileDto { Cutoff = 10 };
@@ -49,8 +53,9 @@ internal sealed class QualityProfileDtoTest
         result.Cutoff.Should().Be(expected);
     }
 
-    [TestCase(null, 10)]
-    [TestCase(20, 20)]
+    [Test]
+    [Arguments(null, 10)]
+    [Arguments(20, 20)]
     public void Cutoff_format_score_set_behavior(int? value, int? expected)
     {
         var dto = new QualityProfileDto { CutoffFormatScore = 10 };
