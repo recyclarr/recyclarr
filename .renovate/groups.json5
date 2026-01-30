@@ -17,6 +17,13 @@
       minimumGroupSize: 2,
     },
     {
+      description: "TUnit packages",
+      groupName: "TUnit Packages",
+      matchManagers: ["nuget"],
+      matchPackageNames: ["TUnit*"],
+      minimumGroupSize: 2,
+    },
+    {
       description: ".NET SDK and runtime major version upgrades (replaces built-in dotnet monorepo preset)",
       groupName: "dotnet monorepo",
       matchDatasources: ["docker", "dotnet-version"],

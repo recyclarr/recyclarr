@@ -9,7 +9,7 @@ description: >
 
 ## Technical Stack
 
-- NUnit 4 test framework
+- TUnit test framework
 - NSubstitute for mocking
 - AutoFixture for test data generation
 - AwesomeAssertions for fluent assertions (NOT FluentAssertions)
@@ -56,10 +56,8 @@ Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`
 ## AutoFixture Attributes
 
 - `[AutoMockData]`: Basic DI with mocks
-- `[InlineAutoMockData(params)]`: Parameterized tests
 - `[Frozen]` or `[Frozen(Matching.ImplementedInterfaces)]`: Shared mock instances
-- `[CustomizeWith(typeof(T))]`: Custom configuration
-- `[AutoMockData(typeof(TestClass), nameof(Method))]`: DI container integration
+- `[CustomizeWith(typeof(T))]`: Custom ICustomization for parameter
 
 ## NSubstitute Patterns
 
@@ -96,7 +94,7 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `CliIntegrationFixture`: CLI integration with composition root
 - `Verify.That<T>()`: NSubstitute matcher with assertions
 - `TestableLogger`: Capture log messages
-- `NUnitAnsiConsole`: Console output verification
+- `TestAnsiConsole`: Console output for tests (TUnit auto-captures Console.Out)
 - `MockFileSystem`: Filesystem testing (avoid absolute paths)
 - Factory classes: `NewCf`, `NewConfig`, `NewQualitySize`
 

@@ -146,8 +146,9 @@ internal sealed class UpdatedQualityProfileTest
         dto.Name.Should().Be("config_name");
     }
 
-    [TestCase(null)]
-    [TestCase(8)]
+    [Test]
+    [Arguments(null)]
+    [Arguments(8)]
     public void Cutoff_obtained_from_updated_qualities(int? originalCutoff)
     {
         var profile = new UpdatedQualityProfile
@@ -187,8 +188,9 @@ internal sealed class UpdatedQualityProfileTest
         dto.Cutoff.Should().Be(2);
     }
 
-    [TestCase(null)]
-    [TestCase(8)]
+    [Test]
+    [Arguments(null)]
+    [Arguments(8)]
     public void Cutoff_obtained_from_original_qualities(int? originalCutoff)
     {
         var profile = new UpdatedQualityProfile

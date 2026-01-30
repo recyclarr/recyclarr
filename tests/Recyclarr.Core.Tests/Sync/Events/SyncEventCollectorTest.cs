@@ -3,7 +3,6 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Core.Tests.Sync.Events;
 
-[TestFixture]
 internal sealed class SyncEventCollectorTest
 {
     private static (SyncEventCollector Collector, SyncContextSource Context) CreateCollector(

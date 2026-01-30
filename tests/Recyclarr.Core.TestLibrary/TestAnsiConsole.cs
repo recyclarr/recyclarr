@@ -2,7 +2,7 @@ using Spectre.Console;
 
 namespace Recyclarr.Core.TestLibrary;
 
-public static class NUnitAnsiConsole
+public static class TestAnsiConsole
 {
     public static IAnsiConsole Create()
     {
@@ -11,7 +11,7 @@ public static class NUnitAnsiConsole
             {
                 Ansi = AnsiSupport.No,
                 ColorSystem = ColorSystemSupport.NoColors,
-                Out = new NUnitAnsiConsoleOutput(),
+                Out = new TestAnsiConsoleOutput(),
                 Interactive = InteractionSupport.No,
                 ExclusivityMode = new NoopExclusivityMode(),
                 Enrichment = new ProfileEnrichment { UseDefaultEnrichers = false },

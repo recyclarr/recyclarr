@@ -32,9 +32,9 @@ jobs:
 
       - name: Test
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
-        run: >-
-          dotnet test -c Release
-          --filter FullyQualifiedName!~Recyclarr.EndToEndTests
+        run: |
+          dotnet build -c Release
+          dotnet test --test-modules "tests/**/bin/Release/**/Recyclarr.*.Tests.dll"
 
       - name: Publish
         shell: pwsh

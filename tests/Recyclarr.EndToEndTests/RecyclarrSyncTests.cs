@@ -5,12 +5,12 @@ using CliWrap;
 using CliWrap.Buffered;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using NUnit.Framework;
 using Recyclarr.EndToEndTests.Clients;
 
 namespace Recyclarr.EndToEndTests;
 
-[TestFixture(Category = "E2E"), Explicit, NonParallelizable]
+[NotInParallel]
+[Category("E2E")]
 internal sealed class RecyclarrSyncTests
 {
     private static readonly FileSystem FileSystem = new();
@@ -23,11 +23,9 @@ internal sealed class RecyclarrSyncTests
     private static string _configPath = string.Empty;
     private static string _configPathDeleteDisabled = string.Empty;
 
-    [OneTimeSetUp]
-    public static async Task OneTimeSetUp()
+    [Before(Class)]
+    public static async Task OneTimeSetUp(CancellationToken ct)
     {
-        var ct = TestContext.CurrentContext.CancellationToken;
-
         const string apiKey = "testkey";
 
         var guid = Guid.NewGuid();
@@ -40,19 +38,17 @@ internal sealed class RecyclarrSyncTests
         );
         _tempAppDataDir.Create();
 
-        _configPath = Path.Combine(
-            TestContext.CurrentContext.TestDirectory,
-            "Fixtures",
-            "recyclarr.yml"
-        );
+        var testDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        _configPath = Path.Combine(testDirectory, "Fixtures", "recyclarr.yml");
 
         _configPathDeleteDisabled = Path.Combine(
-            TestContext.CurrentContext.TestDirectory,
+            testDirectory,
             "Fixtures",
             "recyclarr-delete-disabled.yml"
         );
 
-        await SetUpFixtures(ct);
+        await SetUpFixtures(testDirectory, ct);
 
         var repositoryRoot = GetRepositoryRoot();
         var cliProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Cli");
@@ -100,7 +96,7 @@ internal sealed class RecyclarrSyncTests
         _radarr = new ServarrTestClient(radarrUrl, apiKey);
     }
 
-    [OneTimeTearDown]
+    [After(Class)]
     public static async Task OneTimeTearDown()
     {
         if (_sonarrContainer is not null)
@@ -119,8 +115,8 @@ internal sealed class RecyclarrSyncTests
         }
     }
 
-    [Test, Order(1)]
-    [CancelAfter(60_000)]
+    [Test, NotInParallel(Order = 1)]
+    [Timeout(60_000)]
     public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
         var result = await RunRecyclarrSync(ct);
@@ -135,8 +131,8 @@ internal sealed class RecyclarrSyncTests
         await VerifyRadarrState(ct);
     }
 
-    [Test, Order(2)]
-    [CancelAfter(60_000)]
+    [Test, NotInParallel(Order = 2)]
+    [Timeout(60_000)]
     public async Task Order2_resync_is_idempotent(CancellationToken ct)
     {
         var result = await RunRecyclarrSync(ct);
@@ -183,8 +179,8 @@ internal sealed class RecyclarrSyncTests
             );
     }
 
-    [Test, Order(3)]
-    [CancelAfter(60_000)]
+    [Test, NotInParallel(Order = 3)]
+    [Timeout(60_000)]
     public async Task Order3_resync_restores_renamed_custom_format(CancellationToken ct)
     {
         // Rename a CF directly in Sonarr (simulates manual edit or service-side change)
@@ -212,8 +208,8 @@ internal sealed class RecyclarrSyncTests
         restoredCfs.Should().NotContain(cf => cf.Name == "Obfuscated-RENAMED");
     }
 
-    [Test, Order(4)]
-    [CancelAfter(60_000)]
+    [Test, NotInParallel(Order = 4)]
+    [Timeout(60_000)]
     public async Task Order4_resync_recreates_deleted_custom_format(CancellationToken ct)
     {
         // Delete a CF directly in Sonarr (simulates accidental deletion)
@@ -237,8 +233,8 @@ internal sealed class RecyclarrSyncTests
             .Contain(cf => cf.Name == "Bad Dual Groups", "deleted CF should be recreated");
     }
 
-    [Test, Order(5)]
-    [CancelAfter(60_000)]
+    [Test, NotInParallel(Order = 5)]
+    [Timeout(60_000)]
     public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
     {
         // Run sync with alternate config that has Obfuscated removed and delete_old_custom_formats: false
@@ -284,11 +280,11 @@ internal sealed class RecyclarrSyncTests
 
     private static async Task LogOutput(BufferedCommandResult result)
     {
-        var testName = TestContext.CurrentContext.Test.Name;
-        await TestContext.Out.WriteLineAsync(
+        var testName = TestContext.Current?.Metadata.TestDetails.TestName ?? "Unknown";
+        await Console.Out.WriteLineAsync(
             $"=== [{testName}] Recyclarr stdout ===\n{result.StandardOutput}"
         );
-        await TestContext.Out.WriteLineAsync(
+        await Console.Out.WriteLineAsync(
             $"=== [{testName}] Recyclarr stderr ===\n{result.StandardError}"
         );
     }
@@ -450,10 +446,10 @@ internal sealed class RecyclarrSyncTests
         }
     }
 
-    private static async Task SetUpFixtures(CancellationToken ct)
+    private static async Task SetUpFixtures(string testDirectory, CancellationToken ct)
     {
         var fixturesDir = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(TestContext.CurrentContext.TestDirectory, "Fixtures")
+            FileSystem.Path.Combine(testDirectory, "Fixtures")
         );
 
         var sonarrCfsSource = fixturesDir.SubDirectory("custom-formats-sonarr");

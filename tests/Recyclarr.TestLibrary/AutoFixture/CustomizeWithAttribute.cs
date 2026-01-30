@@ -1,10 +1,14 @@
 using System.Reflection;
 using AutoFixture;
-using AutoFixture.NUnit4;
 
 namespace Recyclarr.TestLibrary.AutoFixture;
 
-// Based on the answer here: https://stackoverflow.com/a/16735551/157971
+/// <summary>
+/// Attribute that applies a custom ICustomization to a test parameter.
+/// </summary>
+/// <remarks>
+/// Based on https://stackoverflow.com/a/16735551/157971
+/// </remarks>
 [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = true)]
 public sealed class CustomizeWithAttribute : CustomizeAttribute
 {

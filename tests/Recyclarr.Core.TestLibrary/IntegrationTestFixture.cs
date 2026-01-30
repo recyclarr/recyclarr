@@ -56,7 +56,7 @@ public abstract class IntegrationTestFixture : IDisposable
     {
         builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
 
-        builder.Register(_ => NUnitAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
+        builder.Register(_ => TestAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 

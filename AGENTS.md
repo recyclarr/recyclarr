@@ -27,7 +27,9 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
 - DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
   gets its own Autofac Module to keep DI registration modular.
 - Config: YAML + `schemas/config-schema.json` validation
-- Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
+- Testing: TUnit + NSubstitute + AutoFixture + parallel execution
+  - `*.Tests`: Unit tests (fast, isolated); integration tests in `IntegrationTests/` subdirectory
+  - `*.EndToEndTests`: E2E tests (slow, containers); excluded from `dotnet test`, run explicitly
 - Dotnet tools in `.config/dotnet-tools.json`
 - CLI: `Spectre.Console` package for CLI framework
 

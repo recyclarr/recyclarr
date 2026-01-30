@@ -8,7 +8,4 @@
     <EmbeddedResource Include="Common\DefaultDataFile.txt" />
     <EmbeddedResource Include="Common\TestData\DataFile.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Remove="Serilog.Sinks.NUnit" />
-  </ItemGroup>
 </Project>

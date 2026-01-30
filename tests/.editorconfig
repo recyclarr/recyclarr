@@ -5,3 +5,6 @@ dotnet_diagnostic.ca1707.severity = none
 
 # Avoid constant arrays as arguments
 dotnet_diagnostic.ca1861.severity = none
+
+# Consider making public types internal (test libraries need public types for cross-project use)
+dotnet_diagnostic.ca1515.severity = none
