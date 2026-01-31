@@ -1,6 +1,7 @@
 ---
 description: DevOps specialist for CI/CD pipelines and release automation
 mode: subagent
+model: anthropic/claude-sonnet-4-5
 permission:
   skill:
     "*": deny

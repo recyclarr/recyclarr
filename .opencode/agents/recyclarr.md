@@ -1,6 +1,10 @@
 ---
 description: Implementation agent for Recyclarr business logic
 mode: subagent
+model: anthropic/claude-sonnet-4-5
+thinking:
+  type: enabled
+  budgetTokens: 8000
 permission:
   skill:
     "*": deny
