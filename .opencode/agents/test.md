@@ -4,6 +4,10 @@ description: >
   modifying tests, improving coverage, debugging test failures, updating E2E fixtures, or working
   in tests/** directories.
 mode: subagent
+model: anthropic/claude-sonnet-4-5
+thinking:
+  type: enabled
+  budgetTokens: 8000
 permission:
   skill:
     "*": deny
