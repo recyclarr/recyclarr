@@ -25,6 +25,14 @@ should be independently trackable, referenceable, and supersedable.
 **Date accuracy**: Use the date the decision was made, not when documented. For existing decisions,
 verify against git history (`git log --format="%ai" <commit> -1`).
 
+**Reference-style links**: Use reference-style links for long URLs to respect line length limits:
+
+```markdown
+- **Upstream:** [Discord DM][upstream] with TRaSH Guides contributor
+
+[upstream]: https://discordapp.com/channels/@me/...
+```
+
 ## Status Values
 
 - `proposed` - Under consideration, not yet decided
@@ -49,7 +57,29 @@ aspects in the document body.
 - Deciding feature scope or priorities
 - Tracking external decisions that drive Recyclarr development
 
-PDRs require `upstream:` frontmatter linking to the external driver (issue, PR, Discord thread).
+PDRs MUST have `upstream:` linking to the external driver. Private links (DMs, gated channels) are
+acceptable; the link provides provenance even if not publicly accessible. If no upstream link is
+available, ask the user for one before finalizing the PDR.
+
+## Attribution
+
+**No individual names in PDR body.** Use roles ("TRaSH Guides contributor", "upstream maintainer")
+rather than personal names. Reasons:
+
+- Roles outlast individuals
+- Reduces friction in candid discussions
+- Avoids taking statements out of context
+
+**Upstream link is the audit trail.** The link provides who/when/full-context; the PDR body provides
+what/why synthesis. If someone questions a decision and cannot access the link, the PDR rationale
+SHOULD stand on its own merits.
+
+**Private links are valid.** Discord DMs, private channels, or gated sources are acceptable upstream
+references. The link serves as:
+
+- Provenance for those with access
+- Good faith signal that a source exists
+- Future-proofing if access later expands
 
 ## Perspective
 
