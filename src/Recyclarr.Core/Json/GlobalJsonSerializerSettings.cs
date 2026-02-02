@@ -24,7 +24,7 @@ public static class GlobalJsonSerializerSettings
         };
 
     /// <summary>
-    /// JSON settings used by cache and other Recyclarr-owned JSON files.
+    /// JSON settings used by state and other Recyclarr-owned JSON files.
     /// </summary>
     public static JsonSerializerOptions Recyclarr { get; } =
         new() { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower, WriteIndented = true };

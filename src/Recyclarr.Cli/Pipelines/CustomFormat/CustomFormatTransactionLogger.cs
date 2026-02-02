@@ -99,7 +99,7 @@ internal class CustomFormatTransactionLogger(
             eventPublisher.AddError(
                 $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
                     + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
-                    + "then run: recyclarr cache rebuild"
+                    + "then run: recyclarr state repair"
             );
         }
 
@@ -128,7 +128,7 @@ internal class CustomFormatTransactionLogger(
         eventPublisher.AddError(
             $"{conflicts.Count} Custom Formats cannot be synced because CFs with matching names "
                 + $"already exist (e.g., {examples}{suffix}). "
-                + "To adopt existing CFs, run: `recyclarr cache rebuild --adopt`"
+                + "To adopt existing CFs, run: `recyclarr state repair --adopt`"
         );
 
         log.Debug(

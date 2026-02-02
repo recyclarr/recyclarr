@@ -18,7 +18,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
 
         // Initialize other directories used throughout the application
         // Do not initialize the repo directory here; the RepoUpdater handles that later.
-        paths.CacheDirectory.Create();
+        paths.StateDirectory.Create();
         paths.LogDirectory.Create();
         paths.ConfigsDirectory.Create();
         paths.IncludesDirectory.Create();

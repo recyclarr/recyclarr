@@ -24,7 +24,7 @@ public static class ConfigContextualMessages
         )
         {
             return "The `replace_existing_custom_formats` option has been removed. "
-                + "Use `recyclarr cache rebuild --adopt` to adopt manually-created custom formats. "
+                + "Use `recyclarr state repair --adopt` to adopt manually-created custom formats. "
                 + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed>";
         }
 

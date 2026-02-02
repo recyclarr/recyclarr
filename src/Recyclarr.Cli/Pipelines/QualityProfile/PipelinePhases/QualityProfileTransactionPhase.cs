@@ -1,13 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
@@ -27,7 +27,7 @@ internal class QualityProfileTransactionPhase(
             transactions,
             context.Plan.QualityProfiles,
             context.ApiFetchOutput,
-            context.Cache
+            context.State
         );
 
         // Process new profiles: update scores, validate (remove invalid from collection)
@@ -105,10 +105,10 @@ internal class QualityProfileTransactionPhase(
         QualityProfileTransactionData transactions,
         IEnumerable<PlannedQualityProfile> plannedProfiles,
         QualityProfileServiceData serviceData,
-        TrashIdCache<QualityProfileCacheObject> cache
+        TrashIdMappingStore<QualityProfileMappings> state
     )
     {
-        var builder = new UpdatedProfileBuilder(log, serviceData, cache, transactions);
+        var builder = new UpdatedProfileBuilder(log, serviceData, state, transactions);
         return builder.BuildFrom(plannedProfiles);
     }
 

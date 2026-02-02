@@ -121,7 +121,7 @@ update-vs-create decisions.
 **Preview**: Users need to understand planned changes before committing, especially in production.
 This implements dry-run by terminating the pipeline after displaying the transaction plan.
 
-**ApiPersistence**: Execute changes with proper error handling and cache maintenance. All validation
+**ApiPersistence**: Execute changes with proper error handling and state maintenance. All validation
 is complete, so this focuses on execution reliability.
 
 ### Error Collection Strategy

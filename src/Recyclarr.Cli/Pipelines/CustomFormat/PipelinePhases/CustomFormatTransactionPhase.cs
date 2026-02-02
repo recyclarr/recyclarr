@@ -1,7 +1,7 @@
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
@@ -29,13 +29,13 @@ internal class CustomFormatTransactionPhase(ILogger log)
                 guideCf.Name
             );
 
-            var cachedId = context.Cache.FindId(guideCf.TrashId);
+            var storedId = context.State.FindId(guideCf.TrashId);
 
-            if (cachedId.HasValue)
+            if (storedId.HasValue)
             {
                 ProcessCachedCf(
                     guideCf,
-                    cachedId.Value,
+                    storedId.Value,
                     serviceCfsById,
                     serviceCfsByName,
                     transactions
@@ -49,10 +49,10 @@ internal class CustomFormatTransactionPhase(ILogger log)
 
         // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
         var deletionCandidates = context
-            .Cache.Mappings
-            // Custom format must be in the cache but NOT in the user's config
+            .State.Mappings
+            // Custom format must be in the state but NOT in the user's config
             .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
-            // Also, that cache-only CF must exist in the service (otherwise there is nothing to delete)
+            // Also, that state-only CF must exist in the service (otherwise there is nothing to delete)
             .Where(map => serviceCfsById.ContainsKey(map.ServiceId))
             .ToList();
 
@@ -62,12 +62,12 @@ internal class CustomFormatTransactionPhase(ILogger log)
             .Select(cf => cf.Id)
             .ToHashSet();
 
-        // Separate valid deletions from invalid cache entries (duplicate service IDs)
+        // Separate valid deletions from invalid state entries (duplicate service IDs)
         foreach (var candidate in deletionCandidates)
         {
             if (managedServiceIds.Contains(candidate.ServiceId))
             {
-                // Cache inconsistency: service ID is claimed by both a managed CF and an orphan
+                // State inconsistency: service ID is claimed by both a managed CF and an orphan
                 transactions.InvalidCacheEntries.Add(candidate);
             }
             else
@@ -82,16 +82,16 @@ internal class CustomFormatTransactionPhase(ILogger log)
 
     private void ProcessCachedCf(
         CustomFormatResource guideCf,
-        int cachedId,
+        int storedId,
         Dictionary<int, CustomFormatResource> serviceCfsById,
         ILookup<string, CustomFormatResource> serviceCfsByName,
         CustomFormatTransactionData transactions
     )
     {
-        if (serviceCfsById.TryGetValue(cachedId, out var serviceCf))
+        if (serviceCfsById.TryGetValue(storedId, out var serviceCf))
         {
-            // ID-first: Found by cached ID - update regardless of name
-            guideCf.Id = cachedId;
+            // ID-first: Found by stored ID - update regardless of name
+            guideCf.Id = storedId;
 
             if (!serviceCf.Name.EqualsIgnoreCase(guideCf.Name))
             {
@@ -107,10 +107,10 @@ internal class CustomFormatTransactionPhase(ILogger log)
         }
         else
         {
-            // Stale cache: cached ID no longer exists in service
+            // Stale state: stored ID no longer exists in service
             log.Debug(
-                "Cached service ID {CachedId} for CF {TrashId} no longer exists in service",
-                cachedId,
+                "Stored service ID {StoredId} for CF {TrashId} no longer exists in service",
+                storedId,
                 guideCf.TrashId
             );
 
@@ -144,7 +144,7 @@ internal class CustomFormatTransactionPhase(ILogger log)
                 break;
 
             case 1:
-                // Single match - conflict (user must run cache rebuild --adopt)
+                // Single match - conflict (user must run state repair --adopt)
                 transactions.ConflictingCustomFormats.Add(
                     new ConflictingCustomFormat(guideCf, nameMatches[0].Id)
                 );

@@ -60,16 +60,16 @@ internal static class CliSetup
         );
 
         cli.AddBranch(
-            "cache",
-            cache =>
+            "state",
+            state =>
             {
-                cache.SetDescription("Cache management operations");
-                cache
-                    .AddCommand<CacheRebuildCommand>("rebuild")
-                    .WithExample("cache", "rebuild")
-                    .WithExample("cache", "rebuild", "custom-formats")
-                    .WithExample("cache", "rebuild", "-i", "instance1", "-i", "instance2")
-                    .WithExample("cache", "rebuild", "custom-formats", "--preview");
+                state.SetDescription("State management operations");
+                state
+                    .AddCommand<StateRepairCommand>("repair")
+                    .WithExample("state", "repair")
+                    .WithExample("state", "repair", "custom-formats")
+                    .WithExample("state", "repair", "-i", "instance1", "-i", "instance2")
+                    .WithExample("state", "repair", "custom-formats", "--preview");
             }
         );
     }

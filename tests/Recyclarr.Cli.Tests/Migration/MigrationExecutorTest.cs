@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Autofac.Extras.Ordering;
+using Autofac.Features.Metadata;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
 using Spectre.Console.Testing;
@@ -8,13 +8,26 @@ namespace Recyclarr.Cli.Tests.Migration;
 
 internal sealed class MigrationExecutorTest
 {
+    private static List<Meta<IMigrationStep>> WrapWithMetadata(IEnumerable<IMigrationStep> steps)
+    {
+        return steps
+            .Select(
+                (step, index) =>
+                    new Meta<IMigrationStep>(
+                        step,
+                        new Dictionary<string, object?> { ["Order"] = index }
+                    )
+            )
+            .ToList();
+    }
+
     [Test]
     public void Step_not_executed_if_check_returns_false()
     {
         using var console = new TestConsole();
         var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
+        var executor = new MigrationExecutor(WrapWithMetadata([step]), console, log);
 
         step.CheckIfNeeded().Returns(false);
 
@@ -30,7 +43,7 @@ internal sealed class MigrationExecutorTest
         using var console = new TestConsole();
         var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
+        var executor = new MigrationExecutor(WrapWithMetadata([step]), console, log);
 
         step.CheckIfNeeded().Returns(true);
 
@@ -53,7 +66,7 @@ internal sealed class MigrationExecutorTest
             Substitute.For<IMigrationStep>(),
         };
 
-        var executor = new MigrationExecutor(steps.AsOrdered(), console, log);
+        var executor = new MigrationExecutor(WrapWithMetadata(steps), console, log);
 
         executor.PerformAllMigrationSteps();
 
@@ -71,7 +84,7 @@ internal sealed class MigrationExecutorTest
         using var console = new TestConsole();
         var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
+        var executor = new MigrationExecutor(WrapWithMetadata([step]), console, log);
 
         step.CheckIfNeeded().Returns(true);
         step.When(x => x.Execute(Arg.Any<ILogger>())).Throw(new ArgumentException("test message"));
@@ -95,7 +108,7 @@ internal sealed class MigrationExecutorTest
         using var console = new TestConsole();
         var log = Substitute.For<ILogger>();
         var step = Substitute.For<IMigrationStep>();
-        var executor = new MigrationExecutor(new[] { step }.AsOrdered(), console, log);
+        var executor = new MigrationExecutor(WrapWithMetadata([step]), console, log);
         var exception = new MigrationException(new ArgumentException(), "a", ["b"]);
 
         step.CheckIfNeeded().Returns(true);

@@ -3,14 +3,14 @@
 Quality Profile synchronization follows the standard pipeline pattern. This document covers
 QP-specific behaviors in transaction and persistence phases. For plan phase details, see
 [sync-plan-phase.md](sync-plan-phase.md). For the ID-first matching algorithm, see
-[trash-id-cache-system.md](trash-id-cache-system.md).
+[trash-id-state-system.md](trash-id-state-system.md).
 
 ## Profile Types
 
-**Guide-backed profiles** (with `trash_id`) load from TRaSH Guides and use cache-based ID-first
+**Guide-backed profiles** (with `trash_id`) load from TRaSH Guides and use state-based ID-first
 matching.
 
-**User-defined profiles** (name only) use name-based matching and are not cached.
+**User-defined profiles** (name only) use name-based matching and are not tracked in state.
 
 ## Three-Layer Precedence
 
@@ -52,9 +52,9 @@ delete unwanted profiles.
 - **Conflicting** - guide-backed profiles with name collision (suggest `--adopt`)
 - **Ambiguous** - multiple name matches
 
-## Cache Rebuild States
+## State Repair States
 
-QP cache rebuild produces these states:
+QP state repair produces these states:
 
 **Changes**: Added, Adopted, Corrected, Removed
 

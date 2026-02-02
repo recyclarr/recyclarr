@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
-using Recyclarr.Cache;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.Models;
 

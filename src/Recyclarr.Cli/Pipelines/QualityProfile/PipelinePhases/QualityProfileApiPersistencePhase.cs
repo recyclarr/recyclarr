@@ -1,12 +1,12 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiPersistencePhase(
     IQualityProfileApiService api,
-    ICachePersister<QualityProfileCacheObject> cachePersister,
+    ISyncStatePersister<QualityProfileMappings> statePersister,
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
@@ -30,8 +30,8 @@ internal class QualityProfileApiPersistencePhase(
             await api.UpdateQualityProfile(dto, ct);
         }
 
-        context.Cache.Update(context);
-        cachePersister.Save(context.Cache);
+        context.State.Update(context);
+        statePersister.Save(context.State);
 
         logger.LogPersistenceResults(context);
         return PipelineFlow.Continue;

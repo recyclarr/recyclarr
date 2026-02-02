@@ -1,4 +1,3 @@
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
@@ -7,6 +6,7 @@ using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.SyncState;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
@@ -33,7 +33,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            State = CfCache.New(),
             ApiFetchOutput = [],
             Plan = CreatePlan(NewCf.Data("one", "cf1")),
         };
@@ -58,7 +58,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            State = CfCache.New(),
             ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 5 }],
             Plan = CreatePlan(guideCf),
         };
@@ -86,7 +86,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(),
+            State = CfCache.New(),
             ApiFetchOutput =
             [
                 new CustomFormatResource { Name = "HULU", Id = 10 },
@@ -126,7 +126,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "old-name", 2)),
+            State = CfCache.New(new TrashIdMapping("cf1", "old-name", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "service-name", Id = 2 }],
             Plan = CreatePlan(guideCf),
         };
@@ -160,7 +160,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "one", 1)),
             ApiFetchOutput = [new CustomFormatResource { Name = "one", Id = 1 }],
             Plan = CreatePlan(guideCf),
         };
@@ -185,7 +185,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 200)), // ID 200 doesn't exist
+            State = CfCache.New(new TrashIdMapping("cf2", "two", 200)), // ID 200 doesn't exist
             ApiFetchOutput = [], // Empty service
             Plan = CreatePlan(guideCf),
         };
@@ -208,7 +208,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "existing", 999)), // ID 999 deleted
+            State = CfCache.New(new TrashIdMapping("cf1", "existing", 999)), // ID 999 deleted
             ApiFetchOutput = [new CustomFormatResource { Name = "existing", Id = 5 }], // Different CF
             Plan = CreatePlan(guideCf),
         };
@@ -234,7 +234,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
+            State = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
             Plan = new PipelinePlan(), // Empty plan - no CFs in config
         };
@@ -260,7 +260,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
+            State = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
             Plan = CreatePlan(NewCf.Data("two", "cf2")),
         };
@@ -305,7 +305,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -355,7 +355,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -393,7 +393,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -434,7 +434,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -488,7 +488,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
             ApiFetchOutput = [serviceCf],
             Plan = CreatePlan(guideCf),
         };
@@ -518,7 +518,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         var context = new CustomFormatPipelineContext
         {
-            Cache = CfCache.New(
+            State = CfCache.New(
                 new TrashIdMapping("real-trash-id", "BR-DISK", 1), // In config
                 new TrashIdMapping("orphan-trash-id", "BR-DISK", 1) // Orphaned, same service ID
             ),

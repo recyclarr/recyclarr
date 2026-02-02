@@ -1,17 +1,17 @@
 using System.Globalization;
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class UpdatedProfileBuilder
 {
     private readonly ILogger _log;
-    private readonly TrashIdCache<QualityProfileCacheObject> _cache;
+    private readonly TrashIdMappingStore<QualityProfileMappings> _state;
     private readonly QualityProfileTransactionData _transactions;
     private readonly Dictionary<int, QualityProfileDto> _serviceDtosById;
     private readonly ILookup<string, QualityProfileDto> _serviceDtosByName;
@@ -22,12 +22,12 @@ internal class UpdatedProfileBuilder
     public UpdatedProfileBuilder(
         ILogger log,
         QualityProfileServiceData serviceData,
-        TrashIdCache<QualityProfileCacheObject> cache,
+        TrashIdMappingStore<QualityProfileMappings> state,
         QualityProfileTransactionData transactions
     )
     {
         _log = log;
-        _cache = cache;
+        _state = state;
         _transactions = transactions;
         _schema = serviceData.Schema;
         _languages = serviceData.Languages;
@@ -65,7 +65,7 @@ internal class UpdatedProfileBuilder
     private void ProcessGuideBackedProfile(PlannedQualityProfile planned)
     {
         var trashId = planned.Resource!.TrashId;
-        var cachedId = _cache.FindId(trashId);
+        var cachedId = _state.FindId(trashId);
 
         _log.Debug(
             "Process transaction for guide QP {TrashId} ({Name}), cached ID: {CachedId}",

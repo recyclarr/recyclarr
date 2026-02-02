@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using Recyclarr.Cache;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.ResourceProviders.Domain;
 

@@ -1,20 +1,20 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
 internal static class CfCache
 {
-    public static TrashIdCache<CustomFormatCacheObject> New(params TrashIdMapping[] mappings)
+    public static TrashIdMappingStore<CustomFormatMappings> New(params TrashIdMapping[] mappings)
     {
-        return new TrashIdCache<CustomFormatCacheObject>(
-            new CustomFormatCacheObject { Mappings = mappings.ToList() }
+        return new TrashIdMappingStore<CustomFormatMappings>(
+            new CustomFormatMappings { Mappings = mappings.ToList() }
         );
     }
 
-    public static ICacheSyncSource ToSyncSource(
+    public static ISyncStateSource ToSyncSource(
         this CustomFormatTransactionData transactions,
         IEnumerable<CustomFormatResource> serviceCfs
     )
@@ -33,5 +33,5 @@ internal static class CfCache
         IEnumerable<TrashIdMapping> SyncedMappings,
         IEnumerable<int> DeletedIds,
         IEnumerable<int> ValidServiceIds
-    ) : ICacheSyncSource;
+    ) : ISyncStateSource;
 }

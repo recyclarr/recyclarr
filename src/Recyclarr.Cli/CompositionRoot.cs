@@ -11,9 +11,9 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Processors.CacheRebuild;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
+using Recyclarr.Cli.Processors.StateRepair;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
@@ -67,9 +67,9 @@ internal static class CompositionRoot
         // Delete
         builder.RegisterType<DeleteCustomFormatsProcessor>();
 
-        // Cache
-        builder.RegisterType<CacheRebuildProcessor>();
-        builder.RegisterType<CacheRebuildInstanceProcessor>();
+        // State
+        builder.RegisterType<StateRepairProcessor>();
+        builder.RegisterType<StateRepairInstanceProcessor>();
         builder.RegisterType<CustomFormatResourceAdapter>().As<IResourceAdapter>();
         builder.RegisterType<QualityProfileResourceAdapter>().As<IResourceAdapter>();
 
@@ -99,13 +99,16 @@ internal static class CompositionRoot
 
     private static void RegisterMigrations(ContainerBuilder builder)
     {
+        var thisAssembly = typeof(CompositionRoot).Assembly;
+
         builder.RegisterType<MigrationExecutor>();
 
-        // Migration Steps
+        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
         builder
-            .RegisterTypes(typeof(DeleteRepoDirMigrationStep))
+            .RegisterAssemblyTypes(thisAssembly)
+            .AssignableTo<IMigrationStep>()
             .As<IMigrationStep>()
-            .OrderByRegistration();
+            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)

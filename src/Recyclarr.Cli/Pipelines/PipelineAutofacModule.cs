@@ -1,9 +1,8 @@
 using Autofac;
 using Autofac.Extras.Ordering;
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Cli.Pipelines.MediaManagement;
 using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming;
@@ -12,12 +11,13 @@ using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.SyncState;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -93,8 +93,8 @@ internal class PipelineAutofacModule : Module
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
         builder
-            .RegisterType<QualityProfileCachePersister>()
-            .As<ICachePersister<QualityProfileCacheObject>>();
+            .RegisterType<QualityProfileStatePersister>()
+            .As<ISyncStatePersister<QualityProfileMappings>>();
 
         builder
             .RegisterTypes(
@@ -136,8 +136,8 @@ internal class PipelineAutofacModule : Module
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
         builder.RegisterType<CategorizedCustomFormatProvider>();
         builder
-            .RegisterType<CustomFormatCachePersister>()
-            .As<ICachePersister<CustomFormatCacheObject>>();
+            .RegisterType<CustomFormatStatePersister>()
+            .As<ISyncStatePersister<CustomFormatMappings>>();
         builder.RegisterType<CustomFormatTransactionLogger>();
 
         builder

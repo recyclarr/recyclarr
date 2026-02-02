@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json.Serialization;
-using Recyclarr.Cache;
 using Recyclarr.Json;
+using Recyclarr.SyncState;
 using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.ResourceProviders.Domain;

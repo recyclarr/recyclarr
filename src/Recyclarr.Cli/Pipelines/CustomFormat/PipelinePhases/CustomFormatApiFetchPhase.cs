@@ -1,13 +1,13 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiFetchPhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCacheObject> cachePersister
+    ISyncStatePersister<CustomFormatMappings> statePersister
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -15,7 +15,7 @@ internal class CustomFormatApiFetchPhase(
         CancellationToken ct
     )
     {
-        context.Cache = cachePersister.Load();
+        context.State = statePersister.Load();
         var result = await api.GetCustomFormats(ct);
         context.ApiFetchOutput.AddRange(result);
         return PipelineFlow.Continue;

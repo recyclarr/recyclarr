@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Recyclarr.Cache;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.ServarrApi.QualityProfile;
 

@@ -1,12 +1,12 @@
-using Recyclarr.Cache;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
@@ -23,13 +23,13 @@ internal sealed class QualityProfileTransactionPhaseTest
         return plan;
     }
 
-    private static TrashIdCache<QualityProfileCacheObject> CreateCache(
+    private static TrashIdMappingStore<QualityProfileMappings> CreateCache(
         params TrashIdMapping[] mappings
     )
     {
-        var cacheObject = new QualityProfileCacheObject();
+        var cacheObject = new QualityProfileMappings();
         cacheObject.Mappings.AddRange(mappings);
-        return new TrashIdCache<QualityProfileCacheObject>(cacheObject);
+        return new TrashIdMappingStore<QualityProfileMappings>(cacheObject);
     }
 
     [Test, AutoMockData]
@@ -49,7 +49,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(invalidProfile, validProfile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -91,7 +91,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(newProfile),
             ApiFetchOutput = NewQp.ServiceData(dtos, schema: schema),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -158,7 +158,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -206,7 +206,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = new PipelinePlan(),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -251,7 +251,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -310,7 +310,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -375,7 +375,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -440,7 +440,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -505,7 +505,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(dtos),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -566,7 +566,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     ],
                 }
             ),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -610,7 +610,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([serviceDto]),
-            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 42)),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 42)),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -641,7 +641,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([serviceDto]),
-            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Old Service Name", 42)),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "Old Service Name", 42)),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -672,7 +672,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([serviceDtoWithName]),
-            Cache = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 999)),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "Guide Profile", 999)),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -699,7 +699,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([existingDto]),
-            Cache = CreateCache(), // No cache entries
+            State = CreateCache(), // No cache entries
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -737,7 +737,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([], schema: schema),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -764,7 +764,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([dto1, dto2]),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -790,7 +790,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         {
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData([]),
-            Cache = CreateCache(),
+            State = CreateCache(),
         };
 
         await sut.Execute(context, CancellationToken.None);

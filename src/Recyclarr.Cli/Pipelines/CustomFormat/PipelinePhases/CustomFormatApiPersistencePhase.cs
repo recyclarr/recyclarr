@@ -1,13 +1,13 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
+using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiPersistencePhase(
     ICustomFormatApiService api,
-    ICachePersister<CustomFormatCacheObject> cachePersister,
+    ISyncStatePersister<CustomFormatMappings> statePersister,
     CustomFormatTransactionLogger cfLogger,
     IServiceConfiguration config
 ) : IPipelinePhase<CustomFormatPipelineContext>
@@ -43,8 +43,8 @@ internal class CustomFormatApiPersistencePhase(
             }
         }
 
-        context.Cache.Update(context);
-        cachePersister.Save(context.Cache);
+        context.State.Update(context);
+        statePersister.Save(context.State);
 
         return PipelineFlow.Continue;
     }

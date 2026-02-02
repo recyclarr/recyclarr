@@ -1,11 +1,11 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Sync;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-internal class QualityProfilePipelineContext : PipelineContext, ICacheSyncSource, IPipelineMetadata
+internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.QualityProfile;
     public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
@@ -14,10 +14,10 @@ internal class QualityProfilePipelineContext : PipelineContext, ICacheSyncSource
 
     public QualityProfileServiceData ApiFetchOutput { get; set; } = null!;
     public QualityProfileTransactionData TransactionOutput { get; set; } = null!;
-    public TrashIdCache<QualityProfileCacheObject> Cache { get; set; } = null!;
+    public TrashIdMappingStore<QualityProfileMappings> State { get; set; } = null!;
 
-    // ICacheSyncSource implementation
-    // Only cache guide-backed profiles (those with TrashId and valid service ID)
+    // ISyncStateSource implementation
+    // Only store guide-backed profiles (those with TrashId and valid service ID)
     public IEnumerable<TrashIdMapping> SyncedMappings =>
         TransactionOutput
             .NewProfiles.Concat(TransactionOutput.UnchangedProfiles)

@@ -1,13 +1,13 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.QualityProfile.Cache;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiFetchPhase(
     IQualityProfileApiService api,
-    ICachePersister<QualityProfileCacheObject> cachePersister
+    ISyncStatePersister<QualityProfileMappings> statePersister
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -25,7 +25,7 @@ internal class QualityProfileApiFetchPhase(
             await schemaTask,
             (await languagesTask).AsReadOnly()
         );
-        context.Cache = cachePersister.Load();
+        context.State = statePersister.Load();
         return PipelineFlow.Continue;
     }
 }

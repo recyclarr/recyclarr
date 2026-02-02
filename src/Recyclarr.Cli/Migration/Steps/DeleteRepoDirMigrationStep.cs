@@ -5,6 +5,7 @@ using Recyclarr.Platform;
 namespace Recyclarr.Cli.Migration.Steps;
 
 [UsedImplicitly]
+[MigrationOrder(1)]
 internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
 {
     public string Description => "Delete old repo directory";

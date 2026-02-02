@@ -2,7 +2,6 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Flurl.Http.Configuration;
-using Recyclarr.Cache;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
@@ -32,6 +31,7 @@ using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
+using Recyclarr.SyncState;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
@@ -62,7 +62,7 @@ public class CoreAutofacModule : Module
 
     private static void RegisterCache(ContainerBuilder builder)
     {
-        builder.RegisterType<CacheStoragePath>().As<ICacheStoragePath>();
+        builder.RegisterType<SyncStateStoragePath>().As<ISyncStateStoragePath>();
     }
 
     private static void RegisterCommon(ContainerBuilder builder)

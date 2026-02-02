@@ -1,12 +1,12 @@
-using Recyclarr.Cache;
-using Recyclarr.Cli.Pipelines.CustomFormat.Cache;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
+using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatPipelineContext : PipelineContext, ICacheSyncSource, IPipelineMetadata
+internal class CustomFormatPipelineContext : PipelineContext, ISyncStateSource, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
@@ -15,9 +15,9 @@ internal class CustomFormatPipelineContext : PipelineContext, ICacheSyncSource, 
 
     public IList<CustomFormatResource> ApiFetchOutput { get; init; } = [];
     public CustomFormatTransactionData TransactionOutput { get; set; } = null!;
-    public TrashIdCache<CustomFormatCacheObject> Cache { get; set; } = null!;
+    public TrashIdMappingStore<CustomFormatMappings> State { get; set; } = null!;
 
-    // ICacheSyncSource implementation
+    // ISyncStateSource implementation
     public IEnumerable<TrashIdMapping> SyncedMappings =>
         TransactionOutput
             .NewCustomFormats.Concat(TransactionOutput.UpdatedCustomFormats)
