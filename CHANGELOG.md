@@ -31,8 +31,8 @@ changes you may need to make.
   directory.
 - CLI: New `--log [level]` option for explicit log output control. Valid levels: `debug`, `info`
   (default), `warn`.
-- CLI: New `cache rebuild` command to rebuild cache mappings by matching configured resources
-  (custom formats, quality profiles) to service resources by name.
+- CLI: New `state repair` command to rebuild cache mappings by matching configured resources (custom
+  formats, quality profiles) to service resources by name.
 - CLI: New `list custom-format-groups` command to discover available CF group trash_ids.
 - CLI: New `list score-sets` command to list available score sets for custom formats.
 - CLI: New `list quality-profiles` command to discover available quality profile trash_ids.
@@ -46,8 +46,8 @@ changes you may need to make.
 - CLI: **BREAKING** List commands now display formatted tables instead of plain text. Use `--raw`
   for the previous behavior (now TSV format for scripting).
 - CLI: **BREAKING** The global `--raw` option has been removed. It is now specific to list commands.
-- CLI: **BREAKING** The `--score-sets` option on `list custom-formats` has been removed. Use
-  `list score-sets` instead.
+- CLI: **BREAKING** The `--score-sets` option on `list custom-formats` has been removed. Use `list
+  score-sets` instead.
 - Sync: Simplified custom format matching logic. Cached IDs are now trusted over name matching,
   reducing complexity and resolving edge cases like multiple CFs with case-variant names (#672).
 - Sync: Preview mode now shows instance name in section headers and a visual separator between
@@ -58,8 +58,8 @@ changes you may need to make.
 
 ### Removed
 
-- Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use
-  `recyclarr cache rebuild --adopt` to adopt manually-created custom formats.
+- Config: **BREAKING** The `replace_existing_custom_formats` option has been removed. Use `recyclarr
+  state repair --adopt` to adopt manually-created custom formats.
 - Config: **BREAKING** The deprecated `quality_profiles` element under `custom_formats` has been
   removed.
 - Config: **BREAKING** Include templates in the `configs` directory are no longer supported. Move
