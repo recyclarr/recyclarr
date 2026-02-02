@@ -7,6 +7,7 @@
 Recyclarr uses an orchestrator-based agent model:
 
 - **recyclarr**: Business logic implementation. Use directly via `@recyclarr` for simple tasks.
+  Includes internal `code-review` quality gate for semantic changes.
 - **test**: Testing specialist. Owns `tests/**` directory.
 - **devops**: CI/CD specialist. Owns `.github/**`, `ci/**`.
 - **trash-guides**: TRaSH Guides research (read-only).
@@ -51,7 +52,9 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
   - Early returns/continues: Include reason if not obvious from context
   - Complex algorithms: Comment explaining approach at top, not line-by-line
   - General: Any code where a reader would pause and wonder "why?" or "what's happening here?"
-  - NEVER: XML doc comments, commented-out code, restating what code literally does
+  - XML doc comments (`/// <summary>`): Use for public/internal interfaces, classes, and non-obvious
+    members where IntelliSense tooltips add value. Skip for private implementation details.
+  - NEVER: Commented-out code, restating what code literally does
 - Zero warnings/analysis issues
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
   polymorphism tradeoffs for discussion rather than defaulting to enums.

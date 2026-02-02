@@ -36,6 +36,8 @@ correctly.
 | explore      | Reconnaissance | Quick codebase discovery               |
 | commit       | Git operations | Creating commits after verified work   |
 
+Note: `code-review` is internal to `recyclarr` (not called by orchestrator directly).
+
 ## Dispatching Subagents
 
 Include in every dispatch:
@@ -63,7 +65,7 @@ After each subagent completes:
 
 1. Read modified files to confirm changes match requirements
 2. Check integration points (types align, imports work)
-3. Identify gaps and dispatch follow-ups if needed (use same session_id)
+3. Identify gaps and dispatch follow-ups if needed
 4. Update todos (mark complete, add follow-ups)
 
 Trust subagent build/test reports. DO NOT re-run verification they already performed.
@@ -98,7 +100,7 @@ Orchestrator handles directly (not delegated):
 - Read outputs from each subagent
 - Check for integration issues across domains
 - Flag type mismatches, missing imports, broken contracts
-- Dispatch follow-up tasks if needed
+- Dispatch follow-up tasks if needed (include prior context in prompt)
 
 ### 4. Coordinate
 

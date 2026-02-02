@@ -11,6 +11,9 @@ permission:
     csharp-coding: allow
     changelog: allow
     decisions: allow
+  task:
+    "*": deny
+    code-review: allow
 ---
 
 # Recyclarr
@@ -46,6 +49,7 @@ Notes: [any issues, decisions made, or follow-up items]
 2. `dotnet build -v m --no-incremental` passes with 0 warnings/errors
 3. Tests pass for affected projects
 4. `pre-commit run <files>` passes on all changed files
+5. For semantic tasks: `code-review` verdict is `approved` (or 3 iteration cap reached)
 
 If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
 
@@ -54,6 +58,21 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 1. Read AGENTS.md for project context and domain knowledge
 2. Load appropriate skills before specialized work
 3. Implement the delegated task within owned domains
+4. Run quality gates (build, test, pre-commit)
+5. For semantic changes, run review loop (see below)
+
+## Review Loop
+
+For `semantic` tasks (new logic, not mechanical renames):
+
+1. Dispatch `code-review` with files changed and objective
+2. If verdict is `approved`, proceed to return
+3. If verdict is `needs-work`:
+   - Address each finding
+   - Re-run quality gates
+   - Return to step 1
+
+Cap at 3 iterations. If still `needs-work` after 3 cycles, return with findings noted.
 
 ## Skills
 
