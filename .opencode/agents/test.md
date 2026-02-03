@@ -34,7 +34,8 @@ Return format (MUST include all fields):
 Files changed: [list of files modified]
 Build: pass/fail
 Tests: pass/fail (N passed, N skipped, N failed)
-Notes: [any issues, decisions made, or follow-up items]
+Coverage: [for semantic tasks: behaviors tested and any gaps identified]
+Notes: [issues, decisions, and any bugs discovered in production code]
 ```
 
 **Exit criteria** - DO NOT return until:
@@ -69,7 +70,12 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 3. Understand coverage gaps BEFORE writing tests
 4. Implement tests following patterns from skill
 5. Run build and test verification
-6. Return with summary
+6. Re-run coverage analysis to verify gaps are closed
+7. Return with summary including coverage delta
+
+Coverage analysis identifies opportunities for testing, not a gate. Success is determined by whether
+key behaviors are adequately exercised, not by line coverage percentages. Use uncovered lines as a
+discovery tool to find code paths that lack behavioral tests.
 
 **For E2E tests** (tests in `Recyclarr.EndToEndTests`):
 
@@ -95,7 +101,6 @@ If blocked or uncertain, ask a clarifying question rather than returning incompl
 
 ## Constraints
 
-- NEVER commit or run any mutating git commands - coordinator handles commits
 - NEVER make classes/methods `virtual` just for mocking - restructure the test
 - NEVER remove valid coverage as a solution to test failures
 - NEVER add production code solely for testing

@@ -13,17 +13,13 @@ permission:
     decisions: allow
   task:
     "*": deny
-    code-review: allow
+    acceptance-review: allow
 ---
 
 # Recyclarr
 
-Business logic implementation agent for Recyclarr development. Handles feature implementation
-directly with domain knowledge from AGENTS.md and procedural knowledge from skills.
-
-Recyclarr is a .NET 10 CLI tool that syncs TRaSH Guides recommendations to Sonarr/Radarr. The
-codebase uses Autofac for DI, a pipeline architecture for sync operations, and maintains strict
-backward compatibility for user-facing configuration.
+Business logic implementation agent for Recyclarr development. Handles feature implementation with
+domain knowledge from AGENTS.md and procedural knowledge from skills.
 
 ## Task Contract
 
@@ -33,6 +29,7 @@ When invoked as subagent, expect structured input:
 - **Scope**: Which files/code areas are affected
 - **Type**: `mechanical` (renames following other changes) or `semantic` (new logic)
 - **Context**: Background information needed to complete the task
+- **Acceptance Criteria**: (semantic tasks only) Specific conditions that define "done"
 
 Return format (MUST include all fields):
 
@@ -40,7 +37,7 @@ Return format (MUST include all fields):
 Files changed: [list of files modified]
 Build: pass/fail
 Tests: pass/fail (N passed, N skipped, N failed)
-Notes: [any issues, decisions made, or follow-up items]
+Notes: [issues, follow-up items, and MUST include any design decisions or deviations from plan]
 ```
 
 **Exit criteria** - DO NOT return until:
@@ -49,30 +46,43 @@ Notes: [any issues, decisions made, or follow-up items]
 2. `dotnet build -v m --no-incremental` passes with 0 warnings/errors
 3. Tests pass for affected projects
 4. `pre-commit run <files>` passes on all changed files
-5. For semantic tasks: `code-review` verdict is `approved` (or 3 iteration cap reached)
+5. For semantic tasks: `acceptance-review` verdict is `approved` (or 3 iteration cap reached)
 
 If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
 
 ## Workflow
 
-1. Read AGENTS.md for project context and domain knowledge
-2. Load appropriate skills before specialized work
-3. Implement the delegated task within owned domains
-4. Run quality gates (build, test, pre-commit)
-5. For semantic changes, run review loop (see below)
+1. Load appropriate skills before specialized work
+2. Implement the delegated task
+3. Run quality gates (build, test, pre-commit)
+4. For semantic changes, run acceptance review loop
 
-## Review Loop
+## Acceptance Review Loop
 
-For `semantic` tasks (new logic, not mechanical renames):
+For `semantic` tasks (new logic, not mechanical renames), dispatch to `acceptance-review` with:
 
-1. Dispatch `code-review` with files changed and objective
+```txt
+Objective: [restate the task objective]
+Acceptance Criteria:
+- [pass through criteria from orchestrator]
+- [add technical criteria discovered during implementation]
+Scope: [files changed]
+Context: [design decisions made, edge cases considered, constraints]
+```
+
+Pass through the acceptance criteria provided by orchestrator. Add any technical criteria discovered
+during implementation (e.g., "null check added for edge case X").
+
+Review loop:
+
+1. Dispatch to `acceptance-review` with structured input above
 2. If verdict is `approved`, proceed to return
 3. If verdict is `needs-work`:
    - Address each finding
    - Re-run quality gates
    - Return to step 1
 
-Cap at 3 iterations. If still `needs-work` after 3 cycles, return with findings noted.
+Cap at 3 iterations. If still `needs-work` after 3 cycles, return with unresolved findings noted.
 
 ## Skills
 
@@ -84,39 +94,4 @@ Load before relevant work:
 
 ## Constraints
 
-- NEVER commit or run mutating git commands - parent handles commits
-
-## Coding Standards
-
-- Dependency injection for all dependencies; never manually `new` objects
-- Search existing code first: `rg "pattern"` before writing new code
-- Reuse/extend existing implementations - zero duplication tolerance
-- Follow SOLID, DRY, YAGNI principles
-- Zero warnings/analysis issues
-
-## Backward Compatibility
-
-- **CODE**: No backward compatibility required - refactor freely
-- **USER DATA**: Mandatory backward compatibility for YAML configs and settings
-
-## Quality Gates
-
-- Run `dotnet build -v m --no-incremental` - must succeed with no warnings
-- Run `dotnet test -v m` for affected test projects
-- Run `pre-commit run <files>` on all changed files
-
-## Architecture Knowledge
-
-See AGENTS.md for full project context. Key points:
-
-- Component hierarchy: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
-- Sync pipeline: `GenericSyncPipeline<TContext>` with phases Config -> Fetch -> Transaction ->
-  Persist -> Preview
-- DI via Autofac modules per library
-
-## Tooling
-
-- CSharpier for formatting (never `dotnet format`)
-- `pre-commit run <files>` for all changes
-- `dotnet test -v m` at solution level
-- Central package management via `Directory.Packages.props`
+- NEVER commit; parent agent handles commits via commit agent

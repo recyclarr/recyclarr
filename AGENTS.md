@@ -7,10 +7,13 @@
 Recyclarr uses an orchestrator-based agent model:
 
 - **recyclarr**: Business logic implementation. Use directly via `@recyclarr` for simple tasks.
-  Includes internal `code-review` quality gate for semantic changes.
+  Runs `acceptance-review` loop for semantic changes.
 - **test**: Testing specialist. Owns `tests/**` directory.
 - **devops**: CI/CD specialist. Owns `.github/**`, `ci/**`.
 - **trash-guides**: TRaSH Guides research (read-only).
+
+Subagents NEVER commit directly; the orchestrator handles commits via the `commit` agent after user
+approval.
 
 ## Skills
 

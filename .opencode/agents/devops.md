@@ -31,8 +31,9 @@ Notes: [any issues, decisions made, or follow-up items]
 **Exit criteria** - DO NOT return until:
 
 1. All requested changes are complete
-2. Workflow syntax is valid (if workflows modified)
+2. Workflow syntax is valid: run `actionlint` on modified workflows
 3. Scripts are tested where possible
+4. `pre-commit run <files>` passes on all changed files
 
 If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
 
@@ -49,18 +50,8 @@ Implements code quality checks and automates release processes.
 - `scripts/` - Development and release scripts
 - `.config/dotnet-tools.json` - Dotnet tool management
 
-## Primary Responsibilities
-
-- Maintain CI/CD pipelines for build, test, and release
-- Manage Docker image builds and publishing
-- Implement code quality checks (Qodana, linting)
-- Automate release processes
-- Optimize build performance and caching
-- Manage secrets and environment configuration
-
 ## Constraints
 
-- NEVER commit or run any mutating git commands - coordinator handles commits
 - NEVER run human-only scripts (see below)
 - Secrets never in logs or artifacts
 - Workflows should fail fast on errors
@@ -124,17 +115,3 @@ CI handles:
 
 - `notify.yml` - Release notifications
 - `reusable-*.yml` - Shared workflow components
-
-## Development Scripts
-
-- `test_coverage.py` - Run tests with coverage
-- `query_coverage.py` - Query coverage results
-- `query_issues.py` - Query Qodana issues
-- `Docker-Debug.ps1` - Start dev dependencies
-
-## Environment
-
-- .NET 10.0 SDK
-- Docker for containerization
-- GitHub Actions runners (ubuntu-latest primary)
-- Qodana for static analysis
