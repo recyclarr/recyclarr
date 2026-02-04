@@ -36,7 +36,7 @@ public class ResourceProviderAutofacModule : Module
 
     private static void RegisterDomainLayer(ContainerBuilder builder)
     {
-        builder.RegisterType<JsonResourceLoader>();
+        builder.RegisterType<JsonResourceLoader>().InstancePerLifetimeScope();
 
         builder.RegisterType<CategoryResourceQuery>();
         builder.RegisterType<CustomFormatResourceQuery>();
