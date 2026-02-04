@@ -159,7 +159,7 @@ public class CoreAutofacModule : Module
 
     private static void RegisterNotifications(ContainerBuilder builder)
     {
-        builder.RegisterType<NotificationService>().SingleInstance();
+        builder.RegisterType<NotificationService>();
 
         // Apprise
         builder
