@@ -13,14 +13,14 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
         [
             $"Ensure Recyclarr has permission to read/write {CacheDir} and {StateDir}",
             $"Manually move {CacheDir}/sonarr and {CacheDir}/radarr to {StateDir}",
-            $"Manually move {CacheDir}/resources to {paths.AppDataDirectory.SubDirectory("resources")}",
+            $"Manually move {CacheDir}/resources to {paths.ResourceDirectory}",
             $"Delete {CacheDir} after moving contents",
         ];
 
     public bool Required => true;
-    private IDirectoryInfo CacheDir => paths.AppDataDirectory.SubDirectory("cache");
-    private IDirectoryInfo StateDir => paths.AppDataDirectory.SubDirectory("state");
-    private IDirectoryInfo ResourcesDir => paths.AppDataDirectory.SubDirectory("resources");
+    private IDirectoryInfo CacheDir => paths.ConfigDirectory.SubDirectory("cache");
+    private IDirectoryInfo StateDir => paths.ConfigDirectory.SubDirectory("state");
+    private IDirectoryInfo ResourcesDir => paths.ResourceDirectory;
 
     public bool CheckIfNeeded()
     {

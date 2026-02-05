@@ -40,7 +40,7 @@ internal class ConfigListLocalProcessor(
         console.WriteLine("Local configuration files:");
         console.WriteLine();
 
-        var tree = new Tree(paths.AppDataDirectory.ToString()!);
+        var tree = new Tree(paths.ConfigDirectory.ToString()!);
 
         foreach (var pair in configsByFile)
         {
@@ -78,7 +78,7 @@ internal class ConfigListLocalProcessor(
         }
 
         var configPath = new Uri(path.FullName, UriKind.Absolute);
-        var configDir = new Uri(paths.ConfigsDirectory.FullName, UriKind.Absolute);
+        var configDir = new Uri(paths.YamlConfigDirectory.FullName, UriKind.Absolute);
         return configDir.MakeRelativeUri(configPath).ToString();
     }
 

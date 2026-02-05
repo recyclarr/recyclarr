@@ -19,7 +19,7 @@ internal sealed class SettingsLoaderTest
 
         fileSystem
             .AllFiles.Should()
-            .ContainSingle(paths.AppDataDirectory.File("settings.yml").FullName);
+            .ContainSingle(paths.ConfigDirectory.File("settings.yml").FullName);
     }
 
     [Test, AutoMockData]

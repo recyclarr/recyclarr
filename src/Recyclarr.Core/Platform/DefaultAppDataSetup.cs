@@ -4,44 +4,84 @@ namespace Recyclarr.Platform;
 
 public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSetup
 {
-    private string? _appDataDirectoryOverride;
+    private string? _configDirectoryOverride;
+    private string? _dataDirectoryOverride;
 
-    public void SetAppDataDirectoryOverride(string path)
+    public void SetConfigDirectoryOverride(string path)
     {
-        _appDataDirectoryOverride = path;
+        _configDirectoryOverride = path;
+    }
+
+    public void SetDataDirectoryOverride(string path)
+    {
+        _dataDirectoryOverride = path;
     }
 
     public IAppPaths CreateAppPaths()
     {
-        var appDir = GetAppDataDirectory(_appDataDirectoryOverride);
-        var paths = new AppPaths(fs.DirectoryInfo.New(appDir));
+        CheckForDeprecatedEnvironmentVariable();
+
+        var configDir = GetConfigDirectory();
+        var dataDir = GetDataDirectory(configDir);
+        var paths = new AppPaths(configDir, dataDir);
 
         // Initialize other directories used throughout the application
         // Do not initialize the repo directory here; the RepoUpdater handles that later.
         paths.StateDirectory.Create();
         paths.LogDirectory.Create();
-        paths.ConfigsDirectory.Create();
-        paths.IncludesDirectory.Create();
+        paths.YamlConfigDirectory.Create();
+        paths.YamlIncludeDirectory.Create();
 
         return paths;
     }
 
-    private string GetAppDataDirectory(string? appDataDirectoryOverride)
+    private void CheckForDeprecatedEnvironmentVariable()
     {
-        if (string.IsNullOrEmpty(appDataDirectoryOverride))
+        var deprecatedVar = env.GetEnvironmentVariable("RECYCLARR_APP_DATA");
+        if (!string.IsNullOrEmpty(deprecatedVar))
         {
-            // If a specific app data directory is not provided, use the following environment variable to find the path.
-            appDataDirectoryOverride = env.GetEnvironmentVariable("RECYCLARR_APP_DATA") ?? "";
+            throw new InvalidOperationException(
+                """
+                RECYCLARR_APP_DATA is no longer supported. Use these instead:
+                  - RECYCLARR_CONFIG_DIR: User configuration (replaces APP_DATA)
+                  - RECYCLARR_DATA_DIR: Ephemeral data (optional, defaults to CONFIG_DIR)
+
+                To migrate, rename RECYCLARR_APP_DATA to RECYCLARR_CONFIG_DIR in your environment.
+                """
+            );
+        }
+    }
+
+    private IDirectoryInfo GetConfigDirectory()
+    {
+        // Priority: override via code > override via new env var > platform default
+        var configDir =
+            _configDirectoryOverride
+            ?? env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR")
+            ?? GetPlatformDefaultDirectory();
+
+        return fs.Directory.CreateDirectory(configDir);
+    }
+
+    private IDirectoryInfo GetDataDirectory(IDirectoryInfo configDir)
+    {
+        // Priority: override via code > env var > config directory
+        var dataDir =
+            _dataDirectoryOverride
+            ?? env.GetEnvironmentVariable("RECYCLARR_DATA_DIR")
+            ?? configDir.FullName;
+
+        // If data dir is relative, resolve it relative to config dir
+        if (!fs.Path.IsPathRooted(dataDir))
+        {
+            dataDir = fs.Path.Combine(configDir.FullName, dataDir);
         }
 
-        // Ensure user-specified app data directory is created and use it.
-        if (!string.IsNullOrEmpty(appDataDirectoryOverride))
-        {
-            return fs.Directory.CreateDirectory(appDataDirectoryOverride).FullName;
-        }
+        return fs.Directory.CreateDirectory(dataDir);
+    }
 
-        // Set app data path to application directory value (e.g. `$HOME/.config` on Linux) and ensure it is
-        // created.
+    private string GetPlatformDefaultDirectory()
+    {
         var appData = env.GetFolderPath(
             Environment.SpecialFolder.ApplicationData,
             Environment.SpecialFolderOption.Create
@@ -51,7 +91,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         {
             throw new NoHomeDirectoryException(
                 "Unable to find or create the default app data directory. The application cannot determine where "
-                    + "to place data files. Please use the --app-data option to explicitly set a location for these files."
+                    + "to place data files. Please set the RECYCLARR_CONFIG_DIR environment variable to explicitly set a location for these files."
             );
         }
 

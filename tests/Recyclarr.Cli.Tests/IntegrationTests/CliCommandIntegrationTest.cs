@@ -11,7 +11,7 @@ internal sealed class CliCommandIntegrationTest : CliIntegrationFixture
     {
         // Add naming data file at the expected path (StubRepoUpdater handles metadata.json)
         var officialRepoPath = Paths
-            .ReposDirectory.SubDirectory("trash-guides")
+            .ResourceDirectory.SubDirectory("trash-guides")
             .SubDirectory("git")
             .SubDirectory("official");
 

@@ -11,9 +11,4 @@ internal class BaseCommandSettings : CommandSettings
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     [DefaultValue(CliLogLevel.Info)]
     public FlagValue<CliLogLevel> LogLevel { get; init; } = null!;
-
-    [CommandOption("--app-data")]
-    [Description("Custom path to the application data directory")]
-    [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-    public string? AppData { get; init; }
 }

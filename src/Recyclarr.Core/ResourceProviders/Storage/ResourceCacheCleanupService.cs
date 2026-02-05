@@ -8,7 +8,7 @@ public class ResourceCacheCleanupService(IAppPaths appPaths, ILogger log)
 {
     public void CleanupOrphans(IEnumerable<IDirectoryInfo> activePaths)
     {
-        if (!appPaths.ReposDirectory.Exists)
+        if (!appPaths.ResourceDirectory.Exists)
         {
             return;
         }
@@ -17,7 +17,7 @@ public class ResourceCacheCleanupService(IAppPaths appPaths, ILogger log)
         {
             var activeSet = activePaths.Select(p => p.FullName).ToHashSet();
             var allCachePaths = appPaths
-                .ReposDirectory.EnumerateDirectories()
+                .ResourceDirectory.EnumerateDirectories()
                 .SelectMany(typeDir =>
                     typeDir
                         .EnumerateDirectories()

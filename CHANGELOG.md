@@ -40,6 +40,9 @@ changes you may need to make.
 - Sync: Unified diagnostics panel displayed at end of sync, consolidating all errors and warnings.
 - Sync: Live progress display showing real-time status of all instances and pipelines during sync.
 - Settings: Git resource providers now support both `main` and `master` as default branches.
+- Config: New `RECYCLARR_CONFIG_DIR` environment variable for user configuration directory.
+- Config: New `RECYCLARR_DATA_DIR` environment variable for ephemeral data (resources, logs),
+  enabling backup separation from user configuration (#699).
 
 ### Changed
 
@@ -68,6 +71,10 @@ changes you may need to make.
   `resource_providers` instead.
 - Migrate: **BREAKING** macOS users upgrading from versions prior to v6.0 must manually move app
   data from `~/.config/recyclarr` to `~/Library/Application Support/recyclarr`.
+- CLI: **BREAKING** The `--app-data` option has been removed. Use `RECYCLARR_CONFIG_DIR` environment
+  variable instead.
+- Config: **BREAKING** The `RECYCLARR_APP_DATA` environment variable has been removed. Use
+  `RECYCLARR_CONFIG_DIR` instead.
 
 ### Fixed
 

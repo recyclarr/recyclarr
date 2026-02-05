@@ -135,7 +135,6 @@ internal static class CompositionRoot
         builder.RegisterComposite<CompositeGlobalSetupTask, IGlobalSetupTask>();
         builder
             .RegisterTypes(
-                typeof(AppDataDirSetupTask), // This must be first; ILogger creation depends on IAppPaths
                 typeof(ConsoleSetupTask), // Must run before LoggerSetupTask (handles console redirect)
                 typeof(LoggerSetupTask),
                 typeof(ProgramInformationDisplayTask),

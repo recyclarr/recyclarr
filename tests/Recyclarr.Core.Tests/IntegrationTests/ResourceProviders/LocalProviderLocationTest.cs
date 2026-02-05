@@ -10,7 +10,7 @@ internal sealed class LocalProviderLocationTest : IntegrationTestFixture
     [Test]
     public async Task Resolve_relative_path_against_app_data_directory()
     {
-        var expectedDir = Paths.AppDataDirectory.SubDirectory("my-custom-formats");
+        var expectedDir = Paths.ConfigDirectory.SubDirectory("my-custom-formats");
         Fs.AddDirectory(expectedDir.FullName);
 
         var config = new LocalResourceProvider

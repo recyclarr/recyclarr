@@ -16,7 +16,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
 
         sut.Process(new ConfigCreateCommand.CliSettings { Path = null });
 
-        var file = Fs.GetFile(Paths.AppDataDirectory.File("recyclarr.yml"));
+        var file = Fs.GetFile(Paths.ConfigDirectory.File("recyclarr.yml"));
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }
@@ -85,7 +85,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
 
         // Create a mock templates.json file in the expected location BEFORE initialization
         var mockRepoPath = Paths
-            .ReposDirectory.SubDirectory("config-templates")
+            .ResourceDirectory.SubDirectory("config-templates")
             .SubDirectory("git")
             .SubDirectory("official");
         Fs.AddDirectory(mockRepoPath);
@@ -113,8 +113,8 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
 
         Fs.AllFiles.Should()
             .Contain([
-                Paths.ConfigsDirectory.File("template-file1.yml").FullName,
-                Paths.ConfigsDirectory.File("template-file2.yml").FullName,
+                Paths.YamlConfigDirectory.File("template-file1.yml").FullName,
+                Paths.YamlConfigDirectory.File("template-file2.yml").FullName,
             ]);
     }
 }

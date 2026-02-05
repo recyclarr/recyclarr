@@ -44,6 +44,6 @@ public class LocalProviderLocation(
             return fileSystem.DirectoryInfo.New(path);
         }
 
-        return appPaths.AppDataDirectory.SubDirectory(path);
+        return appPaths.ConfigDirectory.SubDirectory(path);
     }
 }

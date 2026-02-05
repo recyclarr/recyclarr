@@ -4,10 +4,10 @@ namespace Recyclarr.Platform;
 
 public interface IAppPaths
 {
-    IDirectoryInfo AppDataDirectory { get; }
+    IDirectoryInfo ConfigDirectory { get; }
     IDirectoryInfo LogDirectory { get; }
-    IDirectoryInfo ReposDirectory { get; }
+    IDirectoryInfo ResourceDirectory { get; }
     IDirectoryInfo StateDirectory { get; }
-    IDirectoryInfo ConfigsDirectory { get; }
-    IDirectoryInfo IncludesDirectory { get; }
+    IDirectoryInfo YamlConfigDirectory { get; }
+    IDirectoryInfo YamlIncludeDirectory { get; }
 }

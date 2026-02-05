@@ -23,7 +23,7 @@ internal class LocalConfigCreator(
     public void Create(ICreateConfigSettings settings)
     {
         var configFile = settings.Path is null
-            ? paths.AppDataDirectory.File("recyclarr.yml")
+            ? paths.ConfigDirectory.File("recyclarr.yml")
             : fs.FileInfo.New(settings.Path);
 
         if (configFile.Exists)

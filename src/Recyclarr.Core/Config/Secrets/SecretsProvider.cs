@@ -19,7 +19,7 @@ public class SecretsProvider : ISecretsProvider
 
     private Dictionary<string, string> LoadSecretsFile()
     {
-        var yamlPath = _paths.AppDataDirectory.YamlFile("secrets");
+        var yamlPath = _paths.ConfigDirectory.YamlFile("secrets");
         if (yamlPath is null)
         {
             return [];

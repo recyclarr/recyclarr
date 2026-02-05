@@ -23,13 +23,13 @@ internal sealed class ConfigIncludeProcessorTest
         ConfigIncludeProcessor sut
     )
     {
-        fs.AddEmptyFile(paths.IncludesDirectory.File("foo/bar/config.yml"));
+        fs.AddEmptyFile(paths.YamlIncludeDirectory.File("foo/bar/config.yml"));
 
         var includeDirective = new ConfigYamlInclude { Config = "foo/bar/config.yml" };
 
         var path = sut.GetPathToConfig(includeDirective, default);
 
-        path.FullName.Should().Be(paths.IncludesDirectory.File("foo/bar/config.yml").FullName);
+        path.FullName.Should().Be(paths.YamlIncludeDirectory.File("foo/bar/config.yml").FullName);
     }
 
     [Test, AutoMockData]

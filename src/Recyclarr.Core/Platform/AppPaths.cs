@@ -2,14 +2,19 @@ using System.IO.Abstractions;
 
 namespace Recyclarr.Platform;
 
-public class AppPaths(IDirectoryInfo appDataPath) : IAppPaths
+public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IAppPaths
 {
     public static string DefaultAppDataDirectoryName => "recyclarr";
 
-    public IDirectoryInfo AppDataDirectory { get; } = appDataPath;
-    public IDirectoryInfo LogDirectory => AppDataDirectory.SubDirectory("logs", "cli");
-    public IDirectoryInfo ReposDirectory => AppDataDirectory.SubDirectory("resources");
-    public IDirectoryInfo StateDirectory => AppDataDirectory.SubDirectory("state");
-    public IDirectoryInfo ConfigsDirectory => AppDataDirectory.SubDirectory("configs");
-    public IDirectoryInfo IncludesDirectory => AppDataDirectory.SubDirectory("includes");
+    // Config root for backward compatibility with other code
+    public IDirectoryInfo ConfigDirectory => configRoot;
+
+    // Ephemeral data directories (derive from data root)
+    public IDirectoryInfo LogDirectory => dataRoot.SubDirectory("logs", "cli");
+    public IDirectoryInfo ResourceDirectory => dataRoot.SubDirectory("resources");
+
+    // User configuration directories (derive from config root)
+    public IDirectoryInfo StateDirectory => configRoot.SubDirectory("state");
+    public IDirectoryInfo YamlConfigDirectory => configRoot.SubDirectory("configs");
+    public IDirectoryInfo YamlIncludeDirectory => configRoot.SubDirectory("includes");
 }

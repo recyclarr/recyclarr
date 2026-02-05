@@ -36,7 +36,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     private void SetupGuideCfs(string serviceType, params (string TrashId, string Name)[] cfs)
     {
         var cfDir = Paths
-            .ReposDirectory.SubDirectory("trash-guides")
+            .ResourceDirectory.SubDirectory("trash-guides")
             .SubDirectory("git")
             .SubDirectory("official")
             .SubDirectory("docs")
@@ -75,7 +75,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                 },
             },
         };
-        Fs.AddYamlFile(Paths.ConfigsDirectory.File("config.yml"), config);
+        Fs.AddYamlFile(Paths.YamlConfigDirectory.File("config.yml"), config);
     }
 
     private void SetupServiceCfs(params CustomFormatResource[] cfs)
@@ -571,7 +571,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     private void SetupGuideQps(string serviceType, params (string TrashId, string Name)[] qps)
     {
         var qpDir = Paths
-            .ReposDirectory.SubDirectory("trash-guides")
+            .ResourceDirectory.SubDirectory("trash-guides")
             .SubDirectory("git")
             .SubDirectory("official")
             .SubDirectory("docs")
@@ -621,7 +621,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                 },
             },
         };
-        Fs.AddYamlFile(Paths.ConfigsDirectory.File("config.yml"), config);
+        Fs.AddYamlFile(Paths.YamlConfigDirectory.File("config.yml"), config);
     }
 
     [Test]

@@ -16,7 +16,7 @@ internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
         ];
 
     public bool Required => false;
-    private IDirectoryInfo RepoDir => paths.AppDataDirectory.SubDirectory("repo");
+    private IDirectoryInfo RepoDir => paths.ConfigDirectory.SubDirectory("repo");
 
     public bool CheckIfNeeded()
     {

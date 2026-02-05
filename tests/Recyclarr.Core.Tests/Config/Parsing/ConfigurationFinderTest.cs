@@ -11,9 +11,9 @@ internal sealed class ConfigurationFinderTest
     {
         return
         [
-            paths.AppDataDirectory.File("recyclarr.yml"),
-            paths.ConfigsDirectory.File("b.yml"),
-            paths.ConfigsDirectory.File("c.yaml"),
+            paths.ConfigDirectory.File("recyclarr.yml"),
+            paths.YamlConfigDirectory.File("b.yml"),
+            paths.YamlConfigDirectory.File("c.yaml"),
         ];
     }
 
@@ -62,7 +62,7 @@ internal sealed class ConfigurationFinderTest
         ConfigurationFinder sut
     )
     {
-        var testFile = paths.ConfigsDirectory.File("test.yml");
+        var testFile = paths.YamlConfigDirectory.File("test.yml");
         fs.AddEmptyFile(testFile);
 
         var result = sut.GetConfigFiles();
@@ -77,7 +77,7 @@ internal sealed class ConfigurationFinderTest
         ConfigurationFinder sut
     )
     {
-        var configFile = paths.AppDataDirectory.File("recyclarr.yml");
+        var configFile = paths.ConfigDirectory.File("recyclarr.yml");
         fs.AddEmptyFile(configFile);
 
         var result = sut.GetConfigFiles();

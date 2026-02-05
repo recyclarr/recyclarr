@@ -56,7 +56,7 @@ internal class TemplateConfigCreator(
 
     private void CopyTemplate(IFileInfo templateFile, ICreateConfigSettings settings)
     {
-        var destinationFile = paths.ConfigsDirectory.File(templateFile.Name);
+        var destinationFile = paths.YamlConfigDirectory.File(templateFile.Name);
         var alreadyExists = destinationFile.Exists;
 
         if (alreadyExists && !settings.Force)

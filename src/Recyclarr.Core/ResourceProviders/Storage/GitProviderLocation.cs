@@ -25,7 +25,7 @@ public class GitProviderLocation(
     )
     {
         var cachePath = appPaths
-            .ReposDirectory.SubDirectory(config.Type)
+            .ResourceDirectory.SubDirectory(config.Type)
             .SubDirectory("git")
             .SubDirectory(config.Name);
 

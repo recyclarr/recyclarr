@@ -29,7 +29,7 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
             """;
 
         Fs.AddFile(
-            Paths.AppDataDirectory.File("secrets.yml").FullName,
+            Paths.ConfigDirectory.File("secrets.yml").FullName,
             new MockFileData(secretsYml)
         );
 
@@ -68,7 +68,7 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
         const string secretsYml = "no_api_key: 95283e6b156c42f3af8a9b16173f876b";
 
         Fs.AddFile(
-            Paths.AppDataDirectory.File("recyclarr.yml").FullName,
+            Paths.ConfigDirectory.File("recyclarr.yml").FullName,
             new MockFileData(secretsYml)
         );
 
@@ -130,7 +130,7 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
         const string secretsYml = "bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
         Fs.AddFile(
-            Paths.AppDataDirectory.File("recyclarr.yml").FullName,
+            Paths.ConfigDirectory.File("recyclarr.yml").FullName,
             new MockFileData(secretsYml)
         );
         configLoader

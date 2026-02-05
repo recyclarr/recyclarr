@@ -11,7 +11,7 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
     private IDirectoryInfo SetupTemplateRepo(string templatesJson)
     {
         var mockRepoPath = Paths
-            .ReposDirectory.SubDirectory("config-templates")
+            .ResourceDirectory.SubDirectory("config-templates")
             .SubDirectory("git")
             .SubDirectory("official");
         Fs.AddDirectory(mockRepoPath);
@@ -67,8 +67,8 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
 
         Fs.AllFiles.Should()
             .Contain([
-                Paths.ConfigsDirectory.File("template-file1.yml").FullName,
-                Paths.ConfigsDirectory.File("template-file2.yml").FullName,
+                Paths.YamlConfigDirectory.File("template-file1.yml").FullName,
+                Paths.YamlConfigDirectory.File("template-file2.yml").FullName,
             ]);
     }
 
@@ -91,7 +91,7 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
         Fs.AddFile(mockRepoPath.File("existing-template.yml"), new MockFileData("new content"));
 
         // Create existing file in configs directory with different content
-        var existingFile = Paths.ConfigsDirectory.File("existing-template.yml");
+        var existingFile = Paths.YamlConfigDirectory.File("existing-template.yml");
         Fs.AddFile(existingFile, new MockFileData("old content"));
 
         var factory = Resolve<ProviderInitializationFactory>();

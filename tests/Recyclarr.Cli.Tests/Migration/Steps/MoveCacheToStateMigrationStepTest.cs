@@ -12,7 +12,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
         fs.AddDirectory("/app/cache");
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
@@ -29,7 +29,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
@@ -46,7 +46,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/abc123/custom-format-cache.json", new MockFileData("{}"));
         fs.AddFile("/app/cache/sonarr/abc123/quality-profile-cache.json", new MockFileData("{}"));
@@ -69,7 +69,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/radarr/def456/custom-format-cache.json", new MockFileData("{}"));
 
@@ -89,7 +89,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddDirectory("/app/cache");
 
@@ -111,7 +111,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
 
@@ -130,7 +130,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
 
@@ -149,7 +149,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
 
@@ -168,7 +168,8 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
+        appPaths.ResourceDirectory.Returns(fs.DirectoryInfo.New("/app/resources"));
 
         fs.AddFile("/app/cache/resources/test.json", new MockFileData("{}"));
 
@@ -188,10 +189,11 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/resources/old.json", new MockFileData("{}"));
         fs.AddFile("/app/resources/new.json", new MockFileData("{}"));
+        appPaths.ResourceDirectory.Returns(fs.DirectoryInfo.New("/app/resources"));
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
@@ -209,7 +211,8 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
+        appPaths.ResourceDirectory.Returns(fs.DirectoryInfo.New("/app/resources"));
 
         fs.AddDirectory("/app/cache");
 
@@ -230,7 +233,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
 
@@ -249,7 +252,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
         fs.AddFile("/app/cache/unexpected-file.txt", new MockFileData("keep me"));
@@ -285,7 +288,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         var sut = new MoveCacheToStateMigrationStep(appPaths);
 
@@ -304,7 +307,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/cf-cache.json", new MockFileData("{}"));
         fs.AddFile("/app/cache/sonarr/hash2/qp-cache.json", new MockFileData("{}"));
@@ -328,7 +331,7 @@ internal sealed class MoveCacheToStateMigrationStepTest
     )
     {
         var appDataDir = fs.DirectoryInfo.New("/app");
-        appPaths.AppDataDirectory.Returns(appDataDir);
+        appPaths.ConfigDirectory.Returns(appDataDir);
 
         fs.AddFile("/app/cache/sonarr/hash1/test-cache.json", new MockFileData("{}"));
         fs.AddFile("/app/cache/sonarr/hash1/no-rename.json", new MockFileData("{}"));

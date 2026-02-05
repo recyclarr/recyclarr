@@ -36,7 +36,7 @@ public class ConfigIncludeProcessor(IFileSystem fs, IAppPaths paths, ILogger log
             return fs.FileInfo.New(path);
         }
 
-        var fsPath = paths.IncludesDirectory.File(path);
+        var fsPath = paths.YamlIncludeDirectory.File(path);
         if (fsPath.Exists)
         {
             log.Debug("Path rooted to the includes directory: {Path}", path);

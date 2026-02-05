@@ -275,7 +275,8 @@ internal sealed class RecyclarrSyncTests
                         $"http://localhost:{_radarrContainer!.GetMappedPublicPort(7878)}"
                     )
                     .Set("RADARR_API_KEY", "testkey")
-                    .Set("RECYCLARR_APP_DATA", _tempAppDataDir.FullName)
+                    .Set("RECYCLARR_CONFIG_DIR", _tempAppDataDir.FullName)
+                    .Set("RECYCLARR_APP_DATA", "")
             )
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync(ct);

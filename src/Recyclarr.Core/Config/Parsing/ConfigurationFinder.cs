@@ -11,14 +11,14 @@ public class ConfigurationFinder(IAppPaths paths) : IConfigurationFinder
     {
         var configs = new List<IFileInfo>();
 
-        if (paths.ConfigsDirectory.Exists)
+        if (paths.YamlConfigDirectory.Exists)
         {
             var extensions = new[] { "*.yml", "*.yaml" };
-            var files = extensions.SelectMany(x => paths.ConfigsDirectory.EnumerateFiles(x));
+            var files = extensions.SelectMany(x => paths.YamlConfigDirectory.EnumerateFiles(x));
             configs.AddRange(files);
         }
 
-        var configPath = paths.AppDataDirectory.YamlFile("recyclarr");
+        var configPath = paths.ConfigDirectory.YamlFile("recyclarr");
         if (configPath is not null)
         {
             configs.Add(configPath);

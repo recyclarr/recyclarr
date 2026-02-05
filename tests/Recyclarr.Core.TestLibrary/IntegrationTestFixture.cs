@@ -87,7 +87,7 @@ public abstract class IntegrationTestFixture : IDisposable
     public void Setup()
     {
         var appDataSetup = Resolve<DefaultAppDataSetup>();
-        appDataSetup.SetAppDataDirectoryOverride(
+        appDataSetup.SetConfigDirectoryOverride(
             Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName
         );
     }

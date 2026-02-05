@@ -8,7 +8,7 @@ internal class ProgramInformationDisplayTask(ILogger log, IAppPaths paths) : IGl
     public void OnStart(BaseCommandSettings cmd)
     {
         log.Debug("Recyclarr Version: {Version}", GitVersionInformation.InformationalVersion);
-        log.Debug("App Data Dir: {AppData}", paths.AppDataDirectory);
+        log.Debug("App Data Dir: {AppData}", paths.ConfigDirectory);
     }
 
     public void OnFinish() { }

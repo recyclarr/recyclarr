@@ -18,7 +18,7 @@ public class SettingsLoader(
 {
     public RecyclarrSettings LoadAndOptionallyCreate()
     {
-        var yamlPath = paths.AppDataDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
+        var yamlPath = paths.ConfigDirectory.YamlFile("settings") ?? CreateDefaultSettingsFile();
 
         try
         {
@@ -65,7 +65,7 @@ public class SettingsLoader(
             # https://recyclarr.dev/reference/settings/
             """;
 
-        var settingsFile = paths.AppDataDirectory.File("settings.yml");
+        var settingsFile = paths.ConfigDirectory.File("settings.yml");
         settingsFile.CreateParentDirectory();
         using var stream = settingsFile.CreateText();
         stream.Write(fileData);
