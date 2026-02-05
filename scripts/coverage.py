@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Query code coverage results. AI-optimized output: path:pct:covered/total[:uncovered_lines]"""
+"""Run tests with code coverage and query results.
+
+AI-optimized output format: path:pct:covered/total[:uncovered_lines]
+"""
 
 import argparse
 import json
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -10,11 +15,38 @@ RESULTS_DIR = Path("/tmp/recyclarr-coverage")
 REPO_ROOT = Path(__file__).parent.parent.resolve()
 
 
+def run_coverage() -> int:
+    """Run dotnet test with code coverage."""
+    if RESULTS_DIR.exists():
+        shutil.rmtree(RESULTS_DIR)
+
+    result = subprocess.run(
+        [
+            "dotnet",
+            "test",
+            "--collect:XPlat Code Coverage;Format=json",
+            "--results-directory",
+            str(RESULTS_DIR),
+            "-v",
+            "q",
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        print(result.stdout)
+        print(result.stderr, file=sys.stderr)
+        return result.returncode
+
+    return 0
+
+
 def get_coverage_data() -> dict[str, dict[int, int]]:
     """Load and merge coverage from all JSON files, taking max hit count per line."""
     json_files = list(RESULTS_DIR.rglob("coverage.json"))
     if not json_files:
-        print("No coverage files found. Run Test-Coverage.py first.", file=sys.stderr)
+        print("No coverage files found. Run with --run first.", file=sys.stderr)
         sys.exit(1)
 
     merged: dict[str, dict[int, int]] = {}
@@ -31,8 +63,9 @@ def get_coverage_data() -> dict[str, dict[int, int]]:
                     for method_data in class_data.values():
                         for line_num, hits in method_data.get("Lines", {}).items():
                             line = int(line_num)
-                            # Take max hits across all coverage files (fixes the overwrite bug)
-                            merged[rel_path][line] = max(merged[rel_path].get(line, 0), hits)
+                            merged[rel_path][line] = max(
+                                merged[rel_path].get(line, 0), hits
+                            )
 
     return merged
 
@@ -92,23 +125,52 @@ def print_results(results: list[dict], include_lines: bool) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Query code coverage results")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser = argparse.ArgumentParser(
+        description="Run tests with coverage and query results"
+    )
+    parser.add_argument(
+        "-r", "--run", action="store_true", help="Run tests before querying"
+    )
+    subparsers = parser.add_subparsers(dest="command")
 
-    files_parser = subparsers.add_parser("files", help="Coverage % for matching files")
-    files_parser.add_argument("patterns", nargs="+", help="Substrings to match in file paths")
+    files_parser = subparsers.add_parser("files", help="Coverage %% for matching files")
+    files_parser.add_argument(
+        "patterns", nargs="+", help="Substrings to match (case-insensitive, not globs)"
+    )
     files_parser.add_argument("-f", "--first", type=int, help="Return first N results")
     files_parser.add_argument("-l", "--last", type=int, help="Return last N results")
 
-    uncovered_parser = subparsers.add_parser("uncovered", help="Same as files + line numbers")
-    uncovered_parser.add_argument("patterns", nargs="+", help="Substrings to match in file paths")
-    uncovered_parser.add_argument("-f", "--first", type=int, help="Return first N results")
-    uncovered_parser.add_argument("-l", "--last", type=int, help="Return last N results")
+    uncovered_parser = subparsers.add_parser(
+        "uncovered", help="Same as files + line numbers"
+    )
+    uncovered_parser.add_argument(
+        "patterns", nargs="+", help="Substrings to match (case-insensitive, not globs)"
+    )
+    uncovered_parser.add_argument(
+        "-f", "--first", type=int, help="Return first N results"
+    )
+    uncovered_parser.add_argument(
+        "-l", "--last", type=int, help="Return last N results"
+    )
 
     lowest_parser = subparsers.add_parser("lowest", help="N files with lowest coverage")
-    lowest_parser.add_argument("n", nargs="?", type=int, default=10, help="Number of files")
+    lowest_parser.add_argument(
+        "n", nargs="?", type=int, default=10, help="Number of files (default: 10)"
+    )
 
     args = parser.parse_args()
+
+    if args.run:
+        returncode = run_coverage()
+        if returncode != 0:
+            sys.exit(returncode)
+
+    if not args.command:
+        if not args.run:
+            parser.print_help()
+            sys.exit(1)
+        sys.exit(0)
+
     coverage = get_coverage_data()
 
     if args.command == "files":

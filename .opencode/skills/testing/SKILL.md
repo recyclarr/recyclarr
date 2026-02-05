@@ -163,32 +163,29 @@ dotnet test -v m --filter "FullyQualifiedName~TestMethodName"
 
 Use coverage analysis to identify gaps before writing tests.
 
-1. Generate coverage data:
+```bash
+# Run tests + query uncovered lines (one-shot, preferred)
+./scripts/coverage.py --run uncovered Platform Migration
 
-   ```bash
-   ./scripts/test_coverage.py
-   ```
+# Run separately only when making multiple queries
+./scripts/coverage.py --run
+./scripts/coverage.py uncovered Platform
+./scripts/coverage.py files Migration
 
-   CRITICAL: Must succeed before querying. Investigate failures - coverage data is invalid on
-   failure.
+# Find N files with lowest coverage
+./scripts/coverage.py --run lowest 10
+```
 
-2. Query coverage for files in scope:
+Patterns are **substring matches** (case-insensitive), not globs. Multiple patterns match files
+containing ANY pattern. Examples:
 
-   ```bash
-   # Coverage % for matching files
-   ./scripts/query_coverage.py files "src/Path/To/Code/**"
+- `Platform` matches `src/Recyclarr.Core/Platform/AppPaths.cs`
+- `Platform Migration` matches files containing "Platform" OR "Migration"
 
-   # Same but includes uncovered line numbers
-   ./scripts/query_coverage.py uncovered "src/Path/To/Code/**"
+Output format: `path:pct:covered/total[:uncovered_lines]`
 
-   # Find N files with lowest coverage
-   ./scripts/query_coverage.py lowest 10
-   ```
-
-   Output format: `path:pct:covered/total[:uncovered_lines]`
-
-Run coverage BEFORE writing tests to understand gaps. Target uncovered lines, don't duplicate
-existing coverage.
+CRITICAL: `--run` must succeed before querying. Investigate failures - coverage data is invalid on
+failure. Run coverage BEFORE writing tests to understand gaps.
 
 ---
 
