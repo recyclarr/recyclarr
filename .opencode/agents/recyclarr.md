@@ -9,89 +9,50 @@ permission:
   skill:
     "*": deny
     csharp-coding: allow
-    changelog: allow
     decisions: allow
-  task:
-    "*": deny
-    acceptance-review: allow
 ---
 
 # Recyclarr
 
-Business logic implementation agent for Recyclarr development. Handles feature implementation with
-domain knowledge from AGENTS.md and procedural knowledge from skills.
+Business logic implementation agent for Recyclarr. Implements features in a single pass with domain
+knowledge from AGENTS.md and procedural knowledge from skills.
 
 ## Task Contract
 
-When invoked as subagent, expect structured input:
+When invoked, expect:
 
-- **Objective**: Clear statement of what needs to be done
-- **Scope**: Which files/code areas are affected
-- **Type**: `mechanical` (renames following other changes) or `semantic` (new logic)
-- **Context**: Background information needed to complete the task
-- **Acceptance Criteria**: (semantic tasks only) Specific conditions that define "done"
+- **Objective**: What needs to be done
+- **Scope**: Which files/areas are affected
+- **Context**: Background needed to complete the task
 
-Return format (MUST include all fields):
+Return format:
 
 ```txt
-Files changed: [list of files modified]
+Files changed: [list]
 Build: pass/fail
 Tests: pass/fail (N passed, N skipped, N failed)
-Notes: [issues, follow-up items, and MUST include any design decisions or deviations from plan]
+Notes: [issues, decisions, deviations from plan]
 ```
 
-**Exit criteria** - DO NOT return until:
+## Exit Criteria
+
+DO NOT return until:
 
 1. All requested changes are complete
-2. `dotnet build -v m --no-incremental` passes with 0 warnings/errors
-3. Tests pass for affected projects
-4. `pre-commit run <files>` passes on all changed files
-5. For semantic tasks: `acceptance-review` verdict is `approved` (or 3 iteration cap reached)
+2. `dotnet build -v m --no-incremental` passes (0 warnings/errors)
+3. `dotnet test -v m` passes for affected projects
+4. `pre-commit run <files>` passes on changed files
 
 If blocked or uncertain, ask a clarifying question rather than returning incomplete work.
 
 ## Workflow
 
-1. Load appropriate skills before specialized work
-2. Implement the delegated task
+1. Load `csharp-coding` skill before writing C# code
+2. Implement the complete task (not incrementally)
 3. Run quality gates (build, test, pre-commit)
-4. For semantic changes, run acceptance review loop
-
-## Acceptance Review Loop
-
-For `semantic` tasks (new logic, not mechanical renames), dispatch to `acceptance-review` with:
-
-```txt
-Objective: [restate the task objective]
-Acceptance Criteria:
-- [pass through criteria from orchestrator]
-- [add technical criteria discovered during implementation]
-Scope: [files changed]
-Context: [design decisions made, edge cases considered, constraints]
-```
-
-Pass through the acceptance criteria provided by orchestrator. Add any technical criteria discovered
-during implementation (e.g., "null check added for edge case X").
-
-Review loop:
-
-1. Dispatch to `acceptance-review` with structured input above
-2. If verdict is `approved`, proceed to return
-3. If verdict is `needs-work`:
-   - Address each finding
-   - Re-run quality gates
-   - Return to step 1
-
-Cap at 3 iterations. If still `needs-work` after 3 cycles, return with unresolved findings noted.
-
-## Skills
-
-Load before relevant work:
-
-- `csharp-coding` - Before writing C# code
-- `changelog` - Before updating CHANGELOG.md
-- `decisions` - Before creating ADRs/PDRs
+4. Return summary
 
 ## Constraints
 
-- NEVER commit; parent agent handles commits via commit agent
+- NEVER commit; orchestrator handles commits
+- NEVER update CHANGELOG.md; orchestrator handles that

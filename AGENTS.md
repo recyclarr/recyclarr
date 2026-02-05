@@ -6,14 +6,17 @@
 
 Recyclarr uses an orchestrator-based agent model:
 
-- **recyclarr**: Business logic implementation. Use directly via `@recyclarr` for simple tasks.
-  Runs `acceptance-review` loop for semantic changes.
-- **test**: Testing specialist. Owns `tests/**` directory.
-- **devops**: CI/CD specialist. Owns `.github/**`, `ci/**`.
-- **trash-guides**: TRaSH Guides research (read-only).
+- **recyclarr**: Business logic implementation in `src/**`
+- **test**: Testing specialist for `tests/**`
+- **devops**: CI/CD specialist for `.github/**`, `ci/**`
+- **trash-guides**: TRaSH Guides research (read-only)
 
-Subagents NEVER commit directly; the orchestrator handles commits via the `commit` agent after user
-approval.
+Orchestrator responsibilities (not delegated):
+
+- Code review after implementation
+- CHANGELOG.md updates
+- Linear issue creation
+- Commits via `commit` agent after user approval
 
 ## Skills
 
@@ -170,8 +173,7 @@ Some key files and directories:
 
 All under `./scripts`. MUST use `testing` skill for test-related work.
 
-- `test_coverage.py`: Run tests with code coverage
-- `query_coverage.py`: Query coverage results
+- `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`, `lowest`)
 - `Run-E2ETests.ps1`: Run E2E tests
 - `Docker-Debug.ps1`: Start Docker services (Sonarr, Radarr, Apprise) for local debugging/E2E tests
 - `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts Docker-Debug if needed
