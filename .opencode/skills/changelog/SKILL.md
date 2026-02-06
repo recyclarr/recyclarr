@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: CHANGELOG format and conventions for Recyclarr releases
+description: Use when updating CHANGELOG.md for a release or user-facing change
 ---
 
 # Changelog Skill

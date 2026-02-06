@@ -1,6 +1,6 @@
 ---
 name: decisions
-description: Creating and editing decision records (ADRs for architecture, PDRs for product/upstream)
+description: Use when creating or editing ADRs or PDRs in docs/decisions/
 ---
 
 # Decision Records

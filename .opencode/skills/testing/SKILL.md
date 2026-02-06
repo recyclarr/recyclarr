@@ -1,8 +1,8 @@
 ---
 name: testing
 description: >
-  Testing patterns, infrastructure, and fixtures for Recyclarr. Covers unit, integration, and E2E
-  tests, coverage analysis scripts, debugging test failures, and test utilities.
+  Use when writing or modifying tests, improving coverage, debugging test failures, updating E2E
+  fixtures, or working in tests/** directories.
 ---
 
 # Testing Patterns and Infrastructure

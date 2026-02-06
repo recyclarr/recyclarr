@@ -4,19 +4,10 @@
 
 ## Agent Architecture
 
-Recyclarr uses an orchestrator-based agent model:
+Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
 
-- **recyclarr**: Business logic implementation in `src/**`
-- **test**: Testing specialist for `tests/**`
-- **devops**: CI/CD specialist for `.github/**`, `ci/**`
-- **trash-guides**: TRaSH Guides research (read-only)
-
-Orchestrator responsibilities (not delegated):
-
-- Code review after implementation
-- CHANGELOG.md updates
-- Linear issue creation
-- Commits via `commit` agent after user approval
+- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost)
+- **commit**: Git operations after user approval
 
 ## Skills
 
