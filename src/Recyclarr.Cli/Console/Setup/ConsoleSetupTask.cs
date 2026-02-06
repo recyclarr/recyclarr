@@ -1,11 +1,9 @@
 using Recyclarr.Cli.Console.Commands;
-using Recyclarr.Cli.Console.Helpers;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Console.Setup;
 
-internal class ConsoleSetupTask(IAnsiConsole console, ProgressFactory progressFactory)
-    : IGlobalSetupTask
+internal class ConsoleSetupTask(IAnsiConsole console) : IGlobalSetupTask
 {
     public void OnStart(BaseCommandSettings cmd)
     {
@@ -19,7 +17,6 @@ internal class ConsoleSetupTask(IAnsiConsole console, ProgressFactory progressFa
         if (cmd is ListCommandSettings { Raw: true })
         {
             console.Profile.Capabilities.Interactive = false;
-            progressFactory.UseSilentFallback = true;
         }
     }
 

@@ -34,7 +34,7 @@ internal class ListCustomFormatsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
         ListCustomFormats(settings);
         return (int)ExitStatus.Succeeded;
     }

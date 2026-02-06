@@ -66,7 +66,7 @@ internal class StateRepairCommand(
     {
         migration.CheckNeededMigrations();
 
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
         return (int)await processor.Process(settings, ct);
     }

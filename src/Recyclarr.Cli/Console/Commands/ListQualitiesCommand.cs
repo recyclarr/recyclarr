@@ -34,7 +34,7 @@ internal class ListQualitiesCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         var qualitySizes = guide.Get(settings.Service).ToList();
 

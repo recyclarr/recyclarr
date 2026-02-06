@@ -1,19 +1,21 @@
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.ResourceProviders.Storage;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
-internal class ProviderProgressHandler(
-    IAnsiConsole console,
-    ProviderInitializationFactory factory,
-    ProgressFactory progressFactory
-)
+internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializationFactory factory)
 {
-    public async Task InitializeProvidersAsync(CancellationToken ct)
+    public async Task InitializeProvidersAsync(bool silent, CancellationToken ct)
     {
-        await progressFactory
-            .Create()
+        var progress = console.Progress();
+        if (silent)
+        {
+            progress.UseRenderHook((_, _) => new EmptyRenderable());
+        }
+
+        await progress
             .AutoClear(false)
             .Columns(
                 new TaskDescriptionColumn(),
@@ -24,8 +26,8 @@ internal class ProviderProgressHandler(
             .StartAsync(async ctx =>
             {
                 var task = ctx.AddTask("Initializing Resource Providers");
-                var progress = new ProgressReporter(console, task);
-                await factory.InitializeProvidersAsync(progress, ct);
+                var reporter = new ProgressReporter(console, task);
+                await factory.InitializeProvidersAsync(reporter, ct);
             });
     }
 
@@ -55,5 +57,12 @@ internal class ProviderProgressHandler(
                     break;
             }
         }
+    }
+
+    private sealed class EmptyRenderable : IRenderable
+    {
+        public Measurement Measure(RenderOptions options, int maxWidth) => new(0, 0);
+
+        public IEnumerable<Segment> Render(RenderOptions options, int maxWidth) => [];
     }
 }

@@ -54,7 +54,7 @@ internal class ConfigCreateCommand(
     {
         try
         {
-            await providerProgressHandler.InitializeProvidersAsync(ct);
+            await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
             processor.Process(settings);
             return (int)ExitStatus.Succeeded;
         }

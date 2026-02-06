@@ -62,7 +62,7 @@ internal class SyncCommand(
         // Will throw if migration is required, otherwise just a warning is issued.
         migration.CheckNeededMigrations();
 
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
         return (int)await syncProcessor.Process(settings, ct);
     }

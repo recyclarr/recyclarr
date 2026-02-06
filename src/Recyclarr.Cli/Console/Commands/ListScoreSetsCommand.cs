@@ -34,7 +34,7 @@ internal class ListScoreSetsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         var customFormats = provider.Get(settings.Service);
 

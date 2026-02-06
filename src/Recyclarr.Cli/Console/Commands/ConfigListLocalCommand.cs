@@ -23,7 +23,7 @@ internal class ConfigListLocalCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
         processor.Process();
         return (int)ExitStatus.Succeeded;
     }

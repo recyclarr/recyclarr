@@ -35,7 +35,7 @@ internal class ListQualityProfilesCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         var profiles = guide.Get(settings.Service).OrderBy(p => p.Name).ToList();
 

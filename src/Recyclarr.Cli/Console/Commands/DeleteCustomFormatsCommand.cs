@@ -54,7 +54,7 @@ internal class DeleteCustomFormatsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
         await processor.Process(settings, ct);
         return (int)ExitStatus.Succeeded;

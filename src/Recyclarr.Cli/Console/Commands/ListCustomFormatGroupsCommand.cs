@@ -35,7 +35,7 @@ internal class ListCustomFormatGroupsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         var groups = cfGroupQuery.Get(settings.Service).OrderBy(g => g.Name).ToList();
 

@@ -143,7 +143,6 @@ internal static class CompositionRoot
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
 
-        builder.RegisterType<ProgressFactory>().SingleInstance();
         builder.RegisterType<ProviderProgressHandler>();
     }
 

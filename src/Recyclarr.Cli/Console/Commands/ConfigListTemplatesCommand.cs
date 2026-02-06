@@ -32,7 +32,7 @@ internal class ConfigListTemplatesCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
         processor.Process(settings);
         return (int)ExitStatus.Succeeded;
     }

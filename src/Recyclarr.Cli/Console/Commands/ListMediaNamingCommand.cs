@@ -35,7 +35,7 @@ internal class ListMediaNamingCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(ct);
+        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         switch (settings.Service)
         {
