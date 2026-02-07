@@ -105,50 +105,6 @@ internal sealed class DefaultAppDataSetupTest
     }
 
     [Test, AutoMockData]
-    public void Explicit_config_override_takes_precedence_over_environment_variable(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut
-    )
-    {
-        var expectedPath = fs.CurrentDirectory().SubDirectory("override").FullName;
-
-        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns("/some/env/path");
-        env.GetEnvironmentVariable("RECYCLARR_APP_DATA").Returns((string?)null);
-        env.GetEnvironmentVariable("RECYCLARR_DATA_DIR").Returns((string?)null);
-
-        sut.SetConfigDirectoryOverride(expectedPath);
-
-        var paths = sut.CreateAppPaths();
-
-        paths.ConfigDirectory.FullName.Should().Be(expectedPath);
-        fs.AllDirectories.Should().Contain(expectedPath);
-    }
-
-    [Test, AutoMockData]
-    public void Explicit_data_override_takes_precedence_over_environment_variable(
-        [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
-        [Frozen] IEnvironment env,
-        DefaultAppDataSetup sut
-    )
-    {
-        var configPath = fs.CurrentDirectory().SubDirectory("config").FullName;
-        var dataPath = fs.CurrentDirectory().SubDirectory("data").FullName;
-
-        env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(configPath);
-        env.GetEnvironmentVariable("RECYCLARR_DATA_DIR").Returns("/some/env/path");
-        env.GetEnvironmentVariable("RECYCLARR_APP_DATA").Returns((string?)null);
-
-        sut.SetDataDirectoryOverride(dataPath);
-
-        var paths = sut.CreateAppPaths();
-
-        paths.LogDirectory.FullName.Should().StartWith(dataPath);
-        paths.ResourceDirectory.FullName.Should().StartWith(dataPath);
-        fs.AllDirectories.Should().Contain(dataPath);
-    }
-
-    [Test, AutoMockData]
     public void Deprecated_app_data_variable_throws_error(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] IEnvironment env,

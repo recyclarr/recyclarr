@@ -17,4 +17,13 @@ public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IApp
     public IDirectoryInfo StateDirectory => configRoot.SubDirectory("state");
     public IDirectoryInfo YamlConfigDirectory => configRoot.SubDirectory("configs");
     public IDirectoryInfo YamlIncludeDirectory => configRoot.SubDirectory("includes");
+
+    // Do not initialize the repo directory here; the RepoUpdater handles that later.
+    public void CreateTopDirectories()
+    {
+        StateDirectory.Create();
+        LogDirectory.Create();
+        YamlConfigDirectory.Create();
+        YamlIncludeDirectory.Create();
+    }
 }

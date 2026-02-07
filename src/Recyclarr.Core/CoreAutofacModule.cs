@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
@@ -181,12 +182,18 @@ public class CoreAutofacModule : Module
 
     private static void RegisterPlatform(ContainerBuilder builder)
     {
-        builder.RegisterType<DefaultAppDataSetup>().As<IAppDataSetup>().AsSelf().SingleInstance();
         builder.RegisterType<DefaultEnvironment>().As<IEnvironment>();
         builder.RegisterType<DefaultRuntimeInformation>().As<IRuntimeInformation>();
 
         builder
-            .Register(c => c.Resolve<DefaultAppDataSetup>().CreateAppPaths())
+            .Register(c =>
+            {
+                var setup = new DefaultAppDataSetup(
+                    c.Resolve<IEnvironment>(),
+                    c.Resolve<IFileSystem>()
+                );
+                return setup.CreateAppPaths();
+            })
             .As<IAppPaths>()
             .SingleInstance();
     }

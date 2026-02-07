@@ -2,21 +2,8 @@ using System.IO.Abstractions;
 
 namespace Recyclarr.Platform;
 
-public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSetup
+internal class DefaultAppDataSetup(IEnvironment env, IFileSystem fs)
 {
-    private string? _configDirectoryOverride;
-    private string? _dataDirectoryOverride;
-
-    public void SetConfigDirectoryOverride(string path)
-    {
-        _configDirectoryOverride = path;
-    }
-
-    public void SetDataDirectoryOverride(string path)
-    {
-        _dataDirectoryOverride = path;
-    }
-
     public IAppPaths CreateAppPaths()
     {
         CheckForDeprecatedEnvironmentVariable();
@@ -24,14 +11,7 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
         var configDir = GetConfigDirectory();
         var dataDir = GetDataDirectory(configDir);
         var paths = new AppPaths(configDir, dataDir);
-
-        // Initialize other directories used throughout the application
-        // Do not initialize the repo directory here; the RepoUpdater handles that later.
-        paths.StateDirectory.Create();
-        paths.LogDirectory.Create();
-        paths.YamlConfigDirectory.Create();
-        paths.YamlIncludeDirectory.Create();
-
+        paths.CreateTopDirectories();
         return paths;
     }
 
@@ -54,22 +34,15 @@ public class DefaultAppDataSetup(IEnvironment env, IFileSystem fs) : IAppDataSet
 
     private IDirectoryInfo GetConfigDirectory()
     {
-        // Priority: override via code > override via new env var > platform default
         var configDir =
-            _configDirectoryOverride
-            ?? env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR")
-            ?? GetPlatformDefaultDirectory();
+            env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR") ?? GetPlatformDefaultDirectory();
 
         return fs.Directory.CreateDirectory(configDir);
     }
 
     private IDirectoryInfo GetDataDirectory(IDirectoryInfo configDir)
     {
-        // Priority: override via code > env var > config directory
-        var dataDir =
-            _dataDirectoryOverride
-            ?? env.GetEnvironmentVariable("RECYCLARR_DATA_DIR")
-            ?? configDir.FullName;
+        var dataDir = env.GetEnvironmentVariable("RECYCLARR_DATA_DIR") ?? configDir.FullName;
 
         // If data dir is relative, resolve it relative to config dir
         if (!fs.Path.IsPathRooted(dataDir))

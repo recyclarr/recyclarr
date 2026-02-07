@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
-using NUnit.Framework;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
@@ -39,9 +38,8 @@ public abstract class IntegrationTestFixture : IDisposable
     }
 
     /// <summary>
-    /// Register "real" types (usually Module-derived classes from other projects). This call happens
-    /// before
-    /// RegisterStubsAndMocks().
+    /// Register "real" types (usually Module-derived classes from other projects). This call
+    /// happens before RegisterStubsAndMocks().
     /// </summary>
     protected virtual void RegisterTypes(ContainerBuilder builder)
     {
@@ -62,6 +60,11 @@ public abstract class IntegrationTestFixture : IDisposable
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
 
+        var testRoot = Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
+        var paths = new AppPaths(testRoot, testRoot);
+        paths.CreateTopDirectories();
+        builder.RegisterInstance(paths).As<IAppPaths>();
+
         builder.RegisterMockFor<IEnvironment>(m =>
         {
             m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
@@ -75,20 +78,8 @@ public abstract class IntegrationTestFixture : IDisposable
 
         // Create empty settings.yml to avoid SettingsLoader creating one and triggering YAML errors
         Fs.AddFile(
-            Fs.Path.Combine(
-                Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName,
-                "settings.yml"
-            ),
+            Fs.Path.Combine(testRoot.FullName, "settings.yml"),
             new MockFileData("# Empty settings for tests\n")
-        );
-    }
-
-    [SetUp]
-    public void Setup()
-    {
-        var appDataSetup = Resolve<DefaultAppDataSetup>();
-        appDataSetup.SetConfigDirectoryOverride(
-            Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr").FullName
         );
     }
 
