@@ -118,8 +118,7 @@ internal static class CompositionRoot
         builder.RegisterType<ConsoleLogSinkConfigurator>();
 
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
-        builder.RegisterType<LoggerFactory>().SingleInstance();
-        builder.RegisterType<IndirectLoggerDecorator>().As<ILogger>();
+        builder.RegisterType<ReloadableLogger>().AsSelf().As<ILogger>().SingleInstance();
 
         builder.RegisterType<LogJanitor>();
         builder.RegisterType<ValidationLogger>();

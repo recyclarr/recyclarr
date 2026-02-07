@@ -7,7 +7,7 @@ namespace Recyclarr.Cli.Console.Setup;
 
 internal class LoggerSetupTask(
     LoggingLevelSwitch loggingLevelSwitch,
-    LoggerFactory loggerFactory,
+    ReloadableLogger reloadableLogger,
     ConsoleLogSinkConfigurator consoleLogSinkConfigurator,
     IList<ILogConfigurator> logConfigurators
 ) : IGlobalSetupTask
@@ -21,7 +21,7 @@ internal class LoggerSetupTask(
             logConfigurators.Add(consoleLogSinkConfigurator);
         }
 
-        loggerFactory.AddLogConfiguration(logConfigurators);
+        reloadableLogger.Reload(logConfigurators);
     }
 
     public void OnFinish() { }
