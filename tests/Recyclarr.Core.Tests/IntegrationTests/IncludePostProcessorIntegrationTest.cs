@@ -6,13 +6,15 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class IncludePostProcessorIntegrationTest(
+    IncludePostProcessor sut,
+    MockFileSystem fs
+)
 {
     [Test]
     public void No_change_when_no_includes()
     {
-        var sut = Resolve<IncludePostProcessor>();
-
         var config = new RootConfigYaml
         {
             Radarr = new Dictionary<string, RadarrConfigYaml?>
@@ -29,11 +31,9 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
     [Test]
     public void Throw_when_unable_to_parse()
     {
-        var sut = Resolve<IncludePostProcessor>();
+        var configPath = fs.CurrentDirectory().File("my-include.yml");
 
-        var configPath = Fs.CurrentDirectory().File("my-include.yml");
-
-        Fs.AddFile(
+        fs.AddFile(
             configPath,
             new MockFileData(
                 """
@@ -63,11 +63,9 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
     [Test]
     public void Throw_when_unable_to_validate()
     {
-        var sut = Resolve<IncludePostProcessor>();
+        var configPath = fs.CurrentDirectory().File("my-include.yml");
 
-        var configPath = Fs.CurrentDirectory().File("my-include.yml");
-
-        Fs.AddFile(
+        fs.AddFile(
             configPath,
             new MockFileData(
                 """
@@ -97,10 +95,8 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
     [Test]
     public void Merge_works()
     {
-        var sut = Resolve<IncludePostProcessor>();
-
-        var configPath1 = Fs.CurrentDirectory().File("my-include1.yml");
-        Fs.AddFile(
+        var configPath1 = fs.CurrentDirectory().File("my-include1.yml");
+        fs.AddFile(
             configPath1,
             new MockFileData(
                 """
@@ -117,8 +113,8 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
             )
         );
 
-        var configPath2 = Fs.CurrentDirectory().File("sub_dir/my-include2.yml");
-        Fs.AddFile(
+        var configPath2 = fs.CurrentDirectory().File("sub_dir/my-include2.yml");
+        fs.AddFile(
             configPath2,
             new MockFileData(
                 """
@@ -200,10 +196,8 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
     [Test]
     public void Merge_custom_format_groups_by_trash_id()
     {
-        var sut = Resolve<IncludePostProcessor>();
-
-        var includePath = Fs.CurrentDirectory().File("include.yml");
-        Fs.AddFile(
+        var includePath = fs.CurrentDirectory().File("include.yml");
+        fs.AddFile(
             includePath,
             new MockFileData(
                 """

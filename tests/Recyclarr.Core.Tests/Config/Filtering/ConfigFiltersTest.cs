@@ -5,18 +5,22 @@ using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.Config.Filtering;
 
-internal sealed class ConfigFiltersTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigFiltersTest(
+    InvalidInstancesFilter invalidInstancesFilter,
+    SplitInstancesFilter splitInstancesFilter,
+    NonExistentInstancesFilter nonExistentInstancesFilter,
+    DuplicateInstancesFilter duplicateInstancesFilter
+)
 {
     [Test]
     public void Filter_out_invalid_instances()
     {
-        var sut = Resolve<InvalidInstancesFilter>();
-
         var config = new RadarrConfigYaml { BaseUrl = "http://localhost:7878", ApiKey = "" };
 
         var context = new FilterContext();
 
-        var result = sut.Filter(
+        var result = invalidInstancesFilter.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
             [new LoadedConfigYaml("instance1", SupportedServices.Radarr, config)],
             context
@@ -40,11 +44,9 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
     [Test]
     public void Filter_out_split_instances()
     {
-        var sut = Resolve<SplitInstancesFilter>();
-
         var context = new FilterContext();
 
-        var result = sut.Filter(
+        var result = splitInstancesFilter.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
             [
                 new LoadedConfigYaml(
@@ -79,8 +81,6 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
     [Test]
     public void Filter_out_non_existent_instances()
     {
-        var sut = Resolve<NonExistentInstancesFilter>();
-
         var context = new FilterContext { AllAvailableInstances = ["instance1", "instance2"] };
         LoadedConfigYaml[] yaml =
         [
@@ -91,7 +91,7 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
             ),
         ];
 
-        var result = sut.Filter(
+        var result = nonExistentInstancesFilter.Filter(
             new ConfigFilterCriteria { Instances = ["instance_non_existent"] },
             yaml,
             context
@@ -113,8 +113,6 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
     [Test]
     public void No_result_when_all_requested_instances_exist()
     {
-        var sut = Resolve<NonExistentInstancesFilter>();
-
         var context = new FilterContext { AllAvailableInstances = ["instance1"] };
         LoadedConfigYaml[] yaml =
         [
@@ -125,7 +123,7 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
             ),
         ];
 
-        var result = sut.Filter(
+        var result = nonExistentInstancesFilter.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
             yaml,
             context
@@ -138,8 +136,6 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
     [Test]
     public void Filter_out_duplicate_instances()
     {
-        var sut = Resolve<DuplicateInstancesFilter>();
-
         var context = new FilterContext();
         LoadedConfigYaml[] yaml =
         [
@@ -155,7 +151,7 @@ internal sealed class ConfigFiltersTest : IntegrationTestFixture
             ),
         ];
 
-        var result = sut.Filter(
+        var result = duplicateInstancesFilter.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
             yaml,
             context

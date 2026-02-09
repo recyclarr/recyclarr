@@ -7,7 +7,8 @@ using Recyclarr.ServarrApi.CustomFormat;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class CustomFormatServiceTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class CustomFormatServiceTest(ConfigurationScopeFactory scopeFactory)
 {
     [Test]
     public async Task Get_can_parse_json()
@@ -18,7 +19,6 @@ internal sealed class CustomFormatServiceTest : IntegrationTestFixture
         using var http = new HttpTest();
         http.RespondWith(jsonBody);
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
             new RadarrConfiguration { InstanceName = "instance" }
         );

@@ -3,14 +3,13 @@ using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderFileTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigurationLoaderFileTest(ConfigurationLoader sut, MockFileSystem fs)
 {
     [Test]
     public void Successful_file_loading()
     {
-        Fs.AddFile("path/to/test_secret", "the-api-key");
-
-        var sut = Resolve<ConfigurationLoader>();
+        fs.AddFile("path/to/test_secret", "the-api-key");
 
         const string testYml = """
             sonarr:
@@ -30,10 +29,6 @@ internal sealed class ConfigurationLoaderFileTest : IntegrationTestFixture
     [Test]
     public void Fail_when_file_not_found()
     {
-        // We intentionally do not add the file to the mock filesystem
-
-        var sut = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance:

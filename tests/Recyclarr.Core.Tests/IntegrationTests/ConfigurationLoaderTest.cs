@@ -1,29 +1,20 @@
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
-using Autofac;
-using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigurationLoaderTest(ConfigurationLoader loader, MockFileSystem fs)
 {
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-        builder.RegisterMockFor<IValidator<RadarrConfigYaml>>();
-        builder.RegisterMockFor<IValidator<SonarrConfigYaml>>();
-    }
-
     [Test]
     public void Load_many_iterations_of_config()
     {
-        var baseDir = Fs.CurrentDirectory();
+        var baseDir = fs.CurrentDirectory();
         var fileData = new[]
         {
             (baseDir.File("config1.yml"), MockYaml("sonarr", "one", "two")),
@@ -34,10 +25,8 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
 
         foreach (var (file, data) in fileData)
         {
-            Fs.AddFile(file.FullName, new MockFileData(data));
+            fs.AddFile(file.FullName, new MockFileData(data));
         }
-
-        var loader = Resolve<ConfigurationLoader>();
 
         var result = fileData.SelectMany(x => loader.Load(x.Item1)).ToList();
 
@@ -83,8 +72,7 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
     [Test]
     public void Parse_using_stream()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-        var result = configLoader.Load(
+        var result = loader.Load(
             """
             sonarr:
               name:

@@ -5,13 +5,12 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class CfGroupLoaderIntegrationTest(JsonResourceLoader sut, MockFileSystem fs)
 {
     [Test]
     public void Load_cf_group_json_with_snake_case_works()
     {
-        var sut = Resolve<JsonResourceLoader>();
-
         const string json = """
             {
                 "name": "[Audio] Audio Formats",
@@ -41,11 +40,11 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
             }
             """;
 
-        Fs.AddFile("audio-formats.json", new MockFileData(json));
+        fs.AddFile("audio-formats.json", new MockFileData(json));
 
         IFileInfo[] files =
         [
-            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "audio-formats.json")),
+            fs.FileInfo.New(fs.Path.Combine(fs.CurrentDirectory().FullName, "audio-formats.json")),
         ];
 
         var results = sut.Load<CfGroupResource>(files, GlobalJsonSerializerSettings.Metadata)
@@ -94,8 +93,6 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
     [Test]
     public void Load_multiple_cf_groups_deduplicates_by_trash_id()
     {
-        var sut = Resolve<JsonResourceLoader>();
-
         const string json1 = """
             {
                 "name": "First Group",
@@ -114,13 +111,13 @@ internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
             }
             """;
 
-        Fs.AddFile("first.json", new MockFileData(json1));
-        Fs.AddFile("second.json", new MockFileData(json2));
+        fs.AddFile("first.json", new MockFileData(json1));
+        fs.AddFile("second.json", new MockFileData(json2));
 
         IFileInfo[] files =
         [
-            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "first.json")),
-            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "second.json")),
+            fs.FileInfo.New(fs.Path.Combine(fs.CurrentDirectory().FullName, "first.json")),
+            fs.FileInfo.New(fs.Path.Combine(fs.CurrentDirectory().FullName, "second.json")),
         ];
 
         var results = sut.Load<CfGroupResource>(files, GlobalJsonSerializerSettings.Metadata)

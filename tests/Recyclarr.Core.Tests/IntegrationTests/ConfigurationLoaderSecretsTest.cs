@@ -1,17 +1,21 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigurationLoaderSecretsTest(
+    ConfigurationLoader configLoader,
+    MockFileSystem fs,
+    IAppPaths paths
+)
 {
     [Test]
     public void Test_secret_loading()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance1:
@@ -28,8 +32,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
             secret_rp: 1234567
             """;
 
-        Fs.AddFile(
-            Paths.ConfigDirectory.File("secrets.yml").FullName,
+        fs.AddFile(
+            paths.ConfigDirectory.File("secrets.yml").FullName,
             new MockFileData(secretsYml)
         );
 
@@ -56,8 +60,6 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     [Test]
     public void Throw_when_referencing_invalid_secret()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance2:
@@ -67,8 +69,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         const string secretsYml = "no_api_key: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(
-            Paths.ConfigDirectory.File("recyclarr.yml").FullName,
+        fs.AddFile(
+            paths.ConfigDirectory.File("recyclarr.yml").FullName,
             new MockFileData(secretsYml)
         );
 
@@ -81,8 +83,6 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     [Test]
     public void Throw_when_referencing_secret_without_secrets_file()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance3:
@@ -99,8 +99,6 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     [Test]
     public void No_config_loaded_when_secret_value_is_not_scalar()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance4:
@@ -117,8 +115,6 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
     [Test]
     public void No_config_loaded_when_resolved_value_is_not_correct()
     {
-        var configLoader = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance5:
@@ -129,8 +125,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
 
         const string secretsYml = "bogus_profile: 95283e6b156c42f3af8a9b16173f876b";
 
-        Fs.AddFile(
-            Paths.ConfigDirectory.File("recyclarr.yml").FullName,
+        fs.AddFile(
+            paths.ConfigDirectory.File("recyclarr.yml").FullName,
             new MockFileData(secretsYml)
         );
         configLoader

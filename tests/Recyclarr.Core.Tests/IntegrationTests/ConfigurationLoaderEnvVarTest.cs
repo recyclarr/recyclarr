@@ -4,16 +4,14 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigurationLoaderEnvVarTest(ConfigurationLoader sut, IEnvironment env)
 {
     [Test]
     public void Test_successful_environment_variable_loading()
     {
-        var env = Resolve<IEnvironment>();
         env.GetEnvironmentVariable("SONARR_API_KEY").Returns("the_api_key");
         env.GetEnvironmentVariable("SONARR_URL").Returns("http://the_url");
-
-        var sut = Resolve<ConfigurationLoader>();
 
         const string testYml = """
             sonarr:
@@ -36,8 +34,6 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Use_default_value_if_env_var_not_defined()
     {
-        var sut = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance:
@@ -53,10 +49,7 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Default_value_with_spaces_is_allowed()
     {
-        var env = Resolve<IEnvironment>();
         env.GetEnvironmentVariable("SONARR_URL").Returns("");
-
-        var sut = Resolve<ConfigurationLoader>();
 
         const string testYml = """
             sonarr:
@@ -73,10 +66,7 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Quotation_characters_are_stripped_from_default_value()
     {
-        var env = Resolve<IEnvironment>();
         env.GetEnvironmentVariable("SONARR_URL").Returns("");
-
-        var sut = Resolve<ConfigurationLoader>();
 
         const string testYml = """
             sonarr:
@@ -98,8 +88,6 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Multiple_spaces_between_default_and_env_var_work()
     {
-        var sut = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance:
@@ -114,8 +102,6 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void Tab_characters_are_stripped()
     {
-        var sut = Resolve<ConfigurationLoader>();
-
         const string testYml = $"""
             sonarr:
               instance:
@@ -130,8 +116,6 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
     [Test]
     public void No_configs_returned_when_no_env_var_and_no_default()
     {
-        var sut = Resolve<ConfigurationLoader>();
-
         const string testYml = """
             sonarr:
               instance:

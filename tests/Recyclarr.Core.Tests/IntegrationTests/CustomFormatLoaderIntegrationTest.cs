@@ -6,19 +6,19 @@ using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class CustomFormatLoaderIntegrationTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class CustomFormatLoaderIntegrationTest(JsonResourceLoader sut, MockFileSystem fs)
 {
     [Test]
     public void Load_custom_format_json_works()
     {
-        var sut = Resolve<JsonResourceLoader>();
-        Fs.AddFile("first.json", new MockFileData("""{"name":"first","trash_id":"1"}"""));
-        Fs.AddFile("second.json", new MockFileData("""{"name":"second","trash_id":"2"}"""));
+        fs.AddFile("first.json", new MockFileData("""{"name":"first","trash_id":"1"}"""));
+        fs.AddFile("second.json", new MockFileData("""{"name":"second","trash_id":"2"}"""));
 
         var files = new[]
         {
-            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "first.json")),
-            Fs.FileInfo.New(Fs.Path.Combine(Fs.CurrentDirectory().FullName, "second.json")),
+            fs.FileInfo.New(fs.Path.Combine(fs.CurrentDirectory().FullName, "first.json")),
+            fs.FileInfo.New(fs.Path.Combine(fs.CurrentDirectory().FullName, "second.json")),
         };
 
         var results = sut.Load<CustomFormatResource>(files, GlobalJsonSerializerSettings.Guide)
