@@ -65,7 +65,21 @@ internal class HttpExceptionStrategy : IExceptionStrategy
             using var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
 
-            // Try single "message" property
+            // Array of validation errors: [{"errorMessage":"..."}]
+            if (root.ValueKind == JsonValueKind.Array)
+            {
+                var messages = root.EnumerateArray()
+                    .Where(item =>
+                        item.TryGetProperty("errorMessage", out var errProp)
+                        && errProp.ValueKind == JsonValueKind.String
+                    )
+                    .Select(item => $"{statusText}: {item.GetProperty("errorMessage").GetString()}")
+                    .ToList();
+
+                return messages.Count > 0 ? messages : [];
+            }
+
+            // Single object with "message" property: {"message":"..."}
             if (
                 root.TryGetProperty("message", out var msgProp)
                 && msgProp.ValueKind == JsonValueKind.String
@@ -75,26 +89,7 @@ internal class HttpExceptionStrategy : IExceptionStrategy
                 return [$"{statusText}: {msg}"];
             }
 
-            // Try array of objects with "errorMessage"
-            if (root.ValueKind == JsonValueKind.Array)
-            {
-                var messages = new List<string> { statusText };
-                foreach (var item in root.EnumerateArray())
-                {
-                    if (
-                        item.TryGetProperty("errorMessage", out var errProp)
-                        && errProp.ValueKind == JsonValueKind.String
-                        && errProp.GetString() is { } errMsg
-                    )
-                    {
-                        messages.Add(errMsg);
-                    }
-                }
-
-                return messages.Count > 1 ? messages : [];
-            }
-
-            // Try ServiceErrorsList format with Title and Errors
+            // ServiceErrorsList format: {"Title":"...","Errors":{"field":["msg"]}}
             if (
                 root.TryGetProperty("Title", out var titleProp)
                 && titleProp.ValueKind == JsonValueKind.String
