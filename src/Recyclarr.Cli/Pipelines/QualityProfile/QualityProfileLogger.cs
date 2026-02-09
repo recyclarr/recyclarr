@@ -27,7 +27,7 @@ internal class QualityProfileLogger(
         {
             foreach (var error in errors)
             {
-                eventPublisher.AddWarning($"Profile '{profile.ProfileName}': {error.ErrorMessage}");
+                eventPublisher.AddError($"Profile '{profile.ProfileName}': {error.ErrorMessage}");
             }
         }
 

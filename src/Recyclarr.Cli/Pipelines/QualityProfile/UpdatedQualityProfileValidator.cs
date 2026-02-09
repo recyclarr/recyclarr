@@ -7,7 +7,7 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
 {
     public UpdatedQualityProfileValidator()
     {
-        RuleFor(x => x.ProfileConfig.Config.MinFormatScore).Custom(ValidateMinScoreSatisfied);
+        RuleFor(x => x.EffectiveMinFormatScore).Custom(ValidateMinScoreSatisfied);
 
         RuleFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
             .Custom(ValidateCutoff!)

@@ -36,38 +36,49 @@ internal record UpdatedQualityProfile
 
     public string? TrashId => ProfileConfig.Resource?.TrashId;
 
+    // Effective value resolution: config override > guide resource > service DTO.
+    // These are the single source of truth for what gets sent to the API and validated.
+    public string EffectiveName
+    {
+        get
+        {
+            var config = ProfileConfig.Config;
+            var resource = ProfileConfig.Resource;
+            return !string.IsNullOrEmpty(config.Name)
+                ? config.Name
+                : resource?.Name ?? ProfileDto.Name;
+        }
+    }
+
+    public bool? EffectiveUpgradeAllowed =>
+        ProfileConfig.Config.UpgradeAllowed
+        ?? ProfileConfig.Resource?.UpgradeAllowed
+        ?? ProfileDto.UpgradeAllowed;
+
+    public int? EffectiveMinFormatScore =>
+        ProfileConfig.Config.MinFormatScore
+        ?? ProfileConfig.Resource?.MinFormatScore
+        ?? ProfileDto.MinFormatScore;
+
+    public int? EffectiveMinUpgradeFormatScore =>
+        ProfileConfig.Config.MinUpgradeFormatScore
+        ?? ProfileConfig.Resource?.MinUpgradeFormatScore
+        ?? ProfileDto.MinUpgradeFormatScore;
+
+    public int? EffectiveCutoffFormatScore =>
+        ProfileConfig.Config.UpgradeUntilScore
+        ?? ProfileConfig.Resource?.CutoffFormatScore
+        ?? ProfileDto.CutoffFormatScore;
+
     public QualityProfileDto BuildUpdatedDto()
     {
-        var config = ProfileConfig.Config;
-        var resource = ProfileConfig.Resource;
-
-        // Build effective values: Service DTO -> Guide Resource -> Config overrides
-        // Each layer only applies if it has a value
-
-        // Effective name: config override > guide resource > service DTO
-        var effectiveName = !string.IsNullOrEmpty(config.Name)
-            ? config.Name
-            : resource?.Name ?? ProfileDto.Name;
-
-        // Effective values: config override > guide resource > service DTO
-        var effectiveUpgradeAllowed =
-            config.UpgradeAllowed ?? resource?.UpgradeAllowed ?? ProfileDto.UpgradeAllowed;
-        var effectiveMinFormatScore =
-            config.MinFormatScore ?? resource?.MinFormatScore ?? ProfileDto.MinFormatScore;
-        var effectiveMinUpgradeFormatScore =
-            config.MinUpgradeFormatScore
-            ?? resource?.MinUpgradeFormatScore
-            ?? ProfileDto.MinUpgradeFormatScore;
-        var effectiveCutoffFormatScore =
-            config.UpgradeUntilScore ?? resource?.CutoffFormatScore ?? ProfileDto.CutoffFormatScore;
-
         var newDto = ProfileDto with
         {
-            Name = effectiveName,
-            UpgradeAllowed = effectiveUpgradeAllowed,
-            MinFormatScore = effectiveMinFormatScore,
-            MinUpgradeFormatScore = effectiveMinUpgradeFormatScore,
-            CutoffFormatScore = effectiveCutoffFormatScore,
+            Name = EffectiveName,
+            UpgradeAllowed = EffectiveUpgradeAllowed,
+            MinFormatScore = EffectiveMinFormatScore,
+            MinUpgradeFormatScore = EffectiveMinUpgradeFormatScore,
+            CutoffFormatScore = EffectiveCutoffFormatScore,
             FormatItems = UpdatedScores.Select(x => x.Dto with { Score = x.NewScore }).ToList(),
         };
 
@@ -89,7 +100,8 @@ internal record UpdatedQualityProfile
         //
         // Additionally, there's no point in assigning a cutoff if the user didn't specify one in
         // their config.
-        var effectiveCutoff = config.UpgradeUntilQuality ?? resource?.Cutoff;
+        var effectiveCutoff =
+            ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.Resource?.Cutoff;
         if (newDto.Cutoff is null || effectiveCutoff is not null)
         {
             newDto = newDto with
@@ -99,10 +111,11 @@ internal record UpdatedQualityProfile
         }
 
         // Language passthrough from guide resource
-        if (!string.IsNullOrEmpty(resource?.Language))
+        var resourceLanguage = ProfileConfig.Resource?.Language;
+        if (!string.IsNullOrEmpty(resourceLanguage))
         {
             var language = Languages.FirstOrDefault(l =>
-                l.Name.Equals(resource.Language, StringComparison.OrdinalIgnoreCase)
+                l.Name.Equals(resourceLanguage, StringComparison.OrdinalIgnoreCase)
             );
             if (language is not null)
             {

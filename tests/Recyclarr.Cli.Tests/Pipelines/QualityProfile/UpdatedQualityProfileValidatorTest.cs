@@ -45,7 +45,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
             const int expectedTotalScore = 400;
 
             result
-                .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore)
+                .ShouldHaveValidationErrorFor(x => x.EffectiveMinFormatScore)
                 .WithErrorMessage(
                     $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
                         + $"positive scores is {expectedTotalScore} and no single score meets the minimum"
@@ -62,7 +62,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
 
         var updatedProfile = new UpdatedQualityProfile
         {
-            UpdatedScores = [], // Empty scores would fail validation otherwise
+            UpdatedScores = [],
             ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
@@ -70,8 +70,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var validator = new UpdatedQualityProfileValidator();
         var result = validator.TestValidate(updatedProfile);
 
-        // Should not fail on MinFormatScore (may fail on other rules)
-        result.ShouldNotHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore);
+        result.ShouldNotHaveValidationErrorFor(x => x.EffectiveMinFormatScore);
     }
 
     [Test]
@@ -90,9 +89,41 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var result = validator.TestValidate(updatedProfile);
 
         result
-            .ShouldHaveValidationErrorFor(x => x.ProfileConfig.Config.MinFormatScore)
+            .ShouldHaveValidationErrorFor(x => x.EffectiveMinFormatScore)
             .WithErrorMessage(
                 "Minimum Custom Format Score of 100 can never be satisfied because the total of all "
+                    + "positive scores is 0 and no single score meets the minimum"
+            );
+    }
+
+    [Test]
+    public void Min_score_from_service_dto_validated_when_config_unset()
+    {
+        // Config doesn't set min_format_score, but service DTO has it set to 1000.
+        // With reset_unmatched_scores zeroing everything, max achievable = 0.
+        var updatedProfile = new UpdatedQualityProfile
+        {
+            UpdatedScores =
+            [
+                NewQp.UpdatedScore("foo1", 0, 0, FormatScoreUpdateReason.Reset),
+                NewQp.UpdatedScore("foo2", 0, -50, FormatScoreUpdateReason.Updated),
+            ],
+            ProfileDto = new QualityProfileDto
+            {
+                Id = 1,
+                Name = "SQP-1 (1080p)",
+                MinFormatScore = 1000,
+            },
+            ProfileConfig = NewPlan.Qp(new QualityProfileConfig()),
+        };
+
+        var validator = new UpdatedQualityProfileValidator();
+        var result = validator.TestValidate(updatedProfile);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.EffectiveMinFormatScore)
+            .WithErrorMessage(
+                "Minimum Custom Format Score of 1000 can never be satisfied because the total of all "
                     + "positive scores is 0 and no single score meets the minimum"
             );
     }
