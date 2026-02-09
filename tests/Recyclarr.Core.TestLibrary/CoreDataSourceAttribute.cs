@@ -6,6 +6,7 @@ using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
 using Recyclarr.Compatibility;
+using Recyclarr.Config.Filtering;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
@@ -31,11 +32,16 @@ public class CoreDataSourceAttribute : DependencyInjectionDataSourceAttribute<IL
     {
         var builder = new ContainerBuilder();
 
-        var fs = new MockFileSystem(new MockFileSystemOptions { CreateDefaultTempDir = false });
-        builder.RegisterInstance(fs).As<IFileSystem>().AsSelf();
+        builder
+            .Register(_ => new MockFileSystem(
+                new MockFileSystemOptions { CreateDefaultTempDir = false }
+            ))
+            .As<IFileSystem>()
+            .AsSelf()
+            .SingleInstance();
 
         RegisterTypes(builder);
-        RegisterStubsAndMocks(builder, fs);
+        RegisterStubsAndMocks(builder);
 
         builder.RegisterSource<AnyConcreteTypeNotAlreadyRegisteredSource>();
 
@@ -59,7 +65,7 @@ public class CoreDataSourceAttribute : DependencyInjectionDataSourceAttribute<IL
     /// <summary>
     /// Register test doubles. Called after RegisterTypes() to allow overriding production registrations.
     /// </summary>
-    protected virtual void RegisterStubsAndMocks(ContainerBuilder builder, MockFileSystem fs)
+    protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.Register(_ => TestAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
@@ -70,20 +76,29 @@ public class CoreDataSourceAttribute : DependencyInjectionDataSourceAttribute<IL
             m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
         });
         builder.RegisterMockFor<IGitRepository>();
+        builder.RegisterMockFor<IFilterResultRenderer>();
         builder.RegisterMockFor<IServiceInformation>(m =>
         {
             m.GetVersion(CancellationToken.None).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
         });
 
-        var testRoot = fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
-        var paths = new AppPaths(testRoot, testRoot);
-        paths.CreateTopDirectories();
-        builder.RegisterInstance(paths).As<IAppPaths>();
+        builder
+            .Register(c =>
+            {
+                var fs = c.Resolve<MockFileSystem>();
+                var testRoot = fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
+                var paths = new AppPaths(testRoot, testRoot);
+                paths.CreateTopDirectories();
 
-        // Create empty settings.yml to avoid SettingsLoader errors
-        fs.AddFile(
-            fs.Path.Combine(testRoot.FullName, "settings.yml"),
-            new MockFileData("# Empty settings for tests\n")
-        );
+                // Create empty settings.yml to avoid SettingsLoader errors
+                fs.AddFile(
+                    fs.Path.Combine(testRoot.FullName, "settings.yml"),
+                    new MockFileData("# Empty settings for tests\n")
+                );
+
+                return paths;
+            })
+            .As<IAppPaths>()
+            .SingleInstance();
     }
 }

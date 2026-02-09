@@ -1,30 +1,17 @@
-using Autofac;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.TestLibrary.Autofac;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
+[CoreDataSource]
+internal sealed class ConfigurationRegistryTest(ConfigurationRegistry sut, MockFileSystem fs)
 {
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-
-        // ConfigurationRegistry uses ConfigFilterProcessor which depends on
-        // IFilterResultRenderer, so we need to register a mock for it since we
-        // don't care about rendering logic for this test.
-        builder.RegisterMockFor<IFilterResultRenderer>();
-    }
-
     [Test]
     public void Use_explicit_paths_instead_of_default()
     {
-        var sut = Resolve<ConfigurationRegistry>();
-
-        Fs.AddFile(
+        fs.AddFile(
             "manual.yml",
             new MockFileData(
                 """
@@ -57,8 +44,6 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Throw_on_invalid_config_files()
     {
-        var sut = Resolve<ConfigurationRegistry>();
-
         var act = () =>
             sut.FindAndLoadConfigs(new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] });
 
@@ -68,9 +53,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Parse_custom_format_groups()
     {
-        var sut = Resolve<ConfigurationRegistry>();
-
-        Fs.AddFile(
+        fs.AddFile(
             "config.yml",
             new MockFileData(
                 """
