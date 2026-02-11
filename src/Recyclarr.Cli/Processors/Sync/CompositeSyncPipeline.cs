@@ -1,21 +1,14 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Compatibility;
-using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 internal class CompositeSyncPipeline(
     ILogger log,
-    IAnsiConsole console,
     IEnumerable<ISyncPipeline> pipelines,
-    IEnumerable<IPipelineCache> caches,
-    ServiceAgnosticCapabilityEnforcer enforcer,
-    IServiceConfiguration config,
     ISyncContextSource contextSource,
     IProgressSource progressSource
 ) : IPipelineExecutor
@@ -26,25 +19,6 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
-        if (settings.Preview)
-        {
-            console.WriteLine();
-            console.Write(new Rule($"[bold]{config.InstanceName}[/]").LeftJustified());
-        }
-
-        log.Information(
-            "Processing {Server} server {Name}",
-            config.ServiceType,
-            config.InstanceName
-        );
-
-        await enforcer.Check(config, ct);
-
-        foreach (var cache in caches)
-        {
-            cache.Clear();
-        }
-
         var sortedPipelines = TopologicalSort(pipelines);
         log.Debug(
             "Pipeline execution order: {Order}",

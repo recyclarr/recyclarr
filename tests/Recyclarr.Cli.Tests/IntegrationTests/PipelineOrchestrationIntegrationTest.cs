@@ -3,8 +3,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Config.Models;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -15,7 +13,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private List<PipelineType> _executionOrder = null!;
     private ISyncContextSource _contextSource = null!;
     private IProgressSource _progressSource = null!;
-    private IServiceConfiguration _config = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
@@ -24,11 +21,9 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         _executionOrder = [];
         _contextSource = Substitute.For<ISyncContextSource>();
         _progressSource = Substitute.For<IProgressSource>();
-        _config = NewConfig.Radarr() with { InstanceName = "test-instance" };
 
         builder.RegisterInstance(_contextSource).As<ISyncContextSource>();
         builder.RegisterInstance(_progressSource).As<IProgressSource>();
-        builder.RegisterInstance(_config).As<IServiceConfiguration>();
     }
 
     private ISyncPipeline CreateStubPipeline(
@@ -54,15 +49,11 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         return pipeline;
     }
 
-    private IPipelineExecutor CreateExecutor(
-        IEnumerable<ISyncPipeline> pipelines,
-        IEnumerable<IPipelineCache>? caches = null
-    )
+    private IPipelineExecutor CreateExecutor(IEnumerable<ISyncPipeline> pipelines)
     {
         var scope = Container.BeginLifetimeScope(builder =>
         {
             builder.RegisterInstance(pipelines).As<IEnumerable<ISyncPipeline>>();
-            builder.RegisterInstance(caches ?? []).As<IEnumerable<IPipelineCache>>();
         });
         return scope.Resolve<IPipelineExecutor>();
     }
@@ -189,21 +180,5 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var act = () => sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
 
         act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Cycle*");
-    }
-
-    [Test]
-    public async Task Caches_cleared_before_pipeline_execution()
-    {
-        var cache1 = Substitute.For<IPipelineCache>();
-        var cache2 = Substitute.For<IPipelineCache>();
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
-
-        var sut = CreateExecutor([cfPipeline], [cache1, cache2]);
-
-        var settings = Substitute.For<ISyncSettings>();
-        await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
-
-        cache1.Received(1).Clear();
-        cache2.Received(1).Clear();
     }
 }
