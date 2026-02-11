@@ -1,8 +1,8 @@
 namespace Recyclarr.Sync.Progress;
 
-public interface IProgressSource : IObservable<ProgressSnapshot>
+public interface IProgressSource
 {
-    ProgressSnapshot Current { get; }
+    IObservable<ProgressSnapshot> Observable { get; }
     void AddInstance(string name);
     void SetInstanceStatus(InstanceProgressStatus status);
     void SetPipelineStatus(PipelineProgressStatus status, int? count = null);

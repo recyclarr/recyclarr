@@ -16,7 +16,7 @@
       <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="SuperLinq" />
       <PackageReference Include="System.Data.HashFunction.FNV" />
-      <PackageReference Include="System.Reactive" />
+      <PackageReference Include="System.Reactive.Linq" />
       <PackageReference Include="TestableIO.System.IO.Abstractions" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
       <PackageReference Include="YamlDotNet" />

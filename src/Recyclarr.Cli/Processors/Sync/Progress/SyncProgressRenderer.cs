@@ -10,13 +10,12 @@ internal class SyncProgressRenderer : IDisposable
     private readonly IAnsiConsole _console;
     private readonly ProgressTableBuilder _tableBuilder = new();
     private readonly IDisposable _subscription;
-    private ProgressSnapshot _snapshot;
+    private ProgressSnapshot _snapshot = new([]);
 
     public SyncProgressRenderer(IAnsiConsole console, IProgressSource progressSource)
     {
         _console = console;
-        _snapshot = progressSource.Current;
-        _subscription = progressSource.Subscribe(s => _snapshot = s);
+        _subscription = progressSource.Observable.Subscribe(s => _snapshot = s);
     }
 
     public async Task RenderProgressAsync(Func<Task> syncAction, CancellationToken ct)
