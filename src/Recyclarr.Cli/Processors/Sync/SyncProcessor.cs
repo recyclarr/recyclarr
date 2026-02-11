@@ -1,16 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.ErrorHandling;
-using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
-using Recyclarr.Sync;
-using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -18,19 +12,14 @@ namespace Recyclarr.Cli.Processors.Sync;
 [UsedImplicitly]
 internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
 {
-    public PlanBuilder PlanBuilder { get; } = scope.Resolve<PlanBuilder>();
-    public IPipelineExecutor Pipelines { get; } = scope.Resolve<IPipelineExecutor>();
+    public InstanceSyncProcessor InstanceProcessor { get; } =
+        scope.Resolve<InstanceSyncProcessor>();
 }
 
-[SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 internal class SyncProcessor(
     ConfigurationRegistry configRegistry,
     ConfigurationScopeFactory configScopeFactory,
-    ExceptionHandler exceptionHandler,
-    SyncEventOutputStrategy syncEventOutput,
     NotificationService notify,
-    ISyncContextSource contextSource,
-    SyncEventStorage eventStorage,
     DiagnosticsRenderer diagnosticsRenderer,
     IProgressSource progressSource,
     SyncProgressRenderer progressRenderer
@@ -87,62 +76,26 @@ internal class SyncProcessor(
         CancellationToken ct
     )
     {
-        var failureDetected = await ProcessService(settings, configs, ct);
-        return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
-    }
-
-    private async Task<bool> ProcessService(
-        ISyncSettings settings,
-        IEnumerable<IServiceConfiguration> configs,
-        CancellationToken ct
-    )
-    {
         var failureDetected = false;
 
         foreach (var config in configs)
         {
-            contextSource.SetInstance(config.InstanceName);
             progressSource.SetInstanceStatus(InstanceProgressStatus.Running);
 
-            try
-            {
-                using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(
-                    config
-                );
+            using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
+            var result = await configScope.InstanceProcessor.Process(settings, ct);
 
-                var plan = configScope.PlanBuilder.Build();
-
-                if (eventStorage.HasInstanceErrors(config.InstanceName))
-                {
-                    progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
-                    failureDetected = true;
-                    continue;
-                }
-
-                var result = await configScope.Pipelines.Execute(settings, plan, ct);
-                if (result == PipelineResult.Failed)
-                {
-                    progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
-                    failureDetected = true;
-                }
-                else
-                {
-                    progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
-                }
-            }
-            catch (Exception e)
+            if (result == InstanceSyncResult.Failed)
             {
                 progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
-
-                if (!await exceptionHandler.TryHandleAsync(e, syncEventOutput))
-                {
-                    throw;
-                }
-
                 failureDetected = true;
+            }
+            else
+            {
+                progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
             }
         }
 
-        return failureDetected;
+        return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
     }
 }

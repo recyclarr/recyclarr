@@ -57,6 +57,7 @@ internal static class CompositionRoot
 
         // Sync
         builder.RegisterType<SyncProcessor>();
+        builder.RegisterType<InstanceSyncProcessor>();
         builder.RegisterType<SyncProgressRenderer>();
 
         // Configuration
