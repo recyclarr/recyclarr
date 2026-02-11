@@ -5,30 +5,18 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.TestLibrary.Autofac;
+using Serilog;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
+[GenericSyncPipelineDataSource]
+internal sealed class GenericSyncPipelineTest(ILogger logger, IProgressSource progressSource)
 {
-    private IProgressSource _progressSource = null!;
-
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-
-        _progressSource = Substitute.For<IProgressSource>();
-
-        builder.RegisterInstance(_progressSource).As<IProgressSource>();
-    }
-
     private GenericSyncPipeline<TestPipelineContext> CreatePipeline(params TestPhase[] phases)
     {
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
-        return new GenericSyncPipeline<TestPipelineContext>(
-            Resolve<ILogger>(),
-            _progressSource,
-            orderedPhases
-        );
+        return new GenericSyncPipeline<TestPipelineContext>(logger, progressSource, orderedPhases);
     }
 
     private GenericSyncPipeline<SkippedTestPipelineContext> CreateSkippedPipeline(
@@ -37,8 +25,8 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
     {
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
         return new GenericSyncPipeline<SkippedTestPipelineContext>(
-            Resolve<ILogger>(),
-            _progressSource,
+            logger,
+            progressSource,
             orderedPhases
         );
     }
@@ -88,7 +76,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
 
         result.Should().Be(PipelineResult.Failed);
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
+        progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
     }
 
     [Test]
@@ -102,7 +90,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var act = () => sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("test error");
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
+        progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
     }
 
     [Test]
@@ -118,7 +106,16 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 
         result.Should().Be(PipelineResult.Completed);
         phaseExecuted.Should().BeFalse();
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
+        progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
+    }
+}
+
+internal sealed class GenericSyncPipelineDataSourceAttribute : CliDataSourceAttribute
+{
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    {
+        base.RegisterStubsAndMocks(builder);
+        builder.RegisterMockFor<IProgressSource>();
     }
 }
 

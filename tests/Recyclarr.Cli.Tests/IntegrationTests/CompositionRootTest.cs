@@ -6,23 +6,18 @@ using Recyclarr.TestLibrary.Autofac;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class CompositionRootTest : CliIntegrationFixture
+[CompositionRootDataSource]
+internal sealed class CompositionRootTest(ILifetimeScope container)
 {
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-        builder.RegisterMockFor<IServiceConfiguration>();
-    }
-
 #pragma warning disable TUnit0046 // Type is immutable; isolation not needed
     public static IEnumerable<Type> GetServiceTypes()
 #pragma warning restore TUnit0046
     {
         var builder = new ContainerBuilder();
         CompositionRoot.Setup(builder);
-        var container = builder.Build();
+        var built = builder.Build();
 
-        return container
+        return built
             .ComponentRegistry.Registrations.SelectMany(x => x.Services)
             .OfType<TypedService>()
             .Select(x => x.ServiceType)
@@ -37,6 +32,15 @@ internal sealed class CompositionRootTest : CliIntegrationFixture
     [MethodDataSource(nameof(GetServiceTypes))]
     public void Service_should_be_instantiable(Type service)
     {
-        Container.Resolve(service).Should().NotBeNull();
+        container.Resolve(service).Should().NotBeNull();
+    }
+}
+
+internal sealed class CompositionRootDataSourceAttribute : CliDataSourceAttribute
+{
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    {
+        base.RegisterStubsAndMocks(builder);
+        builder.RegisterMockFor<IServiceConfiguration>();
     }
 }

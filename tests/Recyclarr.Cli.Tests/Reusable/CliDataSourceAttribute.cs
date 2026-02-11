@@ -13,7 +13,7 @@ namespace Recyclarr.Cli.Tests.Reusable;
     "CA1813:Avoid unsealed attributes",
     Justification = "May need to be inheritable"
 )]
-internal sealed class CliDataSourceAttribute : CoreDataSourceAttribute
+internal class CliDataSourceAttribute : CoreDataSourceAttribute
 {
     protected override void RegisterTypes(ContainerBuilder builder)
     {

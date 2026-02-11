@@ -39,21 +39,122 @@ description: >
 - Methods: Underscore-separated behavior (`Load_many_iterations_of_config`)
 - Pattern: `internal sealed class`
 
-## Integration Test Setup
+## TUnit DI Data Source Architecture
+
+Integration tests use TUnit's `DependencyInjectionDataSourceAttribute<TScope>` with Autofac. The
+hierarchy:
+
+```txt
+DependencyInjectionDataSourceAttribute<ILifetimeScope>   (TUnit base)
+  CoreDataSourceAttribute                                 (CoreAutofacModule + test doubles)
+    CliDataSourceAttribute                                (CompositionRoot.Setup() superset)
+      Custom overrides (per-test-class)                   (additional mocks)
+```
+
+**Key behaviors:**
+
+- TUnit creates a **new class instance per test method** (full isolation by design)
+- Each instance gets a fresh DI container scope
+- Constructor parameters are resolved from the container
+- `AnyConcreteTypeNotAlreadyRegisteredSource` is registered as a fallback resolver
+
+### Basic integration test (CLI level)
 
 ```csharp
-internal sealed class MyFeatureIntegrationTest : CliIntegrationFixture
+[CliDataSource]
+internal sealed class MyFeatureIntegrationTest(
+    IMyService sut,
+    MockFileSystem fs,
+    IAppPaths paths
+)
 {
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    [Test]
+    public void My_test()
     {
-        // Register custom mocks here
+        sut.DoSomething();
+        // assert
     }
 }
 ```
 
-Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`).
+### DI injection placement
 
-## AutoFixture Attributes
+- **Class-level** `[CliDataSource]`: Resolves constructor parameters. Use for dependencies shared
+  across most/all test methods in the class.
+- **Method-level** `[CliDataSource]`: Resolves method parameters. Use for dependencies needed by
+  only one or a few test methods.
+
+Class-level and method-level can coexist. The class attribute does NOT automatically inject method
+parameters; each level requires its own attribute.
+
+### Injecting registered types
+
+Types registered via interfaces (e.g., `.As<IFoo>()`) must be injected by their **interface type**,
+not the concrete type. Injecting the concrete type falls through to
+`AnyConcreteTypeNotAlreadyRegisteredSource`, which creates a separate instance with potentially
+different dependency resolution.
+
+```csharp
+// GOOD: Resolves the production registration
+internal sealed class MyTest(IConfigCreationProcessor sut) { }
+
+// BAD: Creates a second instance via AnyConcreteTypeNotAlreadyRegisteredSource
+internal sealed class MyTest(ConfigCreationProcessor sut) { }
+```
+
+Exception: Types registered `.AsSelf()` or as concrete types can be injected directly.
+
+### Custom data source overrides
+
+When tests need additional mocks beyond the base `CliDataSourceAttribute`, create a custom attribute
+that overrides `RegisterStubsAndMocks`:
+
+```csharp
+internal sealed class MyCustomDataSourceAttribute : CliDataSourceAttribute
+{
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    {
+        base.RegisterStubsAndMocks(builder);
+        builder.RegisterMockFor<IMyExternalService>();
+    }
+}
+```
+
+Use sparingly. Prefer the base attributes when possible.
+
+### Child scope resolution
+
+Some types are only available in child scopes (e.g., `PlanBuilder` lives inside a
+`ConfigurationScope`). These cannot be constructor-injected and must be resolved from the child
+scope:
+
+```csharp
+[CliDataSource]
+internal sealed class MyTest(ConfigurationScopeFactory scopeFactory)
+{
+    [Test]
+    public void My_test()
+    {
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        // ...
+    }
+}
+```
+
+`Autofac` using is required for `scope.Resolve<>()` calls on child scopes.
+
+## Unit Tests with AutoFixture
+
+```csharp
+[Test, AutoMockData]
+public void My_unit_test([Frozen] IMyDependency dep, MySut sut)
+{
+    dep.Method().Returns(value);
+    sut.DoSomething();
+    dep.Received().Method();
+}
+```
 
 - `[AutoMockData]`: Basic DI with mocks
 - `[Frozen]` or `[Frozen(Matching.ImplementedInterfaces)]`: Shared mock instances
@@ -84,14 +185,14 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 
 **Anti-patterns:**
 
-- `dict!["key"]!` - use `ContainKey().WhoseValue` instead
-- `HaveCount()` + `BeEquivalentTo()` - redundant; equivalence checks count
+- `dict!["key"]!` -- use `ContainKey().WhoseValue` instead
+- `HaveCount()` + `BeEquivalentTo()` -- redundant; equivalence checks count
 - Multiple assertions instead of `.And` chaining
 
 ## Utilities
 
-- `IntegrationTestFixture`: Core library integration tests
-- `CliIntegrationFixture`: CLI integration with composition root
+- `CoreDataSourceAttribute`: Core library integration tests (Autofac DI)
+- `CliDataSourceAttribute`: CLI integration with full composition root
 - `Verify.That<T>()`: NSubstitute matcher with assertions
 - `TestableLogger`: Capture log messages
 - `TestAnsiConsole`: Console output for tests (TUnit auto-captures Console.Out)
@@ -104,7 +205,7 @@ Avoid absolute paths in `MockFileSystem` (platform-incompatible):
 
 ```csharp
 // Good
-Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
+fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 
 // Bad
 "/absolute/path/file.json"
@@ -114,13 +215,13 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 
 **Gather evidence before changing code.** Avoid guess-and-check cycles.
 
-1. **Read assertion output carefully** - Diff output often reveals the issue immediately
-2. **Add adhoc logs** - Trace execution in tests or production code; remove when done
-3. **Compare with passing tests** - Diff similar working tests to spot differences
-4. **Add intermediate assertions** - Verify state at each step to pinpoint divergence
-5. **Simplify to minimal reproduction** - Strip test down, add back until failure
-6. **Write adhoc granular tests** - Isolate suspected areas; remove when done
-7. **Check test isolation** - Run alone (`--filter`) vs. suite to detect state leakage
+1. **Read assertion output carefully** -- Diff output often reveals the issue immediately
+2. **Add adhoc logs** -- Trace execution in tests or production code; remove when done
+3. **Compare with passing tests** -- Diff similar working tests to spot differences
+4. **Add intermediate assertions** -- Verify state at each step to pinpoint divergence
+5. **Simplify to minimal reproduction** -- Strip test down, add back until failure
+6. **Write adhoc granular tests** -- Isolate suspected areas; remove when done
+7. **Check test isolation** -- Run alone (`--filter`) vs. suite to detect state leakage
 
 ## Test Framing
 
@@ -140,6 +241,7 @@ Both are equally important. The distinction is about clarity, not preference.
 - Duplicate coverage for same logical paths
 - Production code added solely for testing
 - Unexplained magic constants
+- Using `container.Resolve<T>()` instead of constructor/method injection
 
 ## Running Tests
 
@@ -148,10 +250,11 @@ Both are equally important. The distinction is about clarity, not preference.
 dotnet test -v m
 
 # Specific test project
-dotnet test -v m tests/Recyclarr.Cli.Tests/
+dotnet test --project tests/Recyclarr.Cli.Tests -v m
 
-# Single test by name
-dotnet test -v m --filter "FullyQualifiedName~TestMethodName"
+# Single test class (TUnit tree filter)
+dotnet test --project tests/Recyclarr.Cli.Tests -v m \
+  --treenode-filter "/Recyclarr.Cli.Tests/Namespace/ClassName/**"
 
 # E2E tests (requires Docker services)
 ./scripts/Run-E2ETests.ps1
@@ -182,7 +285,7 @@ containing ANY pattern. Examples:
 
 Output format: `path:pct:covered/total[:uncovered_lines]`
 
-CRITICAL: `--run` must succeed before querying. Investigate failures - coverage data is invalid on
+CRITICAL: `--run` must succeed before querying. Investigate failures; coverage data is invalid on
 failure. Run coverage BEFORE writing tests to understand gaps.
 
 ---
@@ -194,8 +297,8 @@ that sync operations produce expected state in the services.
 
 ### Running E2E Tests
 
-**MANDATORY**: Use `./scripts/Run-E2ETests.ps1` - never run `dotnet test` directly for E2E tests.
-The script outputs a log file path; use `rg` to search logs without rerunning tests.
+**MANDATORY**: Use `./scripts/Run-E2ETests.ps1`; never run `dotnet test` directly for E2E tests. The
+script outputs a log file path; use `rg` to search logs without rerunning tests.
 
 ### Resource Provider Strategy
 
@@ -284,12 +387,12 @@ Fixtures/
 
 ### Trash ID Conventions
 
-- `e2e00000000000000000000000000001` - E2E test Radarr quality profile
-- `e2e00000000000000000000000000002` - E2E test Sonarr quality profile
-- `e2e00000000000000000000000000003` - E2E test Sonarr guide-only profile
-- `e2e00000000000000000000000000010` - E2E test Sonarr CF group
-- `e2e00000000000000000000000000011` - E2E test Radarr CF group
-- `00000000000000000000000000000001` through `00000000000000000000000000000007` - Local test CFs
+- `e2e00000000000000000000000000001` -- E2E test Radarr quality profile
+- `e2e00000000000000000000000000002` -- E2E test Sonarr quality profile
+- `e2e00000000000000000000000000003` -- E2E test Sonarr guide-only profile
+- `e2e00000000000000000000000000010` -- E2E test Sonarr CF group
+- `e2e00000000000000000000000000011` -- E2E test Radarr CF group
+- `00000000000000000000000000000001` through `00000000000000000000000000000007` -- Local test CFs
 
 ### Adding New Test Cases
 

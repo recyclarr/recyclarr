@@ -11,7 +11,8 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
+[CliDataSource]
+internal sealed class CustomFormatTransactionPhaseTest(ConfigurationScopeFactory scopeFactory)
 {
     private static PipelinePlan CreatePlan(params CustomFormatResource[] cfs)
     {
@@ -27,7 +28,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Create_new_cf_when_no_cache_and_no_name_match()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -50,7 +50,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Conflict_when_no_cache_and_single_name_match()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -78,7 +77,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Ambiguous_when_no_cache_and_multiple_name_matches()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -113,7 +111,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Update_cf_by_cached_id_regardless_of_name()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -152,7 +149,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_cf_when_cached_id_matches_and_content_same()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -177,7 +173,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Create_new_cf_when_stale_cache_and_no_name_collision()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -200,7 +195,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Conflict_when_stale_cache_and_name_collision()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -228,7 +222,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Deleted_cfs_populated_for_orphaned_cache_entries()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -254,7 +247,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Deleted_cfs_excludes_cfs_in_config()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -273,7 +265,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_specifications_match()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -319,7 +310,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Updated_when_specification_differs()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -369,7 +359,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Updated_when_specification_count_differs()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -406,7 +395,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_spec_order_differs()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -448,7 +436,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_service_has_extra_fields()
     {
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
         var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
@@ -506,7 +493,6 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         // One is in config (would be unchanged), one is orphaned (would be deleted).
         // Expected: Sync detects the conflict and reports an error, telling user to run cache rebuild.
         // Sync should NOT silently delete a CF that's also being updated.
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(
             NewConfig.Radarr() with
             {

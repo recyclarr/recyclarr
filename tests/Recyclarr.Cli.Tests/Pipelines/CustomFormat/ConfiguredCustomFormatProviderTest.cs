@@ -1,13 +1,24 @@
+using System.IO.Abstractions;
+using Autofac;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Tests.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.ResourceProviders.Infrastructure;
+using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
-internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class ConfiguredCustomFormatProviderTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Auto_discovers_default_groups_when_qp_matches_include_list()
@@ -37,8 +48,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -86,8 +96,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "User Profile" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -124,8 +133,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -163,8 +171,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "user-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -202,8 +209,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -244,8 +250,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -277,8 +282,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1"] }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -316,8 +320,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -368,8 +371,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -412,8 +414,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -467,8 +468,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();
@@ -508,8 +508,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
         var entries = sut.GetAll().ToList();

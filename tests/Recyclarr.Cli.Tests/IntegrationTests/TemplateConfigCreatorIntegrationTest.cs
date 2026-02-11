@@ -2,20 +2,27 @@ using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Platform;
 using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixture
+[CliDataSource]
+internal sealed class TemplateConfigCreatorIntegrationTest(
+    TemplateConfigCreator sut,
+    ProviderInitializationFactory providerFactory,
+    MockFileSystem fs,
+    IAppPaths paths
+)
 {
     private IDirectoryInfo SetupTemplateRepo(string templatesJson)
     {
-        var mockRepoPath = Paths
+        var mockRepoPath = paths
             .ResourceDirectory.SubDirectory("config-templates")
             .SubDirectory("git")
             .SubDirectory("official");
-        Fs.AddDirectory(mockRepoPath);
-        Fs.AddFile(mockRepoPath.File("templates.json"), new MockFileData(templatesJson));
+        fs.AddDirectory(mockRepoPath);
+        fs.AddFile(mockRepoPath.File("templates.json"), new MockFileData(templatesJson));
         return mockRepoPath;
     }
 
@@ -44,14 +51,13 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
             """;
 
         var mockRepoPath = SetupTemplateRepo(templatesJson);
-        Fs.AddEmptyFile(mockRepoPath.File("template-file1.yml"));
-        Fs.AddEmptyFile(mockRepoPath.File("template-file2.yml"));
+        fs.AddEmptyFile(mockRepoPath.File("template-file1.yml"));
+        fs.AddEmptyFile(mockRepoPath.File("template-file2.yml"));
         // This one shouldn't show up in the result because the user didn't ask for it
-        Fs.AddEmptyFile(mockRepoPath.File("template-file3.yml"));
+        fs.AddEmptyFile(mockRepoPath.File("template-file3.yml"));
 
         // Initialize resource providers to populate repository paths
-        var factory = Resolve<ProviderInitializationFactory>();
-        await factory.InitializeProvidersAsync(null, CancellationToken.None);
+        await providerFactory.InitializeProvidersAsync(null, CancellationToken.None);
 
         var settings = Substitute.For<ICreateConfigSettings>();
         settings.Templates.Returns([
@@ -62,13 +68,12 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
             "template-file4",
         ]);
 
-        var sut = Resolve<TemplateConfigCreator>();
         sut.Create(settings);
 
-        Fs.AllFiles.Should()
+        fs.AllFiles.Should()
             .Contain([
-                Paths.YamlConfigDirectory.File("template-file1.yml").FullName,
-                Paths.YamlConfigDirectory.File("template-file2.yml").FullName,
+                paths.YamlConfigDirectory.File("template-file1.yml").FullName,
+                paths.YamlConfigDirectory.File("template-file2.yml").FullName,
             ]);
     }
 
@@ -88,22 +93,20 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
             """;
 
         var mockRepoPath = SetupTemplateRepo(templatesJson);
-        Fs.AddFile(mockRepoPath.File("existing-template.yml"), new MockFileData("new content"));
+        fs.AddFile(mockRepoPath.File("existing-template.yml"), new MockFileData("new content"));
 
         // Create existing file in configs directory with different content
-        var existingFile = Paths.YamlConfigDirectory.File("existing-template.yml");
-        Fs.AddFile(existingFile, new MockFileData("old content"));
+        var existingFile = paths.YamlConfigDirectory.File("existing-template.yml");
+        fs.AddFile(existingFile, new MockFileData("old content"));
 
-        var factory = Resolve<ProviderInitializationFactory>();
-        await factory.InitializeProvidersAsync(null, CancellationToken.None);
+        await providerFactory.InitializeProvidersAsync(null, CancellationToken.None);
 
         var settings = Substitute.For<ICreateConfigSettings>();
         settings.Templates.Returns(["existing-template"]);
         settings.Force.Returns(true);
 
-        var sut = Resolve<TemplateConfigCreator>();
         sut.Create(settings);
 
-        (await Fs.File.ReadAllTextAsync(existingFile.FullName)).Should().Be("new content");
+        (await fs.File.ReadAllTextAsync(existingFile.FullName)).Should().Be("new content");
     }
 }

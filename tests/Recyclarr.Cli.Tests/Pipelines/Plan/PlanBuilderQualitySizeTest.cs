@@ -1,12 +1,22 @@
+using System.IO.Abstractions;
+using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class PlanBuilderQualitySizeTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Build_with_quality_definition_produces_quality_sizes_in_plan()
@@ -18,17 +28,15 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
             QualityDefinition = new QualityDefinitionConfig { Type = "movie" },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.QualitySizes.Should().NotBeNull();
         plan.QualitySizes.Type.Should().Be("movie");
         plan.QualitySizes.Qualities.Should().HaveCount(2);
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -39,14 +47,12 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
             QualityDefinition = new QualityDefinitionConfig { Type = "nonexistent" },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.QualitySizesAvailable.Should().BeFalse();
-        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent"));
+        GetErrors(EventStorage).Should().Contain(e => e.Contains("nonexistent"));
     }
 }

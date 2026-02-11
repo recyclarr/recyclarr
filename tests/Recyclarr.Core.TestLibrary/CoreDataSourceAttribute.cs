@@ -32,14 +32,6 @@ public class CoreDataSourceAttribute : DependencyInjectionDataSourceAttribute<IL
     {
         var builder = new ContainerBuilder();
 
-        builder
-            .Register(_ => new MockFileSystem(
-                new MockFileSystemOptions { CreateDefaultTempDir = false }
-            ))
-            .As<IFileSystem>()
-            .AsSelf()
-            .SingleInstance();
-
         RegisterTypes(builder);
         RegisterStubsAndMocks(builder);
 
@@ -67,6 +59,15 @@ public class CoreDataSourceAttribute : DependencyInjectionDataSourceAttribute<IL
     /// </summary>
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
+        // Must be registered here (after RegisterTypes) to override the real FileSystem
+        builder
+            .Register(_ => new MockFileSystem(
+                new MockFileSystemOptions { CreateDefaultTempDir = false }
+            ))
+            .As<IFileSystem>()
+            .AsSelf()
+            .SingleInstance();
+
         builder.Register(_ => TestAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
         builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
         builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();

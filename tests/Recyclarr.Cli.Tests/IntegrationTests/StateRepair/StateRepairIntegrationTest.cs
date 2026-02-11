@@ -8,34 +8,27 @@ using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
+using Recyclarr.Platform;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.SyncState;
+using Recyclarr.TestLibrary.Autofac;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests.StateRepair;
 
-internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
+[StateRepairDataSource]
+internal sealed class StateRepairIntegrationTest(
+    ILifetimeScope container,
+    MockFileSystem fs,
+    IAppPaths paths,
+    ICustomFormatApiService cfApiService,
+    IQualityProfileApiService qpApiService
+)
 {
-    private ICustomFormatApiService _cfApiService = null!;
-    private IQualityProfileApiService _qpApiService = null!;
-
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-
-        _cfApiService = Substitute.For<ICustomFormatApiService>();
-        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns([]);
-        builder.RegisterInstance(_cfApiService).As<ICustomFormatApiService>();
-
-        _qpApiService = Substitute.For<IQualityProfileApiService>();
-        _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns([]);
-        builder.RegisterInstance(_qpApiService).As<IQualityProfileApiService>();
-    }
-
     private void SetupGuideCfs(string serviceType, params (string TrashId, string Name)[] cfs)
     {
-        var cfDir = Paths
+        var cfDir = paths
             .ResourceDirectory.SubDirectory("trash-guides")
             .SubDirectory("git")
             .SubDirectory("official")
@@ -54,7 +47,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                     "specifications": []
                 }
                 """;
-            Fs.AddFile(cfDir.File($"{trashId}.json"), new MockFileData(cfJson));
+            fs.AddFile(cfDir.File($"{trashId}.json"), new MockFileData(cfJson));
         }
     }
 
@@ -75,12 +68,12 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                 },
             },
         };
-        Fs.AddYamlFile(Paths.YamlConfigDirectory.File("config.yml"), config);
+        fs.AddYamlFile(paths.YamlConfigDirectory.File("config.yml"), config);
     }
 
     private void SetupServiceCfs(params CustomFormatResource[] cfs)
     {
-        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
+        cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
     }
 
     [Test]
@@ -99,7 +92,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // --adopt is required to add entries when no cache exists
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "-i", "test-instance", "--adopt"]
         );
 
@@ -107,9 +100,9 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // Verify cache file was created with correct mappings
         var cacheFile = GetCacheFilePath("radarr");
-        Fs.File.Exists(cacheFile).Should().BeTrue();
+        fs.File.Exists(cacheFile).Should().BeTrue();
 
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -138,7 +131,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
             new CustomFormatResource { Id = 30, Name = "hulu" }
         );
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(1);
 
@@ -159,7 +152,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Exists In Service" });
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "-i", "test-instance", "--adopt"]
         );
 
@@ -167,9 +160,9 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // Verify cache only contains the CF that exists in service
         var cacheFile = GetCacheFilePath("radarr");
-        Fs.File.Exists(cacheFile).Should().BeTrue();
+        fs.File.Exists(cacheFile).Should().BeTrue();
 
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -198,7 +191,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupExistingCache("radarr", existingCache);
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "-i", "test-instance", "--preview"]
         );
 
@@ -206,7 +199,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // Verify cache unchanged (still has wrong ID, not corrected to 10)
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -229,7 +222,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // Explicit resource type argument: "custom-formats" (kebab-case)
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "custom-formats", "-i", "test-instance", "--adopt"]
         );
 
@@ -237,7 +230,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // Verify cache was created
         var cacheFile = GetCacheFilePath("radarr");
-        Fs.File.Exists(cacheFile).Should().BeTrue();
+        fs.File.Exists(cacheFile).Should().BeTrue();
     }
 
     [Test]
@@ -262,13 +255,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         };
         SetupExistingCache("radarr", existingCache);
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
         // Verify cache contains both entries
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -306,13 +299,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         };
         SetupExistingCache("radarr", existingCache);
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
         // Verify cache only contains the valid entry (stale entry removed)
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -341,13 +334,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         };
         SetupExistingCache("radarr", existingCache);
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
         // Verify cache has corrected mapping
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -375,13 +368,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         };
         SetupExistingCache("radarr", existingCache);
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
         // Verify cache preserved
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -403,7 +396,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Test CF" });
         // No existing cache - service CF matches by name but isn't tracked
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
@@ -421,7 +414,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // No existing cache - service CF matches by name but isn't tracked
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "-i", "test-instance", "--adopt"]
         );
 
@@ -429,9 +422,9 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         // With --adopt, cache file should be created with the adopted mapping
         var cacheFile = GetCacheFilePath("radarr");
-        Fs.File.Exists(cacheFile).Should().BeTrue();
+        fs.File.Exists(cacheFile).Should().BeTrue();
 
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -465,13 +458,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
             """;
         SetupExistingCacheRaw("radarr", legacyCache);
 
-        var exitCode = await CliSetup.Run(Container, ["state", "repair", "-i", "test-instance"]);
+        var exitCode = await CliSetup.Run(container, ["state", "repair", "-i", "test-instance"]);
 
         exitCode.Should().Be(0);
 
         // Cache should be unchanged (already correct)
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -488,12 +481,12 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
     private void SetupExistingCacheRaw(string serviceType, string cacheJson)
     {
-        var cacheDir = Paths
+        var cacheDir = paths
             .StateDirectory.SubDirectory(serviceType.ToLowerInvariant())
             .SubDirectory("8247e13ec45dc17b"); // Hash from test config
 
-        Fs.Directory.CreateDirectory(cacheDir.FullName);
-        Fs.AddFile(cacheDir.File("custom-format-mappings.json"), new MockFileData(cacheJson));
+        fs.Directory.CreateDirectory(cacheDir.FullName);
+        fs.AddFile(cacheDir.File("custom-format-mappings.json"), new MockFileData(cacheJson));
     }
 
     private string GetCacheFilePath(string serviceType)
@@ -509,20 +502,20 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     private string GetCacheFilePath(string serviceType, string cacheFileName)
     {
         // Cache path is: {appdata}/cache/{service}/{hash}/{cacheFileName}
-        var cacheDir = Paths.StateDirectory.SubDirectory(serviceType.ToLowerInvariant());
+        var cacheDir = paths.StateDirectory.SubDirectory(serviceType.ToLowerInvariant());
 
-        if (!Fs.Directory.Exists(cacheDir.FullName))
+        if (!fs.Directory.Exists(cacheDir.FullName))
         {
             return string.Empty;
         }
 
-        var subdirs = Fs.Directory.GetDirectories(cacheDir.FullName);
+        var subdirs = fs.Directory.GetDirectories(cacheDir.FullName);
         if (subdirs.Length == 0)
         {
             return string.Empty;
         }
 
-        return Fs.Path.Combine(subdirs[0], cacheFileName);
+        return fs.Path.Combine(subdirs[0], cacheFileName);
     }
 
     [Test]
@@ -543,7 +536,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupExistingCache("radarr", existingCache);
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "-i", "test-instance", "--adopt"]
         );
 
@@ -552,7 +545,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Cache should contain ONLY the adopted entry, NOT the orphan
         // (orphan discarded because its service ID is claimed by the adopted entry)
         var cacheFile = GetCacheFilePath("radarr");
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -570,7 +563,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
     private void SetupGuideQps(string serviceType, params (string TrashId, string Name)[] qps)
     {
-        var qpDir = Paths
+        var qpDir = paths
             .ResourceDirectory.SubDirectory("trash-guides")
             .SubDirectory("git")
             .SubDirectory("official")
@@ -590,13 +583,13 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                     "items": []
                 }
                 """;
-            Fs.AddFile(qpDir.File($"{trashId}.json"), new MockFileData(qpJson));
+            fs.AddFile(qpDir.File($"{trashId}.json"), new MockFileData(qpJson));
         }
     }
 
     private void SetupServiceQps(params QualityProfileDto[] qps)
     {
-        _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns(qps.ToList());
+        qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns(qps.ToList());
     }
 
     private void SetupRadarrConfigWithQps(
@@ -621,7 +614,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
                 },
             },
         };
-        Fs.AddYamlFile(Paths.YamlConfigDirectory.File("config.yml"), config);
+        fs.AddYamlFile(paths.YamlConfigDirectory.File("config.yml"), config);
     }
 
     [Test]
@@ -639,16 +632,16 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         );
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "quality-profiles", "-i", "test-instance", "--adopt"]
         );
 
         exitCode.Should().Be(0);
 
         var cacheFile = GetQpCacheFilePath("radarr");
-        Fs.File.Exists(cacheFile).Should().BeTrue();
+        fs.File.Exists(cacheFile).Should().BeTrue();
 
-        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cacheContent = await fs.File.ReadAllTextAsync(cacheFile);
         var cache = JsonSerializer.Deserialize<QualityProfileMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
@@ -674,7 +667,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceQps(new QualityProfileDto { Id = 10, Name = "Test Profile" });
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "quality-profiles", "-i", "test-instance"]
         );
 
@@ -697,7 +690,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         );
 
         var exitCode = await CliSetup.Run(
-            Container,
+            container,
             ["state", "repair", "quality-profiles", "-i", "test-instance"]
         );
 
@@ -706,5 +699,21 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // No cache file created due to ambiguity
         var cacheFile = GetQpCacheFilePath("radarr");
         cacheFile.Should().BeEmpty();
+    }
+}
+
+internal sealed class StateRepairDataSourceAttribute : CliDataSourceAttribute
+{
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    {
+        base.RegisterStubsAndMocks(builder);
+        builder.RegisterMockFor<ICustomFormatApiService>(m =>
+        {
+            m.GetCustomFormats(Arg.Any<CancellationToken>()).Returns([]);
+        });
+        builder.RegisterMockFor<IQualityProfileApiService>(m =>
+        {
+            m.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns([]);
+        });
     }
 }

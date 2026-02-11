@@ -3,20 +3,25 @@ using Recyclarr.Cli.Console.Commands;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Platform;
 using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFixture
+[CliDataSource]
+internal sealed class ConfigCreationProcessorIntegrationTest(
+    IConfigCreationProcessor sut,
+    ProviderInitializationFactory providerFactory,
+    MockFileSystem fs,
+    IAppPaths paths
+)
 {
     [Test]
     public void Config_file_created_when_using_default_path()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
-
         sut.Process(new ConfigCreateCommand.CliSettings { Path = null });
 
-        var file = Fs.GetFile(Paths.ConfigDirectory.File("recyclarr.yml"));
+        var file = fs.GetFile(paths.ConfigDirectory.File("recyclarr.yml"));
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }
@@ -24,11 +29,9 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Config_file_created_when_using_user_specified_path()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
-
         var settings = new ConfigCreateCommand.CliSettings
         {
-            Path = Fs.CurrentDirectory()
+            Path = fs.CurrentDirectory()
                 .SubDirectory("user")
                 .SubDirectory("specified")
                 .File("file.yml")
@@ -37,7 +40,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
 
         sut.Process(settings);
 
-        var file = Fs.GetFile(settings.Path);
+        var file = fs.GetFile(settings.Path);
         file.Should().NotBeNull();
         file.Contents.Should().NotBeEmpty();
     }
@@ -45,14 +48,12 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Should_throw_if_file_already_exists()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
-
         var settings = new ConfigCreateCommand.CliSettings
         {
-            Path = Fs.CurrentDirectory().File("file.yml").FullName,
+            Path = fs.CurrentDirectory().File("file.yml").FullName,
         };
 
-        Fs.AddEmptyFile(settings.Path);
+        fs.AddEmptyFile(settings.Path);
 
         var act = () => sut.Process(settings);
 
@@ -84,20 +85,19 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
             """;
 
         // Create a mock templates.json file in the expected location BEFORE initialization
-        var mockRepoPath = Paths
+        var mockRepoPath = paths
             .ResourceDirectory.SubDirectory("config-templates")
             .SubDirectory("git")
             .SubDirectory("official");
-        Fs.AddDirectory(mockRepoPath);
-        Fs.AddFile(mockRepoPath.File("templates.json"), new MockFileData(templatesJson));
-        Fs.AddEmptyFile(mockRepoPath.File("template-file1.yml"));
-        Fs.AddEmptyFile(mockRepoPath.File("template-file2.yml"));
+        fs.AddDirectory(mockRepoPath);
+        fs.AddFile(mockRepoPath.File("templates.json"), new MockFileData(templatesJson));
+        fs.AddEmptyFile(mockRepoPath.File("template-file1.yml"));
+        fs.AddEmptyFile(mockRepoPath.File("template-file2.yml"));
         // This one shouldn't show up in the result because the user didn't ask for it
-        Fs.AddEmptyFile(mockRepoPath.File("template-file3.yml"));
+        fs.AddEmptyFile(mockRepoPath.File("template-file3.yml"));
 
         // Initialize resource providers to populate repository paths
-        var factory = Resolve<ProviderInitializationFactory>();
-        await factory.InitializeProvidersAsync(null, CancellationToken.None);
+        await providerFactory.InitializeProvidersAsync(null, CancellationToken.None);
 
         var settings = Substitute.For<ICreateConfigSettings>();
         settings.Templates.Returns([
@@ -108,13 +108,12 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
             "template-file4",
         ]);
 
-        var sut = Resolve<ConfigCreationProcessor>();
         sut.Process(settings);
 
-        Fs.AllFiles.Should()
+        fs.AllFiles.Should()
             .Contain([
-                Paths.YamlConfigDirectory.File("template-file1.yml").FullName,
-                Paths.YamlConfigDirectory.File("template-file2.yml").FullName,
+                paths.YamlConfigDirectory.File("template-file1.yml").FullName,
+                paths.YamlConfigDirectory.File("template-file2.yml").FullName,
             ]);
     }
 }

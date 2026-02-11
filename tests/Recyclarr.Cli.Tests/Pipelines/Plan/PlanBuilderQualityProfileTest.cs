@@ -1,6 +1,8 @@
 using System.IO.Abstractions;
 using System.Text.Json;
+using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
@@ -11,7 +13,13 @@ using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class PlanBuilderQualityProfileTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Cf_id_hydration_visible_to_qp_scores()
@@ -51,10 +59,8 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-trash-id" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
@@ -62,7 +68,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         plan.QualityProfiles.First().Name.Should().Be("Guide QP Name");
         plan.QualityProfiles.First().Resource.Should().NotBeNull();
         plan.QualityProfiles.First().Resource!.TrashId.Should().Be("qp-trash-id");
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -73,15 +79,13 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "nonexistent-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.QualityProfiles.Should().BeEmpty();
-        GetWarnings(storage).Should().Contain(w => w.Contains("nonexistent-qp"));
+        GetWarnings(EventStorage).Should().Contain(w => w.Contains("nonexistent-qp"));
     }
 
     [Test]
@@ -100,8 +104,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-qualities" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
 
         var plan = sut.Build();
@@ -120,7 +123,6 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         SetupCustomFormatGuideData(("Test CF", "cf-with-scores"));
 
         // Need to setup the CF with score sets - let me use a more direct approach
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var cf = new RadarrCustomFormatResource
         {
             Name = "CF With Score Set",
@@ -130,7 +132,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var json = JsonSerializer.Serialize(cf, GlobalJsonSerializerSettings.Guide);
         var path = "/guide/radarr/cf/cf-score-set.json";
         Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
+        Registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
 
         var config = NewConfig.Radarr() with
         {
@@ -148,8 +150,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
 
         var plan = sut.Build();
@@ -180,14 +181,12 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "Test Profile" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         sut.Build();
 
-        GetWarnings(storage)
+        GetWarnings(EventStorage)
             .Should()
             .Contain(w => w.Contains("dup-cf") && w.Contains("conflicting"));
     }
@@ -213,10 +212,8 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-format-items" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
@@ -228,14 +225,13 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
         profile.CfScores.Select(x => x.Score).Should().BeEquivalentTo([100, 200]);
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
     public void Build_with_qp_formatItems_inherits_trash_score_set()
     {
         // Setup CF with score sets
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var cf = new RadarrCustomFormatResource
         {
             Name = "CF With Scores",
@@ -245,7 +241,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var json = JsonSerializer.Serialize(cf, GlobalJsonSerializerSettings.Guide);
         var path = "/guide/radarr/cf/cf-scores.json";
         Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
+        Registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
 
         // Setup QP with formatItems and trash_score_set
         SetupQualityProfileWithFormatItems(
@@ -261,8 +257,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-anime" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
 
         var plan = sut.Build();
@@ -305,8 +300,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-partial" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
 
         var plan = sut.Build();

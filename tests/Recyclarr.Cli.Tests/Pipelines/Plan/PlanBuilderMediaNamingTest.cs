@@ -1,12 +1,22 @@
+using System.IO.Abstractions;
+using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class PlanBuilderMediaNamingTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Build_with_valid_media_naming_produces_plan()
@@ -22,15 +32,13 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.MediaNaming.Should().NotBeNull();
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -47,14 +55,12 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         sut.Build();
 
-        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent"));
+        GetErrors(EventStorage).Should().Contain(e => e.Contains("nonexistent"));
     }
 
     [Test]
@@ -72,13 +78,11 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         sut.Build();
 
-        HasErrors(storage).Should().BeTrue();
+        HasErrors(EventStorage).Should().BeTrue();
     }
 }

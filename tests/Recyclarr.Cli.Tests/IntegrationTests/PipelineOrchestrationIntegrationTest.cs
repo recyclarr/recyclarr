@@ -7,29 +7,18 @@ using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.TestLibrary.Autofac;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixture
+[PipelineOrchestrationDataSource]
+internal sealed class PipelineOrchestrationIntegrationTest(
+    ILifetimeScope container,
+    ISyncContextSource contextSource,
+    IProgressSource progressSource
+)
 {
-    private List<PipelineType> _executionOrder = null!;
-    private ISyncContextSource _contextSource = null!;
-    private IProgressSource _progressSource = null!;
-    private IServiceConfiguration _config = null!;
-
-    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
-    {
-        base.RegisterStubsAndMocks(builder);
-
-        _executionOrder = [];
-        _contextSource = Substitute.For<ISyncContextSource>();
-        _progressSource = Substitute.For<IProgressSource>();
-        _config = NewConfig.Radarr() with { InstanceName = "test-instance" };
-
-        builder.RegisterInstance(_contextSource).As<ISyncContextSource>();
-        builder.RegisterInstance(_progressSource).As<IProgressSource>();
-        builder.RegisterInstance(_config).As<IServiceConfiguration>();
-    }
+    private readonly List<PipelineType> _executionOrder = [];
 
     private ISyncPipeline CreateStubPipeline(
         PipelineType type,
@@ -59,7 +48,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         IEnumerable<IPipelineCache>? caches = null
     )
     {
-        var scope = Container.BeginLifetimeScope(builder =>
+        var scope = container.BeginLifetimeScope(builder =>
         {
             builder.RegisterInstance(pipelines).As<IEnumerable<ISyncPipeline>>();
             builder.RegisterInstance(caches ?? []).As<IEnumerable<IPipelineCache>>();
@@ -124,8 +113,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             ]);
 
         // QP should be marked as skipped (context set to QP, then status set to Skipped)
-        _contextSource.Received().SetPipeline(PipelineType.QualityProfile);
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
+        contextSource.Received().SetPipeline(PipelineType.QualityProfile);
+        progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
 
         // Overall result should be Failed
         result.Should().Be(PipelineResult.Failed);
@@ -205,5 +194,18 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
 
         cache1.Received(1).Clear();
         cache2.Received(1).Clear();
+    }
+}
+
+internal sealed class PipelineOrchestrationDataSourceAttribute : CliDataSourceAttribute
+{
+    protected override void RegisterStubsAndMocks(ContainerBuilder builder)
+    {
+        base.RegisterStubsAndMocks(builder);
+        builder.RegisterMockFor<ISyncContextSource>();
+        builder.RegisterMockFor<IProgressSource>();
+
+        var config = NewConfig.Radarr() with { InstanceName = "test-instance" };
+        builder.RegisterInstance(config).As<IServiceConfiguration>();
     }
 }

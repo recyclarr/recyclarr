@@ -1,12 +1,21 @@
+using System.IO.Abstractions;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class PlanBuilderCustomFormatTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Build_with_complete_config_produces_valid_plan()
@@ -18,16 +27,14 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2"] }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(2);
         plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("cf1", "cf2");
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -40,15 +47,13 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["valid-cf", "invalid-cf"] }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(1);
-        GetWarnings(storage).Should().Contain(w => w.Contains("invalid-cf"));
+        GetWarnings(EventStorage).Should().Contain(w => w.Contains("invalid-cf"));
     }
 
     [Test]
@@ -56,14 +61,12 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
     {
         var config = NewConfig.Radarr();
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().BeEmpty();
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 }

@@ -1,12 +1,22 @@
+using System.IO.Abstractions;
+using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
+[CliDataSource]
+internal sealed class PlanBuilderMediaManagementTest(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+) : PlanBuilderTestBase(scopeFactory, registry, eventStorage, fs)
 {
     [Test]
     public void Build_with_configured_propers_and_repacks_adds_to_plan()
@@ -19,16 +29,14 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeTrue();
         plan.MediaManagement.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotUpgrade);
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -39,15 +47,13 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             MediaManagement = new MediaManagementConfig { PropersAndRepacks = null },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeFalse();
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -56,15 +62,13 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
         // Default MediaManagementConfig has PropersAndRepacks = null
         var config = NewConfig.Radarr();
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeFalse();
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 
     [Test]
@@ -78,15 +82,13 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        using var scope = ScopeFactory.Start<TestConfigurationScope>(config);
         var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
 
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeTrue();
         plan.MediaManagement.PropersAndRepacks.Should().Be(PropersAndRepacksMode.PreferAndUpgrade);
-        HasErrors(storage).Should().BeFalse();
+        HasErrors(EventStorage).Should().BeFalse();
     }
 }

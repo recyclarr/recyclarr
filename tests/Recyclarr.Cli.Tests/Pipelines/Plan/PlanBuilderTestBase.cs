@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
@@ -10,18 +11,28 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
-internal abstract class PlanBuilderTestBase : CliIntegrationFixture
+[CliDataSource]
+internal abstract class PlanBuilderTestBase(
+    ConfigurationScopeFactory scopeFactory,
+    ResourceRegistry<IFileInfo> registry,
+    SyncEventStorage eventStorage,
+    MockFileSystem fs
+)
 {
+    protected ConfigurationScopeFactory ScopeFactory => scopeFactory;
+    protected ResourceRegistry<IFileInfo> Registry => registry;
+    protected SyncEventStorage EventStorage => eventStorage;
+    protected MockFileSystem Fs => fs;
+
     protected void SetupCustomFormatGuideData(params (string Name, string TrashId)[] cfs)
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         foreach (var (name, trashId) in cfs)
         {
             var cf = NewCf.RadarrData(name, trashId);
             var json = JsonSerializer.Serialize(cf, GlobalJsonSerializerSettings.Guide);
             var path = $"/guide/radarr/cf/{trashId}.json";
-            Fs.AddFile(path, new MockFileData(json));
-            registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
+            fs.AddFile(path, new MockFileData(json));
+            registry.Register<RadarrCustomFormatResource>([fs.FileInfo.New(path)]);
         }
     }
 
@@ -30,7 +41,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         params (string Name, decimal Min, decimal Max, decimal Preferred)[] qualities
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var qs = new RadarrQualitySizeResource
         {
             Type = type,
@@ -46,8 +56,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         };
         var json = JsonSerializer.Serialize(qs, GlobalJsonSerializerSettings.Guide);
         var path = $"/guide/radarr/quality-size/{type}.json";
-        Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrQualitySizeResource>([Fs.FileInfo.New(path)]);
+        fs.AddFile(path, new MockFileData(json));
+        registry.Register<RadarrQualitySizeResource>([fs.FileInfo.New(path)]);
     }
 
     protected void SetupMediaNamingGuideData(
@@ -55,7 +65,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         IReadOnlyDictionary<string, string>? fileFormats = null
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var naming = new RadarrMediaNamingResource
         {
             Folder = folderFormats ?? new Dictionary<string, string> { ["default"] = "{Movie}" },
@@ -63,8 +72,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         };
         var json = JsonSerializer.Serialize(naming, GlobalJsonSerializerSettings.Guide);
         var path = "/guide/radarr/naming/radarr-naming.json";
-        Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrMediaNamingResource>([Fs.FileInfo.New(path)]);
+        fs.AddFile(path, new MockFileData(json));
+        registry.Register<RadarrMediaNamingResource>([fs.FileInfo.New(path)]);
     }
 
     protected void SetupQualityProfileGuideData(
@@ -73,7 +82,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         params (string Name, bool Allowed, string[]? Items)[] qualities
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var qp = new RadarrQualityProfileResource
         {
             TrashId = trashId,
@@ -89,8 +97,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         };
         var json = JsonSerializer.Serialize(qp, GlobalJsonSerializerSettings.Guide);
         var path = $"/guide/radarr/quality-profiles/{trashId}.json";
-        Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrQualityProfileResource>([Fs.FileInfo.New(path)]);
+        fs.AddFile(path, new MockFileData(json));
+        registry.Register<RadarrQualityProfileResource>([fs.FileInfo.New(path)]);
     }
 
     protected void SetupQualityProfileWithFormatItems(
@@ -100,7 +108,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         IReadOnlyDictionary<string, string> formatItems
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var qp = new RadarrQualityProfileResource
         {
             TrashId = trashId,
@@ -110,8 +117,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         };
         var json = JsonSerializer.Serialize(qp, GlobalJsonSerializerSettings.Guide);
         var path = $"/guide/radarr/quality-profiles/{trashId}.json";
-        Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrQualityProfileResource>([Fs.FileInfo.New(path)]);
+        fs.AddFile(path, new MockFileData(json));
+        registry.Register<RadarrQualityProfileResource>([fs.FileInfo.New(path)]);
     }
 
     protected void SetupCustomFormatWithScores(
@@ -120,7 +127,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         params (string ScoreSet, int Score)[] scores
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var cf = new RadarrCustomFormatResource
         {
             Name = name,
@@ -129,8 +135,8 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         };
         var json = JsonSerializer.Serialize(cf, GlobalJsonSerializerSettings.Guide);
         var path = $"/guide/radarr/cf/{trashId}.json";
-        Fs.AddFile(path, new MockFileData(json));
-        registry.Register<RadarrCustomFormatResource>([Fs.FileInfo.New(path)]);
+        fs.AddFile(path, new MockFileData(json));
+        registry.Register<RadarrCustomFormatResource>([fs.FileInfo.New(path)]);
     }
 
     protected void SetupCfGroupGuideData(
@@ -141,7 +147,6 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         bool isDefault = false
     )
     {
-        var registry = Resolve<ResourceRegistry<IFileInfo>>();
         var group = new RadarrCfGroupResource
         {
             TrashId = trashId,
@@ -153,10 +158,10 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
                 Include = profileInclusions ?? new Dictionary<string, string>(),
             },
         };
-        var file = Fs.CurrentDirectory()
+        var file = fs.CurrentDirectory()
             .SubDirectory("guide", "radarr", "cf-groups")
             .File($"{trashId}.json");
-        Fs.AddJsonFile(file, group, GlobalJsonSerializerSettings.Metadata);
+        fs.AddJsonFile(file, group, GlobalJsonSerializerSettings.Metadata);
         registry.Register<RadarrCfGroupResource>([file]);
     }
 
