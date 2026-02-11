@@ -46,6 +46,9 @@ internal class SyncProcessor(
             progressSource.AddInstance(config.InstanceName);
         }
 
+        var snapshot = new ProgressSnapshot([]);
+        using var subscription = progressSource.Observable.Subscribe(s => snapshot = s);
+
         var result = ExitStatus.Succeeded;
         if (settings.Preview)
         {
@@ -60,7 +63,7 @@ internal class SyncProcessor(
         }
 
         diagnosticsRenderer.Report();
-        await notify.SendNotification(result != ExitStatus.Failed);
+        await notify.SendNotification(result != ExitStatus.Failed, snapshot);
         return result;
     }
 

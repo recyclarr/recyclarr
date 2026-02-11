@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace Recyclarr.Sync.Progress;
@@ -7,7 +8,7 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
 {
     private readonly BehaviorSubject<ProgressSnapshot> _subject = new(new ProgressSnapshot([]));
 
-    public ProgressSnapshot Current => _subject.Value;
+    public IObservable<ProgressSnapshot> Observable => _subject.AsObservable();
 
     public void AddInstance(string name)
     {
@@ -84,11 +85,6 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
     public void Clear()
     {
         _subject.OnNext(new ProgressSnapshot([]));
-    }
-
-    public IDisposable Subscribe(IObserver<ProgressSnapshot> observer)
-    {
-        return _subject.Subscribe(observer);
     }
 
     public void Dispose()

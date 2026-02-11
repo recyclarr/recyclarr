@@ -17,14 +17,13 @@ public sealed class NotificationService(
     IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
     ISettings<NotificationSettings> settings,
     SyncEventStorage eventStorage,
-    IProgressSource progressSource,
     VerbosityOptions verbosity
 )
 {
     private const string NoInstance = "[no instance]";
     private readonly AppriseNotificationSettings? _settings = settings.Value.Apprise;
 
-    public async Task SendNotification(bool succeeded)
+    public async Task SendNotification(bool succeeded, ProgressSnapshot snapshot)
     {
         if (_settings is null)
         {
@@ -35,7 +34,7 @@ public sealed class NotificationService(
         }
 
         var messageType = succeeded ? AppriseMessageType.Success : AppriseMessageType.Failure;
-        var body = BuildNotificationBody();
+        var body = BuildNotificationBody(snapshot);
         await SendAppriseNotification(succeeded, body, messageType);
     }
 
@@ -77,10 +76,9 @@ public sealed class NotificationService(
         }
     }
 
-    private string BuildNotificationBody()
+    private string BuildNotificationBody(ProgressSnapshot snapshot)
     {
         var body = new StringBuilder();
-        var snapshot = progressSource.Current;
 
         // Handle diagnostics without an instance (general errors)
         var generalDiagnostics = eventStorage
