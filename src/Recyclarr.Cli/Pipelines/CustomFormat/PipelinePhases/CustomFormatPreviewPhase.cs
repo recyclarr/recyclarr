@@ -1,11 +1,10 @@
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-internal class CustomFormatPreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
-    : PreviewPipelinePhase<CustomFormatPipelineContext>(console, contextSource)
+internal class CustomFormatPreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<CustomFormatPipelineContext>(console)
 {
     protected override void RenderPreview(CustomFormatPipelineContext context)
     {

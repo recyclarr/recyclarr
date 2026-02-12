@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -8,7 +9,8 @@ namespace Recyclarr.Cli.Pipelines;
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
     IProgressSource progressSource,
-    IOrderedEnumerable<IPipelinePhase<TContext>> phases
+    IOrderedEnumerable<IPipelinePhase<TContext>> phases,
+    IServiceConfiguration config
 ) : ISyncPipeline
     where TContext : PipelineContext, IPipelineMetadata, new()
 {
@@ -21,7 +23,12 @@ internal class GenericSyncPipeline<TContext>(
         CancellationToken ct
     )
     {
-        var context = new TContext { SyncSettings = settings, Plan = plan };
+        var context = new TContext
+        {
+            InstanceName = config.InstanceName,
+            SyncSettings = settings,
+            Plan = plan,
+        };
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
 
         if (context.ShouldSkip)

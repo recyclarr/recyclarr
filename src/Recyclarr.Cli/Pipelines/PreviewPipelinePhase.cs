@@ -1,12 +1,8 @@
-using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines;
 
-internal abstract class PreviewPipelinePhase<T>(
-    IAnsiConsole console,
-    ISyncContextSource contextSource
-) : IPipelinePhase<T>
+internal abstract class PreviewPipelinePhase<T>(IAnsiConsole console) : IPipelinePhase<T>
     where T : PipelineContext
 {
     protected IAnsiConsole Console => console;
@@ -27,10 +23,9 @@ internal abstract class PreviewPipelinePhase<T>(
 
     protected void RenderTitle(T context)
     {
-        var instanceName = contextSource.Current.InstanceName;
         console.WriteLine();
         console.MarkupLine(
-            $"── [bold]{context.PipelineDescription}[/] [red](Preview)[/] [dim][[{instanceName}]][/] ──"
+            $"── [bold]{context.PipelineDescription}[/] [red](Preview)[/] [dim][[{context.InstanceName}]][/] ──"
         );
     }
 

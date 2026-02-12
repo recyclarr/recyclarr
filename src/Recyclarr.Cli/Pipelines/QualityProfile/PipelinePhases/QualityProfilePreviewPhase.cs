@@ -1,13 +1,12 @@
 using System.Globalization;
 using Recyclarr.ServarrApi.QualityProfile;
-using Recyclarr.Sync;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-internal class QualityProfilePreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
-    : PreviewPipelinePhase<QualityProfilePipelineContext>(console, contextSource)
+internal class QualityProfilePreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<QualityProfilePipelineContext>(console)
 {
     protected override void RenderPreview(QualityProfilePipelineContext context)
     {

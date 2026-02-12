@@ -1,10 +1,9 @@
-using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 
-internal class MediaManagementPreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
-    : PreviewPipelinePhase<MediaManagementPipelineContext>(console, contextSource)
+internal class MediaManagementPreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<MediaManagementPipelineContext>(console)
 {
     protected override void RenderPreview(MediaManagementPipelineContext context)
     {

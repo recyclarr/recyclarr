@@ -3,6 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -27,7 +28,8 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         return new GenericSyncPipeline<TestPipelineContext>(
             Resolve<ILogger>(),
             _progressSource,
-            orderedPhases
+            orderedPhases,
+            Substitute.For<IServiceConfiguration>()
         );
     }
 
@@ -39,7 +41,8 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         return new GenericSyncPipeline<SkippedTestPipelineContext>(
             Resolve<ILogger>(),
             _progressSource,
-            orderedPhases
+            orderedPhases,
+            Substitute.For<IServiceConfiguration>()
         );
     }
 

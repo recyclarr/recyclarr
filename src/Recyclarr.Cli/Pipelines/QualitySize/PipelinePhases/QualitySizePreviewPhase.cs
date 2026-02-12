@@ -1,11 +1,10 @@
 using System.Globalization;
-using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizePreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
-    : PreviewPipelinePhase<QualitySizePipelineContext>(console, contextSource)
+internal class QualitySizePreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<QualitySizePipelineContext>(console)
 {
     protected override void RenderPreview(QualitySizePipelineContext context)
     {
