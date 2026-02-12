@@ -1,11 +1,10 @@
 using Recyclarr.ServarrApi.MediaNaming;
-using Recyclarr.Sync;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-internal class MediaNamingPreviewPhase(IAnsiConsole console, ISyncContextSource contextSource)
-    : PreviewPipelinePhase<MediaNamingPipelineContext>(console, contextSource)
+internal class MediaNamingPreviewPhase(IAnsiConsole console)
+    : PreviewPipelinePhase<MediaNamingPipelineContext>(console)
 {
     private Table? _table;
 
