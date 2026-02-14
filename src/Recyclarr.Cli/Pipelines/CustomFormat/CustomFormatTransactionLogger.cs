@@ -5,11 +5,7 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(
-    ILogger log,
-    ISyncEventPublisher eventPublisher,
-    IProgressSource progressSource
-)
+internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher eventPublisher)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
@@ -23,7 +19,7 @@ internal class CustomFormatTransactionLogger(
 
         var totalCount = LogResults(transactions);
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalCount);
+        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
     }
 
     private int LogResults(CustomFormatTransactionData transactions)

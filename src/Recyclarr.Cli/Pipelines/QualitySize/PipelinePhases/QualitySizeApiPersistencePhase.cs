@@ -3,11 +3,8 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizeApiPersistencePhase(
-    ILogger log,
-    IQualityDefinitionApiService api,
-    IProgressSource progressSource
-) : IPipelinePhase<QualitySizePipelineContext>
+internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApiService api)
+    : IPipelinePhase<QualitySizePipelineContext>
 {
     public async Task<PipelineFlow> Execute(
         QualitySizePipelineContext context,
@@ -25,7 +22,7 @@ internal class QualitySizeApiPersistencePhase(
                 "All sizes for quality definition {Name} are already up to date!",
                 context.QualityDefinitionType
             );
-            progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, 0);
+            context.Progress.SetStatus(PipelineProgressStatus.Succeeded, 0);
             return PipelineFlow.Terminate;
         }
 
@@ -36,7 +33,7 @@ internal class QualitySizeApiPersistencePhase(
             itemsToUpdate.Count,
             context.QualityDefinitionType
         );
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
+        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
 
         return PipelineFlow.Continue;
     }

@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 
 namespace Recyclarr.Sync.Progress;
 
-internal class ProgressSource(ISyncContextSource contextSource) : IProgressSource, IDisposable
+internal class ProgressSource : IProgressSource, IDisposable
 {
     private readonly BehaviorSubject<ProgressSnapshot> _subject = new(new ProgressSnapshot([]));
 
@@ -22,17 +22,11 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
         _subject.OnNext(new ProgressSnapshot(snapshot.Instances.Add(instance)));
     }
 
-    public void SetInstanceStatus(InstanceProgressStatus status)
+    public void SetInstanceStatus(string instanceName, InstanceProgressStatus status)
     {
-        var name =
-            contextSource.Current.InstanceName
-            ?? throw new InvalidOperationException(
-                "Instance name must be set before updating status"
-            );
-
         var snapshot = _subject.Value;
         var index = snapshot.Instances.FindIndex(i =>
-            i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+            i.Name.Equals(instanceName, StringComparison.OrdinalIgnoreCase)
         );
         if (index < 0)
         {
@@ -46,15 +40,11 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
         );
     }
 
-    public void SetPipelineStatus(PipelineProgressStatus status, int? count = null)
+    public PipelineProgressWriter ForPipeline(string instanceName, PipelineType pipeline)
     {
-        var ctx = contextSource.Current;
-        if (ctx.InstanceName is null || ctx.Pipeline is null)
-        {
-            return;
-        }
-
-        UpdatePipelineSnapshot(ctx.InstanceName, ctx.Pipeline.Value, status, count);
+        return new PipelineProgressWriter(
+            (status, count) => UpdatePipelineSnapshot(instanceName, pipeline, status, count)
+        );
     }
 
     private void UpdatePipelineSnapshot(
@@ -80,11 +70,6 @@ internal class ProgressSource(ISyncContextSource contextSource) : IProgressSourc
         _subject.OnNext(
             new ProgressSnapshot(Instances: snapshot.Instances.SetItem(index, updated))
         );
-    }
-
-    public void Clear()
-    {
-        _subject.OnNext(new ProgressSnapshot([]));
     }
 
     public void Dispose()

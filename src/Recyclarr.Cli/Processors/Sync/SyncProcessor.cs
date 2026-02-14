@@ -80,19 +80,25 @@ internal class SyncProcessor(
 
         foreach (var config in configs)
         {
-            progressSource.SetInstanceStatus(InstanceProgressStatus.Running);
+            progressSource.SetInstanceStatus(config.InstanceName, InstanceProgressStatus.Running);
 
             using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
             var result = await configScope.InstanceProcessor.Process(settings, ct);
 
             if (result == InstanceSyncResult.Failed)
             {
-                progressSource.SetInstanceStatus(InstanceProgressStatus.Failed);
+                progressSource.SetInstanceStatus(
+                    config.InstanceName,
+                    InstanceProgressStatus.Failed
+                );
                 failureDetected = true;
             }
             else
             {
-                progressSource.SetInstanceStatus(InstanceProgressStatus.Succeeded);
+                progressSource.SetInstanceStatus(
+                    config.InstanceName,
+                    InstanceProgressStatus.Succeeded
+                );
             }
         }
 
