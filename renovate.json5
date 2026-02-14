@@ -7,7 +7,6 @@
     "config:recommended",
     ":disableRateLimiting",
     ":ignoreUnstable",
-    "security:openssf-scorecard",
     "helpers:pinGitHubActionDigestsToSemver",
     "recyclarr/recyclarr//.renovate/autoMerge.json5",
     "recyclarr/recyclarr//.renovate/customManagers.json5",
