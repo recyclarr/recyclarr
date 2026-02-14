@@ -11,15 +11,13 @@ namespace Recyclarr.Cli.Tests.IntegrationTests;
 
 internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 {
-    private IProgressSource _progressSource = null!;
+    private PipelineProgressStatus? _lastStatus;
+    private PipelineProgressWriter _writer = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
-
-        _progressSource = Substitute.For<IProgressSource>();
-
-        builder.RegisterInstance(_progressSource).As<IProgressSource>();
+        _writer = new PipelineProgressWriter((status, _) => _lastStatus = status);
     }
 
     private GenericSyncPipeline<TestPipelineContext> CreatePipeline(params TestPhase[] phases)
@@ -27,7 +25,6 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
         return new GenericSyncPipeline<TestPipelineContext>(
             Resolve<ILogger>(),
-            _progressSource,
             orderedPhases,
             Substitute.For<IServiceConfiguration>()
         );
@@ -40,7 +37,6 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var orderedPhases = phases.ToList().OrderBy(p => p.Order);
         return new GenericSyncPipeline<SkippedTestPipelineContext>(
             Resolve<ILogger>(),
-            _progressSource,
             orderedPhases,
             Substitute.For<IServiceConfiguration>()
         );
@@ -57,7 +53,12 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase1, phase2, phase3);
         var settings = Substitute.For<ISyncSettings>();
 
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _writer,
+            CancellationToken.None
+        );
 
         result.Should().Be(PipelineResult.Completed);
         executionOrder.Should().BeEquivalentTo([1, 2, 3], opts => opts.WithStrictOrdering());
@@ -74,7 +75,12 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase1, phase2, phase3);
         var settings = Substitute.For<ISyncSettings>();
 
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _writer,
+            CancellationToken.None
+        );
 
         result.Should().Be(PipelineResult.Completed);
         executionOrder.Should().BeEquivalentTo([1, 2], opts => opts.WithStrictOrdering());
@@ -88,10 +94,15 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase);
         var settings = Substitute.For<ISyncSettings>();
 
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _writer,
+            CancellationToken.None
+        );
 
         result.Should().Be(PipelineResult.Failed);
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
+        _lastStatus.Should().Be(PipelineProgressStatus.Failed);
     }
 
     [Test]
@@ -102,10 +113,10 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase);
         var settings = Substitute.For<ISyncSettings>();
 
-        var act = () => sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var act = () => sut.Execute(settings, new PipelinePlan(), _writer, CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("test error");
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Failed);
+        _lastStatus.Should().Be(PipelineProgressStatus.Failed);
     }
 
     [Test]
@@ -117,11 +128,16 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreateSkippedPipeline(phase);
         var settings = Substitute.For<ISyncSettings>();
 
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _writer,
+            CancellationToken.None
+        );
 
         result.Should().Be(PipelineResult.Completed);
         phaseExecuted.Should().BeFalse();
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
+        _lastStatus.Should().Be(PipelineProgressStatus.Skipped);
     }
 }
 

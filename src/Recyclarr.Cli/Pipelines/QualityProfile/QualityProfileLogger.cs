@@ -3,11 +3,7 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-internal class QualityProfileLogger(
-    ILogger log,
-    ISyncEventPublisher eventPublisher,
-    IProgressSource progressSource
-)
+internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublisher)
 {
     public void LogTransactionNotices(QualityProfilePipelineContext context)
     {
@@ -128,6 +124,6 @@ internal class QualityProfileLogger(
             log.Information("All quality profiles are up to date!");
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, totalChanged);
+        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
     }
 }

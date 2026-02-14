@@ -3,11 +3,8 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 
-internal class MediaManagementApiPersistencePhase(
-    ILogger log,
-    IMediaManagementApiService api,
-    IProgressSource progressSource
-) : IPipelinePhase<MediaManagementPipelineContext>
+internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementApiService api)
+    : IPipelinePhase<MediaManagementPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
         MediaManagementPipelineContext context,
@@ -33,6 +30,6 @@ internal class MediaManagementApiPersistencePhase(
             log.Information("Media management is up to date!");
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, differences.Count);
+        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

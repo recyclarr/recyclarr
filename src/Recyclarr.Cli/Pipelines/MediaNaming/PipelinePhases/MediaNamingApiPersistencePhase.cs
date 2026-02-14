@@ -3,11 +3,8 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 
-internal class MediaNamingApiPersistencePhase(
-    ILogger log,
-    IMediaNamingApiService api,
-    IProgressSource progressSource
-) : IPipelinePhase<MediaNamingPipelineContext>
+internal class MediaNamingApiPersistencePhase(ILogger log, IMediaNamingApiService api)
+    : IPipelinePhase<MediaNamingPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
         MediaNamingPipelineContext context,
@@ -38,6 +35,6 @@ internal class MediaNamingApiPersistencePhase(
             log.Information("Media naming is up to date!");
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Succeeded, differences.Count);
+        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

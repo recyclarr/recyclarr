@@ -8,7 +8,6 @@ namespace Recyclarr.Cli.Pipelines;
 
 internal class GenericSyncPipeline<TContext>(
     ILogger log,
-    IProgressSource progressSource,
     IOrderedEnumerable<IPipelinePhase<TContext>> phases,
     IServiceConfiguration config
 ) : ISyncPipeline
@@ -20,6 +19,7 @@ internal class GenericSyncPipeline<TContext>(
     public async Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
+        PipelineProgressWriter progress,
         CancellationToken ct
     )
     {
@@ -27,17 +27,18 @@ internal class GenericSyncPipeline<TContext>(
         {
             InstanceName = config.InstanceName,
             SyncSettings = settings,
+            Progress = progress,
             Plan = plan,
         };
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
 
         if (context.ShouldSkip)
         {
-            progressSource.SetPipelineStatus(PipelineProgressStatus.Skipped);
+            progress.SetStatus(PipelineProgressStatus.Skipped);
             return PipelineResult.Completed;
         }
 
-        progressSource.SetPipelineStatus(PipelineProgressStatus.Running);
+        progress.SetStatus(PipelineProgressStatus.Running);
 
         try
         {
@@ -54,12 +55,12 @@ internal class GenericSyncPipeline<TContext>(
         }
         catch (PipelineInterruptException)
         {
-            progressSource.SetPipelineStatus(PipelineProgressStatus.Failed);
+            progress.SetStatus(PipelineProgressStatus.Failed);
             return PipelineResult.Failed;
         }
         catch
         {
-            progressSource.SetPipelineStatus(PipelineProgressStatus.Failed);
+            progress.SetStatus(PipelineProgressStatus.Failed);
             throw;
         }
     }

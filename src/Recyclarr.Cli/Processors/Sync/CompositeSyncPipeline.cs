@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -10,7 +11,8 @@ internal class CompositeSyncPipeline(
     ILogger log,
     IEnumerable<ISyncPipeline> pipelines,
     ISyncContextSource contextSource,
-    IProgressSource progressSource
+    IProgressSource progressSource,
+    IServiceConfiguration config
 ) : IPipelineExecutor
 {
     public virtual async Task<PipelineResult> Execute(
@@ -31,8 +33,9 @@ internal class CompositeSyncPipeline(
         {
             contextSource.SetPipeline(pipeline.PipelineType);
 
-            var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
+            var progress = progressSource.ForPipeline(config.InstanceName, pipeline.PipelineType);
 
+            var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
             if (failedDependencies.Count > 0)
             {
                 log.Debug(
@@ -40,11 +43,11 @@ internal class CompositeSyncPipeline(
                     pipeline.PipelineType,
                     failedDependencies[0]
                 );
-                progressSource.SetPipelineStatus(PipelineProgressStatus.Skipped);
+                progress.SetStatus(PipelineProgressStatus.Skipped);
                 continue;
             }
 
-            var result = await pipeline.Execute(settings, plan, ct);
+            var result = await pipeline.Execute(settings, plan, progress, ct);
             log.Debug("Pipeline {Pipeline} result: {Result}", pipeline.PipelineType, result);
 
             if (result == PipelineResult.Failed)

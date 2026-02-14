@@ -3,6 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -13,17 +14,39 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private List<PipelineType> _executionOrder = null!;
     private ISyncContextSource _contextSource = null!;
     private IProgressSource _progressSource = null!;
+    private List<(
+        string Instance,
+        PipelineType Pipeline,
+        PipelineProgressStatus Status
+    )> _statusUpdates = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
         _executionOrder = [];
+        _statusUpdates = [];
         _contextSource = Substitute.For<ISyncContextSource>();
         _progressSource = Substitute.For<IProgressSource>();
 
+        // Capture status updates via the writer delegate
+        _progressSource
+            .ForPipeline(Arg.Any<string>(), Arg.Any<PipelineType>())
+            .Returns(callInfo =>
+            {
+                var instance = callInfo.ArgAt<string>(0);
+                var pipeline = callInfo.ArgAt<PipelineType>(1);
+                return new PipelineProgressWriter(
+                    (status, _) => _statusUpdates.Add((instance, pipeline, status))
+                );
+            });
+
+        var config = Substitute.For<IServiceConfiguration>();
+        config.InstanceName.Returns("test-instance");
+
         builder.RegisterInstance(_contextSource).As<ISyncContextSource>();
         builder.RegisterInstance(_progressSource).As<IProgressSource>();
+        builder.RegisterInstance(config).As<IServiceConfiguration>();
     }
 
     private ISyncPipeline CreateStubPipeline(
@@ -39,6 +62,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             .Execute(
                 Arg.Any<ISyncSettings>(),
                 Arg.Any<PipelinePlan>(),
+                Arg.Any<PipelineProgressWriter>(),
                 Arg.Any<CancellationToken>()
             )
             .Returns(_ =>
@@ -114,9 +138,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
                 PipelineType.MediaNaming,
             ]);
 
-        // QP should be marked as skipped (context set to QP, then status set to Skipped)
+        // QP should be marked as skipped
         _contextSource.Received().SetPipeline(PipelineType.QualityProfile);
-        _progressSource.Received().SetPipelineStatus(PipelineProgressStatus.Skipped);
+        _statusUpdates
+            .Should()
+            .Contain(x =>
+                x.Pipeline == PipelineType.QualityProfile
+                && x.Status == PipelineProgressStatus.Skipped
+            );
 
         // Overall result should be Failed
         result.Should().Be(PipelineResult.Failed);
