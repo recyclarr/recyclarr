@@ -3,7 +3,7 @@ using Autofac.Builder;
 
 namespace Recyclarr.Common;
 
-internal static class ContainerBuilderExtensions
+public static class ContainerBuilderExtensions
 {
     public static void RegisterMatchingScope(
         this ContainerBuilder builder,
@@ -16,7 +16,7 @@ internal static class ContainerBuilderExtensions
     }
 }
 
-internal class ScopedRegistrationBuilder(ContainerBuilder builder, object tag)
+public class ScopedRegistrationBuilder(ContainerBuilder builder, object tag)
 {
     public IRegistrationBuilder<
         T,

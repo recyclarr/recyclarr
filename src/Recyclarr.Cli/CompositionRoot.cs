@@ -55,10 +55,18 @@ internal static class CompositionRoot
     {
         RegisterErrorHandling(builder);
 
-        // Sync
-        builder.RegisterType<SyncProcessor>();
+        // Sync (registered in named "sync" scope for lifecycle management)
+        builder.RegisterMatchingScope(
+            "sync",
+            b =>
+            {
+                b.RegisterType<SyncProcessor>();
+                b.RegisterType<SyncProgressRenderer>();
+            }
+        );
+
+        // Instance-level (resolved from "instance" child scope of "sync")
         builder.RegisterType<InstanceSyncProcessor>();
-        builder.RegisterType<SyncProgressRenderer>();
 
         // Configuration
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();

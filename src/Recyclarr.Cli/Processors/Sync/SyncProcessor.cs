@@ -9,16 +9,9 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-[UsedImplicitly]
-internal class SyncBasedConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
-{
-    public InstanceSyncProcessor InstanceProcessor { get; } =
-        scope.Resolve<InstanceSyncProcessor>();
-}
-
 internal class SyncProcessor(
     ConfigurationRegistry configRegistry,
-    ConfigurationScopeFactory configScopeFactory,
+    LifetimeScopeFactory scopeFactory,
     NotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
     IProgressSource progressSource,
@@ -82,8 +75,11 @@ internal class SyncProcessor(
         {
             progressSource.SetInstanceStatus(config.InstanceName, InstanceProgressStatus.Running);
 
-            using var configScope = configScopeFactory.Start<SyncBasedConfigurationScope>(config);
-            var result = await configScope.InstanceProcessor.Process(settings, ct);
+            using var instanceScope = scopeFactory.Start<InstanceScope>(
+                "instance",
+                c => c.RegisterInstance(config).AsSelf().As<IServiceConfiguration>()
+            );
+            var result = await instanceScope.InstanceProcessor.Process(settings, ct);
 
             if (result == InstanceSyncResult.Failed)
             {

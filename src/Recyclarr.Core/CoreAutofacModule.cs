@@ -269,9 +269,18 @@ public class CoreAutofacModule : Module
 
     private static void RegisterSyncEvents(ContainerBuilder builder)
     {
+        // Legacy registrations (will be removed after full event system migration)
         builder.RegisterType<SyncEventStorage>().SingleInstance();
         builder.RegisterType<SyncContextSource>().As<ISyncContextSource>().SingleInstance();
         builder.RegisterType<ProgressSource>().As<IProgressSource>().SingleInstance();
         builder.RegisterType<SyncEventCollector>().As<ISyncEventPublisher>().SingleInstance();
+
+        // New event system
+        builder
+            .RegisterType<SyncRunScope>()
+            .AsImplementedInterfaces()
+            .InstancePerMatchingLifetimeScope("sync");
+
+        builder.RegisterType<LifetimeScopeFactory>();
     }
 }

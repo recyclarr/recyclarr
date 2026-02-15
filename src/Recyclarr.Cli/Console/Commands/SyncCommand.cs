@@ -4,6 +4,7 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Config;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -14,7 +15,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class SyncCommand(
     MigrationExecutor migration,
     ProviderProgressHandler providerProgressHandler,
-    SyncProcessor syncProcessor
+    LifetimeScopeFactory scopeFactory
 ) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -64,6 +65,10 @@ internal class SyncCommand(
 
         await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
-        return (int)await syncProcessor.Process(settings, ct);
+        // Sync scope owns the lifecycle of all sync-run-scoped services.
+        // Disposing it fires OnCompleted on all observables, triggering
+        // diagnostics rendering and notifications automatically.
+        using var syncScope = scopeFactory.Start<SyncScope>("sync");
+        return (int)await syncScope.Processor.Process(settings, ct);
     }
 }
