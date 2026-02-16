@@ -3,7 +3,7 @@ namespace Recyclarr.ResourceProviders.Infrastructure;
 public class ResourceRegistry<TMetadata>
     where TMetadata : class
 {
-    private readonly Dictionary<Type, List<TMetadata>> _metadataByResourceType = new();
+    private readonly Dictionary<Type, List<TMetadata>> _metadataByResourceType = [];
 
     public void Register<TResource>(IEnumerable<TMetadata> metadata)
         where TResource : class

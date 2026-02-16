@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -14,11 +13,7 @@ internal class ProgressSource : IProgressSource, IDisposable
     {
         // Capture current state for consistent read-modify-write (immutable update pattern)
         var snapshot = _subject.Value;
-        var instance = new InstanceSnapshot(
-            name,
-            InstanceProgressStatus.Pending,
-            ImmutableDictionary<PipelineType, PipelineSnapshot>.Empty
-        );
+        var instance = new InstanceSnapshot(name, InstanceProgressStatus.Pending, []);
         _subject.OnNext(new ProgressSnapshot(snapshot.Instances.Add(instance)));
     }
 

@@ -24,5 +24,5 @@ public record RadarrMediaNamingDto : MediaNamingDto
 
     [UsedImplicitly]
     [JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }

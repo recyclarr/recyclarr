@@ -13,14 +13,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "valid",
             BaseUrl = "http://valid",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
-                    TrashIds = new List<string> { "01234567890123456789012345678901" },
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                    TrashIds = (List<string>)["01234567890123456789012345678901"],
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "valid" }],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
@@ -37,14 +37,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "", // Must not be empty
             BaseUrl = "http://valid",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "valid" }],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
@@ -64,14 +64,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "valid",
             BaseUrl = "",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "valid" }],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
@@ -93,14 +93,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "valid",
             BaseUrl = "ftp://foo.com",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
                     TrashIds = ["valid"],
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "valid" }],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 
@@ -124,14 +124,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "valid",
             BaseUrl = "http://valid",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
-                    TrashIds = new List<string> { "valid" },
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() { Name = "valid" } },
+                    TrashIds = (List<string>)["valid"],
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "valid" }],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "" },
         };
 
@@ -148,14 +148,14 @@ internal sealed class YamlConfigValidatorTest
         {
             ApiKey = "valid",
             BaseUrl = "http://valid",
-            CustomFormats = new List<CustomFormatConfigYaml>
-            {
-                new()
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
                 {
-                    TrashIds = new List<string> { "valid" },
-                    AssignScoresTo = new List<QualityScoreConfigYaml> { new() },
+                    TrashIds = (List<string>)["valid"],
+                    AssignScoresTo = [new QualityScoreConfigYaml()],
                 },
-            },
+            ],
             QualityDefinition = new QualitySizeConfigYaml { Type = "valid" },
         };
 

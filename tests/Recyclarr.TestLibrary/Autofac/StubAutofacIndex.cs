@@ -7,7 +7,7 @@ namespace Recyclarr.TestLibrary.Autofac;
 public class StubAutofacIndex<TKey, TValue> : IIndex<TKey, TValue>
     where TKey : notnull
 {
-    private readonly Dictionary<TKey, TValue> _values = new();
+    private readonly Dictionary<TKey, TValue> _values = [];
 
     public StubAutofacIndex() { }
 

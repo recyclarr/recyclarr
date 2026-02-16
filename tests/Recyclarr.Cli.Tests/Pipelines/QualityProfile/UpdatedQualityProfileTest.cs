@@ -59,8 +59,8 @@ internal sealed class UpdatedQualityProfileTest
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 1,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "Quality Item 1", true),
                     NewQp.QualityDto(2, "Quality Item 2", true),
                     NewQp.GroupDto(
@@ -69,7 +69,7 @@ internal sealed class UpdatedQualityProfileTest
                         true,
                         NewQp.QualityDto(4, "Quality Item 4", true)
                     ),
-                },
+                ],
             },
         };
 
@@ -102,18 +102,18 @@ internal sealed class UpdatedQualityProfileTest
         {
             ProfileDto = new QualityProfileDto
             {
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(8, "Quality Item 8", true),
                     NewQp.QualityDto(9, "Quality Item 9", true),
-                },
+                ],
             },
             ProfileConfig = NewPlan.Qp(""),
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 0,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "Quality Item 1", true),
                     NewQp.QualityDto(2, "Quality Item 2", true),
                     NewQp.GroupDto(
@@ -122,7 +122,7 @@ internal sealed class UpdatedQualityProfileTest
                         true,
                         NewQp.QualityDto(4, "Quality Item 4", true)
                     ),
-                },
+                ],
             },
         };
 
@@ -156,11 +156,11 @@ internal sealed class UpdatedQualityProfileTest
             {
                 // To verify that it gets overwritten because config specifies a cutoff
                 Cutoff = originalCutoff,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(8, "Quality Item 8", true),
                     NewQp.QualityDto(9, "Quality Item 9", true),
-                },
+                ],
             },
             ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig { UpgradeUntilQuality = "Quality Item 2" }
@@ -168,8 +168,8 @@ internal sealed class UpdatedQualityProfileTest
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 1,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "Quality Item 1", true),
                     NewQp.QualityDto(2, "Quality Item 2", true),
                     NewQp.GroupDto(
@@ -178,7 +178,7 @@ internal sealed class UpdatedQualityProfileTest
                         true,
                         NewQp.QualityDto(4, "Quality Item 4", true)
                     ),
-                },
+                ],
             },
         };
 
@@ -197,11 +197,11 @@ internal sealed class UpdatedQualityProfileTest
             {
                 // To verify that it gets overwritten because config specifies a cutoff
                 Cutoff = originalCutoff,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(8, "Quality Item 8", true),
                     NewQp.QualityDto(9, "Quality Item 9", true),
-                },
+                ],
             },
             ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig { UpgradeUntilQuality = "Quality Item 9" }
@@ -209,8 +209,8 @@ internal sealed class UpdatedQualityProfileTest
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 0, // zero forces cutoff search to fall back to original DTO items
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "Quality Item 1", true),
                     NewQp.QualityDto(2, "Quality Item 2", true),
                     NewQp.GroupDto(
@@ -219,7 +219,7 @@ internal sealed class UpdatedQualityProfileTest
                         true,
                         NewQp.QualityDto(4, "Quality Item 4", true)
                     ),
-                },
+                ],
             },
         };
 
@@ -235,11 +235,11 @@ internal sealed class UpdatedQualityProfileTest
         {
             ProfileDto = new QualityProfileDto
             {
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(8, "Quality Item 8", true),
                     NewQp.QualityDto(9, "Quality Item 9", true),
-                },
+                ],
             },
             ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig
@@ -250,8 +250,8 @@ internal sealed class UpdatedQualityProfileTest
             UpdatedQualities = new UpdatedQualities
             {
                 NumWantedItems = 1,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(1, "Quality Item 1", true),
                     NewQp.QualityDto(2, "Quality Item 2", true),
                     NewQp.GroupDto(
@@ -260,7 +260,7 @@ internal sealed class UpdatedQualityProfileTest
                         true,
                         NewQp.QualityDto(4, "Quality Item 4", true)
                     ),
-                },
+                ],
             },
         };
 
@@ -277,11 +277,11 @@ internal sealed class UpdatedQualityProfileTest
             ProfileDto = new QualityProfileDto
             {
                 Cutoff = 8,
-                Items = new List<ProfileItemDto>
-                {
+                Items =
+                [
                     NewQp.QualityDto(8, "Quality Item 8", true),
                     NewQp.QualityDto(9, "Quality Item 9", true),
-                },
+                ],
             },
             ProfileConfig = NewPlan.Qp(
                 new QualityProfileConfig

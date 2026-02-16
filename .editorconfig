@@ -38,6 +38,21 @@ resharper_arrange_trailing_comma_in_multiline_lists_highlighting = none
 resharper_trailing_comma_in_multiline_lists = true
 resharper_trailing_comma_in_singleline_lists = false
 
+### Style Enforcement
+
+# Use collection expressions ([], [item]) and collection initializers
+dotnet_diagnostic.IDE0028.severity = warning
+dotnet_diagnostic.IDE0300.severity = warning
+dotnet_diagnostic.IDE0301.severity = warning
+dotnet_diagnostic.IDE0302.severity = warning
+dotnet_diagnostic.IDE0303.severity = warning
+dotnet_diagnostic.IDE0304.severity = warning
+# ToList/ToArray -> collection expression hurts readability in LINQ chains
+dotnet_diagnostic.IDE0305.severity = none
+
+# Use pattern matching: extended property patterns
+dotnet_diagnostic.IDE0170.severity = warning
+
 ### Analysis Suppression
 
 # Validate arguments of public methods

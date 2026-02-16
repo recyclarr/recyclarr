@@ -32,7 +32,7 @@ internal sealed class ConfigYamlDataObjectsValidationTest
         {
             Name = "My QP",
             Upgrade = new QualityProfileFormatUpgradeYaml { Allowed = true },
-            Qualities = new List<QualityProfileQualityConfigYaml>(),
+            Qualities = [],
         };
 
         var validator = new QualityProfileFormatUpgradeYamlValidator(data);

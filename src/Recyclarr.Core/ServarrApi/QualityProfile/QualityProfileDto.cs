@@ -75,7 +75,7 @@ public record QualityProfileDto : IServiceResource
     }
 
     [UsedImplicitly, JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
 
 [UsedImplicitly]
@@ -86,7 +86,7 @@ public record ProfileFormatItemDto
     public int Score { get; init; }
 
     [UsedImplicitly, JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
 
 [UsedImplicitly]
@@ -105,7 +105,7 @@ public record ProfileItemDto
     public ICollection<ProfileItemDto> Items { get; init; } = [];
 
     [UsedImplicitly, JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
 
 [UsedImplicitly]
@@ -115,7 +115,7 @@ public record ProfileItemQualityDto
     public string? Name { get; init; }
 
     [UsedImplicitly, JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

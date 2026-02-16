@@ -102,20 +102,17 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
         groups.Skip.Should().BeEquivalentTo("group-to-skip");
         groups
             .Add.Should()
-            .BeEquivalentTo(
-                new[]
+            .BeEquivalentTo([
+                new
                 {
-                    new
+                    TrashId = "anime-web-tier-01",
+                    AssignScoresTo = new[]
                     {
-                        TrashId = "anime-web-tier-01",
-                        AssignScoresTo = new[]
-                        {
-                            new { TrashId = "profile-trash-id-1" },
-                            new { TrashId = "profile-trash-id-2" },
-                        },
-                        Select = new[] { "cf-to-select-1", "cf-to-select-2" },
+                        new { TrashId = "profile-trash-id-1" },
+                        new { TrashId = "profile-trash-id-2" },
                     },
-                }
-            );
+                    Select = new[] { "cf-to-select-1", "cf-to-select-2" },
+                },
+            ]);
     }
 }

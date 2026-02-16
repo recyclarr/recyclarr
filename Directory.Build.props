@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DebugType>embedded</DebugType>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <RecyclarrRepositoryRoot>$(RepositoryRoot)</RecyclarrRepositoryRoot>
     <TestDirectory>$(RepositoryRoot)tests\</TestDirectory>

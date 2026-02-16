@@ -118,13 +118,10 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         cache.Should().NotBeNull();
         cache
             .Mappings.Should()
-            .BeEquivalentTo(
-                new[]
-                {
-                    new { TrashId = "trash-id-1", ServiceId = 10 },
-                    new { TrashId = "trash-id-2", ServiceId = 20 },
-                }
-            );
+            .BeEquivalentTo([
+                new { TrashId = "trash-id-1", ServiceId = 10 },
+                new { TrashId = "trash-id-2", ServiceId = 20 },
+            ]);
     }
 
     [Test]
@@ -277,13 +274,10 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         cache.Should().NotBeNull();
         cache
             .Mappings.Should()
-            .BeEquivalentTo(
-                new[]
-                {
-                    new { TrashId = "trash-id-1", ServiceId = 10 },
-                    new { TrashId = "trash-id-old", ServiceId = 20 },
-                }
-            );
+            .BeEquivalentTo([
+                new { TrashId = "trash-id-1", ServiceId = 10 },
+                new { TrashId = "trash-id-old", ServiceId = 20 },
+            ]);
     }
 
     [Test]
@@ -657,13 +651,10 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         cache.Should().NotBeNull();
         cache
             .Mappings.Should()
-            .BeEquivalentTo(
-                new[]
-                {
-                    new { TrashId = "qp-trash-id-1", ServiceId = 10 },
-                    new { TrashId = "qp-trash-id-2", ServiceId = 20 },
-                }
-            );
+            .BeEquivalentTo([
+                new { TrashId = "qp-trash-id-1", ServiceId = 10 },
+                new { TrashId = "qp-trash-id-2", ServiceId = 20 },
+            ]);
     }
 
     [Test]

@@ -42,5 +42,5 @@ public record SonarrMediaNamingDto : MediaNamingDto
 
     [UsedImplicitly]
     [JsonExtensionData]
-    public Dictionary<string, object> ExtraJson { get; init; } = new();
+    public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
