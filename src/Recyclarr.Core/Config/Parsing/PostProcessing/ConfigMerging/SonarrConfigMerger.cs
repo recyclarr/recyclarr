@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 public class SonarrConfigMerger : ServiceConfigMerger<SonarrConfigYaml>
@@ -12,7 +10,6 @@ public class SonarrConfigMerger : ServiceConfigMerger<SonarrConfigYaml>
         };
     }
 
-    [SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
     private static SonarrMediaNamingConfigYaml MergeMediaNaming(
         SonarrMediaNamingConfigYaml a,
         SonarrMediaNamingConfigYaml b

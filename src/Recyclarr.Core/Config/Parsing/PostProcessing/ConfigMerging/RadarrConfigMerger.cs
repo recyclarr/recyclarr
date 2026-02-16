@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 public class RadarrConfigMerger : ServiceConfigMerger<RadarrConfigYaml>
@@ -12,7 +10,6 @@ public class RadarrConfigMerger : ServiceConfigMerger<RadarrConfigYaml>
         };
     }
 
-    [SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
     private static RadarrMediaNamingConfigYaml MergeMediaNaming(
         RadarrMediaNamingConfigYaml a,
         RadarrMediaNamingConfigYaml b

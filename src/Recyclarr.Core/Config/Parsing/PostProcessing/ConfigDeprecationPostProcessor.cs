@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Logging;
 using Recyclarr.Sync;
@@ -11,7 +10,6 @@ public class ConfigDeprecationPostProcessor(
     ISyncContextSource contextSource
 ) : IConfigPostProcessor
 {
-    [SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
     public RootConfigYaml Process(RootConfigYaml config)
     {
         return config with

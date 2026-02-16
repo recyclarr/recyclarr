@@ -1,9 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
-[SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
 public abstract class ServiceConfigMerger<T>
     where T : ServiceConfigYaml
 {

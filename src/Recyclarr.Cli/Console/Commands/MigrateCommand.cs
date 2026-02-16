@@ -9,7 +9,6 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [UsedImplicitly]
 [Description("Perform migration steps that may be needed between versions")]
-[SuppressMessage("ReSharper", "WithExpressionModifiesAllMembers")]
 internal class MigrateCommand(IAnsiConsole console, ILogger log, MigrationExecutor migration)
     : Command<MigrateCommand.CliSettings>
 {
