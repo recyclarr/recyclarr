@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines;
@@ -14,6 +15,7 @@ internal abstract class PipelineContext
     public string InstanceName { get; init; } = null!;
     public ISyncSettings SyncSettings { get; init; } = null!;
     public PipelineProgressWriter Progress { get; init; } = null!;
+    public PipelinePublisher Publisher { get; init; } = PipelinePublisher.Noop;
 
     // Shared plan across all pipelines. Set by sync orchestration before pipelines run.
     public PipelinePlan Plan { get; init; } = null!;

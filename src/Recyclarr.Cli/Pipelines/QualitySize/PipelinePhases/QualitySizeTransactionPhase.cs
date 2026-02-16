@@ -22,9 +22,10 @@ internal class QualitySizeTransactionPhase(ILogger log, ISyncEventPublisher even
             );
             if (serverEntry == null)
             {
-                eventPublisher.AddWarning(
-                    $"Server lacks quality definition for {plannedQuality.Quality}; it will be skipped"
-                );
+                var message =
+                    $"Server lacks quality definition for {plannedQuality.Quality}; it will be skipped";
+                eventPublisher.AddWarning(message);
+                context.Publisher.AddWarning(message);
                 continue;
             }
 

@@ -23,6 +23,7 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
                 context.QualityDefinitionType
             );
             context.Progress.SetStatus(PipelineProgressStatus.Succeeded, 0);
+            context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, 0);
             return PipelineFlow.Terminate;
         }
 
@@ -34,6 +35,7 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
             context.QualityDefinitionType
         );
         context.Progress.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
 
         return PipelineFlow.Continue;
     }

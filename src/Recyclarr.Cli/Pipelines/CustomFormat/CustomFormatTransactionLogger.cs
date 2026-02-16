@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
@@ -11,7 +12,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
     {
         var transactions = context.TransactionOutput;
 
-        var hasBlockingErrors = LogDiagnostics(transactions);
+        var hasBlockingErrors = LogDiagnostics(context.Publisher, transactions);
         if (hasBlockingErrors)
         {
             throw new PipelineInterruptException();
@@ -20,6 +21,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
         var totalCount = LogResults(transactions);
 
         context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
     }
 
     private int LogResults(CustomFormatTransactionData transactions)
@@ -82,9 +84,12 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
         return totalCount;
     }
 
-    private bool LogDiagnostics(CustomFormatTransactionData transactions)
+    private bool LogDiagnostics(
+        PipelinePublisher publisher,
+        CustomFormatTransactionData transactions
+    )
     {
-        LogConflictingCustomFormats(transactions.ConflictingCustomFormats);
+        LogConflictingCustomFormats(publisher, transactions.ConflictingCustomFormats);
 
         foreach (var ambiguous in transactions.AmbiguousCustomFormats)
         {
@@ -92,11 +97,12 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
                 ", ",
                 ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
             );
-            eventPublisher.AddError(
+            var message =
                 $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
-                    + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
-                    + "then run: recyclarr state repair"
-            );
+                + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
+                + "then run: recyclarr state repair";
+            eventPublisher.AddError(message);
+            publisher.AddError(message);
         }
 
         var hasBlockingErrors =
@@ -105,7 +111,10 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
         return hasBlockingErrors;
     }
 
-    private void LogConflictingCustomFormats(Collection<ConflictingCustomFormat> conflicts)
+    private void LogConflictingCustomFormats(
+        PipelinePublisher publisher,
+        Collection<ConflictingCustomFormat> conflicts
+    )
     {
         if (conflicts.Count == 0)
         {
@@ -121,11 +130,12 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
         var remainingCount = conflicts.Count - maxExamples;
         var suffix = remainingCount > 0 ? $", and {remainingCount} more" : "";
 
-        eventPublisher.AddError(
+        var message =
             $"{conflicts.Count} Custom Formats cannot be synced because CFs with matching names "
-                + $"already exist (e.g., {examples}{suffix}). "
-                + "To adopt existing CFs, run: `recyclarr state repair --adopt`"
-        );
+            + $"already exist (e.g., {examples}{suffix}). "
+            + "To adopt existing CFs, run: `recyclarr state repair --adopt`";
+        eventPublisher.AddError(message);
+        publisher.AddError(message);
 
         log.Debug(
             "Conflicting Custom Formats: {@Conflicts}",

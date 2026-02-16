@@ -18,6 +18,7 @@ internal class CompositeSyncPipeline(
     public virtual async Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
+        InstancePublisher instancePublisher,
         CancellationToken ct
     )
     {
@@ -34,6 +35,7 @@ internal class CompositeSyncPipeline(
             contextSource.SetPipeline(pipeline.PipelineType);
 
             var progress = progressSource.ForPipeline(config.InstanceName, pipeline.PipelineType);
+            var publisher = instancePublisher.ForPipeline(pipeline.PipelineType);
 
             var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
             if (failedDependencies.Count > 0)
@@ -44,10 +46,11 @@ internal class CompositeSyncPipeline(
                     failedDependencies[0]
                 );
                 progress.SetStatus(PipelineProgressStatus.Skipped);
+                publisher.SetStatus(PipelineProgressStatus.Skipped);
                 continue;
             }
 
-            var result = await pipeline.Execute(settings, plan, progress, ct);
+            var result = await pipeline.Execute(settings, plan, progress, publisher, ct);
             log.Debug("Pipeline {Pipeline} result: {Result}", pipeline.PipelineType, result);
 
             if (result == PipelineResult.Failed)

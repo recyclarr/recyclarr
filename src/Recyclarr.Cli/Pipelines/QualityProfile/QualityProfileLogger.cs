@@ -11,53 +11,61 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
 
         if (transactions.NonExistentProfiles.Count > 0)
         {
-            eventPublisher.AddWarning(
+            var message =
                 "The following quality profile names have no definition in the top-level `quality_profiles` "
-                    + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
-                    + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
-                    + $"you: {string.Join(", ", transactions.NonExistentProfiles)}"
-            );
+                + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
+                + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
+                + $"you: {string.Join(", ", transactions.NonExistentProfiles)}";
+            eventPublisher.AddWarning(message);
+            context.Publisher.AddWarning(message);
         }
 
         foreach (var (profile, errors) in transactions.InvalidProfiles)
         {
             foreach (var error in errors)
             {
-                eventPublisher.AddError($"Profile '{profile.ProfileName}': {error.ErrorMessage}");
+                var message = $"Profile '{profile.ProfileName}': {error.ErrorMessage}";
+                eventPublisher.AddError(message);
+                context.Publisher.AddError(message);
             }
         }
 
         // Log warnings for new profiles
         foreach (var profile in transactions.NewProfiles)
         {
-            LogProfileWarnings(profile);
+            LogProfileWarnings(context, profile);
         }
 
         // Log warnings for updated profiles
         foreach (var profileWithStats in transactions.UpdatedProfiles)
         {
-            LogProfileWarnings(profileWithStats.Profile);
+            LogProfileWarnings(context, profileWithStats.Profile);
         }
     }
 
-    private void LogProfileWarnings(UpdatedQualityProfile profile)
+    private void LogProfileWarnings(
+        QualityProfilePipelineContext context,
+        UpdatedQualityProfile profile
+    )
     {
         var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
         if (invalidQualityNames.Count != 0)
         {
-            eventPublisher.AddWarning(
+            var message =
                 $"Quality profile '{profile.ProfileName}' references invalid quality names: "
-                    + string.Join(", ", invalidQualityNames)
-            );
+                + string.Join(", ", invalidQualityNames);
+            eventPublisher.AddWarning(message);
+            context.Publisher.AddWarning(message);
         }
 
         var invalidCfExceptNames = profile.InvalidExceptCfNames;
         if (invalidCfExceptNames.Count != 0)
         {
-            eventPublisher.AddWarning(
+            var message =
                 $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
-                    + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}"
-            );
+                + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}";
+            eventPublisher.AddWarning(message);
+            context.Publisher.AddWarning(message);
         }
 
         var missingQualities = profile.MissingQualities;
@@ -125,5 +133,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
         }
 
         context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
     }
 }

@@ -20,6 +20,7 @@ internal class GenericSyncPipeline<TContext>(
         ISyncSettings settings,
         PipelinePlan plan,
         PipelineProgressWriter progress,
+        PipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -28,6 +29,7 @@ internal class GenericSyncPipeline<TContext>(
             InstanceName = config.InstanceName,
             SyncSettings = settings,
             Progress = progress,
+            Publisher = publisher,
             Plan = plan,
         };
         log.Debug("Executing Pipeline: {Pipeline}", context.PipelineDescription);
@@ -35,10 +37,12 @@ internal class GenericSyncPipeline<TContext>(
         if (context.ShouldSkip)
         {
             progress.SetStatus(PipelineProgressStatus.Skipped);
+            publisher.SetStatus(PipelineProgressStatus.Skipped);
             return PipelineResult.Completed;
         }
 
         progress.SetStatus(PipelineProgressStatus.Running);
+        publisher.SetStatus(PipelineProgressStatus.Running);
 
         try
         {
@@ -56,11 +60,13 @@ internal class GenericSyncPipeline<TContext>(
         catch (PipelineInterruptException)
         {
             progress.SetStatus(PipelineProgressStatus.Failed);
+            publisher.SetStatus(PipelineProgressStatus.Failed);
             return PipelineResult.Failed;
         }
         catch
         {
             progress.SetStatus(PipelineProgressStatus.Failed);
+            publisher.SetStatus(PipelineProgressStatus.Failed);
             throw;
         }
     }

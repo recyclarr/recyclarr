@@ -31,5 +31,6 @@ internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementA
         }
 
         context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

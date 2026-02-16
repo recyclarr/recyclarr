@@ -17,6 +17,7 @@ internal interface ISyncPipeline
         ISyncSettings settings,
         PipelinePlan plan,
         PipelineProgressWriter progress,
+        PipelinePublisher publisher,
         CancellationToken ct
     );
 }

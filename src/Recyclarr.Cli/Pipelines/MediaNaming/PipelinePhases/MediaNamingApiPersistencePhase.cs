@@ -36,5 +36,6 @@ internal class MediaNamingApiPersistencePhase(ILogger log, IMediaNamingApiServic
         }
 
         context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

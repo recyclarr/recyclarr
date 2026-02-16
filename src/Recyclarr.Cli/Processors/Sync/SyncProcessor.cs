@@ -5,6 +5,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -15,6 +16,7 @@ internal class SyncProcessor(
     NotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
     IProgressSource progressSource,
+    ISyncRunPublisher runPublisher,
     SyncProgressRenderer progressRenderer
 )
 {
@@ -73,13 +75,20 @@ internal class SyncProcessor(
 
         foreach (var config in configs)
         {
+            var instancePublisher = new InstancePublisher(config.InstanceName, runPublisher);
+
             progressSource.SetInstanceStatus(config.InstanceName, InstanceProgressStatus.Running);
+            instancePublisher.SetStatus(InstanceProgressStatus.Running);
 
             using var instanceScope = scopeFactory.Start<InstanceScope>(
                 "instance",
                 c => c.RegisterInstance(config).AsSelf().As<IServiceConfiguration>()
             );
-            var result = await instanceScope.InstanceProcessor.Process(settings, ct);
+            var result = await instanceScope.InstanceProcessor.Process(
+                settings,
+                instancePublisher,
+                ct
+            );
 
             if (result == InstanceSyncResult.Failed)
             {
@@ -87,6 +96,7 @@ internal class SyncProcessor(
                     config.InstanceName,
                     InstanceProgressStatus.Failed
                 );
+                instancePublisher.SetStatus(InstanceProgressStatus.Failed);
                 failureDetected = true;
             }
             else
@@ -95,6 +105,7 @@ internal class SyncProcessor(
                     config.InstanceName,
                     InstanceProgressStatus.Succeeded
                 );
+                instancePublisher.SetStatus(InstanceProgressStatus.Succeeded);
             }
         }
 

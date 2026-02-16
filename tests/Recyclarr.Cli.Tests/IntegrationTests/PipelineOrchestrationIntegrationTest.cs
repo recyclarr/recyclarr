@@ -14,6 +14,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private List<PipelineType> _executionOrder = null!;
     private ISyncContextSource _contextSource = null!;
     private IProgressSource _progressSource = null!;
+    private InstancePublisher _instancePublisher = null!;
     private List<(
         string Instance,
         PipelineType Pipeline,
@@ -28,6 +29,10 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         _statusUpdates = [];
         _contextSource = Substitute.For<ISyncContextSource>();
         _progressSource = Substitute.For<IProgressSource>();
+        _instancePublisher = new InstancePublisher(
+            "test-instance",
+            Substitute.For<ISyncRunPublisher>()
+        );
 
         // Capture status updates via the writer delegate
         _progressSource
@@ -63,6 +68,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
                 Arg.Any<ISyncSettings>(),
                 Arg.Any<PipelinePlan>(),
                 Arg.Any<PipelineProgressWriter>(),
+                Arg.Any<PipelinePublisher>(),
                 Arg.Any<CancellationToken>()
             )
             .Returns(_ =>
@@ -98,7 +104,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([qpPipeline, mnPipeline, cfPipeline, qsPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
-        await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        await sut.Execute(settings, new PipelinePlan(), _instancePublisher, CancellationToken.None);
 
         // CF must execute before QP (its dependent)
         var cfIndex = _executionOrder.IndexOf(PipelineType.CustomFormat);
@@ -124,7 +130,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _instancePublisher,
+            CancellationToken.None
+        );
 
         // QP should NOT have executed (skipped due to CF failure)
         _executionOrder.Should().NotContain(PipelineType.QualityProfile);
@@ -166,7 +177,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _instancePublisher,
+            CancellationToken.None
+        );
 
         // All 4 pipelines should have executed (QS failure doesn't affect others)
         _executionOrder.Should().HaveCount(4);
@@ -185,7 +201,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([cfPipeline, qpPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
-        var result = await sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            new PipelinePlan(),
+            _instancePublisher,
+            CancellationToken.None
+        );
 
         result.Should().Be(PipelineResult.Completed);
     }
@@ -206,7 +227,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([cfPipeline, qpPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
-        var act = () => sut.Execute(settings, new PipelinePlan(), CancellationToken.None);
+        var act = () =>
+            sut.Execute(settings, new PipelinePlan(), _instancePublisher, CancellationToken.None);
 
         act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Cycle*");
     }

@@ -13,11 +13,17 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 {
     private PipelineProgressStatus? _lastStatus;
     private PipelineProgressWriter _writer = null!;
+    private PipelinePublisher _publisher = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
         _writer = new PipelineProgressWriter((status, _) => _lastStatus = status);
+        _publisher = new PipelinePublisher(
+            "test-instance",
+            PipelineType.CustomFormat,
+            Substitute.For<ISyncRunPublisher>()
+        );
     }
 
     private GenericSyncPipeline<TestPipelineContext> CreatePipeline(params TestPhase[] phases)
@@ -57,6 +63,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
             settings,
             new PipelinePlan(),
             _writer,
+            _publisher,
             CancellationToken.None
         );
 
@@ -79,6 +86,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
             settings,
             new PipelinePlan(),
             _writer,
+            _publisher,
             CancellationToken.None
         );
 
@@ -98,6 +106,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
             settings,
             new PipelinePlan(),
             _writer,
+            _publisher,
             CancellationToken.None
         );
 
@@ -113,7 +122,8 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase);
         var settings = Substitute.For<ISyncSettings>();
 
-        var act = () => sut.Execute(settings, new PipelinePlan(), _writer, CancellationToken.None);
+        var act = () =>
+            sut.Execute(settings, new PipelinePlan(), _writer, _publisher, CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("test error");
         _lastStatus.Should().Be(PipelineProgressStatus.Failed);
@@ -132,6 +142,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
             settings,
             new PipelinePlan(),
             _writer,
+            _publisher,
             CancellationToken.None
         );
 
