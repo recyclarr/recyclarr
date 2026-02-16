@@ -1,36 +1,59 @@
+using System.Collections.Immutable;
+using System.Reactive.Linq;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync.Progress;
 
-internal class SyncProgressRenderer : IDisposable
+internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
 {
     private const int RefreshIntervalMs = 80;
 
-    private readonly IAnsiConsole _console;
     private readonly ProgressTableBuilder _tableBuilder = new();
-    private readonly IDisposable _subscription;
     private ProgressSnapshot _snapshot = new([]);
 
-    public SyncProgressRenderer(IAnsiConsole console, IProgressSource progressSource)
+    public async Task RenderProgressAsync(
+        IReadOnlyList<string> instanceNames,
+        Func<Task> syncAction,
+        CancellationToken ct
+    )
     {
-        _console = console;
-        _subscription = progressSource.Observable.Subscribe(s => _snapshot = s);
-    }
+        _snapshot = BuildInitialSnapshot(instanceNames);
 
-    public async Task RenderProgressAsync(Func<Task> syncAction, CancellationToken ct)
-    {
-        _console.MarkupLine(
-            "[grey]Legend:[/] [green]✓[/] ok [grey]·[/] [red]✗[/] failed [grey]·[/] [grey]--[/] skipped"
+        // Merge instance and pipeline events, fold into immutable snapshots via Scan.
+        // Subscribe replaces the snapshot reference atomically for the render loop to poll.
+        using var subscription = Observable
+            .Merge(
+                run.Instances.Select(e => (SyncRunEvent)e),
+                run.Pipelines.Select(e => (SyncRunEvent)e)
+            )
+            .Scan(
+                _snapshot,
+                (snapshot, evt) =>
+                    evt switch
+                    {
+                        InstanceEvent ie => ApplyInstanceEvent(snapshot, ie),
+                        PipelineEvent pe => ApplyPipelineEvent(snapshot, pe),
+                        _ => snapshot,
+                    }
+            )
+            .Subscribe(s => _snapshot = s);
+
+        console.MarkupLine(
+            "[grey]Legend:[/] "
+                + "[green]✓[/] ok [grey]·[/] "
+                + "[red]✗[/] failed [grey]·[/] "
+                + "[grey]--[/] skipped"
+                + "\n"
         );
-        _console.WriteLine();
 
-        await _console
+        await console
             .Live(ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame()))
             .AutoClear(false)
             .StartAsync(RunSyncLoop);
 
-        _console.WriteLine();
+        console.WriteLine();
         return;
 
         async Task RunSyncLoop(LiveDisplayContext ctx)
@@ -61,8 +84,45 @@ internal class SyncProgressRenderer : IDisposable
         }
     }
 
-    public void Dispose()
+    private static ProgressSnapshot BuildInitialSnapshot(IReadOnlyList<string> instanceNames)
     {
-        _subscription.Dispose();
+        var instances = instanceNames
+            .Select(n => new InstanceSnapshot(n, InstanceProgressStatus.Pending, []))
+            .ToImmutableList();
+
+        return new ProgressSnapshot(instances);
+    }
+
+    private static ProgressSnapshot ApplyInstanceEvent(ProgressSnapshot snapshot, InstanceEvent evt)
+    {
+        var index = snapshot.Instances.FindIndex(i =>
+            i.Name.Equals(evt.Name, StringComparison.OrdinalIgnoreCase)
+        );
+        if (index < 0)
+        {
+            return snapshot;
+        }
+
+        var updated = snapshot.Instances[index] with { Status = evt.Status };
+        return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
+    }
+
+    private static ProgressSnapshot ApplyPipelineEvent(ProgressSnapshot snapshot, PipelineEvent evt)
+    {
+        var index = snapshot.Instances.FindIndex(i =>
+            i.Name.Equals(evt.Instance, StringComparison.OrdinalIgnoreCase)
+        );
+        if (index < 0)
+        {
+            return snapshot;
+        }
+
+        var instance = snapshot.Instances[index];
+        var pipelineSnapshot = new PipelineSnapshot(evt.Status, evt.Count);
+        var updated = instance with
+        {
+            Pipelines = instance.Pipelines.SetItem(evt.Type, pipelineSnapshot),
+        };
+        return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
     }
 }

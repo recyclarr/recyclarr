@@ -23,15 +23,12 @@ internal class SyncProcessor(
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
         var configs = LoadConfigs(settings);
+        var instanceNames = configs.Select(c => c.InstanceName).ToList();
+
         foreach (var config in configs)
         {
-            // All instances are added up front (as opposed to lazily) to support showing
-            // the full list of instances in the UI in a pending state before processing begins.
             progressSource.AddInstance(config.InstanceName);
         }
-
-        var snapshot = new ProgressSnapshot([]);
-        using var subscription = progressSource.Observable.Subscribe(s => snapshot = s);
 
         var result = ExitStatus.Succeeded;
         if (settings.Preview)
@@ -41,13 +38,14 @@ internal class SyncProcessor(
         else
         {
             await progressRenderer.RenderProgressAsync(
+                instanceNames,
                 async () => result = await ProcessConfigs(settings, configs, ct),
                 ct
             );
         }
 
         diagnosticsRenderer.Report();
-        await notify.SendNotification(result != ExitStatus.Failed, snapshot);
+        await notify.SendNotification();
         return result;
     }
 

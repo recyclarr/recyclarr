@@ -1,10 +1,10 @@
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storage)
+internal class DiagnosticsRenderer : IDisposable
 {
     private static readonly string[] InstanceColors =
     [
@@ -15,25 +15,34 @@ internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storag
         "yellow",
     ];
 
+    private readonly IAnsiConsole _console;
+    private readonly List<SyncDiagnosticEvent> _diagnostics = [];
+    private readonly IDisposable _subscription;
+
+    public DiagnosticsRenderer(IAnsiConsole console, ISyncRunScope run)
+    {
+        _console = console;
+        _subscription = run.Diagnostics.Subscribe(_diagnostics.Add);
+    }
+
     public void Report()
     {
-        var diagnostics = storage.Diagnostics.ToList();
-        if (diagnostics.Count == 0)
+        if (_diagnostics.Count == 0)
         {
             return;
         }
 
-        var colorMap = BuildInstanceColorMap(diagnostics);
+        var colorMap = BuildInstanceColorMap(_diagnostics);
         var sections = new List<IRenderable>();
 
-        var errors = diagnostics.Where(d => d.Type == DiagnosticType.Error).ToList();
+        var errors = _diagnostics.Where(d => d.Level == SyncDiagnosticLevel.Error).ToList();
         if (errors.Count > 0)
         {
             sections.Add(BuildSection("Errors", errors, "red", colorMap));
         }
 
-        var warnings = diagnostics
-            .Where(d => d.Type is DiagnosticType.Warning or DiagnosticType.Deprecation)
+        var warnings = _diagnostics
+            .Where(d => d.Level is SyncDiagnosticLevel.Warning or SyncDiagnosticLevel.Deprecation)
             .ToList();
         if (warnings.Count > 0)
         {
@@ -50,18 +59,18 @@ internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storag
             .Border(BoxBorder.Rounded)
             .Expand();
 
-        console.WriteLine();
-        console.Write(panel);
+        _console.WriteLine();
+        _console.Write(panel);
     }
 
     // Assigns a unique color to each instance name for visual distinction in diagnostic output.
     // Colors cycle if there are more instances than available colors.
     private static Dictionary<string, string> BuildInstanceColorMap(
-        List<DiagnosticEvent> diagnostics
+        List<SyncDiagnosticEvent> diagnostics
     )
     {
         var instances = diagnostics
-            .Select(e => e.InstanceName)
+            .Select(e => e.Instance)
             .Where(i => !string.IsNullOrEmpty(i))
             .Distinct()
             .ToList();
@@ -73,7 +82,7 @@ internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storag
 
     private static Rows BuildSection(
         string header,
-        List<DiagnosticEvent> items,
+        List<SyncDiagnosticEvent> items,
         string color,
         Dictionary<string, string> colorMap
     )
@@ -82,9 +91,9 @@ internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storag
         grid.AddColumn(new GridColumn().NoWrap().PadRight(1).PadLeft(0));
         grid.AddColumn(new GridColumn().PadLeft(0).PadRight(0));
 
-        foreach (var item in items.OrderBy(x => x.InstanceName ?? "").ThenBy(x => x.Message))
+        foreach (var item in items.OrderBy(x => x.Instance ?? "").ThenBy(x => x.Message))
         {
-            var prefix = FormatInstancePrefix(item.InstanceName, colorMap);
+            var prefix = FormatInstancePrefix(item.Instance, colorMap);
             var message = FormatMessage(item);
             grid.AddRow(new Markup($"  [{color}]•[/]"), new Markup($"{prefix} — {message}"));
         }
@@ -110,10 +119,14 @@ internal class DiagnosticsRenderer(IAnsiConsole console, SyncEventStorage storag
         return $"[{instanceColor}][[{instance.EscapeMarkup()}]][/]";
     }
 
-    private static string FormatMessage(DiagnosticEvent entry)
+    private static string FormatMessage(SyncDiagnosticEvent entry)
     {
         var deprecationTag =
-            entry.Type == DiagnosticType.Deprecation ? "[darkorange bold][[DEPRECATED]][/] " : "";
+            entry.Level == SyncDiagnosticLevel.Deprecation
+                ? "[darkorange bold][[DEPRECATED]][/] "
+                : "";
         return $"{deprecationTag}{entry.Message.EscapeMarkup()}";
     }
+
+    public void Dispose() => _subscription.Dispose();
 }
