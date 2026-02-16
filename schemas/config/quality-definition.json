@@ -8,6 +8,11 @@
     "type": {
       "type": "string"
     },
+    "reset_before_sync": {
+      "type": "boolean",
+      "default": false,
+      "description": "Reset all quality definitions to installation defaults before syncing guide values."
+    },
     "preferred_ratio": {
       "type": "number",
       "default": 1.0,

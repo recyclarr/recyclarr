@@ -66,6 +66,7 @@ internal class QualitySizePlanComponent(
         {
             Type = configSizeData.Type,
             PreferredRatio = preferredRatio,
+            ResetBeforeSync = configSizeData.ResetBeforeSync,
             Qualities = plannedQualities,
         };
     }

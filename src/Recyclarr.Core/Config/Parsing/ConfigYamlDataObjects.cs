@@ -56,6 +56,7 @@ public record QualitySizeConfigYaml
 {
     public string? Type { get; init; }
     public decimal? PreferredRatio { get; init; }
+    public bool? ResetBeforeSync { get; init; }
     public IReadOnlyCollection<QualitySizeItemConfigYaml>? Qualities { get; init; }
 }
 

@@ -32,6 +32,32 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Build_with_reset_before_sync_propagates_to_plan()
+    {
+        SetupQualitySizeGuideData("movie", ("Bluray-1080p", 5, 100, 50));
+
+        var config = NewConfig.Radarr() with
+        {
+            QualityDefinition = new QualityDefinitionConfig
+            {
+                Type = "movie",
+                ResetBeforeSync = true,
+            },
+        };
+
+        var scopeFactory = Resolve<ConfigurationScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
+        var sut = scope.Resolve<PlanBuilder>();
+        var storage = Resolve<SyncEventStorage>();
+
+        var plan = sut.Build();
+
+        plan.QualitySizes.Should().NotBeNull();
+        plan.QualitySizes.ResetBeforeSync.Should().BeTrue();
+        HasErrors(storage).Should().BeFalse();
+    }
+
+    [Test]
     public void Build_with_invalid_quality_type_reports_error()
     {
         var config = NewConfig.Radarr() with

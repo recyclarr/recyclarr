@@ -92,7 +92,7 @@ internal static class NewPlan
 
     public static PlannedQualitySizes Qs(string type, params PlannedQualityItem[] qualities)
     {
-        return Qs(type, null, qualities);
+        return Qs(type, null, false, qualities);
     }
 
     public static PlannedQualitySizes Qs(
@@ -101,10 +101,21 @@ internal static class NewPlan
         params PlannedQualityItem[] qualities
     )
     {
+        return Qs(type, preferredRatio, false, qualities);
+    }
+
+    public static PlannedQualitySizes Qs(
+        string type,
+        decimal? preferredRatio,
+        bool resetBeforeSync,
+        params PlannedQualityItem[] qualities
+    )
+    {
         return new PlannedQualitySizes
         {
             Type = type,
             PreferredRatio = preferredRatio,
+            ResetBeforeSync = resetBeforeSync,
             Qualities = qualities,
         };
     }

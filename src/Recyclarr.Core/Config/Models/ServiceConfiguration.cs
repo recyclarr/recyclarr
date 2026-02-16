@@ -75,6 +75,7 @@ public record QualityDefinitionConfig
 {
     public string Type { get; init; } = "";
     public decimal? PreferredRatio { get; set; }
+    public bool ResetBeforeSync { get; init; }
     public IReadOnlyCollection<QualityDefinitionItemConfig> Qualities { get; init; } = [];
 }
 

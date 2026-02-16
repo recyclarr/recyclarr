@@ -58,4 +58,56 @@ internal sealed class MergeQualityDefinitionTest
 
         result.Should().BeEquivalentTo(rightConfig);
     }
+
+    [Test]
+    public void Reset_before_sync_right_overrides_left()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            QualityDefinition = new QualitySizeConfigYaml
+            {
+                Type = "type1",
+                ResetBeforeSync = false,
+            },
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            QualityDefinition = new QualitySizeConfigYaml
+            {
+                Type = "type1",
+                ResetBeforeSync = true,
+            },
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        result.QualityDefinition!.ResetBeforeSync.Should().BeTrue();
+    }
+
+    [Test]
+    public void Reset_before_sync_null_right_keeps_left()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            QualityDefinition = new QualitySizeConfigYaml
+            {
+                Type = "type1",
+                ResetBeforeSync = true,
+            },
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            QualityDefinition = new QualitySizeConfigYaml { Type = "type1" },
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        result.QualityDefinition!.ResetBeforeSync.Should().BeTrue();
+    }
 }

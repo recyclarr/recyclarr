@@ -41,6 +41,7 @@ public abstract class ServiceConfigMerger<T>
                     {
                         Type = b1.Type ?? a1.Type,
                         PreferredRatio = b1.PreferredRatio ?? a1.PreferredRatio,
+                        ResetBeforeSync = b1.ResetBeforeSync ?? a1.ResetBeforeSync,
                         Qualities = MergeQualitySizeItems(a1.Qualities, b1.Qualities),
                     }
             ),

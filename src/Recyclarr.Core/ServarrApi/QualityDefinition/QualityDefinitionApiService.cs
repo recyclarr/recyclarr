@@ -27,4 +27,11 @@ internal class QualityDefinitionApiService(IServarrRequestBuilder service)
             .PutJsonAsync(newQuality, cancellationToken: ct)
             .ReceiveJson<List<ServiceQualityDefinitionItem>>();
     }
+
+    public async Task ResetQualityDefinitions(CancellationToken ct)
+    {
+        await service
+            .Request("command")
+            .PostJsonAsync(new { name = "ResetQualityDefinitions" }, cancellationToken: ct);
+    }
 }

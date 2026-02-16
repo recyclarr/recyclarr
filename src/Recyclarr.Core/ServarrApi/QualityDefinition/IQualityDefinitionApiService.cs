@@ -8,4 +8,6 @@ public interface IQualityDefinitionApiService
         IList<ServiceQualityDefinitionItem> newQuality,
         CancellationToken ct
     );
+
+    Task ResetQualityDefinitions(CancellationToken ct);
 }

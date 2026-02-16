@@ -78,6 +78,7 @@ internal static class ConfigYamlExtensions
         {
             Type = yaml.Type ?? "",
             PreferredRatio = yaml.PreferredRatio,
+            ResetBeforeSync = yaml.ResetBeforeSync ?? false,
             Qualities =
                 yaml.Qualities?.Select(x => x.ToQualityDefinitionItemConfig()).ToList() ?? [],
         };
