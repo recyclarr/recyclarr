@@ -1,38 +1,43 @@
+using FluentValidation;
 using Recyclarr.Cli.Pipelines.CustomFormat;
+using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class CustomFormatPlanComponent(
-    IInstancePublisher events,
     ConfiguredCustomFormatProvider cfProvider,
     CustomFormatResourceQuery cfQuery,
+    IValidator<CustomFormatGroupConfig> cfGroupValidator,
     IServiceConfiguration config
 ) : IPlanComponent
 {
     public void Process(PipelinePlan plan)
     {
+        // Validate explicit CF group config before resolution
+        foreach (var groupConfig in config.CustomFormatGroups.Add)
+        {
+            cfGroupValidator.Validate(groupConfig).ForwardTo(plan);
+        }
+
         var cfResources = cfQuery
             .Get(config.ServiceType)
             .ToDictionary(r => r.TrashId, StringComparer.OrdinalIgnoreCase);
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll(events)
+            .GetAll()
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)
         {
             if (!cfResources.TryGetValue(group.Key, out var resource))
             {
-                events.AddWarning($"Invalid trash_id: {group.Key}");
+                plan.AddWarning($"Invalid trash_id: {group.Key}");
                 continue;
             }
 
-            // Use the first entry's source info (same CF may appear multiple times,
-            // but the source from the first occurrence is representative)
             var first = group.First();
             plan.AddCustomFormat(
                 new PlannedCustomFormat(resource)

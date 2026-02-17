@@ -1,7 +1,27 @@
+using Recyclarr.Sync;
+
 namespace Recyclarr.Cli.Pipelines.Plan;
 
-internal class PipelinePlan
+internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublisher
 {
+    public bool HasErrors { get; private set; }
+
+    public void AddError(string message)
+    {
+        HasErrors = true;
+        publisher.AddError(message);
+    }
+
+    public void AddWarning(string message)
+    {
+        publisher.AddWarning(message);
+    }
+
+    public void AddDeprecation(string message)
+    {
+        publisher.AddDeprecation(message);
+    }
+
     private readonly Dictionary<string, PlannedCustomFormat> _customFormats = new(
         StringComparer.OrdinalIgnoreCase
     );

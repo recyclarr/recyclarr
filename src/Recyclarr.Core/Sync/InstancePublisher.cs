@@ -7,7 +7,6 @@ internal class InstancePublisher(IServiceConfiguration config, ISyncRunPublisher
     : IInstancePublisher
 {
     public string Name => config.InstanceName;
-    public bool HasErrors { get; private set; }
 
     public void SetStatus(InstanceProgressStatus status)
     {
@@ -16,7 +15,6 @@ internal class InstancePublisher(IServiceConfiguration config, ISyncRunPublisher
 
     public void AddError(string message)
     {
-        HasErrors = true;
         publisher.Publish(
             new SyncDiagnosticEvent(config.InstanceName, SyncDiagnosticLevel.Error, message)
         );

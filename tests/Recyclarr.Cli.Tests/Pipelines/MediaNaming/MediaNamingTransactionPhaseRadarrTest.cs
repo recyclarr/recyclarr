@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
@@ -13,9 +14,9 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 )]
 internal sealed class MediaNamingTransactionPhaseRadarrTest
 {
-    private static PipelinePlan CreatePlan(MediaNamingDto dto)
+    private static TestPlan CreatePlan(MediaNamingDto dto)
     {
-        var plan = new PipelinePlan { MediaNaming = new PlannedMediaNaming { Dto = dto } };
+        var plan = new TestPlan { MediaNaming = new PlannedMediaNaming { Dto = dto } };
         return plan;
     }
 

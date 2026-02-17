@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
@@ -14,7 +15,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     [Test]
     public void Cf_id_hydration_visible_to_qp_scores()
     {
-        var plan = new PipelinePlan();
+        var plan = new TestPlan();
         var cf = new PlannedCustomFormat(NewCf.Data("Test", "cf1"));
         plan.AddCustomFormat(cf);
 

@@ -1,13 +1,11 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class QualitySizePlanComponent(
-    IInstancePublisher events,
     QualitySizeResourceQuery guide,
     IServiceConfiguration config,
     ILogger log
@@ -22,7 +20,7 @@ internal class QualitySizePlanComponent(
             return;
         }
 
-        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, events);
+        var preferredRatio = ClampPreferredRatio(configSizeData.PreferredRatio, plan);
 
         var guideSizeData = guide
             .Get(config.ServiceType)
@@ -30,7 +28,7 @@ internal class QualitySizePlanComponent(
 
         if (guideSizeData is null)
         {
-            events.AddError(
+            plan.AddError(
                 $"The specified quality definition type does not exist: {configSizeData.Type}"
             );
             return;
@@ -47,7 +45,7 @@ internal class QualitySizePlanComponent(
             .ToList();
 
         // Validate min ≤ preferred ≤ max ordering for each quality
-        if (plannedQualities.Any(quality => !ValidateQualitySizeOrder(quality, events)))
+        if (plannedQualities.Any(quality => !ValidateQualitySizeOrder(quality, plan)))
         {
             return;
         }
@@ -57,7 +55,7 @@ internal class QualitySizePlanComponent(
         {
             if (!guideSizeData.Qualities.Any(x => x.Quality.EqualsIgnoreCase(configQuality.Name)))
             {
-                events.AddError(
+                plan.AddError(
                     $"Quality '{configQuality.Name}' does not exist in the guide for type '{configSizeData.Type}'"
                 );
             }
@@ -71,7 +69,7 @@ internal class QualitySizePlanComponent(
         };
     }
 
-    private static decimal? ClampPreferredRatio(decimal? ratio, IInstancePublisher events)
+    private static decimal? ClampPreferredRatio(decimal? ratio, PipelinePlan diagnostics)
     {
         if (ratio is not (< 0 or > 1))
         {
@@ -79,7 +77,7 @@ internal class QualitySizePlanComponent(
         }
 
         var clamped = Math.Clamp(ratio.Value, min: 0, max: 1);
-        events.AddWarning(
+        diagnostics.AddWarning(
             $"preferred_ratio of {ratio} is out of range (0.0-1.0), clamped to {clamped}"
         );
         return clamped;
@@ -128,13 +126,13 @@ internal class QualitySizePlanComponent(
 
     private static bool ValidateQualitySizeOrder(
         PlannedQualityItem quality,
-        IInstancePublisher events
+        PipelinePlan diagnostics
     )
     {
         // preferred null = unlimited, so min is always ≤ preferred when preferred is unlimited
         if (quality.Preferred is not null && quality.Min > quality.Preferred)
         {
-            events.AddError(
+            diagnostics.AddError(
                 $"Quality '{quality.Quality}': min ({quality.Min}) cannot be greater than preferred ({quality.Preferred})"
             );
             return false;
@@ -144,7 +142,7 @@ internal class QualitySizePlanComponent(
         // But if preferred is unlimited (null) and max is not, that's invalid
         if (quality.Preferred is null && quality.Max is not null)
         {
-            events.AddError(
+            diagnostics.AddError(
                 $"Quality '{quality.Quality}': preferred (unlimited) cannot be greater than max ({quality.Max})"
             );
             return false;
@@ -156,7 +154,7 @@ internal class QualitySizePlanComponent(
             && quality.Preferred > quality.Max
         )
         {
-            events.AddError(
+            diagnostics.AddError(
                 $"Quality '{quality.Quality}': preferred ({quality.Preferred}) cannot be greater than max ({quality.Max})"
             );
             return false;

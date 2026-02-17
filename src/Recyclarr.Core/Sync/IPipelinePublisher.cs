@@ -2,14 +2,11 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Sync;
 
-public interface IPipelinePublisher
+public interface IPipelinePublisher : IDiagnosticPublisher
 {
     static IPipelinePublisher Noop { get; } = new NoopPipelinePublisher();
 
     void SetStatus(PipelineProgressStatus status, int? count = null);
-    void AddError(string message);
-    void AddWarning(string message);
-    void AddDeprecation(string message);
 }
 
 internal sealed class NoopPipelinePublisher : IPipelinePublisher

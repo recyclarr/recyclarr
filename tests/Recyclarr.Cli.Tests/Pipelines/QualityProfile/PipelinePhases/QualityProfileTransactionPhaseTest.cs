@@ -12,9 +12,9 @@ namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
 
 internal sealed class QualityProfileTransactionPhaseTest
 {
-    private static PipelinePlan CreatePlan(params PlannedQualityProfile[] profiles)
+    private static TestPlan CreatePlan(params PlannedQualityProfile[] profiles)
     {
-        var plan = new PipelinePlan();
+        var plan = new TestPlan();
         foreach (var profile in profiles)
         {
             plan.AddQualityProfile(profile);
@@ -204,7 +204,7 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         var context = new QualityProfilePipelineContext
         {
-            Plan = new PipelinePlan(),
+            Plan = new TestPlan(),
             ApiFetchOutput = NewQp.ServiceData(dtos),
             State = CreateCache(),
         };

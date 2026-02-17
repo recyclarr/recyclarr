@@ -11,9 +11,9 @@ internal sealed class QualitySizeTransactionPhaseTest
 {
     private static readonly QualityItemLimits DefaultLimits = new(400, 400);
 
-    private static PipelinePlan CreatePlan(PlannedQualitySizes qualitySizes)
+    private static TestPlan CreatePlan(PlannedQualitySizes qualitySizes)
     {
-        return new PipelinePlan { QualitySizes = qualitySizes };
+        return new TestPlan { QualitySizes = qualitySizes };
     }
 
     [Test, AutoMockData]

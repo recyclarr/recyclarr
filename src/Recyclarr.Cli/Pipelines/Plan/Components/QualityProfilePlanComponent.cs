@@ -1,12 +1,10 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class QualityProfilePlanComponent(
-    IInstancePublisher events,
     QualityProfileResourceQuery guide,
     IServiceConfiguration config,
     ILogger log
@@ -43,7 +41,7 @@ internal class QualityProfilePlanComponent(
 
         // Start with explicitly defined quality profiles
         var allProfiles = config
-            .QualityProfiles.Select(x => CreatePlannedProfile(x, guideResources, events))
+            .QualityProfiles.Select(x => CreatePlannedProfile(x, guideResources, plan))
             .NotNull()
             .ToDictionary(x => x.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
 
@@ -60,7 +58,7 @@ internal class QualityProfilePlanComponent(
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf, events);
+            AddCustomFormatScore(profile, scoreConfig, cf, plan);
         }
 
         // Add all profiles to the plan
@@ -74,7 +72,7 @@ internal class QualityProfilePlanComponent(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
         PlannedCustomFormat cf,
-        IInstancePublisher events
+        PipelinePlan diagnostics
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -92,7 +90,7 @@ internal class QualityProfilePlanComponent(
         {
             if (existingScore.Score != scoreToUse)
             {
-                events.AddWarning(
+                diagnostics.AddWarning(
                     $"Custom format {cf.Resource.Name} ({cf.Resource.TrashId}) is duplicated in quality profile "
                         + $"{profile.Name} with conflicting scores: {existingScore.Score} vs {scoreToUse}"
                 );
@@ -131,7 +129,7 @@ internal class QualityProfilePlanComponent(
     private static PlannedQualityProfile? CreatePlannedProfile(
         QualityProfileConfig config,
         Dictionary<string, QualityProfileResource> guideResources,
-        IInstancePublisher events
+        PipelinePlan diagnostics
     )
     {
         QualityProfileResource? resource = null;
@@ -140,7 +138,7 @@ internal class QualityProfilePlanComponent(
         {
             if (!guideResources.TryGetValue(config.TrashId, out resource))
             {
-                events.AddWarning($"Invalid quality profile trash_id: {config.TrashId}");
+                diagnostics.AddWarning($"Invalid quality profile trash_id: {config.TrashId}");
                 return null;
             }
         }

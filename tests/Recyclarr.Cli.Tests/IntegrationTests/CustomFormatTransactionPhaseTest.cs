@@ -13,9 +13,9 @@ namespace Recyclarr.Cli.Tests.IntegrationTests;
 
 internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 {
-    private static PipelinePlan CreatePlan(params CustomFormatResource[] cfs)
+    private static TestPlan CreatePlan(params CustomFormatResource[] cfs)
     {
-        var plan = new PipelinePlan();
+        var plan = new TestPlan();
         foreach (var cf in cfs)
         {
             plan.AddCustomFormat(new PlannedCustomFormat(cf));
@@ -236,7 +236,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         {
             State = CfCache.New(new TrashIdMapping("cf2", "two", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "two", Id = 2 }],
-            Plan = new PipelinePlan(), // Empty plan - no CFs in config
+            Plan = new TestPlan(), // Empty plan - no CFs in config
         };
 
         await sut.Execute(context, CancellationToken.None);

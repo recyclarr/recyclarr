@@ -3,13 +3,11 @@ using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.MediaNaming;
-using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class MediaNamingPlanComponent(
-    IInstancePublisher events,
     MediaNamingResourceQuery guide,
     IIndex<SupportedServices, IServiceBasedMediaNamingConfigPhase> configPhaseStrategyFactory,
     IServiceConfiguration config
@@ -24,7 +22,7 @@ internal class MediaNamingPlanComponent(
         // Capture validation errors in diagnostics
         foreach (var (type, configValue) in lookup.Errors)
         {
-            events.AddError($"Invalid {type} naming format: {configValue}");
+            plan.AddError($"Invalid {type} naming format: {configValue}");
         }
 
         // Check if there are any differences from defaults

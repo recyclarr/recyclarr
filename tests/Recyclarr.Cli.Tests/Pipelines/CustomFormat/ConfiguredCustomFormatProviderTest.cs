@@ -5,7 +5,6 @@ using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
@@ -47,7 +46,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // CF should be auto-discovered from default group with implicit source
         entries
@@ -100,7 +99,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // No auto-discovery because QP has no trash_id
         entries.Should().BeEmpty();
@@ -142,7 +141,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // No auto-discovery because group is not default
         entries.Should().BeEmpty();
@@ -185,7 +184,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // No auto-discovery because QP is not in include list
         entries.Should().BeEmpty();
@@ -228,7 +227,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // No auto-discovery because group is in skip list
         entries.Should().BeEmpty();
@@ -274,7 +273,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         entries
             .Should()
@@ -311,7 +310,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         entries
             .Should()
@@ -354,7 +353,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         entries
             .Should()
@@ -410,7 +409,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         entries
             .Should()
@@ -458,7 +457,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         entries
             .Should()
@@ -517,7 +516,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // Only cf1 (selected) should be included; cf2 (default but not selected) excluded
         entries.Should().ContainSingle().Which.TrashId.Should().Be("cf1");
@@ -562,7 +561,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         });
         var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
 
-        var entries = sut.GetAll(IInstancePublisher.Noop).ToList();
+        var entries = sut.GetAll().ToList();
 
         // AssignScoresTo should use the config's custom name
         entries

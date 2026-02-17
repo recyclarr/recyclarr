@@ -1,7 +1,6 @@
 using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
@@ -59,7 +58,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 
         var result = await sut.Execute(
             settings,
-            new PipelinePlan(),
+            new TestPlan(),
             _publisher,
             CancellationToken.None
         );
@@ -81,7 +80,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 
         var result = await sut.Execute(
             settings,
-            new PipelinePlan(),
+            new TestPlan(),
             _publisher,
             CancellationToken.None
         );
@@ -100,7 +99,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 
         var result = await sut.Execute(
             settings,
-            new PipelinePlan(),
+            new TestPlan(),
             _publisher,
             CancellationToken.None
         );
@@ -117,8 +116,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
         var sut = CreatePipeline(phase);
         var settings = Substitute.For<ISyncSettings>();
 
-        var act = () =>
-            sut.Execute(settings, new PipelinePlan(), _publisher, CancellationToken.None);
+        var act = () => sut.Execute(settings, new TestPlan(), _publisher, CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("test error");
         _lastStatus.Should().Be(PipelineProgressStatus.Failed);
@@ -135,7 +133,7 @@ internal sealed class GenericSyncPipelineTest : CliIntegrationFixture
 
         var result = await sut.Execute(
             settings,
-            new PipelinePlan(),
+            new TestPlan(),
             _publisher,
             CancellationToken.None
         );

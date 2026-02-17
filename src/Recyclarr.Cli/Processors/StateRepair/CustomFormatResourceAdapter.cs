@@ -4,7 +4,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
-using Recyclarr.Sync;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Processors.StateRepair;
@@ -32,7 +31,7 @@ internal class CustomFormatResourceAdapter(
     public IReadOnlyList<IGuideResource> GetConfiguredGuideResources()
     {
         var configuredTrashIds = cfProvider
-            .GetAll(IInstancePublisher.Noop)
+            .GetAll()
             .Select(entry => entry.TrashId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 

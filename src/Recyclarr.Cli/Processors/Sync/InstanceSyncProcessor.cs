@@ -46,7 +46,7 @@ internal class InstanceSyncProcessor(
 
             var plan = planBuilder.Build();
 
-            if (instancePublisher.HasErrors)
+            if (plan.HasErrors)
             {
                 return InstanceSyncResult.Failed;
             }

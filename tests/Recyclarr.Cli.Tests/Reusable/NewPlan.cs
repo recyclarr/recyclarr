@@ -1,8 +1,11 @@
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Tests.Reusable;
+
+internal class TestPlan() : PipelinePlan(Substitute.For<IDiagnosticPublisher>());
 
 internal static class NewPlan
 {

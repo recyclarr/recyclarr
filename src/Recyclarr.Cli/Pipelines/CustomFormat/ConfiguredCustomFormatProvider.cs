@@ -1,6 +1,5 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -11,7 +10,7 @@ internal class ConfiguredCustomFormatProvider(
     ILogger log
 )
 {
-    public IEnumerable<ConfiguredCfEntry> GetAll(IInstancePublisher events)
+    public IEnumerable<ConfiguredCfEntry> GetAll()
     {
         var qpResources = qpQuery
             .Get(config.ServiceType)
@@ -44,8 +43,8 @@ internal class ConfiguredCustomFormatProvider(
             yield return entry;
         }
 
-        // From explicit CF groups (custom_format_groups.add)
-        foreach (var entry in FromExplicitGroups(events, qpResources, cfGroupResources))
+        // From explicit CF groups (assumes validation already ran)
+        foreach (var entry in FromExplicitGroups(qpResources, cfGroupResources))
         {
             yield return entry;
         }
@@ -194,33 +193,20 @@ internal class ConfiguredCustomFormatProvider(
     }
 
     // Processes explicitly added CF groups (custom_format_groups.add).
+    // Assumes validation already ran via ExplicitCfGroupValidator.
     private IEnumerable<ConfiguredCfEntry> FromExplicitGroups(
-        IInstancePublisher events,
         Dictionary<string, QualityProfileResource> qpResources,
         Dictionary<string, CfGroupResource> cfGroupResources
     )
     {
         foreach (var groupConfig in config.CustomFormatGroups.Add)
         {
-            // Resolve group trash_id to guide resource
             if (!cfGroupResources.TryGetValue(groupConfig.TrashId, out var groupResource))
             {
-                events.AddError($"Invalid custom format group trash_id: {groupConfig.TrashId}");
                 continue;
             }
 
-            // Validate select list
-            if (!ValidateSelectList(events, groupConfig, groupResource))
-            {
-                continue;
-            }
-
-            // Determine which profiles this group's CFs should be assigned to
-            var assignScoresTo = DetermineProfiles(events, groupConfig, groupResource, qpResources);
-            if (assignScoresTo is null)
-            {
-                continue;
-            }
+            var assignScoresTo = DetermineProfiles(groupConfig, groupResource, qpResources);
 
             if (assignScoresTo.Count == 0)
             {
@@ -228,7 +214,6 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Resolve CFs using opt-in semantics with inclusion reason tracking
             var cfEntries = ResolveCfsForGroup(groupConfig, groupResource);
 
             var hasEntries = false;
@@ -295,58 +280,14 @@ internal class ConfiguredCustomFormatProvider(
         }
     }
 
-    // Validates the select list for a CF group. Returns true if valid, false if errors found.
-    private static bool ValidateSelectList(
-        IInstancePublisher events,
-        CustomFormatGroupConfig groupConfig,
-        CfGroupResource groupResource
-    )
-    {
-        var groupCfTrashIds = groupResource
-            .CustomFormats.Select(cf => cf.TrashId)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var hasErrors = false;
-
-        foreach (var selectId in groupConfig.Select)
-        {
-            // Check if the selected trash_id exists in this group
-            if (!groupCfTrashIds.Contains(selectId))
-            {
-                events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Invalid CF trash_id in select: {selectId}"
-                );
-                hasErrors = true;
-                continue;
-            }
-
-            // Warn if selecting a required CF (redundant but allowed)
-            var cf = groupResource.CustomFormats.First(c =>
-                c.TrashId.Equals(selectId, StringComparison.OrdinalIgnoreCase)
-            );
-            if (cf.Required)
-            {
-                events.AddWarning(
-                    $"CF group '{groupConfig.TrashId}': Selecting required CF '{selectId}' is redundant (required CFs are always included)"
-                );
-            }
-        }
-
-        return !hasErrors;
-    }
-
-    // Returns the list of profiles to assign this group's CFs to. If the user specified
-    // explicit assign_scores_to entries, validates and uses those. Otherwise, uses
-    // guide-backed quality profiles from the config that are in the group's include list.
-    // Returns null if validation errors occurred for explicit profiles.
-    private List<AssignScoresToConfig>? DetermineProfiles(
-        IInstancePublisher events,
+    // Returns the list of profiles to assign this group's CFs to.
+    // Assumes validation already ran via ExplicitCfGroupValidator.
+    private List<AssignScoresToConfig> DetermineProfiles(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
         Dictionary<string, QualityProfileResource> qpResources
     )
     {
-        // Build set of profile trash_ids included by the guide for this group
         var includedProfiles = new HashSet<string>(
             groupResource.QualityProfiles.Include.Values,
             StringComparer.OrdinalIgnoreCase
@@ -354,12 +295,20 @@ internal class ConfiguredCustomFormatProvider(
 
         if (groupConfig.AssignScoresTo.Count > 0)
         {
-            // Explicit: user specified profiles - validate each one
-            return ValidateExplicitProfiles(events, groupConfig, includedProfiles, qpResources);
+            // Explicit: user specified profiles (already validated)
+            return groupConfig
+                .AssignScoresTo.Where(s =>
+                    qpResources.ContainsKey(s.TrashId) && includedProfiles.Contains(s.TrashId)
+                )
+                .Select(s => new AssignScoresToConfig
+                {
+                    TrashId = s.TrashId,
+                    Name = qpResources[s.TrashId].Name,
+                })
+                .ToList();
         }
 
         // Implicit: guide-backed profiles in user's config that are in the include list
-        // Use config name if set, otherwise fall back to guide resource name
         return config
             .QualityProfiles.Where(qp => qp.TrashId is not null)
             .Where(qp => qpResources.ContainsKey(qp.TrashId!))
@@ -370,46 +319,5 @@ internal class ConfiguredCustomFormatProvider(
                 Name = !string.IsNullOrEmpty(qp.Name) ? qp.Name : qpResources[qp.TrashId!].Name,
             })
             .ToList();
-    }
-
-    // Validates explicit assign_scores_to profiles. Returns null if errors found.
-    private static List<AssignScoresToConfig>? ValidateExplicitProfiles(
-        IInstancePublisher events,
-        CustomFormatGroupConfig groupConfig,
-        HashSet<string> includedProfiles,
-        Dictionary<string, QualityProfileResource> qpResources
-    )
-    {
-        var hasErrors = false;
-        var result = new List<AssignScoresToConfig>();
-
-        foreach (var score in groupConfig.AssignScoresTo)
-        {
-            // Check if profile trash_id exists
-            if (!qpResources.TryGetValue(score.TrashId, out var qpResource))
-            {
-                events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Invalid profile trash_id in assign_scores_to: {score.TrashId}"
-                );
-                hasErrors = true;
-                continue;
-            }
-
-            // Check if profile is in the guide's include list
-            if (!includedProfiles.Contains(score.TrashId))
-            {
-                events.AddError(
-                    $"CF group '{groupConfig.TrashId}': Profile '{score.TrashId}' is not in this group's include list"
-                );
-                hasErrors = true;
-                continue;
-            }
-
-            result.Add(
-                new AssignScoresToConfig { TrashId = score.TrashId, Name = qpResource.Name }
-            );
-        }
-
-        return hasErrors ? null : result;
     }
 }

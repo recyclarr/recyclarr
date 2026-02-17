@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.MediaManagement;
 using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaManagement;
 
@@ -9,9 +10,9 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaManagement;
 
 internal sealed class MediaManagementTransactionPhaseTest
 {
-    private static PipelinePlan CreatePlan(PropersAndRepacksMode mode)
+    private static TestPlan CreatePlan(PropersAndRepacksMode mode)
     {
-        var plan = new PipelinePlan { MediaManagement = new PlannedMediaManagement(mode) };
+        var plan = new TestPlan { MediaManagement = new PlannedMediaManagement(mode) };
         return plan;
     }
 

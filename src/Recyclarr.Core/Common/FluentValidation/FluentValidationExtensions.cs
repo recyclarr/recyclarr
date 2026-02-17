@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Common.FluentValidation;
 
@@ -43,6 +44,28 @@ public static class FluentValidationExtensions
         };
 
         return ruleBuilder.SetAsyncValidator(adapter);
+    }
+
+    /// <summary>
+    /// Forwards validation failures to an <see cref="IDiagnosticPublisher"/> as errors or warnings
+    /// based on severity. Returns true if the result has no errors.
+    /// </summary>
+    public static bool ForwardTo(this ValidationResult result, IDiagnosticPublisher publisher)
+    {
+        foreach (var failure in result.Errors)
+        {
+            switch (failure.Severity)
+            {
+                case Severity.Warning:
+                    publisher.AddWarning(failure.ErrorMessage);
+                    break;
+                default:
+                    publisher.AddError(failure.ErrorMessage);
+                    break;
+            }
+        }
+
+        return result.IsValid;
     }
 
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(

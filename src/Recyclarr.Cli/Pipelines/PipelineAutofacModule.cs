@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extras.Ordering;
+using FluentValidation;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
@@ -17,6 +18,7 @@ using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Config.Models;
 using Recyclarr.SyncState;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
@@ -53,6 +55,7 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<PlanBuilder>();
         builder.RegisterType<DiagnosticsRenderer>();
+        builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
 
         // ORDER HERE IS IMPORTANT!
         // CF must run before QP (QP references CFs from plan)
