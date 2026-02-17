@@ -54,7 +54,6 @@ internal class PipelineAutofacModule : Module
     private static void RegisterPlan(ContainerBuilder builder)
     {
         builder.RegisterType<PlanBuilder>();
-        builder.RegisterType<DiagnosticsRenderer>();
         builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
 
         // ORDER HERE IS IMPORTANT!
