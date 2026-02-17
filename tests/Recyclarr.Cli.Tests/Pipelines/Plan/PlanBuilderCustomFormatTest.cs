@@ -1,8 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
@@ -18,16 +15,13 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2"] }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(2);
         plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("cf1", "cf2");
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -40,15 +34,12 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["valid-cf", "invalid-cf"] }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(1);
-        GetWarnings(storage).Should().Contain(w => w.Contains("invalid-cf"));
+        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("invalid-cf")));
     }
 
     [Test]
@@ -56,14 +47,11 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
     {
         var config = NewConfig.Radarr();
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         plan.CustomFormats.Should().BeEmpty();
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 }

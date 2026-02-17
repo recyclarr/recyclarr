@@ -3,7 +3,6 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -12,46 +11,26 @@ namespace Recyclarr.Cli.Tests.IntegrationTests;
 internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixture
 {
     private List<PipelineType> _executionOrder = null!;
-    private ISyncContextSource _contextSource = null!;
-    private IProgressSource _progressSource = null!;
-    private InstancePublisher _instancePublisher = null!;
-    private List<(
-        string Instance,
-        PipelineType Pipeline,
-        PipelineProgressStatus Status
-    )> _statusUpdates = null!;
+    private IInstancePublisher _instancePublisher = null!;
+    private Dictionary<PipelineType, IPipelinePublisher> _pipelinePublishers = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
         _executionOrder = [];
-        _statusUpdates = [];
-        _contextSource = Substitute.For<ISyncContextSource>();
-        _progressSource = Substitute.For<IProgressSource>();
-        _instancePublisher = new InstancePublisher(
-            "test-instance",
-            Substitute.For<ISyncRunPublisher>()
-        );
+        _pipelinePublishers = [];
 
-        // Capture status updates via the writer delegate
-        _progressSource
-            .ForPipeline(Arg.Any<string>(), Arg.Any<PipelineType>())
-            .Returns(callInfo =>
+        _instancePublisher = Substitute.For<IInstancePublisher>();
+        _instancePublisher
+            .ForPipeline(Arg.Any<PipelineType>())
+            .Returns(ci =>
             {
-                var instance = callInfo.ArgAt<string>(0);
-                var pipeline = callInfo.ArgAt<PipelineType>(1);
-                return new PipelineProgressWriter(
-                    (status, _) => _statusUpdates.Add((instance, pipeline, status))
-                );
+                var type = ci.Arg<PipelineType>();
+                var pub = Substitute.For<IPipelinePublisher>();
+                _pipelinePublishers[type] = pub;
+                return pub;
             });
-
-        var config = Substitute.For<IServiceConfiguration>();
-        config.InstanceName.Returns("test-instance");
-
-        builder.RegisterInstance(_contextSource).As<ISyncContextSource>();
-        builder.RegisterInstance(_progressSource).As<IProgressSource>();
-        builder.RegisterInstance(config).As<IServiceConfiguration>();
     }
 
     private ISyncPipeline CreateStubPipeline(
@@ -67,8 +46,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             .Execute(
                 Arg.Any<ISyncSettings>(),
                 Arg.Any<PipelinePlan>(),
-                Arg.Any<PipelineProgressWriter>(),
-                Arg.Any<PipelinePublisher>(),
+                Arg.Any<IPipelinePublisher>(),
                 Arg.Any<CancellationToken>()
             )
             .Returns(_ =>
@@ -91,7 +69,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public async Task Pipelines_execute_in_topological_order()
     {
-        // QP depends on CF; QS and MN are independent
         var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
         var qpPipeline = CreateStubPipeline(
             PipelineType.QualityProfile,
@@ -100,25 +77,21 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
         var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
 
-        // Register in non-topological order to prove sort works
         var sut = CreateExecutor([qpPipeline, mnPipeline, cfPipeline, qsPipeline]);
 
         var settings = Substitute.For<ISyncSettings>();
         await sut.Execute(settings, new PipelinePlan(), _instancePublisher, CancellationToken.None);
 
-        // CF must execute before QP (its dependent)
         var cfIndex = _executionOrder.IndexOf(PipelineType.CustomFormat);
         var qpIndex = _executionOrder.IndexOf(PipelineType.QualityProfile);
         cfIndex.Should().BeLessThan(qpIndex, "CF must run before QP due to dependency");
 
-        // All 4 pipelines should have executed
         _executionOrder.Should().HaveCount(4);
     }
 
     [Test]
     public async Task Failed_pipeline_causes_dependents_to_be_skipped()
     {
-        // CF fails, so QP should be skipped. QS and MN are independent and should still run.
         var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, [], PipelineResult.Failed);
         var qpPipeline = CreateStubPipeline(
             PipelineType.QualityProfile,
@@ -137,10 +110,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             CancellationToken.None
         );
 
-        // QP should NOT have executed (skipped due to CF failure)
         _executionOrder.Should().NotContain(PipelineType.QualityProfile);
 
-        // CF, QS, and MN should have executed
         _executionOrder
             .Should()
             .BeEquivalentTo([
@@ -149,23 +120,17 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
                 PipelineType.MediaNaming,
             ]);
 
-        // QP should be marked as skipped
-        _contextSource.Received().SetPipeline(PipelineType.QualityProfile);
-        _statusUpdates
-            .Should()
-            .Contain(x =>
-                x.Pipeline == PipelineType.QualityProfile
-                && x.Status == PipelineProgressStatus.Skipped
-            );
+        // QP should be marked as skipped via its pipeline publisher
+        _pipelinePublishers[PipelineType.QualityProfile]
+            .Received()
+            .SetStatus(PipelineProgressStatus.Skipped, Arg.Any<int?>());
 
-        // Overall result should be Failed
         result.Should().Be(PipelineResult.Failed);
     }
 
     [Test]
     public async Task Independent_pipelines_run_even_when_others_fail()
     {
-        // QS fails, but since nothing depends on it, all other pipelines should still run
         var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
         var qpPipeline = CreateStubPipeline(
             PipelineType.QualityProfile,
@@ -184,7 +149,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             CancellationToken.None
         );
 
-        // All 4 pipelines should have executed (QS failure doesn't affect others)
         _executionOrder.Should().HaveCount(4);
         result.Should().Be(PipelineResult.Failed);
     }
@@ -214,7 +178,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public void Circular_dependency_throws_InvalidOperationException()
     {
-        // CF depends on QP, QP depends on CF - circular dependency
         var cfPipeline = CreateStubPipeline(
             PipelineType.CustomFormat,
             [PipelineType.QualityProfile]

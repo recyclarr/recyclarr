@@ -1,18 +1,43 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Sync;
 
-public class InstancePublisher(string name, ISyncRunPublisher publisher)
+internal class InstancePublisher(IServiceConfiguration config, ISyncRunPublisher publisher)
+    : IInstancePublisher
 {
-    public string Name => name;
+    public string Name => config.InstanceName;
+    public bool HasErrors { get; private set; }
 
     public void SetStatus(InstanceProgressStatus status)
     {
-        publisher.Publish(new InstanceEvent(name, status));
+        publisher.Publish(new InstanceEvent(config.InstanceName, status));
     }
 
-    public PipelinePublisher ForPipeline(PipelineType type)
+    public void AddError(string message)
     {
-        return new PipelinePublisher(name, type, publisher);
+        HasErrors = true;
+        publisher.Publish(
+            new SyncDiagnosticEvent(config.InstanceName, SyncDiagnosticLevel.Error, message)
+        );
+    }
+
+    public void AddWarning(string message)
+    {
+        publisher.Publish(
+            new SyncDiagnosticEvent(config.InstanceName, SyncDiagnosticLevel.Warning, message)
+        );
+    }
+
+    public void AddDeprecation(string message)
+    {
+        publisher.Publish(
+            new SyncDiagnosticEvent(config.InstanceName, SyncDiagnosticLevel.Deprecation, message)
+        );
+    }
+
+    public IPipelinePublisher ForPipeline(PipelineType type)
+    {
+        return new PipelinePublisher(config.InstanceName, type, publisher);
     }
 }

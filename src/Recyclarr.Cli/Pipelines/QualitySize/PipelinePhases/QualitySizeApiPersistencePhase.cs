@@ -22,7 +22,6 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
                 "All sizes for quality definition {Name} are already up to date!",
                 context.QualityDefinitionType
             );
-            context.Progress.SetStatus(PipelineProgressStatus.Succeeded, 0);
             context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, 0);
             return PipelineFlow.Terminate;
         }
@@ -34,7 +33,6 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
             itemsToUpdate.Count,
             context.QualityDefinitionType
         );
-        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
 
         return PipelineFlow.Continue;

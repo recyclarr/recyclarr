@@ -10,4 +10,11 @@ public class LifetimeScopeFactory(ILifetimeScope scope)
         var childScope = scope.BeginLifetimeScope(tag, c => configure?.Invoke(c));
         return childScope.Resolve<T>();
     }
+
+    public T Start<T>(Action<ContainerBuilder>? configure = null)
+        where T : LifetimeScopeWrapper
+    {
+        var childScope = scope.BeginLifetimeScope(c => configure?.Invoke(c));
+        return childScope.Resolve<T>();
+    }
 }

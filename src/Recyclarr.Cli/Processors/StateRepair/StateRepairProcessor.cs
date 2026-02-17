@@ -4,12 +4,13 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
+using Recyclarr.Config.Models;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.StateRepair;
 
 [UsedImplicitly]
-internal class CacheRebuildConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+internal class CacheRebuildConfigurationScope(ILifetimeScope scope) : LifetimeScopeWrapper(scope)
 {
     public StateRepairInstanceProcessor InstanceProcessor { get; } =
         scope.Resolve<StateRepairInstanceProcessor>();
@@ -19,7 +20,7 @@ internal class CacheRebuildConfigurationScope(ILifetimeScope scope) : Configurat
 internal class StateRepairProcessor(
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
-    ConfigurationScopeFactory scopeFactory,
+    LifetimeScopeFactory scopeFactory,
     ExceptionHandler exceptionHandler
 )
 {
@@ -42,7 +43,11 @@ internal class StateRepairProcessor(
         {
             try
             {
-                using var scope = scopeFactory.Start<CacheRebuildConfigurationScope>(config);
+                using var scope = scopeFactory.Start<CacheRebuildConfigurationScope>(c =>
+                {
+                    c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+                    c.RegisterType<CacheRebuildConfigurationScope>();
+                });
                 if (await scope.InstanceProcessor.ProcessAsync(settings, ct))
                 {
                     succeeded++;

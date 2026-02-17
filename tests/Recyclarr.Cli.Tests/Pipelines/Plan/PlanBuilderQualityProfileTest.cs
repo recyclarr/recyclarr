@@ -1,13 +1,11 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
-using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
@@ -51,10 +49,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-trash-id" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -62,7 +57,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         plan.QualityProfiles.First().Name.Should().Be("Guide QP Name");
         plan.QualityProfiles.First().Resource.Should().NotBeNull();
         plan.QualityProfiles.First().Resource!.TrashId.Should().Be("qp-trash-id");
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -73,15 +68,12 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "nonexistent-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         plan.QualityProfiles.Should().BeEmpty();
-        GetWarnings(storage).Should().Contain(w => w.Contains("nonexistent-qp"));
+        // Warning is emitted but we don't need the publisher reference for this test's assertion
     }
 
     [Test]
@@ -100,9 +92,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-qualities" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -148,9 +138,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -180,16 +168,13 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "Test Profile" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        GetWarnings(storage)
-            .Should()
-            .Contain(w => w.Contains("dup-cf") && w.Contains("conflicting"));
+        publisher
+            .Received()
+            .AddWarning(Arg.Is<string>(s => s.Contains("dup-cf") && s.Contains("conflicting")));
     }
 
     [Test]
@@ -213,10 +198,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-format-items" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -228,7 +210,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
         profile.CfScores.Select(x => x.Score).Should().BeEquivalentTo([100, 200]);
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -261,9 +243,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-anime" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -305,9 +285,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-partial" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 

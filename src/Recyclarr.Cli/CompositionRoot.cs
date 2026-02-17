@@ -60,12 +60,14 @@ internal static class CompositionRoot
             "sync",
             b =>
             {
+                b.RegisterType<SyncScope>();
                 b.RegisterType<SyncProcessor>();
                 b.RegisterType<SyncProgressRenderer>();
             }
         );
 
         // Instance-level (resolved from "instance" child scope of "sync")
+        builder.RegisterType<InstanceScope>();
         builder.RegisterType<InstanceSyncProcessor>();
 
         // Configuration

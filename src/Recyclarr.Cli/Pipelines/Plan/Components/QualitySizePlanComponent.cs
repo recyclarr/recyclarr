@@ -1,18 +1,19 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class QualitySizePlanComponent(
+    IInstancePublisher events,
     QualitySizeResourceQuery guide,
     IServiceConfiguration config,
     ILogger log
 ) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, ISyncEventPublisher events)
+    public void Process(PipelinePlan plan)
     {
         var configSizeData = config.QualityDefinition;
         if (configSizeData is null)
@@ -70,7 +71,7 @@ internal class QualitySizePlanComponent(
         };
     }
 
-    private static decimal? ClampPreferredRatio(decimal? ratio, ISyncEventPublisher events)
+    private static decimal? ClampPreferredRatio(decimal? ratio, IInstancePublisher events)
     {
         if (ratio is not (< 0 or > 1))
         {
@@ -127,7 +128,7 @@ internal class QualitySizePlanComponent(
 
     private static bool ValidateQualitySizeOrder(
         PlannedQualityItem quality,
-        ISyncEventPublisher events
+        IInstancePublisher events
     )
     {
         // preferred null = unlimited, so min is always ≤ preferred when preferred is unlimited

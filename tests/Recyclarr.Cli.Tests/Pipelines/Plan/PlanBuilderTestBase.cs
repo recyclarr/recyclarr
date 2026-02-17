@@ -1,11 +1,15 @@
 using System.IO.Abstractions;
 using System.Text.Json;
+using Autofac;
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config;
+using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ResourceProviders.Infrastructure;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
@@ -160,12 +164,18 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         registry.Register<RadarrCfGroupResource>([file]);
     }
 
-    protected static bool HasErrors(SyncEventStorage storage) =>
-        storage.Diagnostics.Any(e => e.Type == DiagnosticType.Error);
-
-    protected static IEnumerable<string> GetWarnings(SyncEventStorage storage) =>
-        storage.Diagnostics.Where(e => e.Type == DiagnosticType.Warning).Select(e => e.Message);
-
-    protected static IEnumerable<string> GetErrors(SyncEventStorage storage) =>
-        storage.Diagnostics.Where(e => e.Type == DiagnosticType.Error).Select(e => e.Message);
+    protected (PlanBuilder Sut, IInstancePublisher Publisher) CreatePlanBuilder(
+        IServiceConfiguration config
+    )
+    {
+        var publisher = Substitute.For<IInstancePublisher>();
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterInstance(publisher).As<IInstancePublisher>();
+            c.RegisterType<TestConfigurationScope>();
+        });
+        return (scope.Resolve<PlanBuilder>(), publisher);
+    }
 }

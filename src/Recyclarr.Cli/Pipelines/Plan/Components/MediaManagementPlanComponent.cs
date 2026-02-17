@@ -1,11 +1,10 @@
 using Recyclarr.Config.Models;
-using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class MediaManagementPlanComponent(IServiceConfiguration config) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, ISyncEventPublisher events)
+    public void Process(PipelinePlan plan)
     {
         var propersAndRepacks = config.MediaManagement.PropersAndRepacks;
 

@@ -1,14 +1,10 @@
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Logging;
-using Recyclarr.Sync;
 using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing.PostProcessing;
 
-public class ConfigDeprecationPostProcessor(
-    ConfigDeprecations deprecations,
-    ISyncContextSource contextSource
-) : IConfigPostProcessor
+public class ConfigDeprecationPostProcessor(ConfigDeprecations deprecations) : IConfigPostProcessor
 {
     public RootConfigYaml Process(RootConfigYaml config)
     {
@@ -29,7 +25,6 @@ public class ConfigDeprecationPostProcessor(
         where T : ServiceConfigYaml
     {
         using var logScope = LogContext.PushProperty(LogProperty.Scope, instanceName);
-        contextSource.SetInstance(instanceName);
         return deprecations.CheckAndTransform(yaml);
     }
 }

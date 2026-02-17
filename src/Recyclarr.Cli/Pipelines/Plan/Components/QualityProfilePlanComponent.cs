@@ -1,17 +1,18 @@
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class QualityProfilePlanComponent(
+    IInstancePublisher events,
     QualityProfileResourceQuery guide,
     IServiceConfiguration config,
     ILogger log
 ) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, ISyncEventPublisher events)
+    public void Process(PipelinePlan plan)
     {
         log.Debug(
             "Planning quality profiles for {Service} {Instance}: {Count} profiles",
@@ -73,7 +74,7 @@ internal class QualityProfilePlanComponent(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
         PlannedCustomFormat cf,
-        ISyncEventPublisher events
+        IInstancePublisher events
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -130,7 +131,7 @@ internal class QualityProfilePlanComponent(
     private static PlannedQualityProfile? CreatePlannedProfile(
         QualityProfileConfig config,
         Dictionary<string, QualityProfileResource> guideResources,
-        ISyncEventPublisher events
+        IInstancePublisher events
     )
     {
         QualityProfileResource? resource = null;

@@ -1,6 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -8,11 +8,10 @@ internal class ConfiguredCustomFormatProvider(
     IServiceConfiguration config,
     QualityProfileResourceQuery qpQuery,
     CfGroupResourceQuery cfGroupQuery,
-    ISyncEventPublisher events,
     ILogger log
 )
 {
-    public IEnumerable<ConfiguredCfEntry> GetAll()
+    public IEnumerable<ConfiguredCfEntry> GetAll(IInstancePublisher events)
     {
         var qpResources = qpQuery
             .Get(config.ServiceType)
@@ -46,7 +45,7 @@ internal class ConfiguredCustomFormatProvider(
         }
 
         // From explicit CF groups (custom_format_groups.add)
-        foreach (var entry in FromExplicitGroups(qpResources, cfGroupResources))
+        foreach (var entry in FromExplicitGroups(events, qpResources, cfGroupResources))
         {
             yield return entry;
         }
@@ -196,6 +195,7 @@ internal class ConfiguredCustomFormatProvider(
 
     // Processes explicitly added CF groups (custom_format_groups.add).
     private IEnumerable<ConfiguredCfEntry> FromExplicitGroups(
+        IInstancePublisher events,
         Dictionary<string, QualityProfileResource> qpResources,
         Dictionary<string, CfGroupResource> cfGroupResources
     )
@@ -210,13 +210,13 @@ internal class ConfiguredCustomFormatProvider(
             }
 
             // Validate select list
-            if (!ValidateSelectList(groupConfig, groupResource))
+            if (!ValidateSelectList(events, groupConfig, groupResource))
             {
                 continue;
             }
 
             // Determine which profiles this group's CFs should be assigned to
-            var assignScoresTo = DetermineProfiles(groupConfig, groupResource, qpResources);
+            var assignScoresTo = DetermineProfiles(events, groupConfig, groupResource, qpResources);
             if (assignScoresTo is null)
             {
                 continue;
@@ -296,7 +296,8 @@ internal class ConfiguredCustomFormatProvider(
     }
 
     // Validates the select list for a CF group. Returns true if valid, false if errors found.
-    private bool ValidateSelectList(
+    private static bool ValidateSelectList(
+        IInstancePublisher events,
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource
     )
@@ -339,6 +340,7 @@ internal class ConfiguredCustomFormatProvider(
     // guide-backed quality profiles from the config that are in the group's include list.
     // Returns null if validation errors occurred for explicit profiles.
     private List<AssignScoresToConfig>? DetermineProfiles(
+        IInstancePublisher events,
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
         Dictionary<string, QualityProfileResource> qpResources
@@ -353,7 +355,7 @@ internal class ConfiguredCustomFormatProvider(
         if (groupConfig.AssignScoresTo.Count > 0)
         {
             // Explicit: user specified profiles - validate each one
-            return ValidateExplicitProfiles(groupConfig, includedProfiles, qpResources);
+            return ValidateExplicitProfiles(events, groupConfig, includedProfiles, qpResources);
         }
 
         // Implicit: guide-backed profiles in user's config that are in the include list
@@ -371,7 +373,8 @@ internal class ConfiguredCustomFormatProvider(
     }
 
     // Validates explicit assign_scores_to profiles. Returns null if errors found.
-    private List<AssignScoresToConfig>? ValidateExplicitProfiles(
+    private static List<AssignScoresToConfig>? ValidateExplicitProfiles(
+        IInstancePublisher events,
         CustomFormatGroupConfig groupConfig,
         HashSet<string> includedProfiles,
         Dictionary<string, QualityProfileResource> qpResources

@@ -35,7 +35,6 @@ internal class MediaNamingApiPersistencePhase(ILogger log, IMediaNamingApiServic
             log.Information("Media naming is up to date!");
         }
 
-        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

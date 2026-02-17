@@ -6,7 +6,6 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Events;
 using Serilog.Context;
 using Spectre.Console;
 
@@ -17,22 +16,16 @@ internal class InstanceSyncProcessor(
     ILogger log,
     IAnsiConsole console,
     IServiceConfiguration config,
+    IInstancePublisher instancePublisher,
     PlanBuilder planBuilder,
     IPipelineExecutor pipelines,
     ExceptionHandler exceptionHandler,
     SyncEventOutputStrategy syncEventOutput,
-    ISyncContextSource contextSource,
-    SyncEventStorage eventStorage,
     ServiceAgnosticCapabilityEnforcer enforcer
 )
 {
-    public async Task<InstanceSyncResult> Process(
-        ISyncSettings settings,
-        InstancePublisher instancePublisher,
-        CancellationToken ct
-    )
+    public async Task<InstanceSyncResult> Process(ISyncSettings settings, CancellationToken ct)
     {
-        contextSource.SetInstance(config.InstanceName);
         using var _ = LogContext.PushProperty("InstanceName", config.InstanceName);
 
         try
@@ -53,7 +46,7 @@ internal class InstanceSyncProcessor(
 
             var plan = planBuilder.Build();
 
-            if (eventStorage.HasInstanceErrors(config.InstanceName))
+            if (instancePublisher.HasErrors)
             {
                 return InstanceSyncResult.Failed;
             }

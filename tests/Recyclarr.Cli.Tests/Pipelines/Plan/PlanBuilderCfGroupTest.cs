@@ -1,9 +1,6 @@
-using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
@@ -50,10 +47,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -66,7 +60,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // CFs should be assigned to the guide-backed profile
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -119,9 +113,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -171,9 +163,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -218,9 +208,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -247,16 +235,13 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         // No CFs in plan (group was skipped due to error)
         plan.CustomFormats.Should().BeEmpty();
-        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent-group"));
+        publisher.Received().AddError(Arg.Is<string>(s => s.Contains("nonexistent-group")));
     }
 
     [Test]
@@ -280,16 +265,13 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "User Profile" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         // No CFs from group (no guide-backed profiles to assign to)
         plan.CustomFormats.Should().BeEmpty();
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -316,16 +298,13 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         // No CFs in plan (optional CF not selected)
         plan.CustomFormats.Should().BeEmpty();
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -367,10 +346,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -379,7 +355,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -429,10 +405,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -440,7 +413,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         plan.CustomFormats.Select(x => x.Resource.TrashId)
             .Should()
             .BeEquivalentTo("required-cf", "optional-cf");
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -483,10 +456,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -494,7 +464,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         plan.CustomFormats.Select(x => x.Resource.TrashId)
             .Should()
             .BeEquivalentTo("required-cf", "default-cf");
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -535,10 +505,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -547,8 +514,8 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
-        GetWarnings(storage).Should().Contain(w => w.Contains("redundant"));
-        HasErrors(storage).Should().BeFalse();
+        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("redundant")));
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -581,16 +548,17 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        GetErrors(storage)
-            .Should()
-            .Contain(e => e.Contains("nonexistent-cf") && e.Contains("Invalid CF trash_id"));
+        publisher
+            .Received()
+            .AddError(
+                Arg.Is<string>(s =>
+                    s.Contains("nonexistent-cf") && s.Contains("Invalid CF trash_id")
+                )
+            );
     }
 
     [Test]
@@ -632,17 +600,16 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "not-included-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        GetErrors(storage)
-            .Should()
-            .Contain(e =>
-                e.Contains("not-included-qp") && e.Contains("not in this group's include list")
+        publisher
+            .Received()
+            .AddError(
+                Arg.Is<string>(s =>
+                    s.Contains("not-included-qp") && s.Contains("not in this group's include list")
+                )
             );
     }
 
@@ -679,17 +646,16 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "valid-qp" }],
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        GetErrors(storage)
-            .Should()
-            .Contain(e =>
-                e.Contains("nonexistent-profile") && e.Contains("Invalid profile trash_id")
+        publisher
+            .Received()
+            .AddError(
+                Arg.Is<string>(s =>
+                    s.Contains("nonexistent-profile") && s.Contains("Invalid profile trash_id")
+                )
             );
     }
 }

@@ -1,7 +1,6 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines;
 
@@ -16,8 +15,7 @@ internal interface ISyncPipeline
     Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
-        PipelineProgressWriter progress,
-        PipelinePublisher publisher,
+        IPipelinePublisher publisher,
         CancellationToken ct
     );
 }

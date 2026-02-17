@@ -9,7 +9,7 @@ internal interface IPipelineExecutor
     Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
-        InstancePublisher instancePublisher,
+        IInstancePublisher instancePublisher,
         CancellationToken ct
     );
 }

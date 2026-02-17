@@ -1,3 +1,4 @@
+using Autofac;
 using Flurl.Http.Testing;
 using Recyclarr.Common;
 using Recyclarr.Config;
@@ -18,10 +19,13 @@ internal sealed class CustomFormatServiceTest : IntegrationTestFixture
         using var http = new HttpTest();
         http.RespondWith(jsonBody);
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
-            new RadarrConfiguration { InstanceName = "instance" }
-        );
+        var config = new RadarrConfiguration { InstanceName = "instance" };
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As<RadarrConfiguration>().As<IServiceConfiguration>();
+            c.RegisterType<TestConfigurationScope>();
+        });
 
         var sut = scope.Resolve<CustomFormatApiService>();
         var result = await sut.GetCustomFormats(CancellationToken.None);

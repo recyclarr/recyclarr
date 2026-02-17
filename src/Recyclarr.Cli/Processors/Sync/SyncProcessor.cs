@@ -5,7 +5,6 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
-using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -15,8 +14,6 @@ internal class SyncProcessor(
     LifetimeScopeFactory scopeFactory,
     NotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
-    IProgressSource progressSource,
-    ISyncRunPublisher runPublisher,
     SyncProgressRenderer progressRenderer
 )
 {
@@ -24,11 +21,6 @@ internal class SyncProcessor(
     {
         var configs = LoadConfigs(settings);
         var instanceNames = configs.Select(c => c.InstanceName).ToList();
-
-        foreach (var config in configs)
-        {
-            progressSource.AddInstance(config.InstanceName);
-        }
 
         var result = ExitStatus.Succeeded;
         if (settings.Preview)
@@ -73,37 +65,27 @@ internal class SyncProcessor(
 
         foreach (var config in configs)
         {
-            var instancePublisher = new InstancePublisher(config.InstanceName, runPublisher);
-
-            progressSource.SetInstanceStatus(config.InstanceName, InstanceProgressStatus.Running);
-            instancePublisher.SetStatus(InstanceProgressStatus.Running);
-
             using var instanceScope = scopeFactory.Start<InstanceScope>(
                 "instance",
-                c => c.RegisterInstance(config).AsSelf().As<IServiceConfiguration>()
+                c =>
+                {
+                    c.RegisterInstance(config).AsSelf().As<IServiceConfiguration>();
+                }
             );
-            var result = await instanceScope.InstanceProcessor.Process(
-                settings,
-                instancePublisher,
-                ct
-            );
+
+            var publisher = instanceScope.Publisher;
+            publisher.SetStatus(InstanceProgressStatus.Running);
+
+            var result = await instanceScope.InstanceProcessor.Process(settings, ct);
 
             if (result == InstanceSyncResult.Failed)
             {
-                progressSource.SetInstanceStatus(
-                    config.InstanceName,
-                    InstanceProgressStatus.Failed
-                );
-                instancePublisher.SetStatus(InstanceProgressStatus.Failed);
+                publisher.SetStatus(InstanceProgressStatus.Failed);
                 failureDetected = true;
             }
             else
             {
-                progressSource.SetInstanceStatus(
-                    config.InstanceName,
-                    InstanceProgressStatus.Succeeded
-                );
-                instancePublisher.SetStatus(InstanceProgressStatus.Succeeded);
+                publisher.SetStatus(InstanceProgressStatus.Succeeded);
             }
         }
 

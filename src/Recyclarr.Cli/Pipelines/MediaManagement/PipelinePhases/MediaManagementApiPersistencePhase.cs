@@ -30,7 +30,6 @@ internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementA
             log.Information("Media management is up to date!");
         }
 
-        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
     }
 }

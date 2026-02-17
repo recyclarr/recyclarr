@@ -30,8 +30,6 @@ using Recyclarr.Settings;
 using Recyclarr.Settings.Deprecations;
 using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Events;
-using Recyclarr.Sync.Progress;
 using Recyclarr.SyncState;
 using Recyclarr.TrashGuide.CustomFormat;
 using Recyclarr.VersionControl;
@@ -98,7 +96,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<ConfigurationScopeFactory>();
+        builder.RegisterType<LifetimeScopeFactory>();
 
         // Filter Processors
         builder.RegisterType<ConfigFilterProcessor>();
@@ -269,18 +267,14 @@ public class CoreAutofacModule : Module
 
     private static void RegisterSyncEvents(ContainerBuilder builder)
     {
-        // Legacy registrations (will be removed after full event system migration)
-        builder.RegisterType<SyncEventStorage>().SingleInstance();
-        builder.RegisterType<SyncContextSource>().As<ISyncContextSource>().SingleInstance();
-        builder.RegisterType<ProgressSource>().As<IProgressSource>().SingleInstance();
-        builder.RegisterType<SyncEventCollector>().As<ISyncEventPublisher>().SingleInstance();
-
-        // New event system
         builder
             .RegisterType<SyncRunScope>()
             .AsImplementedInterfaces()
             .InstancePerMatchingLifetimeScope("sync");
 
-        builder.RegisterType<LifetimeScopeFactory>();
+        builder
+            .RegisterType<InstancePublisher>()
+            .As<IInstancePublisher>()
+            .InstancePerMatchingLifetimeScope("instance");
     }
 }

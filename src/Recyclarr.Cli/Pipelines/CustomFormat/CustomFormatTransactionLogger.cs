@@ -1,12 +1,11 @@
 using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher eventPublisher)
+internal class CustomFormatTransactionLogger(ILogger log)
 {
     public void LogTransactions(CustomFormatPipelineContext context)
     {
@@ -20,7 +19,6 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
 
         var totalCount = LogResults(transactions);
 
-        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
     }
 
@@ -85,7 +83,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
     }
 
     private bool LogDiagnostics(
-        PipelinePublisher publisher,
+        IPipelinePublisher publisher,
         CustomFormatTransactionData transactions
     )
     {
@@ -101,7 +99,6 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
                 $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
                 + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
                 + "then run: recyclarr state repair";
-            eventPublisher.AddError(message);
             publisher.AddError(message);
         }
 
@@ -112,7 +109,7 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
     }
 
     private void LogConflictingCustomFormats(
-        PipelinePublisher publisher,
+        IPipelinePublisher publisher,
         Collection<ConflictingCustomFormat> conflicts
     )
     {
@@ -134,7 +131,6 @@ internal class CustomFormatTransactionLogger(ILogger log, ISyncEventPublisher ev
             $"{conflicts.Count} Custom Formats cannot be synced because CFs with matching names "
             + $"already exist (e.g., {examples}{suffix}). "
             + "To adopt existing CFs, run: `recyclarr state repair --adopt`";
-        eventPublisher.AddError(message);
         publisher.AddError(message);
 
         log.Debug(

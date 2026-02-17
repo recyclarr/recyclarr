@@ -1,8 +1,8 @@
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.ErrorHandling;
 
-internal class SyncEventOutputStrategy(ISyncEventPublisher publisher) : IErrorOutputStrategy
+internal class SyncEventOutputStrategy(IInstancePublisher publisher) : IErrorOutputStrategy
 {
     public void WriteError(string message)
     {

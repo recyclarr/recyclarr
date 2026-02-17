@@ -1,24 +1,18 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-internal class CompositeSyncPipeline(
-    ILogger log,
-    IEnumerable<ISyncPipeline> pipelines,
-    ISyncContextSource contextSource,
-    IProgressSource progressSource,
-    IServiceConfiguration config
-) : IPipelineExecutor
+internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pipelines)
+    : IPipelineExecutor
 {
     public virtual async Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
-        InstancePublisher instancePublisher,
+        IInstancePublisher instancePublisher,
         CancellationToken ct
     )
     {
@@ -32,9 +26,6 @@ internal class CompositeSyncPipeline(
 
         foreach (var pipeline in sortedPipelines)
         {
-            contextSource.SetPipeline(pipeline.PipelineType);
-
-            var progress = progressSource.ForPipeline(config.InstanceName, pipeline.PipelineType);
             var publisher = instancePublisher.ForPipeline(pipeline.PipelineType);
 
             var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
@@ -45,12 +36,11 @@ internal class CompositeSyncPipeline(
                     pipeline.PipelineType,
                     failedDependencies[0]
                 );
-                progress.SetStatus(PipelineProgressStatus.Skipped);
                 publisher.SetStatus(PipelineProgressStatus.Skipped);
                 continue;
             }
 
-            var result = await pipeline.Execute(settings, plan, progress, publisher, ct);
+            var result = await pipeline.Execute(settings, plan, publisher, ct);
             log.Debug("Pipeline {Pipeline} result: {Result}", pipeline.PipelineType, result);
 
             if (result == PipelineResult.Failed)

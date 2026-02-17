@@ -1,8 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
-using Recyclarr.Sync.Events;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;
 
@@ -22,15 +19,12 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
         plan.MediaNaming.Should().NotBeNull();
-        HasErrors(storage).Should().BeFalse();
+        publisher.DidNotReceive().AddError(Arg.Any<string>());
     }
 
     [Test]
@@ -47,14 +41,11 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        GetErrors(storage).Should().Contain(e => e.Contains("nonexistent"));
+        publisher.Received().AddError(Arg.Is<string>(s => s.Contains("nonexistent")));
     }
 
     [Test]
@@ -72,13 +63,10 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var scopeFactory = Resolve<ConfigurationScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(config);
-        var sut = scope.Resolve<PlanBuilder>();
-        var storage = Resolve<SyncEventStorage>();
+        var (sut, publisher) = CreatePlanBuilder(config);
 
         sut.Build();
 
-        HasErrors(storage).Should().BeTrue();
+        publisher.Received().AddError(Arg.Any<string>());
     }
 }

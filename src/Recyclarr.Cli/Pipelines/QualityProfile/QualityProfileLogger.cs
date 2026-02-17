@@ -1,9 +1,8 @@
-using Recyclarr.Sync.Events;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublisher)
+internal class QualityProfileLogger(ILogger log)
 {
     public void LogTransactionNotices(QualityProfilePipelineContext context)
     {
@@ -16,7 +15,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
                 + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
                 + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
                 + $"you: {string.Join(", ", transactions.NonExistentProfiles)}";
-            eventPublisher.AddWarning(message);
             context.Publisher.AddWarning(message);
         }
 
@@ -25,7 +23,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
             foreach (var error in errors)
             {
                 var message = $"Profile '{profile.ProfileName}': {error.ErrorMessage}";
-                eventPublisher.AddError(message);
                 context.Publisher.AddError(message);
             }
         }
@@ -54,7 +51,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
             var message =
                 $"Quality profile '{profile.ProfileName}' references invalid quality names: "
                 + string.Join(", ", invalidQualityNames);
-            eventPublisher.AddWarning(message);
             context.Publisher.AddWarning(message);
         }
 
@@ -64,7 +60,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
             var message =
                 $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
                 + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}";
-            eventPublisher.AddWarning(message);
             context.Publisher.AddWarning(message);
         }
 
@@ -132,7 +127,6 @@ internal class QualityProfileLogger(ILogger log, ISyncEventPublisher eventPublis
             log.Information("All quality profiles are up to date!");
         }
 
-        context.Progress.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
     }
 }

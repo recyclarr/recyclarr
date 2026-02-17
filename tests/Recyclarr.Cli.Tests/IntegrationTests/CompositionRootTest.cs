@@ -47,12 +47,13 @@ internal sealed class CompositionRootTest : CliIntegrationFixture
         }
     }
 
-    // Resolve from a "sync" child scope so that sync-scoped types are resolvable.
+    // Resolve from nested "sync" > "instance" scopes so all scope-tagged types are resolvable.
     // Child scopes can also resolve parent (root) registrations, so this covers everything.
     [TestCaseSource(typeof(ConcreteTypeEnumerator))]
     public void Service_should_be_instantiable(Type service)
     {
         using var syncScope = Container.BeginLifetimeScope("sync");
-        syncScope.Resolve(service).Should().NotBeNull();
+        using var instanceScope = syncScope.BeginLifetimeScope("instance");
+        instanceScope.Resolve(service).Should().NotBeNull();
     }
 }

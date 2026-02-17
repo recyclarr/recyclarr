@@ -1,17 +1,18 @@
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.Sync.Events;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
 internal class CustomFormatPlanComponent(
+    IInstancePublisher events,
     ConfiguredCustomFormatProvider cfProvider,
     CustomFormatResourceQuery cfQuery,
     IServiceConfiguration config
 ) : IPlanComponent
 {
-    public void Process(PipelinePlan plan, ISyncEventPublisher events)
+    public void Process(PipelinePlan plan)
     {
         var cfResources = cfQuery
             .Get(config.ServiceType)
@@ -19,7 +20,7 @@ internal class CustomFormatPlanComponent(
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll()
+            .GetAll(events)
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)

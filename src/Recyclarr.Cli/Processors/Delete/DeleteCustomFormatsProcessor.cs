@@ -6,6 +6,7 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
+using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.CustomFormat;
 using Spectre.Console;
@@ -13,7 +14,7 @@ using Spectre.Console;
 namespace Recyclarr.Cli.Processors.Delete;
 
 [UsedImplicitly]
-internal class CustomFormatConfigurationScope(ILifetimeScope scope) : ConfigurationScope(scope)
+internal class CustomFormatConfigurationScope(ILifetimeScope scope) : LifetimeScopeWrapper(scope)
 {
     public ICustomFormatApiService CustomFormatApi { get; } =
         scope.Resolve<ICustomFormatApiService>();
@@ -23,7 +24,7 @@ internal class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
     ConfigurationRegistry configRegistry,
-    ConfigurationScopeFactory scopeFactory
+    LifetimeScopeFactory scopeFactory
 )
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
@@ -37,7 +38,12 @@ internal class DeleteCustomFormatsProcessor(
             return;
         }
 
-        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(configs.Single());
+        var config = configs.Single();
+        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterType<CustomFormatConfigurationScope>();
+        });
 
         var cfs = await ObtainCustomFormats(scope.CustomFormatApi, ct);
 
