@@ -5,6 +5,10 @@
     "linear": {
       "type": "remote",
       "url": "https://mcp.linear.app/mcp"
+    },
+    "mslearn": {
+      "type": "remote",
+      "url": "https://learn.microsoft.com/api/mcp"
     }
   },
   "formatter": {
