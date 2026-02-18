@@ -504,7 +504,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     {
         // Scenario: Cache corruption results in two trash_ids mapping to the same service ID.
         // One is in config (would be unchanged), one is orphaned (would be deleted).
-        // Expected: Sync detects the conflict and reports an error, telling user to run cache rebuild.
+        // Expected: Sync detects the conflict and reports an error, telling user to run state repair.
         // Sync should NOT silently delete a CF that's also being updated.
         var scopeFactory = Resolve<LifetimeScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(

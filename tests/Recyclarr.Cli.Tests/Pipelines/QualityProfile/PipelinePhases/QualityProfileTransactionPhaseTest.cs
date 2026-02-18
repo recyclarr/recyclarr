@@ -677,7 +677,7 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        // Stale cache + name match for guide profile = conflict (needs cache rebuild --adopt)
+        // Stale state + name match for guide profile = conflict (needs state repair --adopt)
         context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
         context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(50);
     }

@@ -523,7 +523,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     public async Task Rebuild_discards_orphan_when_service_id_claimed_by_adopted_entry()
     {
         // Scenario: User manually edited cache, changing trash_id from 'real-id' to 'orphan-id'.
-        // Cache rebuild should adopt the correct mapping and discard the orphan.
+        // State repair should adopt the correct mapping and discard the orphan.
         // This tests cache deduplication by service ID.
         SetupRadarrConfig("test-instance", "real-trash-id");
         SetupGuideCfs("radarr", ("real-trash-id", "BR-DISK"));

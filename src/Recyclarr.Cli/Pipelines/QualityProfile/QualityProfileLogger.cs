@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
@@ -26,6 +27,9 @@ internal class QualityProfileLogger(ILogger log)
                 context.Publisher.AddError(message);
             }
         }
+
+        LogConflictingProfiles(context, transactions);
+        LogAmbiguousProfiles(context, transactions);
 
         // Log warnings for new profiles
         foreach (var profile in transactions.NewProfiles)
@@ -73,6 +77,70 @@ internal class QualityProfileLogger(ILogger log)
                 missingQualities
             );
         }
+    }
+
+    private void LogConflictingProfiles(
+        QualityProfilePipelineContext context,
+        QualityProfileTransactionData transactions
+    )
+    {
+        if (transactions.ConflictingProfiles.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var conflict in transactions.ConflictingProfiles)
+        {
+            var message =
+                $"Quality profile '{conflict.PlannedProfile.Name}' cannot be synced because a "
+                + $"profile with that name already exists (ID: {conflict.ConflictingId}). "
+                + "To adopt the existing profile, run: `recyclarr state repair --adopt`";
+            context.Publisher.AddError(message);
+        }
+
+        log.Debug(
+            "Conflicting Quality Profiles: {@Conflicts}",
+            transactions.ConflictingProfiles.Select(x => new
+            {
+                x.PlannedProfile.Name,
+                x.PlannedProfile.Resource?.TrashId,
+                ServiceId = x.ConflictingId,
+            })
+        );
+    }
+
+    private void LogAmbiguousProfiles(
+        QualityProfilePipelineContext context,
+        QualityProfileTransactionData transactions
+    )
+    {
+        if (transactions.AmbiguousProfiles.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var ambiguous in transactions.AmbiguousProfiles)
+        {
+            var matchList = string.Join(
+                ", ",
+                ambiguous.ServiceMatches.Select(m => $"\"{m.Name}\" (ID: {m.Id})")
+            );
+            var message =
+                $"Quality profile '{ambiguous.PlannedProfile.Name}' cannot be synced because "
+                + $"multiple profiles match this name: {matchList}. Delete or rename duplicate "
+                + "profiles in the service, then run: recyclarr state repair";
+            context.Publisher.AddError(message);
+        }
+
+        log.Debug(
+            "Ambiguous Quality Profiles: {@Ambiguous}",
+            transactions.AmbiguousProfiles.Select(x => new
+            {
+                x.PlannedProfile.Name,
+                x.PlannedProfile.Resource?.TrashId,
+                Matches = x.ServiceMatches,
+            })
+        );
     }
 
     public void LogPersistenceResults(QualityProfilePipelineContext context)
