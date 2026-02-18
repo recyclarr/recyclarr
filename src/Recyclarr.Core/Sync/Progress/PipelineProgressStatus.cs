@@ -5,6 +5,7 @@ public enum PipelineProgressStatus
     Pending,
     Running,
     Succeeded,
+    Partial,
     Failed,
     Skipped,
 }

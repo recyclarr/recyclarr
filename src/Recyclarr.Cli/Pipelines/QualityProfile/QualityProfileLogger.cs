@@ -195,6 +195,29 @@ internal class QualityProfileLogger(ILogger log)
             log.Information("All quality profiles are up to date!");
         }
 
-        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalChanged);
+        var status = DetermineStatus(transactions);
+        context.Publisher.SetStatus(status, totalChanged);
+    }
+
+    private static PipelineProgressStatus DetermineStatus(
+        QualityProfileTransactionData transactions
+    )
+    {
+        var hasErrors =
+            transactions.InvalidProfiles.Count > 0
+            || transactions.ConflictingProfiles.Count > 0
+            || transactions.AmbiguousProfiles.Count > 0;
+
+        if (!hasErrors)
+        {
+            return PipelineProgressStatus.Succeeded;
+        }
+
+        var hasValidProfiles =
+            transactions.NewProfiles.Count > 0
+            || transactions.UpdatedProfiles.Count > 0
+            || transactions.UnchangedProfiles.Count > 0;
+
+        return hasValidProfiles ? PipelineProgressStatus.Partial : PipelineProgressStatus.Failed;
     }
 }

@@ -45,12 +45,6 @@ internal class InstanceSyncProcessor(
             await enforcer.Check(config, ct);
 
             var plan = planBuilder.Build();
-
-            if (plan.HasErrors)
-            {
-                return InstanceSyncResult.Failed;
-            }
-
             var result = await pipelines.Execute(settings, plan, instancePublisher, ct);
             return result == PipelineResult.Failed
                 ? InstanceSyncResult.Failed

@@ -5,7 +5,6 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
-using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
@@ -73,19 +72,10 @@ internal class SyncProcessor(
                 }
             );
 
-            var publisher = instanceScope.Publisher;
-            publisher.SetStatus(InstanceProgressStatus.Running);
-
             var result = await instanceScope.InstanceProcessor.Process(settings, ct);
-
             if (result == InstanceSyncResult.Failed)
             {
-                publisher.SetStatus(InstanceProgressStatus.Failed);
                 failureDetected = true;
-            }
-            else
-            {
-                publisher.SetStatus(InstanceProgressStatus.Succeeded);
             }
         }
 

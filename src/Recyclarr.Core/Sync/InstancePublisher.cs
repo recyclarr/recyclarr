@@ -1,18 +1,10 @@
 using Recyclarr.Config.Models;
-using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Sync;
 
 internal class InstancePublisher(IServiceConfiguration config, ISyncRunPublisher publisher)
     : IInstancePublisher
 {
-    public string Name => config.InstanceName;
-
-    public void SetStatus(InstanceProgressStatus status)
-    {
-        publisher.Publish(new InstanceEvent(config.InstanceName, status));
-    }
-
     public void AddError(string message)
     {
         publisher.Publish(

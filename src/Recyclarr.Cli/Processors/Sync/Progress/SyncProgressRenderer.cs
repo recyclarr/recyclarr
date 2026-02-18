@@ -21,28 +21,17 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
     {
         _snapshot = BuildInitialSnapshot(instanceNames);
 
-        // Merge instance and pipeline events, fold into immutable snapshots via Scan.
+        // Fold pipeline events into immutable snapshots via Scan.
+        // Instance status is derived from pipeline statuses (worst-status-wins).
         // Subscribe replaces the snapshot reference atomically for the render loop to poll.
-        using var subscription = Observable
-            .Merge(
-                run.Instances.Select(e => (SyncRunEvent)e),
-                run.Pipelines.Select(e => (SyncRunEvent)e)
-            )
-            .Scan(
-                _snapshot,
-                (snapshot, evt) =>
-                    evt switch
-                    {
-                        InstanceEvent ie => ApplyInstanceEvent(snapshot, ie),
-                        PipelineEvent pe => ApplyPipelineEvent(snapshot, pe),
-                        _ => snapshot,
-                    }
-            )
+        using var subscription = run
+            .Pipelines.Scan(_snapshot, ApplyPipelineEvent)
             .Subscribe(s => _snapshot = s);
 
         console.MarkupLine(
             "[grey]Legend:[/] "
                 + "[green]✓[/] ok [grey]·[/] "
+                + "[yellow]~[/] partial [grey]·[/] "
                 + "[red]✗[/] failed [grey]·[/] "
                 + "[grey]--[/] skipped"
                 + "\n"
@@ -93,20 +82,6 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
         return new ProgressSnapshot(instances);
     }
 
-    private static ProgressSnapshot ApplyInstanceEvent(ProgressSnapshot snapshot, InstanceEvent evt)
-    {
-        var index = snapshot.Instances.FindIndex(i =>
-            i.Name.Equals(evt.Name, StringComparison.OrdinalIgnoreCase)
-        );
-        if (index < 0)
-        {
-            return snapshot;
-        }
-
-        var updated = snapshot.Instances[index] with { Status = evt.Status };
-        return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
-    }
-
     private static ProgressSnapshot ApplyPipelineEvent(ProgressSnapshot snapshot, PipelineEvent evt)
     {
         var index = snapshot.Instances.FindIndex(i =>
@@ -118,10 +93,14 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
         }
 
         var instance = snapshot.Instances[index];
-        var pipelineSnapshot = new PipelineSnapshot(evt.Status, evt.Count);
+        var pipelines = instance.Pipelines.SetItem(
+            evt.Type,
+            new PipelineSnapshot(evt.Status, evt.Count)
+        );
         var updated = instance with
         {
-            Pipelines = instance.Pipelines.SetItem(evt.Type, pipelineSnapshot),
+            Pipelines = pipelines,
+            Status = InstanceSnapshot.DeriveStatus(pipelines),
         };
         return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
     }

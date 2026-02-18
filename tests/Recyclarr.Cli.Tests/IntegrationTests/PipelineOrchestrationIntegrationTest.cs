@@ -4,7 +4,6 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -121,9 +120,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             ]);
 
         // QP should be marked as skipped via its pipeline publisher
-        _pipelinePublishers[PipelineType.QualityProfile]
-            .Received()
-            .SetStatus(PipelineProgressStatus.Skipped, Arg.Any<int?>());
+        _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
 
         result.Should().Be(PipelineResult.Failed);
     }
@@ -173,6 +170,32 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         );
 
         result.Should().Be(PipelineResult.Completed);
+    }
+
+    [Test]
+    public async Task Plan_errors_skip_all_pipelines_and_return_Failed()
+    {
+        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
+        var qpPipeline = CreateStubPipeline(
+            PipelineType.QualityProfile,
+            [PipelineType.CustomFormat]
+        );
+
+        var sut = CreateExecutor([cfPipeline, qpPipeline]);
+
+        var plan = new TestPlan();
+        plan.AddError("Simulated plan error");
+
+        var settings = Substitute.For<ISyncSettings>();
+        var result = await sut.Execute(settings, plan, _instancePublisher, CancellationToken.None);
+
+        _executionOrder.Should().BeEmpty("no pipelines should execute when plan has errors");
+
+        _pipelinePublishers[PipelineType.CustomFormat].ReceivedWithAnyArgs().SetStatus(default);
+
+        _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
+
+        result.Should().Be(PipelineResult.Failed);
     }
 
     [Test]

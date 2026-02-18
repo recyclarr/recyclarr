@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Reactive.Disposables;
 using System.Text;
@@ -21,7 +22,6 @@ public sealed class NotificationService : IDisposable
     private readonly VerbosityOptions _verbosity;
     private readonly AppriseNotificationSettings? _settings;
 
-    private readonly List<InstanceEvent> _instances = [];
     private readonly List<PipelineEvent> _pipelines = [];
     private readonly List<SyncDiagnosticEvent> _diagnostics = [];
     private readonly CompositeDisposable _subscriptions;
@@ -41,7 +41,6 @@ public sealed class NotificationService : IDisposable
 
         _subscriptions =
         [
-            run.Instances.Subscribe(_instances.Add),
             run.Pipelines.Subscribe(_pipelines.Add),
             run.Diagnostics.Subscribe(_diagnostics.Add),
         ];
@@ -57,7 +56,15 @@ public sealed class NotificationService : IDisposable
             return;
         }
 
-        var succeeded = _instances.All(i => i.Status != InstanceProgressStatus.Failed);
+        // Derive overall success from pipeline statuses per instance (worst-status-wins).
+        // DeriveStatus returns Running/Pending for incomplete pipelines, which would read as
+        // "not failed" here. This is fine because SyncProcessor calls SendNotification() after
+        // all instances finish processing, so all pipelines have terminal statuses by this point.
+        var succeeded = BuildPipelineSnapshotsByInstance()
+            .Values.All(snapshots =>
+                InstanceSnapshot.DeriveStatus(snapshots.ToImmutableDictionary())
+                != InstanceProgressStatus.Failed
+            );
         var messageType = succeeded ? AppriseMessageType.Success : AppriseMessageType.Failure;
         var body = BuildNotificationBody();
         await SendAppriseNotification(succeeded, body, messageType);
@@ -114,28 +121,15 @@ public sealed class NotificationService : IDisposable
         }
 
         // Build per-instance pipeline results from flat event lists
-        var instanceNames = _instances.Select(i => i.Name).Distinct().OrderBy(n => n);
+        var snapshotsByInstance = BuildPipelineSnapshotsByInstance();
 
-        foreach (var instanceName in instanceNames)
+        foreach (var (instanceName, pipelineSnapshots) in snapshotsByInstance.OrderBy(x => x.Key))
         {
             var instanceDiagnostics = _diagnostics
                 .Where(e =>
                     e.Instance?.Equals(instanceName, StringComparison.OrdinalIgnoreCase) == true
                 )
                 .ToList();
-
-            // Build pipeline snapshot dict from pipeline events for this instance
-            var pipelineSnapshots = _pipelines
-                .Where(p => p.Instance.Equals(instanceName, StringComparison.OrdinalIgnoreCase))
-                .GroupBy(p => p.Type)
-                .ToDictionary(
-                    g => g.Key,
-                    g =>
-                    {
-                        var last = g.Last();
-                        return new PipelineSnapshot(last.Status, last.Count);
-                    }
-                );
 
             RenderSection(body, instanceName, pipelineSnapshots, instanceDiagnostics);
         }
@@ -237,6 +231,28 @@ public sealed class NotificationService : IDisposable
             PipelineType.MediaNaming => "Media Naming Synced",
             _ => "Items Synced",
         };
+    }
+
+    // Groups pipeline events by instance, taking the last event per pipeline type as the final
+    // status
+    private Dictionary<
+        string,
+        Dictionary<PipelineType, PipelineSnapshot>
+    > BuildPipelineSnapshotsByInstance()
+    {
+        return _pipelines
+            .GroupBy(p => p.Instance, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.GroupBy(p => p.Type).ToDictionary(ig => ig.Key, ToSnapshot),
+                StringComparer.OrdinalIgnoreCase
+            );
+    }
+
+    private static PipelineSnapshot ToSnapshot(IGrouping<PipelineType, PipelineEvent> g)
+    {
+        var last = g.Last();
+        return new PipelineSnapshot(last.Status, last.Count);
     }
 
     public void Dispose() => _subscriptions.Dispose();

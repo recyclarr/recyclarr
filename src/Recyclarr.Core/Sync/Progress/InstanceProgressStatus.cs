@@ -5,5 +5,6 @@ public enum InstanceProgressStatus
     Pending,
     Running,
     Succeeded,
+    Partial,
     Failed,
 }

@@ -28,6 +28,14 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pip
         {
             var publisher = instancePublisher.ForPipeline(pipeline.PipelineType);
 
+            // Plan errors mean nothing can run; mark all pipelines skipped so the progress
+            // table shows `--` across the row and DeriveStatus infers instance Failed.
+            if (plan.HasErrors)
+            {
+                publisher.SetStatus(PipelineProgressStatus.Skipped);
+                continue;
+            }
+
             var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
             if (failedDependencies.Count > 0)
             {
@@ -51,7 +59,9 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pip
 
         log.Information("Completed at {Date}", DateTime.Now);
 
-        return failedPipelines.Count > 0 ? PipelineResult.Failed : PipelineResult.Completed;
+        return failedPipelines.Count > 0 || plan.HasErrors
+            ? PipelineResult.Failed
+            : PipelineResult.Completed;
     }
 
     private static List<ISyncPipeline> TopologicalSort(IEnumerable<ISyncPipeline> pipelines)

@@ -61,6 +61,7 @@ internal class ProgressTableBuilder
             InstanceProgressStatus.Pending => $"[grey{boldStyle}]{spinnerFrame}[/]",
             InstanceProgressStatus.Running => $"[blue{boldStyle}]{spinnerFrame}[/]",
             InstanceProgressStatus.Succeeded => "[green]✓[/]",
+            InstanceProgressStatus.Partial => "[yellow]~[/]",
             InstanceProgressStatus.Failed => "[red]✗[/]",
             _ => " ",
         };
@@ -116,6 +117,7 @@ internal class ProgressTableBuilder
                         : "✓",
                     "green"
                 ),
+                PipelineProgressStatus.Partial => ("~", "yellow"),
                 PipelineProgressStatus.Failed => ("✗", "red"),
                 PipelineProgressStatus.Skipped => ("--", "grey"),
                 _ => ("?", "white"),
