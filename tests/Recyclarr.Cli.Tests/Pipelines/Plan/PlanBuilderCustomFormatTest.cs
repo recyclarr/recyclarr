@@ -21,7 +21,7 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
 
         plan.CustomFormats.Should().HaveCount(2);
         plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("cf1", "cf2");
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -52,6 +52,6 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.CustomFormats.Should().BeEmpty();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 }

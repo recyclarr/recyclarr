@@ -60,7 +60,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         // CFs should be assigned to the guide-backed profile
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -271,7 +271,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 
         // No CFs from group (no guide-backed profiles to assign to)
         plan.CustomFormats.Should().BeEmpty();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -304,7 +304,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 
         // No CFs in plan (optional CF not selected)
         plan.CustomFormats.Should().BeEmpty();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -355,7 +355,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -413,7 +413,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         plan.CustomFormats.Select(x => x.Resource.TrashId)
             .Should()
             .BeEquivalentTo("required-cf", "optional-cf");
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -464,7 +464,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         plan.CustomFormats.Select(x => x.Resource.TrashId)
             .Should()
             .BeEquivalentTo("required-cf", "default-cf");
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -515,7 +515,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
         publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("redundant")));
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]

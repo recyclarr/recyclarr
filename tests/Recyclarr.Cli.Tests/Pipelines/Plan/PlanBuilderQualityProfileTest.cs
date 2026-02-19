@@ -58,7 +58,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         plan.QualityProfiles.First().Name.Should().Be("Guide QP Name");
         plan.QualityProfiles.First().Resource.Should().NotBeNull();
         plan.QualityProfiles.First().Resource!.TrashId.Should().Be("qp-trash-id");
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -211,7 +211,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
         profile.CfScores.Select(x => x.Score).Should().BeEquivalentTo([100, 200]);
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]

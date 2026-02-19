@@ -22,7 +22,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
 
         plan.MediaManagementAvailable.Should().BeTrue();
         plan.MediaManagement.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotUpgrade);
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -38,7 +38,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeFalse();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -52,7 +52,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.MediaManagementAvailable.Should().BeFalse();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -72,6 +72,6 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
 
         plan.MediaManagementAvailable.Should().BeTrue();
         plan.MediaManagement.PropersAndRepacks.Should().Be(PropersAndRepacksMode.PreferAndUpgrade);
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 }

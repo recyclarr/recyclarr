@@ -34,7 +34,7 @@ internal sealed class MigrationExecutorTest
         executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.DidNotReceive().Execute(Arg.Any<ILogger>());
+        step.DidNotReceiveWithAnyArgs().Execute(default!);
     }
 
     [Test]
@@ -50,7 +50,7 @@ internal sealed class MigrationExecutorTest
         executor.PerformAllMigrationSteps();
 
         step.Received().CheckIfNeeded();
-        step.Received().Execute(Arg.Any<ILogger>());
+        step.ReceivedWithAnyArgs().Execute(default!);
     }
 
     [Test]

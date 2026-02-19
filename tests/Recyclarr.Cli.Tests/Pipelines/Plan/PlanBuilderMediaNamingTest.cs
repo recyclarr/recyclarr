@@ -24,7 +24,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.MediaNaming.Should().NotBeNull();
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -67,6 +67,6 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         sut.Build();
 
-        publisher.Received().AddError(Arg.Any<string>());
+        publisher.ReceivedWithAnyArgs().AddError(default!);
     }
 }

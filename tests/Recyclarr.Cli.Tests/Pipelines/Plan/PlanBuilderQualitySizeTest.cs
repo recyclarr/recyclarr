@@ -22,7 +22,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
         plan.QualitySizes.Should().NotBeNull();
         plan.QualitySizes.Type.Should().Be("movie");
         plan.QualitySizes.Qualities.Should().HaveCount(2);
-        publisher.DidNotReceive().AddError(Arg.Any<string>());
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
