@@ -71,6 +71,14 @@ services:
       - sonarr_develop1:/sonarr/develop1
       - sonarr_develop2:/sonarr/develop2
 
+  # http://localhost:8090/recyclarr
+  ntfy:
+    image: binwiederhier/ntfy
+    ports: [8090:80]
+    command: serve --base-url=http://localhost:8090
+    environment:
+      TZ: America/Chicago
+
   # http://localhost:8000
   apprise:
     image: caronc/apprise
@@ -80,7 +88,7 @@ services:
       - /attach
       - /plugin
     volumes:
-      - ./docker/debugging/apprise:/config
+      - ./docker/apprise/recyclarr.yml:/config/recyclarr.yml
     environment:
       TZ: America/Chicago
       APPRISE_DEFAULT_THEM: dark
