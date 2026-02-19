@@ -72,6 +72,20 @@ mock.Received().Method(arguments);
 Verify.That<T>(x => x.Property.Should().Be(expected));
 ```
 
+**Argument matching**: Prefer `ReceivedWithAnyArgs()` with `default` over `Received()` with
+`Arg.Any<T>()`. This applies to any NSubstitute call that ignores argument values (returns setup,
+received verification, etc.):
+
+```csharp
+// Good
+mock.ReceivedWithAnyArgs().SetStatus(default, default);
+mock.Method(default!, default!).ReturnsForAnyArgs(value);
+
+// Bad
+mock.Received().SetStatus(Arg.Any<Status>(), Arg.Any<int?>());
+mock.Method(Arg.Any<string>(), Arg.Any<int>()).ReturnsForAnyArgs(value);
+```
+
 ## AwesomeAssertions
 
 **Preferred:**
