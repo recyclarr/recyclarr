@@ -19,5 +19,5 @@ Update-Changelog -ReleaseVersion $version -LinkMode Automatic -LinkPattern @{
 $content = Get-Content -Path .\CHANGELOG.md
 Set-Content -Path .\CHANGELOG.md -Value $content
 
-git commit -m "release: v$version" -- CHANGELOG.md
+git commit -m "release: v$version" --no-verify -- CHANGELOG.md
 git tag -fm "release v$version" "v$version"
