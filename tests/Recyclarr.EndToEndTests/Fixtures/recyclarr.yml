@@ -117,12 +117,13 @@ radarr:
         assign_scores_to:
           - name: HD-1080p
 
-    # CF groups - tests explicit profile assignment with trash_id
+    # CF groups - tests explicit profile assignment with trash_id and name
     custom_format_groups:
       add:
         - trash_id: e2e00000000000000000000000000011
           assign_scores_to:
             - trash_id: e2e00000000000000000000000000001
+            - name: HD-1080p
 
     # Quality definition with unlimited values and guide defaults
     quality_definition:

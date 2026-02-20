@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Custom Formats: CF group `assign_scores_to` now accepts `name` to target custom (non-guide-backed)
+  quality profiles, in addition to the existing `trash_id` for guide-backed profiles.
+
 ## [8.0.1] - 2026-02-19
 
 ### Fixed

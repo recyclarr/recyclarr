@@ -43,7 +43,8 @@ public record AssignScoresToConfig
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CfGroupAssignScoresToConfig
 {
-    public string TrashId { get; init; } = "";
+    public string? TrashId { get; init; }
+    public string? Name { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

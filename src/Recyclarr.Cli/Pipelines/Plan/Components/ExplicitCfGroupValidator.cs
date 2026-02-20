@@ -58,25 +58,55 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                             + "(required CFs are always included)"
                     );
 
-                RuleForEach(g => g.AssignScoresTo)
-                    .Must(s => profiles.ContainsKey(s.TrashId))
-                    .WithMessage(
-                        (g, s) =>
-                            $"CF group '{g.TrashId}': Invalid profile trash_id in assign_scores_to: {s.TrashId}"
-                    );
+                // User-defined (non-guide) profile names from config
+                var userProfileNames = config
+                    .QualityProfiles.Select(qp => qp.Name)
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
                 RuleForEach(g => g.AssignScoresTo)
-                    .Must(
-                        (g, s) =>
-                            !profiles.ContainsKey(s.TrashId)
-                            || groups[g.TrashId]
-                                .QualityProfiles.Include.Values.Any(v =>
-                                    v.Equals(s.TrashId, StringComparison.OrdinalIgnoreCase)
+                    .Custom(
+                        (s, context) =>
+                        {
+                            var groupConfig = context.InstanceToValidate;
+                            var group = groups[groupConfig.TrashId];
+
+                            if (!string.IsNullOrEmpty(s.TrashId))
+                            {
+                                // Guide-backed profile: must exist and be in include list
+                                if (!profiles.ContainsKey(s.TrashId))
+                                {
+                                    context.AddFailure(
+                                        $"CF group '{groupConfig.TrashId}': Invalid profile trash_id "
+                                            + $"in assign_scores_to: {s.TrashId}"
+                                    );
+                                    return;
+                                }
+
+                                if (
+                                    !group.QualityProfiles.Include.Values.Any(v =>
+                                        v.Equals(s.TrashId, StringComparison.OrdinalIgnoreCase)
+                                    )
                                 )
-                    )
-                    .WithMessage(
-                        (g, s) =>
-                            $"CF group '{g.TrashId}': Profile '{s.TrashId}' is not in this group's include list"
+                                {
+                                    context.AddFailure(
+                                        $"CF group '{groupConfig.TrashId}': Profile '{s.TrashId}' "
+                                            + "is not in this group's include list"
+                                    );
+                                }
+                            }
+                            else if (!string.IsNullOrEmpty(s.Name))
+                            {
+                                // Custom profile: must exist in user's config
+                                if (!userProfileNames.Contains(s.Name))
+                                {
+                                    context.AddFailure(
+                                        $"CF group '{groupConfig.TrashId}': No quality profile "
+                                            + $"named '{s.Name}' exists in this config"
+                                    );
+                                }
+                            }
+                        }
                     );
             }
         );

@@ -25,6 +25,7 @@ public record CustomFormatConfigYaml
 public record CfGroupAssignScoresToConfigYaml
 {
     public string? TrashId { get; init; }
+    public string? Name { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

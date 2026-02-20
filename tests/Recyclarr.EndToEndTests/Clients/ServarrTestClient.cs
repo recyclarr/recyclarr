@@ -84,6 +84,15 @@ internal sealed record FauxQualityProfile
     public int MinUpgradeFormatScore { get; init; }
     public bool UpgradeAllowed { get; init; }
     public FauxProfileLanguage? Language { get; init; }
+    public List<FauxFormatItem> FormatItems { get; init; } = [];
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+internal sealed record FauxFormatItem
+{
+    public int Format { get; init; }
+    public string Name { get; init; } = "";
+    public int Score { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

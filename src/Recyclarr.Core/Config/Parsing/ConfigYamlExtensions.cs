@@ -30,7 +30,7 @@ internal static class ConfigYamlExtensions
         this CfGroupAssignScoresToConfigYaml yaml
     )
     {
-        return new CfGroupAssignScoresToConfig { TrashId = yaml.TrashId ?? "" };
+        return new CfGroupAssignScoresToConfig { TrashId = yaml.TrashId, Name = yaml.Name };
     }
 
     private static CustomFormatGroupConfig ToCustomFormatGroupConfig(

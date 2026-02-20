@@ -335,8 +335,19 @@ internal sealed class RecyclarrSyncTests
         var profiles = await _radarr.GetQualityProfiles(ct);
 
         // User-defined quality profile
-        profiles.Select(p => p.Name).Should().Contain("HD-1080p");
-        profiles.First(p => p.Name == "HD-1080p").MinUpgradeFormatScore.Should().Be(200);
+        var hdProfile = profiles.First(p => p.Name == "HD-1080p");
+        hdProfile.MinUpgradeFormatScore.Should().Be(200);
+
+        // CF group CFs should be scored on HD-1080p (tests name-based assign_scores_to)
+        var hdScoredCfNames = hdProfile
+            .FormatItems.Where(fi => fi.Score != 0)
+            .Select(fi => fi.Name);
+        hdScoredCfNames
+            .Should()
+            .Contain(
+                ["E2E-GroupCF1", "E2E-GroupCF2"],
+                "CF group CFs should be scored on user-defined profile via name-based assignment"
+            );
 
         // Guide-synced quality profile with config overrides
         var guideRadarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-RadarrGuideOverride");

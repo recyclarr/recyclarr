@@ -36,9 +36,14 @@
               "properties": {
                 "trash_id": {
                   "type": "string",
-                  "description": "The trash_id of a guide-backed quality profile."
+                  "description": "The trash_id of a guide-backed quality profile from the TRaSH Guides."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of a custom (non-guide-backed) quality profile."
                 }
-              }
+              },
+              "oneOf": [{ "required": ["trash_id"] }, { "required": ["name"] }]
             }
           },
           "select": {

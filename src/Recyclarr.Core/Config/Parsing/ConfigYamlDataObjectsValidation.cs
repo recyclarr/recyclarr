@@ -78,6 +78,21 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
     }
 }
 
+public class CfGroupAssignScoresToConfigYamlValidator
+    : AbstractValidator<CfGroupAssignScoresToConfigYaml>
+{
+    public CfGroupAssignScoresToConfigYamlValidator()
+    {
+        RuleFor(x => x)
+            .Must(x => !string.IsNullOrEmpty(x.TrashId) || !string.IsNullOrEmpty(x.Name))
+            .WithMessage("Either 'trash_id' or 'name' is required for assign_scores_to entries");
+
+        RuleFor(x => x)
+            .Must(x => string.IsNullOrEmpty(x.TrashId) || string.IsNullOrEmpty(x.Name))
+            .WithMessage("Cannot specify both 'trash_id' and 'name'; choose one");
+    }
+}
+
 public class CustomFormatGroupConfigYamlValidator : AbstractValidator<CustomFormatGroupConfigYaml>
 {
     public CustomFormatGroupConfigYamlValidator()
@@ -85,6 +100,9 @@ public class CustomFormatGroupConfigYamlValidator : AbstractValidator<CustomForm
         RuleFor(x => x.TrashId)
             .NotEmpty()
             .WithMessage("'trash_id' is required for custom_format_groups entries");
+
+        RuleForEach(x => x.AssignScoresTo)
+            .SetValidator(new CfGroupAssignScoresToConfigYamlValidator());
     }
 }
 

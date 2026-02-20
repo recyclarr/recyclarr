@@ -328,17 +328,7 @@ internal class ConfiguredCustomFormatProvider(
 
         if (groupConfig.AssignScoresTo.Count > 0)
         {
-            // Explicit: user specified profiles (already validated)
-            return groupConfig
-                .AssignScoresTo.Where(s =>
-                    qpResources.ContainsKey(s.TrashId) && includedProfiles.Contains(s.TrashId)
-                )
-                .Select(s => new AssignScoresToConfig
-                {
-                    TrashId = s.TrashId,
-                    Name = qpResources[s.TrashId].Name,
-                })
-                .ToList();
+            return ResolveExplicitProfiles(groupConfig, qpResources, includedProfiles);
         }
 
         // Implicit: guide-backed profiles in user's config that are in the include list
@@ -352,5 +342,40 @@ internal class ConfiguredCustomFormatProvider(
                 Name = !string.IsNullOrEmpty(qp.Name) ? qp.Name : qpResources[qp.TrashId!].Name,
             })
             .ToList();
+    }
+
+    // Resolves explicitly specified assign_scores_to entries.
+    // Handles both guide-backed (trash_id) and custom (name) profile variants.
+    private static List<AssignScoresToConfig> ResolveExplicitProfiles(
+        CustomFormatGroupConfig groupConfig,
+        Dictionary<string, QualityProfileResource> qpResources,
+        HashSet<string> includedProfiles
+    )
+    {
+        var results = new List<AssignScoresToConfig>();
+
+        foreach (var entry in groupConfig.AssignScoresTo)
+        {
+            if (!string.IsNullOrEmpty(entry.TrashId))
+            {
+                // Guide-backed profile: resolve name from guide resource
+                if (
+                    qpResources.TryGetValue(entry.TrashId, out var qpResource)
+                    && includedProfiles.Contains(entry.TrashId)
+                )
+                {
+                    results.Add(
+                        new AssignScoresToConfig { TrashId = entry.TrashId, Name = qpResource.Name }
+                    );
+                }
+            }
+            else if (!string.IsNullOrEmpty(entry.Name))
+            {
+                // Custom profile: use name directly (bypasses include list)
+                results.Add(new AssignScoresToConfig { Name = entry.Name });
+            }
+        }
+
+        return results;
     }
 }

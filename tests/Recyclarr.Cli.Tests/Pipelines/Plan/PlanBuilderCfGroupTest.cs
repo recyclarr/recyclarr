@@ -658,4 +658,191 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
                 )
             );
     }
+
+    [Test]
+    public void Build_with_cf_group_assign_to_custom_profile_by_name()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("guide-qp", "Guide Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Guide Profile"] = "guide-qp" }
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { Name = "My Custom Profile" },
+                        ],
+                    },
+                ],
+            },
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "guide-qp" },
+                new QualityProfileConfig { Name = "My Custom Profile" },
+            ],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        // CF should be assigned to the custom profile
+        var customProfile = plan.QualityProfiles.Single(p => p.Name == "My Custom Profile");
+        customProfile.CfScores.Should().ContainSingle();
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
+    }
+
+    [Test]
+    public void Build_with_cf_group_mixed_trash_id_and_name_assignment()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("guide-qp", "Guide Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Guide Profile"] = "guide-qp" }
+        );
+
+        // Assign to both a guide profile (trash_id) and a custom profile (name)
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { TrashId = "guide-qp" },
+                            new CfGroupAssignScoresToConfig { Name = "Custom Profile" },
+                        ],
+                    },
+                ],
+            },
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "guide-qp" },
+                new QualityProfileConfig { Name = "Custom Profile" },
+            ],
+        };
+
+        var (sut, _) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        // CF should be assigned to both profiles
+        plan.QualityProfiles.Should().HaveCount(2).And.OnlyContain(p => p.CfScores.Count == 1);
+    }
+
+    [Test]
+    public void Build_with_cf_group_assign_to_nonexistent_custom_profile_reports_error()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new CfGroupAssignScoresToConfig { Name = "Nonexistent Profile" },
+                        ],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        sut.Build();
+
+        publisher
+            .Received()
+            .AddError(
+                Arg.Is<string>(s =>
+                    s.Contains("Nonexistent Profile") && s.Contains("No quality profile")
+                )
+            );
+    }
+
+    [Test]
+    public void Build_with_cf_group_auto_sync_does_not_include_custom_profiles()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("guide-qp", "Guide Profile", ("HDTV-1080p", true, null));
+
+        // Default group that auto-syncs
+        SetupCfGroupGuideData(
+            "default-group",
+            "Default Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Guide Profile"] = "guide-qp" },
+            isDefault: true
+        );
+
+        // Config with only a custom profile (no guide-backed profiles)
+        var config = NewConfig.Radarr() with
+        {
+            QualityProfiles = [new QualityProfileConfig { Name = "My Custom Profile" }],
+        };
+
+        var (sut, _) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        // Default groups should NOT auto-sync to custom profiles
+        plan.CustomFormats.Should().BeEmpty();
+    }
 }
