@@ -34,6 +34,7 @@ public record CustomFormatGroupConfigYaml
     public string? TrashId { get; init; }
     public IReadOnlyCollection<CfGroupAssignScoresToConfigYaml>? AssignScoresTo { get; init; }
     public IReadOnlyCollection<string>? Select { get; init; }
+    public IReadOnlyCollection<string>? Exclude { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

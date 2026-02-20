@@ -30,6 +30,6 @@
     { "name": "Raw-HD", "allowed": false }
   ],
   "formatItems": {
-    "E2E-GroupCF1": "00000000000000000000000000000003"
+    "E2E-GroupCF1": "cf000000000000000000000000000003"
   }
 }

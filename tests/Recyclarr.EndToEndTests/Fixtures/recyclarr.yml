@@ -41,8 +41,8 @@ sonarr:
           - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
           - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
           - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
-          - "00000000000000000000000000000002" # E2E-SonarrCustom
-          - "00000000000000000000000000000007" # E2E-SonarrOverride (tests local override)
+          - cf000000000000000000000000000002 # E2E-SonarrCustom
+          - cf000000000000000000000000000007 # E2E-SonarrOverride (tests local override)
         assign_scores_to:
           # Tests assign_scores_to with trash_id (instead of name)
           - trash_id: e2e00000000000000000000000000002
@@ -113,14 +113,20 @@ radarr:
           - 9d27d9d2181838f76dee150882bdc58c # Masters of Cinema
           - db9b4c4b53d312a3ca5f1378f6440fc9 # Vinegar Syndrome
           - 957d0f44b592285f26449575e8b1167e # Special Edition
-          - "00000000000000000000000000000001" # E2E-TestFormat
+          - cf000000000000000000000000000001 # E2E-TestFormat
         assign_scores_to:
           - name: HD-1080p
 
-    # CF groups - tests explicit profile assignment with trash_id and name
+    # CF groups - tests explicit profile assignment with select+exclude composition
+    # Group has: CF1 (required), CF2 (default), CF3 (non-default)
+    # Exclude CF2, select CF3 -> result: CF1 + CF3 synced, CF2 excluded
     custom_format_groups:
       add:
         - trash_id: e2e00000000000000000000000000011
+          exclude:
+            - cf000000000000000000000000000006 # E2E-GroupCF2 (default, excluded)
+          select:
+            - cf000000000000000000000000000008 # E2E-GroupCF3 (non-default, selected)
           assign_scores_to:
             - trash_id: e2e00000000000000000000000000001
             - name: HD-1080p

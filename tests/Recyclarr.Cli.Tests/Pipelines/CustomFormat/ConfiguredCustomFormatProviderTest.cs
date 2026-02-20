@@ -467,9 +467,64 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
     }
 
     [Test]
-    public void Add_with_select_overrides_default_cfs()
+    public void Select_adds_non_default_cfs_alongside_defaults()
     {
-        // Setup: CF group with two default CFs
+        // Setup: CF group with one default CF and one non-default CF
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupCustomFormatWithScores("CF Two", "cf2", ("default", 200));
+        SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "explicit-group",
+            "Explicit Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+                new CfGroupCustomFormat { TrashId = "cf2", Name = "CF Two" },
+            ],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" },
+            isDefault: false
+        );
+
+        // Select adds the non-default cf2 alongside the default cf1
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig { TrashId = "explicit-group", Select = ["cf2"] },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
+        };
+
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterType<TestConfigurationScope>();
+        });
+        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+
+        var entries = sut.GetAll().ToList();
+
+        entries
+            .Select(e => (e.TrashId, e.InclusionReason))
+            .Should()
+            .BeEquivalentTo([
+                ("cf1", CfInclusionReason.Default),
+                ("cf2", CfInclusionReason.Selected),
+            ]);
+    }
+
+    [Test]
+    public void Exclude_removes_specific_default_cfs()
+    {
         SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
         SetupCustomFormatWithScores("CF Two", "cf2", ("default", 200));
         SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
@@ -495,14 +550,13 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             isDefault: false
         );
 
-        // Config with select list - only cf1 should be included
         var config = NewConfig.Radarr() with
         {
             CustomFormatGroups = new CustomFormatGroupsConfig
             {
                 Add =
                 [
-                    new CustomFormatGroupConfig { TrashId = "explicit-group", Select = ["cf1"] },
+                    new CustomFormatGroupConfig { TrashId = "explicit-group", Exclude = ["cf2"] },
                 ],
             },
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
@@ -518,8 +572,128 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
 
         var entries = sut.GetAll().ToList();
 
-        // Only cf1 (selected) should be included; cf2 (default but not selected) excluded
         entries.Should().ContainSingle().Which.TrashId.Should().Be("cf1");
+    }
+
+    [Test]
+    public void Exclude_does_not_remove_required_cfs()
+    {
+        SetupCustomFormatWithScores("Required CF", "required-cf", ("default", 100));
+        SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "explicit-group",
+            "Explicit Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "required-cf",
+                    Name = "Required CF",
+                    Required = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" },
+            isDefault: false
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "explicit-group",
+                        Exclude = ["required-cf"],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
+        };
+
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterType<TestConfigurationScope>();
+        });
+        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+
+        var entries = sut.GetAll().ToList();
+
+        entries
+            .Should()
+            .ContainSingle()
+            .Which.InclusionReason.Should()
+            .Be(CfInclusionReason.Required);
+    }
+
+    [Test]
+    public void Exclude_and_select_compose_correctly()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupCustomFormatWithScores("CF Two", "cf2", ("default", 200));
+        SetupCustomFormatWithScores("CF Three", "cf3", ("default", 300));
+        SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "explicit-group",
+            "Explicit Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf2",
+                    Name = "CF Two",
+                    Default = true,
+                },
+                new CfGroupCustomFormat { TrashId = "cf3", Name = "CF Three" },
+            ],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" },
+            isDefault: false
+        );
+
+        // Exclude cf2 (default), select cf3 (non-default) -> result: cf1 + cf3
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "explicit-group",
+                        Exclude = ["cf2"],
+                        Select = ["cf3"],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
+        };
+
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterType<TestConfigurationScope>();
+        });
+        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+
+        var entries = sut.GetAll().ToList();
+
+        entries
+            .Select(e => (e.TrashId, e.InclusionReason))
+            .Should()
+            .BeEquivalentTo([
+                ("cf1", CfInclusionReason.Default),
+                ("cf3", CfInclusionReason.Selected),
+            ]);
     }
 
     [Test]

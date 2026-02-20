@@ -43,6 +43,7 @@ internal static class ConfigYamlExtensions
             AssignScoresTo =
                 yaml.AssignScoresTo?.Select(x => x.ToCfGroupAssignScoresToConfig()).ToList() ?? [],
             Select = yaml.Select?.ToList() ?? [],
+            Exclude = yaml.Exclude?.ToList() ?? [],
         };
     }
 

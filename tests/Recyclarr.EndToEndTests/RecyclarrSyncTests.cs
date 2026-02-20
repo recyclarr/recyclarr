@@ -155,9 +155,19 @@ internal sealed class RecyclarrSyncTests
         radarrCfNames
             .Should()
             .Contain(
-                ["Hybrid-OVERRIDE", "E2E-TestFormat", "E2E-GroupCF1", "x265 (HD)", "AMZN"],
+                [
+                    "Hybrid-OVERRIDE",
+                    "E2E-TestFormat",
+                    "E2E-GroupCF1",
+                    "E2E-GroupCF3",
+                    "x265 (HD)",
+                    "AMZN",
+                ],
                 "CFs should be unchanged after re-sync"
             );
+        radarrCfNames
+            .Should()
+            .NotContain("E2E-GroupCF2", "excluded CF should remain absent after re-sync");
     }
 
     [Test, Order(3)]
@@ -339,15 +349,19 @@ internal sealed class RecyclarrSyncTests
         hdProfile.MinUpgradeFormatScore.Should().Be(200);
 
         // CF group CFs should be scored on HD-1080p (tests name-based assign_scores_to)
+        // CF1 (required) + CF3 (selected) are scored; CF2 (excluded) is not
         var hdScoredCfNames = hdProfile
             .FormatItems.Where(fi => fi.Score != 0)
             .Select(fi => fi.Name);
         hdScoredCfNames
             .Should()
             .Contain(
-                ["E2E-GroupCF1", "E2E-GroupCF2"],
-                "CF group CFs should be scored on user-defined profile via name-based assignment"
+                ["E2E-GroupCF1", "E2E-GroupCF3"],
+                "CF group: required + selected CFs should be scored via name-based assignment"
             );
+        hdScoredCfNames
+            .Should()
+            .NotContain("E2E-GroupCF2", "CF group: excluded default CF should not be scored");
 
         // Guide-synced quality profile with config overrides
         var guideRadarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-RadarrGuideOverride");
@@ -385,14 +399,17 @@ internal sealed class RecyclarrSyncTests
             // From E2E override QP formatItems
             "Repack/Proper",
             "LQ",
-            // From E2E CF group (explicit assignment to guide profile)
+            // From E2E CF group: CF1 (required) + CF3 (selected); CF2 excluded
             "E2E-GroupCF1",
-            "E2E-GroupCF2",
+            "E2E-GroupCF3",
             // From default guide CF groups implicitly included via HD Bluray + WEB profile
             "x265 (HD)", // [Required] Golden Rule HD
             "AMZN", // [Streaming Services] General
         ];
         radarrCfNames.Should().Contain(expectedRadarrCfs);
+        radarrCfNames
+            .Should()
+            .NotContain("E2E-GroupCF2", "excluded default CF should not be synced");
 
         var qualityDefs = await _radarr.GetQualityDefinitions(ct);
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");

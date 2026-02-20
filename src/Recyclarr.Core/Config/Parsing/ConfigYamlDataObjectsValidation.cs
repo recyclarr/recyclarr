@@ -103,6 +103,19 @@ public class CustomFormatGroupConfigYamlValidator : AbstractValidator<CustomForm
 
         RuleForEach(x => x.AssignScoresTo)
             .SetValidator(new CfGroupAssignScoresToConfigYamlValidator());
+
+        RuleFor(x => x)
+            .Must(x =>
+            {
+                if (x.Select is null || x.Exclude is null)
+                {
+                    return true;
+                }
+
+                var selectSet = x.Select.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                return !x.Exclude.Any(id => selectSet.Contains(id));
+            })
+            .WithMessage("A custom format trash_id cannot appear in both 'select' and 'exclude'");
     }
 }
 

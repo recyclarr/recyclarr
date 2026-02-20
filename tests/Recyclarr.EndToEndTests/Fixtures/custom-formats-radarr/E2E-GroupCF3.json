@@ -1,15 +1,18 @@
 {
-  "trash_id": "cf000000000000000000000000000002",
-  "name": "E2E-SonarrCustom",
+  "trash_id": "cf000000000000000000000000000008",
+  "trash_scores": {
+    "default": 350
+  },
+  "name": "E2E-GroupCF3",
   "includeCustomFormatWhenRenaming": false,
   "specifications": [
     {
-      "name": "E2E Sonarr Test",
+      "name": "E2E Group CF3",
       "implementation": "ReleaseTitleSpecification",
       "negate": false,
       "required": false,
       "fields": {
-        "value": "e2e-sonarr"
+        "value": "e2e-group-cf3"
       }
     }
   ]

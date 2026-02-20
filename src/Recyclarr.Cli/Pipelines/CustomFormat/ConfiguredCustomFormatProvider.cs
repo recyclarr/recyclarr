@@ -240,43 +240,37 @@ internal class ConfiguredCustomFormatProvider(
         }
     }
 
-    // Resolves which CFs to include using opt-in semantics, returning inclusion reason:
-    // - Always include required CFs (Required)
-    // - If select is empty: include default CFs (Default)
-    // - If select is non-empty: include only selected CFs (Selected)
+    // Resolves which CFs to include via composition: (required) + (defaults - exclude) + (select)
     private static IEnumerable<(string TrashId, CfInclusionReason Reason)> ResolveCfsForGroup(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource
     )
     {
-        var selectedSet = groupConfig.Select.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var hasSelections = selectedSet.Count > 0;
+        var selectSet = groupConfig.Select.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var excludeSet = groupConfig.Exclude.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var cf in groupResource.CustomFormats)
         {
-            // Required CFs are always included
             if (cf.Required)
             {
                 yield return (cf.TrashId, CfInclusionReason.Required);
                 continue;
             }
 
-            // Optional CFs: check select list or fall back to defaults
-            if (hasSelections)
+            if (cf.Default)
             {
-                // User specified selections - only include if selected
-                if (selectedSet.Contains(cf.TrashId))
-                {
-                    yield return (cf.TrashId, CfInclusionReason.Selected);
-                }
-            }
-            else
-            {
-                // No selections - include defaults
-                if (cf.Default)
+                if (!excludeSet.Contains(cf.TrashId))
                 {
                     yield return (cf.TrashId, CfInclusionReason.Default);
                 }
+
+                continue;
+            }
+
+            // Non-default, non-required: only include if explicitly selected
+            if (selectSet.Contains(cf.TrashId))
+            {
+                yield return (cf.TrashId, CfInclusionReason.Selected);
             }
         }
     }

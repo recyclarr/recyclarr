@@ -48,7 +48,15 @@
           },
           "select": {
             "type": ["null", "array"],
-            "description": "Specific optional custom formats to include. Replaces defaults; required CFs are always included.",
+            "description": "Non-default custom formats to additionally include. Required CFs are always included.",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "exclude": {
+            "type": ["null", "array"],
+            "description": "Default custom formats to exclude. Required CFs cannot be excluded.",
             "uniqueItems": true,
             "items": {
               "type": "string"

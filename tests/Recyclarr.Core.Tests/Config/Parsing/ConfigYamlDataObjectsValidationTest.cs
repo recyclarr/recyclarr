@@ -270,4 +270,40 @@ internal sealed class ConfigYamlDataObjectsValidationTest
             .ShouldHaveValidationErrorFor(x => x.TrashId)
             .WithErrorMessage("'trash_id' is required for custom_format_groups entries");
     }
+
+    [Test]
+    public void Custom_format_group_error_when_cf_in_both_select_and_exclude()
+    {
+        var data = new CustomFormatGroupConfigYaml
+        {
+            TrashId = "group1",
+            Select = ["cf1", "cf2"],
+            Exclude = ["cf2", "cf3"],
+        };
+
+        var validator = new CustomFormatGroupConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x)
+            .WithErrorMessage(
+                "A custom format trash_id cannot appear in both 'select' and 'exclude'"
+            );
+    }
+
+    [Test]
+    public void Custom_format_group_no_error_when_select_and_exclude_do_not_overlap()
+    {
+        var data = new CustomFormatGroupConfigYaml
+        {
+            TrashId = "group1",
+            Select = ["cf1"],
+            Exclude = ["cf2"],
+        };
+
+        var validator = new CustomFormatGroupConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldNotHaveAnyValidationErrors();
+    }
 }
