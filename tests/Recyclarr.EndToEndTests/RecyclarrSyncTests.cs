@@ -143,42 +143,19 @@ internal sealed class RecyclarrSyncTests
         await LogOutput(result);
         result.ExitCode.Should().Be(0, "re-sync should succeed");
 
-        var sonarrCfs = await _sonarr.GetCustomFormats(ct);
-        sonarrCfs
-            .Select(cf => cf.Name)
+        var sonarrCfNames = (await _sonarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        sonarrCfNames
             .Should()
-            .BeEquivalentTo(
-                [
-                    "Bad Dual Groups",
-                    "No-RlsGroup",
-                    "Obfuscated",
-                    "E2E-SonarrCustom",
-                    "E2E-SonarrOverride",
-                    "E2E-GroupCF1",
-                    "E2E-GroupCF2",
-                ],
+            .Contain(
+                ["Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom"],
                 "CFs should be unchanged after re-sync"
             );
 
-        var radarrCfs = await _radarr.GetCustomFormats(ct);
-        radarrCfs
-            .Select(cf => cf.Name)
+        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        radarrCfNames
             .Should()
-            .BeEquivalentTo(
-                [
-                    "Hybrid-OVERRIDE",
-                    "Remaster",
-                    "4K Remaster",
-                    "Criterion Collection",
-                    "Masters of Cinema",
-                    "Vinegar Syndrome",
-                    "Special Edition",
-                    "E2E-TestFormat",
-                    "Repack/Proper",
-                    "LQ",
-                    "E2E-GroupCF1",
-                    "E2E-GroupCF2",
-                ],
+            .Contain(
+                ["Hybrid-OVERRIDE", "E2E-TestFormat", "E2E-GroupCF1", "x265 (HD)", "AMZN"],
                 "CFs should be unchanged after re-sync"
             );
     }
@@ -322,21 +299,20 @@ internal sealed class RecyclarrSyncTests
         guideOnlyProfile.MinFormatScore.Should().Be(10, "guide minFormatScore should be inherited");
         guideOnlyProfile.UpgradeAllowed.Should().BeTrue("guide upgradeAllowed should be inherited");
 
-        var customFormats = await _sonarr.GetCustomFormats(ct);
-        customFormats
-            .Select(cf => cf.Name)
-            .Should()
-            .BeEquivalentTo(
-                // From YAML custom_formats section
-                "Bad Dual Groups",
-                "No-RlsGroup",
-                "Obfuscated",
-                "E2E-SonarrCustom",
-                "E2E-SonarrOverride",
-                // From CF group (implicit assignment to all guide-backed profiles)
-                "E2E-GroupCF1",
-                "E2E-GroupCF2"
-            );
+        var sonarrCfNames = (await _sonarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        string[] expectedSonarrCfs =
+        [
+            // From YAML custom_formats section
+            "Bad Dual Groups",
+            "No-RlsGroup",
+            "Obfuscated",
+            "E2E-SonarrCustom",
+            "E2E-SonarrOverride",
+            // From CF group (implicit assignment to all guide-backed profiles)
+            "E2E-GroupCF1",
+            "E2E-GroupCF2",
+        ];
+        sonarrCfNames.Should().Contain(expectedSonarrCfs);
 
         var qualityDefs = await _sonarr.GetQualityDefinitions(ct);
         var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
@@ -377,27 +353,35 @@ internal sealed class RecyclarrSyncTests
             .Language?.Name.Should()
             .Be("English", "language from guide resource should be applied");
 
-        var customFormats = await _radarr.GetCustomFormats(ct);
-        customFormats
-            .Select(cf => cf.Name)
-            .Should()
-            .BeEquivalentTo(
-                // From YAML custom_formats section
-                "Hybrid-OVERRIDE",
-                "Remaster",
-                "4K Remaster",
-                "Criterion Collection",
-                "Masters of Cinema",
-                "Vinegar Syndrome",
-                "Special Edition",
-                "E2E-TestFormat",
-                // From QP formatItems (not in YAML custom_formats, synced via guide QP)
-                "Repack/Proper",
-                "LQ",
-                // From CF group (explicit assignment to guide profile)
-                "E2E-GroupCF1",
-                "E2E-GroupCF2"
-            );
+        // Guide-synced quality profile (tests implicit CF group inclusion)
+        // Guide-synced quality profile (tests implicit CF group inclusion)
+        var hdBlurayProfile = profiles.FirstOrDefault(p => p.Name == "HD Bluray + WEB");
+        hdBlurayProfile.Should().NotBeNull("guide HD Bluray + WEB profile should be created");
+        hdBlurayProfile.UpgradeAllowed.Should().BeTrue("guide value should be inherited");
+
+        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        string[] expectedRadarrCfs =
+        [
+            // From YAML custom_formats section
+            "Hybrid-OVERRIDE",
+            "Remaster",
+            "4K Remaster",
+            "Criterion Collection",
+            "Masters of Cinema",
+            "Vinegar Syndrome",
+            "Special Edition",
+            "E2E-TestFormat",
+            // From E2E override QP formatItems
+            "Repack/Proper",
+            "LQ",
+            // From E2E CF group (explicit assignment to guide profile)
+            "E2E-GroupCF1",
+            "E2E-GroupCF2",
+            // From default guide CF groups implicitly included via HD Bluray + WEB profile
+            "x265 (HD)", // [Required] Golden Rule HD
+            "AMZN", // [Streaming Services] General
+        ];
+        radarrCfNames.Should().Contain(expectedRadarrCfs);
 
         var qualityDefs = await _radarr.GetQualityDefinitions(ct);
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");

@@ -4,7 +4,7 @@ resource_providers:
   - name: trash-guides-pinned
     type: trash-guides
     clone_url: https://github.com/TRaSH-Guides/Guides.git
-    reference: 376139d7739674911e9534a3d638cd21ccd5bce8
+    reference: 2994a7979d8036a7908a92e2cd286054fd4fcc1b
     replace_default: true
   # Official config-templates at pinned SHA (replaces default)
   - name: config-templates-pinned

@@ -100,6 +100,9 @@ radarr:
         upgrade:
           allowed: false
 
+      # Guide-synced quality profile (tests implicit CF group inclusion from guide data)
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9 # HD Bluray + WEB
+
     custom_formats:
       - trash_ids:
           # Movie Versions - commonly available formats for E2E testing
