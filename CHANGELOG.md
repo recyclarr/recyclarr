@@ -17,6 +17,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Custom Formats: Adding a CF group where all custom formats are optional no longer silently
+  produces nothing; a warning is now shown advising to use `select`.
 - Sync: Diagnostic messages (errors, warnings, deprecations) were invisible when using `--log`,
   including the `state repair --adopt` suggestion for quality profile conflicts.
 

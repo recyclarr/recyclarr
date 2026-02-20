@@ -27,7 +27,7 @@ internal class CustomFormatPlanComponent(
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll()
+            .GetAll(plan)
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)

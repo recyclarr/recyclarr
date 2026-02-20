@@ -5,11 +5,26 @@ using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
 internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
 {
+    private (ConfiguredCustomFormatProvider Sut, IDiagnosticPublisher Diagnostics) CreateSut(
+        IServiceConfiguration config
+    )
+    {
+        var diagnostics = Substitute.For<IDiagnosticPublisher>();
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        var scope = scopeFactory.Start<TestConfigurationScope>(c =>
+        {
+            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
+            c.RegisterType<TestConfigurationScope>();
+        });
+        return (scope.Resolve<ConfiguredCustomFormatProvider>(), diagnostics);
+    }
+
     [Test]
     public void Auto_discovers_default_groups_when_qp_matches_include_list()
     {
@@ -38,15 +53,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // CF should be auto-discovered from default group with implicit source
         entries
@@ -91,15 +100,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "User Profile" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // No auto-discovery because QP has no trash_id
         entries.Should().BeEmpty();
@@ -133,15 +136,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // No auto-discovery because group is not default
         entries.Should().BeEmpty();
@@ -176,15 +173,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "user-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // No auto-discovery because QP is not in include list
         entries.Should().BeEmpty();
@@ -219,15 +210,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // No auto-discovery because group is in skip list
         entries.Should().BeEmpty();
@@ -265,15 +250,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -302,15 +281,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1"] }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -345,15 +318,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -401,15 +368,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -449,15 +410,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -503,15 +458,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Select(e => (e.TrashId, e.InclusionReason))
@@ -562,15 +511,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries.Should().ContainSingle().Which.TrashId.Should().Be("cf1");
     }
@@ -612,15 +555,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Should()
@@ -677,15 +614,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         entries
             .Select(e => (e.TrashId, e.InclusionReason))
@@ -727,15 +658,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             ],
         };
 
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        var sut = scope.Resolve<ConfiguredCustomFormatProvider>();
+        var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll().ToList();
+        var entries = sut.GetAll(diagnostics).ToList();
 
         // AssignScoresTo should use the config's custom name
         entries
@@ -745,5 +670,37 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Name.Should()
             .Be("Custom Name");
+    }
+
+    [Test]
+    public void Optional_only_group_emits_warning()
+    {
+        // All CFs in this group are optional (no required, no default)
+        SetupCustomFormatWithScores("Optional CF", "optional-cf", ("default", 100));
+        SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "optional-group",
+            "Optional Miscellaneous",
+            [new CfGroupCustomFormat { TrashId = "optional-cf", Name = "Optional CF" }],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" },
+            isDefault: false
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "optional-group" }],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        var entries = sut.GetAll(diagnostics).ToList();
+
+        entries.Should().BeEmpty();
+        diagnostics.Received(1).AddWarning(Arg.Is<string>(s => s.Contains("optional-group")));
     }
 }

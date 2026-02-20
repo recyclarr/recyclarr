@@ -1,5 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -10,7 +11,7 @@ internal class ConfiguredCustomFormatProvider(
     ILogger log
 )
 {
-    public IEnumerable<ConfiguredCfEntry> GetAll()
+    public IEnumerable<ConfiguredCfEntry> GetAll(IDiagnosticPublisher diagnostics)
     {
         var qpResources = qpQuery
             .Get(config.ServiceType)
@@ -45,7 +46,7 @@ internal class ConfiguredCustomFormatProvider(
         }
 
         // From explicit CF groups (assumes validation already ran)
-        foreach (var entry in FromExplicitGroups(qpResources, cfGroupResources))
+        foreach (var entry in FromExplicitGroups(qpResources, cfGroupResources, diagnostics))
         {
             yield return entry;
         }
@@ -197,7 +198,8 @@ internal class ConfiguredCustomFormatProvider(
     // Assumes validation already ran via ExplicitCfGroupValidator.
     private IEnumerable<ConfiguredCfEntry> FromExplicitGroups(
         Dictionary<string, QualityProfileResource> qpResources,
-        Dictionary<string, CfGroupResource> cfGroupResources
+        Dictionary<string, CfGroupResource> cfGroupResources,
+        IDiagnosticPublisher diagnostics
     )
     {
         foreach (var groupConfig in config.CustomFormatGroups.Add)
@@ -232,9 +234,10 @@ internal class ConfiguredCustomFormatProvider(
 
             if (!hasEntries)
             {
-                log.Debug(
-                    "CF group {TrashId} has no CFs after applying opt-in semantics",
-                    groupConfig.TrashId
+                diagnostics.AddWarning(
+                    $"CF group '{groupResource.Name}' ({groupConfig.TrashId}) has no custom formats after"
+                        + " applying opt-in semantics. All CFs in this group are optional; use `select`"
+                        + " to pick specific CFs to include."
                 );
             }
         }
