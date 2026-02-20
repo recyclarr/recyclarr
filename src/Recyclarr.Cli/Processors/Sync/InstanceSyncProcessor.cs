@@ -5,6 +5,7 @@ using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
+using Recyclarr.Logging;
 using Recyclarr.Sync;
 using Serilog.Context;
 using Spectre.Console;
@@ -26,7 +27,7 @@ internal class InstanceSyncProcessor(
 {
     public async Task<InstanceSyncResult> Process(ISyncSettings settings, CancellationToken ct)
     {
-        using var _ = LogContext.PushProperty("InstanceName", config.InstanceName);
+        using var _ = LogContext.PushProperty(LogProperty.Scope, config.InstanceName);
 
         try
         {

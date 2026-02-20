@@ -160,6 +160,13 @@ Subscribes to both `Instances` and `Pipelines` streams via `Observable.Merge` (u
 render loop polls the latest snapshot reference on a timer. Thread safety comes from `Scan`
 producing immutable snapshots and `Subscribe` performing an atomic reference swap.
 
+### DiagnosticsLogger
+
+Subscribes to the `Diagnostics` stream and logs each event immediately via `ILogger` at the
+appropriate level (Error, Warning). This ensures diagnostic messages appear when `--log` is active
+(where `IAnsiConsole` output is suppressed). Has no explicit call site; activated by DI resolution in
+`SyncProcessor`.
+
 ### DiagnosticsRenderer
 
 Accumulates `SyncDiagnosticEvent` entries via a simple `Subscribe` that appends to a list.
@@ -227,7 +234,7 @@ Participants map to concrete types as follows:
 
 - **Processors**: `SyncCommand`, `SyncProcessor`, `InstanceSyncProcessor`, `CompositeSyncPipeline`
 - **Hub**: `SyncRunScope` (the three Subjects behind `ISyncRunScope` / `ISyncRunPublisher`)
-- **Consumers**: `SyncProgressRenderer`, `DiagnosticsRenderer`, `NotificationService`
+- **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`, `NotificationService`
 - **Pipelines**: `GenericSyncPipeline<TContext>` and its phases
 
 ## Relationship to Pipeline Architecture

@@ -13,11 +13,15 @@ internal class SyncProcessor(
     LifetimeScopeFactory scopeFactory,
     NotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
+    DiagnosticsLogger diagnosticsLogger,
     SyncProgressRenderer progressRenderer
 )
 {
     public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
     {
+        // Injected to activate its diagnostic subscription; no callable API
+        _ = diagnosticsLogger;
+
         var configs = LoadConfigs(settings);
         var instanceNames = configs.Select(c => c.InstanceName).ToList();
 

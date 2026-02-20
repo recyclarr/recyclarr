@@ -64,6 +64,7 @@ internal static class CompositionRoot
                 b.RegisterType<SyncProcessor>();
                 b.RegisterType<SyncProgressRenderer>();
                 b.RegisterType<DiagnosticsRenderer>();
+                b.RegisterType<DiagnosticsLogger>();
             }
         );
 

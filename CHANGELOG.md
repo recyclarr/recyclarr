@@ -15,6 +15,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   quality profiles, in addition to the existing `trash_id` for guide-backed profiles.
 - Sync: `exclude` option for custom format groups to opt out of specific default custom formats.
 
+### Fixed
+
+- Sync: Diagnostic messages (errors, warnings, deprecations) were invisible when using `--log`,
+  including the `state repair --adopt` suggestion for quality profile conflicts.
+
 ### Changed
 
 - Sync: `select` in custom format groups now adds non-default custom formats alongside defaults,
