@@ -68,7 +68,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         var oldDto = profile.ProfileDto;
         var newDto = profile.BuildUpdatedDto();
 
-        table.AddRow("Name", oldDto.Name, newDto.Name);
+        table.AddRow("Name", Markup.Escape(oldDto.Name), Markup.Escape(newDto.Name));
         table.AddRow(
             "Upgrades Allowed?",
             YesNo(oldDto.UpgradeAllowed),
@@ -104,7 +104,8 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         return table;
 
         static string YesNo(bool? val) => val is true ? "Yes" : "No";
-        static string Null<T>(T? val) => val is null ? "<unset>" : val.ToString() ?? "<invalid>";
+        static string Null<T>(T? val) =>
+            val is null ? "<unset>" : Markup.Escape(val.ToString() ?? "<invalid>");
     }
 
     private static Rows SetupQualityItemTable(UpdatedQualityProfile profile)
@@ -183,7 +184,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         foreach (var score in updatedScores)
         {
             table.AddRow(
-                score.Dto.Name,
+                Markup.Escape(score.Dto.Name),
                 score.Dto.Score.ToString(CultureInfo.InvariantCulture),
                 score.NewScore.ToString(CultureInfo.InvariantCulture),
                 score.Reason.ToString()

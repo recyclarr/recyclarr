@@ -28,7 +28,7 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
         foreach (var item in changedItems)
         {
             table.AddRow(
-                $"[dodgerblue1]{item.Quality}[/]",
+                $"[dodgerblue1]{Markup.Escape(item.Quality)}[/]",
                 item.Min.ToString(CultureInfo.InvariantCulture),
                 FormatWithLimit(item.Max, limits.MaxLimit),
                 FormatWithLimit(item.Preferred, limits.PreferredLimit)

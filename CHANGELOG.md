@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync: Crash when previewing quality profiles or quality sizes with square brackets in names
+
 ## [8.0.0] - 2026-02-19
 
 This release contains **BREAKING CHANGES**. See the [v8.0 Upgrade Guide][breaking8] for required
