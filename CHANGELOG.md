@@ -13,6 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - State Repair: Quality profiles with a config `name` override were not matched to service profiles
   during `state repair --adopt`
+- Sync: `assign_scores_to` with `trash_id` instead of `name` failed to resolve to the correct
+  quality profile
 - Sync: Crash when previewing quality profiles or quality sizes with square brackets in names
 
 ## [8.0.0] - 2026-02-19

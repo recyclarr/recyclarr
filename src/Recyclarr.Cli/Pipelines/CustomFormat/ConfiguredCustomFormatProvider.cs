@@ -25,9 +25,10 @@ internal class ConfiguredCustomFormatProvider(
         // From flat custom_formats
         foreach (var cfg in config.CustomFormats)
         {
+            var resolvedScores = ResolveAssignScoresTo(cfg.AssignScoresTo, qpResources);
             foreach (var trashId in cfg.TrashIds)
             {
-                yield return new ConfiguredCfEntry(trashId, cfg.AssignScoresTo, null);
+                yield return new ConfiguredCfEntry(trashId, resolvedScores, null);
             }
         }
 
@@ -278,6 +279,38 @@ internal class ConfiguredCustomFormatProvider(
                 }
             }
         }
+    }
+
+    // Resolves assign_scores_to entries that use trash_id to the effective profile name.
+    // Config name takes precedence over guide name, matching the sync pipeline's resolution.
+    private List<AssignScoresToConfig> ResolveAssignScoresTo(
+        ICollection<AssignScoresToConfig> scores,
+        Dictionary<string, QualityProfileResource> qpResources
+    )
+    {
+        return scores
+            .Select(s =>
+            {
+                if (string.IsNullOrEmpty(s.TrashId) || !string.IsNullOrEmpty(s.Name))
+                {
+                    return s;
+                }
+
+                var configQp = config.QualityProfiles.FirstOrDefault(qp =>
+                    s.TrashId.Equals(qp.TrashId, StringComparison.OrdinalIgnoreCase)
+                );
+
+                var name =
+                    configQp is not null && !string.IsNullOrEmpty(configQp.Name)
+                        ? configQp.Name
+                        : qpResources.GetValueOrDefault(s.TrashId)?.Name ?? "";
+
+                return s with
+                {
+                    Name = name,
+                };
+            })
+            .ToList();
     }
 
     // Returns the list of profiles to assign this group's CFs to.

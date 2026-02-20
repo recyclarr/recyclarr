@@ -148,6 +148,54 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Build_with_assign_scores_to_trash_id_resolves_to_explicit_profile()
+    {
+        SetupCustomFormatGuideData(("Uncensored", "cf-uncensored"));
+
+        // Guide QP has name "[Anime] Remux-1080p", but config overrides to "Remux-1080p - Anime"
+        SetupQualityProfileGuideData(
+            "qp-anime",
+            "[Anime] Remux-1080p",
+            ("Bluray-1080p", true, null)
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfig
+                {
+                    TrashIds = ["cf-uncensored"],
+                    AssignScoresTo =
+                    [
+                        // Uses trash_id instead of name to reference the QP
+                        new AssignScoresToConfig { TrashId = "qp-anime", Score = 101 },
+                    ],
+                },
+            ],
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "qp-anime", Name = "Remux-1080p - Anime" },
+            ],
+        };
+
+        var (sut, _) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        // The CF score should land on the explicit profile, not create a separate implicit one
+        plan.QualityProfiles.Should()
+            .ContainSingle()
+            .Which.Name.Should()
+            .Be("Remux-1080p - Anime");
+        plan.QualityProfiles.Single()
+            .CfScores.Should()
+            .ContainSingle()
+            .Which.Score.Should()
+            .Be(101);
+    }
+
+    [Test]
     public void Build_with_duplicate_cf_in_profile_warns_on_conflict()
     {
         SetupCustomFormatGuideData(("Duplicate CF", "dup-cf"));
