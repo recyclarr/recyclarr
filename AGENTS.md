@@ -165,7 +165,7 @@ Some key files and directories:
 All under `./scripts`. MUST use `testing` skill for test-related work.
 
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`, `lowest`)
-- `Run-E2ETests.ps1`: Run E2E tests
+- `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
 - `Docker-Debug.ps1`: Start Docker services (Sonarr, Radarr, Apprise) for local debugging/E2E tests
 - `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts Docker-Debug if needed
 - `query_issues.py`: Query Qodana issues from GitHub code scanning API

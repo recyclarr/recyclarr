@@ -305,7 +305,10 @@ Fixtures/
 - `e2e00000000000000000000000000003` - E2E test Sonarr guide-only profile
 - `e2e00000000000000000000000000010` - E2E test Sonarr CF group
 - `e2e00000000000000000000000000011` - E2E test Radarr CF group
-- `00000000000000000000000000000001` through `00000000000000000000000000000007` - Local test CFs
+- `cf000000000000000000000000000001` through `cf000000000000000000000000000008` - Local test CFs
+
+**Convention**: Local test trash IDs use a `cf` prefix so YAML treats them as strings without
+quoting. Never use all-numeric trash IDs in fixtures.
 
 ### Adding New Test Cases
 
