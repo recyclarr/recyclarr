@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Settings;
 using Recyclarr.Yaml;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -59,7 +58,7 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
                     break;
             }
 
-            var context = SettingsContextualMessages.GetContextualErrorFromException(e);
+            var context = ConfigContextualMessages.GetContextualErrorFromException(e);
             if (context is not null)
             {
                 log.Error("{Context}", context);

@@ -21,6 +21,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   produces nothing; a warning is now shown advising to use `select`.
 - Sync: Diagnostic messages (errors, warnings, deprecations) were invisible when using `--log`,
   including the `state repair --adopt` suggestion for quality profile conflicts.
+- Config: Helpful migration messages for removed config properties (e.g. `replace_existing_custom_formats`,
+  `quality_profiles`) were never shown due to an internal wiring mistake.
 
 ### Changed
 
