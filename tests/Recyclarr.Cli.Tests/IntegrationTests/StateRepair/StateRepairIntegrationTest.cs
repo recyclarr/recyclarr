@@ -677,6 +677,35 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     }
 
     [Test]
+    public async Task Rebuild_quality_profiles_uses_config_name_over_guide_name()
+    {
+        // Config specifies name "SQP-3", but guide resource has name "[SQP] SQP-3".
+        // Service profile uses the config name "SQP-3", so state repair must match using that.
+        SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", "SQP-3"));
+        SetupGuideQps("radarr", ("qp-trash-id-1", "[SQP] SQP-3"));
+        SetupServiceQps(new QualityProfileDto { Id = 11, Name = "SQP-3" });
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["state", "repair", "quality-profiles", "-i", "test-instance", "--adopt"]
+        );
+
+        exitCode.Should().Be(0);
+
+        var cacheFile = GetQpCacheFilePath("radarr");
+        Fs.File.Exists(cacheFile).Should().BeTrue();
+
+        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cache = JsonSerializer.Deserialize<QualityProfileMappings>(
+            cacheContent,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
+
+        cache.Should().NotBeNull();
+        cache.Mappings.Should().BeEquivalentTo([new { TrashId = "qp-trash-id-1", ServiceId = 11 }]);
+    }
+
+    [Test]
     public async Task Rebuild_quality_profiles_detects_ambiguous_names()
     {
         SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null));

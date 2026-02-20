@@ -32,13 +32,18 @@ internal class QualityProfileResourceAdapter(
             .Get(config.ServiceType)
             .ToDictionary(qp => qp.TrashId, StringComparer.OrdinalIgnoreCase);
 
-        // Get configured QPs that have a trash_id and exist in the guide
+        // Use effective name: config name takes precedence over guide name,
+        // matching the sync pipeline's name resolution logic.
         return config
             .QualityProfiles.Where(qp => !string.IsNullOrEmpty(qp.TrashId))
             .Where(qp => guideQps.ContainsKey(qp.TrashId!))
-            .Select(qp => guideQps[qp.TrashId!])
+            .Select(qp =>
+            {
+                var guide = guideQps[qp.TrashId!];
+                var effectiveName = string.IsNullOrEmpty(qp.Name) ? guide.Name : qp.Name;
+                return (IGuideResource)(guide with { Name = effectiveName });
+            })
             .Distinct()
-            .Cast<IGuideResource>()
             .ToList();
     }
 

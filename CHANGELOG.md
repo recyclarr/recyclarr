@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- State Repair: Quality profiles with a config `name` override were not matched to service profiles
+  during `state repair --adopt`
 - Sync: Crash when previewing quality profiles or quality sizes with square brackets in names
 
 ## [8.0.0] - 2026-02-19
