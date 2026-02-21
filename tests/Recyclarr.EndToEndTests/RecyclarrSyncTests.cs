@@ -151,7 +151,7 @@ internal sealed class RecyclarrSyncTests
                 "CFs should be unchanged after re-sync"
             );
 
-        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name).ToList();
         radarrCfNames
             .Should()
             .Contain(
@@ -352,7 +352,8 @@ internal sealed class RecyclarrSyncTests
         // CF1 (required) + CF3 (selected) are scored; CF2 (excluded) is not
         var hdScoredCfNames = hdProfile
             .FormatItems.Where(fi => fi.Score != 0)
-            .Select(fi => fi.Name);
+            .Select(fi => fi.Name)
+            .ToList();
         hdScoredCfNames
             .Should()
             .Contain(
@@ -384,7 +385,7 @@ internal sealed class RecyclarrSyncTests
         hdBlurayProfile.Should().NotBeNull("guide HD Bluray + WEB profile should be created");
         hdBlurayProfile.UpgradeAllowed.Should().BeTrue("guide value should be inherited");
 
-        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name).ToList();
         string[] expectedRadarrCfs =
         [
             // From YAML custom_formats section
