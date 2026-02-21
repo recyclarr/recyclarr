@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- CLI: `list custom-format-groups` now shows the contents of each group and supports filtering by
+  name (#720).
+
 ### Fixed
 
 - Sync: Overriding custom format scores from guide-backed profiles no longer produces a spurious

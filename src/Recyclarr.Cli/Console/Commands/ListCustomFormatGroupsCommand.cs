@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors;
 using Recyclarr.ResourceProviders.Domain;
@@ -27,6 +26,11 @@ internal class ListCustomFormatGroupsCommand(
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
+
+        [CommandOption("--filter")]
+        [Description("Filter groups by name (case-insensitive substring match)")]
+        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+        public string? Filter { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(
@@ -38,6 +42,13 @@ internal class ListCustomFormatGroupsCommand(
         await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
 
         var groups = cfGroupQuery.Get(settings.Service).OrderBy(g => g.Name).ToList();
+
+        if (settings.Filter is not null)
+        {
+            groups = groups
+                .Where(g => g.Name.Contains(settings.Filter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         log.Debug(
             "Found {Count} custom format groups for {Service}",
@@ -62,33 +73,60 @@ internal class ListCustomFormatGroupsCommand(
     {
         foreach (var group in groups)
         {
-            var cfCount = group.CustomFormats.Count.ToString(CultureInfo.InvariantCulture);
-            console.WriteLine($"{group.TrashId}\t{group.Name}\t{cfCount}");
+            foreach (var cf in group.CustomFormats)
+            {
+                var required = cf.Required.ToString().ToLowerInvariant();
+                var isDefault = cf.Default.ToString().ToLowerInvariant();
+                console.WriteLine(
+                    $"{group.TrashId}\t{group.Name}\t{cf.TrashId}\t{cf.Name}\t{required}\t{isDefault}"
+                );
+            }
         }
     }
 
     private void OutputTable(IReadOnlyCollection<CfGroupResource> groups)
     {
-        var table = new Table().AddColumns("Name", "Trash ID", "CF Count");
-        var alternatingColors = new[] { "white", "paleturquoise4" };
-        var colorIndex = 0;
+        console.WriteLine();
 
         foreach (var group in groups)
         {
-            var color = alternatingColors[colorIndex];
-            var cfCount = group.CustomFormats.Count.ToString(CultureInfo.InvariantCulture);
-            table.AddRow(
-                $"[{color}]{Markup.Escape(group.Name)}[/]",
-                $"[{color}]{Markup.Escape(group.TrashId)}[/]",
-                $"[{color}]{cfCount}[/]"
-            );
-            colorIndex = 1 - colorIndex;
+            var table = new Table()
+                .AddColumns("Name", "Trash ID", "Required", "Default")
+                .Border(TableBorder.Simple);
+
+            var rowIndex = 0;
+            foreach (var cf in group.CustomFormats.OrderBy(c => c.Name))
+            {
+                var color = rowIndex++ % 2 == 0 ? "white" : "grey";
+                table.AddRow(
+                    $"[{color}]{cf.Name.EscapeMarkup()}[/]",
+                    $"[{color}]{cf.TrashId}[/]",
+                    $"[{color}]{(cf.Required ? "Yes" : "No")}[/]",
+                    $"[{color}]{(cf.Default ? "Yes" : "No")}[/]"
+                );
+            }
+
+            var content = new Rows(table);
+
+            var profileNames = group.QualityProfiles.Include.Keys.Order().ToList();
+            if (profileNames.Count > 0)
+            {
+                var profileLines = profileNames.Select(p => new Markup($"  {p.EscapeMarkup()}"));
+                content = new Rows([
+                    table,
+                    new Markup("[blue]Quality Profiles:[/]"),
+                    .. profileLines,
+                ]);
+            }
+
+            var header =
+                $"[orange3]{group.Name.EscapeMarkup()}[/]" + $"  [grey]({group.TrashId})[/]";
+
+            var panel = new Panel(content).Header(new PanelHeader(header)).BorderColor(Color.Grey);
+
+            console.Write(panel);
         }
 
-        console.WriteLine();
-        console.MarkupLine("[orange3]Custom Format Groups in the TRaSH Guides[/]");
-        console.WriteLine();
-        console.Write(table);
         console.WriteLine();
         console.WriteLine(
             "Copy the Trash ID values to use with the `custom_format_groups:` property in your config."
