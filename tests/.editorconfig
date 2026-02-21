@@ -5,3 +5,6 @@ dotnet_diagnostic.ca1707.severity = none
 
 # Avoid constant arrays as arguments
 dotnet_diagnostic.ca1861.severity = none
+
+# Unused parameters (AutoFixture injects via constructor parameters)
+dotnet_diagnostic.IDE0060.severity = none

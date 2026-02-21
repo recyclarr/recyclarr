@@ -7,6 +7,9 @@
     <DebugType>embedded</DebugType>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppress XML doc warnings caused by GenerateDocumentationFile (needed for IDE0005) -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <RecyclarrRepositoryRoot>$(RepositoryRoot)</RecyclarrRepositoryRoot>
     <TestDirectory>$(RepositoryRoot)tests\</TestDirectory>

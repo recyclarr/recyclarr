@@ -40,6 +40,54 @@ resharper_trailing_comma_in_singleline_lists = false
 
 ### Style Enforcement
 
+# File-scoped namespaces (IDE0161)
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Primary constructors (IDE0290)
+csharp_style_prefer_primary_constructors = true:warning
+
+# Pattern matching
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_prefer_pattern_matching = true:warning
+csharp_style_prefer_not_pattern = true:warning
+csharp_style_prefer_switch_expression = true:warning
+
+# Null-coalescing and simplification
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
+dotnet_style_prefer_compound_assignment = true:warning
+
+# Immutability
+dotnet_style_readonly_field = true:warning
+
+# Unnecessary code removal
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0059.severity = warning
+dotnet_diagnostic.IDE0060.severity = warning
+dotnet_code_quality_unused_parameters = all
+dotnet_diagnostic.IDE0079.severity = warning
+dotnet_remove_unnecessary_suppression_exclusions = none
+
+# Simple using declarations (IDE0063)
+csharp_prefer_simple_using_statement = true:warning
+
+# Explicit access modifiers (IDE0040)
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+
+# Target-typed new (IDE0090)
+csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
+
+# Static members
+dotnet_diagnostic.CA1822.severity = warning
+
+# Performance
+dotnet_diagnostic.CA1851.severity = warning
+dotnet_diagnostic.CA1859.severity = warning
+dotnet_diagnostic.CA1860.severity = warning
+dotnet_diagnostic.CA1861.severity = warning
+
 # Use collection expressions ([], [item]) and collection initializers
 dotnet_diagnostic.IDE0028.severity = warning
 dotnet_diagnostic.IDE0300.severity = warning
@@ -55,10 +103,6 @@ dotnet_diagnostic.IDE0170.severity = warning
 
 # Remove redundant type casts
 dotnet_diagnostic.IDE0004.severity = warning
-
-# Require explicit modifiers on non-interface members; flag redundant `public` on interface members
-dotnet_style_require_accessibility_modifiers = for_non_interface_members
-dotnet_diagnostic.IDE0040.severity = warning
 
 ### Analysis Suppression
 

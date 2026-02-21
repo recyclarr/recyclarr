@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Autofac;
-using Autofac.Core;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Flurl.Http.Configuration;

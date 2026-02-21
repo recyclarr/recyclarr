@@ -18,16 +18,11 @@ public class TemplateIncludeProcessor(ConfigIncludesResourceQuery includes) : II
 
         var includesForService = includes.Get(serviceType);
 
-        var includePath = includesForService.LastOrDefault(x =>
-            x.Id.EqualsIgnoreCase(include.Template)
-        );
-
-        if (includePath is null)
-        {
-            throw new YamlIncludeException(
+        var includePath =
+            includesForService.LastOrDefault(x => x.Id.EqualsIgnoreCase(include.Template))
+            ?? throw new YamlIncludeException(
                 $"Unable to find include template with name '{include.Template}'"
             );
-        }
 
         return includePath.TemplateFile;
     }

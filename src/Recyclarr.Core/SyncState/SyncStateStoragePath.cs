@@ -32,13 +32,11 @@ public partial class SyncStateStoragePath(IAppPaths paths, IServiceConfiguration
 
     private static string GetStateObjectNameFromAttribute<T>()
     {
-        var attribute = typeof(T).GetCustomAttribute<SyncStateNameAttribute>();
-        if (attribute == null)
-        {
-            throw new ArgumentException(
+        var attribute =
+            typeof(T).GetCustomAttribute<SyncStateNameAttribute>()
+            ?? throw new ArgumentException(
                 $"{nameof(SyncStateNameAttribute)} is missing on type {nameof(T)}"
             );
-        }
 
         if (!AllowedObjectNameCharactersRegex().IsMatch(attribute.Name))
         {

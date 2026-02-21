@@ -41,12 +41,7 @@ public class CollectionJsonConverter : JsonConverterFactory
             throw new JsonException();
         }
 
-        var instance = Activator.CreateInstance(converterType);
-
-        if (instance is null)
-        {
-            throw new JsonException();
-        }
+        var instance = Activator.CreateInstance(converterType) ?? throw new JsonException();
 
         return (JsonConverter)instance;
     }

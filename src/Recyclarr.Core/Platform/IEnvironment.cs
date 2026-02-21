@@ -7,5 +7,6 @@ public interface IEnvironment
         Environment.SpecialFolder folder,
         Environment.SpecialFolderOption folderOption
     );
+
     string? GetEnvironmentVariable(string variable);
 }

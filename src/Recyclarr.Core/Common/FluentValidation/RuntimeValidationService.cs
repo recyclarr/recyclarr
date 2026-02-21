@@ -4,9 +4,13 @@ using FluentValidation.Results;
 
 namespace Recyclarr.Common.FluentValidation;
 
-public class RuntimeValidationService : IRuntimeValidationService
+public class RuntimeValidationService(IEnumerable<IValidator> validators)
+    : IRuntimeValidationService
 {
-    private readonly Dictionary<Type, IValidator> _validators;
+    private readonly Dictionary<Type, IValidator> _validators = validators
+        .Select(x => (x, GetValidatorInterface(x.GetType())))
+        .Where(x => x.Item2 is not null)
+        .ToDictionary(x => x.Item2!.GetGenericArguments()[0], x => x.Item1);
 
     private static Type? GetValidatorInterface(Type type)
     {
@@ -14,14 +18,6 @@ public class RuntimeValidationService : IRuntimeValidationService
             type.GetInterfaces(),
             i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>)
         );
-    }
-
-    public RuntimeValidationService(IEnumerable<IValidator> validators)
-    {
-        _validators = validators
-            .Select(x => (x, GetValidatorInterface(x.GetType())))
-            .Where(x => x.Item2 is not null)
-            .ToDictionary(x => x.Item2!.GetGenericArguments()[0], x => x.Item1);
     }
 
     public ValidationResult Validate(object instance, params string[] additionalRuleSets)

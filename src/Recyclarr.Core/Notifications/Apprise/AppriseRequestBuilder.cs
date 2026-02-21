@@ -16,11 +16,9 @@ public sealed class AppriseRequestBuilder(
 {
     public IFlurlRequest Request(params object[] path)
     {
-        var apprise = notificationSettings.Value.Apprise;
-        if (apprise is null)
-        {
-            throw new ArgumentException("No apprise notification settings have been defined");
-        }
+        var apprise =
+            notificationSettings.Value.Apprise
+            ?? throw new ArgumentException("No apprise notification settings have been defined");
 
         var client = clientCache.GetOrAdd("apprise", apprise.BaseUrl.ToString(), Configure);
         return client.Request(path);

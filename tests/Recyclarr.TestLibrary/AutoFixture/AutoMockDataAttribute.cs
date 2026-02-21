@@ -21,14 +21,12 @@ public sealed class AutoMockDataAttribute : AutoDataAttribute
             methodName,
             BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static
         );
-        var getContainer = method?.CreateDelegate<Func<ILifetimeScope>>();
-        if (getContainer is null)
-        {
-            throw new ArgumentException(
+        var getContainer =
+            method?.CreateDelegate<Func<ILifetimeScope>>()
+            ?? throw new ArgumentException(
                 "Unable to find method on test fixture. Method must be non-public to be found.",
                 nameof(methodName)
             );
-        }
 
         var fixture = NSubstituteFixture.Create();
         fixture.Customizations.Add(new AutofacSpecimenBuilder(getContainer()));

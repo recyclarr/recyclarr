@@ -53,22 +53,15 @@ public class ResourceDataReader(Assembly assembly, string subdirectory = "") : I
             x => x.EndsWith(resourcePath, StringComparison.Ordinal)
         );
 
-        if (foundResource is null)
-        {
-            throw new ArgumentException($"Embedded resource not found: {resourcePath}");
-        }
-
-        return foundResource;
+        return foundResource
+            ?? throw new ArgumentException($"Embedded resource not found: {resourcePath}");
     }
 
     private string GetResourceData(string resourcePath)
     {
-        using var stream = assembly.GetManifestResourceStream(resourcePath);
-        if (stream is null)
-        {
-            throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");
-        }
-
+        using var stream =
+            assembly.GetManifestResourceStream(resourcePath)
+            ?? throw new ArgumentException($"Unable to open embedded resource: {resourcePath}");
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }

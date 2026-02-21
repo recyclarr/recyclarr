@@ -8,38 +8,23 @@ using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-internal class UpdatedProfileBuilder
+internal class UpdatedProfileBuilder(
+    ILogger log,
+    QualityProfileServiceData serviceData,
+    TrashIdMappingStore<QualityProfileMappings> state,
+    QualityProfileTransactionData transactions
+)
 {
-    private readonly ILogger _log;
-    private readonly TrashIdMappingStore<QualityProfileMappings> _state;
-    private readonly QualityProfileTransactionData _transactions;
-    private readonly Dictionary<int, QualityProfileDto> _serviceDtosById;
-    private readonly ILookup<string, QualityProfileDto> _serviceDtosByName;
-    private readonly QualityProfileDto _schema;
-    private readonly IReadOnlyList<ProfileLanguageDto> _languages;
+    private readonly Dictionary<int, QualityProfileDto> _serviceDtosById = serviceData
+        .Profiles.Where(p => p.Id.HasValue)
+        .ToDictionary(p => p.Id!.Value);
+
+    private readonly ILookup<string, QualityProfileDto> _serviceDtosByName =
+        serviceData.Profiles.ToLookup(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+    private readonly QualityProfileDto _schema = serviceData.Schema;
+    private readonly IReadOnlyList<ProfileLanguageDto> _languages = serviceData.Languages;
     private readonly List<UpdatedQualityProfile> _existingProfiles = [];
-
-    public UpdatedProfileBuilder(
-        ILogger log,
-        QualityProfileServiceData serviceData,
-        TrashIdMappingStore<QualityProfileMappings> state,
-        QualityProfileTransactionData transactions
-    )
-    {
-        _log = log;
-        _state = state;
-        _transactions = transactions;
-        _schema = serviceData.Schema;
-        _languages = serviceData.Languages;
-
-        _serviceDtosById = serviceData
-            .Profiles.Where(p => p.Id.HasValue)
-            .ToDictionary(p => p.Id!.Value);
-        _serviceDtosByName = serviceData.Profiles.ToLookup(
-            p => p.Name,
-            StringComparer.OrdinalIgnoreCase
-        );
-    }
 
     /// <summary>
     /// Processes planned profiles. New profiles are added directly to transactions.NewProfiles.
@@ -65,9 +50,9 @@ internal class UpdatedProfileBuilder
     private void ProcessGuideBackedProfile(PlannedQualityProfile planned)
     {
         var trashId = planned.Resource!.TrashId;
-        var cachedId = _state.FindId(trashId);
+        var cachedId = state.FindId(trashId);
 
-        _log.Debug(
+        log.Debug(
             "Process transaction for guide QP {TrashId} ({Name}), cached ID: {CachedId}",
             trashId,
             planned.Name,
@@ -90,7 +75,7 @@ internal class UpdatedProfileBuilder
         {
             if (!serviceDto.Name.EqualsIgnoreCase(planned.Name))
             {
-                _log.Debug(
+                log.Debug(
                     "QP {TrashId} will be renamed from '{ServiceName}' to '{GuideName}'",
                     planned.Resource!.TrashId,
                     serviceDto.Name,
@@ -103,7 +88,7 @@ internal class UpdatedProfileBuilder
         }
         else
         {
-            _log.Debug(
+            log.Debug(
                 "Cached service ID {CachedId} for QP {TrashId} no longer exists in service",
                 cachedId,
                 planned.Resource!.TrashId
@@ -131,14 +116,14 @@ internal class UpdatedProfileBuilder
                 }
                 else
                 {
-                    _transactions.NonExistentProfiles.Add(planned.Config.Name);
+                    transactions.NonExistentProfiles.Add(planned.Config.Name);
                 }
                 break;
 
             case 1:
                 if (planned.Resource is not null)
                 {
-                    _transactions.ConflictingProfiles.Add(
+                    transactions.ConflictingProfiles.Add(
                         new ConflictingQualityProfile(planned, nameMatches[0].Id!.Value)
                     );
                 }
@@ -151,7 +136,7 @@ internal class UpdatedProfileBuilder
                 break;
 
             default:
-                _transactions.AmbiguousProfiles.Add(
+                transactions.AmbiguousProfiles.Add(
                     new AmbiguousQualityProfile(
                         planned,
                         nameMatches.Select(p => (p.Name, p.Id!.Value)).ToList()
@@ -174,7 +159,7 @@ internal class UpdatedProfileBuilder
                 }
                 else
                 {
-                    _transactions.NonExistentProfiles.Add(planned.Config.Name);
+                    transactions.NonExistentProfiles.Add(planned.Config.Name);
                 }
                 break;
 
@@ -185,7 +170,7 @@ internal class UpdatedProfileBuilder
                 break;
 
             default:
-                _transactions.AmbiguousProfiles.Add(
+                transactions.AmbiguousProfiles.Add(
                     new AmbiguousQualityProfile(
                         planned,
                         nameMatches.Select(p => (p.Name, p.Id!.Value)).ToList()
@@ -198,7 +183,7 @@ internal class UpdatedProfileBuilder
     private void AddNewProfile(PlannedQualityProfile planned)
     {
         var organizer = new QualityItemOrganizer();
-        _transactions.NewProfiles.Add(
+        transactions.NewProfiles.Add(
             new UpdatedQualityProfile
             {
                 ProfileConfig = planned,

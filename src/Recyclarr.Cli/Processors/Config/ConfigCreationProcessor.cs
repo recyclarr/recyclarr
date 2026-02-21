@@ -7,11 +7,9 @@ internal class ConfigCreationProcessor(IOrderedEnumerable<IConfigCreator> creato
 {
     public void Process(ICreateConfigSettings settings)
     {
-        var creator = creators.FirstOrDefault(x => x.CanHandle(settings));
-        if (creator is null)
-        {
-            throw new FatalException("Unable to determine which config creation logic to use");
-        }
+        var creator =
+            creators.FirstOrDefault(x => x.CanHandle(settings))
+            ?? throw new FatalException("Unable to determine which config creation logic to use");
 
         creator.Create(settings);
     }
