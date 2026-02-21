@@ -53,6 +53,13 @@ dotnet_diagnostic.IDE0305.severity = none
 # Use pattern matching: extended property patterns
 dotnet_diagnostic.IDE0170.severity = warning
 
+# Remove redundant type casts
+dotnet_diagnostic.IDE0004.severity = warning
+
+# Require explicit modifiers on non-interface members; flag redundant `public` on interface members
+dotnet_style_require_accessibility_modifiers = for_non_interface_members
+dotnet_diagnostic.IDE0040.severity = warning
+
 ### Analysis Suppression
 
 # Validate arguments of public methods
