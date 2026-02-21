@@ -58,7 +58,7 @@ internal class QualityProfilePlanComponent(
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf, plan);
+            AddCustomFormatScore(profile, scoreConfig, cf);
         }
 
         // Add all profiles to the plan
@@ -68,11 +68,10 @@ internal class QualityProfilePlanComponent(
         }
     }
 
-    private static void AddCustomFormatScore(
+    private void AddCustomFormatScore(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
-        PlannedCustomFormat cf,
-        PipelinePlan diagnostics
+        PlannedCustomFormat cf
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -90,9 +89,15 @@ internal class QualityProfilePlanComponent(
         {
             if (existingScore.Score != scoreToUse)
             {
-                diagnostics.AddWarning(
-                    $"Custom format {cf.Resource.Name} ({cf.Resource.TrashId}) is duplicated in quality profile "
-                        + $"{profile.Name} with conflicting scores: {existingScore.Score} vs {scoreToUse}"
+                // User config overrides guide-provided scores; log for visibility only
+                log.Information(
+                    "Custom format {Name} ({TrashId}) has conflicting scores in profile "
+                        + "{Profile}: {Existing} vs {New} (first value wins)",
+                    cf.Resource.Name,
+                    cf.Resource.TrashId,
+                    profile.Name,
+                    existingScore.Score,
+                    scoreToUse
                 );
             }
             return;

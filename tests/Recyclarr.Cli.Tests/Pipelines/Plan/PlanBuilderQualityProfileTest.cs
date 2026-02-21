@@ -196,7 +196,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
     }
 
     [Test]
-    public void Build_with_duplicate_cf_in_profile_warns_on_conflict()
+    public void Build_with_duplicate_cf_in_profile_uses_first_score()
     {
         SetupCustomFormatGuideData(("Duplicate CF", "dup-cf"));
 
@@ -217,13 +217,16 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "Test Profile" }],
         };
 
-        var (sut, publisher) = CreatePlanBuilder(config);
+        var (sut, _) = CreatePlanBuilder(config);
 
-        sut.Build();
+        var plan = sut.Build();
 
-        publisher
-            .Received()
-            .AddWarning(Arg.Is<string>(s => s.Contains("dup-cf") && s.Contains("conflicting")));
+        plan.QualityProfiles.Should()
+            .ContainSingle()
+            .Which.CfScores.Should()
+            .ContainSingle()
+            .Which.Score.Should()
+            .Be(100);
     }
 
     [Test]

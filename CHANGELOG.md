@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync: Overriding custom format scores from guide-backed profiles no longer produces a spurious
+  warning in sync diagnostics.
+
 ## [8.1.0] - 2026-02-20
 
 ### Added
