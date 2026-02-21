@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.2.0] - 2026-02-21
+
 ### Added
 
 - CLI: `list custom-format-groups` now shows the contents of each group and supports filtering by
@@ -1248,7 +1250,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.1.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.2.0...HEAD
+[8.2.0]: https://github.com/recyclarr/recyclarr/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/recyclarr/recyclarr/compare/v8.0.1...v8.1.0
 [8.0.1]: https://github.com/recyclarr/recyclarr/compare/v8.0.0...v8.0.1
 [8.0.0]: https://github.com/recyclarr/recyclarr/compare/v7.5.2...v8.0.0
