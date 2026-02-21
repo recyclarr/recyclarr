@@ -266,14 +266,6 @@ internal sealed class MoveCacheToStateMigrationStepTest
     }
 
     [Test, AutoMockData]
-    public void Required_returns_true([Frozen] IAppPaths appPaths)
-    {
-        var sut = new MoveCacheToStateMigrationStep(appPaths);
-
-        sut.Required.Should().BeTrue();
-    }
-
-    [Test, AutoMockData]
     public void Description_is_correct([Frozen] IAppPaths appPaths)
     {
         var sut = new MoveCacheToStateMigrationStep(appPaths);

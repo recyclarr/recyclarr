@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Config;
 using Recyclarr.TrashGuide;
@@ -13,7 +12,6 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("Sync the guide to services")]
 [UsedImplicitly]
 internal class SyncCommand(
-    MigrationExecutor migration,
     ProviderProgressHandler providerProgressHandler,
     LifetimeScopeFactory scopeFactory
 ) : AsyncCommand<SyncCommand.CliSettings>
@@ -60,9 +58,6 @@ internal class SyncCommand(
         CancellationToken ct
     )
     {
-        // Will throw if migration is required, otherwise just a warning is issued.
-        migration.CheckNeededMigrations();
-
         await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
         // Sync scope owns the lifecycle of all sync-run-scoped services.

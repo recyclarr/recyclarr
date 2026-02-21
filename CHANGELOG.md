@@ -31,6 +31,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sync: `select` in custom format groups now adds non-default custom formats alongside defaults,
   instead of replacing them. Use `exclude` to remove unwanted defaults.
 
+### Deprecated
+
+- CLI: The `migrate` command is deprecated. Migrations now run automatically at startup.
+
 ## [8.0.1] - 2026-02-19
 
 ### Fixed

@@ -2,7 +2,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors.StateRepair;
 using Spectre.Console.Cli;
 
@@ -11,7 +10,6 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("Repair state by matching guide resources to service resources")]
 [UsedImplicitly]
 internal class StateRepairCommand(
-    MigrationExecutor migration,
     ProviderProgressHandler providerProgressHandler,
     StateRepairProcessor processor
 ) : AsyncCommand<StateRepairCommand.CliSettings>
@@ -64,8 +62,6 @@ internal class StateRepairCommand(
         CancellationToken ct
     )
     {
-        migration.CheckNeededMigrations();
-
         await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
         return (int)await processor.Process(settings, ct);

@@ -15,12 +15,6 @@ internal interface IMigrationStep
     IReadOnlyCollection<string> Remediation { get; }
 
     /// <summary>
-    /// Determines if this migration step is required. If so, it must be executed before the program may be
-    /// used normally.
-    /// </summary>
-    bool Required { get; }
-
-    /// <summary>
     /// Run logic to determine if this migration step is necessary
     /// </summary>
     /// <returns>

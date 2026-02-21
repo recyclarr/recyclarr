@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
+using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors;
 using Spectre.Console;
 
@@ -22,6 +23,7 @@ internal static class Program
 
         try
         {
+            scope.Resolve<MigrationExecutor>().PerformAllMigrationSteps();
             return await CliSetup.Run(scope, args);
         }
         catch (Exception e)

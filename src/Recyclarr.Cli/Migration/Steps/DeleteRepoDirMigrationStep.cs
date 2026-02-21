@@ -15,7 +15,6 @@ internal class DeleteRepoDirMigrationStep(IAppPaths paths) : IMigrationStep
             $"Delete {RepoDir} manually if Recyclarr can't do it",
         ];
 
-    public bool Required => false;
     private IDirectoryInfo RepoDir => paths.ConfigDirectory.SubDirectory("repo");
 
     public bool CheckIfNeeded()

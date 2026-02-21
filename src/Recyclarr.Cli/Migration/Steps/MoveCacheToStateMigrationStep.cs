@@ -17,7 +17,6 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
             $"Delete {CacheDir} after moving contents",
         ];
 
-    public bool Required => true;
     private IDirectoryInfo CacheDir => paths.ConfigDirectory.SubDirectory("cache");
     private IDirectoryInfo StateDir => paths.ConfigDirectory.SubDirectory("state");
     private IDirectoryInfo ResourcesDir => paths.ResourceDirectory;
