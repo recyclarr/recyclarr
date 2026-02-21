@@ -1,8 +1,10 @@
 name: Feature Request
 description: Want to see a new feature or an improvement to existing feature?
+title: "[Feature]: "
 labels: [enhancement]
 body:
   - type: checkboxes
+    id: existing-issue
     attributes:
       label: Is there an existing issue for this?
       description: >
@@ -11,6 +13,7 @@ body:
         - label: I have searched the existing issues
           required: true
   - type: textarea
+    id: feature-description
     attributes:
       label: Feature Description
       description: A concise description of what feature or improvement you want.

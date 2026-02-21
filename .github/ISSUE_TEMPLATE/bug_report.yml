@@ -1,8 +1,10 @@
 name: Bug Report
 description: Create a report to help us improve
+title: "[Bug]: "
 labels: [bug]
 body:
   - type: checkboxes
+    id: existing-issue
     attributes:
       label: Is there an existing issue for this?
       description: Please search to see if an issue already exists for the bug you encountered.
@@ -10,64 +12,81 @@ body:
         - label: I have searched the existing issues
           required: true
   - type: textarea
+    id: description
     validations: { required: true }
     attributes:
-      label: Current Behavior
-      description: A concise description of what you're experiencing.
-  - type: textarea
-    validations: { required: true }
-    attributes:
-      label: Expected Behavior
-      description: A concise description of what you expected to happen.
-  - type: textarea
-    validations: { required: true }
-    attributes:
-      label: Steps To Reproduce
-      description: Steps to reproduce the behavior.
+      label: Describe the Bug
+      description: >
+        What happened, and how can we reproduce it? Include what you were doing, what went wrong,
+        and the steps or commands to trigger the issue.
       placeholder: |
-        1. In this environment...
-        2. With this config...
-        3. Run '...'
-        4. See error...
-  - type: textarea
+        When I run `recyclarr sync`, it fails with...
+
+        Steps to reproduce:
+        1. With this config...
+        2. Run `recyclarr sync`
+        3. See error...
+  - type: input
+    id: recyclarr-version
     validations: { required: true }
     attributes:
-      label: Environment & Versions
-      render: bash
-      description: |
-        Please provide information about your environment below (only relevant details):
-
-        - OS are you running on (e.g. Windows 10, Ubuntu 22.04)
-        - Your CPU architecture (e.g. arm, arm64, x86, x64)
-        - Recyclarr version (e.g. `v3.0.0`)
-        - Build of Recyclarr in use (e.g. Docker, `linux-arm64`, `osx-x64`)
-        - Sonarr version (e.g. `3.0.9.1549`)
-        - Radarr Version: (e.g. `4.3.0.6671`)
-      value: |
-        - Operating System:
-        - Architecture:
-        - Recyclarr Version:
-        - Recyclarr Build:
-        - Sonarr Version:
-        - Radarr Version:
+      label: Recyclarr Version
+      description: >
+        The version of Recyclarr you are using (e.g. `v7.5.2`). Run `recyclarr --version` to find
+        out.
+      placeholder: v7.5.2
+  - type: dropdown
+    id: recyclarr-build
+    validations: { required: true }
+    attributes:
+      label: Recyclarr Build
+      description: How did you install or run Recyclarr?
+      options:
+        - Docker
+        - linux-x64
+        - linux-arm64
+        - linux-arm
+        - linux-musl-x64
+        - linux-musl-arm64
+        - linux-musl-arm
+        - osx-arm64
+        - osx-x64
+        - win-x64
+        - win-arm64
+        - Other (built from source)
+  - type: input
+    id: servarr-version
+    attributes:
+      label: Sonarr / Radarr Version
+      description: If relevant, the version of Sonarr or Radarr (e.g. `Sonarr 4.0.16.2944`).
+      placeholder: Sonarr 4.0.16.2944
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: If relevant (e.g. `Ubuntu 24.04`, `macOS 15.3`, `Windows 11`).
+      placeholder: Ubuntu 24.04
   - type: textarea
+    id: log-files
     validations: { required: true }
     attributes:
       label: Recyclarr Log File(s)
       placeholder: Drag & Drop your Recyclarr log file(s) here.
       description: >
-        Attach one or more [log files](https://recyclarr.dev/guide/troubleshooting/#obtaining-debug-logs)
+        Attach one or more [log files](https://recyclarr.dev/guide/troubleshooting/help/#obtaining-debug-logs)
         that are relevant to the issue. Due to the size of these files, I do not recommend pasting
         it here.
   - type: textarea
+    id: config-yaml
     validations: { required: true }
     attributes:
       label: Configuration YAML
       render: YAML
       description: >
-        Provide your [redacted](https://recyclarr.dev/guide/troubleshooting/#redact-config)
+        Provide your [redacted](https://recyclarr.dev/guide/troubleshooting/help/#redact-config)
         configuration YAML here (e.g. `recyclarr.yml`).
   - type: textarea
+    id: servarr-logs
     attributes:
       label: Sonarr / Radarr Logs
       description: >
