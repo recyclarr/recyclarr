@@ -1,6 +1,5 @@
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors;
 
