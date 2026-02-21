@@ -13,6 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: `list custom-format-groups` now shows the contents of each group and supports filtering by
   name (#720).
+- CLI: `list quality-profiles` now supports `--details` to show included custom formats and
+  `--filter` to search by name.
 
 ### Fixed
 

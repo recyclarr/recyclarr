@@ -27,6 +27,16 @@ internal class ListQualityProfilesCommand(
         [EnumDescription<SupportedServices>("The service type to obtain information about.")]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices Service { get; init; }
+
+        [CommandOption("--filter")]
+        [Description("Filter profiles by name (case-insensitive substring match)")]
+        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+        public string? Filter { get; init; }
+
+        [CommandOption("--details")]
+        [Description("Show custom formats included in each quality profile")]
+        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
+        public bool Details { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(
@@ -39,6 +49,13 @@ internal class ListQualityProfilesCommand(
 
         var profiles = guide.Get(settings.Service).OrderBy(p => p.Name).ToList();
 
+        if (settings.Filter is not null)
+        {
+            profiles = profiles
+                .Where(p => p.Name.Contains(settings.Filter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
         log.Debug("Found {Count} quality profiles for {Service}", profiles.Count, settings.Service);
 
         if (settings.Raw)
@@ -47,7 +64,7 @@ internal class ListQualityProfilesCommand(
         }
         else
         {
-            OutputTable(profiles, settings.Service);
+            OutputTable(profiles, settings);
         }
 
         return (int)ExitStatus.Succeeded;
@@ -63,11 +80,13 @@ internal class ListQualityProfilesCommand(
 
     private void OutputTable(
         IReadOnlyCollection<QualityProfileResource> profiles,
-        SupportedServices service
+        CliSettings settings
     )
     {
         console.WriteLine();
-        console.MarkupLine($"[orange3]Quality Profiles in the TRaSH Guides ({service})[/]");
+        console.MarkupLine(
+            $"[orange3]Quality Profiles in the TRaSH Guides ({settings.Service})[/]"
+        );
         console.MarkupLine("[dim]Tip: Click profile names to open the guide page.[/]");
         console.WriteLine();
 
@@ -78,7 +97,7 @@ internal class ListQualityProfilesCommand(
 
         foreach (var profile in profiles)
         {
-            AddProfileRow(table, profile);
+            AddProfileRow(table, profile, settings.Details);
         }
 
         console.Write(table);
@@ -88,7 +107,7 @@ internal class ListQualityProfilesCommand(
         );
     }
 
-    private static void AddProfileRow(Table table, QualityProfileResource profile)
+    private static void AddProfileRow(Table table, QualityProfileResource profile, bool showDetails)
     {
         var nameMarkup = string.IsNullOrEmpty(profile.TrashUrl)
             ? Markup.Escape(profile.Name)
@@ -96,9 +115,31 @@ internal class ListQualityProfilesCommand(
 
         var rows = new List<IRenderable> { new Markup($"[bold blue]{nameMarkup}[/]") };
 
+        if (showDetails)
+        {
+            rows.Add(new Markup("\n[underline]Qualities[/]"));
+        }
+
         foreach (var quality in profile.Items.Where(q => q.Allowed))
         {
             rows.Add(FormatQualityRow(quality));
+        }
+
+        if (showDetails && profile.FormatItems.Count > 0)
+        {
+            var scoreSetLabel = string.IsNullOrEmpty(profile.TrashScoreSet)
+                ? "default"
+                : profile.TrashScoreSet;
+
+            rows.Add(
+                new Markup($"\n[underline]Custom Formats[/] [dim](score set: {scoreSetLabel})[/]")
+            );
+
+            // FormatItems: keys are CF display names, values are trash IDs
+            foreach (var (name, _) in profile.FormatItems.OrderBy(kv => kv.Key))
+            {
+                rows.Add(FormatCustomFormatRow(name));
+            }
         }
 
         table.AddRow(new Rows(rows), new Markup($"[dim]{profile.TrashId}[/]"));
@@ -116,6 +157,16 @@ internal class ListQualityProfilesCommand(
         grid.AddColumn(new GridColumn().Width(2).NoWrap().PadLeft(2).PadRight(1));
         grid.AddColumn(new GridColumn().PadLeft(0));
         grid.AddRow(new Markup("[green]:check_mark:[/]"), new Markup(qualityText));
+
+        return grid;
+    }
+
+    private static Grid FormatCustomFormatRow(string name)
+    {
+        var grid = new Grid();
+        grid.AddColumn(new GridColumn().Width(2).NoWrap().PadLeft(2).PadRight(1));
+        grid.AddColumn(new GridColumn().PadLeft(0));
+        grid.AddRow(new Markup("[dim]•[/]"), new Markup(Markup.Escape(name)));
 
         return grid;
     }
