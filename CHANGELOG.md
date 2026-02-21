@@ -23,6 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   including the `state repair --adopt` suggestion for quality profile conflicts.
 - Config: Helpful migration messages for removed config properties (e.g. `replace_existing_custom_formats`,
   `quality_profiles`) were never shown due to an internal wiring mistake.
+- Config: YAML parsing errors (unknown properties, bad values) were silently swallowed, causing
+  sync to produce no output instead of reporting the problem.
 
 ### Changed
 

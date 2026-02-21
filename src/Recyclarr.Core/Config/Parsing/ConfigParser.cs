@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 namespace Recyclarr.Config.Parsing;
 
 [UsedImplicitly]
-public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
+public class ConfigParser(IYamlSerializerFactory yamlFactory)
 {
     private readonly IDeserializer _deserializer = yamlFactory.CreateDeserializer(
         YamlFileType.Config
@@ -16,14 +16,12 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
     public T? Load<T>(IFileInfo file)
         where T : class
     {
-        log.Debug("Loading config file: {File}", file);
         return Load<T>(file.OpenText);
     }
 
     public T? Load<T>(string yaml)
         where T : class
     {
-        log.Debug("Loading config from string data");
         return Load<T>(() => new StringReader(yaml));
     }
 
@@ -37,35 +35,19 @@ public class ConfigParser(ILogger log, IYamlSerializerFactory yamlFactory)
         }
         catch (FeatureRemovalException e)
         {
-            log.Error(e, "Unsupported feature");
+            throw new ConfigParsingException(e.Message, 0, e);
         }
         catch (YamlException e)
         {
-            var line = e.Start.Line;
-
-            switch (e.InnerException)
-            {
-                case InvalidCastException:
-                    log.Error(
-                        e.InnerException,
-                        "Incompatible value assigned/used at line {Line}",
-                        line
-                    );
-                    break;
-
-                default:
-                    log.Error(e.InnerException, "Exception at line {Line}", line);
-                    break;
-            }
-
+            var line = (int)e.Start.Line;
             var context = ConfigContextualMessages.GetContextualErrorFromException(e);
-            if (context is not null)
+            var message = e.InnerException switch
             {
-                log.Error("{Context}", context);
-            }
-        }
+                InvalidCastException => $"Incompatible value assigned/used at line {line}",
+                _ => $"Exception at line {line}",
+            };
 
-        log.Error("Due to previous exception, this config will be skipped");
-        return null;
+            throw new ConfigParsingException(message, line, e, context);
+        }
     }
 }

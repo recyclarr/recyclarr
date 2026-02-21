@@ -1,4 +1,5 @@
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
@@ -40,8 +41,7 @@ internal sealed class ConfigurationLoaderFileTest : IntegrationTestFixture
                 api_key: !file path/to/nonexistent_file
             """;
 
-        var result = sut.Load(testYml);
-
-        result.Should().BeEmpty();
+        var act = () => sut.Load(testYml);
+        act.Should().Throw<ConfigParsingException>();
     }
 }

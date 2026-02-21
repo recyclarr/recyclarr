@@ -5,10 +5,13 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 internal class SyncProcessor(
+    IAnsiConsole console,
+    ILogger log,
     ConfigurationRegistry configRegistry,
     LifetimeScopeFactory scopeFactory,
     NotificationService notify,
@@ -46,16 +49,17 @@ internal class SyncProcessor(
 
     private List<IServiceConfiguration> LoadConfigs(ISyncSettings settings)
     {
-        return configRegistry
-            .FindAndLoadConfigs(
-                new ConfigFilterCriteria
-                {
-                    ManualConfigFiles = settings.Configs,
-                    Instances = settings.Instances ?? [],
-                    Service = settings.Service,
-                }
-            )
-            .ToList();
+        var result = configRegistry.FindAndLoadConfigs(
+            new ConfigFilterCriteria
+            {
+                ManualConfigFiles = settings.Configs,
+                Instances = settings.Instances ?? [],
+                Service = settings.Service,
+            }
+        );
+
+        ConfigFailureRenderer.Render(console, log, result);
+        return result.Configs.ToList();
     }
 
     private async Task<ExitStatus> ProcessConfigs(

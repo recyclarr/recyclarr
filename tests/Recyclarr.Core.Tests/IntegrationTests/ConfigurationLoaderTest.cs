@@ -5,6 +5,7 @@ using Autofac;
 using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashGuide;
@@ -39,7 +40,19 @@ internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
 
         var loader = Resolve<ConfigurationLoader>();
 
-        var result = fileData.SelectMany(x => loader.Load(x.Item1)).ToList();
+        var result = fileData
+            .SelectMany(x =>
+            {
+                try
+                {
+                    return loader.Load(x.Item1);
+                }
+                catch (ConfigParsingException)
+                {
+                    return [];
+                }
+            })
+            .ToList();
 
         result
             .Where(x => x.ServiceType == SupportedServices.Sonarr)

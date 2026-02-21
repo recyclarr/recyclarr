@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Autofac;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
@@ -41,7 +42,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
         );
 
         result
-            .Should()
+            .Configs.Should()
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
@@ -63,6 +64,80 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             sut.FindAndLoadConfigs(new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] });
 
         act.Should().ThrowExactly<InvalidConfigurationFilesException>();
+    }
+
+    [Test]
+    public void Root_config_with_unknown_property_reports_failure()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    replace_existing_custom_formats: true
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
+        );
+
+        result.Configs.Should().BeEmpty();
+        result
+            .Failures.Should()
+            .ContainSingle()
+            .Which.ContextualMessage.Should()
+            .Contain("replace_existing_custom_formats");
+    }
+
+    [Test]
+    public void Included_config_with_unknown_property_reports_failure()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        var includeFile = Paths.YamlIncludeDirectory.File("bad-include.yml");
+        Fs.AddFile(
+            includeFile,
+            new MockFileData(
+                """
+                replace_existing_custom_formats: true
+                custom_formats:
+                  - trash_ids:
+                      - aabbccdd
+                """
+            )
+        );
+
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    include:
+                      - config: bad-include.yml
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
+        );
+
+        result.Configs.Should().BeEmpty();
+        result
+            .Failures.Should()
+            .ContainSingle()
+            .Which.ContextualMessage.Should()
+            .Contain("replace_existing_custom_formats");
     }
 
     [Test]
@@ -97,7 +172,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
         );
 
-        var groups = result.Should().ContainSingle().Which.CustomFormatGroups;
+        var groups = result.Configs.Should().ContainSingle().Which.CustomFormatGroups;
 
         groups.Skip.Should().BeEquivalentTo("group-to-skip");
         groups

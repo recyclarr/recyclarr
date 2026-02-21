@@ -1,4 +1,5 @@
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Platform;
 
@@ -139,7 +140,7 @@ internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
                 api_key: value
             """;
 
-        var result = sut.Load(testYml);
-        result.Should().BeEmpty();
+        var act = () => sut.Load(testYml);
+        act.Should().Throw<ConfigParsingException>();
     }
 }

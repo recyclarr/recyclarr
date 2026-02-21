@@ -29,16 +29,18 @@ internal class DeleteCustomFormatsProcessor(
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
-        var configs = configRegistry.FindAndLoadConfigs(
+        var result = configRegistry.FindAndLoadConfigs(
             new ConfigFilterCriteria { Instances = [settings.InstanceName] }
         );
 
-        if (configs.Count != 1)
+        ConfigFailureRenderer.Render(console, log, result);
+
+        if (result.Configs.Count != 1)
         {
             return;
         }
 
-        var config = configs.Single();
+        var config = result.Configs.Single();
         using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(c =>
         {
             c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();

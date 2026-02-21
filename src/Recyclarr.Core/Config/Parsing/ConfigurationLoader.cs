@@ -23,6 +23,7 @@ public class ConfigurationLoader(
 {
     public IReadOnlyCollection<LoadedConfigYaml> Load(IFileInfo file)
     {
+        log.Debug("Loading config file: {File}", file);
         using var logScope = LogContext.PushProperty(LogProperty.Scope, file.Name);
         return ProcessLoadedConfigs(parser.Load<RootConfigYaml>(file))
             .Select(x => x with { YamlPath = file })

@@ -19,6 +19,7 @@ internal class CacheRebuildConfigurationScope(ILifetimeScope scope) : LifetimeSc
 [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
 internal class StateRepairProcessor(
     IAnsiConsole console,
+    ILogger log,
     ConfigurationRegistry configRegistry,
     LifetimeScopeFactory scopeFactory,
     ExceptionHandler exceptionHandler
@@ -26,11 +27,13 @@ internal class StateRepairProcessor(
 {
     public async Task<ExitStatus> Process(IStateRepairSettings settings, CancellationToken ct)
     {
-        var configs = configRegistry.FindAndLoadConfigs(
+        var result = configRegistry.FindAndLoadConfigs(
             new ConfigFilterCriteria { Instances = settings.Instances ?? [] }
         );
 
-        if (configs.Count == 0)
+        ConfigFailureRenderer.Render(console, log, result);
+
+        if (result.Configs.Count == 0)
         {
             console.MarkupLine("[yellow]No configurations found.[/]");
             return ExitStatus.Succeeded;
@@ -39,7 +42,7 @@ internal class StateRepairProcessor(
         var succeeded = 0;
         var failed = 0;
 
-        foreach (var config in configs)
+        foreach (var config in result.Configs)
         {
             try
             {

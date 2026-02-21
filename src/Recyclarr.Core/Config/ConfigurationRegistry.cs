@@ -1,8 +1,8 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Filtering;
-using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Logging;
 using Serilog.Context;
 
@@ -15,19 +15,17 @@ public class ConfigurationRegistry(
     ConfigFilterProcessor filterProcessor
 )
 {
-    public IReadOnlyCollection<IServiceConfiguration> FindAndLoadConfigs(
-        ConfigFilterCriteria? filterCriteria = null
-    )
+    public ConfigRegistryResult FindAndLoadConfigs(ConfigFilterCriteria? filterCriteria = null)
     {
         filterCriteria ??= new ConfigFilterCriteria();
 
         var manualConfigs = filterCriteria.ManualConfigFiles;
-        var configs =
+        var configFiles =
             manualConfigs.Count != 0
                 ? PrepareManualConfigs(manualConfigs)
                 : finder.GetConfigFiles();
 
-        return LoadAndFilterConfigs(configs, filterCriteria).ToList();
+        return LoadAndFilterConfigs(configFiles, filterCriteria);
     }
 
     private List<IFileInfo> PrepareManualConfigs(IEnumerable<string> manualConfigs)
@@ -42,12 +40,31 @@ public class ConfigurationRegistry(
         return configFiles[true].ToList();
     }
 
-    private List<IServiceConfiguration> LoadAndFilterConfigs(
-        IEnumerable<IFileInfo> configs,
+    private ConfigRegistryResult LoadAndFilterConfigs(
+        IEnumerable<IFileInfo> configFiles,
         ConfigFilterCriteria filterCriteria
     )
     {
-        var allLoadedConfigs = configs.SelectMany(loader.Load).ToList();
+        var allLoadedConfigs = new List<LoadedConfigYaml>();
+        var failures = new List<ConfigParsingException>();
+
+        foreach (var file in configFiles)
+        {
+            try
+            {
+                allLoadedConfigs.AddRange(loader.Load(file));
+            }
+            catch (ConfigParsingException e)
+            {
+                e.FilePath = file;
+                failures.Add(e);
+            }
+            catch (YamlIncludeException e) when (e.InnerException is ConfigParsingException inner)
+            {
+                inner.FilePath = file;
+                failures.Add(inner);
+            }
+        }
 
         // Extract all instance names before filtering for better error messages
         var allInstanceNames = allLoadedConfigs
@@ -63,7 +80,7 @@ public class ConfigurationRegistry(
             allInstanceNames
         );
 
-        return filteredConfigs
+        var configs = filteredConfigs
             .Select(x =>
             {
                 using var logScope = LogContext.PushProperty(LogProperty.Scope, x.YamlPath);
@@ -81,5 +98,7 @@ public class ConfigurationRegistry(
                 };
             })
             .ToList();
+
+        return new ConfigRegistryResult(configs, failures);
     }
 }

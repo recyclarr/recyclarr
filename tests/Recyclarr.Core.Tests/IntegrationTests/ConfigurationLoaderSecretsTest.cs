@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide;
 
@@ -72,10 +73,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
             new MockFileData(secretsYml)
         );
 
-        configLoader
-            .Load(() => new StringReader(testYml))
-            .Should()
-            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
+        var act = () => configLoader.Load(() => new StringReader(testYml));
+        act.Should().Throw<ConfigParsingException>();
     }
 
     [Test]
@@ -90,10 +89,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
                 base_url: fake_url
             """;
 
-        configLoader
-            .Load(() => new StringReader(testYml))
-            .Should()
-            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
+        var act = () => configLoader.Load(() => new StringReader(testYml));
+        act.Should().Throw<ConfigParsingException>();
     }
 
     [Test]
@@ -108,10 +105,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
                 base_url: fake_url
             """;
 
-        configLoader
-            .Load(() => new StringReader(testYml))
-            .Should()
-            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
+        var act = () => configLoader.Load(() => new StringReader(testYml));
+        act.Should().Throw<ConfigParsingException>();
     }
 
     [Test]
@@ -133,9 +128,8 @@ internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
             Paths.ConfigDirectory.File("recyclarr.yml").FullName,
             new MockFileData(secretsYml)
         );
-        configLoader
-            .Load(() => new StringReader(testYml))
-            .Should()
-            .NotContain(x => x.ServiceType == SupportedServices.Sonarr);
+
+        var act = () => configLoader.Load(() => new StringReader(testYml));
+        act.Should().Throw<ConfigParsingException>();
     }
 }

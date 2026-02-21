@@ -1,3 +1,4 @@
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Logging;
@@ -95,7 +96,7 @@ public sealed class IncludePostProcessor(
             }
             catch (YamlIncludeException e)
             {
-                throw new YamlIncludeException($"Instance '{key}': {e.Message}");
+                throw new YamlIncludeException($"Instance '{key}': {e.Message}", e.InnerException);
             }
         }
 
@@ -108,10 +109,16 @@ public sealed class IncludePostProcessor(
         var yamlFile = includeResolver.GetIncludePath(includeDirective, serviceType);
         _logScope = LogContext.PushProperty(LogProperty.Scope, $"Include {yamlFile.Name}");
 
-        var configToMerge = parser.Load<T>(yamlFile);
-        if (configToMerge is null)
+        T configToMerge;
+        try
         {
-            throw new YamlIncludeException($"Failed to parse include file: {yamlFile.FullName}");
+            configToMerge =
+                parser.Load<T>(yamlFile)
+                ?? throw new YamlIncludeException($"Include file is empty: {yamlFile.FullName}");
+        }
+        catch (ConfigParsingException e)
+        {
+            throw new YamlIncludeException($"Failed to parse include file: {yamlFile.FullName}", e);
         }
 
         if (!validator.Validate(configToMerge))

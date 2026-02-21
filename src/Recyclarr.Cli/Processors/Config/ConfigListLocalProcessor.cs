@@ -18,7 +18,10 @@ internal class ConfigListLocalProcessor(
 {
     public void Process()
     {
-        var allConfigs = configRegistry.FindAndLoadConfigs().ToList();
+        var result = configRegistry.FindAndLoadConfigs();
+        ConfigFailureRenderer.Render(console, log, result);
+
+        var allConfigs = result.Configs.ToList();
         var configsByFile = allConfigs.ToLookup(x => MakeRelative(x.YamlPath));
 
         var radarrCount = allConfigs.Count(x => x.ServiceType == SupportedServices.Radarr);
