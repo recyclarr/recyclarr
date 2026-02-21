@@ -8,3 +8,5 @@ docker compose -f $debuggingYaml up -d --pull always
 if ($LASTEXITCODE -ne 0) {
     throw "docker compose up failed (debug)"
 }
+
+Write-Host "ntfy: http://localhost:8090/recyclarr"
