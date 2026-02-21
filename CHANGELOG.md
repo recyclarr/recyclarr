@@ -16,6 +16,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Notifications: Empty sync results (all zeros, no errors) no longer trigger notifications in normal
+  mode.
 - Sync: Overriding custom format scores from guide-backed profiles no longer produces a spurious
   warning in sync diagnostics.
 
