@@ -14,7 +14,7 @@ internal class SyncProcessor(
     ILogger log,
     ConfigurationRegistry configRegistry,
     LifetimeScopeFactory scopeFactory,
-    NotificationService notify,
+    INotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
     DiagnosticsLogger diagnosticsLogger,
     SyncProgressRenderer progressRenderer

@@ -2,25 +2,21 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Reactive.Disposables;
 using System.Text;
-using Autofac.Features.Indexed;
 using Flurl.Http;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
-using Recyclarr.Settings;
-using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Notifications;
 
-public sealed class NotificationService : IDisposable
+internal sealed class NotificationService : INotificationService, IDisposable
 {
     private const string NoInstance = "[no instance]";
 
     private readonly ILogger _log;
-    private readonly IIndex<AppriseMode, IAppriseNotificationApiService> _apiFactory;
+    private readonly IAppriseNotificationApiService _api;
     private readonly VerbosityOptions _verbosity;
-    private readonly AppriseNotificationSettings? _settings;
 
     private readonly List<PipelineEvent> _pipelines = [];
     private readonly List<SyncDiagnosticEvent> _diagnostics = [];
@@ -28,16 +24,14 @@ public sealed class NotificationService : IDisposable
 
     public NotificationService(
         ILogger log,
-        IIndex<AppriseMode, IAppriseNotificationApiService> apiFactory,
-        ISettings<NotificationSettings> settings,
+        IAppriseNotificationApiService api,
         ISyncRunScope run,
         VerbosityOptions verbosity
     )
     {
         _log = log;
-        _apiFactory = apiFactory;
+        _api = api;
         _verbosity = verbosity;
-        _settings = settings.Value.Apprise;
 
         _subscriptions =
         [
@@ -48,14 +42,6 @@ public sealed class NotificationService : IDisposable
 
     public async Task SendNotification()
     {
-        if (_settings is null)
-        {
-            _log.Debug(
-                "Notification settings are not present, so this notification will not be sent"
-            );
-            return;
-        }
-
         // Derive overall success from pipeline statuses per instance (worst-status-wins).
         // DeriveStatus returns Running/Pending for incomplete pipelines, which would read as
         // "not failed" here. This is fine because SyncProcessor calls SendNotification() after
@@ -88,18 +74,14 @@ public sealed class NotificationService : IDisposable
 
         try
         {
-            var api = _apiFactory[_settings!.Mode!.Value];
-
-            await api.Notify(
-                _settings!,
-                payload =>
-                    payload with
-                    {
-                        Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
-                        Body = body,
-                        Type = messageType,
-                        Format = AppriseMessageFormat.Markdown,
-                    }
+            await _api.Notify(payload =>
+                payload with
+                {
+                    Title = $"Recyclarr Sync {(succeeded ? "Completed" : "Failed")}",
+                    Body = body,
+                    Type = messageType,
+                    Format = AppriseMessageFormat.Markdown,
+                }
             );
         }
         catch (FlurlHttpException e)
@@ -144,16 +126,8 @@ public sealed class NotificationService : IDisposable
         IReadOnlyList<SyncDiagnosticEvent> diagnostics
     )
     {
-        if (instanceName == NoInstance)
-        {
-            body.AppendLine("### General");
-        }
-        else
-        {
-            body.AppendLine(CultureInfo.InvariantCulture, $"### Instance: `{instanceName}`");
-        }
-
-        body.AppendLine();
+        // Build section content first; only emit the header if there's something to show
+        var section = new StringBuilder();
 
         // Render completion counts from pipeline events (Information category)
         if (pipelineSnapshots is not null && _verbosity.SendInfo)
@@ -168,24 +142,26 @@ public sealed class NotificationService : IDisposable
                     )
                 )
                 .Where(x =>
-                    x.Result is { Status: PipelineProgressStatus.Succeeded, Count: not null }
+                    x.Result
+                        is { Status: PipelineProgressStatus.Succeeded, Count: not null and > 0 }
                 )
                 .ToList();
 
             if (pipelineResults.Count > 0)
             {
-                body.AppendLine("Information:");
-                body.AppendLine();
+                section.AppendLine("Information:");
+                section.AppendLine();
                 foreach (var (pipelineType, result) in pipelineResults)
                 {
                     var description = GetPipelineDescription(pipelineType);
-                    body.AppendLine(
+                    // Non-null guaranteed by Where filter above (Count: not null)
+                    section.AppendLine(
                         CultureInfo.InvariantCulture,
                         $"- {description}: {result!.Value.Count}"
                     );
                 }
 
-                body.AppendLine();
+                section.AppendLine();
             }
         }
 
@@ -193,14 +169,14 @@ public sealed class NotificationService : IDisposable
         var errors = diagnostics.Where(e => e.Level == SyncDiagnosticLevel.Error).ToList();
         if (errors.Count > 0)
         {
-            body.AppendLine("Errors:");
-            body.AppendLine();
+            section.AppendLine("Errors:");
+            section.AppendLine();
             foreach (var evt in errors)
             {
-                body.AppendLine(CultureInfo.InvariantCulture, $"- {evt.Message}");
+                section.AppendLine(CultureInfo.InvariantCulture, $"- {evt.Message}");
             }
 
-            body.AppendLine();
+            section.AppendLine();
         }
 
         // Render warnings (including deprecations)
@@ -209,16 +185,33 @@ public sealed class NotificationService : IDisposable
             .ToList();
         if (warnings.Count > 0)
         {
-            body.AppendLine("Warnings:");
-            body.AppendLine();
+            section.AppendLine("Warnings:");
+            section.AppendLine();
             foreach (var evt in warnings)
             {
                 var prefix = evt.Level == SyncDiagnosticLevel.Deprecation ? "[DEPRECATED] " : "";
-                body.AppendLine(CultureInfo.InvariantCulture, $"- {prefix}{evt.Message}");
+                section.AppendLine(CultureInfo.InvariantCulture, $"- {prefix}{evt.Message}");
             }
 
-            body.AppendLine();
+            section.AppendLine();
         }
+
+        if (section.Length == 0)
+        {
+            return;
+        }
+
+        if (instanceName == NoInstance)
+        {
+            body.AppendLine("### General");
+        }
+        else
+        {
+            body.AppendLine(CultureInfo.InvariantCulture, $"### Instance: `{instanceName}`");
+        }
+
+        body.AppendLine();
+        body.Append(section);
     }
 
     private static string GetPipelineDescription(PipelineType pipeline)

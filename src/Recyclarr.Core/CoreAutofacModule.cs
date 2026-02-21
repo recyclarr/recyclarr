@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Autofac;
+using Autofac.Core;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Flurl.Http.Configuration;
@@ -159,15 +160,15 @@ public class CoreAutofacModule : Module
     private static void RegisterNotifications(ContainerBuilder builder)
     {
         builder.RegisterType<NotificationService>();
+        builder.RegisterType<AppriseNotificationApiService>().As<IAppriseNotificationApiService>();
 
-        // Apprise
-        builder
-            .RegisterType<AppriseStatefulNotificationApiService>()
-            .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateful);
-
-        builder
-            .RegisterType<AppriseStatelessNotificationApiService>()
-            .Keyed<IAppriseNotificationApiService>(AppriseMode.Stateless);
+        builder.Register<INotificationService>(c =>
+        {
+            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
+            return settings.Apprise is not null
+                ? c.Resolve<NotificationService>()
+                : new NoopNotificationService();
+        });
 
         builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
 
