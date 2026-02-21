@@ -16,12 +16,12 @@ File: `CHANGELOG.md`
 
 Section order: Added, Changed, Deprecated, Removed, Fixed, Security
 
-Entry format: `- Scope: Description`
+Entry format: `- Scope: Description (#NNN)`
 
 ```markdown
 ### Fixed
 
-- Sync: Crash while processing quality profiles
+- Sync: Crash while processing quality profiles (#720)
 ```
 
 ## Rules
@@ -30,6 +30,10 @@ Entry format: `- Scope: Description`
 - One line per change
 - Entries under "Fixed" should not start with "Fixed"
 - New entries go under `[Unreleased]` section near the top of the file
+- Keep entries high-level: state what was added or changed, not an exhaustive
+  list of capabilities. Users can visit the docs for details.
+- Include a GitHub issue reference `(#NNN)` at the end of the entry when an
+  issue exists. Omit when there is no associated issue.
 
 ## Breaking Changes Format
 
