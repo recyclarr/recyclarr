@@ -306,4 +306,40 @@ internal sealed class ConfigYamlDataObjectsValidationTest
 
         result.ShouldNotHaveAnyValidationErrors();
     }
+
+    [Test]
+    public void Duplicate_quality_profile_trash_ids_rejected()
+    {
+        var data = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Profile A" },
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Profile B" },
+            ],
+        };
+
+        var validator = new SonarrConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.Errors.Select(x => x.ErrorMessage).Should().ContainMatch("*trash_id 'abc123'*");
+    }
+
+    [Test]
+    public void Distinct_quality_profile_trash_ids_pass_validation()
+    {
+        var data = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Profile A" },
+                new QualityProfileConfigYaml { TrashId = "def456", Name = "Profile B" },
+            ],
+        };
+
+        var validator = new SonarrConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.QualityProfiles);
+    }
 }

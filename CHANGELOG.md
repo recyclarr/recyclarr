@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Config: Using the same quality profile `trash_id` multiple times now produces a validation error
+  instead of silently corrupting sync state.
+
 ## [8.2.0] - 2026-02-21
 
 ### Added
