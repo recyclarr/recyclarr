@@ -8,6 +8,11 @@
 - Statuses: Backlog, Todo, In Progress, Done, Canceled, Duplicate
 - Labels: Bug, Tech Debt, Documentation, Templates, Blocked By Trash Guides
 
+Operational Directives:
+
+- Manage issue lifecycle when working on issues
+- Always check comments when reading issue details
+
 ## Agent Architecture
 
 Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
