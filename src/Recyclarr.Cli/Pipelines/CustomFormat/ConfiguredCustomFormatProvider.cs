@@ -325,7 +325,7 @@ internal class ConfiguredCustomFormatProvider(
 
         if (groupConfig.AssignScoresTo.Count > 0)
         {
-            return ResolveExplicitProfiles(groupConfig, qpResources, includedProfiles);
+            return ResolveExplicitProfiles(groupConfig, qpResources);
         }
 
         // Implicit: guide-backed profiles in user's config that are in the include list
@@ -345,8 +345,7 @@ internal class ConfiguredCustomFormatProvider(
     // Handles both guide-backed (trash_id) and custom (name) profile variants.
     private static List<AssignScoresToConfig> ResolveExplicitProfiles(
         CustomFormatGroupConfig groupConfig,
-        Dictionary<string, QualityProfileResource> qpResources,
-        HashSet<string> includedProfiles
+        Dictionary<string, QualityProfileResource> qpResources
     )
     {
         var results = new List<AssignScoresToConfig>();
@@ -356,10 +355,7 @@ internal class ConfiguredCustomFormatProvider(
             if (!string.IsNullOrEmpty(entry.TrashId))
             {
                 // Guide-backed profile: resolve name from guide resource
-                if (
-                    qpResources.TryGetValue(entry.TrashId, out var qpResource)
-                    && includedProfiles.Contains(entry.TrashId)
-                )
+                if (qpResources.TryGetValue(entry.TrashId, out var qpResource))
                 {
                     results.Add(
                         new AssignScoresToConfig { TrashId = entry.TrashId, Name = qpResource.Name }

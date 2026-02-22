@@ -15,6 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   warning instead of silently preventing sync.
 - Config: Using the same quality profile `trash_id` multiple times now produces a validation error
   instead of silently corrupting sync state.
+- Sync: `assign_scores_to` with `trash_id` no longer requires the target profile to be in the CF
+  group's include list (#726).
 
 ## [8.2.0] - 2026-02-21
 

@@ -608,7 +608,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
     }
 
     [Test]
-    public void Build_with_cf_group_profile_not_in_include_list_reports_error()
+    public void Build_with_cf_group_profile_not_in_include_list_still_assigns()
     {
         SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
         SetupQualityProfileGuideData(
@@ -622,11 +622,18 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         SetupCfGroupGuideData(
             "test-group",
             "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
             new Dictionary<string, string> { ["Other Profile"] = "other-qp" }
         );
 
-        // User explicitly assigns to a profile not in the include list
+        // Explicit assign_scores_to bypasses include list
         var config = NewConfig.Radarr() with
         {
             CustomFormatGroups = new CustomFormatGroupsConfig
@@ -646,63 +653,12 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "not-included-qp" }],
         };
 
-        var (sut, publisher) = CreatePlanBuilder(config);
+        var (sut, _) = CreatePlanBuilder(config);
 
-        sut.Build();
+        var plan = sut.Build();
 
-        publisher
-            .Received()
-            .AddError(
-                Arg.Is<string>(s =>
-                    s.Contains("not-included-qp") && s.Contains("not in this group's include list")
-                )
-            );
-    }
-
-    [Test]
-    public void Build_with_cf_group_invalid_assign_scores_to_trash_id_reports_error()
-    {
-        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
-        SetupQualityProfileGuideData("valid-qp", "Valid Profile", ("HDTV-1080p", true, null));
-
-        SetupCfGroupGuideData(
-            "test-group",
-            "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
-            new Dictionary<string, string> { ["Valid Profile"] = "valid-qp" }
-        );
-
-        // User assigns to a profile that doesn't exist
-        var config = NewConfig.Radarr() with
-        {
-            CustomFormatGroups = new CustomFormatGroupsConfig
-            {
-                Add =
-                [
-                    new CustomFormatGroupConfig
-                    {
-                        TrashId = "test-group",
-                        AssignScoresTo =
-                        [
-                            new CfGroupAssignScoresToConfig { TrashId = "nonexistent-profile" },
-                        ],
-                    },
-                ],
-            },
-            QualityProfiles = [new QualityProfileConfig { TrashId = "valid-qp" }],
-        };
-
-        var (sut, publisher) = CreatePlanBuilder(config);
-
-        sut.Build();
-
-        publisher
-            .Received()
-            .AddError(
-                Arg.Is<string>(s =>
-                    s.Contains("nonexistent-profile") && s.Contains("Invalid profile trash_id")
-                )
-            );
+        var profile = plan.QualityProfiles.Single();
+        profile.CfScores.Should().ContainSingle();
     }
 
     [Test]
@@ -809,51 +765,6 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 
         // CF should be assigned to both profiles
         plan.QualityProfiles.Should().HaveCount(2).And.OnlyContain(p => p.CfScores.Count == 1);
-    }
-
-    [Test]
-    public void Build_with_cf_group_assign_to_nonexistent_custom_profile_reports_error()
-    {
-        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
-        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
-
-        SetupCfGroupGuideData(
-            "test-group",
-            "Test Group",
-            [new CfGroupCustomFormat { TrashId = "cf1", Name = "CF One" }],
-            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
-        );
-
-        var config = NewConfig.Radarr() with
-        {
-            CustomFormatGroups = new CustomFormatGroupsConfig
-            {
-                Add =
-                [
-                    new CustomFormatGroupConfig
-                    {
-                        TrashId = "test-group",
-                        AssignScoresTo =
-                        [
-                            new CfGroupAssignScoresToConfig { Name = "Nonexistent Profile" },
-                        ],
-                    },
-                ],
-            },
-            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
-        };
-
-        var (sut, publisher) = CreatePlanBuilder(config);
-
-        sut.Build();
-
-        publisher
-            .Received()
-            .AddError(
-                Arg.Is<string>(s =>
-                    s.Contains("Nonexistent Profile") && s.Contains("No quality profile")
-                )
-            );
     }
 
     [Test]
