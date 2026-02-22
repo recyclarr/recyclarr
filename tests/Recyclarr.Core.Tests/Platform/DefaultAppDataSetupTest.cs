@@ -116,7 +116,7 @@ internal sealed class DefaultAppDataSetupTest
         var act = () => sut.CreateAppPaths();
 
         act.Should()
-            .Throw<InvalidOperationException>()
+            .Throw<EnvironmentException>()
             .WithMessage("*RECYCLARR_APP_DATA is no longer supported*");
     }
 
@@ -182,7 +182,7 @@ internal sealed class DefaultAppDataSetupTest
         var act = () => sut.CreateAppPaths();
 
         act.Should()
-            .Throw<NoHomeDirectoryException>()
+            .Throw<EnvironmentException>()
             .WithMessage("*Unable to find or create the default app data directory*");
     }
 }

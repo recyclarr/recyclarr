@@ -102,6 +102,7 @@ internal static class CompositionRoot
         builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
         builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
         builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
 
         // Output strategies (routing)
         builder.RegisterType<FatalErrorOutputStrategy>();

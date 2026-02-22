@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- CLI: `RECYCLARR_APP_DATA` deprecation message is now displayed cleanly instead of being buried in
+  a stack trace.
+
 ## [8.2.1] - 2026-02-22
 
 ### Fixed

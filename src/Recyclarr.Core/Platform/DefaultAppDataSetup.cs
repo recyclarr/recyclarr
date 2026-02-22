@@ -20,7 +20,7 @@ internal class DefaultAppDataSetup(IEnvironment env, IFileSystem fs)
         var deprecatedVar = env.GetEnvironmentVariable("RECYCLARR_APP_DATA");
         if (!string.IsNullOrEmpty(deprecatedVar))
         {
-            throw new InvalidOperationException(
+            throw new EnvironmentException(
                 """
                 RECYCLARR_APP_DATA is no longer supported. Use these instead:
                   - RECYCLARR_CONFIG_DIR: User configuration (replaces APP_DATA)
@@ -62,7 +62,7 @@ internal class DefaultAppDataSetup(IEnvironment env, IFileSystem fs)
 
         if (string.IsNullOrEmpty(appData))
         {
-            throw new NoHomeDirectoryException(
+            throw new EnvironmentException(
                 "Unable to find or create the default app data directory. The application cannot determine where "
                     + "to place data files. Please set the RECYCLARR_CONFIG_DIR environment variable to explicitly set a location for these files."
             );
