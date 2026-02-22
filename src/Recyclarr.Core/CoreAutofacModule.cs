@@ -10,6 +10,7 @@ using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Parsing;
+using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
@@ -131,6 +132,12 @@ public class CoreAutofacModule : Module
 
         // Config Deprecations
         builder.RegisterType<ConfigDeprecations>();
+
+        // Config Diagnostic Collector (shared between YAML type inspector and config registry)
+        builder
+            .RegisterType<ConfigDiagnosticCollector>()
+            .As<IConfigDiagnosticCollector>()
+            .InstancePerLifetimeScope();
 
         // Settings Deprecations
         builder.RegisterType<SettingsDeprecations>();

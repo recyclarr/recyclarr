@@ -67,7 +67,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     }
 
     [Test]
-    public void Root_config_with_unknown_property_reports_failure()
+    public void Deprecated_property_produces_warning_and_continues_sync()
     {
         var sut = Resolve<ConfigurationRegistry>();
 
@@ -88,20 +88,21 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
         );
 
-        result.Configs.Should().BeEmpty();
+        result.Configs.Should().ContainSingle();
+        result.Failures.Should().BeEmpty();
         result
-            .Failures.Should()
+            .DeprecationWarnings.Should()
             .ContainSingle()
-            .Which.ContextualMessage.Should()
+            .Which.Should()
             .Contain("replace_existing_custom_formats");
     }
 
     [Test]
-    public void Included_config_with_unknown_property_reports_failure()
+    public void Deprecated_property_in_include_produces_warning_and_continues_sync()
     {
         var sut = Resolve<ConfigurationRegistry>();
 
-        var includeFile = Paths.YamlIncludeDirectory.File("bad-include.yml");
+        var includeFile = Paths.YamlIncludeDirectory.File("deprecated-include.yml");
         Fs.AddFile(
             includeFile,
             new MockFileData(
@@ -123,7 +124,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
                     base_url: http://localhost:7878
                     api_key: asdf
                     include:
-                      - config: bad-include.yml
+                      - config: deprecated-include.yml
                 """
             )
         );
@@ -132,11 +133,12 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
         );
 
-        result.Configs.Should().BeEmpty();
+        result.Configs.Should().ContainSingle();
+        result.Failures.Should().BeEmpty();
         result
-            .Failures.Should()
+            .DeprecationWarnings.Should()
             .ContainSingle()
-            .Which.ContextualMessage.Should()
+            .Which.Should()
             .Contain("replace_existing_custom_formats");
     }
 

@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Config: Removed properties like `replace_existing_custom_formats` now produce a deprecation
+  warning instead of silently preventing sync.
 - Config: Using the same quality profile `trash_id` multiple times now produces a validation error
   instead of silently corrupting sync state.
 

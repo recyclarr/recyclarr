@@ -16,18 +16,6 @@ public static class ConfigContextualMessages
             return null;
         }
 
-        if (
-            msg.Contains(
-                "Property 'replace_existing_custom_formats' not found on type",
-                StringComparison.Ordinal
-            )
-        )
-        {
-            return "The `replace_existing_custom_formats` option has been removed. "
-                + "Use `recyclarr state repair --adopt` to adopt manually-created custom formats. "
-                + "See: <https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed>";
-        }
-
         if (msg.Contains("Property 'quality_profiles' not found on type", StringComparison.Ordinal))
         {
             return "The `quality_profiles` element under `custom_formats` has been renamed to `assign_scores_to`. "

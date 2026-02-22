@@ -4,5 +4,6 @@ namespace Recyclarr.Config.Parsing.ErrorHandling;
 
 public record ConfigRegistryResult(
     IReadOnlyCollection<IServiceConfiguration> Configs,
-    IReadOnlyCollection<ConfigParsingException> Failures
+    IReadOnlyCollection<ConfigParsingException> Failures,
+    IReadOnlyList<string> DeprecationWarnings
 );

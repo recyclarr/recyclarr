@@ -12,7 +12,8 @@ public class ConfigurationRegistry(
     ConfigurationLoader loader,
     IConfigurationFinder finder,
     IFileSystem fs,
-    ConfigFilterProcessor filterProcessor
+    ConfigFilterProcessor filterProcessor,
+    IConfigDiagnosticCollector diagnosticCollector
 )
 {
     public ConfigRegistryResult FindAndLoadConfigs(ConfigFilterCriteria? filterCriteria = null)
@@ -99,6 +100,6 @@ public class ConfigurationRegistry(
             })
             .ToList();
 
-        return new ConfigRegistryResult(configs, failures);
+        return new ConfigRegistryResult(configs, failures, diagnosticCollector.Deprecations);
     }
 }
