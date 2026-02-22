@@ -4,22 +4,26 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Yaml.YamlDotNet;
 
+internal enum RemovedPropertySeverity
+{
+    Warning,
+    Error,
+}
+
+internal record RemovedPropertyEntry(string Message, RemovedPropertySeverity Severity);
+
+/// <summary>
+/// Intercepts property lookup during YAML deserialization. When a property isn't found on the
+/// target type, checks if it's a known removed property. Warning-severity entries are skipped with
+/// a deprecation report so parsing continues. Error-severity entries throw a
+/// ConfigParsingException to block sync with a helpful message.
+/// </summary>
 internal sealed class DeprecatedPropertyInspector(
     ITypeInspector inner,
-    IConfigDiagnosticCollector collector
+    IReadOnlyDictionary<string, RemovedPropertyEntry> removedProperties,
+    Action<string> reportDeprecation
 ) : ITypeInspector
 {
-    // Known removed properties that should produce a warning instead of a parse error.
-    // The key is the YAML property name (after naming convention is applied).
-    private static readonly Dictionary<string, string> DeprecatedProperties = new(
-        StringComparer.Ordinal
-    )
-    {
-        ["replace_existing_custom_formats"] =
-            "The `replace_existing_custom_formats` option has been removed and will be ignored. "
-            + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed",
-    };
-
     public IEnumerable<IPropertyDescriptor> GetProperties(Type type, object? container)
     {
         return inner.GetProperties(type, container);
@@ -45,16 +49,18 @@ internal sealed class DeprecatedPropertyInspector(
         }
         catch (SerializationException)
         {
-            // Property not found on the type. Check if it's a known deprecated property.
-            if (DeprecatedProperties.TryGetValue(name, out var message))
+            if (!removedProperties.TryGetValue(name, out var entry))
             {
-                collector.AddDeprecation(message);
-
-                // Return null to skip this property (YamlDotNet advances past the value)
-                return null!;
+                throw;
             }
 
-            throw;
+            if (entry.Severity is RemovedPropertySeverity.Error)
+            {
+                throw new ConfigParsingException(entry.Message, 0, new SerializationException());
+            }
+
+            reportDeprecation(entry.Message);
+            return null!;
         }
     }
 

@@ -35,7 +35,7 @@ public sealed class SyntaxErrorHelper : INodeTypeResolver
             throw new YamlException(
                 nodeEvent.Start,
                 nodeEvent.End,
-                $"A list/array/sequence is not allowed for {currentType.Name}"
+                "Expected a single value, not a list"
             );
         }
     }

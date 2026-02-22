@@ -4,6 +4,20 @@ namespace Recyclarr.Logging;
 
 public static class ExceptionExtensions
 {
+    public static T? FindInnerException<T>(this Exception e)
+        where T : Exception
+    {
+        for (var current = e.InnerException; current is not null; current = current.InnerException)
+        {
+            if (current is T match)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
     public static string FullMessage(this Exception ex)
     {
         if (ex is AggregateException aex)

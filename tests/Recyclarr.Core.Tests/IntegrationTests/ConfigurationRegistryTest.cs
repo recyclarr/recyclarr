@@ -143,6 +143,68 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     }
 
     [Test]
+    public void Object_in_skip_list_produces_clear_error_instead_of_generic_exception()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    custom_format_groups:
+                      skip:
+                        - trash_id: 9d5acd8f1da78dfbae788182f7605200
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Configs.Should().BeEmpty();
+        result
+            .Failures.Should()
+            .ContainSingle()
+            .Which.Message.Should()
+            .Contain("not key-value pairs");
+    }
+
+    [Test]
+    public void Renamed_quality_profiles_in_custom_formats_produces_error()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    custom_formats:
+                      - trash_ids:
+                          - aabbccdd
+                        quality_profiles:
+                          - name: TestProfile
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Configs.Should().BeEmpty();
+        result.Failures.Should().ContainSingle().Which.Message.Should().Contain("assign_scores_to");
+    }
+
+    [Test]
     public void Parse_custom_format_groups()
     {
         var sut = Resolve<ConfigurationRegistry>();

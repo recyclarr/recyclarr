@@ -8,44 +8,77 @@ namespace Recyclarr.Core.Tests.Yaml;
 [TestFixture]
 internal sealed class DeprecatedPropertyInspectorTest
 {
+    private static readonly Dictionary<string, RemovedPropertyEntry> TestProperties = new(
+        StringComparer.Ordinal
+    )
+    {
+        ["deprecated_prop"] = new(
+            "The `deprecated_prop` option has been removed.",
+            RemovedPropertySeverity.Warning
+        ),
+        ["errored_prop"] = new(
+            "The `errored_prop` option has been renamed to `new_prop`.",
+            RemovedPropertySeverity.Error
+        ),
+    };
+
     [Test]
     public void Known_deprecated_property_records_warning_and_returns_null()
     {
         var inner = Substitute.For<ITypeInspector>();
-        var collector = new ConfigDiagnosticCollector();
-        var sut = new DeprecatedPropertyInspector(inner, collector);
+        var reported = new List<string>();
+        var sut = new DeprecatedPropertyInspector(inner, TestProperties, reported.Add);
 
-        // Inner throws because the property doesn't exist on the type
         inner
             .GetProperty(default!, default, default!, default, default)
             .ReturnsForAnyArgs(_ =>
-                throw new SerializationException(
-                    "Property 'replace_existing_custom_formats' not found"
-                )
+                throw new SerializationException("Property 'deprecated_prop' not found")
             );
 
         var result = sut.GetProperty(
             typeof(object),
             null,
-            "replace_existing_custom_formats",
+            "deprecated_prop",
             ignoreUnmatched: false,
             caseInsensitivePropertyMatching: false
         );
 
         result.Should().BeNull();
-        collector
-            .Deprecations.Should()
-            .ContainSingle()
-            .Which.Should()
-            .Contain("replace_existing_custom_formats");
+        reported.Should().ContainSingle().Which.Should().Contain("deprecated_prop");
+    }
+
+    [Test]
+    public void Known_errored_property_throws_config_parsing_exception()
+    {
+        var inner = Substitute.For<ITypeInspector>();
+        var reported = new List<string>();
+        var sut = new DeprecatedPropertyInspector(inner, TestProperties, reported.Add);
+
+        inner
+            .GetProperty(default!, default, default!, default, default)
+            .ReturnsForAnyArgs(_ =>
+                throw new SerializationException("Property 'errored_prop' not found")
+            );
+
+        var act = () =>
+            sut.GetProperty(
+                typeof(object),
+                null,
+                "errored_prop",
+                ignoreUnmatched: false,
+                caseInsensitivePropertyMatching: false
+            );
+
+        act.Should().Throw<ConfigParsingException>().Which.Message.Should().Contain("new_prop");
+        reported.Should().BeEmpty();
     }
 
     [Test]
     public void Known_property_on_type_delegates_normally()
     {
         var inner = Substitute.For<ITypeInspector>();
-        var collector = new ConfigDiagnosticCollector();
-        var sut = new DeprecatedPropertyInspector(inner, collector);
+        var reported = new List<string>();
+        var sut = new DeprecatedPropertyInspector(inner, TestProperties, reported.Add);
 
         var expectedProperty = Substitute.For<IPropertyDescriptor>();
         inner
@@ -61,15 +94,15 @@ internal sealed class DeprecatedPropertyInspectorTest
         );
 
         result.Should().BeSameAs(expectedProperty);
-        collector.Deprecations.Should().BeEmpty();
+        reported.Should().BeEmpty();
     }
 
     [Test]
     public void Unknown_property_not_in_registry_throws()
     {
         var inner = Substitute.For<ITypeInspector>();
-        var collector = new ConfigDiagnosticCollector();
-        var sut = new DeprecatedPropertyInspector(inner, collector);
+        var reported = new List<string>();
+        var sut = new DeprecatedPropertyInspector(inner, TestProperties, reported.Add);
 
         inner
             .GetProperty(default!, default, default!, default, default)
@@ -87,6 +120,6 @@ internal sealed class DeprecatedPropertyInspectorTest
             );
 
         act.Should().Throw<SerializationException>();
-        collector.Deprecations.Should().BeEmpty();
+        reported.Should().BeEmpty();
     }
 }

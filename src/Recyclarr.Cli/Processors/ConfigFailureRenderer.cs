@@ -13,7 +13,7 @@ internal static class ConfigFailureRenderer
         foreach (var failure in result.Failures)
         {
             var file = failure.FilePath?.Name ?? "unknown";
-            var message = failure.ContextualMessage ?? failure.Message;
+            var message = failure.Message;
 
             panel.AddError(file, message);
             log.Error(failure, "Config parsing failed in {File}: {Message}", file, message);

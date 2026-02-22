@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing.ErrorHandling;
+using Recyclarr.Logging;
 using Recyclarr.Yaml;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -39,15 +40,45 @@ public class ConfigParser(IYamlSerializerFactory yamlFactory)
         }
         catch (YamlException e)
         {
-            var line = (int)e.Start.Line;
-            var context = ConfigContextualMessages.GetContextualErrorFromException(e);
-            var message = e.InnerException switch
+            // Layer 1 handlers throw ConfigParsingException inside the pipeline, which
+            // YamlDotNet wraps. Unwrap and re-throw the original directly.
+            if (e.FindInnerException<ConfigParsingException>() is { } inner)
             {
-                InvalidCastException => $"Incompatible value assigned/used at line {line}",
-                _ => $"Exception at line {line}",
-            };
+                throw inner;
+            }
 
-            throw new ConfigParsingException(message, line, e, context);
+            var line = (int)e.Start.Line;
+            var message = ExtractBestMessage(e, line);
+            throw new ConfigParsingException(message, line, e);
         }
+    }
+
+    // Walks the exception chain to find the most specific, user-relevant message.
+    // YamlDotNet often wraps the real cause in generic "Exception during deserialization" messages.
+    private static string ExtractBestMessage(YamlException e, int line)
+    {
+        for (Exception? current = e; current is not null; current = current.InnerException)
+        {
+            // Skip generic wrapper messages that carry no useful information
+            if (
+                current.Message.Contains(
+                    "Exception during deserialization",
+                    StringComparison.Ordinal
+                )
+            )
+            {
+                continue;
+            }
+
+            // Skip messages that are just the type name (e.g. from reflection failures)
+            if (current is MissingMethodException)
+            {
+                continue;
+            }
+
+            return $"YAML error at line {line}: {current.Message}";
+        }
+
+        return $"YAML error at line {line}";
     }
 }

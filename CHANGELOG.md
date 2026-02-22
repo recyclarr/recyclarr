@@ -13,6 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: `RECYCLARR_APP_DATA` deprecation message is now displayed cleanly instead of being buried in
   a stack trace.
+- Config: YAML errors now show specific, actionable messages instead of generic "Exception at line"
+  text (#728).
 
 ## [8.2.1] - 2026-02-22
 

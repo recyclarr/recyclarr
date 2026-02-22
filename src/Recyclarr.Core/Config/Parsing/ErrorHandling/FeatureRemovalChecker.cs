@@ -3,9 +3,9 @@ using YamlDotNet.Serialization;
 
 namespace Recyclarr.Config.Parsing.ErrorHandling;
 
-// Note: Backward breaking changes involving node removals cannot be handled here, since that will cause exceptions
-// before the Node Type Resolver gets invoked. Those are handled reactively by inspecting the YamlException object
-// passed to the ContextualMessages static class.
+// Note: Backward breaking changes involving property removals are handled by
+// DeprecatedPropertyInspector, not here. This checker only detects structural changes
+// (e.g. array-style instances) that are visible at the node type resolver level.
 public sealed class FeatureRemovalChecker : INodeTypeResolver
 {
     public bool Resolve(NodeEvent? nodeEvent, ref Type currentType)

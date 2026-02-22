@@ -1,6 +1,7 @@
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
+using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 using Recyclarr.TestLibrary;
@@ -43,9 +44,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task All_zero_counts_suppresses_notification()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Normal)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Normal));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 0);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 0);
@@ -60,9 +59,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task Mix_of_zero_and_nonzero_counts_sends_only_nonzero()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Normal)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Normal));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 5);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 0);
@@ -81,9 +78,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task All_nonzero_counts_includes_all_stats()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Normal)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Normal));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 2);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 1);
@@ -102,9 +97,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task Diagnostics_present_with_zero_counts_sends_notification()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Normal)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Normal));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 0);
         PublishDiagnostic("Radarr", SyncDiagnosticLevel.Error, "Something went wrong");
@@ -118,9 +111,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task Detailed_verbosity_sends_even_when_empty()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Detailed)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Detailed));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 0);
 
@@ -132,9 +123,7 @@ internal sealed class NotificationServiceTest
     [Test]
     public async Task Minimal_verbosity_suppresses_info_stats()
     {
-        using var sut = CreateSut(
-            VerbosityOptions.From(Settings.Models.NotificationVerbosity.Minimal)
-        );
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Minimal));
 
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 5);
         PublishDiagnostic("Radarr", SyncDiagnosticLevel.Warning, "Deprecated feature");

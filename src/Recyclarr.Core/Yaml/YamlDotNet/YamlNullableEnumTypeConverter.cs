@@ -1,6 +1,7 @@
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Recyclarr.Yaml.YamlDotNet;
 
@@ -32,7 +33,13 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
         }
         catch (Exception ex)
         {
-            throw new YamlException($"Invalid value: \"{scalar.Value}\" for {type.Name}", ex);
+            var validValues = FormatValidValues(type);
+            throw new YamlException(
+                scalar.Start,
+                scalar.End,
+                $"Invalid value '{scalar.Value}'. Valid options: {validValues}",
+                ex
+            );
         }
     }
 
@@ -51,6 +58,14 @@ public class YamlNullableEnumTypeConverter : IYamlTypeConverter
             Enum.GetName(type, value)
             ?? throw new InvalidOperationException($"Invalid value {value} for enum: {type}");
         emitter.Emit(new Scalar(null!, null!, toWrite, ScalarStyle.Any, true, false));
+    }
+
+    // Formats enum values as YAML snake_case for user-facing messages
+    private static string FormatValidValues(Type enumType)
+    {
+        var naming = UnderscoredNamingConvention.Instance;
+        var values = Enum.GetNames(enumType).Select(n => naming.Apply(n));
+        return string.Join(", ", values);
     }
 
     private static bool NodeIsNull(NodeEvent nodeEvent)

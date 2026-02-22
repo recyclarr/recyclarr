@@ -259,8 +259,19 @@ public class CoreAutofacModule : Module
     {
         builder
             .RegisterAssemblyTypes(ThisAssembly)
-            .Where(t => typeof(IYamlBehavior).IsAssignableFrom(t) && !t.IsAbstract)
+            .Where(t =>
+                typeof(IYamlBehavior).IsAssignableFrom(t)
+                && !t.IsAbstract
+                && t != typeof(SettingsDeprecatedPropertyBehavior)
+            )
             .As<IYamlBehavior>();
+
+        // Registered both as itself (for SettingsLoader to read deprecations) and as IYamlBehavior
+        builder
+            .RegisterType<SettingsDeprecatedPropertyBehavior>()
+            .AsSelf()
+            .As<IYamlBehavior>()
+            .SingleInstance();
 
         builder.RegisterType<YamlSerializerFactory>().As<IYamlSerializerFactory>();
         builder.RegisterType<DefaultObjectFactory>().As<IObjectFactory>();
