@@ -2,6 +2,12 @@
 
 .NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr.
 
+## Linear
+
+- Issue prefix: `REC-` (e.g. REC-74 is Linear; #74 is GitHub)
+- Statuses: Backlog, Todo, In Progress, Done, Canceled, Duplicate
+- Labels: Bug, Tech Debt, Documentation, Templates, Blocked By Trash Guides
+
 ## Agent Architecture
 
 Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
