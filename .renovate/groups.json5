@@ -7,7 +7,7 @@
       matchManagers: ["nuget", "custom.regex"],
       matchPackageNames: ["gitversion*", "GitTools/GitVersion"],
       commitMessagePrefix: "build(deps):",
-      minimumGroupSize: 2,
+      minimumGroupSize: 3,
     },
     {
       description: "System.IO.Abstractions packages",
