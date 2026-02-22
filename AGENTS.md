@@ -100,6 +100,20 @@ All sync operations must be deterministic.
 - `AddError()`: Issues that cause items or pipelines to be skipped
 - `AddWarning()`: Deprecations and informational messages only
 
+## YAML Error Handling
+
+Two layers translate YamlDotNet failures into user-facing messages. Both produce the same enriched
+exception type (`ConfigParsingException`); they differ in where translation happens.
+
+- Can deserialization continue? → **Deprecation system** (`DeprecatedPropertyInspector` via
+  `IYamlBehavior`). Skips the property, collects a warning, config loads normally.
+- Did deserialization fail? → **YamlBehavior handlers + catch-site fallback**. Handlers inside the
+  YamlDotNet pipeline (`INodeDeserializer`) catch structural mismatches where property/node context
+  is needed. `ConfigParser` catch block is the final fallback.
+
+Key constraint: YamlDotNet exceptions often lack property names or contain C# type names instead of
+YAML names. Handlers that need property context MUST operate inside the pipeline, not post-hoc.
+
 ## Console and Logging Output
 
 The `--log` flag controls which output channel is visible to users:
