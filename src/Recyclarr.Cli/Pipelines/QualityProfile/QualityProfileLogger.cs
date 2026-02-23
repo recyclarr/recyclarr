@@ -12,10 +12,12 @@ internal class QualityProfileLogger(ILogger log)
         if (transactions.NonExistentProfiles.Count > 0)
         {
             var message =
-                "The following quality profile names have no definition in the top-level `quality_profiles` "
-                + "list *and* do not exist in the remote service. Either create them manually in the service *or* add "
-                + "them to the top-level `quality_profiles` section so that Recyclarr can create the profiles for "
+                "The following quality profile names have no definition in the top-level "
+                + "`quality_profiles` list *and* do not exist in the remote service. Either "
+                + "create them manually in the service *or* add them to the top-level "
+                + "`quality_profiles` section so that Recyclarr can create the profiles for "
                 + $"you: {string.Join(", ", transactions.NonExistentProfiles)}";
+
             context.Publisher.AddWarning(message);
         }
 

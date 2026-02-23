@@ -130,8 +130,7 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                 RuleForEach(g => g.AssignScoresTo)
                     .SetValidator(g => new CfGroupAssignScoresToEntryValidator(
                         g.TrashId,
-                        profiles,
-                        config.QualityProfiles
+                        profiles
                     ));
             }
         );

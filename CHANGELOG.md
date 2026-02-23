@@ -15,6 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a stack trace.
 - Config: YAML errors now show specific, actionable messages instead of generic "Exception at line"
   text (#728).
+- Sync: CF group `assign_scores_to` with `name` no longer requires the profile to be in
+  `quality_profiles` (#726).
 
 ## [8.2.1] - 2026-02-22
 

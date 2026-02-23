@@ -24,8 +24,7 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
     {
         var sut = new CfGroupAssignScoresToEntryValidator(
             "test-group",
-            GuideProfiles(("valid-qp", "Valid Profile")),
-            []
+            GuideProfiles(("valid-qp", "Valid Profile"))
         );
 
         var result = sut.Validate(new CfGroupAssignScoresToConfig { TrashId = "nonexistent" });
@@ -42,8 +41,7 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
     {
         var sut = new CfGroupAssignScoresToEntryValidator(
             "test-group",
-            GuideProfiles(("valid-qp", "Valid Profile")),
-            []
+            GuideProfiles(("valid-qp", "Valid Profile"))
         );
 
         var result = sut.Validate(new CfGroupAssignScoresToConfig { TrashId = "valid-qp" });
@@ -56,8 +54,7 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
     {
         var sut = new CfGroupAssignScoresToEntryValidator(
             "test-group",
-            GuideProfiles(("guide-qp", "Guide Profile")),
-            [new QualityProfileConfig { TrashId = "guide-qp" }]
+            GuideProfiles(("guide-qp", "Guide Profile"))
         );
 
         var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "Guide Profile" });
@@ -66,33 +63,14 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
     }
 
     [Test]
-    public void Name_referencing_nonexistent_profile_fails()
+    public void Name_not_in_guide_passes_validation()
     {
         var sut = new CfGroupAssignScoresToEntryValidator(
             "test-group",
-            GuideProfiles(("guide-qp", "Guide Profile")),
-            []
+            GuideProfiles(("guide-qp", "Guide Profile"))
         );
 
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "Nonexistent Profile" });
-
-        result
-            .Errors.Should()
-            .ContainSingle()
-            .Which.ErrorMessage.Should()
-            .Contain("No quality profile");
-    }
-
-    [Test]
-    public void Name_referencing_user_defined_profile_passes()
-    {
-        var sut = new CfGroupAssignScoresToEntryValidator(
-            "test-group",
-            GuideProfiles(("guide-qp", "Guide Profile")),
-            [new QualityProfileConfig { Name = "My Custom Profile" }]
-        );
-
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "My Custom Profile" });
+        var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "Any" });
 
         result.IsValid.Should().BeTrue();
     }

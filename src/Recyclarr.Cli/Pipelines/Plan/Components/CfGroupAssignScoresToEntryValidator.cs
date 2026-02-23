@@ -8,18 +8,11 @@ internal class CfGroupAssignScoresToEntryValidator : AbstractValidator<CfGroupAs
 {
     public CfGroupAssignScoresToEntryValidator(
         string groupTrashId,
-        IReadOnlyDictionary<string, QualityProfileResource> guideProfiles,
-        IReadOnlyCollection<QualityProfileConfig> configuredProfiles
+        IReadOnlyDictionary<string, QualityProfileResource> guideProfiles
     )
     {
         var guideProfileNames = guideProfiles
             .Values.Select(p => p.Name)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        // User-defined (non-guide) profile names from config
-        var userProfileNames = configuredProfiles
-            .Select(qp => qp.Name)
-            .Where(n => !string.IsNullOrEmpty(n))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         RuleFor(s => s.TrashId)
@@ -36,17 +29,6 @@ internal class CfGroupAssignScoresToEntryValidator : AbstractValidator<CfGroupAs
             .WithMessage(s =>
                 $"CF group '{groupTrashId}': Profile '{s.Name}' is guide-backed; "
                 + "use trash_id instead of name to reference it"
-            );
-
-        RuleFor(s => s.Name)
-            .Must(name => userProfileNames.Contains(name!))
-            .When(
-                s => !string.IsNullOrEmpty(s.Name) && !guideProfileNames.Contains(s.Name!),
-                ApplyConditionTo.CurrentValidator
-            )
-            .WithMessage(s =>
-                $"CF group '{groupTrashId}': No quality profile "
-                + $"named '{s.Name}' exists in this config"
             );
     }
 }
