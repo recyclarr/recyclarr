@@ -10,7 +10,7 @@
     <PackageVersion Include="Autofac.Extras.AggregateService" Version="6.1.2" />
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
-    <PackageVersion Include="AwesomeAssertions" Version="9.3.0" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
     <PackageVersion Include="CliWrap" Version="3.10.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
