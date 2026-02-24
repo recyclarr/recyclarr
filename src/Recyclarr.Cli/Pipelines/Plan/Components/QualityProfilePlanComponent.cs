@@ -39,11 +39,9 @@ internal class QualityProfilePlanComponent(
             cf.AssignScoresTo.Select(scoreConfig => (Profile: scoreConfig, Cf: cf))
         );
 
-        // Start with explicitly defined quality profiles
-        var allProfiles = config
-            .QualityProfiles.Select(x => CreatePlannedProfile(x, guideResources, plan))
-            .NotNull()
-            .ToDictionary(x => x.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
+        // Start with explicitly defined quality profiles.
+        // Multiple profiles can share a trash_id as long as they have distinct names.
+        var allProfiles = BuildExplicitProfiles(config.QualityProfiles, guideResources, plan);
 
         foreach (var (scoreConfig, cf) in profileAndCfs)
         {
@@ -66,6 +64,48 @@ internal class QualityProfilePlanComponent(
         {
             plan.AddQualityProfile(profile);
         }
+    }
+
+    private static Dictionary<string, PlannedQualityProfile> BuildExplicitProfiles(
+        IReadOnlyCollection<QualityProfileConfig> profiles,
+        Dictionary<string, QualityProfileResource> guideResources,
+        PipelinePlan plan
+    )
+    {
+        var result = new Dictionary<string, PlannedQualityProfile>(
+            StringComparer.InvariantCultureIgnoreCase
+        );
+
+        // Track names that have duplicates so all instances are skipped
+        var duplicateNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+        foreach (var config in profiles)
+        {
+            var planned = CreatePlannedProfile(config, guideResources, plan);
+            if (planned is null)
+            {
+                continue;
+            }
+
+            if (result.ContainsKey(planned.Name))
+            {
+                if (duplicateNames.Add(planned.Name))
+                {
+                    // First time seeing this duplicate; report error and remove the earlier entry
+                    plan.AddError(
+                        $"Duplicate quality profile name '{planned.Name}'. "
+                            + "Each quality profile must have a unique name."
+                    );
+                    result.Remove(planned.Name);
+                }
+
+                continue;
+            }
+
+            result[planned.Name] = planned;
+        }
+
+        return result;
     }
 
     private void AddCustomFormatScore(

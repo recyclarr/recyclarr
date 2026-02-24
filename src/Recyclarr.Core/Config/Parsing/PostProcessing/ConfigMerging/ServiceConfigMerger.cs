@@ -193,10 +193,13 @@ public abstract class ServiceConfigMerger<T>
             b,
             (a1, b1) =>
             {
+                // Composite key: profiles merge only when both trash_id and name match.
+                // This allows multiple profiles sharing a trash_id (with different names)
+                // to pass through includes without collapsing.
                 return a1.FullOuterHashJoin(
                         b1,
-                        x => x.TrashId ?? x.Name,
-                        x => x.TrashId ?? x.Name,
+                        x => $"{x.TrashId}\0{x.Name}",
+                        x => $"{x.TrashId}\0{x.Name}",
                         l => l,
                         r => r,
                         MergeQualityProfile,

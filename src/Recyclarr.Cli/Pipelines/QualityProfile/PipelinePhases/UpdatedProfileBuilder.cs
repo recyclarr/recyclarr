@@ -26,51 +26,128 @@ internal class UpdatedProfileBuilder(
     private readonly IReadOnlyList<ProfileLanguageDto> _languages = serviceData.Languages;
     private readonly List<UpdatedQualityProfile> _existingProfiles = [];
 
-    /// <summary>
-    /// Processes planned profiles. New profiles are added directly to transactions.NewProfiles.
-    /// Returns only existing profiles that need stats calculation and change detection.
-    /// </summary>
+    // Tracks which state mapping service_ids have been claimed during two-pass resolution.
+    // Prevents multiple planned profiles from resolving to the same state entry.
+    private readonly HashSet<int> _claimedServiceIds = [];
+
     public List<UpdatedQualityProfile> BuildFrom(IEnumerable<PlannedQualityProfile> plannedProfiles)
     {
-        foreach (var planned in plannedProfiles)
+        var profileList = plannedProfiles.ToList();
+        var guideBacked = profileList.Where(p => p.Resource is not null).ToList();
+        var userDefined = profileList.Where(p => p.Resource is null);
+
+        // Two-pass resolution for guide-backed profiles to support multiple profiles
+        // sharing the same trash_id (see docs/architecture/quality-profile-state-resolution.md)
+        var unmatchedAfterPass1 = ResolveExactMatches(guideBacked);
+        ResolveRenames(unmatchedAfterPass1);
+
+        foreach (var planned in userDefined)
         {
-            if (planned.Resource is not null)
-            {
-                ProcessGuideBackedProfile(planned);
-            }
-            else
-            {
-                ProcessUserDefinedProfile(planned);
-            }
+            ProcessUserDefinedProfile(planned);
         }
 
         return _existingProfiles;
     }
 
-    private void ProcessGuideBackedProfile(PlannedQualityProfile planned)
+    // Pass 1: exact match by (trash_id, name). Profiles that match are claimed
+    // and processed immediately. Returns profiles that didn't find an exact match.
+    private List<PlannedQualityProfile> ResolveExactMatches(List<PlannedQualityProfile> guideBacked)
     {
-        var trashId = planned.Resource!.TrashId;
-        var cachedId = state.FindId(trashId);
+        List<PlannedQualityProfile> unmatched = [];
 
-        log.Debug(
-            "Process transaction for guide QP {TrashId} ({Name}), cached ID: {CachedId}",
-            trashId,
-            planned.Name,
-            cachedId?.ToString(CultureInfo.InvariantCulture) ?? "none"
-        );
-
-        if (cachedId.HasValue)
+        foreach (var planned in guideBacked)
         {
-            ProcessCachedProfile(planned, cachedId.Value);
+            var trashId = planned.Resource!.TrashId;
+            var cachedId = state.FindId(trashId, planned.Name);
+
+            log.Debug(
+                "Pass 1: guide QP {TrashId} ({Name}), exact cached ID: {CachedId}",
+                trashId,
+                planned.Name,
+                cachedId?.ToString(CultureInfo.InvariantCulture) ?? "none"
+            );
+
+            if (cachedId.HasValue)
+            {
+                _claimedServiceIds.Add(cachedId.Value);
+                ProcessCachedProfile(planned, cachedId.Value);
+            }
+            else
+            {
+                unmatched.Add(planned);
+            }
         }
-        else
+
+        return unmatched;
+    }
+
+    // Pass 2: for each unmatched profile, check unclaimed state mappings with the same trash_id.
+    // A rename is resolved only when exactly 1 unclaimed mapping and 1 unmatched profile exist
+    // for that trash_id. All other combinations fall through to ProcessNameCollision.
+    private void ResolveRenames(List<PlannedQualityProfile> unmatched)
+    {
+        // Group unmatched profiles by trash_id to evaluate rename eligibility per group
+        var unmatchedByTrashId = unmatched
+            .GroupBy(p => p.Resource!.TrashId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (trashId, profiles) in unmatchedByTrashId)
         {
-            ProcessUncachedProfile(planned);
+            var unclaimed = state
+                .FindAllByTrashId(trashId)
+                .Where(m => !_claimedServiceIds.Contains(m.ServiceId))
+                .ToList();
+
+            log.Debug(
+                "Pass 2: trash_id {TrashId} has {Unclaimed} unclaimed mapping(s) "
+                    + "and {Unmatched} unmatched profile(s)",
+                trashId,
+                unclaimed.Count,
+                profiles.Count
+            );
+
+            if (unclaimed.Count == 1 && profiles.Count == 1)
+            {
+                // Unambiguous rename: one old mapping, one new profile
+                var mapping = unclaimed[0];
+                _claimedServiceIds.Add(mapping.ServiceId);
+                ProcessCachedProfile(profiles[0], mapping.ServiceId);
+            }
+            else
+            {
+                foreach (var planned in profiles)
+                {
+                    ProcessNameCollision(planned);
+                }
+            }
         }
     }
 
     private void ProcessCachedProfile(PlannedQualityProfile planned, int cachedId)
     {
+        // Check if target name is already taken by a different service profile.
+        // This catches renames that would collide with manually created profiles.
+        var nameConflicts = _serviceDtosByName[planned.Name].Where(p => p.Id != cachedId).ToList();
+
+        if (nameConflicts.Count == 1)
+        {
+            transactions.ConflictingProfiles.Add(
+                new ConflictingQualityProfile(planned, nameConflicts[0].Id!.Value)
+            );
+            return;
+        }
+
+        if (nameConflicts.Count > 1)
+        {
+            transactions.AmbiguousProfiles.Add(
+                new AmbiguousQualityProfile(
+                    planned,
+                    nameConflicts.Select(p => (p.Name, p.Id!.Value)).ToList()
+                )
+            );
+            return;
+        }
+
         if (_serviceDtosById.TryGetValue(cachedId, out var serviceDto))
         {
             if (!serviceDto.Name.EqualsIgnoreCase(planned.Name))
@@ -96,11 +173,6 @@ internal class UpdatedProfileBuilder(
 
             ProcessNameCollision(planned);
         }
-    }
-
-    private void ProcessUncachedProfile(PlannedQualityProfile planned)
-    {
-        ProcessNameCollision(planned);
     }
 
     private void ProcessNameCollision(PlannedQualityProfile planned)

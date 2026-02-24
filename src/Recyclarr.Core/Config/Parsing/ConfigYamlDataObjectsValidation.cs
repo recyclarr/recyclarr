@@ -40,35 +40,9 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
             .WithName("quality_profiles")
             .ForEach(x => x.SetValidator(new QualityProfileConfigYamlValidator()));
 
-        RuleFor(x => x.QualityProfiles!)
-            .Custom(ValidateNoDuplicateQualityProfileTrashIds)
-            .When(x => x.QualityProfiles != null);
-
         RuleFor(x => x.CustomFormatGroups)
             .SetNonNullableValidator(new CustomFormatGroupsConfigYamlValidator())
             .WithName("custom_format_groups");
-    }
-
-    private static void ValidateNoDuplicateQualityProfileTrashIds(
-        IReadOnlyCollection<QualityProfileConfigYaml> profiles,
-        ValidationContext<ServiceConfigYaml> context
-    )
-    {
-        // Profiles without a trash_id are name-based and don't participate in state tracking
-        var duplicates = profiles
-            .Where(x => !string.IsNullOrEmpty(x.TrashId))
-            .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase)
-            .Where(g => g.Count() > 1);
-
-        foreach (var group in duplicates)
-        {
-            context.AddFailure(
-                "quality_profiles",
-                $"'quality_profiles' contains multiple entries with the same trash_id '{group.Key}'. "
-                    + "Each trash_id can only be used once. To create a similar profile with a different name, "
-                    + "define it by 'name' only and configure its qualities and scores explicitly."
-            );
-        }
     }
 }
 

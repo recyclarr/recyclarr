@@ -223,7 +223,7 @@ internal sealed class MergeQualityProfilesTest
     }
 
     [Test]
-    public void Profiles_with_same_trash_id_merge_regardless_of_name()
+    public void Profiles_with_same_trash_id_but_different_names_stay_separate()
     {
         var leftConfig = new SonarrConfigYaml
         {
@@ -255,7 +255,7 @@ internal sealed class MergeQualityProfilesTest
 
         var result = sut.Merge(leftConfig, rightConfig);
 
-        // Profiles should merge by trash_id, with right values taking precedence
+        // Same trash_id but different names: two distinct profiles
         result
             .Should()
             .BeEquivalentTo(
@@ -268,6 +268,11 @@ internal sealed class MergeQualityProfilesTest
                             TrashId = "profile-123",
                             Name = "Old Profile Name",
                             MinFormatScore = 100,
+                        },
+                        new QualityProfileConfigYaml
+                        {
+                            TrashId = "profile-123",
+                            Name = "New Profile Name",
                             ScoreSet = "default",
                         },
                     ],

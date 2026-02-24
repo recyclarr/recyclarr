@@ -17,6 +17,28 @@ public class TrashIdMappingStore<TStateObject>(TStateObject stateObject)
         return stateObject.Mappings.Find(m => m.TrashId == trashId)?.ServiceId;
     }
 
+    // Composite lookup for quality profiles where multiple profiles can share a trash_id.
+    // Returns the service_id only when both trash_id AND name match.
+    public int? FindId(string trashId, string name)
+    {
+        return stateObject
+            .Mappings.Find(m =>
+                string.Equals(m.TrashId, trashId, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase)
+            )
+            ?.ServiceId;
+    }
+
+    // Returns all state mappings for a given trash_id (used for rename detection in Pass 2)
+    public IReadOnlyList<TrashIdMapping> FindAllByTrashId(string trashId)
+    {
+        return stateObject
+            .Mappings.Where(m =>
+                string.Equals(m.TrashId, trashId, StringComparison.OrdinalIgnoreCase)
+            )
+            .ToList();
+    }
+
     public void Update(ISyncStateSource source)
     {
         Update(source.SyncedMappings, source.DeletedIds, source.ValidServiceIds);

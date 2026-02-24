@@ -8,7 +8,9 @@ QP-specific behaviors in transaction and persistence phases. For plan phase deta
 ## Profile Types
 
 **Guide-backed profiles** (with `trash_id`) load from TRaSH Guides and use state-based ID-first
-matching.
+matching. Multiple profiles can share the same `trash_id` with different names and config overrides.
+See [quality-profile-state-resolution.md](quality-profile-state-resolution.md) for the two-pass
+algorithm that supports this.
 
 **User-defined profiles** (name only) use name-based matching and are not tracked in state.
 

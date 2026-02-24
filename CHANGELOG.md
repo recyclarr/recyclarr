@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Sync: The same guide-backed quality profile `trash_id` can now be used multiple times with
+  different names, allowing variations of the same profile on a single instance.
+
 ### Fixed
 
 - CLI: `RECYCLARR_APP_DATA` deprecation message is now displayed cleanly instead of being buried in

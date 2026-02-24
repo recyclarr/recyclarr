@@ -50,7 +50,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-trash-id" }],
         };
 
-        var (sut, publisher) = CreatePlanBuilder(config);
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -58,7 +58,6 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         plan.QualityProfiles.First().Name.Should().Be("Guide QP Name");
         plan.QualityProfiles.First().Resource.Should().NotBeNull();
         plan.QualityProfiles.First().Resource!.TrashId.Should().Be("qp-trash-id");
-        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -250,7 +249,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-format-items" }],
         };
 
-        var (sut, publisher) = CreatePlanBuilder(config);
+        var (sut, _) = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -262,7 +261,6 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var profile = plan.QualityProfiles.Single();
         profile.CfScores.Should().HaveCount(2);
         profile.CfScores.Select(x => x.Score).Should().BeEquivalentTo([100, 200]);
-        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
     [Test]
@@ -350,5 +348,52 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         // cf2 should have merged assignments (from both config and formatItems)
         var cf2 = plan.CustomFormats.Single(x => x.Resource.TrashId == "cf2");
         cf2.AssignScoresTo.Should().HaveCount(2);
+    }
+
+    [Test]
+    public void Duplicate_profile_names_reports_error_and_skips_both()
+    {
+        SetupQualityProfileGuideData("qp-trash-1", "Guide QP One", ("HDTV-1080p", true, null));
+        SetupQualityProfileGuideData("qp-trash-2", "Guide QP Two", ("Bluray-1080p", true, null));
+
+        // Two different trash_ids but same explicit name
+        var config = NewConfig.Radarr() with
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "qp-trash-1", Name = "Same Name" },
+                new QualityProfileConfig { TrashId = "qp-trash-2", Name = "Same Name" },
+            ],
+        };
+
+        var (sut, _) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.QualityProfiles.Should().BeEmpty();
+        plan.HasErrors.Should().BeTrue();
+    }
+
+    [Test]
+    public void Same_trash_id_different_names_both_in_plan()
+    {
+        SetupQualityProfileGuideData("qp-shared", "Guide Default Name", ("HDTV-1080p", true, null));
+
+        var config = NewConfig.Radarr() with
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "qp-shared", Name = "Any" },
+                new QualityProfileConfig { TrashId = "qp-shared", Name = "Arabic" },
+            ],
+        };
+
+        var (sut, _) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.QualityProfiles.Should().HaveCount(2);
+        plan.QualityProfiles.Select(p => p.Name).Should().BeEquivalentTo("Any", "Arabic");
+        plan.QualityProfiles.Should().OnlyContain(p => p.Resource!.TrashId == "qp-shared");
     }
 }

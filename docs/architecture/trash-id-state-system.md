@@ -186,7 +186,9 @@ ISyncStateSource (interface in Core)
 
 TrashIdMappingStore<TMappings> (concrete class in Core)
   ├── Mappings: IReadOnlyList<TrashIdMapping>
-  ├── FindId(string trashId): int?
+  ├── FindId(string trashId): int?                  // 1:1 lookup (CFs)
+  ├── FindId(string trashId, string name): int?     // Composite lookup (QPs)
+  ├── FindAllByTrashId(string trashId): IReadOnlyList<TrashIdMapping>
   └── Update(ISyncStateSource source): void
 
 ISyncStatePersister<TMappings> (interface in Core)

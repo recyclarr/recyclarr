@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
-using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -136,10 +135,11 @@ internal class QualityProfileTransactionPhase(
             return [];
         }
 
-        var serviceCfNames = profileDto.FormatItems.Select(x => x.Name).ToList();
         return except
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .Where(x => serviceCfNames.TrueForAll(y => !y.EqualsIgnoreCase(x)))
+            .Except(
+                profileDto.FormatItems.Select(x => x.Name),
+                StringComparer.InvariantCultureIgnoreCase
+            )
             .ToList();
     }
 
@@ -153,7 +153,7 @@ internal class QualityProfileTransactionPhase(
         QualityProfileDto profileDto
     )
     {
-        var scoreMap = profileData
+        return profileData
             .CfScores.FullOuterHashJoin(
                 profileDto.FormatItems,
                 x => x.ServiceId,
@@ -167,7 +167,5 @@ internal class QualityProfileTransactionPhase(
                 (l, r) => UpdatedFormatScore.Updated(r, l)
             )
             .ToList();
-
-        return scoreMap;
     }
 }

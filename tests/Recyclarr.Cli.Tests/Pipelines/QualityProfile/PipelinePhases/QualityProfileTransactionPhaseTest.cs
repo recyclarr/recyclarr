@@ -798,4 +798,231 @@ internal sealed class QualityProfileTransactionPhaseTest
         context.TransactionOutput.NonExistentProfiles.Should().ContainSingle();
         context.TransactionOutput.NonExistentProfiles.Should().Contain("Missing Profile");
     }
+
+    // Helper to create a guide-backed PlannedQualityProfile with explicit Name control.
+    // NewPlan.Qp uses resource.Name which doesn't work when testing multiple profiles
+    // sharing one resource with different names.
+    private static PlannedQualityProfile GuideQp(
+        string name,
+        string trashId,
+        QualityProfileConfig? config = null
+    )
+    {
+        var resource = NewPlan.QpResource(trashId, "Guide Default Name");
+        return new PlannedQualityProfile
+        {
+            Name = name,
+            Config = config ?? new QualityProfileConfig { Name = name, TrashId = trashId },
+            Resource = resource,
+            ShouldCreate = true,
+        };
+    }
+
+    [Test, AutoMockData]
+    public async Task Two_profiles_same_trash_id_both_resolve_via_exact_match(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var profileA = GuideQp("A", "trash-id-1");
+        var profileB = GuideQp("B", "trash-id-1");
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileA, profileB),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA, serviceDtoB]),
+            State = CreateCache(
+                new TrashIdMapping("trash-id-1", "A", 42),
+                new TrashIdMapping("trash-id-1", "B", 43)
+            ),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.NewProfiles.Should().BeEmpty();
+        context.TransactionOutput.ConflictingProfiles.Should().BeEmpty();
+        var allExisting = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allExisting.Select(p => p.ProfileDto.Id).Should().BeEquivalentTo([42, 43]);
+    }
+
+    [Test, AutoMockData]
+    public async Task Same_trash_id_rename_one_of_two(QualityProfileTransactionPhase sut)
+    {
+        var profileA = GuideQp("A", "trash-id-1");
+        var profileB2 = GuideQp("B2", "trash-id-1");
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileA, profileB2),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA, serviceDtoB]),
+            State = CreateCache(
+                new TrashIdMapping("trash-id-1", "A", 42),
+                new TrashIdMapping("trash-id-1", "B", 43)
+            ),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.NewProfiles.Should().BeEmpty();
+        context.TransactionOutput.ConflictingProfiles.Should().BeEmpty();
+        var allExisting = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allExisting.Select(p => p.ProfileDto.Id).Should().BeEquivalentTo([42, 43]);
+    }
+
+    [Test, AutoMockData]
+    public async Task Same_trash_id_add_second_instance(QualityProfileTransactionPhase sut)
+    {
+        var profileA = GuideQp("A", "trash-id-1");
+        var profileClone = GuideQp(
+            "Clone",
+            "trash-id-1",
+            new QualityProfileConfig
+            {
+                Name = "Clone",
+                TrashId = "trash-id-1",
+                Qualities = [new QualityProfileQualityConfig { Name = "quality1", Enabled = true }],
+            }
+        );
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var schema = new QualityProfileDto
+        {
+            Items =
+            [
+                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+            ],
+        };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileA, profileClone),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA], schema: schema),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "A", 42)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.NewProfiles.Should().ContainSingle();
+        context.TransactionOutput.NewProfiles[0].ProfileConfig.Name.Should().Be("Clone");
+        var allExisting = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allExisting.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
+    }
+
+    [Test, AutoMockData]
+    public async Task Same_trash_id_rename_two_of_two_creates_new(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var profileA2 = GuideQp(
+            "A2",
+            "trash-id-1",
+            new QualityProfileConfig
+            {
+                Name = "A2",
+                TrashId = "trash-id-1",
+                Qualities = [new QualityProfileQualityConfig { Name = "quality1", Enabled = true }],
+            }
+        );
+        var profileB2 = GuideQp(
+            "B2",
+            "trash-id-1",
+            new QualityProfileConfig
+            {
+                Name = "B2",
+                TrashId = "trash-id-1",
+                Qualities = [new QualityProfileQualityConfig { Name = "quality1", Enabled = true }],
+            }
+        );
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
+        var schema = new QualityProfileDto
+        {
+            Items =
+            [
+                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+            ],
+        };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileA2, profileB2),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA, serviceDtoB], schema: schema),
+            State = CreateCache(
+                new TrashIdMapping("trash-id-1", "A", 42),
+                new TrashIdMapping("trash-id-1", "B", 43)
+            ),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Neither matches in Pass 1; 2 unclaimed in Pass 2 = ambiguous; both create new
+        context.TransactionOutput.NewProfiles.Should().HaveCount(2);
+        context
+            .TransactionOutput.NewProfiles.Select(p => p.ProfileConfig.Name)
+            .Should()
+            .BeEquivalentTo("A2", "B2");
+    }
+
+    [Test, AutoMockData]
+    public async Task Rename_to_name_taken_by_service_profile_creates_conflict(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var profileC = GuideQp("C", "trash-id-1");
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var serviceDtoC = new QualityProfileDto { Id = 99, Name = "C" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileC),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA, serviceDtoC]),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "A", 42)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Rename detected in Pass 2, but ProcessCachedProfile sees "C" is taken by id 99
+        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
+        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(99);
+    }
+
+    [Test, AutoMockData]
+    public async Task Rename_to_name_with_multiple_service_matches_creates_ambiguous(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var profileC = GuideQp("C", "trash-id-1");
+
+        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
+        var serviceDtoC1 = new QualityProfileDto { Id = 98, Name = "C" };
+        var serviceDtoC2 = new QualityProfileDto { Id = 99, Name = "c" };
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profileC),
+            ApiFetchOutput = NewQp.ServiceData([serviceDtoA, serviceDtoC1, serviceDtoC2]),
+            State = CreateCache(new TrashIdMapping("trash-id-1", "A", 42)),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.AmbiguousProfiles.Should().ContainSingle();
+        context.TransactionOutput.AmbiguousProfiles[0].ServiceMatches.Should().HaveCount(2);
+    }
 }
