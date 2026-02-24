@@ -8,4 +8,5 @@ public enum PipelineProgressStatus
     Partial,
     Failed,
     Skipped,
+    Interrupted,
 }

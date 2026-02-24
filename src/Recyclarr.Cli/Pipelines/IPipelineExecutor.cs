@@ -12,4 +12,6 @@ internal interface IPipelineExecutor
         IInstancePublisher instancePublisher,
         CancellationToken ct
     );
+
+    void InterruptAll(IInstancePublisher instancePublisher);
 }

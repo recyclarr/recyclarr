@@ -44,7 +44,7 @@ public readonly record struct InstanceSnapshot(
             return InstanceProgressStatus.Succeeded;
         }
 
-        // All pipelines are Skipped with none succeeded; instance failed
+        // All pipelines are Skipped/Interrupted with none succeeded; instance failed
         return InstanceProgressStatus.Failed;
     }
 
@@ -54,6 +54,7 @@ public readonly record struct InstanceSnapshot(
             is PipelineProgressStatus.Succeeded
                 or PipelineProgressStatus.Partial
                 or PipelineProgressStatus.Failed
-                or PipelineProgressStatus.Skipped;
+                or PipelineProgressStatus.Skipped
+                or PipelineProgressStatus.Interrupted;
     }
 }

@@ -120,6 +120,7 @@ internal class ProgressTableBuilder
                 PipelineProgressStatus.Partial => ("~", "yellow"),
                 PipelineProgressStatus.Failed => ("✗", "red"),
                 PipelineProgressStatus.Skipped => ("--", "grey"),
+                PipelineProgressStatus.Interrupted => ("--", "grey"),
                 _ => ("?", "white"),
             };
         }

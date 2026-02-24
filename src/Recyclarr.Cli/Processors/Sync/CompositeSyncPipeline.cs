@@ -64,6 +64,16 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pip
             : PipelineResult.Completed;
     }
 
+    public void InterruptAll(IInstancePublisher instancePublisher)
+    {
+        foreach (var pipeline in pipelines)
+        {
+            instancePublisher
+                .ForPipeline(pipeline.PipelineType)
+                .SetStatus(PipelineProgressStatus.Interrupted);
+        }
+    }
+
     private static List<ISyncPipeline> TopologicalSort(IEnumerable<ISyncPipeline> pipelines)
     {
         var pipelineList = pipelines.ToList();

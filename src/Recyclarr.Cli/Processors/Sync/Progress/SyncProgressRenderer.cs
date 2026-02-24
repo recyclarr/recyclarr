@@ -93,6 +93,18 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
         }
 
         var instance = snapshot.Instances[index];
+
+        // Interrupted only affects pipelines that haven't reached a terminal state yet;
+        // pipelines that already succeeded/failed/etc. keep their status.
+        if (
+            evt.Status is PipelineProgressStatus.Interrupted
+            && instance.Pipelines.TryGetValue(evt.Type, out var existing)
+            && IsTerminal(existing.Status)
+        )
+        {
+            return snapshot;
+        }
+
         var pipelines = instance.Pipelines.SetItem(
             evt.Type,
             new PipelineSnapshot(evt.Status, evt.Count)
@@ -103,5 +115,15 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
             Status = InstanceSnapshot.DeriveStatus(pipelines),
         };
         return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
+    }
+
+    private static bool IsTerminal(PipelineProgressStatus status)
+    {
+        return status
+            is PipelineProgressStatus.Succeeded
+                or PipelineProgressStatus.Partial
+                or PipelineProgressStatus.Failed
+                or PipelineProgressStatus.Skipped
+                or PipelineProgressStatus.Interrupted;
     }
 }

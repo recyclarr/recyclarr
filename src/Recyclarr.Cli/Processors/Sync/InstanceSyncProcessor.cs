@@ -58,6 +58,7 @@ internal class InstanceSyncProcessor(
                 throw;
             }
 
+            pipelines.InterruptAll(instancePublisher);
             return InstanceSyncResult.Failed;
         }
     }
