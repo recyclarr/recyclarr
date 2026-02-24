@@ -4,9 +4,6 @@ mode: subagent
 model: anthropic/claude-haiku-4-5
 permission:
   edit: deny
-  bash:
-    "*": deny
-    "rg *": allow
 ---
 
 # TRaSH Guides Repository

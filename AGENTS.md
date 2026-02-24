@@ -17,7 +17,9 @@ Operational Directives:
 
 Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
 
-- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost)
+- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost). MUST
+  use this subagent for any question about TRaSH Guides content (custom formats, quality profiles,
+  naming, quality sizes, trash_ids). NEVER use the generic explore agent for guides research.
 - **commit**: Git operations after user approval
 
 ## Skills
