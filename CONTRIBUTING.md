@@ -43,16 +43,14 @@ There are two recommended ways to use CSharpier:
 ### Essential
 
 - .NET SDK 9.0 and tooling (including dotnet CLI)
-- Powershell v5.1 or greater
+- PowerShell 7+
+- Python 3.12+
 - Docker CLI (Docker Desktop on Windows)
 
 ### Highly Recommended
 
 - Jetbrains Rider (IDE for editing C# code)
 - Visual Studio Code (with workspace-recommended extensions)
-
-Additional required tooling can be installed via the `scripts/Install-Tooling.ps1` powershell
-script. Run this occasionally for upgrades as well.
 
 ## Conventional Commits
 
@@ -162,11 +160,12 @@ executable according to [Conventional Commits][commits] rules.
 
 ### Making a Release
 
-1. Run `scripts/Prepare-Release.ps1`, which will:
+1. Run `scripts/prepare_release.py`, which will:
    - Update the changelog according to [Keep a Changelog][changelog] rules
    - Commit the changelog updates
    - Create a tag for the release (using GitVersion)
-1. Push the new tag and commits on `master` to trigger Github Workflows
+   - Prompt to push (which triggers the release pipeline)
+1. Use `--dry-run` to preview or `--undo` to reverse a local release
 
 ### Automated Release Process
 

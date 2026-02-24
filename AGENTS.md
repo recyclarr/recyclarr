@@ -201,9 +201,8 @@ All under `./scripts`. MUST use `testing` skill for test-related work.
 
 **ONLY for human use (AI must never run these):**
 
-- `Prepare-Release.ps1`: Initiates a release of Recyclarr.
+- `prepare_release.py`: Initiates a release of Recyclarr.
 - `Update-Gitignore.ps1`: Updates the global `.gitignore`.
-- `Install-Tooling.ps1`: Install or update local tools.
 - `Commit-Gitignore.ps1`: Commit git ignore changes.
 
 ## Commits and Changelog
