@@ -1,13 +1,12 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/media-naming-sonarr.json",
-  "type": "object",
+  "type": ["null", "object"],
   "additionalProperties": false,
   "properties": {
     "season": { "type": "string" },
     "series": { "type": "string" },
     "episodes": {
-      "type": "object",
+      "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
         "rename": { "type": "boolean" },

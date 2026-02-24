@@ -205,6 +205,85 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     }
 
     [Test]
+    public void Empty_custom_formats_is_no_op()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    custom_formats:
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Failures.Should().BeEmpty();
+        result.Configs.Should().ContainSingle().Which.CustomFormats.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Empty_quality_profiles_is_no_op()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    quality_profiles:
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Failures.Should().BeEmpty();
+        result.Configs.Should().ContainSingle().Which.QualityProfiles.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Empty_custom_format_groups_add_is_no_op()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                    custom_format_groups:
+                      add:
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Failures.Should().BeEmpty();
+        result.Configs.Should().ContainSingle().Which.CustomFormatGroups.Add.Should().BeEmpty();
+    }
+
+    [Test]
     public void Parse_custom_format_groups()
     {
         var sut = Resolve<ConfigurationRegistry>();

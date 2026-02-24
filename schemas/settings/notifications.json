@@ -1,12 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/settings/notifications.json",
-  "type": "object",
+  "type": ["null", "object"],
   "additionalProperties": false,
   "properties": {
     "apprise": {
       "description": "Apprise-specific notification settings",
-      "type": "object",
+      "type": ["null", "object"],
       "additionalProperties": false,
       "required": ["base_url", "mode"],
       "properties": {
@@ -30,7 +29,7 @@
         },
         "urls": {
           "description": "List of notification service URLs. Used in 'stateless' mode, ignored in 'stateful' mode.",
-          "type": "array",
+          "type": ["null", "array"],
           "items": {
             "type": "string",
             "format": "uri"

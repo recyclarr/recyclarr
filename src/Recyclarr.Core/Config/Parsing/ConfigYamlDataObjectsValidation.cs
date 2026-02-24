@@ -25,20 +25,12 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
             }
         );
 
-        RuleFor(x => x.CustomFormats)
-            .NotEmpty()
-            .When(x => x.CustomFormats is not null)
-            .ForEach(x => x.SetValidator(new CustomFormatConfigYamlValidator()))
-            .WithName("custom_formats");
+        RuleForEach(x => x.CustomFormats).SetValidator(new CustomFormatConfigYamlValidator());
 
         RuleFor(x => x.QualityDefinition)
             .SetNonNullableValidator(new QualitySizeConfigYamlValidator());
 
-        RuleFor(x => x.QualityProfiles)
-            .NotEmpty()
-            .When(x => x.QualityProfiles != null)
-            .WithName("quality_profiles")
-            .ForEach(x => x.SetValidator(new QualityProfileConfigYamlValidator()));
+        RuleForEach(x => x.QualityProfiles).SetValidator(new QualityProfileConfigYamlValidator());
 
         RuleFor(x => x.CustomFormatGroups)
             .SetNonNullableValidator(new CustomFormatGroupsConfigYamlValidator())
@@ -50,11 +42,7 @@ public class CustomFormatGroupsConfigYamlValidator : AbstractValidator<CustomFor
 {
     public CustomFormatGroupsConfigYamlValidator()
     {
-        RuleFor(x => x.Add)
-            .NotEmpty()
-            .When(x => x.Add is not null)
-            .ForEach(x => x.SetValidator(new CustomFormatGroupConfigYamlValidator()))
-            .WithName("add");
+        RuleForEach(x => x.Add).SetValidator(new CustomFormatGroupConfigYamlValidator());
     }
 }
 

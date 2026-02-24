@@ -1,8 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/includes.json",
-  "type": "array",
-  "minItems": 1,
+  "type": ["null", "array"],
   "description": "One or more include directives, which refer to external YAML to merge into an instance config.",
   "items": {
     "type": "object",

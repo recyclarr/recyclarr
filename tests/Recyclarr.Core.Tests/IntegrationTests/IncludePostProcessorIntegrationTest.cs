@@ -71,7 +71,10 @@ internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixtu
             configPath,
             new MockFileData(
                 """
-                custom_formats:
+                custom_format_groups:
+                  add:
+                    - select:
+                        - some-cf
                 """
             )
         );

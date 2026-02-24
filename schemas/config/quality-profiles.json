@@ -1,9 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/quality-profiles.json",
-  "type": "array",
+  "type": ["null", "array"],
   "description": "An array of quality profiles that exist in the remote service along with any configuration properties that Recyclarr should use to modify that quality profile.",
-  "minItems": 1,
   "items": {
     "type": "object",
     "additionalProperties": false,
@@ -18,7 +16,7 @@
         "description": "The name of the quality profile. For guide-backed profiles (with trash_id), this overrides the guide name. For user-defined profiles, this is the profile identity."
       },
       "reset_unmatched_scores": {
-        "type": "object",
+        "type": ["null", "object"],
         "description": "Settings related to resetting unmatched CF scores.",
         "additionalProperties": false,
         "required": ["enabled"],
@@ -28,9 +26,8 @@
             "description": "If set to true, enables setting scores to 0 in quality profiles where either a CF was not mentioned in the trash_ids array or it was in that list but did not get a score (e.g. no score in guide)."
           },
           "except": {
-            "type": "array",
+            "type": ["null", "array"],
             "description": "An array of strings that match custom formats to exclude when resetting scores. Matching is case-insensitive.",
-            "minItems": 1,
             "items": {
               "type": "string"
             }
@@ -43,7 +40,7 @@
         "default": "default"
       },
       "upgrade": {
-        "type": "object",
+        "type": ["null", "object"],
         "additionalProperties": false,
         "required": ["allowed"],
         "properties": {
@@ -71,8 +68,7 @@
         "default": "top"
       },
       "qualities": {
-        "type": "array",
-        "minItems": 1,
+        "type": ["null", "array"],
         "items": {
           "type": "object",
           "additionalProperties": false,

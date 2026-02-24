@@ -16,6 +16,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Config: Empty YAML nodes (e.g. `custom_formats:` with all entries commented out) are now treated
+  as no-ops instead of validation errors.
 - CLI: `RECYCLARR_APP_DATA` deprecation message is now displayed cleanly instead of being buried in
   a stack trace.
 - Config: YAML errors now show specific, actionable messages instead of generic "Exception at line"

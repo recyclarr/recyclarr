@@ -1,7 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config/quality-definition.json",
-  "type": "object",
+  "type": ["null", "object"],
   "additionalProperties": false,
   "required": ["type"],
   "properties": {
@@ -15,7 +14,7 @@
       "maximum": 1.0
     },
     "qualities": {
-      "type": "array",
+      "type": ["null", "array"],
       "description": "Per-quality size overrides. Values not specified default to guide data.",
       "items": {
         "type": "object",
