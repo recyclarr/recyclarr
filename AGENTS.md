@@ -10,8 +10,9 @@
 
 Operational Directives:
 
-- Manage issue lifecycle when working on issues
-- Always check comments when reading issue details
+- MUST transition issue to "In Progress" when starting work on it
+- MUST transition issue to "Done" after the final commit lands
+- MUST check comments when reading issue details
 
 ## Agent Architecture
 
