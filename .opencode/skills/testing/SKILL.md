@@ -63,18 +63,37 @@ Mock externals only: Git (LibGit2Sharp), HTTP APIs, filesystem (`MockFileSystem`
 
 ## NSubstitute Patterns
 
+**Arrange (setting up dependencies):**
+
 ```csharp
 dependency.Method().Returns(value);
 dependency.Property.ReturnsNull();
 dependency.Method(default!).ReturnsForAnyArgs(value);
 dependency.Method().Returns([item1, item2]);
-mock.Received().Method(arguments);
 Verify.That<T>(x => x.Property.Should().Be(expected));
 ```
 
-**Argument matching**: Prefer `ReceivedWithAnyArgs()` with `default` over `Received()` with
-`Arg.Any<T>()`. This applies to any NSubstitute call that ignores argument values (returns setup,
-received verification, etc.):
+**Assert on observable outcomes, not mock interactions.** Verify the result, side effect, or state
+change rather than asserting a method was called. Tests that assert `Received()` are coupled to
+implementation; they break when internals are refactored even if behavior is correct.
+
+```csharp
+// Good: assert on the outcome
+result.Should().BeEquivalentTo(expected);
+fileSystem.AllFiles.Should().Contain(expectedPath);
+
+// Last resort: verify interaction only when there is no observable outcome
+mock.ReceivedWithAnyArgs().SetStatus(default, default);
+```
+
+If `Received()` feels like the only option, **challenge the design first**. Needing mock
+verification often signals a testability problem (void method hiding a meaningful result, missing
+return value, side effect with no observable state change). Flag this to the user as a potential
+design improvement even if it is outside the current scope of work; do not silently accommodate
+untestable designs.
+
+**Argument matching** (returns setup and received verification): Prefer
+`ReceivedWithAnyArgs()`/`ReturnsForAnyArgs()` with `default` over `Arg.Any<T>()`:
 
 ```csharp
 // Good
