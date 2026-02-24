@@ -80,10 +80,9 @@ internal sealed class UpdatedQualityProfileTest
             .BeEquivalentTo(
                 new QualityProfileDto
                 {
-                    // For right now, names are used for lookups (since QPs have no cache yet). As such, two profiles with
-                    // different names will never be matched and so the names should normally be identical. However, for testing
-                    // purposes, I made them different to make sure it doesn't get overwritten.
-                    Name = "dto_name",
+                    // Config name takes precedence: with trash_id-based state matching,
+                    // a profile can be renamed by changing the config/guide name.
+                    Name = "config_name",
                     Id = 1,
                     MinFormatScore = 110,
                     MinUpgradeFormatScore = 110,

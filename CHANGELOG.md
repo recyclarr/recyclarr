@@ -22,6 +22,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   text (#728).
 - Sync: CF group `assign_scores_to` with `name` no longer requires the profile to be in
   `quality_profiles` (#726).
+- Sync: Quality profile names are now updated when the config or guide name differs from the service
+  (#729).
 
 ## [8.2.1] - 2026-02-22
 

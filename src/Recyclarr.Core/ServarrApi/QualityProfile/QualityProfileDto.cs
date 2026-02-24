@@ -12,17 +12,7 @@ public record QualityProfileDto : IServiceResource
     int IServiceResource.Id =>
         Id ?? throw new InvalidOperationException("QualityProfileDto.Id is null");
 
-    public string Name
-    {
-        get;
-        init
-        {
-            if (string.IsNullOrEmpty(field))
-            {
-                field = value;
-            }
-        }
-    } = "";
+    public string Name { get; init; } = "";
 
     public bool? UpgradeAllowed
     {

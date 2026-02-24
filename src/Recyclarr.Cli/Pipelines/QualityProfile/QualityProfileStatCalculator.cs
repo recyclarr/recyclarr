@@ -34,6 +34,7 @@ internal class QualityProfileStatCalculator(ILogger log)
     {
         var changed = false;
 
+        Check("Name", oldDto.Name, newDto.Name);
         Check("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
         Check(
             "Cutoff",
