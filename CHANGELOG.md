@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.3.2] - 2026-02-25
+
 ### Fixed
 
 - Sync: Default CF groups now apply to all profile variants sharing the same `trash_id` (#735)
@@ -1293,7 +1295,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.3.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.3.2...HEAD
+[8.3.2]: https://github.com/recyclarr/recyclarr/compare/v8.3.1...v8.3.2
 [8.3.1]: https://github.com/recyclarr/recyclarr/compare/v8.3.0...v8.3.1
 [8.3.0]: https://github.com/recyclarr/recyclarr/compare/v8.2.1...v8.3.0
 [8.2.1]: https://github.com/recyclarr/recyclarr/compare/v8.2.0...v8.2.1
