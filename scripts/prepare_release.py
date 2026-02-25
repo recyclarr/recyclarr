@@ -322,22 +322,17 @@ def format_version_label(version: str, prev_version: str | None) -> str:
     return f"v{version}"
 
 
-def print_dry_run(
-    old_lines: list[str], version: str, prev_version: str | None, sections: list[str]
+def print_changelog_preview(
+    lines: list[str], version: str, prev_version: str | None
 ) -> None:
-    """Show a preview of the release that would be created."""
-    unreleased_idx, next_heading_idx, _ = parse_changelog(old_lines)
+    """Print the release content as it will appear in the changelog."""
+    unreleased_idx, next_heading_idx, _ = parse_changelog(lines)
     today = date.today().isoformat()
 
-    print(f"{BOLD}Dry run: {format_version_label(version, prev_version)}{RESET}")
-    print()
-
-    # Show the release as it will appear in the changelog
     print(f"{CYAN}## [{version}] - {today}{RESET}")
-    for line in old_lines[unreleased_idx + 1 : next_heading_idx]:
+    for line in lines[unreleased_idx + 1 : next_heading_idx]:
         print(line)
 
-    # Show the link references that will be added/updated
     print(f"{DIM}Links:{RESET}")
     print(f"  {DIM}[Unreleased]: ...compare/v{version}...HEAD{RESET}")
     if prev_version:
@@ -345,20 +340,32 @@ def print_dry_run(
     else:
         print(f"  {DIM}[{version}]: ...releases/tag/v{version}{RESET}")
 
+
+def print_dry_run(
+    lines: list[str], version: str, prev_version: str | None, sections: list[str]
+) -> None:
+    """Show a preview of the release that would be created."""
+    print(f"{BOLD}Dry run: {format_version_label(version, prev_version)}{RESET}")
+    print()
+    print_changelog_preview(lines, version, prev_version)
     print()
     print(f"{DIM}No files were modified.{RESET}")
 
 
 def print_summary(
-    version: str, prev_version: str | None, sections: list[str], sha: str
+    lines: list[str],
+    version: str,
+    prev_version: str | None,
+    sections: list[str],
+    sha: str,
 ) -> None:
     """Print a release summary."""
     print()
     print(f"{BOLD}Release prepared{RESET}")
     info("version:", format_version_label(version, prev_version))
     info(" commit:", sha)
-    if sections:
-        info("  sections:", ", ".join(sections))
+    print()
+    print_changelog_preview(lines, version, prev_version)
     print()
 
 
@@ -444,7 +451,7 @@ def main() -> None:
     git_tag(version)
 
     # Summary and push prompt
-    print_summary(version, prev_version, sections, sha)
+    print_summary(lines, version, prev_version, sections, sha)
     prompt_push(version, mainline)
 
 
