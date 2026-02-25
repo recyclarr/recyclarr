@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.3.1] - 2026-02-24
+
 ### Fixed
 
 - CLI: State repair crash when multiple quality profiles share the same `trash_id`.
@@ -1285,7 +1287,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.3.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.3.1...HEAD
+[8.3.1]: https://github.com/recyclarr/recyclarr/compare/v8.3.0...v8.3.1
 [8.3.0]: https://github.com/recyclarr/recyclarr/compare/v8.2.1...v8.3.0
 [8.2.1]: https://github.com/recyclarr/recyclarr/compare/v8.2.0...v8.2.1
 [8.2.0]: https://github.com/recyclarr/recyclarr/compare/v8.1.0...v8.2.0
