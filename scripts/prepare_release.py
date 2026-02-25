@@ -249,6 +249,16 @@ def require_mainline_branch(mainline: str) -> None:
         sys.exit(1)
 
 
+def require_up_to_date(mainline: str) -> None:
+    """Exit if the local branch is behind the remote."""
+    run_quiet(["git", "fetch", "origin", mainline])
+    result = run_quiet(["git", "rev-list", "--count", f"origin/{mainline}..HEAD"])
+    behind = run_quiet(["git", "rev-list", "--count", f"HEAD..origin/{mainline}"])
+    if int(behind.stdout.strip()) > 0:
+        error(f"{mainline} is behind origin/{mainline}; pull or rebase first")
+        sys.exit(1)
+
+
 def git_push(version: str, mainline: str) -> None:
     """Push the mainline branch and the release tag."""
     result = run_quiet(["git", "push", "origin", mainline, f"v{version}"])
@@ -322,6 +332,9 @@ def format_version_label(version: str, prev_version: str | None) -> str:
     return f"v{version}"
 
 
+SEPARATOR = f"{DIM}{'─' * 60}{RESET}"
+
+
 def print_changelog_preview(
     lines: list[str], version: str, prev_version: str | None
 ) -> None:
@@ -329,16 +342,17 @@ def print_changelog_preview(
     unreleased_idx, next_heading_idx, _ = parse_changelog(lines)
     today = date.today().isoformat()
 
+    print(SEPARATOR)
     print(f"{CYAN}## [{version}] - {today}{RESET}")
     for line in lines[unreleased_idx + 1 : next_heading_idx]:
         print(line)
-
     print(f"{DIM}Links:{RESET}")
     print(f"  {DIM}[Unreleased]: ...compare/v{version}...HEAD{RESET}")
     if prev_version:
         print(f"  {DIM}[{version}]: ...compare/v{prev_version}...v{version}{RESET}")
     else:
         print(f"  {DIM}[{version}]: ...releases/tag/v{version}{RESET}")
+    print(SEPARATOR)
 
 
 def print_dry_run(
@@ -352,37 +366,20 @@ def print_dry_run(
     print(f"{DIM}No files were modified.{RESET}")
 
 
-def print_summary(
-    lines: list[str],
-    version: str,
-    prev_version: str | None,
-    sections: list[str],
-    sha: str,
-) -> None:
-    """Print a release summary."""
-    print()
-    print(f"{BOLD}Release prepared{RESET}")
-    info("version:", format_version_label(version, prev_version))
-    info(" commit:", sha)
-    print()
-    print_changelog_preview(lines, version, prev_version)
-    print()
+def prompt_action(version: str, mainline: str) -> int:
+    """Present release options and return the user's choice (1, 2, or 3)."""
+    print(f"{YELLOW}What would you like to do?{RESET}")
+    print(f"  {BOLD}1{RESET}) Create release (commit + tag)")
+    print(f"  {BOLD}2{RESET}) Create release & push {mainline} + v{version} to origin")
+    print(f"     {DIM}This will start the release pipeline.{RESET}")
+    print(f"  {BOLD}3{RESET}) Abort")
 
-
-def prompt_push(version: str, mainline: str) -> None:
-    """Ask the user whether to push and kick off the release."""
-    print(f"{YELLOW}Push {mainline} and v{version} to origin?{RESET}")
-    print(f"  {DIM}This will start the release pipeline.{RESET}")
-    answer = input(f"  {YELLOW}[y/N]{RESET} ").strip().lower()
-    print()
-
-    if answer == "y":
-        git_push(version, mainline)
-        success(f"pushed {mainline} and v{version} to origin")
-    else:
-        print(f"  {DIM}Skipped. To push manually:{RESET}")
-        print(f"  {DIM}  git push origin {mainline} v{version}{RESET}")
-    print()
+    while True:
+        choice = input(f"  {YELLOW}[1/2/3]{RESET} ").strip()
+        if choice in ("1", "2", "3"):
+            print()
+            return int(choice)
+        print(f"  {DIM}Please enter 1, 2, or 3.{RESET}")
 
 
 def main() -> None:
@@ -444,15 +441,33 @@ def main() -> None:
         return
 
     require_clean_worktree()
+    require_up_to_date(mainline)
+
+    # Show what will be released
+    print()
+    print(f"{BOLD}Release: {format_version_label(version, prev_version)}{RESET}")
+    print()
+    print_changelog_preview(lines, version, prev_version)
+    print()
+
+    choice = prompt_action(version, mainline)
+    if choice == 3:
+        print(f"{DIM}Aborted.{RESET}")
+        return
 
     # Write, commit, tag
     CHANGELOG_PATH.write_text(new_text)
     sha = git_commit(version)
     git_tag(version)
+    success(f"committed {sha} and tagged v{version}")
 
-    # Summary and push prompt
-    print_summary(lines, version, prev_version, sections, sha)
-    prompt_push(version, mainline)
+    if choice == 2:
+        git_push(version, mainline)
+        success(f"pushed {mainline} and v{version} to origin")
+    else:
+        print(f"  {DIM}To push manually:{RESET}")
+        print(f"  {DIM}  git push origin {mainline} v{version}{RESET}")
+    print()
 
 
 if __name__ == "__main__":
