@@ -1,13 +1,12 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.ServarrApi.QualityProfile;
-using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiFetchPhase(
     IQualityProfileApiService api,
-    ISyncStatePersister<QualityProfileMappings> statePersister
+    IQualityProfileStatePersister statePersister
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
     public async Task<PipelineFlow> Execute(

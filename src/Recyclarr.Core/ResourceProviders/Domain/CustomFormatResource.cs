@@ -25,6 +25,9 @@ public record CustomFormatResource : IGuideResource, IServiceResource
 
     public int Id { get; set; }
     public string Name { get; init; } = "";
+
+    [JsonIgnore]
+    public MappingKey MappingKey => new(TrashId, Name);
     public bool IncludeCustomFormatWhenRenaming { get; init; }
     public IReadOnlyCollection<CustomFormatSpecificationData> Specifications { get; init; } = [];
 }

@@ -3,13 +3,6 @@ using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
 
-[SyncStateName("test-state")]
-internal sealed record TestStateObject : SyncStateObject, ITrashIdMappings
-{
-    public string? ExtraData { [UsedImplicitly] get; init; }
-    public List<TrashIdMapping> Mappings { get; init; } = [];
-}
-
 // This class exists because AutoFixture does not use NSubstitute's ForPartsOf()
 // See: https://github.com/AutoFixture/AutoFixture/issues/1355
 [SuppressMessage(
@@ -18,22 +11,22 @@ internal sealed record TestStateObject : SyncStateObject, ITrashIdMappings
     Justification = "Created by AutoFixture"
 )]
 internal sealed class TestSyncStatePersister(ILogger log, ISyncStateStoragePath storagePath)
-    : SyncStatePersister<TestStateObject>(log, storagePath)
+    : SyncStatePersister(log, storagePath, "test-state")
 {
-    protected override string StateName => "Test State";
+    protected override string DisplayName => "Test State";
 }
 
 internal sealed class SyncStatePersisterTest
 {
     [Test, AutoMockData]
-    public void Load_returns_default_when_file_does_not_exist(TestSyncStatePersister sut)
+    public void Load_returns_empty_when_file_does_not_exist(TestSyncStatePersister sut)
     {
         var result = sut.Load();
-        result.StateObject.Should().BeEquivalentTo(new TestStateObject());
+        result.Mappings.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
-    public void Load_returns_default_when_json_has_error(
+    public void Load_returns_empty_when_json_has_error(
         [Frozen(Matching.ImplementedInterfaces)] MockFileSystem fs,
         [Frozen] ISyncStateStoragePath storage,
         TestSyncStatePersister sut
@@ -41,16 +34,16 @@ internal sealed class SyncStatePersisterTest
     {
         const string stateJson = """
             {\
-              extra_data: Hello
+              mappings: Hello
             }/
             """;
 
         fs.AddFile("stateFile.json", new MockFileData(stateJson));
-        storage.CalculatePath<TestStateObject>().Returns(fs.FileInfo.New("stateFile.json"));
+        storage.CalculatePath("test-state").Returns(fs.FileInfo.New("stateFile.json"));
 
         var result = sut.Load();
 
-        result.StateObject.Should().BeEquivalentTo(new TestStateObject());
+        result.Mappings.Should().BeEmpty();
     }
 
     [Test, AutoMockData]
@@ -62,15 +55,17 @@ internal sealed class SyncStatePersisterTest
     {
         const string stateJson = """
             {
-              "extra_data": "Hello"
+              "mappings": [
+                { "trash_id": "abc", "name": "Test", "service_id": 42 }
+              ]
             }
             """;
 
         fs.AddFile("stateFile.json", new MockFileData(stateJson));
-        storage.CalculatePath<TestStateObject>().Returns(fs.FileInfo.New("stateFile.json"));
+        storage.CalculatePath("test-state").Returns(fs.FileInfo.New("stateFile.json"));
 
         var result = sut.Load();
 
-        result.StateObject.Should().BeEquivalentTo(new TestStateObject { ExtraData = "Hello" });
+        result.Mappings.Should().BeEquivalentTo([new TrashIdMapping("abc", "Test", 42)]);
     }
 }

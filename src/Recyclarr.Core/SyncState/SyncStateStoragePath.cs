@@ -1,7 +1,6 @@
 using System.Data.HashFunction.FNV;
 using System.Globalization;
 using System.IO.Abstractions;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Recyclarr.Config.Models;
@@ -20,38 +19,24 @@ public partial class SyncStateStoragePath(IAppPaths paths, IServiceConfiguration
         return _hash.ComputeHash(Encoding.ASCII.GetBytes(url)).AsHexString();
     }
 
-    private IFileInfo CalculatePathInternal(string stateObjectName, string serviceDir)
+    private IFileInfo CalculatePathInternal(string stateName, string serviceDir)
     {
         return paths
             .StateDirectory.SubDirectory(
                 config.ServiceType.ToString().ToLower(CultureInfo.CurrentCulture)
             )
             .SubDirectory(serviceDir)
-            .File(stateObjectName + ".json");
+            .File(stateName + ".json");
     }
 
-    private static string GetStateObjectNameFromAttribute<T>()
+    public IFileInfo CalculatePath(string stateName)
     {
-        var attribute =
-            typeof(T).GetCustomAttribute<SyncStateNameAttribute>()
-            ?? throw new ArgumentException(
-                $"{nameof(SyncStateNameAttribute)} is missing on type {nameof(T)}"
-            );
-
-        if (!AllowedObjectNameCharactersRegex().IsMatch(attribute.Name))
+        if (!AllowedObjectNameCharactersRegex().IsMatch(stateName))
         {
-            throw new ArgumentException(
-                $"Object name '{attribute.Name}' has unacceptable characters"
-            );
+            throw new ArgumentException($"State name '{stateName}' has unacceptable characters");
         }
 
-        return attribute.Name;
-    }
-
-    public IFileInfo CalculatePath<T>()
-    {
-        var stateObjectName = GetStateObjectNameFromAttribute<T>();
-        return CalculatePathInternal(stateObjectName, BuildUniqueServiceDir());
+        return CalculatePathInternal(stateName, BuildUniqueServiceDir());
     }
 
     [GeneratedRegex(@"^[\w-]+$", RegexOptions.None, 1000)]

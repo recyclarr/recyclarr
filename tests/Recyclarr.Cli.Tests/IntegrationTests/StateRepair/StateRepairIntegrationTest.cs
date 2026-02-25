@@ -1,9 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Text.Json;
 using Autofac;
 using Recyclarr.Cli.Console;
-using Recyclarr.Cli.Pipelines.CustomFormat.State;
-using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
@@ -14,6 +13,14 @@ using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests.StateRepair;
+
+// Mirrors the JSON shape produced by SyncStatePersister.MappingsContainer (which is private).
+// Used for both writing test cache files and reading them back.
+[SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "Test POCO")]
+internal sealed record TestMappings
+{
+    public List<TrashIdMapping> Mappings { get; init; } = [];
+}
 
 internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 {
@@ -110,7 +117,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         Fs.File.Exists(cacheFile).Should().BeTrue();
 
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -167,7 +174,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         Fs.File.Exists(cacheFile).Should().BeTrue();
 
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -188,7 +195,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Test CF" });
 
         // Existing cache with wrong ID that would be corrected in non-preview mode
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings = [new TrashIdMapping("trash-id-1", "Test CF", ServiceId: 99)],
         };
@@ -204,7 +211,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Verify cache unchanged (still has wrong ID, not corrected to 10)
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -249,7 +256,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         );
 
         // Create existing cache with both entries
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings =
             [
@@ -266,7 +273,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Verify cache contains both entries
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -290,7 +297,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Note: No service CF with ID 99
 
         // Create existing cache with stale entry
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings =
             [
@@ -307,7 +314,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Verify cache only contains the valid entry (stale entry removed)
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -329,7 +336,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 20, Name = "Test CF" }); // ID 20, not 10
 
         // Create existing cache with wrong ID
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings = [new TrashIdMapping("trash-id-1", "Test CF", ServiceId: 10)], // Wrong ID - should be 20
         };
@@ -342,7 +349,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Verify cache has corrected mapping
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -363,7 +370,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Test CF" });
 
         // Existing cache already has correct ID
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings = [new TrashIdMapping("trash-id-1", "Test CF", ServiceId: 10)],
         };
@@ -376,7 +383,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Verify cache preserved
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -426,7 +433,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         Fs.File.Exists(cacheFile).Should().BeTrue();
 
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -446,11 +453,10 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupGuideCfs("radarr", ("trash-id-1", "Test CF"));
         SetupServiceCfs(new CustomFormatResource { Id = 10, Name = "Test CF" });
 
-        // Legacy cache format (pre-v8.0) with old field names
+        // Legacy cache format (pre-v8.0) with old field names for TrashIdMapping fields
         const string legacyCache = """
             {
-              "version": 1,
-              "trash_id_mappings": [{
+              "mappings": [{
                 "trash_id": "trash-id-1",
                 "custom_format_name": "Test CF",
                 "custom_format_id": 10
@@ -466,7 +472,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Cache should be unchanged (already correct)
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -474,7 +480,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         cache!.Mappings.Should().BeEquivalentTo([new { TrashId = "trash-id-1", ServiceId = 10 }]);
     }
 
-    private void SetupExistingCache(string serviceType, CustomFormatMappings cacheObj)
+    private void SetupExistingCache(string serviceType, TestMappings cacheObj)
     {
         var cacheJson = JsonSerializer.Serialize(cacheObj, GlobalJsonSerializerSettings.Recyclarr);
         SetupExistingCacheRaw(serviceType, cacheJson);
@@ -488,6 +494,17 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
         Fs.Directory.CreateDirectory(cacheDir.FullName);
         Fs.AddFile(cacheDir.File("custom-format-mappings.json"), new MockFileData(cacheJson));
+    }
+
+    private void SetupExistingQpCache(string serviceType, TestMappings cacheObj)
+    {
+        var cacheJson = JsonSerializer.Serialize(cacheObj, GlobalJsonSerializerSettings.Recyclarr);
+        var cacheDir = Paths
+            .StateDirectory.SubDirectory(serviceType.ToLowerInvariant())
+            .SubDirectory("8247e13ec45dc17b"); // Hash from test config
+
+        Fs.Directory.CreateDirectory(cacheDir.FullName);
+        Fs.AddFile(cacheDir.File("quality-profile-mappings.json"), new MockFileData(cacheJson));
     }
 
     private string GetCacheFilePath(string serviceType)
@@ -530,7 +547,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupServiceCfs(new CustomFormatResource { Id = 1, Name = "BR-DISK" });
 
         // Existing cache has orphaned entry (trash_id was manually changed)
-        var existingCache = new CustomFormatMappings
+        var existingCache = new TestMappings
         {
             Mappings = [new TrashIdMapping("orphan-trash-id", "BR-DISK", ServiceId: 1)],
         };
@@ -547,7 +564,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // (orphan discarded because its service ID is claimed by the adopted entry)
         var cacheFile = GetCacheFilePath("radarr");
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<CustomFormatMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -643,7 +660,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         Fs.File.Exists(cacheFile).Should().BeTrue();
 
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<QualityProfileMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
@@ -696,13 +713,81 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         Fs.File.Exists(cacheFile).Should().BeTrue();
 
         var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
-        var cache = JsonSerializer.Deserialize<QualityProfileMappings>(
+        var cache = JsonSerializer.Deserialize<TestMappings>(
             cacheContent,
             GlobalJsonSerializerSettings.Recyclarr
         );
 
         cache.Should().NotBeNull();
         cache.Mappings.Should().BeEquivalentTo([new { TrashId = "qp-trash-id-1", ServiceId = 11 }]);
+    }
+
+    [Test]
+    public async Task Rebuild_quality_profiles_with_shared_trash_id_and_existing_state()
+    {
+        // Multiple profiles share the same trash_id but have different user-specified names.
+        // Existing state has entries for all of them. Loading state must not crash on duplicate keys.
+        SetupRadarrConfigWithQps(
+            "test-instance",
+            ("shared-qp-id", "English"),
+            ("shared-qp-id", "German"),
+            ("shared-qp-id", "French")
+        );
+        SetupGuideQps("radarr", ("shared-qp-id", "HD Bluray + WEB"));
+        SetupServiceQps(
+            new QualityProfileDto { Id = 10, Name = "English" },
+            new QualityProfileDto { Id = 20, Name = "German" },
+            new QualityProfileDto { Id = 30, Name = "French" }
+        );
+
+        var existingCache = new TestMappings
+        {
+            Mappings =
+            [
+                new TrashIdMapping("shared-qp-id", "English", ServiceId: 10),
+                new TrashIdMapping("shared-qp-id", "German", ServiceId: 20),
+                new TrashIdMapping("shared-qp-id", "French", ServiceId: 30),
+            ],
+        };
+        SetupExistingQpCache("radarr", existingCache);
+
+        var exitCode = await CliSetup.Run(
+            Container,
+            ["state", "repair", "quality-profiles", "-i", "test-instance"]
+        );
+
+        exitCode.Should().Be(0);
+
+        var cacheFile = GetQpCacheFilePath("radarr");
+        var cacheContent = await Fs.File.ReadAllTextAsync(cacheFile);
+        var cache = JsonSerializer.Deserialize<TestMappings>(
+            cacheContent,
+            GlobalJsonSerializerSettings.Recyclarr
+        );
+
+        cache.Should().NotBeNull();
+        cache
+            .Mappings.Should()
+            .BeEquivalentTo([
+                new
+                {
+                    TrashId = "shared-qp-id",
+                    Name = "English",
+                    ServiceId = 10,
+                },
+                new
+                {
+                    TrashId = "shared-qp-id",
+                    Name = "German",
+                    ServiceId = 20,
+                },
+                new
+                {
+                    TrashId = "shared-qp-id",
+                    Name = "French",
+                    ServiceId = 30,
+                },
+            ]);
     }
 
     [Test]

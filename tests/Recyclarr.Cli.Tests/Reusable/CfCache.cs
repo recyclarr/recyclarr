@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.SyncState;
 
@@ -7,11 +6,9 @@ namespace Recyclarr.Cli.Tests.Reusable;
 
 internal static class CfCache
 {
-    public static TrashIdMappingStore<CustomFormatMappings> New(params TrashIdMapping[] mappings)
+    public static TrashIdMappingStore New(params TrashIdMapping[] mappings)
     {
-        return new TrashIdMappingStore<CustomFormatMappings>(
-            new CustomFormatMappings { Mappings = mappings.ToList() }
-        );
+        return new TrashIdMappingStore(mappings.ToList());
     }
 
     public static ISyncStateSource ToSyncSource(

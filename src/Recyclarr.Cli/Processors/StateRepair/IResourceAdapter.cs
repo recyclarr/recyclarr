@@ -11,7 +11,7 @@ internal interface IResourceAdapter
     Task<IReadOnlyList<IServiceResource>> FetchServiceResourcesAsync(CancellationToken ct);
     IReadOnlyList<IGuideResource> GetConfiguredGuideResources();
 
-    Dictionary<string, TrashIdMapping> LoadExistingMappings();
+    IMappingStoreView LoadExistingMappings();
     void SaveMappings(List<TrashIdMapping> mappings);
     string GetStateFilePath();
 }

@@ -3,70 +3,44 @@ using System.Diagnostics.CodeAnalysis;
 namespace Recyclarr.SyncState;
 
 /// <summary>
-/// Generic store that maps TRaSH Guides trash_ids to Sonarr/Radarr service IDs.
+/// Store that maps TRaSH Guides trash_ids to Sonarr/Radarr service IDs.
 /// Provides shared logic for finding, updating, and cleaning up mappings.
 /// </summary>
-public class TrashIdMappingStore<TStateObject>(TStateObject stateObject)
-    : BaseMappingStore(stateObject)
-    where TStateObject : SyncStateObject, ITrashIdMappings
+[SuppressMessage(
+    "Design",
+    "CA1002:Do not expose generic lists",
+    Justification = "Mutable for Update()"
+)]
+public class TrashIdMappingStore(List<TrashIdMapping> mappings) : IMappingStoreView
 {
-    public IReadOnlyList<TrashIdMapping> Mappings => stateObject.Mappings;
+    public List<TrashIdMapping> Mappings { get; } = mappings;
 
-    public int? FindId(string trashId)
-    {
-        return stateObject.Mappings.Find(m => m.TrashId == trashId)?.ServiceId;
-    }
+    IReadOnlyList<TrashIdMapping> IMappingStoreView.Mappings => Mappings;
 
-    // Composite lookup for quality profiles where multiple profiles can share a trash_id.
-    // Returns the service_id only when both trash_id AND name match.
-    public int? FindId(string trashId, string name)
+    public int? FindId(MappingKey key)
     {
-        return stateObject
-            .Mappings.Find(m =>
-                string.Equals(m.TrashId, trashId, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(m.Name, name, StringComparison.OrdinalIgnoreCase)
+        return Mappings
+            .Find(m =>
+                string.Equals(m.TrashId, key.TrashId, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(m.Name, key.Name, StringComparison.OrdinalIgnoreCase)
             )
             ?.ServiceId;
     }
 
-    // Returns all state mappings for a given trash_id (used for rename detection in Pass 2)
-    public IReadOnlyList<TrashIdMapping> FindAllByTrashId(string trashId)
-    {
-        return stateObject
-            .Mappings.Where(m =>
-                string.Equals(m.TrashId, trashId, StringComparison.OrdinalIgnoreCase)
-            )
-            .ToList();
-    }
-
     public void Update(ISyncStateSource source)
     {
-        Update(source.SyncedMappings, source.DeletedIds, source.ValidServiceIds);
-    }
-
-    [SuppressMessage(
-        "ReSharper",
-        "UnusedParameter.Local",
-        Justification = "LINQ l/r variables double as documentation"
-    )]
-    private void Update(
-        IEnumerable<TrashIdMapping> syncedMappings,
-        IEnumerable<int> deletedIds,
-        IEnumerable<int> validServiceIds
-    )
-    {
-        var validIds = validServiceIds.ToHashSet();
-        var deleted = deletedIds.ToHashSet();
+        var validIds = source.ValidServiceIds.ToHashSet();
+        var deleted = source.DeletedIds.ToHashSet();
 
         // Filter to valid entries: must exist in service, not be zero, and not be deleted
-        var existingMappings = stateObject
-            .Mappings.Where(m => m.ServiceId != 0 && validIds.Contains(m.ServiceId))
+        var existingMappings = Mappings
+            .Where(m => m.ServiceId != 0 && validIds.Contains(m.ServiceId))
             .Where(m => !deleted.Contains(m.ServiceId))
             .DistinctBy(m => m.ServiceId);
 
         var result = existingMappings
             .FullOuterHashJoin(
-                syncedMappings,
+                source.SyncedMappings,
                 l => l.ServiceId,
                 r => r.ServiceId,
                 l => l, // Keep existing service items not in user config
@@ -77,7 +51,7 @@ public class TrashIdMappingStore<TStateObject>(TStateObject stateObject)
             .OrderBy(m => m.ServiceId)
             .ToList();
 
-        stateObject.Mappings.Clear();
-        stateObject.Mappings.AddRange(result);
+        Mappings.Clear();
+        Mappings.AddRange(result);
     }
 }

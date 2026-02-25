@@ -2,7 +2,6 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
-using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -23,13 +22,9 @@ internal sealed class QualityProfileTransactionPhaseTest
         return plan;
     }
 
-    private static TrashIdMappingStore<QualityProfileMappings> CreateCache(
-        params TrashIdMapping[] mappings
-    )
+    private static TrashIdMappingStore CreateCache(params TrashIdMapping[] mappings)
     {
-        var cacheObject = new QualityProfileMappings();
-        cacheObject.Mappings.AddRange(mappings);
-        return new TrashIdMappingStore<QualityProfileMappings>(cacheObject);
+        return new TrashIdMappingStore(mappings.ToList());
     }
 
     [Test, AutoMockData]

@@ -29,7 +29,7 @@ internal class CustomFormatTransactionPhase(ILogger log)
                 guideCf.Name
             );
 
-            var storedId = context.State.FindId(guideCf.TrashId);
+            var storedId = context.State.FindId(guideCf.MappingKey);
 
             if (storedId.HasValue)
             {

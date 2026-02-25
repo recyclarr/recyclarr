@@ -19,7 +19,6 @@ using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Config.Models;
-using Recyclarr.SyncState;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -94,9 +93,7 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
-        builder
-            .RegisterType<QualityProfileStatePersister>()
-            .As<ISyncStatePersister<QualityProfileMappings>>();
+        builder.RegisterType<QualityProfileStatePersister>().As<IQualityProfileStatePersister>();
 
         builder
             .RegisterTypes(
@@ -137,9 +134,7 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
         builder.RegisterType<CategorizedCustomFormatProvider>();
-        builder
-            .RegisterType<CustomFormatStatePersister>()
-            .As<ISyncStatePersister<CustomFormatMappings>>();
+        builder.RegisterType<CustomFormatStatePersister>().As<ICustomFormatStatePersister>();
         builder.RegisterType<CustomFormatTransactionLogger>();
 
         builder

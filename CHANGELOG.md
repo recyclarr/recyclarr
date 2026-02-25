@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- CLI: State repair crash when multiple quality profiles share the same `trash_id`.
+
 ## [8.3.0] - 2026-02-24
 
 ### Added

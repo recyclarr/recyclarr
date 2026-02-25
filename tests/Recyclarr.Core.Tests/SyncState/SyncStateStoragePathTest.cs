@@ -1,33 +1,11 @@
-using System.Diagnostics.CodeAnalysis;
 using AutoFixture;
 using Recyclarr.Config.Models;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
 
-[SuppressMessage(
-    "ReSharper",
-    "ClassNeverInstantiated.Local",
-    Justification = "POCO objects for testing"
-)]
-[SuppressMessage(
-    "Performance",
-    "CA1812: Avoid uninstantiated internal classes",
-    Justification = "For testing only"
-)]
-[SuppressMessage("SonarLint", "S2094", Justification = "Used for unit test scenario")]
 internal sealed class SyncStateStoragePathTest
 {
-    private const string ValidObjectName = "azAZ_09";
-
-    private sealed class ObjectWithoutAttribute;
-
-    [SyncStateName(ValidObjectName)]
-    private sealed class ObjectWithAttribute;
-
-    [SyncStateName("invalid+name")]
-    private sealed class ObjectWithAttributeInvalidChars;
-
     [Test]
     public void Use_correct_name_in_path()
     {
@@ -42,7 +20,7 @@ internal sealed class SyncStateStoragePathTest
         );
 
         var sut = fixture.Create<SyncStateStoragePath>();
-        var result = sut.CalculatePath<ObjectWithAttribute>();
+        var result = sut.CalculatePath("azAZ_09");
 
         result.FullName.Should().MatchRegex(@".*[/\\][a-f0-9]+[/\\]azAZ_09\.json$");
     }
@@ -53,21 +31,10 @@ internal sealed class SyncStateStoragePathTest
         var fixture = NSubstituteFixture.Create();
         var sut = fixture.Create<SyncStateStoragePath>();
 
-        Action act = () => sut.CalculatePath<ObjectWithAttributeInvalidChars>();
+        Action act = () => sut.CalculatePath("invalid+name");
 
         act.Should()
             .Throw<ArgumentException>()
             .WithMessage("*'invalid+name' has unacceptable characters*");
-    }
-
-    [Test]
-    public void Loading_without_attribute_throws()
-    {
-        var fixture = NSubstituteFixture.Create();
-        var sut = fixture.Create<SyncStateStoragePath>();
-
-        Action act = () => sut.CalculatePath<ObjectWithoutAttribute>();
-
-        act.Should().Throw<ArgumentException>().WithMessage("SyncStateNameAttribute is missing*");
     }
 }

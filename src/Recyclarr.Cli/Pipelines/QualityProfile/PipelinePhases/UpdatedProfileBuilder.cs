@@ -1,7 +1,6 @@
 using System.Globalization;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
-using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.SyncState;
@@ -11,7 +10,7 @@ namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 internal class UpdatedProfileBuilder(
     ILogger log,
     QualityProfileServiceData serviceData,
-    TrashIdMappingStore<QualityProfileMappings> state,
+    TrashIdMappingStore state,
     QualityProfileTransactionData transactions
 )
 {
@@ -58,7 +57,7 @@ internal class UpdatedProfileBuilder(
         foreach (var planned in guideBacked)
         {
             var trashId = planned.Resource!.TrashId;
-            var cachedId = state.FindId(trashId, planned.Name);
+            var cachedId = state.FindId(new MappingKey(trashId, planned.Name));
 
             log.Debug(
                 "Pass 1: guide QP {TrashId} ({Name}), exact cached ID: {CachedId}",
@@ -94,8 +93,10 @@ internal class UpdatedProfileBuilder(
         foreach (var (trashId, profiles) in unmatchedByTrashId)
         {
             var unclaimed = state
-                .FindAllByTrashId(trashId)
-                .Where(m => !_claimedServiceIds.Contains(m.ServiceId))
+                .Mappings.Where(m =>
+                    m.TrashId.Equals(trashId, StringComparison.OrdinalIgnoreCase)
+                    && !_claimedServiceIds.Contains(m.ServiceId)
+                )
                 .ToList();
 
             log.Debug(

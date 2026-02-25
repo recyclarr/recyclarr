@@ -94,7 +94,7 @@ internal class StateRepairInstanceProcessor(
         log.Debug(
             "Loaded existing {ResourceType} state with {Count} entries",
             adapter.ResourceTypeName,
-            existingMappings.Count
+            existingMappings.Mappings.Count
         );
 
         IReadOnlyList<IServiceResource> serviceResources = [];
@@ -117,7 +117,7 @@ internal class StateRepairInstanceProcessor(
         var configuredGuideResources = adapter.GetConfiguredGuideResources();
 
         // Skip empty resource types (no configured resources and no existing state)
-        if (configuredGuideResources.Count == 0 && existingMappings.Count == 0)
+        if (configuredGuideResources.Count == 0 && existingMappings.Mappings.Count == 0)
         {
             if (settings.Verbose)
             {
@@ -187,7 +187,7 @@ internal class StateRepairInstanceProcessor(
 
     private static StateRepairResult BuildNewCache(
         IStateRepairSettings settings,
-        Dictionary<string, TrashIdMapping> existingMappings,
+        IMappingStoreView existingStore,
         List<TrashIdMapping> matches,
         List<AmbiguousMatch> ambiguous,
         IReadOnlyList<IGuideResource> configuredGuideResources,
@@ -195,39 +195,35 @@ internal class StateRepairInstanceProcessor(
     )
     {
         var stats = new StatsAccumulator();
-        var matchedTrashIds = matches
-            .Select(m => m.TrashId)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var matchedKeys = matches.Select(m => m.MappingKey).ToHashSet();
         var ambiguousNames = ambiguous
             .Select(a => a.GuideName)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var configuredTrashIds = configuredGuideResources
-            .Select(r => r.TrashId)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var configuredKeys = configuredGuideResources.Select(r => r.MappingKey).ToHashSet();
 
         // Build lookup of orphan entries by service ID (entries not in current config)
-        var orphansByServiceId = existingMappings
-            .Values.Where(e => !configuredTrashIds.Contains(e.TrashId))
+        var orphansByServiceId = existingStore
+            .Mappings.Where(e => !configuredKeys.Contains(e.MappingKey))
             .GroupBy(e => e.ServiceId)
             .ToDictionary(g => g.Key, g => g.First());
 
         var (matchResults, correctedServiceIds) = ProcessMatches(
             settings,
             matches,
-            existingMappings,
+            existingStore,
             orphansByServiceId,
             stats
         );
 
         var unmatchedDetails = BuildUnmatchedDetails(
             configuredGuideResources,
-            matchedTrashIds,
+            matchedKeys,
             ambiguousNames,
             stats
         );
         var (preserved, removed) = ProcessNonConfiguredEntries(
-            existingMappings,
-            configuredTrashIds,
+            existingStore,
+            configuredKeys,
             serviceIdSet,
             correctedServiceIds,
             stats
@@ -256,7 +252,7 @@ internal class StateRepairInstanceProcessor(
     ) ProcessMatches(
         IStateRepairSettings settings,
         List<TrashIdMapping> matches,
-        Dictionary<string, TrashIdMapping> existingMappings,
+        IMappingStoreView existingStore,
         Dictionary<int, TrashIdMapping> orphansByServiceId,
         StatsAccumulator stats
     )
@@ -265,12 +261,12 @@ internal class StateRepairInstanceProcessor(
         var results = matches
             .Select(match =>
             {
-                existingMappings.TryGetValue(match.TrashId, out var existing);
+                var existingId = existingStore.FindId(match.MappingKey);
                 orphansByServiceId.TryGetValue(match.ServiceId, out var orphan);
 
                 var (state, cachedTrashId, cachedServiceId) = ClassifyMatchState(
                     settings,
-                    existing,
+                    existingId,
                     orphan,
                     match,
                     stats
@@ -303,16 +299,15 @@ internal class StateRepairInstanceProcessor(
         int? CachedServiceId
     ) ClassifyMatchState(
         IStateRepairSettings settings,
-        TrashIdMapping? existing,
+        int? existingServiceId,
         TrashIdMapping? orphan,
         TrashIdMapping match,
         StatsAccumulator stats
     )
     {
-        if (existing is not null)
+        if (existingServiceId.HasValue)
         {
-            // State entry exists for this trash_id
-            if (existing.ServiceId == match.ServiceId)
+            if (existingServiceId.Value == match.ServiceId)
             {
                 stats.RecordUnchanged();
                 return (StateRepairState.Unchanged, null, null);
@@ -320,10 +315,10 @@ internal class StateRepairInstanceProcessor(
 
             // Service ID changed - correct it
             stats.RecordCorrected();
-            return (StateRepairState.Corrected, null, existing.ServiceId);
+            return (StateRepairState.Corrected, null, existingServiceId.Value);
         }
 
-        // No state entry for this trash_id - check if an orphan owns this service ID
+        // No state entry - check if an orphan owns this service ID
         if (orphan is not null)
         {
             // Orphan owns this service ID - correct the trash_id (regardless of --adopt)
@@ -344,13 +339,13 @@ internal class StateRepairInstanceProcessor(
 
     private static IEnumerable<StateRepairDetail> BuildUnmatchedDetails(
         IReadOnlyList<IGuideResource> configuredGuideResources,
-        HashSet<string> matchedTrashIds,
+        HashSet<MappingKey> matchedKeys,
         HashSet<string> ambiguousNames,
         StatsAccumulator stats
     )
     {
         return configuredGuideResources
-            .Where(r => !matchedTrashIds.Contains(r.TrashId))
+            .Where(r => !matchedKeys.Contains(r.MappingKey))
             .Select(r =>
             {
                 var isAmbiguous = ambiguousNames.Contains(r.Name);
@@ -374,8 +369,8 @@ internal class StateRepairInstanceProcessor(
         List<(TrashIdMapping Mapping, StateRepairDetail Detail)> Preserved,
         List<StateRepairDetail> Removed
     ) ProcessNonConfiguredEntries(
-        Dictionary<string, TrashIdMapping> existingMappings,
-        HashSet<string> configuredTrashIds,
+        IMappingStoreView existingStore,
+        HashSet<MappingKey> configuredKeys,
         HashSet<int> serviceIdSet,
         HashSet<int> correctedServiceIds,
         StatsAccumulator stats
@@ -385,7 +380,7 @@ internal class StateRepairInstanceProcessor(
         List<StateRepairDetail> removed = [];
 
         foreach (
-            var entry in existingMappings.Values.Where(e => !configuredTrashIds.Contains(e.TrashId))
+            var entry in existingStore.Mappings.Where(e => !configuredKeys.Contains(e.MappingKey))
         )
         {
             // Service ID was corrected (trash_id fixed) - already handled in ProcessMatches

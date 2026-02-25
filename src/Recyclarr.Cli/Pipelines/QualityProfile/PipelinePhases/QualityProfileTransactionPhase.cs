@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
-using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.QualityProfile;
@@ -104,7 +103,7 @@ internal class QualityProfileTransactionPhase(
         QualityProfileTransactionData transactions,
         IEnumerable<PlannedQualityProfile> plannedProfiles,
         QualityProfileServiceData serviceData,
-        TrashIdMappingStore<QualityProfileMappings> state
+        TrashIdMappingStore state
     )
     {
         var builder = new UpdatedProfileBuilder(log, serviceData, state, transactions);

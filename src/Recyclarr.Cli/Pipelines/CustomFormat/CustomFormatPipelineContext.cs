@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
@@ -15,7 +14,7 @@ internal class CustomFormatPipelineContext : PipelineContext, ISyncStateSource, 
 
     public IList<CustomFormatResource> ApiFetchOutput { get; init; } = [];
     public CustomFormatTransactionData TransactionOutput { get; set; } = null!;
-    public TrashIdMappingStore<CustomFormatMappings> State { get; set; } = null!;
+    public TrashIdMappingStore State { get; set; } = null!;
 
     // ISyncStateSource implementation
     public IEnumerable<TrashIdMapping> SyncedMappings =>

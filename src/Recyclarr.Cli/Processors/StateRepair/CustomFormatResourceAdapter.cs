@@ -11,10 +11,9 @@ namespace Recyclarr.Cli.Processors.StateRepair;
 
 internal class CustomFormatResourceAdapter(
     ICustomFormatApiService customFormatApi,
-    ISyncStatePersister<CustomFormatMappings> statePersister,
-    ISyncStateStoragePath stateStoragePath,
-    ConfiguredCustomFormatProvider cfProvider,
+    ICustomFormatStatePersister statePersister,
     CustomFormatResourceQuery cfQuery,
+    ConfiguredCustomFormatProvider cfProvider,
     IServiceConfiguration config
 ) : IResourceAdapter
 {
@@ -40,24 +39,16 @@ internal class CustomFormatResourceAdapter(
         return allGuideCfs.Where(cf => configuredTrashIds.Contains(cf.TrashId)).ToList();
     }
 
-    public Dictionary<string, TrashIdMapping> LoadExistingMappings()
-    {
-        var existingState = statePersister.Load();
-        return existingState.Mappings.ToDictionary(
-            m => m.TrashId,
-            StringComparer.OrdinalIgnoreCase
-        );
-    }
+    public IMappingStoreView LoadExistingMappings() => statePersister.Load();
 
     public void SaveMappings(List<TrashIdMapping> mappings)
     {
-        var stateObject = new CustomFormatMappings { Mappings = mappings };
-        var state = new TrashIdMappingStore<CustomFormatMappings>(stateObject);
-        statePersister.Save(state);
+        var store = new TrashIdMappingStore(mappings);
+        statePersister.Save(store);
     }
 
     public string GetStateFilePath()
     {
-        return stateStoragePath.CalculatePath<CustomFormatMappings>().FullName;
+        return statePersister.StateFilePath;
     }
 }

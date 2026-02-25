@@ -1,13 +1,12 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ServarrApi.CustomFormat;
-using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiFetchPhase(
     ICustomFormatApiService api,
-    ISyncStatePersister<CustomFormatMappings> statePersister
+    ICustomFormatStatePersister statePersister
 ) : IPipelinePhase<CustomFormatPipelineContext>
 {
     public async Task<PipelineFlow> Execute(

@@ -4,5 +4,5 @@ namespace Recyclarr.SyncState;
 
 public interface ISyncStateStoragePath
 {
-    IFileInfo CalculatePath<T>();
+    IFileInfo CalculatePath(string stateName);
 }

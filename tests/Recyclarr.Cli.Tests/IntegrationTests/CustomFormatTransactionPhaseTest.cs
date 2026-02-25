@@ -111,7 +111,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Update_cf_by_cached_id_regardless_of_name()
+    public async Task Update_cf_by_cached_id_when_service_name_differs()
     {
         var scopeFactory = Resolve<LifetimeScopeFactory>();
         using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
@@ -124,9 +124,10 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             IncludeCustomFormatWhenRenaming = true,
         };
 
+        // Cache name matches guide name (Update() keeps names in sync); service has different name
         var context = new CustomFormatPipelineContext
         {
-            State = CfCache.New(new TrashIdMapping("cf1", "old-name", 2)),
+            State = CfCache.New(new TrashIdMapping("cf1", "guide-name", 2)),
             ApiFetchOutput = [new CustomFormatResource { Name = "service-name", Id = 2 }],
             Plan = CreatePlan(guideCf),
         };

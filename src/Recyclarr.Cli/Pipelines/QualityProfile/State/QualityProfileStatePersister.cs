@@ -3,7 +3,8 @@ using Recyclarr.SyncState;
 namespace Recyclarr.Cli.Pipelines.QualityProfile.State;
 
 internal class QualityProfileStatePersister(ILogger log, ISyncStateStoragePath storagePath)
-    : SyncStatePersister<QualityProfileMappings>(log, storagePath)
+    : SyncStatePersister(log, storagePath, "quality-profile-mappings"),
+        IQualityProfileStatePersister
 {
-    protected override string StateName => "Quality Profile State";
+    protected override string DisplayName => "Quality Profile State";
 }

@@ -25,6 +25,9 @@ public record QualityProfileResource : IGuideResource
 
     public string Name { get; init; } = "";
 
+    [JsonIgnore]
+    public MappingKey MappingKey => new(TrashId, Name);
+
     [JsonPropertyName("trash_url")]
     public string TrashUrl { get; init; } = "";
 

@@ -9,8 +9,7 @@ namespace Recyclarr.Cli.Processors.StateRepair;
 
 internal class QualityProfileResourceAdapter(
     IQualityProfileApiService qpApi,
-    ISyncStatePersister<QualityProfileMappings> statePersister,
-    ISyncStateStoragePath stateStoragePath,
+    IQualityProfileStatePersister statePersister,
     QualityProfileResourceQuery qpQuery,
     IServiceConfiguration config
 ) : IResourceAdapter
@@ -47,24 +46,16 @@ internal class QualityProfileResourceAdapter(
             .ToList();
     }
 
-    public Dictionary<string, TrashIdMapping> LoadExistingMappings()
-    {
-        var existingState = statePersister.Load();
-        return existingState.Mappings.ToDictionary(
-            m => m.TrashId,
-            StringComparer.OrdinalIgnoreCase
-        );
-    }
+    public IMappingStoreView LoadExistingMappings() => statePersister.Load();
 
     public void SaveMappings(List<TrashIdMapping> mappings)
     {
-        var stateObject = new QualityProfileMappings { Mappings = mappings };
-        var state = new TrashIdMappingStore<QualityProfileMappings>(stateObject);
-        statePersister.Save(state);
+        var store = new TrashIdMappingStore(mappings);
+        statePersister.Save(store);
     }
 
     public string GetStateFilePath()
     {
-        return stateStoragePath.CalculatePath<QualityProfileMappings>().FullName;
+        return statePersister.StateFilePath;
     }
 }

@@ -1,5 +1,4 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
-using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
 
@@ -14,7 +13,7 @@ internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource
 
     public QualityProfileServiceData ApiFetchOutput { get; set; } = null!;
     public QualityProfileTransactionData TransactionOutput { get; set; } = null!;
-    public TrashIdMappingStore<QualityProfileMappings> State { get; set; } = null!;
+    public TrashIdMappingStore State { get; set; } = null!;
 
     // ISyncStateSource implementation
     // Only store guide-backed profiles (those with TrashId and valid service ID)

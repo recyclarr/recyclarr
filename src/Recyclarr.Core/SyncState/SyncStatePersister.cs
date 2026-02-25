@@ -4,59 +4,64 @@ using Recyclarr.Json;
 
 namespace Recyclarr.SyncState;
 
-public abstract class SyncStatePersister<TStateObject>(
+public abstract class SyncStatePersister(
     ILogger log,
-    ISyncStateStoragePath storagePath
-) : ISyncStatePersister<TStateObject>
-    where TStateObject : SyncStateObject, ITrashIdMappings, new()
+    ISyncStateStoragePath storagePath,
+    string stateName
+)
 {
     private readonly JsonSerializerOptions _jsonSettings = GlobalJsonSerializerSettings.Recyclarr;
 
-    public TrashIdMappingStore<TStateObject> Load()
+    public TrashIdMappingStore Load()
     {
-        var stateData = LoadFromJson();
-        if (stateData == null)
-        {
-            log.Debug("{StateName} does not exist; proceeding without it", StateName);
-            stateData = new TStateObject();
-        }
-
-        return new TrashIdMappingStore<TStateObject>(stateData);
+        var mappings = LoadFromJson();
+        return new TrashIdMappingStore(mappings);
     }
 
-    private TStateObject? LoadFromJson()
+    private List<TrashIdMapping> LoadFromJson()
     {
-        var path = storagePath.CalculatePath<TStateObject>();
-        log.Debug("Loading {StateName} from path: {Path}", StateName, path.FullName);
+        var path = storagePath.CalculatePath(stateName);
+        log.Debug("Loading {StateName} from path: {Path}", DisplayName, path.FullName);
         if (!path.Exists)
         {
             log.Debug("State path does not exist");
-            return null;
+            return [];
         }
 
         try
         {
             using var stream = path.OpenRead();
-            return JsonSerializer.Deserialize<TStateObject>(stream, _jsonSettings);
+            var container = JsonSerializer.Deserialize<MappingsContainer>(stream, _jsonSettings);
+            return container?.Mappings ?? [];
         }
         catch (JsonException e)
         {
             log.Error(e, "Failed to read state data, will proceed without state");
         }
 
-        return null;
+        return [];
     }
 
-    public void Save(TrashIdMappingStore<TStateObject> store)
+    public void Save(TrashIdMappingStore store)
     {
-        var path = storagePath.CalculatePath<TStateObject>();
-        log.Debug("Saving {StateName} to path {Path}", StateName, path);
+        var path = storagePath.CalculatePath(stateName);
+        log.Debug("Saving {StateName} to path {Path}", DisplayName, path);
 
         path.CreateParentDirectory();
 
         using var stream = path.Create();
-        JsonSerializer.Serialize(stream, store.StateObject, typeof(TStateObject), _jsonSettings);
+        var container = new MappingsContainer { Mappings = store.Mappings };
+        JsonSerializer.Serialize(stream, container, _jsonSettings);
     }
 
-    protected abstract string StateName { get; }
+    public string StateFilePath => storagePath.CalculatePath(stateName).FullName;
+
+    protected abstract string DisplayName { get; }
+
+    // Simple container for JSON serialization. The naming policy produces "mappings" from the
+    // property name, matching the canonical on-disk format after migration.
+    private sealed class MappingsContainer
+    {
+        public List<TrashIdMapping> Mappings { get; init; } = [];
+    }
 }

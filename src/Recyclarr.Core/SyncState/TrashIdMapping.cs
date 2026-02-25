@@ -8,6 +8,9 @@ namespace Recyclarr.SyncState;
 /// </summary>
 public record TrashIdMapping(string TrashId, string Name, int ServiceId)
 {
+    [JsonIgnore]
+    public MappingKey MappingKey => new(TrashId, Name);
+
     // Legacy field aliases for v7.5.x cache files. Keep through v8 since the field rename was never
     // released - users upgrading from v7.5.x need these to read existing cache. Remove in v9.
     [JsonInclude]
