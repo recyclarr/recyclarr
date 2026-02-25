@@ -12,8 +12,23 @@ The prompt must focus on WHAT changed and WHY, not HOW to write the documentatio
 - The intent and rationale behind each change
 - How it affects users (new capabilities, changed behavior, removed functionality, new/changed YAML
   config properties, CLI changes)
-- Any deprecations or breaking changes and their migration path
 - Relevant YAML config examples if configuration changed (use real values, not placeholders)
+- A backward compatibility classification for every change (see below)
+
+The prompt MUST include a dedicated "Backward Compatibility" section that explicitly classifies
+every change. A change is "breaking" only if it requires user action to restore previously working,
+documented functionality. Specifically:
+
+- Breaking: a previously documented and supported behavior now requires the user to modify their
+  YAML config, CLI scripts, or workflow to avoid errors. These belong in the upgrade guide.
+- Not breaking: fixing undefined/undocumented behavior, tightening validation on previously invalid
+  input, or changing undocumented implementation details. Even if someone happened to depend on the
+  accidental behavior, it was never part of Recyclarr's contract. These do NOT belong in the upgrade
+  guide.
+
+For each change, state whether it is breaking or not, and why. If there are no breaking changes, say
+so explicitly: "No breaking changes. No upgrade guide entries needed." Do not leave this to the wiki
+agent's interpretation.
 
 The prompt must be completely self-contained. Embed all factual context directly in the prompt text.
 Do not reference commits, PRs, or issues by identifier alone; always include the substantive
