@@ -19,15 +19,8 @@
         "type": ["null", "array"],
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",
         "items": {
+          "allOf": [{ "$ref": "profile-reference.json" }],
           "properties": {
-            "trash_id": {
-              "type": "string",
-              "description": "The trash_id of a guide-backed quality profile."
-            },
-            "name": {
-              "type": "string",
-              "description": "The name of one of the quality profiles."
-            },
             "score": {
               "type": "integer",
               "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."

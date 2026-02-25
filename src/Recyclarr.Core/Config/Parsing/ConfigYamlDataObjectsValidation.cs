@@ -32,9 +32,38 @@ public class ServiceConfigYamlValidator : AbstractValidator<ServiceConfigYaml>
 
         RuleForEach(x => x.QualityProfiles).SetValidator(new QualityProfileConfigYamlValidator());
 
+        // When a trash_id appears on multiple profiles (variants), all must have explicit names
+        RuleFor(x => x.QualityProfiles)
+            .Custom(ValidateVariantProfileNames!)
+            .When(x => x.QualityProfiles is { Count: > 1 });
+
         RuleFor(x => x.CustomFormatGroups)
             .SetNonNullableValidator(new CustomFormatGroupsConfigYamlValidator())
             .WithName("custom_format_groups");
+    }
+
+    private static void ValidateVariantProfileNames(
+        IReadOnlyCollection<QualityProfileConfigYaml> profiles,
+        ValidationContext<ServiceConfigYaml> context
+    )
+    {
+        // Find trash_ids that appear more than once
+        var duplicateTrashIds = profiles
+            .Where(qp => !string.IsNullOrEmpty(qp.TrashId))
+            .GroupBy(qp => qp.TrashId!, StringComparer.OrdinalIgnoreCase)
+            .Where(g => g.Count() > 1);
+
+        foreach (var group in duplicateTrashIds)
+        {
+            var missingNames = group.Where(qp => string.IsNullOrEmpty(qp.Name)).ToList();
+            if (missingNames.Count > 0)
+            {
+                context.AddFailure(
+                    $"Multiple profiles use trash_id '{group.Key}'; "
+                        + "each must have an explicit 'name' to disambiguate"
+                );
+            }
+        }
     }
 }
 
@@ -63,6 +92,10 @@ public class QualityScoreConfigYamlValidator : AbstractValidator<QualityScoreCon
             .WithMessage(
                 "Either 'name' or 'trash_id' is required for elements under 'assign_scores_to'"
             );
+
+        RuleFor(x => x)
+            .Must(x => string.IsNullOrEmpty(x.TrashId) || string.IsNullOrEmpty(x.Name))
+            .WithMessage("Cannot specify both 'trash_id' and 'name'; choose one");
     }
 }
 

@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "description": "A reference to a quality profile by trash_id or name. Use trash_id when there is exactly one profile with that ID; use name to target a specific profile variant.",
+  "properties": {
+    "trash_id": {
+      "type": "string",
+      "description": "The trash_id of a guide-backed quality profile. Only valid when the trash_id is not shared by multiple profiles."
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of a quality profile (guide-backed or user-defined)."
+    }
+  },
+  "oneOf": [{ "required": ["trash_id"] }, { "required": ["name"] }]
+}

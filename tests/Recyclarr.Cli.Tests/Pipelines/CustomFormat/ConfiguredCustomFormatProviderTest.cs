@@ -703,4 +703,175 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         entries.Should().BeEmpty();
         diagnostics.Received(1).AddWarning(Arg.Is<string>(s => s.Contains("optional-group")));
     }
+
+    [Test]
+    public void Default_group_applies_to_all_variant_profiles()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("shared-qp", "WEB-2160p", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "default-group",
+            "Default Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["WEB-2160p"] = "shared-qp" },
+            isDefault: true
+        );
+
+        // Two profiles sharing the same trash_id (variants)
+        var config = NewConfig.Radarr() with
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p" },
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p (AMZN DV)" },
+            ],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        var entries = sut.GetAll(diagnostics).ToList();
+
+        entries.Should().ContainSingle();
+        entries[0]
+            .AssignScoresTo.Select(a => a.Name)
+            .Should()
+            .BeEquivalentTo("WEB-2160p", "WEB-2160p (AMZN DV)");
+    }
+
+    [Test]
+    public void Explicit_group_assign_scores_to_by_name_targets_specific_variant()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("shared-qp", "WEB-2160p", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["WEB-2160p"] = "shared-qp" },
+            isDefault: false
+        );
+
+        // Target only the variant by name
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        AssignScoresTo =
+                        [
+                            new AssignScoresToConfig { Name = "WEB-2160p (AMZN DV)" },
+                        ],
+                    },
+                ],
+            },
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p" },
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p (AMZN DV)" },
+            ],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        var entries = sut.GetAll(diagnostics).ToList();
+
+        // Should have entries from the explicit group only targeting the variant
+        var explicitEntries = entries.Where(e => e.Source == CfSource.CfGroupExplicit).ToList();
+        explicitEntries
+            .Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Name.Should()
+            .Be("WEB-2160p (AMZN DV)");
+    }
+
+    [Test]
+    public void Flat_cf_trash_id_with_ambiguous_profiles_reports_error()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("shared-qp", "WEB-2160p", ("HDTV-1080p", true, null));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfig
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo = [new AssignScoresToConfig { TrashId = "shared-qp" }],
+                },
+            ],
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p" },
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p (AMZN DV)" },
+            ],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        var entries = sut.GetAll(diagnostics).ToList();
+
+        // Should produce an error about ambiguous trash_id
+        diagnostics.ReceivedWithAnyArgs(1).AddError(default!);
+    }
+
+    [Test]
+    public void Flat_cf_assign_scores_to_by_name_targets_specific_profile()
+    {
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("shared-qp", "WEB-2160p", ("HDTV-1080p", true, null));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfig
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo = [new AssignScoresToConfig { Name = "WEB-2160p (AMZN DV)" }],
+                },
+            ],
+            QualityProfiles =
+            [
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p" },
+                new QualityProfileConfig { TrashId = "shared-qp", Name = "WEB-2160p (AMZN DV)" },
+            ],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        var entries = sut.GetAll(diagnostics).ToList();
+
+        // Flat CF entries targeting the variant
+        var flatEntries = entries.Where(e => e.Source == CfSource.FlatConfig).ToList();
+        flatEntries
+            .Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Name.Should()
+            .Be("WEB-2160p (AMZN DV)");
+    }
 }

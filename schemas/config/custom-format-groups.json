@@ -29,19 +29,7 @@
             "type": ["null", "array"],
             "description": "One or more quality profiles to assign scores to. If omitted, uses all guide-backed profiles.",
             "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "trash_id": {
-                  "type": "string",
-                  "description": "The trash_id of a guide-backed quality profile from the TRaSH Guides."
-                },
-                "name": {
-                  "type": "string",
-                  "description": "The name of a custom (non-guide-backed) quality profile."
-                }
-              },
-              "oneOf": [{ "required": ["trash_id"] }, { "required": ["name"] }]
+              "$ref": "profile-reference.json"
             }
           },
           "select": {

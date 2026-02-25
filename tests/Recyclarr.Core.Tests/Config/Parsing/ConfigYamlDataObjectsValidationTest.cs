@@ -324,4 +324,56 @@ internal sealed class ConfigYamlDataObjectsValidationTest
 
         result.ShouldNotHaveValidationErrorFor(x => x.QualityProfiles);
     }
+
+    [Test]
+    public void Duplicate_trash_id_without_all_names_fails_validation()
+    {
+        var data = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml { TrashId = "abc123" },
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Variant" },
+            ],
+        };
+
+        var validator = new SonarrConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor(x => x.QualityProfiles)
+            .WithErrorMessage(
+                "Multiple profiles use trash_id 'abc123'; "
+                    + "each must have an explicit 'name' to disambiguate"
+            );
+    }
+
+    [Test]
+    public void Duplicate_trash_id_with_all_names_passes_validation()
+    {
+        var data = new SonarrConfigYaml
+        {
+            QualityProfiles =
+            [
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Profile A" },
+                new QualityProfileConfigYaml { TrashId = "abc123", Name = "Profile B" },
+            ],
+        };
+
+        var validator = new SonarrConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.QualityProfiles);
+    }
+
+    [Test]
+    public void Flat_cf_assign_scores_to_rejects_both_trash_id_and_name()
+    {
+        var data = new QualityScoreConfigYaml { TrashId = "abc123", Name = "Profile" };
+
+        var validator = new QualityScoreConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.Errors.Should().ContainSingle().Which.ErrorMessage.Should().Contain("choose one");
+    }
 }

@@ -27,7 +27,7 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
             GuideProfiles(("valid-qp", "Valid Profile"))
         );
 
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { TrashId = "nonexistent" });
+        var result = sut.Validate(new AssignScoresToConfig { TrashId = "nonexistent" });
 
         result
             .Errors.Should()
@@ -44,22 +44,22 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
             GuideProfiles(("valid-qp", "Valid Profile"))
         );
 
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { TrashId = "valid-qp" });
+        var result = sut.Validate(new AssignScoresToConfig { TrashId = "valid-qp" });
 
         result.IsValid.Should().BeTrue();
     }
 
     [Test]
-    public void Name_referencing_guide_backed_profile_fails()
+    public void Name_referencing_guide_backed_profile_passes()
     {
         var sut = new CfGroupAssignScoresToEntryValidator(
             "test-group",
             GuideProfiles(("guide-qp", "Guide Profile"))
         );
 
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "Guide Profile" });
+        var result = sut.Validate(new AssignScoresToConfig { Name = "Guide Profile" });
 
-        result.Errors.Should().ContainSingle().Which.ErrorMessage.Should().Contain("guide-backed");
+        result.IsValid.Should().BeTrue();
     }
 
     [Test]
@@ -70,7 +70,7 @@ internal sealed class CfGroupAssignScoresToEntryValidatorTest
             GuideProfiles(("guide-qp", "Guide Profile"))
         );
 
-        var result = sut.Validate(new CfGroupAssignScoresToConfig { Name = "Any" });
+        var result = sut.Validate(new AssignScoresToConfig { Name = "Any" });
 
         result.IsValid.Should().BeTrue();
     }

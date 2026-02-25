@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync: Default CF groups now apply to all profile variants sharing the same `trash_id` (#735)
+- Sync: CF group `assign_scores_to` now accepts profile names for guide-backed profiles, enabling
+  selective assignment to specific profile variants (#734)
+
 ## [8.3.1] - 2026-02-24
 
 ### Fixed

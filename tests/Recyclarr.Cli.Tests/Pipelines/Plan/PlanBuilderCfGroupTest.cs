@@ -99,10 +99,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
                     new CustomFormatGroupConfig
                     {
                         TrashId = "test-group",
-                        AssignScoresTo =
-                        [
-                            new CfGroupAssignScoresToConfig { TrashId = "profile-a" },
-                        ],
+                        AssignScoresTo = [new AssignScoresToConfig { TrashId = "profile-a" }],
                     },
                 ],
             },
@@ -643,10 +640,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
                     new CustomFormatGroupConfig
                     {
                         TrashId = "test-group",
-                        AssignScoresTo =
-                        [
-                            new CfGroupAssignScoresToConfig { TrashId = "not-included-qp" },
-                        ],
+                        AssignScoresTo = [new AssignScoresToConfig { TrashId = "not-included-qp" }],
                     },
                 ],
             },
@@ -690,10 +684,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
                     new CustomFormatGroupConfig
                     {
                         TrashId = "test-group",
-                        AssignScoresTo =
-                        [
-                            new CfGroupAssignScoresToConfig { Name = "My Custom Profile" },
-                        ],
+                        AssignScoresTo = [new AssignScoresToConfig { Name = "My Custom Profile" }],
                     },
                 ],
             },
@@ -746,8 +737,8 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
                         TrashId = "test-group",
                         AssignScoresTo =
                         [
-                            new CfGroupAssignScoresToConfig { TrashId = "guide-qp" },
-                            new CfGroupAssignScoresToConfig { Name = "Custom Profile" },
+                            new AssignScoresToConfig { TrashId = "guide-qp" },
+                            new AssignScoresToConfig { Name = "Custom Profile" },
                         ],
                     },
                 ],

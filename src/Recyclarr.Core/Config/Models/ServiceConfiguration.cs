@@ -41,17 +41,10 @@ public record AssignScoresToConfig
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-public record CfGroupAssignScoresToConfig
-{
-    public string? TrashId { get; init; }
-    public string? Name { get; init; }
-}
-
-[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
 public record CustomFormatGroupConfig
 {
     public string TrashId { get; init; } = "";
-    public ICollection<CfGroupAssignScoresToConfig> AssignScoresTo { get; init; } = [];
+    public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
     public ICollection<string> Select { get; init; } = [];
     public ICollection<string> Exclude { get; init; } = [];
 }

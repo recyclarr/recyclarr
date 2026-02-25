@@ -26,7 +26,11 @@ internal class ConfiguredCustomFormatProvider(
         // From flat custom_formats
         foreach (var cfg in config.CustomFormats)
         {
-            var resolvedScores = ResolveAssignScoresTo(cfg.AssignScoresTo, qpResources);
+            var resolvedScores = ResolveAssignScoresTo(
+                cfg.AssignScoresTo,
+                qpResources,
+                diagnostics
+            );
             foreach (var trashId in cfg.TrashIds)
             {
                 yield return new ConfiguredCfEntry(trashId, resolvedScores, null);
@@ -94,14 +98,12 @@ internal class ConfiguredCustomFormatProvider(
         HashSet<string> skipSet
     )
     {
-        // Collect guide-backed quality profile trash_ids from user's config
-        var userQpTrashIds = config
-            .QualityProfiles.Where(qp => qp.TrashId is not null)
-            .Where(qp => qpResources.ContainsKey(qp.TrashId!))
-            .Select(qp => qp.TrashId!)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // Check if user has any guide-backed profiles at all
+        var hasGuideBacked = config.QualityProfiles.Any(qp =>
+            qp.TrashId is not null && qpResources.ContainsKey(qp.TrashId)
+        );
 
-        if (userQpTrashIds.Count == 0)
+        if (!hasGuideBacked)
         {
             yield break;
         }
@@ -135,33 +137,17 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Check if any user QP is in this group's include list
-            var includedProfiles = groupResource.QualityProfiles.Include.Values.ToHashSet(
+            var includedTrashIds = groupResource.QualityProfiles.Include.Values.ToHashSet(
                 StringComparer.OrdinalIgnoreCase
             );
-            var matchingQps = userQpTrashIds.Where(qp => includedProfiles.Contains(qp)).ToList();
 
-            if (matchingQps.Count == 0)
+            // Resolve all config profiles whose trash_id is in the include list
+            var assignScoresTo = ResolveImplicitProfiles(includedTrashIds, qpResources);
+
+            if (assignScoresTo.Count == 0)
             {
                 continue;
             }
-
-            // Build AssignScoresTo from matching profiles
-            var assignScoresTo = matchingQps
-                .Select(qpTrashId =>
-                {
-                    var qpConfig = config.QualityProfiles.First(q =>
-                        q.TrashId?.Equals(qpTrashId, StringComparison.OrdinalIgnoreCase) == true
-                    );
-                    return new AssignScoresToConfig
-                    {
-                        TrashId = qpTrashId,
-                        Name = !string.IsNullOrEmpty(qpConfig.Name)
-                            ? qpConfig.Name
-                            : qpResources[qpTrashId].Name,
-                    };
-                })
-                .ToList();
 
             log.Debug(
                 "Auto-syncing default CF group {GroupName} for profiles: {Profiles}",
@@ -209,7 +195,12 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            var assignScoresTo = DetermineProfiles(groupConfig, groupResource, qpResources);
+            var assignScoresTo = DetermineProfiles(
+                groupConfig,
+                groupResource,
+                qpResources,
+                diagnostics
+            );
 
             if (assignScoresTo.Count == 0)
             {
@@ -278,97 +269,113 @@ internal class ConfiguredCustomFormatProvider(
         }
     }
 
-    // Resolves assign_scores_to entries that use trash_id to the effective profile name.
-    // Config name takes precedence over guide name, matching the sync pipeline's resolution.
+    // Resolves flat custom_formats assign_scores_to entries using shared reference resolution.
     private List<AssignScoresToConfig> ResolveAssignScoresTo(
         ICollection<AssignScoresToConfig> scores,
-        Dictionary<string, QualityProfileResource> qpResources
+        Dictionary<string, QualityProfileResource> qpResources,
+        IDiagnosticPublisher diagnostics
     )
     {
         return scores
-            .Select(s =>
-            {
-                if (string.IsNullOrEmpty(s.TrashId) || !string.IsNullOrEmpty(s.Name))
-                {
-                    return s;
-                }
-
-                var configQp = config.QualityProfiles.FirstOrDefault(qp =>
-                    s.TrashId.Equals(qp.TrashId, StringComparison.OrdinalIgnoreCase)
-                );
-
-                var name =
-                    configQp is not null && !string.IsNullOrEmpty(configQp.Name)
-                        ? configQp.Name
-                        : qpResources.GetValueOrDefault(s.TrashId)?.Name ?? "";
-
-                return s with
-                {
-                    Name = name,
-                };
-            })
+            .SelectMany(s => ResolveProfileReference(s, qpResources, diagnostics, "custom_formats"))
             .ToList();
     }
 
     // Returns the list of profiles to assign this group's CFs to.
-    // Assumes validation already ran via ExplicitCfGroupValidator.
     private List<AssignScoresToConfig> DetermineProfiles(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
-        Dictionary<string, QualityProfileResource> qpResources
+        Dictionary<string, QualityProfileResource> qpResources,
+        IDiagnosticPublisher diagnostics
     )
     {
-        var includedProfiles = new HashSet<string>(
+        if (groupConfig.AssignScoresTo.Count > 0)
+        {
+            return groupConfig
+                .AssignScoresTo.SelectMany(entry =>
+                    ResolveProfileReference(
+                        entry,
+                        qpResources,
+                        diagnostics,
+                        $"CF group '{groupConfig.TrashId}'"
+                    )
+                )
+                .ToList();
+        }
+
+        // Implicit: all config profiles whose trash_id is in the group's include list
+        var includedTrashIds = new HashSet<string>(
             groupResource.QualityProfiles.Include.Values,
             StringComparer.OrdinalIgnoreCase
         );
 
-        if (groupConfig.AssignScoresTo.Count > 0)
-        {
-            return ResolveExplicitProfiles(groupConfig, qpResources);
-        }
+        return ResolveImplicitProfiles(includedTrashIds, qpResources);
+    }
 
-        // Implicit: guide-backed profiles in user's config that are in the include list
+    // Resolves all config profiles whose trash_id is in the given include set.
+    // Returns one entry per config profile (including variants with the same trash_id).
+    private List<AssignScoresToConfig> ResolveImplicitProfiles(
+        HashSet<string> includedTrashIds,
+        Dictionary<string, QualityProfileResource> qpResources
+    )
+    {
         return config
             .QualityProfiles.Where(qp => qp.TrashId is not null)
             .Where(qp => qpResources.ContainsKey(qp.TrashId!))
-            .Where(qp => includedProfiles.Contains(qp.TrashId!))
+            .Where(qp => includedTrashIds.Contains(qp.TrashId!))
             .Select(qp => new AssignScoresToConfig
             {
                 TrashId = qp.TrashId,
+                // non-null: filtered to profiles with trash_id in guide resources above
                 Name = !string.IsNullOrEmpty(qp.Name) ? qp.Name : qpResources[qp.TrashId!].Name,
             })
             .ToList();
     }
 
-    // Resolves explicitly specified assign_scores_to entries.
-    // Handles both guide-backed (trash_id) and custom (name) profile variants.
-    private static List<AssignScoresToConfig> ResolveExplicitProfiles(
-        CustomFormatGroupConfig groupConfig,
-        Dictionary<string, QualityProfileResource> qpResources
+    // Resolves a single profile reference (trash_id XOR name) to concrete profile entries.
+    // For name: returns entry as-is.
+    // For trash_id: resolves to the config profile if unambiguous (1 match), or errors if 2+.
+    private IEnumerable<AssignScoresToConfig> ResolveProfileReference(
+        AssignScoresToConfig reference,
+        Dictionary<string, QualityProfileResource> qpResources,
+        IDiagnosticPublisher diagnostics,
+        string context
     )
     {
-        var results = new List<AssignScoresToConfig>();
-
-        foreach (var entry in groupConfig.AssignScoresTo)
+        if (!string.IsNullOrEmpty(reference.Name))
         {
-            if (!string.IsNullOrEmpty(entry.TrashId))
-            {
-                // Guide-backed profile: resolve name from guide resource
-                if (qpResources.TryGetValue(entry.TrashId, out var qpResource))
-                {
-                    results.Add(
-                        new AssignScoresToConfig { TrashId = entry.TrashId, Name = qpResource.Name }
-                    );
-                }
-            }
-            else if (!string.IsNullOrEmpty(entry.Name))
-            {
-                // Custom profile: use name directly (bypasses include list)
-                results.Add(new AssignScoresToConfig { Name = entry.Name });
-            }
+            return [reference];
         }
 
-        return results;
+        if (string.IsNullOrEmpty(reference.TrashId))
+        {
+            return [];
+        }
+
+        // Find all config profiles with this trash_id
+        var matchingProfiles = config
+            .QualityProfiles.Where(qp =>
+                reference.TrashId.Equals(qp.TrashId, StringComparison.OrdinalIgnoreCase)
+            )
+            .ToList();
+
+        if (matchingProfiles.Count > 1)
+        {
+            var names = matchingProfiles.Select(qp => $"'{qp.Name}'");
+            diagnostics.AddError(
+                $"[{context}] trash_id '{reference.TrashId}' matches multiple profiles: "
+                    + $"{string.Join(", ", names)}. Use 'name' to specify which profile to target."
+            );
+            return [];
+        }
+
+        // Single match or no config match (fall back to guide name)
+        var configQp = matchingProfiles.FirstOrDefault();
+        var name =
+            configQp is not null && !string.IsNullOrEmpty(configQp.Name)
+                ? configQp.Name
+                : qpResources.GetValueOrDefault(reference.TrashId)?.Name ?? "";
+
+        return [reference with { Name = name }];
     }
 }

@@ -26,11 +26,11 @@ internal static class ConfigYamlExtensions
         };
     }
 
-    private static CfGroupAssignScoresToConfig ToCfGroupAssignScoresToConfig(
+    private static AssignScoresToConfig ToCfGroupAssignScoresToConfig(
         this CfGroupAssignScoresToConfigYaml yaml
     )
     {
-        return new CfGroupAssignScoresToConfig { TrashId = yaml.TrashId, Name = yaml.Name };
+        return new AssignScoresToConfig { TrashId = yaml.TrashId, Name = yaml.Name ?? "" };
     }
 
     private static CustomFormatGroupConfig ToCustomFormatGroupConfig(
