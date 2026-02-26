@@ -126,6 +126,10 @@ public class CustomFormatGroupConfigYamlValidator : AbstractValidator<CustomForm
             .SetValidator(new CfGroupAssignScoresToConfigYamlValidator());
 
         RuleFor(x => x)
+            .Must(x => x.SelectAll is not true || x.Select is null or { Count: 0 })
+            .WithMessage("'select_all' and 'select' are mutually exclusive");
+
+        RuleFor(x => x)
             .Must(x =>
             {
                 if (x.Select is null || x.Exclude is null)

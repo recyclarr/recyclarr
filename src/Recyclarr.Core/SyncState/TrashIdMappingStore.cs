@@ -27,6 +27,11 @@ public class TrashIdMappingStore(List<TrashIdMapping> mappings) : IMappingStoreV
             ?.ServiceId;
     }
 
+    [SuppressMessage(
+        "ReSharper",
+        "UnusedParameter.Local",
+        Justification = "l/r variables are documentation"
+    )]
     public void Update(ISyncStateSource source)
     {
         var validIds = source.ValidServiceIds.ToHashSet();

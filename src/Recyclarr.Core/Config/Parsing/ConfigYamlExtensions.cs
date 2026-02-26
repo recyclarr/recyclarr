@@ -42,6 +42,7 @@ internal static class ConfigYamlExtensions
             TrashId = yaml.TrashId ?? "",
             AssignScoresTo =
                 yaml.AssignScoresTo?.Select(x => x.ToCfGroupAssignScoresToConfig()).ToList() ?? [],
+            SelectAll = yaml.SelectAll ?? false,
             Select = yaml.Select?.ToList() ?? [],
             Exclude = yaml.Exclude?.ToList() ?? [],
         };

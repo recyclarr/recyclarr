@@ -45,6 +45,7 @@ public record CustomFormatGroupConfig
 {
     public string TrashId { get; init; } = "";
     public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
+    public bool SelectAll { get; init; }
     public ICollection<string> Select { get; init; } = [];
     public ICollection<string> Exclude { get; init; } = [];
 }

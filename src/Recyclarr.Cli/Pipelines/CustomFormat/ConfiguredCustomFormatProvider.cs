@@ -261,10 +261,13 @@ internal class ConfiguredCustomFormatProvider(
                 continue;
             }
 
-            // Non-default, non-required: only include if explicitly selected
-            if (selectSet.Contains(cf.TrashId))
+            // Non-default, non-required: include if select_all or explicitly selected
+            if (groupConfig.SelectAll || selectSet.Contains(cf.TrashId))
             {
-                yield return (cf.TrashId, CfInclusionReason.Selected);
+                if (!excludeSet.Contains(cf.TrashId))
+                {
+                    yield return (cf.TrashId, CfInclusionReason.Selected);
+                }
             }
         }
     }

@@ -934,6 +934,152 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Build_with_cf_group_select_all_includes_all_optionals()
+    {
+        SetupCustomFormatWithScores("Required CF", "required-cf", ("default", 100));
+        SetupCustomFormatWithScores("Default CF", "default-cf", ("default", 200));
+        SetupCustomFormatWithScores("Optional One", "opt1", ("default", 300));
+        SetupCustomFormatWithScores("Optional Two", "opt2", ("default", 400));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "required-cf",
+                    Name = "Required CF",
+                    Required = true,
+                },
+                new CfGroupCustomFormat
+                {
+                    TrashId = "default-cf",
+                    Name = "Default CF",
+                    Default = true,
+                },
+                new CfGroupCustomFormat { TrashId = "opt1", Name = "Optional One" },
+                new CfGroupCustomFormat { TrashId = "opt2", Name = "Optional Two" },
+            ],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add = [new CustomFormatGroupConfig { TrashId = "test-group", SelectAll = true }],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Select(x => x.Resource.TrashId)
+            .Should()
+            .BeEquivalentTo("required-cf", "default-cf", "opt1", "opt2");
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
+    }
+
+    [Test]
+    public void Build_with_cf_group_select_all_with_exclude_subtracts_optionals()
+    {
+        SetupCustomFormatWithScores("Default CF", "default-cf", ("default", 100));
+        SetupCustomFormatWithScores("Optional One", "opt1", ("default", 200));
+        SetupCustomFormatWithScores("Optional Two", "opt2", ("default", 300));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "default-cf",
+                    Name = "Default CF",
+                    Default = true,
+                },
+                new CfGroupCustomFormat { TrashId = "opt1", Name = "Optional One" },
+                new CfGroupCustomFormat { TrashId = "opt2", Name = "Optional Two" },
+            ],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
+        );
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        SelectAll = true,
+                        Exclude = ["opt2"],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Select(x => x.Resource.TrashId)
+            .Should()
+            .BeEquivalentTo("default-cf", "opt1");
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
+    }
+
+    [Test]
+    public void Build_with_cf_group_select_all_exclude_does_not_suppress_non_default_warning()
+    {
+        SetupCustomFormatWithScores("Optional CF", "optional-cf", ("default", 100));
+        SetupCustomFormatWithScores("Optional Two", "opt2", ("default", 200));
+        SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
+
+        // Group with only optional CFs
+        SetupCfGroupGuideData(
+            "test-group",
+            "Test Group",
+            [
+                new CfGroupCustomFormat { TrashId = "optional-cf", Name = "Optional CF" },
+                new CfGroupCustomFormat { TrashId = "opt2", Name = "Optional Two" },
+            ],
+            new Dictionary<string, string> { ["Test Profile"] = "test-qp" }
+        );
+
+        // select_all + exclude optional CF: should work without "has no effect" warning
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Add =
+                [
+                    new CustomFormatGroupConfig
+                    {
+                        TrashId = "test-group",
+                        SelectAll = true,
+                        Exclude = ["optional-cf"],
+                    },
+                ],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "test-qp" }],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Select(x => x.Resource.TrashId).Should().BeEquivalentTo("opt2");
+        publisher.DidNotReceiveWithAnyArgs().AddWarning(default!);
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
+    }
+
+    [Test]
     public void Build_with_cf_group_selecting_default_cf_emits_warning()
     {
         SetupCustomFormatWithScores("Default CF", "default-cf", ("default", 100));

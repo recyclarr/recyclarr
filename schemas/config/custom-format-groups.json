@@ -32,9 +32,14 @@
               "$ref": "profile-reference.json"
             }
           },
+          "select_all": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include all custom formats in the group regardless of their default status. Mutually exclusive with 'select'."
+          },
           "select": {
             "type": ["null", "array"],
-            "description": "Non-default custom formats to additionally include. Required CFs are always included.",
+            "description": "Non-default custom formats to additionally include. Required CFs are always included. Mutually exclusive with 'select_all'.",
             "uniqueItems": true,
             "items": {
               "type": "string"
