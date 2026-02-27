@@ -5,17 +5,18 @@ Living document tracking the implementation of ADR-005 (service adapter layer) a
 
 ## Architecture Decisions
 
-- [ADR-005](../decisions/architecture/005-service-adapter-layer.md): Port + Adapter + Translator
-  pattern, hydrated resource state, shared vs split pipeline litmus test
+- [ADR-005](../decisions/architecture/005-service-adapter-layer.md): Port + Adapter pattern,
+  hydrated resource state, shared vs split pipeline litmus test
 - [ADR-006](../decisions/architecture/006-refit-refitter-api-clients.md): Refit + Refitter for
   generated API clients from OpenAPI specs
 
 ## Key Design Patterns
 
-**Port + Adapter + Translator** (per feature, per service):
+**Port + Adapter** (per feature, per service):
 - Port: domain interface in pipeline layer, speaks domain types only
-- Translator: static class, pure mapping functions (service DTO <-> domain type)
-- Adapter: implements port, owns HTTP client, stashes fetched DTOs for round-trip
+- Adapter: implements port, owns HTTP client, stashes fetched DTOs for round-trip. Contains
+  to/from-domain mapping as private methods (no separate translator class; the mapping is private to
+  one adapter, tested through the adapter, and called from one place)
 
 **Hydrated resource pattern**: adapter holds original DTOs in an internal dictionary keyed by
 resource ID. Populated during fetch, consumed during persist, scoped to one sync operation via
@@ -49,7 +50,7 @@ adapters implement the same port interface and DI resolves the correct one via t
 pattern. For split pipelines, each pipeline has its own port and single adapter (e.g.
 `ISonarrNamingService` implemented by `SonarrNamingAdapter`). There is never a single "shared"
 adapter that handles both services; the adapter is always service-specific because it owns
-service-specific HTTP calls and translator logic. Even when schemas are identical today (e.g. custom
+service-specific HTTP calls and mapping logic. Even when schemas are identical today (e.g. custom
 formats, system status), separate adapters per service are required because they will back different
 generated Refit clients after Part B. The duplication in identical-schema adapters is mechanical and
 temporary; it disappears once each adapter injects its own service-specific Refit interface.
@@ -60,8 +61,8 @@ Part A and requires a "split this adapter" refactor during the Refit migration.
 
 ### Part A: Adapter Layer (Architecture)
 
-Each phase introduces the port + adapter + translator for one pipeline. Pipeline phases are updated
-to inject the port and operate on domain types. Flurl remains the HTTP client inside adapters.
+Each phase introduces the port + adapter for one pipeline. Pipeline phases are updated to inject the
+port and operate on domain types. Flurl remains the HTTP client inside adapters.
 
 #### Phase 1: System pipeline adapter
 - **Status:** not started
@@ -79,7 +80,7 @@ to inject the port and operate on domain types. Flurl remains the HTTP client in
 - **Status:** not started
 - **Size:** small
 - **Notes:** Two methods, minor schema divergence between services. First pipeline where the two
-  adapters differ in translator logic.
+  adapters differ in mapping logic.
 
 #### Phase 4a: Media Naming pipeline split
 - **Status:** not started
@@ -94,9 +95,9 @@ to inject the port and operate on domain types. Flurl remains the HTTP client in
 #### Phase 4b: Media Naming adapters
 - **Status:** not started
 - **Size:** small
-- **Notes:** Add port + adapter + translator for both Sonarr and Radarr naming pipelines. Each
-  pipeline gets its own port (e.g. `ISonarrNamingService`, `IRadarrNamingService`). No shared
-  interface needed since these are independent domain concepts.
+- **Notes:** Add port + adapter for both Sonarr and Radarr naming pipelines. Each pipeline gets its
+  own port (e.g. `ISonarrNamingService`, `IRadarrNamingService`). No shared interface needed since
+  these are independent domain concepts.
 
 #### Phase 5: Custom Formats pipeline adapter
 - **Status:** not started
@@ -134,8 +135,8 @@ Refit. Pipeline phases are untouched.
 - **Depends on:** Phase 7
 - **Notes:** Create `Recyclarr.Api.Sonarr` project with `.refitter` config. Generate Refit
   interfaces and DTOs from Sonarr OpenAPI spec (`includeTags` scoped to consumed endpoints). Update
-  all Sonarr adapter internals from Flurl to injected Refit interfaces. Update Sonarr translators to
-  map between generated DTOs and domain types.
+  all Sonarr adapter internals from Flurl to injected Refit interfaces. Update adapter mapping
+  methods for generated DTOs.
 
 #### Phase 9: Radarr Refit migration
 - **Status:** not started
@@ -353,6 +354,25 @@ surgery.
 Minor wrinkle: `QualityProfileSchema` and `Language` generate as separate interfaces from
 `QualityProfile`. The adapter composes all three behind one port. Wiring detail, not a design
 concern.
+
+### Why no separate translator classes?
+
+The original design had a separate static translator class per adapter (e.g.
+`SonarrSystemTranslator`) containing pure `ToDomain`/`FromDomain` mapping functions. This was
+reconsidered and rejected. The mapping logic is private to one adapter, called from one place, and
+tested through the adapter's public surface. Extracting it to a separate class adds a file and
+indirection with no concrete benefit:
+
+- **Testing:** Adapter tests exercise the mapping identically. The only difference between testing
+  `Translator.ToDomain(dto)` directly vs through the adapter is a single `.Returns(...)` mock setup
+  line, which is trivial.
+- **Reuse:** The mapping is never shared; each adapter has its own service-specific mapping even
+  when schemas are identical.
+- **Complexity:** Even for complex cases (Quality Profiles with nested DTO graphs and many input
+  shape variations), the test setup cost of going through the adapter is negligible.
+
+Decision: to/from-domain mapping lives as private methods on the adapter. No separate translator
+classes.
 
 ### Why not fix architecture and migrate to Refit simultaneously?
 
