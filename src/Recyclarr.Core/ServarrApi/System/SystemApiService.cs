@@ -4,10 +4,10 @@ namespace Recyclarr.ServarrApi.System;
 
 public class SystemApiService(IServarrRequestBuilder service) : ISystemApiService
 {
-    public async Task<SystemStatus> GetStatus(CancellationToken ct)
+    public async Task<ServiceSystemStatus> GetStatus(CancellationToken ct)
     {
         return await service
             .Request("system", "status")
-            .GetJsonAsync<SystemStatus>(cancellationToken: ct);
+            .GetJsonAsync<ServiceSystemStatus>(cancellationToken: ct);
     }
 }

@@ -1,4 +1,4 @@
-namespace Recyclarr.Compatibility;
+namespace Recyclarr.Servarr.SystemStatus;
 
 public interface ISystemService
 {

@@ -1,4 +1,4 @@
-using Recyclarr.Compatibility;
+using Recyclarr.Servarr.SystemStatus;
 
 namespace Recyclarr.ServarrApi.System;
 
@@ -10,7 +10,7 @@ internal class RadarrSystemAdapter(ISystemApiService api) : ISystemService
         return ToDomain(dto);
     }
 
-    private static SystemServiceResult ToDomain(SystemStatus dto)
+    private static SystemServiceResult ToDomain(ServiceSystemStatus dto)
     {
         return new SystemServiceResult(dto.AppName, new Version(dto.Version));
     }

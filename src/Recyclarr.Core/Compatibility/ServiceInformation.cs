@@ -1,4 +1,5 @@
 using Flurl.Http;
+using Recyclarr.Servarr.SystemStatus;
 
 namespace Recyclarr.Compatibility;
 
