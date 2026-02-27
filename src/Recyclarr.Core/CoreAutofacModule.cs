@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Flurl.Http.Configuration;
+using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
@@ -216,6 +217,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
 
         builder.RegisterType<SystemApiService>().As<ISystemApiService>().InstancePerLifetimeScope();
+        builder.RegisterServiceAdapter<ISystemService, SonarrSystemAdapter, RadarrSystemAdapter>();
 
         builder
             .RegisterType<QualityProfileApiService>()

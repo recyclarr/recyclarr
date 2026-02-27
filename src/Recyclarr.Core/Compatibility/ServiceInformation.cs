@@ -1,9 +1,8 @@
 using Flurl.Http;
-using Recyclarr.ServarrApi.System;
 
 namespace Recyclarr.Compatibility;
 
-public class ServiceInformation(ISystemApiService api, ILogger log) : IServiceInformation
+public class ServiceInformation(ISystemService api, ILogger log) : IServiceInformation
 {
     private Version? _version;
 
@@ -16,9 +15,9 @@ public class ServiceInformation(ISystemApiService api, ILogger log) : IServiceIn
     {
         try
         {
-            var status = await api.GetStatus(ct);
-            log.Debug("{Service} Version: {Version}", status.AppName, status.Version);
-            return new Version(status.Version);
+            var result = await api.GetStatus(ct);
+            log.Debug("{Service} Version: {Version}", result.AppName, result.Version);
+            return result.Version;
         }
         catch (FlurlHttpException)
         {

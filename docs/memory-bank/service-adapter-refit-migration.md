@@ -65,7 +65,7 @@ Each phase introduces the port + adapter for one pipeline. Pipeline phases are u
 port and operate on domain types. Flurl remains the HTTP client inside adapters.
 
 #### Phase 1: System pipeline adapter
-- **Status:** not started
+- **Status:** done
 - **Size:** tiny (pattern-establishing; read-only, one method, identical schemas)
 - **Notes:** First adapter. Establishes project structure, DI conventions, and the keyed/non-keyed
   registration pattern. No round-trip concern (no writes).
