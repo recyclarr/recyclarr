@@ -43,6 +43,19 @@ builder.Register(c =>
 - Same resource, service-specific properties -> shared pipeline + adapter
 - Different resource concepts behind a shared path -> split into service-specific pipelines
 
+**Adapter multiplicity**: every pipeline always gets one adapter per service (Sonarr adapter +
+Radarr adapter), regardless of whether the pipeline is shared or split. For shared pipelines, both
+adapters implement the same port interface and DI resolves the correct one via the keyed/non-keyed
+pattern. For split pipelines, each pipeline has its own port and single adapter (e.g.
+`ISonarrNamingService` implemented by `SonarrNamingAdapter`). There is never a single "shared"
+adapter that handles both services; the adapter is always service-specific because it owns
+service-specific HTTP calls and translator logic. Even when schemas are identical today (e.g. custom
+formats, system status), separate adapters per service are required because they will back different
+generated Refit clients after Part B. The duplication in identical-schema adapters is mechanical and
+temporary; it disappears once each adapter injects its own service-specific Refit interface.
+Deferring the split to Part B was considered and rejected because it creates inconsistency during
+Part A and requires a "split this adapter" refactor during the Refit migration.
+
 ## Phases
 
 ### Part A: Adapter Layer (Architecture)
@@ -145,8 +158,8 @@ Refit. Pipeline phases are untouched.
 - **Notes:** Remove Flurl and Flurl.Http packages from `Directory.Packages.props` and project
   references. Delete `IServarrRequestBuilder`, `ServarrRequestBuilder`, `FlurlSpecificEventHandler`,
   `FlurlBeforeCallLogRedactor`, `FlurlAfterCallLogRedactor`, `FlurlRedirectPreventer`,
-  `FlurlLogging`, `IAppriseRequestBuilder`, `AppriseRequestBuilder`. Delete
-  `Flurl.Http.Testing` usage in tests.
+  `FlurlLogging`, `IAppriseRequestBuilder`, `AppriseRequestBuilder`. Delete `Flurl.Http.Testing`
+  usage in tests.
 
 ## Dependency Graph
 
@@ -164,7 +177,8 @@ All of Part A -> Phase 7 (Refit infra) -> Phase 8 (Sonarr Refit)
 ```
 
 Phases 1, 2, 3, 4a, and 5 have no dependencies on each other (except 4a before 4b, and 5 before 6).
-They can be done in any order. Suggested order is simplest-first to establish patterns incrementally.
+They can be done in any order. Suggested order is simplest-first to establish patterns
+incrementally.
 
 ## Related Issues
 
@@ -184,9 +198,9 @@ alternatives, and boundary-testing that led to the decisions above.
 
 ### Why migrate from Flurl?
 
-The initial evaluation compared Flurl (current), Refit, RestEase, and OpenAPI code generation.
-Flurl is deeply integrated (18 production files, custom event handlers, per-client serializer
-config). The migration was not motivated by Flurl being broken but by two concerns:
+The initial evaluation compared Flurl (current), Refit, RestEase, and OpenAPI code generation. Flurl
+is deeply integrated (18 production files, custom event handlers, per-client serializer config). The
+migration was not motivated by Flurl being broken but by two concerns:
 
 1. **Upstream change detection.** Hand-maintained DTOs with `[JsonExtensionData]` are change-blind.
    If Sonarr renames a field, the current code silently stops sending it (deserializes as null, no
@@ -250,8 +264,8 @@ This was tested with hypotheticals:
 - **Hypothetical 1:** Both services have "language" but different wire formats (Radarr: int, Sonarr:
   string). Adapter handles it; same domain concept, different serialization. No split needed.
 - **Hypothetical 2:** Radarr returns a complex language object (`{name, id, region}`) that needs
-  round-tripping. Adapter handles it; the complexity is in the translator and hydrated state, not the
-  pipeline.
+  round-tripping. Adapter handles it; the complexity is in the translator and hydrated state, not
+  the pipeline.
 
 ### The read-modify-write problem
 
@@ -320,10 +334,10 @@ classes that both pipelines depend on, same as any two unrelated pipelines shari
 
 ### CF -> QP pipeline data dependency
 
-Quality Profiles cannot be migrated independently of Custom Formats. `PlannedCfScore` holds a
-direct object reference to `PlannedCustomFormat`. When CF persistence creates a new format and the
-API returns its ID, that ID is visible to QP automatically through the shared reference. This
-coupling is implicit (no visible contract) but functional.
+Quality Profiles cannot be migrated independently of Custom Formats. `PlannedCfScore` holds a direct
+object reference to `PlannedCustomFormat`. When CF persistence creates a new format and the API
+returns its ID, that ID is visible to QP automatically through the shared reference. This coupling
+is implicit (no visible contract) but functional.
 
 Tracked as [REC-88](https://linear.app/recyclarr/issue/REC-88) for future exploration. Not blocking
 current work. Practical impact: CF adapter must be done before QP adapter (phase 5 before phase 6).
