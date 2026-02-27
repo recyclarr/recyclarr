@@ -1,9 +1,9 @@
-using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApiService api)
+internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionService api)
     : IPipelinePhase<QualitySizePipelineContext>
 {
     public async Task<PipelineFlow> Execute(
@@ -13,7 +13,7 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
     {
         var itemsToUpdate = context
             .TransactionOutput.Where(x => x.IsDifferent)
-            .Select(x => x.BuildApiItem(context.Limits))
+            .Select(x => x.BuildUpdatedItem(context.Limits))
             .ToList();
 
         if (itemsToUpdate.Count == 0)
@@ -26,7 +26,7 @@ internal class QualitySizeApiPersistencePhase(ILogger log, IQualityDefinitionApi
             return PipelineFlow.Terminate;
         }
 
-        await api.UpdateQualityDefinition(itemsToUpdate, ct);
+        await api.UpdateQualityDefinitions(itemsToUpdate, ct);
 
         log.Information(
             "Total of {Count} sizes were synced for quality definition {Name}",

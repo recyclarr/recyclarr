@@ -13,10 +13,54 @@ Living document tracking the implementation of ADR-005 (service adapter layer) a
 ## Key Design Patterns
 
 **Port + Adapter** (per feature, per service):
-- Port: domain interface in pipeline layer, speaks domain types only
+- Port: domain interface in `Servarr/` layer, speaks domain types only. Port methods use read-only
+  collection types (`IReadOnlyList<T>`) for both parameters and return values; the caller doesn't
+  need mutability and the adapter shouldn't modify what it receives.
 - Adapter: implements port, owns HTTP client, stashes fetched DTOs for round-trip. Contains
   to/from-domain mapping as private methods (no separate translator class; the mapping is private to
   one adapter, tested through the adapter, and called from one place)
+
+**Directory structure** (`src/Recyclarr.Core/`):
+- `Servarr/{Feature}/` - port interfaces and domain types (e.g. `Servarr/QualitySize/`,
+  `Servarr/SystemStatus/`). These are NOT pipeline-exclusive; system status is consumed by
+  compatibility, not a pipeline. Avoid `System` as a subdirectory name (collides with BCL namespace).
+- `ServarrApi/{Feature}/` - adapters alongside Flurl-backed API services and DTOs. DTO types use
+  `Service` prefix (e.g. `ServiceQualityDefinitionItem`, `ServiceSystemStatus`) to avoid collision
+  with domain types and namespace names.
+
+**Domain type `required` properties**: driven by domain/pipeline invariants, not API schema. A
+property is `required` only when omitting it at construction would silently mask a bug in domain
+logic. If a field has a natural zero/null default that is either valid or harmless in domain context,
+use a non-required `init` property with that default. The API may guarantee a field is always
+present, but that does not mean the domain type needs to enforce it at the type level. Decision tree:
+
+1. Can the caller ever reasonably not care about this field's value? If yes, non-required with
+   sensible default.
+2. Would a default value silently break matching, lookup, or business logic? If yes, `required`.
+3. Otherwise, non-required with that safe default.
+
+Examples: `QualityName` is required (empty string breaks matching). `Id` is not (zero is harmless;
+the adapter always sets it). Nullable fields like `MaxSize` default to null (which has domain meaning
+"unlimited").
+
+**Test factory helpers (`New*` classes)**: each adapter phase MUST overhaul test helpers for
+consistency. Rules:
+
+- One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
+  grab bags mixing unrelated types.
+- Factory methods accept only parameters relevant to the test, with sensible defaults for the rest.
+  This shields tests from model changes and keeps construction sites focused on what the test
+  actually asserts.
+- Methods return one type. If a domain type has variants (e.g. with/without scores), use overloads or
+  optional parameters, not separate classes.
+- Location: `Core.TestLibrary` for types defined in Core; `Cli.Tests/Reusable` for types defined in
+  Cli.
+- Existing helpers that violate these rules (e.g. `NewPlan` as a grab bag, `NewQp` mixing DTOs with
+  domain types) get overhauled when their phase is touched. Scorched earth; don't preserve legacy
+  patterns for consistency with the old code.
+- `NewPlan` specifically: plan item factory methods (e.g. `Cf`, `CfScore`, `Qp`, `Qs`, `QsItem`)
+  should move to the `New*` class for the type they construct. `NewPlan` retains only methods that
+  construct `TestPlan` itself or `Planned*` wrapper types that don't have their own `New*` class.
 
 **Hydrated resource pattern**: adapter holds original DTOs in an internal dictionary keyed by
 resource ID. Populated during fetch, consumed during persist, scoped to one sync operation via
@@ -71,10 +115,11 @@ port and operate on domain types. Flurl remains the HTTP client inside adapters.
   registration pattern. No round-trip concern (no writes).
 
 #### Phase 2: Quality Definitions pipeline adapter
-- **Status:** not started
+- **Status:** done
 - **Size:** small
 - **Notes:** Two methods (get, update). Identical schemas. First pipeline with a write path; first
-  real test of the hydrated resource pattern.
+  real test of the hydrated resource pattern. Established the `Servarr/` directory convention for
+  ports and domain types.
 
 #### Phase 3: Media Management pipeline adapter
 - **Status:** not started

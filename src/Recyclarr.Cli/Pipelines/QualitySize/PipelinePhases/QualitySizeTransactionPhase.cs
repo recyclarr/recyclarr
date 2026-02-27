@@ -1,5 +1,5 @@
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Servarr.QualitySize;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
@@ -16,7 +16,7 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
         foreach (var plannedQuality in planned.Qualities)
         {
             var serverEntry = serverQuality.FirstOrDefault(q =>
-                q.Quality?.Name == plannedQuality.Quality
+                q.QualityName == plannedQuality.Quality
             );
             if (serverEntry == null)
             {
@@ -84,7 +84,7 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
     }
 
     private static bool IsDifferent(
-        ServiceQualityDefinitionItem server,
+        QualityDefinitionItem server,
         (decimal Min, decimal Max, decimal Preferred) resolved,
         QualityItemLimits limits
     )

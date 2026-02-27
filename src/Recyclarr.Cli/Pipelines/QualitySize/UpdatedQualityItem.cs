@@ -1,4 +1,4 @@
-using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Servarr.QualitySize;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize;
@@ -10,9 +10,9 @@ internal record UpdatedQualityItem
     public required decimal Max { get; init; }
     public required decimal Preferred { get; init; }
     public required bool IsDifferent { get; init; }
-    public required ServiceQualityDefinitionItem ServerItem { get; init; }
+    public required QualityDefinitionItem ServerItem { get; init; }
 
-    public ServiceQualityDefinitionItem BuildApiItem(QualityItemLimits limits)
+    public QualityDefinitionItem BuildUpdatedItem(QualityItemLimits limits)
     {
         return ServerItem with
         {

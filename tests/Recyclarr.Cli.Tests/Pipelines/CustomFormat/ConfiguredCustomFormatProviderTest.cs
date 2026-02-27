@@ -831,7 +831,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
 
         var (sut, diagnostics) = CreateSut(config);
 
-        var entries = sut.GetAll(diagnostics).ToList();
+        _ = sut.GetAll(diagnostics).ToList();
 
         // Should produce an error about ambiguous trash_id
         diagnostics.ReceivedWithAnyArgs(1).AddError(default!);

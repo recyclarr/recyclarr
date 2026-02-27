@@ -1,11 +1,11 @@
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Servarr.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
 internal class QualitySizeApiFetchPhase(
-    IQualityDefinitionApiService api,
+    IQualityDefinitionService api,
     IQualityItemLimitFactory limitFactory,
     IServiceConfiguration config
 ) : IPipelinePhase<QualitySizePipelineContext>
@@ -15,7 +15,7 @@ internal class QualitySizeApiFetchPhase(
         CancellationToken ct
     )
     {
-        context.ApiFetchOutput = await api.GetQualityDefinition(ct);
+        context.ApiFetchOutput = await api.GetQualityDefinitions(ct);
         context.Limits = await limitFactory.Create(config.ServiceType, ct);
         return PipelineFlow.Continue;
     }

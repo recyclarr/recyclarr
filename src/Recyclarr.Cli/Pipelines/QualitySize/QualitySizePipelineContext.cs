@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.ServarrApi.QualityDefinition;
+using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -18,7 +18,7 @@ internal class QualitySizePipelineContext : PipelineContext, IPipelineMetadata
     public override string PipelineDescription => "Quality Definition";
     public override bool ShouldSkip => !Plan.QualitySizesAvailable;
 
-    public IList<ServiceQualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
+    public IReadOnlyList<QualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
     public QualityItemLimits Limits { get; set; } = null!;
     public string QualityDefinitionType { get; set; } = null!;
     public IReadOnlyCollection<UpdatedQualityItem> TransactionOutput { get; set; } = [];

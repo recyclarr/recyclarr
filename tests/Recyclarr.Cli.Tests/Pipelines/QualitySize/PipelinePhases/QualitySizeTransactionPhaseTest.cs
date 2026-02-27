@@ -2,7 +2,6 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.ServarrApi.QualityDefinition;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;
@@ -31,13 +30,7 @@ internal sealed class QualitySizeTransactionPhaseTest
                 )
             ),
             Limits = DefaultLimits,
-            ApiFetchOutput =
-            [
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "exists" },
-                },
-            ],
+            ApiFetchOutput = [NewQualityDefinition.Item("exists")],
         };
 
         await sut.Execute(context, CancellationToken.None);
@@ -62,20 +55,8 @@ internal sealed class QualitySizeTransactionPhaseTest
             Limits = DefaultLimits,
             ApiFetchOutput =
             [
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "same1" },
-                    MinSize = 0,
-                    MaxSize = 2,
-                    PreferredSize = 1,
-                },
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "same2" },
-                    MinSize = 0,
-                    MaxSize = 2,
-                    PreferredSize = 1,
-                },
+                NewQualityDefinition.Item("same1", maxSize: 2, preferredSize: 1),
+                NewQualityDefinition.Item("same2", maxSize: 2, preferredSize: 1),
             ],
         };
 
@@ -102,20 +83,8 @@ internal sealed class QualitySizeTransactionPhaseTest
             Limits = DefaultLimits,
             ApiFetchOutput =
             [
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "same1" },
-                    MinSize = 0,
-                    MaxSize = 2,
-                    PreferredSize = 1,
-                },
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "different1" },
-                    MinSize = 0,
-                    MaxSize = 2,
-                    PreferredSize = 1,
-                },
+                NewQualityDefinition.Item("same1", maxSize: 2, preferredSize: 1),
+                NewQualityDefinition.Item("different1", maxSize: 2, preferredSize: 1),
             ],
         };
 
@@ -126,17 +95,9 @@ internal sealed class QualitySizeTransactionPhaseTest
         var differentItems = context.TransactionOutput.Where(x => x.IsDifferent).ToList();
         differentItems.Should().ContainSingle();
         differentItems[0]
-            .BuildApiItem(context.Limits)
+            .BuildUpdatedItem(context.Limits)
             .Should()
-            .BeEquivalentTo(
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "different1" },
-                    MinSize = 0,
-                    MaxSize = 3,
-                    PreferredSize = 1,
-                }
-            );
+            .BeEquivalentTo(NewQualityDefinition.Item("different1", maxSize: 3, preferredSize: 1));
     }
 
     [Test, AutoMockData]
@@ -147,19 +108,11 @@ internal sealed class QualitySizeTransactionPhaseTest
         var limits = new QualityItemLimits(100, 100);
         var context = new QualitySizePipelineContext
         {
-            Plan = CreatePlan(
-                NewPlan.Qs("test", NewPlan.QsItem("quality1", 0, null, null)) // null = unlimited
-            ),
+            Plan = CreatePlan(NewPlan.Qs("test", NewPlan.QsItem("quality1", 0, null, null))),
             Limits = limits,
             ApiFetchOutput =
             [
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "quality1" },
-                    MinSize = 0,
-                    MaxSize = 50, // different from unlimited
-                    PreferredSize = 50,
-                },
+                NewQualityDefinition.Item("quality1", maxSize: 50, preferredSize: 50),
             ],
         };
 
@@ -167,16 +120,8 @@ internal sealed class QualitySizeTransactionPhaseTest
 
         var item = context.TransactionOutput.Should().ContainSingle().Which;
         item.IsDifferent.Should().BeTrue();
-        item.BuildApiItem(limits)
+        item.BuildUpdatedItem(limits)
             .Should()
-            .BeEquivalentTo(
-                new ServiceQualityDefinitionItem
-                {
-                    Quality = new ServiceQualityItem { Name = "quality1" },
-                    MinSize = 0,
-                    MaxSize = null, // null = unlimited (at limit)
-                    PreferredSize = null,
-                }
-            );
+            .BeEquivalentTo(NewQualityDefinition.Item("quality1"));
     }
 }
