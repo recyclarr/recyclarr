@@ -121,5 +121,9 @@ dotnet_diagnostic.CA1308.severity = none
 # Prefer `with` for record copies even when all members are set (future-proofs against new fields)
 resharper_with_expression_modifies_all_members_highlighting = none
 
+# CA1034: C# 14 extension blocks compile to nested types, triggering this rule spuriously.
+# Remove once the analyzer is updated to recognize extension blocks.
+dotnet_diagnostic.CA1034.severity = none
+
 # Allow `default` for reference types (no built-in inspection to enforce default over null)
 resharper_prefer_concrete_value_over_default_highlighting = none
