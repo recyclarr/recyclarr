@@ -8,7 +8,7 @@ internal class MediaManagementTransactionPhase : IPipelinePhase<MediaManagementP
 
         context.TransactionOutput = context.ApiFetchOutput with
         {
-            DownloadPropersAndRepacks = planned.PropersAndRepacks,
+            PropersAndRepacks = planned.PropersAndRepacks,
         };
 
         return Task.FromResult(PipelineFlow.Continue);

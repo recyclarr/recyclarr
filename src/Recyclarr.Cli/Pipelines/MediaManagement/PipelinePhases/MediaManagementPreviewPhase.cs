@@ -12,7 +12,7 @@ internal class MediaManagementPreviewPhase(IAnsiConsole console)
         var table = new Table().AddColumns("[b]Field[/]", "[b]Value[/]");
         table.AddRow(
             "Download Propers and Repacks",
-            context.TransactionOutput.DownloadPropersAndRepacks?.ToString() ?? "UNSET"
+            context.TransactionOutput.PropersAndRepacks?.ToString() ?? "UNSET"
         );
 
         Console.Write(table);

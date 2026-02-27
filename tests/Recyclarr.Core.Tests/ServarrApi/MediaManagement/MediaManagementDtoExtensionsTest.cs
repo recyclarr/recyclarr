@@ -1,23 +1,23 @@
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.MediaManagement;
+using Recyclarr.Servarr.MediaManagement;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaManagement;
 
-internal sealed class MediaManagementDtoExtensionsTest
+internal sealed class MediaManagementDataDifferencesTest
 {
     [Test]
-    public void GetDifferences_returns_diff_when_value_changes()
+    public void Returns_diff_when_value_changes()
     {
-        var oldDto = new MediaManagementDto
+        var original = new MediaManagementData
         {
-            DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
+            PropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
         };
-        var newDto = new MediaManagementDto
+        var updated = new MediaManagementData
         {
-            DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
+            PropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
         };
 
-        var differences = oldDto.GetDifferences(newDto);
+        var differences = original.GetDifferences(updated);
 
         differences.Should().HaveCount(1);
         differences.Should().Contain(d => d.Contains("DownloadPropersAndRepacks"));
@@ -26,43 +26,43 @@ internal sealed class MediaManagementDtoExtensionsTest
     }
 
     [Test]
-    public void GetDifferences_returns_empty_when_values_match()
+    public void Returns_empty_when_values_match()
     {
-        var oldDto = new MediaManagementDto
+        var original = new MediaManagementData
         {
-            DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
+            PropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
         };
-        var newDto = new MediaManagementDto
+        var updated = new MediaManagementData
         {
-            DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
+            PropersAndRepacks = PropersAndRepacksMode.DoNotPrefer,
         };
 
-        var differences = oldDto.GetDifferences(newDto);
+        var differences = original.GetDifferences(updated);
 
         differences.Should().BeEmpty();
     }
 
     [Test]
-    public void GetDifferences_returns_diff_when_old_is_null_and_new_is_set()
+    public void Returns_diff_when_old_is_null_and_new_is_set()
     {
-        var oldDto = new MediaManagementDto { DownloadPropersAndRepacks = null };
-        var newDto = new MediaManagementDto
+        var original = new MediaManagementData { PropersAndRepacks = null };
+        var updated = new MediaManagementData
         {
-            DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
+            PropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
         };
 
-        var differences = oldDto.GetDifferences(newDto);
+        var differences = original.GetDifferences(updated);
 
         differences.Should().HaveCount(1);
     }
 
     [Test]
-    public void GetDifferences_returns_empty_when_both_null()
+    public void Returns_empty_when_both_null()
     {
-        var oldDto = new MediaManagementDto { DownloadPropersAndRepacks = null };
-        var newDto = new MediaManagementDto { DownloadPropersAndRepacks = null };
+        var original = new MediaManagementData { PropersAndRepacks = null };
+        var updated = new MediaManagementData { PropersAndRepacks = null };
 
-        var differences = oldDto.GetDifferences(newDto);
+        var differences = original.GetDifferences(updated);
 
         differences.Should().BeEmpty();
     }

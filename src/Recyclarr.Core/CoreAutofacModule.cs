@@ -21,6 +21,7 @@ using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
+using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Servarr.SystemStatus;
 using Recyclarr.ServarrApi;
@@ -246,6 +247,11 @@ public class CoreAutofacModule : Module
             .RegisterType<MediaManagementApiService>()
             .As<IMediaManagementApiService>()
             .InstancePerLifetimeScope();
+        builder.RegisterServiceAdapter<
+            IMediaManagementService,
+            SonarrMediaManagementAdapter,
+            RadarrMediaManagementAdapter
+        >();
     }
 
     private static void RegisterSettings(ContainerBuilder builder)

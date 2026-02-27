@@ -1,9 +1,9 @@
-using Recyclarr.ServarrApi.MediaManagement;
+using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 
-internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementApiService api)
+internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementService api)
     : IPipelinePhase<MediaManagementPipelineContext>
 {
     public async Task<PipelineFlow> Execute(

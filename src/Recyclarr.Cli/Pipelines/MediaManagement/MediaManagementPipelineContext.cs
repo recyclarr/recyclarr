@@ -1,4 +1,4 @@
-using Recyclarr.ServarrApi.MediaManagement;
+using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement;
@@ -11,6 +11,6 @@ internal class MediaManagementPipelineContext : PipelineContext, IPipelineMetada
     public override string PipelineDescription => "Media Management";
     public override bool ShouldSkip => !Plan.MediaManagementAvailable;
 
-    public MediaManagementDto ApiFetchOutput { get; set; } = null!;
-    public MediaManagementDto TransactionOutput { get; set; } = null!;
+    public MediaManagementData ApiFetchOutput { get; set; } = null!;
+    public MediaManagementData TransactionOutput { get; set; } = null!;
 }

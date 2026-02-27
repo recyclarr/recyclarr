@@ -4,7 +4,7 @@ using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.MediaManagement;
+using Recyclarr.Servarr.MediaManagement;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaManagement;
 
@@ -17,45 +17,22 @@ internal sealed class MediaManagementTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public async Task Applies_planned_value_to_fetched_dto(MediaManagementTransactionPhase sut)
+    public async Task Applies_planned_value_to_fetched_data(MediaManagementTransactionPhase sut)
     {
         var context = new MediaManagementPipelineContext
         {
-            ApiFetchOutput = new MediaManagementDto
+            ApiFetchOutput = new MediaManagementData
             {
                 Id = 1,
-                DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
+                PropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
             },
             Plan = CreatePlan(PropersAndRepacksMode.DoNotUpgrade),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
-        context
-            .TransactionOutput.DownloadPropersAndRepacks.Should()
-            .Be(PropersAndRepacksMode.DoNotUpgrade);
+        context.TransactionOutput.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotUpgrade);
         context.TransactionOutput.Id.Should().Be(1);
-    }
-
-    [Test, AutoMockData]
-    public async Task Preserves_extra_json_from_api_fetch(MediaManagementTransactionPhase sut)
-    {
-        var apiFetchDto = new MediaManagementDto
-        {
-            Id = 1,
-            DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
-        };
-        apiFetchDto.ExtraJson["someOtherProperty"] = "preserved";
-
-        var context = new MediaManagementPipelineContext
-        {
-            ApiFetchOutput = apiFetchDto,
-            Plan = CreatePlan(PropersAndRepacksMode.DoNotPrefer),
-        };
-
-        await sut.Execute(context, CancellationToken.None);
-
-        context.TransactionOutput.ExtraJson.Should().ContainKey("someOtherProperty");
     }
 
     [Test, AutoMockData]
@@ -63,9 +40,9 @@ internal sealed class MediaManagementTransactionPhaseTest
     {
         var context = new MediaManagementPipelineContext
         {
-            ApiFetchOutput = new MediaManagementDto
+            ApiFetchOutput = new MediaManagementData
             {
-                DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
+                PropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
             },
             Plan = CreatePlan(PropersAndRepacksMode.DoNotUpgrade),
         };

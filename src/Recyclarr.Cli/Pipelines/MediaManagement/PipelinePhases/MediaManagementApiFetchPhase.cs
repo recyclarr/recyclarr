@@ -1,8 +1,8 @@
-using Recyclarr.ServarrApi.MediaManagement;
+using Recyclarr.Servarr.MediaManagement;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 
-internal class MediaManagementApiFetchPhase(IMediaManagementApiService api)
+internal class MediaManagementApiFetchPhase(IMediaManagementService api)
     : IPipelinePhase<MediaManagementPipelineContext>
 {
     public async Task<PipelineFlow> Execute(

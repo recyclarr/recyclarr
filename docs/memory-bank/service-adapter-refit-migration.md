@@ -43,14 +43,17 @@ Examples: `QualityName` is required (empty string breaks matching). `Id` is not 
 the adapter always sets it). Nullable fields like `MaxSize` default to null (which has domain meaning
 "unlimited").
 
-**Test factory helpers (`New*` classes)**: each adapter phase MUST overhaul test helpers for
-consistency. Rules:
+**Test factory helpers (`New*` classes)**: each adapter phase should evaluate whether test helpers
+are needed for new domain types. Rules:
 
 - One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
   grab bags mixing unrelated types.
 - Factory methods accept only parameters relevant to the test, with sensible defaults for the rest.
   This shields tests from model changes and keeps construction sites focused on what the test
   actually asserts.
+- **When to skip:** If a domain type is trivial (few properties, no `required` fields, natural
+  defaults), direct construction in tests is acceptable. A factory helper adds no shielding value
+  when the type is unlikely to change shape. Plans must include a brief justification when skipping.
 - Methods return one type. If a domain type has variants (e.g. with/without scores), use overloads or
   optional parameters, not separate classes.
 - Location: `Core.TestLibrary` for types defined in Core; `Cli.Tests/Reusable` for types defined in
@@ -108,6 +111,9 @@ Part A and requires a "split this adapter" refactor during the Refit migration.
 Each phase introduces the port + adapter for one pipeline. Pipeline phases are updated to inject the
 port and operate on domain types. Flurl remains the HTTP client inside adapters.
 
+**Verification after every phase:** run `dotnet test -v m` (unit tests) and
+`./scripts/Run-E2ETests.ps1` (E2E tests) before considering the phase complete.
+
 #### Phase 1: System pipeline adapter
 - **Status:** done
 - **Size:** tiny (pattern-establishing; read-only, one method, identical schemas)
@@ -122,10 +128,13 @@ port and operate on domain types. Flurl remains the HTTP client inside adapters.
   ports and domain types.
 
 #### Phase 3: Media Management pipeline adapter
-- **Status:** not started
+- **Status:** done
 - **Size:** small
-- **Notes:** Two methods, minor schema divergence between services. First pipeline where the two
-  adapters differ in mapping logic.
+- **Notes:** Two methods, identical schemas (divergence absorbed by `ExtraJson` in the DTO layer).
+  Mapping logic is identical across adapters; the mechanical duplication is temporary and disappears
+  when each adapter injects its own Refit client in Part B. `GetDifferences` moved from DTO
+  extension to a method on `MediaManagementData`. No `New*` test factory helper; the domain type is
+  trivial (two properties, no `required` fields) so direct construction is clearer.
 
 #### Phase 4a: Media Naming pipeline split
 - **Status:** not started
