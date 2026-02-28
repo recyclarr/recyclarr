@@ -131,7 +131,23 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `TestableLogger`: Capture log messages
 - `NUnitAnsiConsole`: Console output verification
 - `MockFileSystem`: Filesystem testing (avoid absolute paths)
-- Factory classes: `NewCf`, `NewConfig`, `NewQualitySize`
+- Factory classes: `NewCf`, `NewConfig`, `NewQualitySize`, `NewPlannedCf`, etc.
+
+## Test Factory Helpers (`New*` Classes)
+
+One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
+grab-bag classes mixing unrelated types.
+
+**Rules:**
+
+- Methods return one type. Use overloads or optional parameters for variants, not separate classes.
+- Accept only test-relevant parameters with sensible defaults. This shields tests from model changes.
+- Location: `Core.TestLibrary` for types in Core; `Cli.Tests/Reusable` for types in Cli. Hard
+  constraint from project dependency direction (see REC-90).
+- Overhaul existing helpers when their types are touched. No legacy pattern preservation.
+
+**When to skip:** If a domain type is trivial (few properties, no `required` fields, natural
+defaults), direct construction in tests is acceptable. Include a brief justification when skipping.
 
 ## Filesystem Paths
 

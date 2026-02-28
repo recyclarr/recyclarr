@@ -49,7 +49,7 @@ Servarr/
 Infrastructure class in `src/Recyclarr.Core/ServarrApi/{Feature}/` implementing the port for a
 specific service. Responsibilities:
 
-- Owns the HTTP client (Flurl today, Refit after migration)
+- Owns the HTTP client
 - Contains to/from-domain mapping as **private methods** (no separate translator class)
 - Manages read-modify-write state via the hydrated resource pattern (when applicable)
 
@@ -153,8 +153,8 @@ pipeline is shared or split.
   `ISonarrNamingService` implemented by `SonarrNamingGateway`).
 
 There is never a single "shared" gateway that handles both services. Even when schemas are identical
-today (e.g. custom formats, system status), separate gateways per service are required because they
-will back different generated Refit clients after the Refit migration.
+(e.g. custom formats, system status), separate gateways per service are required because each
+service backs a different API client.
 
 ## Domain Type Design
 
@@ -206,5 +206,22 @@ separate service DTO and no stashed state. See [ADR-007][adr-007] for full ratio
 3. Complex nested type graph where duplication is expensive and error-prone
 
 When any condition is absent, the standard DTO/domain split applies.
+
+## Service API Divergence
+
+Comparison of Sonarr and Radarr OpenAPI specs for endpoints Recyclarr consumes. Useful when deciding
+shared vs split pipeline for new features.
+
+| Endpoint            | Divergence           | Notes                                                  |
+|---------------------|----------------------|--------------------------------------------------------|
+| Custom Formats      | Identical            | Truly shareable                                        |
+| Quality Definitions | Identical            | Nested `Quality` model differs but main schema matches |
+| Language            | Identical            |                                                        |
+| System Status       | Minimal              | `sqliteVersion` Sonarr-only                            |
+| Quality Profiles    | Divergent            | Radarr adds `language` field                           |
+| Media Management    | Divergent            | Domain-specific fields, different enum values          |
+| Media Naming        | Completely different | Almost no overlap beyond `id`                          |
+
+Both services publish official OpenAPI 3.0 specs (auto-generated via Swashbuckle).
 
 [adr-007]: ../decisions/architecture/007-custom-format-gateway-passthrough.md
