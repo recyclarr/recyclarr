@@ -23,7 +23,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.MediaNaming.Should().NotBeNull();
+        plan.RadarrMediaNaming.Should().NotBeNull();
         publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 

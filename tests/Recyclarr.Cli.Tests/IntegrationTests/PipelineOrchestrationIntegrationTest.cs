@@ -74,7 +74,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
 
         var sut = CreateExecutor([qpPipeline, mnPipeline, cfPipeline, qsPipeline]);
 
@@ -97,7 +97,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
 
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 
@@ -116,7 +116,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             .BeEquivalentTo([
                 PipelineType.CustomFormat,
                 PipelineType.QualitySize,
-                PipelineType.MediaNaming,
+                PipelineType.SonarrMediaNaming,
             ]);
 
         // QP should be marked as skipped via its pipeline publisher
@@ -134,7 +134,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, [], PipelineResult.Failed);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
 
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 

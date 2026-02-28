@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
+using Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -10,14 +9,14 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
 internal sealed class MediaNamingTransactionPhaseSonarrTest
 {
-    private static TestPlan CreatePlan(MediaNamingDto dto)
+    private static TestPlan CreatePlan(SonarrMediaNamingDto dto)
     {
-        var plan = new TestPlan { MediaNaming = new PlannedMediaNaming { Dto = dto } };
+        var plan = new TestPlan { SonarrMediaNaming = new PlannedSonarrMediaNaming { Dto = dto } };
         return plan;
     }
 
     [Test, AutoMockData]
-    public async Task Sonarr_left_null(MediaNamingTransactionPhase sut)
+    public async Task Sonarr_left_null(SonarrNamingTransactionPhase sut)
     {
         var configDto = new SonarrMediaNamingDto
         {
@@ -29,7 +28,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
             AnimeEpisodeFormat = "episodes_anime_default_3",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new SonarrNamingPipelineContext
         {
             ApiFetchOutput = new SonarrMediaNamingDto(),
             Plan = CreatePlan(configDto),
@@ -43,7 +42,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Sonarr_right_null(MediaNamingTransactionPhase sut)
+    public async Task Sonarr_right_null(SonarrNamingTransactionPhase sut)
     {
         var apiDto = new SonarrMediaNamingDto
         {
@@ -55,7 +54,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
             AnimeEpisodeFormat = "episodes_anime_default_3",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new SonarrNamingPipelineContext
         {
             ApiFetchOutput = apiDto,
             Plan = CreatePlan(new SonarrMediaNamingDto()),
@@ -69,7 +68,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Sonarr_right_and_left_with_rename(MediaNamingTransactionPhase sut)
+    public async Task Sonarr_right_and_left_with_rename(SonarrNamingTransactionPhase sut)
     {
         var configDto = new SonarrMediaNamingDto
         {
@@ -81,7 +80,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
             AnimeEpisodeFormat = "episodes_anime_default2",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new SonarrNamingPipelineContext
         {
             ApiFetchOutput = new SonarrMediaNamingDto
             {
@@ -103,9 +102,9 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Sonarr_right_and_left_without_rename(MediaNamingTransactionPhase sut)
+    public async Task Sonarr_right_and_left_without_rename(SonarrNamingTransactionPhase sut)
     {
-        var context = new MediaNamingPipelineContext
+        var context = new SonarrNamingPipelineContext
         {
             ApiFetchOutput = new SonarrMediaNamingDto
             {

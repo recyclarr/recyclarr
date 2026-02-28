@@ -6,9 +6,8 @@ using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Cli.Pipelines.MediaManagement;
 using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
-using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
-using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+using Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
+using Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Cli.Pipelines.QualityProfile;
@@ -37,7 +36,8 @@ internal class PipelineAutofacModule : Module
                 typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
                 typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
                 typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<MediaNamingPipelineContext>),
+                typeof(GenericSyncPipeline<SonarrNamingPipelineContext>),
+                typeof(GenericSyncPipeline<RadarrNamingPipelineContext>),
                 typeof(GenericSyncPipeline<MediaManagementPipelineContext>)
             )
             .As<ISyncPipeline>();
@@ -46,7 +46,8 @@ internal class PipelineAutofacModule : Module
         RegisterQualityProfile(builder);
         RegisterQualitySize(builder);
         RegisterCustomFormat(builder);
-        RegisterMediaNaming(builder);
+        RegisterSonarrMediaNaming(builder);
+        RegisterRadarrMediaNaming(builder);
         RegisterMediaManagement(builder);
     }
 
@@ -62,28 +63,35 @@ internal class PipelineAutofacModule : Module
                 typeof(CustomFormatPlanComponent),
                 typeof(QualityProfilePlanComponent),
                 typeof(QualitySizePlanComponent),
-                typeof(MediaNamingPlanComponent),
+                typeof(SonarrMediaNamingPlanComponent),
+                typeof(RadarrMediaNamingPlanComponent),
                 typeof(MediaManagementPlanComponent)
             )
             .As<IPlanComponent>()
             .OrderByRegistration();
     }
 
-    private static void RegisterMediaNaming(ContainerBuilder builder)
+    private static void RegisterSonarrMediaNaming(ContainerBuilder builder)
     {
         builder
-            .RegisterType<RadarrMediaNamingConfigPhase>()
-            .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Radarr);
-        builder
-            .RegisterType<SonarrMediaNamingConfigPhase>()
-            .Keyed<IServiceBasedMediaNamingConfigPhase>(SupportedServices.Sonarr);
+            .RegisterTypes(
+                typeof(SonarrNamingApiFetchPhase),
+                typeof(SonarrNamingTransactionPhase),
+                typeof(SonarrNamingPreviewPhase),
+                typeof(SonarrNamingApiPersistencePhase)
+            )
+            .AsImplementedInterfaces()
+            .OrderByRegistration();
+    }
 
+    private static void RegisterRadarrMediaNaming(ContainerBuilder builder)
+    {
         builder
             .RegisterTypes(
-                typeof(MediaNamingApiFetchPhase),
-                typeof(MediaNamingTransactionPhase),
-                typeof(MediaNamingPreviewPhase),
-                typeof(MediaNamingApiPersistencePhase)
+                typeof(RadarrNamingApiFetchPhase),
+                typeof(RadarrNamingTransactionPhase),
+                typeof(RadarrNamingPreviewPhase),
+                typeof(RadarrNamingApiPersistencePhase)
             )
             .AsImplementedInterfaces()
             .OrderByRegistration();

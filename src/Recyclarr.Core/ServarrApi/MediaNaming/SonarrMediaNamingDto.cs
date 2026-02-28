@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-public record SonarrMediaNamingDto : MediaNamingDto
+public record SonarrMediaNamingDto
 {
     public string? SeriesFolderFormat
     {
@@ -43,4 +43,41 @@ public record SonarrMediaNamingDto : MediaNamingDto
     [UsedImplicitly]
     [JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = [];
+
+    public IReadOnlyCollection<string> GetDifferences(SonarrMediaNamingDto other)
+    {
+        var diff = new List<string>();
+
+        if (RenameEpisodes != other.RenameEpisodes)
+        {
+            diff.Add(nameof(RenameEpisodes));
+        }
+
+        if (SeasonFolderFormat != other.SeasonFolderFormat)
+        {
+            diff.Add(nameof(SeasonFolderFormat));
+        }
+
+        if (SeriesFolderFormat != other.SeriesFolderFormat)
+        {
+            diff.Add(nameof(SeriesFolderFormat));
+        }
+
+        if (StandardEpisodeFormat != other.StandardEpisodeFormat)
+        {
+            diff.Add(nameof(StandardEpisodeFormat));
+        }
+
+        if (DailyEpisodeFormat != other.DailyEpisodeFormat)
+        {
+            diff.Add(nameof(DailyEpisodeFormat));
+        }
+
+        if (AnimeEpisodeFormat != other.AnimeEpisodeFormat)
+        {
+            diff.Add(nameof(AnimeEpisodeFormat));
+        }
+
+        return diff;
+    }
 }

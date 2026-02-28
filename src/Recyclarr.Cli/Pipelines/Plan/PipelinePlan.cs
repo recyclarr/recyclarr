@@ -42,16 +42,28 @@ internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublish
         set => _qualitySizes = value;
     }
 
-    private PlannedMediaNaming? _mediaNaming;
-    public bool MediaNamingAvailable => _mediaNaming is not null;
-    public PlannedMediaNaming MediaNaming
+    private PlannedSonarrMediaNaming? _sonarrMediaNaming;
+    public bool SonarrMediaNamingAvailable => _sonarrMediaNaming is not null;
+    public PlannedSonarrMediaNaming SonarrMediaNaming
     {
         get =>
-            _mediaNaming
+            _sonarrMediaNaming
             ?? throw new InvalidOperationException(
-                "MediaNaming accessed but media_naming not configured"
+                "SonarrMediaNaming accessed but media_naming not configured for Sonarr"
             );
-        set => _mediaNaming = value;
+        set => _sonarrMediaNaming = value;
+    }
+
+    private PlannedRadarrMediaNaming? _radarrMediaNaming;
+    public bool RadarrMediaNamingAvailable => _radarrMediaNaming is not null;
+    public PlannedRadarrMediaNaming RadarrMediaNaming
+    {
+        get =>
+            _radarrMediaNaming
+            ?? throw new InvalidOperationException(
+                "RadarrMediaNaming accessed but media_naming not configured for Radarr"
+            );
+        set => _radarrMediaNaming = value;
     }
 
     private PlannedMediaManagement? _mediaManagement;

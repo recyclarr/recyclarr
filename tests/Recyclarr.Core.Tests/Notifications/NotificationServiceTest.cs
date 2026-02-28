@@ -49,7 +49,7 @@ internal sealed class NotificationServiceTest
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 0);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 0);
         PublishSucceeded("Radarr", PipelineType.QualitySize, 0);
-        PublishSucceeded("Radarr", PipelineType.MediaNaming, 0);
+        PublishSucceeded("Radarr", PipelineType.RadarrMediaNaming, 0);
 
         await sut.SendNotification();
 
@@ -64,7 +64,7 @@ internal sealed class NotificationServiceTest
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 5);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 0);
         PublishSucceeded("Radarr", PipelineType.QualitySize, 3);
-        PublishSucceeded("Radarr", PipelineType.MediaNaming, 0);
+        PublishSucceeded("Radarr", PipelineType.RadarrMediaNaming, 0);
 
         await sut.SendNotification();
 
@@ -83,7 +83,7 @@ internal sealed class NotificationServiceTest
         PublishSucceeded("Radarr", PipelineType.CustomFormat, 2);
         PublishSucceeded("Radarr", PipelineType.QualityProfile, 1);
         PublishSucceeded("Radarr", PipelineType.QualitySize, 4);
-        PublishSucceeded("Radarr", PipelineType.MediaNaming, 1);
+        PublishSucceeded("Radarr", PipelineType.RadarrMediaNaming, 1);
 
         await sut.SendNotification();
 

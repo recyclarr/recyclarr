@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+namespace Recyclarr.Cli.Pipelines.MediaNaming;
 
 internal record InvalidNamingEntry(string Type, string ConfigValue);
 

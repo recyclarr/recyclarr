@@ -221,7 +221,8 @@ internal sealed class NotificationService : INotificationService, IDisposable
             PipelineType.CustomFormat => "Custom Formats Synced",
             PipelineType.QualityProfile => "Quality Profiles Synced",
             PipelineType.QualitySize => "Quality Sizes Synced",
-            PipelineType.MediaNaming => "Media Naming Synced",
+            PipelineType.SonarrMediaNaming => "Media Naming Synced",
+            PipelineType.RadarrMediaNaming => "Media Naming Synced",
             _ => "Items Synced",
         };
     }

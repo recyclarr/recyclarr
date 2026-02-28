@@ -75,7 +75,7 @@ internal class ProgressTableBuilder
             FormatPipeline(PipelineType.CustomFormat),
             FormatPipeline(PipelineType.QualityProfile),
             FormatPipeline(PipelineType.QualitySize),
-            FormatPipeline(PipelineType.MediaNaming),
+            FormatMediaNamingPipeline(),
             FormatPipeline(PipelineType.MediaManagement)
         );
         return;
@@ -85,6 +85,22 @@ internal class ProgressTableBuilder
             var result = instance.Pipelines.TryGetValue(type, out var pipeline)
                 ? pipeline
                 : (PipelineSnapshot?)null;
+            return new Markup(FormatPipelineStatus(result, spinnerFrame, isActive, instanceFailed));
+        }
+
+        // Only one of Sonarr/Radarr naming is active per instance; show whichever has data
+        Markup FormatMediaNamingPipeline()
+        {
+            PipelineSnapshot? result = null;
+            if (instance.Pipelines.TryGetValue(PipelineType.SonarrMediaNaming, out var sonarr))
+            {
+                result = sonarr;
+            }
+            else if (instance.Pipelines.TryGetValue(PipelineType.RadarrMediaNaming, out var radarr))
+            {
+                result = radarr;
+            }
+
             return new Markup(FormatPipelineStatus(result, spinnerFrame, isActive, instanceFailed));
         }
     }

@@ -137,14 +137,18 @@ port and operate on domain types. Flurl remains the HTTP client inside adapters.
   trivial (two properties, no `required` fields) so direct construction is clearer.
 
 #### Phase 4a: Media Naming pipeline split
-- **Status:** not started
+- **Status:** done
 - **Size:** small
-- **Notes:** Pure structural split. Create `SonarrNamingPipelineContext` and
-  `RadarrNamingPipelineContext` with their own phase sets. Move existing code from behind switch
-  statements. Delete: abstract `MediaNamingDto` base, `IServiceBasedMediaNamingConfigPhase`, keyed
-  DI for config phases, all switch/pattern-match dispatch in transaction/preview/persistence phases.
-  `NamingFormatLookup` stays as shared utility. No adapter layer yet; phases talk directly to
-  service-specific API services (still Flurl).
+- **Notes:** Pure structural split. Created `SonarrNamingPipelineContext` and
+  `RadarrNamingPipelineContext` with their own phase sets (fetch, transaction, preview, persistence).
+  Deleted: abstract `MediaNamingDto` base, `IServiceBasedMediaNamingConfigPhase`, keyed DI for
+  config phases, all switch/pattern-match dispatch. Split `PipelineType.MediaNaming` into
+  `SonarrMediaNaming` and `RadarrMediaNaming`. `NamingFormatLookup` stays as shared utility in
+  `Pipelines/MediaNaming/`. Split API service into `ISonarrMediaNamingApiService` and
+  `IRadarrMediaNamingApiService`. Moved `GetDifferences` from extension methods to instance methods
+  on each DTO. Plan components split into `SonarrMediaNamingPlanComponent` and
+  `RadarrMediaNamingPlanComponent` that skip when config doesn't match their service type.
+  `ProgressTableBuilder` merges both pipeline types into one "Media Naming" column.
 
 #### Phase 4b: Media Naming adapters
 - **Status:** not started

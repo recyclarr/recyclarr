@@ -1,13 +1,43 @@
+using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.ServarrApi.MediaNaming;
 
-namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases.Config;
+namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
-internal class SonarrMediaNamingConfigPhase(SonarrConfiguration config)
-    : IServiceBasedMediaNamingConfigPhase
+internal class SonarrMediaNamingPlanComponent(
+    MediaNamingResourceQuery guide,
+    IServiceConfiguration config
+) : IPlanComponent
 {
-    public MediaNamingDto ProcessNaming(MediaNamingResourceQuery guide, NamingFormatLookup lookup)
+    public void Process(PipelinePlan plan)
+    {
+        if (config is not SonarrConfiguration sonarrConfig)
+        {
+            return;
+        }
+
+        var lookup = new NamingFormatLookup();
+        var dto = BuildDto(sonarrConfig, guide, lookup);
+
+        foreach (var (type, configValue) in lookup.Errors)
+        {
+            plan.AddError($"Invalid {type} naming format: {configValue}");
+        }
+
+        if (dto.GetDifferences(new SonarrMediaNamingDto()).Count == 0)
+        {
+            return;
+        }
+
+        plan.SonarrMediaNaming = new PlannedSonarrMediaNaming { Dto = dto };
+    }
+
+    private static SonarrMediaNamingDto BuildDto(
+        SonarrConfiguration config,
+        MediaNamingResourceQuery guide,
+        NamingFormatLookup lookup
+    )
     {
         var guideData = guide.GetSonarr();
         var configData = config.MediaNaming;

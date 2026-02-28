@@ -240,8 +240,12 @@ public class CoreAutofacModule : Module
             RadarrQualityDefinitionAdapter
         >();
         builder
-            .RegisterType<MediaNamingApiService>()
-            .As<IMediaNamingApiService>()
+            .RegisterType<SonarrMediaNamingApiService>()
+            .As<ISonarrMediaNamingApiService>()
+            .InstancePerLifetimeScope();
+        builder
+            .RegisterType<RadarrMediaNamingApiService>()
+            .As<IRadarrMediaNamingApiService>()
             .InstancePerLifetimeScope();
         builder
             .RegisterType<MediaManagementApiService>()

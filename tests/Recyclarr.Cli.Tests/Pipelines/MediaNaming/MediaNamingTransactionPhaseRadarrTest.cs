@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.MediaNaming;
-using Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
+using Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -14,14 +13,14 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 )]
 internal sealed class MediaNamingTransactionPhaseRadarrTest
 {
-    private static TestPlan CreatePlan(MediaNamingDto dto)
+    private static TestPlan CreatePlan(RadarrMediaNamingDto dto)
     {
-        var plan = new TestPlan { MediaNaming = new PlannedMediaNaming { Dto = dto } };
+        var plan = new TestPlan { RadarrMediaNaming = new PlannedRadarrMediaNaming { Dto = dto } };
         return plan;
     }
 
     [Test, AutoMockData]
-    public async Task Radarr_left_null(MediaNamingTransactionPhase sut)
+    public async Task Radarr_left_null(RadarrNamingTransactionPhase sut)
     {
         var configDto = new RadarrMediaNamingDto
         {
@@ -30,7 +29,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
             MovieFolderFormat = "folder_format",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new RadarrNamingPipelineContext
         {
             ApiFetchOutput = new RadarrMediaNamingDto(),
             Plan = CreatePlan(configDto),
@@ -44,7 +43,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Radarr_right_null(MediaNamingTransactionPhase sut)
+    public async Task Radarr_right_null(RadarrNamingTransactionPhase sut)
     {
         var apiDto = new RadarrMediaNamingDto
         {
@@ -53,7 +52,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
             MovieFolderFormat = "folder_format",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new RadarrNamingPipelineContext
         {
             ApiFetchOutput = apiDto,
             Plan = CreatePlan(new RadarrMediaNamingDto()),
@@ -67,7 +66,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Radarr_right_and_left_with_rename(MediaNamingTransactionPhase sut)
+    public async Task Radarr_right_and_left_with_rename(RadarrNamingTransactionPhase sut)
     {
         var configDto = new RadarrMediaNamingDto
         {
@@ -76,7 +75,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
             MovieFolderFormat = "folder_format2",
         };
 
-        var context = new MediaNamingPipelineContext
+        var context = new RadarrNamingPipelineContext
         {
             ApiFetchOutput = new RadarrMediaNamingDto
             {
@@ -95,9 +94,9 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
     }
 
     [Test, AutoMockData]
-    public async Task Radarr_right_and_left_without_rename(MediaNamingTransactionPhase sut)
+    public async Task Radarr_right_and_left_without_rename(RadarrNamingTransactionPhase sut)
     {
-        var context = new MediaNamingPipelineContext
+        var context = new RadarrNamingPipelineContext
         {
             ApiFetchOutput = new RadarrMediaNamingDto
             {

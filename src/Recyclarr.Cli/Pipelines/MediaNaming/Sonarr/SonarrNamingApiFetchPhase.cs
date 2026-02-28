@@ -1,12 +1,12 @@
 using Recyclarr.ServarrApi.MediaNaming;
 
-namespace Recyclarr.Cli.Pipelines.MediaNaming.PipelinePhases;
+namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 
-internal class MediaNamingApiFetchPhase(IMediaNamingApiService api)
-    : IPipelinePhase<MediaNamingPipelineContext>
+internal class SonarrNamingApiFetchPhase(ISonarrMediaNamingApiService api)
+    : IPipelinePhase<SonarrNamingPipelineContext>
 {
     public async Task<PipelineFlow> Execute(
-        MediaNamingPipelineContext context,
+        SonarrNamingPipelineContext context,
         CancellationToken ct
     )
     {
