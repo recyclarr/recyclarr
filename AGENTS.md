@@ -5,21 +5,28 @@
 ## Linear
 
 - Issue prefix: `REC-` (e.g. REC-74 is Linear; #74 is GitHub)
-- Statuses: Backlog, Todo, In Progress, Done, Canceled, Duplicate
+- Issue statuses: Backlog, Todo, In Progress, Done, Canceled, Duplicate
+- Project statuses: Backlog, Planned, In Progress, Completed, Canceled
 - Labels: Bug, Tech Debt, Documentation, Templates, Blocked By Trash Guides
 
-Operational Directives:
+Issue lifecycle:
 
-- MUST transition issue to "In Progress" when starting work on it
-- MUST transition issue to "Done" after the final commit lands
+- MUST transition to "In Progress" when starting work
+- MUST transition to "Done" after the final commit lands
 - MUST check comments when reading issue details
+
+Project lifecycle:
+
+- MUST transition to "In Progress" when starting work on any issue in the project
+- MUST transition to "Completed" when all issues are done
+- SHOULD transition to "Canceled" if the project is abandoned
 
 ## Agent Architecture
 
 Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
 
-- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost). MUST
-  use this subagent for any question about TRaSH Guides content (custom formats, quality profiles,
+- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost). MUST use
+  this subagent for any question about TRaSH Guides content (custom formats, quality profiles,
   naming, quality sizes, trash_ids). NEVER use the generic explore agent for guides research.
 - **commit**: Git operations after user approval
 
@@ -32,6 +39,7 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
   tests)
 - `changelog` - When updating CHANGELOG.md for format and conventions
 - `decisions` - Creating ADRs and PDRs in `docs/decisions/`
+- `linear-planning` - Creating or organizing Linear issues, projects, or initiatives
 
 ## Project Context
 
@@ -162,7 +170,6 @@ log.Warning(message);
     - `architecture/`: Technical implementation decisions (ADRs)
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
-  - `memory-bank/`: AI working memory
 
 Some key files and directories:
 
@@ -192,7 +199,8 @@ Some key files and directories:
 
 All under `./scripts`. MUST use `testing` skill for test-related work.
 
-- `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`, `lowest`)
+- `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
+  `lowest`)
 - `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
 - `Docker-Debug.ps1`: Start Docker services (Sonarr, Radarr, Apprise) for local debugging/E2E tests
 - `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts Docker-Debug if needed
