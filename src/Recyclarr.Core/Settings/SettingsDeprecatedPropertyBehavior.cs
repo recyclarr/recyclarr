@@ -11,12 +11,12 @@ public class SettingsDeprecatedPropertyBehavior : IYamlBehavior
         StringComparer.Ordinal
     )
     {
-        ["repositories"] = new(
+        ["repositories"] = new RemovedPropertyEntry(
             "The `repositories` setting has been removed. Use `resource_providers` instead. "
                 + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#resource-providers",
             RemovedPropertySeverity.Error
         ),
-        ["repository"] = new(
+        ["repository"] = new RemovedPropertyEntry(
             "The `repository` setting has been removed. Use `resource_providers` instead. "
                 + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#resource-providers",
             RemovedPropertySeverity.Error

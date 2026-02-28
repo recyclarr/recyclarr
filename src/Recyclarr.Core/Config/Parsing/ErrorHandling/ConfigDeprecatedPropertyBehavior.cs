@@ -12,12 +12,12 @@ internal class ConfigDeprecatedPropertyBehavior(IConfigDiagnosticCollector colle
         StringComparer.Ordinal
     )
     {
-        ["replace_existing_custom_formats"] = new(
+        ["replace_existing_custom_formats"] = new RemovedPropertyEntry(
             "The `replace_existing_custom_formats` option has been removed and will be ignored. "
                 + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#replace-existing-removed",
             RemovedPropertySeverity.Warning
         ),
-        ["quality_profiles"] = new(
+        ["quality_profiles"] = new RemovedPropertyEntry(
             "The `quality_profiles` element under `custom_formats` has been renamed to "
                 + "`assign_scores_to`. "
                 + "See: https://recyclarr.dev/guide/upgrade-guide/v8.0/#assign-scores-to",

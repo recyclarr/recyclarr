@@ -12,11 +12,11 @@ internal sealed class DeprecatedPropertyInspectorTest
         StringComparer.Ordinal
     )
     {
-        ["deprecated_prop"] = new(
+        ["deprecated_prop"] = new RemovedPropertyEntry(
             "The `deprecated_prop` option has been removed.",
             RemovedPropertySeverity.Warning
         ),
-        ["errored_prop"] = new(
+        ["errored_prop"] = new RemovedPropertyEntry(
             "The `errored_prop` option has been renamed to `new_prop`.",
             RemovedPropertySeverity.Error
         ),
