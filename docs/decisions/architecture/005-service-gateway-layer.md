@@ -1,4 +1,4 @@
-# ADR-005: Service Adapter Layer for Sonarr/Radarr API Abstraction
+# ADR-005: Service Gateway Layer for Sonarr/Radarr API Abstraction
 
 - **Status:** Accepted
 - **Date:** 2026-02-26
@@ -29,51 +29,51 @@ capture unknown API fields for lossless PUT operations. This works but makes the
 
 ## Considered Options
 
-1. Introduce a Port + Adapter layer between pipelines and HTTP clients
+1. Introduce a Port + Gateway layer between pipelines and HTTP clients
 2. Continue extending the unified Servarr abstraction with per-feature dispatch
 3. Replace the unified abstraction with fully separate Sonarr/Radarr codepaths (no sharing)
 
 ## Decision Outcome
 
-Chosen option: "Port + Adapter layer", because it preserves pipeline sharing for genuinely common
+Chosen option: "Port + Gateway layer", because it preserves pipeline sharing for genuinely common
 features while giving service-specific features clean separation.
 
 The architecture introduces two components per feature:
 
 - **Port**: Domain interface defined in the pipeline/domain layer, speaks only domain types (e.g.
   `IQualityProfileService`). This is what pipeline phases inject.
-- **Adapter**: Infrastructure class implementing the port for a specific service. Owns the HTTP
+- **Gateway**: Infrastructure class implementing the port for a specific service. Owns the HTTP
   client, contains to/from-domain mapping as private methods, and manages read-modify-write state
-  (e.g. `SonarrQualityProfileAdapter`).
+  (e.g. `SonarrQualityProfileGateway`).
 
 A separate translator class was considered and rejected. The mapping logic is private to one
-adapter, called from one place, and tested through the adapter's public surface. Extracting it adds
+gateway, called from one place, and tested through the gateway's public surface. Extracting it adds
 a file and indirection with no benefit to testability, reuse, or readability.
 
-### Adapter state management
+### Gateway state management
 
-Adapters use the Hydrated Resource pattern: during fetch, the adapter stashes the original service
-DTO in an internal dictionary keyed by resource ID. During persist, the adapter retrieves the
+Gateways use the Hydrated Resource pattern: during fetch, the gateway stashes the original service
+DTO in an internal dictionary keyed by resource ID. During persist, the gateway retrieves the
 stashed DTO, applies domain changes via its private mapping methods, and PUTs the complete object
 back. This eliminates the need for `[JsonExtensionData]` on domain types while preserving lossless
 round-trips.
 
-Adapter instances are scoped to one sync operation (`InstancePerLifetimeScope`), matching the
+Gateway instances are scoped to one sync operation (`InstancePerLifetimeScope`), matching the
 existing API service lifetime. State is created during fetch, consumed during persist, and discarded
 when the sync completes. No cross-sync state, no shared caches, no concurrency concerns.
 
-The alternative (fetch-in-update: the adapter re-GETs the resource during persist instead of
+The alternative (fetch-in-update: the gateway re-GETs the resource during persist instead of
 stashing it) was rejected because it adds failure modes and network calls to solve a staleness
 problem that does not exist within a single sync operation.
 
 ### Shared vs. service-specific pipeline boundary
 
-The litmus test for whether a feature uses a shared pipeline with adapters or gets service-specific
+The litmus test for whether a feature uses a shared pipeline with gateways or gets service-specific
 pipelines: **Is there a meaningful shared domain concept, or just a shared endpoint path?**
 
-- Same resource with service-specific properties: shared pipeline + adapter. The adapter maps
+- Same resource with service-specific properties: shared pipeline + gateway. The gateway maps
   service-specific fields into optional properties on the domain type. Example: quality profiles
-  (Radarr adds language; the domain type has nullable `Language`; the Sonarr adapter leaves it
+  (Radarr adds language; the domain type has nullable `Language`; the Sonarr gateway leaves it
   null).
 - Different resource concepts behind a shared path: service-specific pipelines. Example: media
   naming (Sonarr episode naming and Radarr movie naming are unrelated domain concepts that happen to
@@ -83,9 +83,9 @@ pipelines: **Is there a meaningful shared domain concept, or just a shared endpo
 
 - Good, because pipeline phases code against domain types with no service awareness
 - Good, because service-specific features get their own pipelines without dispatch hacks
-- Good, because adapters are the natural seam for future Refit/Refitter migration
-- Good, because upstream API changes surface as compile errors in adapter mapping methods, not
+- Good, because gateways are the natural seam for future Refit/Refitter migration
+- Good, because upstream API changes surface as compile errors in gateway mapping methods, not
   silent data loss
-- Bad, because adapters for identical schemas (custom formats) are thin pass-through boilerplate
+- Bad, because gateways for identical schemas (custom formats) are thin pass-through boilerplate
 - Bad, because the stashed DTO dictionary is implicit state that must be understood when reading
-  adapter code
+  gateway code

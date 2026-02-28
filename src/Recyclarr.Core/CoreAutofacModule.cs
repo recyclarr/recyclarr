@@ -22,6 +22,7 @@ using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.Servarr.MediaManagement;
+using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Servarr.SystemStatus;
 using Recyclarr.ServarrApi;
@@ -244,8 +245,16 @@ public class CoreAutofacModule : Module
             .As<ISonarrMediaNamingApiService>()
             .InstancePerLifetimeScope();
         builder
+            .RegisterType<SonarrNamingGateway>()
+            .As<ISonarrNamingService>()
+            .InstancePerLifetimeScope();
+        builder
             .RegisterType<RadarrMediaNamingApiService>()
             .As<IRadarrMediaNamingApiService>()
+            .InstancePerLifetimeScope();
+        builder
+            .RegisterType<RadarrNamingGateway>()
+            .As<IRadarrNamingService>()
             .InstancePerLifetimeScope();
         builder
             .RegisterType<MediaManagementApiService>()

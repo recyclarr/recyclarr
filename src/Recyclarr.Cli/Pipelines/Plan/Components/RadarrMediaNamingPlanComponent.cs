@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
@@ -18,22 +18,22 @@ internal class RadarrMediaNamingPlanComponent(
         }
 
         var lookup = new NamingFormatLookup();
-        var dto = BuildDto(radarrConfig, guide, lookup);
+        var data = BuildData(radarrConfig, guide, lookup);
 
         foreach (var (type, configValue) in lookup.Errors)
         {
             plan.AddError($"Invalid {type} naming format: {configValue}");
         }
 
-        if (dto.GetDifferences(new RadarrMediaNamingDto()).Count == 0)
+        if (!data.HasValues())
         {
             return;
         }
 
-        plan.RadarrMediaNaming = new PlannedRadarrMediaNaming { Dto = dto };
+        plan.RadarrMediaNaming = new PlannedRadarrMediaNaming { Data = data };
     }
 
-    private static RadarrMediaNamingDto BuildDto(
+    private static RadarrNamingData BuildData(
         RadarrConfiguration config,
         MediaNamingResourceQuery guide,
         NamingFormatLookup lookup
@@ -42,7 +42,7 @@ internal class RadarrMediaNamingPlanComponent(
         var guideData = guide.GetRadarr();
         var configData = config.MediaNaming;
 
-        return new RadarrMediaNamingDto
+        return new RadarrNamingData
         {
             StandardMovieFormat = lookup.ObtainFormat(
                 guideData.File,

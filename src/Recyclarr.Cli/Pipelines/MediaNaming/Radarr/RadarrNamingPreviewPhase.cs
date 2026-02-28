@@ -9,11 +9,11 @@ internal class RadarrNamingPreviewPhase(IAnsiConsole console)
     {
         RenderTitle(context);
 
-        var dto = context.TransactionOutput;
+        var data = context.TransactionOutput;
         var table = new Table().AddColumns("[b]Field[/]", "[b]Value[/]");
-        AddRow(table, "Enable Movie Renames?", dto.RenameMovies);
-        AddRow(table, "Movie", dto.StandardMovieFormat);
-        AddRow(table, "Folder", dto.MovieFolderFormat);
+        AddRow(table, "Enable Movie Renames?", data.RenameMovies);
+        AddRow(table, "Movie", data.StandardMovieFormat);
+        AddRow(table, "Folder", data.MovieFolderFormat);
         Console.Write(table);
     }
 

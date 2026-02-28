@@ -1,4 +1,4 @@
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
@@ -11,6 +11,6 @@ internal class SonarrNamingPipelineContext : PipelineContext, IPipelineMetadata
     public override string PipelineDescription => "Sonarr Media Naming";
     public override bool ShouldSkip => !Plan.SonarrMediaNamingAvailable;
 
-    public SonarrMediaNamingDto ApiFetchOutput { get; set; } = null!;
-    public SonarrMediaNamingDto TransactionOutput { get; set; } = null!;
+    public SonarrNamingData ApiFetchOutput { get; set; } = null!;
+    public SonarrNamingData TransactionOutput { get; set; } = null!;
 }

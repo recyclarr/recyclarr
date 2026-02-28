@@ -1,8 +1,8 @@
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
 
-internal class RadarrNamingApiFetchPhase(IRadarrMediaNamingApiService api)
+internal class RadarrNamingApiFetchPhase(IRadarrNamingService api)
     : IPipelinePhase<RadarrNamingPipelineContext>
 {
     public async Task<PipelineFlow> Execute(

@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 
@@ -13,16 +13,19 @@ namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 )]
 internal sealed class MediaNamingTransactionPhaseRadarrTest
 {
-    private static TestPlan CreatePlan(RadarrMediaNamingDto dto)
+    private static TestPlan CreatePlan(RadarrNamingData data)
     {
-        var plan = new TestPlan { RadarrMediaNaming = new PlannedRadarrMediaNaming { Dto = dto } };
+        var plan = new TestPlan
+        {
+            RadarrMediaNaming = new PlannedRadarrMediaNaming { Data = data },
+        };
         return plan;
     }
 
     [Test, AutoMockData]
     public async Task Radarr_left_null(RadarrNamingTransactionPhase sut)
     {
-        var configDto = new RadarrMediaNamingDto
+        var configData = new RadarrNamingData
         {
             RenameMovies = true,
             StandardMovieFormat = "file_format",
@@ -31,21 +34,21 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
 
         var context = new RadarrNamingPipelineContext
         {
-            ApiFetchOutput = new RadarrMediaNamingDto(),
-            Plan = CreatePlan(configDto),
+            ApiFetchOutput = new RadarrNamingData(),
+            Plan = CreatePlan(configData),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Radarr_right_null(RadarrNamingTransactionPhase sut)
     {
-        var apiDto = new RadarrMediaNamingDto
+        var apiData = new RadarrNamingData
         {
             RenameMovies = true,
             StandardMovieFormat = "file_format",
@@ -54,21 +57,21 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
 
         var context = new RadarrNamingPipelineContext
         {
-            ApiFetchOutput = apiDto,
-            Plan = CreatePlan(new RadarrMediaNamingDto()),
+            ApiFetchOutput = apiData,
+            Plan = CreatePlan(new RadarrNamingData()),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(apiDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(apiData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Radarr_right_and_left_with_rename(RadarrNamingTransactionPhase sut)
     {
-        var configDto = new RadarrMediaNamingDto
+        var configData = new RadarrNamingData
         {
             RenameMovies = true,
             StandardMovieFormat = "file_format2",
@@ -77,20 +80,20 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
 
         var context = new RadarrNamingPipelineContext
         {
-            ApiFetchOutput = new RadarrMediaNamingDto
+            ApiFetchOutput = new RadarrNamingData
             {
                 RenameMovies = false,
                 StandardMovieFormat = "file_format",
                 MovieFolderFormat = "folder_format",
             },
-            Plan = CreatePlan(configDto),
+            Plan = CreatePlan(configData),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -98,14 +101,14 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
     {
         var context = new RadarrNamingPipelineContext
         {
-            ApiFetchOutput = new RadarrMediaNamingDto
+            ApiFetchOutput = new RadarrNamingData
             {
                 RenameMovies = true,
                 StandardMovieFormat = "file_format",
                 MovieFolderFormat = "folder_format",
             },
             Plan = CreatePlan(
-                new RadarrMediaNamingDto
+                new RadarrNamingData
                 {
                     RenameMovies = false,
                     StandardMovieFormat = "file_format2",
@@ -119,7 +122,7 @@ internal sealed class MediaNamingTransactionPhaseRadarrTest
         context
             .TransactionOutput.Should()
             .BeEquivalentTo(
-                new RadarrMediaNamingDto
+                new RadarrNamingData
                 {
                     RenameMovies = false,
                     StandardMovieFormat = "file_format2",

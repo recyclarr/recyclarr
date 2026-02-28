@@ -9,14 +9,14 @@ internal class SonarrNamingPreviewPhase(IAnsiConsole console)
     {
         RenderTitle(context);
 
-        var dto = context.TransactionOutput;
+        var data = context.TransactionOutput;
         var table = new Table().AddColumns("[b]Field[/]", "[b]Value[/]");
-        AddRow(table, "Enable Episode Renames?", dto.RenameEpisodes);
-        AddRow(table, "Series Folder", dto.SeriesFolderFormat);
-        AddRow(table, "Season Folder", dto.SeasonFolderFormat);
-        AddRow(table, "Standard Episodes", dto.StandardEpisodeFormat);
-        AddRow(table, "Daily Episodes", dto.DailyEpisodeFormat);
-        AddRow(table, "Anime Episodes", dto.AnimeEpisodeFormat);
+        AddRow(table, "Enable Episode Renames?", data.RenameEpisodes);
+        AddRow(table, "Series Folder", data.SeriesFolderFormat);
+        AddRow(table, "Season Folder", data.SeasonFolderFormat);
+        AddRow(table, "Standard Episodes", data.StandardEpisodeFormat);
+        AddRow(table, "Daily Episodes", data.DailyEpisodeFormat);
+        AddRow(table, "Anime Episodes", data.AnimeEpisodeFormat);
         Console.Write(table);
     }
 

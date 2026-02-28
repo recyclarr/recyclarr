@@ -2,23 +2,26 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming;
 
 [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope")]
 internal sealed class MediaNamingTransactionPhaseSonarrTest
 {
-    private static TestPlan CreatePlan(SonarrMediaNamingDto dto)
+    private static TestPlan CreatePlan(SonarrNamingData data)
     {
-        var plan = new TestPlan { SonarrMediaNaming = new PlannedSonarrMediaNaming { Dto = dto } };
+        var plan = new TestPlan
+        {
+            SonarrMediaNaming = new PlannedSonarrMediaNaming { Data = data },
+        };
         return plan;
     }
 
     [Test, AutoMockData]
     public async Task Sonarr_left_null(SonarrNamingTransactionPhase sut)
     {
-        var configDto = new SonarrMediaNamingDto
+        var configData = new SonarrNamingData
         {
             RenameEpisodes = true,
             SeasonFolderFormat = "season_default",
@@ -30,21 +33,21 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
 
         var context = new SonarrNamingPipelineContext
         {
-            ApiFetchOutput = new SonarrMediaNamingDto(),
-            Plan = CreatePlan(configDto),
+            ApiFetchOutput = new SonarrNamingData(),
+            Plan = CreatePlan(configData),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Sonarr_right_null(SonarrNamingTransactionPhase sut)
     {
-        var apiDto = new SonarrMediaNamingDto
+        var apiData = new SonarrNamingData
         {
             RenameEpisodes = true,
             SeasonFolderFormat = "season_default",
@@ -56,21 +59,21 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
 
         var context = new SonarrNamingPipelineContext
         {
-            ApiFetchOutput = apiDto,
-            Plan = CreatePlan(new SonarrMediaNamingDto()),
+            ApiFetchOutput = apiData,
+            Plan = CreatePlan(new SonarrNamingData()),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(apiDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(apiData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
     public async Task Sonarr_right_and_left_with_rename(SonarrNamingTransactionPhase sut)
     {
-        var configDto = new SonarrMediaNamingDto
+        var configData = new SonarrNamingData
         {
             RenameEpisodes = true,
             SeasonFolderFormat = "season_default2",
@@ -82,7 +85,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
 
         var context = new SonarrNamingPipelineContext
         {
-            ApiFetchOutput = new SonarrMediaNamingDto
+            ApiFetchOutput = new SonarrNamingData
             {
                 RenameEpisodes = false,
                 SeasonFolderFormat = "season_default",
@@ -91,14 +94,14 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
                 DailyEpisodeFormat = "episodes_daily_default",
                 AnimeEpisodeFormat = "episodes_anime_default",
             },
-            Plan = CreatePlan(configDto),
+            Plan = CreatePlan(configData),
         };
 
         await sut.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
-            .BeEquivalentTo(configDto, o => o.PreferringRuntimeMemberTypes());
+            .BeEquivalentTo(configData, o => o.PreferringRuntimeMemberTypes());
     }
 
     [Test, AutoMockData]
@@ -106,7 +109,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
     {
         var context = new SonarrNamingPipelineContext
         {
-            ApiFetchOutput = new SonarrMediaNamingDto
+            ApiFetchOutput = new SonarrNamingData
             {
                 RenameEpisodes = true,
                 SeasonFolderFormat = "season_default",
@@ -116,7 +119,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
                 AnimeEpisodeFormat = "episodes_anime_default",
             },
             Plan = CreatePlan(
-                new SonarrMediaNamingDto
+                new SonarrNamingData
                 {
                     RenameEpisodes = false,
                     SeasonFolderFormat = "season_default2",
@@ -133,7 +136,7 @@ internal sealed class MediaNamingTransactionPhaseSonarrTest
         context
             .TransactionOutput.Should()
             .BeEquivalentTo(
-                new SonarrMediaNamingDto
+                new SonarrNamingData
                 {
                     RenameEpisodes = false,
                     SeasonFolderFormat = "season_default2",

@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.MediaNaming;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.MediaNaming;
+using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.Plan.Components;
 
@@ -18,22 +18,22 @@ internal class SonarrMediaNamingPlanComponent(
         }
 
         var lookup = new NamingFormatLookup();
-        var dto = BuildDto(sonarrConfig, guide, lookup);
+        var data = BuildData(sonarrConfig, guide, lookup);
 
         foreach (var (type, configValue) in lookup.Errors)
         {
             plan.AddError($"Invalid {type} naming format: {configValue}");
         }
 
-        if (dto.GetDifferences(new SonarrMediaNamingDto()).Count == 0)
+        if (!data.HasValues())
         {
             return;
         }
 
-        plan.SonarrMediaNaming = new PlannedSonarrMediaNaming { Dto = dto };
+        plan.SonarrMediaNaming = new PlannedSonarrMediaNaming { Data = data };
     }
 
-    private static SonarrMediaNamingDto BuildDto(
+    private static SonarrNamingData BuildData(
         SonarrConfiguration config,
         MediaNamingResourceQuery guide,
         NamingFormatLookup lookup
@@ -43,7 +43,7 @@ internal class SonarrMediaNamingPlanComponent(
         var configData = config.MediaNaming;
         const string keySuffix = ":4";
 
-        return new SonarrMediaNamingDto
+        return new SonarrNamingData
         {
             SeasonFolderFormat = lookup.ObtainFormat(
                 guideData.Season,
