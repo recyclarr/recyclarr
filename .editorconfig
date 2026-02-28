@@ -70,6 +70,9 @@ dotnet_code_quality_unused_parameters = all
 dotnet_diagnostic.IDE0079.severity = warning
 dotnet_remove_unnecessary_suppression_exclusions = none
 
+# Require braces for all control flow statements (IDE0011)
+csharp_prefer_braces = true:warning
+
 # Simple using declarations (IDE0063)
 csharp_prefer_simple_using_statement = true:warning
 
