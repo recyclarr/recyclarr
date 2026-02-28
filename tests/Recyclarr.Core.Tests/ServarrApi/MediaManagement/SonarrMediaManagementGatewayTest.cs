@@ -3,12 +3,12 @@ using Recyclarr.ServarrApi.MediaManagement;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaManagement;
 
-internal sealed class RadarrMediaManagementAdapterTest
+internal sealed class SonarrMediaManagementGatewayTest
 {
     [Test, AutoMockData]
     public async Task Get_returns_domain_data_with_correct_mapping(
         [Frozen] IMediaManagementApiService api,
-        RadarrMediaManagementAdapter sut
+        SonarrMediaManagementGateway sut
     )
     {
         var dto = new MediaManagementDto
@@ -27,7 +27,7 @@ internal sealed class RadarrMediaManagementAdapterTest
     [Test, AutoMockData]
     public async Task Update_merges_domain_changes_onto_stashed_dto(
         [Frozen] IMediaManagementApiService api,
-        RadarrMediaManagementAdapter sut
+        SonarrMediaManagementGateway sut
     )
     {
         var originalDto = new MediaManagementDto

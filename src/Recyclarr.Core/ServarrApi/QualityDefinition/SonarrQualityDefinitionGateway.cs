@@ -2,7 +2,7 @@ using Recyclarr.Servarr.QualitySize;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
-internal class SonarrQualityDefinitionAdapter(IQualityDefinitionApiService api)
+internal class SonarrQualityDefinitionGateway(IQualityDefinitionApiService api)
     : IQualityDefinitionService
 {
     private readonly Dictionary<int, ServiceQualityDefinitionItem> _stashedDtos = [];

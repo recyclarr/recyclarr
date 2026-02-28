@@ -185,24 +185,12 @@ port and operate on domain types. Flurl remains the HTTP client inside gateways.
   `required` fields).
 
 #### Housekeeping: Rename Adapter -> Gateway
-- **Status:** not started
+- **Status:** done
 - **Size:** tiny
-- **Notes:** Rename all `*Adapter` classes to `*Gateway` across the codebase. User performs the
-  renames using Rider refactoring tools; AI provides the class list and assists with commit and
-  memory bank updates. Also rename `RegisterServiceAdapter` to `RegisterServiceGateway` in
-  `ContainerBuilderExtensions`. Update memory bank terminology after rename.
-
-  All future phases (5, 6, etc.) use `*Gateway` naming from the start.
-
-  Classes to rename:
-  - `SonarrSystemAdapter` -> `SonarrSystemGateway`
-  - `RadarrSystemAdapter` -> `RadarrSystemGateway`
-  - `SonarrQualityDefinitionAdapter` -> `SonarrQualityDefinitionGateway`
-  - `RadarrQualityDefinitionAdapter` -> `RadarrQualityDefinitionGateway`
-  - `SonarrMediaManagementAdapter` -> `SonarrMediaManagementGateway`
-  - `RadarrMediaManagementAdapter` -> `RadarrMediaManagementGateway`
-  - `SonarrNamingAdapter` -> `SonarrNamingGateway`
-  - `RadarrNamingAdapter` -> `RadarrNamingGateway`
+- **Notes:** Renamed all `*Adapter` classes to `*Gateway` across the codebase. Also renamed
+  `RegisterServiceAdapter` to `RegisterServiceGateway` in `ContainerBuilderExtensions`. Naming
+  adapters (`SonarrNamingGateway`, `RadarrNamingGateway`) were already using `*Gateway` naming from
+  Phase 4b. All future phases (5, 6, etc.) use `*Gateway` naming.
 
 #### Phase 5: Custom Formats pipeline gateway
 - **Status:** not started

@@ -2,7 +2,7 @@ using Recyclarr.Servarr.MediaManagement;
 
 namespace Recyclarr.ServarrApi.MediaManagement;
 
-internal class RadarrMediaManagementAdapter(IMediaManagementApiService api)
+internal class RadarrMediaManagementGateway(IMediaManagementApiService api)
     : IMediaManagementService
 {
     private MediaManagementDto? _stashedDto;

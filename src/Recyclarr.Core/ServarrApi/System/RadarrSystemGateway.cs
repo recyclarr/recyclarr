@@ -2,7 +2,7 @@ using Recyclarr.Servarr.SystemStatus;
 
 namespace Recyclarr.ServarrApi.System;
 
-internal class RadarrSystemAdapter(ISystemApiService api) : ISystemService
+internal class RadarrSystemGateway(ISystemApiService api) : ISystemService
 {
     public async Task<SystemServiceResult> GetStatus(CancellationToken ct)
     {

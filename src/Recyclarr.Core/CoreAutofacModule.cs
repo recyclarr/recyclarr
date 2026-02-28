@@ -221,7 +221,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
 
         builder.RegisterType<SystemApiService>().As<ISystemApiService>().InstancePerLifetimeScope();
-        builder.RegisterServiceAdapter<ISystemService, SonarrSystemAdapter, RadarrSystemAdapter>();
+        builder.RegisterServiceGateway<ISystemService, SonarrSystemGateway, RadarrSystemGateway>();
 
         builder
             .RegisterType<QualityProfileApiService>()
@@ -235,10 +235,10 @@ public class CoreAutofacModule : Module
             .RegisterType<QualityDefinitionApiService>()
             .As<IQualityDefinitionApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterServiceAdapter<
+        builder.RegisterServiceGateway<
             IQualityDefinitionService,
-            SonarrQualityDefinitionAdapter,
-            RadarrQualityDefinitionAdapter
+            SonarrQualityDefinitionGateway,
+            RadarrQualityDefinitionGateway
         >();
         builder
             .RegisterType<SonarrMediaNamingApiService>()
@@ -260,10 +260,10 @@ public class CoreAutofacModule : Module
             .RegisterType<MediaManagementApiService>()
             .As<IMediaManagementApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterServiceAdapter<
+        builder.RegisterServiceGateway<
             IMediaManagementService,
-            SonarrMediaManagementAdapter,
-            RadarrMediaManagementAdapter
+            SonarrMediaManagementGateway,
+            RadarrMediaManagementGateway
         >();
     }
 
