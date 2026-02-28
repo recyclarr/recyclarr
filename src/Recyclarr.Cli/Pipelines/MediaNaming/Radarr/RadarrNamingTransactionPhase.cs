@@ -4,7 +4,8 @@ internal class RadarrNamingTransactionPhase : IPipelinePhase<RadarrNamingPipelin
 {
     public Task<PipelineFlow> Execute(RadarrNamingPipelineContext context, CancellationToken ct)
     {
-        var configDto = context.Plan.RadarrMediaNaming.Dto;
+        // non-null: ShouldSkip guarantees RadarrMediaNaming is set before this phase runs
+        var configDto = context.Plan.RadarrMediaNaming!.Dto;
         context.TransactionOutput = context.ApiFetchOutput with
         {
             RenameMovies = configDto.RenameMovies,

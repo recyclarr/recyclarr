@@ -16,7 +16,7 @@ internal class QualitySizePipelineContext : PipelineContext, IPipelineMetadata
     public static IReadOnlyList<PipelineType> Dependencies => [];
 
     public override string PipelineDescription => "Quality Definition";
-    public override bool ShouldSkip => !Plan.QualitySizesAvailable;
+    public override bool ShouldSkip => Plan.QualitySizes is null;
 
     public IReadOnlyList<QualityDefinitionItem> ApiFetchOutput { get; set; } = null!;
     public QualityItemLimits Limits { get; set; } = null!;

@@ -4,7 +4,8 @@ internal class SonarrNamingTransactionPhase : IPipelinePhase<SonarrNamingPipelin
 {
     public Task<PipelineFlow> Execute(SonarrNamingPipelineContext context, CancellationToken ct)
     {
-        var configDto = context.Plan.SonarrMediaNaming.Dto;
+        // non-null: ShouldSkip guarantees SonarrMediaNaming is set before this phase runs
+        var configDto = context.Plan.SonarrMediaNaming!.Dto;
         context.TransactionOutput = context.ApiFetchOutput with
         {
             RenameEpisodes = configDto.RenameEpisodes,

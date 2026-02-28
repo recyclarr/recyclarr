@@ -9,7 +9,7 @@ internal class RadarrNamingPipelineContext : PipelineContext, IPipelineMetadata
     public static IReadOnlyList<PipelineType> Dependencies => [];
 
     public override string PipelineDescription => "Radarr Media Naming";
-    public override bool ShouldSkip => !Plan.RadarrMediaNamingAvailable;
+    public override bool ShouldSkip => Plan.RadarrMediaNaming is null;
 
     public RadarrMediaNamingDto ApiFetchOutput { get; set; } = null!;
     public RadarrMediaNamingDto TransactionOutput { get; set; } = null!;

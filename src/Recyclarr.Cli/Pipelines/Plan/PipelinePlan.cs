@@ -30,53 +30,10 @@ internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublish
         StringComparer.OrdinalIgnoreCase
     );
 
-    private PlannedQualitySizes? _qualitySizes;
-    public bool QualitySizesAvailable => _qualitySizes is not null;
-    public PlannedQualitySizes QualitySizes
-    {
-        get =>
-            _qualitySizes
-            ?? throw new InvalidOperationException(
-                "QualitySizes accessed but quality_definition not configured"
-            );
-        set => _qualitySizes = value;
-    }
-
-    private PlannedSonarrMediaNaming? _sonarrMediaNaming;
-    public bool SonarrMediaNamingAvailable => _sonarrMediaNaming is not null;
-    public PlannedSonarrMediaNaming SonarrMediaNaming
-    {
-        get =>
-            _sonarrMediaNaming
-            ?? throw new InvalidOperationException(
-                "SonarrMediaNaming accessed but media_naming not configured for Sonarr"
-            );
-        set => _sonarrMediaNaming = value;
-    }
-
-    private PlannedRadarrMediaNaming? _radarrMediaNaming;
-    public bool RadarrMediaNamingAvailable => _radarrMediaNaming is not null;
-    public PlannedRadarrMediaNaming RadarrMediaNaming
-    {
-        get =>
-            _radarrMediaNaming
-            ?? throw new InvalidOperationException(
-                "RadarrMediaNaming accessed but media_naming not configured for Radarr"
-            );
-        set => _radarrMediaNaming = value;
-    }
-
-    private PlannedMediaManagement? _mediaManagement;
-    public bool MediaManagementAvailable => _mediaManagement is not null;
-    public PlannedMediaManagement MediaManagement
-    {
-        get =>
-            _mediaManagement
-            ?? throw new InvalidOperationException(
-                "MediaManagement accessed but media_management not configured"
-            );
-        set => _mediaManagement = value;
-    }
+    public PlannedQualitySizes? QualitySizes { get; set; }
+    public PlannedSonarrMediaNaming? SonarrMediaNaming { get; set; }
+    public PlannedRadarrMediaNaming? RadarrMediaNaming { get; set; }
+    public PlannedMediaManagement? MediaManagement { get; set; }
 
     public IReadOnlyCollection<PlannedCustomFormat> CustomFormats => _customFormats.Values;
     public IReadOnlyCollection<PlannedQualityProfile> QualityProfiles => _qualityProfiles.Values;

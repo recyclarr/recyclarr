@@ -9,7 +9,7 @@ internal class MediaManagementPipelineContext : PipelineContext, IPipelineMetada
     public static IReadOnlyList<PipelineType> Dependencies => [];
 
     public override string PipelineDescription => "Media Management";
-    public override bool ShouldSkip => !Plan.MediaManagementAvailable;
+    public override bool ShouldSkip => Plan.MediaManagement is null;
 
     public MediaManagementData ApiFetchOutput { get; set; } = null!;
     public MediaManagementData TransactionOutput { get; set; } = null!;

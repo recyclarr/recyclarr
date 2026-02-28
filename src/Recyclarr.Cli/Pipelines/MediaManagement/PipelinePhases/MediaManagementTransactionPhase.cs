@@ -4,7 +4,8 @@ internal class MediaManagementTransactionPhase : IPipelinePhase<MediaManagementP
 {
     public Task<PipelineFlow> Execute(MediaManagementPipelineContext context, CancellationToken ct)
     {
-        var planned = context.Plan.MediaManagement;
+        // non-null: ShouldSkip guarantees MediaManagement is set before this phase runs
+        var planned = context.Plan.MediaManagement!;
 
         context.TransactionOutput = context.ApiFetchOutput with
         {
