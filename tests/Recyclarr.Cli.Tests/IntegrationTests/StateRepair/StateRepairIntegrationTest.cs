@@ -8,7 +8,7 @@ using Recyclarr.Config.Parsing;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.Servarr.CustomFormat;
 using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.SyncState;
 
@@ -24,16 +24,16 @@ internal sealed record TestMappings
 
 internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 {
-    private ICustomFormatApiService _cfApiService = null!;
+    private ICustomFormatService _cfService = null!;
     private IQualityProfileApiService _qpApiService = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
-        _cfApiService = Substitute.For<ICustomFormatApiService>();
-        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns([]);
-        builder.RegisterInstance(_cfApiService).As<ICustomFormatApiService>();
+        _cfService = Substitute.For<ICustomFormatService>();
+        _cfService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns([]);
+        builder.RegisterInstance(_cfService).As<ICustomFormatService>();
 
         _qpApiService = Substitute.For<IQualityProfileApiService>();
         _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns([]);
@@ -87,7 +87,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
 
     private void SetupServiceCfs(params CustomFormatResource[] cfs)
     {
-        _cfApiService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
+        _cfService.GetCustomFormats(Arg.Any<CancellationToken>()).Returns(cfs.ToList());
     }
 
     [Test]

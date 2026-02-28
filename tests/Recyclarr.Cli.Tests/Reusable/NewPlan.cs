@@ -9,28 +9,6 @@ internal class TestPlan() : PipelinePlan(Substitute.For<IDiagnosticPublisher>())
 
 internal static class NewPlan
 {
-    public static PlannedCustomFormat Cf(string name, string trashId, int serviceId = 0)
-    {
-        return new PlannedCustomFormat(
-            new CustomFormatResource
-            {
-                Name = name,
-                TrashId = trashId,
-                Id = serviceId,
-            }
-        );
-    }
-
-    public static PlannedCfScore CfScore(string trashId, int serviceId, int score)
-    {
-        return new PlannedCfScore(Cf("", trashId, serviceId), score);
-    }
-
-    public static PlannedCfScore CfScore(string name, string trashId, int serviceId, int score)
-    {
-        return new PlannedCfScore(Cf(name, trashId, serviceId), score);
-    }
-
     public static PlannedQualityProfile Qp(string name, params PlannedCfScore[] scores)
     {
         return Qp(new QualityProfileConfig { Name = name }, scores);

@@ -1,11 +1,11 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.Servarr.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
 internal class CustomFormatApiPersistencePhase(
-    ICustomFormatApiService api,
+    ICustomFormatService api,
     ICustomFormatStatePersister statePersister,
     CustomFormatTransactionLogger cfLogger,
     IServiceConfiguration config

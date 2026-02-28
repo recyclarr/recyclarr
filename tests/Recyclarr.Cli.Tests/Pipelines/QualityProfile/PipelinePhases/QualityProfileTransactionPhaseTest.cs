@@ -145,8 +145,8 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         var profile = NewPlan.Qp(
             "profile1",
-            NewPlan.CfScore("id1", 1, 100),
-            NewPlan.CfScore("id2", 2, 500)
+            NewPlannedCf.Score("id1", 1, 100),
+            NewPlannedCf.Score("id2", 2, 500)
         );
 
         var context = new QualityProfilePipelineContext
@@ -238,8 +238,8 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         var profile = NewPlan.Qp(
             "profile1",
-            NewPlan.CfScore("id1", 1, 200),
-            NewPlan.CfScore("id2", 2, 300)
+            NewPlannedCf.Score("id1", 1, 200),
+            NewPlannedCf.Score("id2", 2, 300)
         );
 
         var context = new QualityProfilePipelineContext
@@ -297,8 +297,8 @@ internal sealed class QualityProfileTransactionPhaseTest
                 Name = "profile1",
                 ResetUnmatchedScores = new ResetUnmatchedScoresConfig { Enabled = true },
             },
-            NewPlan.CfScore("quality3", "id3", 3, 100),
-            NewPlan.CfScore("quality4", "id4", 4, 500)
+            NewPlannedCf.Score("quality3", "id3", 3, 100),
+            NewPlannedCf.Score("quality4", "id4", 4, 500)
         );
 
         var context = new QualityProfilePipelineContext
@@ -362,8 +362,8 @@ internal sealed class QualityProfileTransactionPhaseTest
                     Except = ["cf1"],
                 },
             },
-            NewPlan.CfScore("cf3", "id3", 3, 100),
-            NewPlan.CfScore("cf4", "id4", 4, 500)
+            NewPlannedCf.Score("cf3", "id3", 3, 100),
+            NewPlannedCf.Score("cf4", "id4", 4, 500)
         );
 
         var context = new QualityProfilePipelineContext
@@ -427,8 +427,8 @@ internal sealed class QualityProfileTransactionPhaseTest
                     Except = ["cf1"],
                 },
             },
-            NewPlan.CfScore("cf3", "id3", 3, 100),
-            NewPlan.CfScore("cf4", "id4", 4, 500)
+            NewPlannedCf.Score("cf3", "id3", 3, 100),
+            NewPlannedCf.Score("cf4", "id4", 4, 500)
         );
 
         var context = new QualityProfilePipelineContext

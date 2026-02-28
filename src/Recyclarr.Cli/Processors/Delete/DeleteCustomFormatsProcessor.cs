@@ -8,7 +8,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.Servarr.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;
@@ -16,8 +16,7 @@ namespace Recyclarr.Cli.Processors.Delete;
 [UsedImplicitly]
 internal class CustomFormatConfigurationScope(ILifetimeScope scope) : LifetimeScopeWrapper(scope)
 {
-    public ICustomFormatApiService CustomFormatApi { get; } =
-        scope.Resolve<ICustomFormatApiService>();
+    public ICustomFormatService CustomFormatApi { get; } = scope.Resolve<ICustomFormatService>();
 }
 
 internal class DeleteCustomFormatsProcessor(
@@ -61,7 +60,7 @@ internal class DeleteCustomFormatsProcessor(
             cfs = ProcessManuallySpecifiedFormats(settings, cfs);
         }
 
-        if (!cfs.Any())
+        if (cfs.Count == 0)
         {
             console.MarkupLine("[yellow]Done[/]: No custom formats found or specified to delete.");
             return;
@@ -92,8 +91,8 @@ internal class DeleteCustomFormatsProcessor(
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     private async Task DeleteCustomFormats(
-        ICustomFormatApiService api,
-        ICollection<CustomFormatResource> cfs
+        ICustomFormatService api,
+        IReadOnlyCollection<CustomFormatResource> cfs
     )
     {
         ConcurrentBag<string> successNames = [];
@@ -158,12 +157,12 @@ internal class DeleteCustomFormatsProcessor(
         }
     }
 
-    private async Task<IList<CustomFormatResource>> ObtainCustomFormats(
-        ICustomFormatApiService api,
+    private async Task<IReadOnlyList<CustomFormatResource>> ObtainCustomFormats(
+        ICustomFormatService api,
         CancellationToken ct
     )
     {
-        IList<CustomFormatResource> cfs = [];
+        IReadOnlyList<CustomFormatResource> cfs = [];
 
         await console
             .Status()
@@ -178,9 +177,9 @@ internal class DeleteCustomFormatsProcessor(
         return cfs;
     }
 
-    private IList<CustomFormatResource> ProcessManuallySpecifiedFormats(
+    private IReadOnlyList<CustomFormatResource> ProcessManuallySpecifiedFormats(
         IDeleteCustomFormatSettings settings,
-        IList<CustomFormatResource> cfs
+        IReadOnlyList<CustomFormatResource> cfs
     )
     {
         ILookup<bool, (string Name, IEnumerable<CustomFormatResource> Cfs)> result = settings
@@ -212,7 +211,7 @@ internal class DeleteCustomFormatsProcessor(
     }
 
     [SuppressMessage("ReSharper", "CoVariantArrayConversion")]
-    private void PrintPreview(ICollection<CustomFormatResource> cfs)
+    private void PrintPreview(IReadOnlyCollection<CustomFormatResource> cfs)
     {
         console.MarkupLine("The following custom formats will be [bold red]DELETED[/]:");
         console.WriteLine();

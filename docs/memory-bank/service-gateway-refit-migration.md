@@ -46,8 +46,9 @@ Examples: `QualityName` is required (empty string breaks matching). `Id` is not 
 the gateway always sets it). Nullable fields like `MaxSize` default to null (which has domain
 meaning "unlimited").
 
-**Test factory helpers (`New*` classes)**: each gateway phase should evaluate whether test helpers
-are needed for new domain types. Rules:
+**Test factory helpers (`New*` classes)**: **MANDATORY** for every gateway phase. Each phase MUST
+audit and overhaul `New*` helpers for all types touched by that phase. This is a required checklist
+item, not optional evaluation. Rules:
 
 - One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
   grab bags mixing unrelated types.
@@ -56,17 +57,18 @@ are needed for new domain types. Rules:
   actually asserts.
 - **When to skip:** If a domain type is trivial (few properties, no `required` fields, natural
   defaults), direct construction in tests is acceptable. A factory helper adds no shielding value
-  when the type is unlikely to change shape. Plans must include a brief justification when skipping.
+  when the type is unlikely to change shape. Plans MUST include a brief justification when skipping.
 - Methods return one type. If a domain type has variants (e.g. with/without scores), use overloads
   or optional parameters, not separate classes.
 - Location: `Core.TestLibrary` for types defined in Core; `Cli.Tests/Reusable` for types defined in
-  Cli.
+  Cli. This is a hard constraint imposed by the project dependency direction; see REC-90 for future
+  consolidation.
 - Existing helpers that violate these rules (e.g. `NewPlan` as a grab bag, `NewQp` mixing DTOs with
-  domain types) get overhauled when their phase is touched. Scorched earth; don't preserve legacy
-  patterns for consistency with the old code.
-- `NewPlan` specifically: plan item factory methods (e.g. `Cf`, `CfScore`, `Qp`, `Qs`, `QsItem`)
-  should move to the `New*` class for the type they construct. `NewPlan` retains only methods that
-  construct `TestPlan` itself or `Planned*` wrapper types that don't have their own `New*` class.
+  domain types) MUST be overhauled when their phase is touched. Scorched earth; don't preserve
+  legacy patterns for consistency with the old code.
+- `NewPlan` specifically: plan item factory methods (e.g. `Qp`, `Qs`, `QsItem`) should move to the
+  `New*` class for the type they construct. `NewPlan` retains only methods that construct `TestPlan`
+  itself. CF methods (`Cf`, `CfScore`) have been moved to `NewPlannedCf` in Phase 5.
 
 **Hydrated resource pattern**: gateway holds original DTOs in an internal dictionary keyed by
 resource ID. Populated during fetch, consumed during persist, scoped to one sync operation via
@@ -193,11 +195,15 @@ port and operate on domain types. Flurl remains the HTTP client inside gateways.
   Phase 4b. All future phases (5, 6, etc.) use `*Gateway` naming.
 
 #### Phase 5: Custom Formats pipeline gateway
-- **Status:** not started
+- **Status:** done
 - **Size:** medium
-- **Notes:** Full CRUD (4 methods), identical schemas. Stashed state dictionary manages multiple
-  resources; create returns IDs that need tracking, deletes remove entries. First gateway with real
-  lifecycle complexity.
+- **Notes:** Full CRUD (4 methods), identical schemas. Passthrough exception to DTO/domain split
+  (see ADR-007): `CustomFormatResource` used directly as the port's domain type. No stash needed
+  (one-way sync; guide is source of truth). Gateways are thin wrappers delegating to
+  `ICustomFormatApiService`. Moved `NewPlan.Cf()`/`CfScore()` to `NewPlannedCf` in
+  `Cli.Tests/Reusable` (separate from `NewCf` in `Core.TestLibrary` due to project boundary; tracked
+  in REC-90). Created `docs/architecture/service-gateway-layer.md` formalizing gateway patterns from
+  this memory bank doc.
 
 #### Phase 6: Quality Profiles pipeline gateway
 - **Status:** not started

@@ -3,14 +3,14 @@ using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.CustomFormat;
+using Recyclarr.Servarr.CustomFormat;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Processors.StateRepair;
 
 internal class CustomFormatResourceAdapter(
-    ICustomFormatApiService customFormatApi,
+    ICustomFormatService customFormatApi,
     ICustomFormatStatePersister statePersister,
     CustomFormatResourceQuery cfQuery,
     ConfiguredCustomFormatProvider cfProvider,
