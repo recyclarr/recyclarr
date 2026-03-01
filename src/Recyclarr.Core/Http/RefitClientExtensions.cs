@@ -29,7 +29,7 @@ public static class RefitClientExtensions
                     var factory = ctx.Resolve<IHttpClientFactory>();
                     var config = ctx.Resolve<IServiceConfiguration>();
                     var client = factory.CreateClient("servarr");
-                    client.BaseAddress = new Uri(config.BaseUrl, "/api/v3/");
+                    client.BaseAddress = config.BaseUrl;
                     client.DefaultRequestHeaders.Add("X-Api-Key", config.ApiKey);
                     return RestService.For<T>(client, ServarrRefitSettings);
                 })

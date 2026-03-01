@@ -14,7 +14,11 @@ internal sealed class CompositionRootTest : CliIntegrationFixture
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
-        builder.RegisterMockFor<IServiceConfiguration>();
+        builder.RegisterMockFor<IServiceConfiguration>(m =>
+        {
+            m.BaseUrl.Returns(new Uri("http://localhost:7878"));
+            m.ApiKey.Returns("test-api-key");
+        });
     }
 
     [SuppressMessage(

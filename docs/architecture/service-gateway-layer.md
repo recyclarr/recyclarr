@@ -185,27 +185,16 @@ Plan components build domain types, never DTOs. The flow is:
 
 DTOs should only appear inside gateways.
 
-## Custom Format Passthrough Exception
+## Custom Format Gateways
 
-Custom Formats are an exception to the DTO/domain split pattern. The gateway uses
-`CustomFormatResource` (the guide resource type) directly as the port's domain type, with no
-separate service DTO and no stashed state. See [ADR-007][adr-007] for full rationale.
+Custom Format gateways follow the standard DTO/domain split pattern. The generated Refit DTOs serve
+as service types; gateways map to/from the domain `CustomFormatResource`. One-way sync still holds
+(guide is complete source of truth), so no stashed DTOs or hydrated resource pattern is needed.
 
-**Why CF qualifies:**
-
-- CF sync is one-way push (guide is complete source of truth; no fetch-modify-push)
-- Guide JSON format matches the API format (identical schemas); the one divergence (`fields` as
-  object vs array) is handled by `FieldsArrayJsonConverter` at the serialization level
-- Complex nested type graph (3 types with custom JSON converters) makes duplication expensive
-- The CF -> QP pipeline dependency relies on in-place mutation of `PlannedCustomFormat.Resource.Id`
-
-**General passthrough criteria** (all must hold):
-
-1. One-way sync model (guide/config defines complete desired state)
-2. Identical or trivially-bridged schemas (format differences handled by serialization, not mapping)
-3. Complex nested type graph where duplication is expensive and error-prone
-
-When any condition is absent, the standard DTO/domain split applies.
+Previously, CF gateways used a passthrough exception (see [ADR-007][adr-007], now deprecated) where
+`CustomFormatResource` served directly as both guide and API type. The Refit migration introduced
+generated DTOs as separate C# types, breaking the identical-schema condition that justified the
+exception.
 
 ## HTTP Pipeline
 
