@@ -18,6 +18,7 @@
     <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
   </Folder>
+  <Project Path="src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj" />
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
 </Solution>
