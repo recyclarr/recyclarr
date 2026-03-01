@@ -1,4 +1,4 @@
-exclude: \.idea/
+exclude: \.idea/|src/Recyclarr\.Api\..*/openapi\.json
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
