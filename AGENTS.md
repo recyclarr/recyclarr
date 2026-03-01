@@ -53,6 +53,23 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
 - Dotnet tools in `.config/dotnet-tools.json`
 - CLI: `Spectre.Console` package for CLI framework
 
+## Code Review Comments
+
+The `// CodeReview:` marker flags questions or concerns for review before commit. A pre-commit hook
+prevents accidental commits containing these markers.
+
+Lifecycle:
+
+1. Human adds `// CodeReview: <question>` during implementation
+2. Agents MUST stop and present each unresolved CodeReview comment to the user before declaring work
+   complete
+3. Resolution: either address the concern (refactor, add context) or the user explicitly dismisses
+   it
+4. Remove the marker only after resolution; NEVER silently delete
+
+When running `pre-commit run` mid-development (before commit), pass `SKIP=no-review-markers` to
+suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
+
 ## Coding Standards & Development Requirements
 
 - You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
