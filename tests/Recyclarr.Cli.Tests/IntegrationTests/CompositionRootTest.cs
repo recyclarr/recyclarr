@@ -39,7 +39,10 @@ internal sealed class CompositionRootTest : CliIntegrationFixture
                 .Distinct()
                 .Where(x =>
                     x.FullName == null
-                    || !x.FullName.StartsWith("Autofac.", StringComparison.Ordinal)
+                    || (
+                        !x.FullName.StartsWith("Autofac.", StringComparison.Ordinal)
+                        && !x.FullName.StartsWith("Microsoft.Extensions.", StringComparison.Ordinal)
+                    )
                 )
                 .Where(x => x.Name is not "GitProviderLocation" and not "LocalProviderLocation")
                 .Select(x => new TestCaseParameters([x]) { TestName = x.FullName })

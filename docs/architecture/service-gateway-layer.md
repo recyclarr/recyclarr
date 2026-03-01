@@ -104,8 +104,8 @@ internal class SonarrQualityDefinitionGateway(IQualityDefinitionApiService api)
 }
 ```
 
-**Lifecycle:** Gateway instances are scoped to one sync operation (`InstancePerLifetimeScope`).
-State is created during fetch, consumed during persist, and discarded when the sync completes.
+**Lifecycle:** Gateway instances are scoped to one sync instance (`InstancePerLifetimeScope`). State
+is created during fetch, consumed during persist, and discarded when the instance scope ends.
 
 **When not needed:** Pipelines with one-way sync (guide overwrites service) do not need stashed
 DTOs. See the Custom Format passthrough exception below.
@@ -206,6 +206,57 @@ separate service DTO and no stashed state. See [ADR-007][adr-007] for full ratio
 3. Complex nested type graph where duplication is expensive and error-prone
 
 When any condition is absent, the standard DTO/domain split applies.
+
+## HTTP Pipeline
+
+Gateways use Refit-generated interfaces backed by `IHttpClientFactory` named clients. Cross-cutting
+concerns live in `DelegatingHandler` subclasses, configured once per named client.
+
+### Named clients
+
+| Client      | Handlers             | Primary handler config   |
+|-------------|----------------------|--------------------------|
+| `"servarr"` | `HttpLoggingHandler` | SSL bypass (conditional) |
+| `"apprise"` | `HttpLoggingHandler` | (default)                |
+
+### Handler pipeline (servarr)
+
+```txt
+HttpLoggingHandler -> HttpClientHandler -> network
+```
+
+- **HttpLoggingHandler**: Logs request method + sanitized URL (Debug), response status (Debug), and
+  request/response bodies (Verbose). Also detects failed requests that were redirected (by comparing
+  original vs final URI) and logs a warning about potential URL/reverse proxy misconfiguration.
+  Replaces Flurl's `FlurlBeforeCallLogRedactor`, `FlurlAfterCallLogRedactor`, and
+  `FlurlRedirectPreventer`.
+- **SSL bypass**: Conditionally disables certificate validation via
+  `ConfigurePrimaryHttpMessageHandler` based on `EnableSslCertificateValidation` setting.
+
+### Refit client wiring
+
+Per-instance configuration (base URL, API key) is set at Autofac resolve time, not at
+`IHttpClientFactory` registration time. Extension methods on `ContainerBuilder` eliminate
+boilerplate:
+
+```csharp
+// Each call registers a Refit interface scoped to one sync instance
+builder.RegisterServarrRefitClient<ISonarrCustomFormatApi>();
+builder.RegisterAppriseRefitClient<IAppriseApi>();
+```
+
+The resolve lambda calls `IHttpClientFactory.CreateClient("servarr")`, sets `BaseAddress` and
+`X-Api-Key` from `IServiceConfiguration`, then wraps the client with `RestService.For<T>()`. Refit
+clients are scoped to the "instance" lifetime scope
+(`InstancePerMatchingLifetimeScope("instance")`), matching the gateway lifecycle. The underlying
+handler pipeline is pooled by `IHttpClientFactory`.
+
+### IHttpClientFactory + Autofac integration
+
+`ServiceCollection` defines the named clients and handler pipeline, then
+`builder.Populate(services)` bridges them into Autofac. `Populate()` registers
+`AutofacServiceProvider` as `IServiceProvider`, so handler factories (including
+`ConfigurePrimaryHttpMessageHandler`) can resolve Autofac services.
 
 ## Service API Divergence
 

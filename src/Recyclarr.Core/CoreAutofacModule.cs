@@ -1,8 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.Ordering;
 using FluentValidation;
 using Flurl.Http.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
@@ -159,6 +163,7 @@ public class CoreAutofacModule : Module
 
     private static void RegisterHttp(ContainerBuilder builder)
     {
+        // Flurl infrastructure (still active; removed in Phase 17)
         builder.RegisterType<FlurlClientCache>().As<IFlurlClientCache>().SingleInstance();
 
         builder
@@ -168,6 +173,46 @@ public class CoreAutofacModule : Module
                 typeof(FlurlRedirectPreventer)
             )
             .As<FlurlSpecificEventHandler>();
+
+        // Refit/HttpClient infrastructure (used by generated Refit clients)
+        RegisterHttpClientFactory(builder);
+    }
+
+    [SuppressMessage(
+        "Security",
+        "CA5399:HttpClient is created without enabling CheckCertificateRevocationList"
+    )]
+    [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
+    private static void RegisterHttpClientFactory(ContainerBuilder builder)
+    {
+        var services = new ServiceCollection();
+
+        services.AddTransient<HttpLoggingHandler>();
+
+        // Suppress automatic scope creation per client; handler dependencies are all singletons
+        // and these scopes would be invisible to our intentional "sync" > "instance" hierarchy.
+        services.Configure<HttpClientFactoryOptions>("servarr", o => o.SuppressHandlerScope = true);
+        services
+            .AddHttpClient("servarr")
+            .AddHttpMessageHandler<HttpLoggingHandler>()
+            .ConfigurePrimaryHttpMessageHandler(sp =>
+            {
+                var settings = sp.GetRequiredService<ISettings<RecyclarrSettings>>();
+                var handler = new HttpClientHandler();
+
+                if (!settings.Value.EnableSslCertificateValidation)
+                {
+                    handler.ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+                }
+
+                return handler;
+            });
+
+        services.Configure<HttpClientFactoryOptions>("apprise", o => o.SuppressHandlerScope = true);
+        services.AddHttpClient("apprise").AddHttpMessageHandler<HttpLoggingHandler>();
+
+        builder.Populate(services);
     }
 
     private static void RegisterNotifications(ContainerBuilder builder)

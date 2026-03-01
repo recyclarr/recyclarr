@@ -6,12 +6,15 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" />
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" />
       <PackageReference Include="Autofac.Extras.Ordering" />
       <PackageReference Include="CliWrap" />
       <PackageReference Include="FluentValidation" />
       <PackageReference Include="Flurl" />
       <PackageReference Include="Flurl.Http" />
       <PackageReference Include="GitVersion.MsBuild" />
+      <PackageReference Include="Microsoft.Extensions.Http" />
+      <PackageReference Include="Refit.HttpClientFactory" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="SuperLinq" />
