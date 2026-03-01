@@ -1,23 +1,24 @@
 using Recyclarr.Servarr.QualitySize;
+using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.ServarrApi.QualityDefinition;
 
-internal class RadarrQualityDefinitionGateway(IQualityDefinitionApiService api)
+internal class RadarrQualityDefinitionGateway(RadarrApi.IQualityDefinitionApi api)
     : IQualityDefinitionService
 {
-    private readonly Dictionary<int, ServiceQualityDefinitionItem> _stashedDtos = [];
+    private readonly Dictionary<int, RadarrApi.QualityDefinitionResource> _stashedDtos = [];
 
     public async Task<IReadOnlyList<QualityDefinitionItem>> GetQualityDefinitions(
         CancellationToken ct
     )
     {
-        var dtos = await api.GetQualityDefinition(ct);
+        var dtos = await api.QualitydefinitionGet(ct);
         foreach (var dto in dtos)
         {
             _stashedDtos[dto.Id] = dto;
         }
 
-        return dtos.Select(ToDomain).ToList();
+        return dtos.Select(RadarrQualityDefinitionMapper.ToDomain).ToList();
     }
 
     public async Task UpdateQualityDefinitions(
@@ -25,31 +26,15 @@ internal class RadarrQualityDefinitionGateway(IQualityDefinitionApiService api)
         CancellationToken ct
     )
     {
-        var apiItems = items.Select(FromDomain).ToList();
-        await api.UpdateQualityDefinition(apiItems, ct);
+        // Merge domain changes onto stashed DTOs, then send batch update
+        var apiItems = items.Select(ApplyToStashed).ToList();
+        await api.Update(apiItems, ct);
     }
 
-    private static QualityDefinitionItem ToDomain(ServiceQualityDefinitionItem dto)
-    {
-        return new QualityDefinitionItem
-        {
-            Id = dto.Id,
-            QualityName = dto.Quality?.Name ?? "",
-            MinSize = dto.MinSize,
-            MaxSize = dto.MaxSize,
-            PreferredSize = dto.PreferredSize,
-        };
-    }
-
-    // Merges domain changes onto the stashed DTO for round-trip safety
-    private ServiceQualityDefinitionItem FromDomain(QualityDefinitionItem domain)
+    private RadarrApi.QualityDefinitionResource ApplyToStashed(QualityDefinitionItem domain)
     {
         var original = _stashedDtos[domain.Id];
-        return original with
-        {
-            MinSize = domain.MinSize,
-            MaxSize = domain.MaxSize,
-            PreferredSize = domain.PreferredSize,
-        };
+        RadarrQualityDefinitionMapper.UpdateDto(domain, original);
+        return original;
     }
 }

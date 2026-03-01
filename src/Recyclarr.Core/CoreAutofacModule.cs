@@ -280,10 +280,6 @@ public class CoreAutofacModule : Module
             .As<IQualityProfileApiService>()
             .InstancePerLifetimeScope();
         builder
-            .RegisterType<QualityDefinitionApiService>()
-            .As<IQualityDefinitionApiService>()
-            .InstancePerLifetimeScope();
-        builder
             .RegisterType<SonarrMediaNamingApiService>()
             .As<ISonarrMediaNamingApiService>()
             .InstancePerLifetimeScope();
@@ -299,6 +295,8 @@ public class CoreAutofacModule : Module
         // Refit clients
         builder.RegisterServarrRefitClient<SonarrApi.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ICustomFormatApi>();
+        builder.RegisterServarrRefitClient<SonarrApi.IQualityDefinitionApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.IQualityDefinitionApi>();
     }
 
     private static void RegisterServarrGateways(ContainerBuilder builder)
