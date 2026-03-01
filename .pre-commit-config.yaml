@@ -41,6 +41,14 @@ repos:
         types_or: [json, json5, xml, html, yaml, javascript, markdown]
         exclude: ^(\.pre-commit-hooks\.yaml|\.config/|\.claude/)
 
+  - repo: local
+    hooks:
+      - id: no-review-markers
+        name: Forbid review comment markers
+        language: pygrep
+        entry: CodeReview
+        types: [c#]
+
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.21.0
     hooks:
