@@ -5,7 +5,7 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 // Discriminated key for quality item lookup: distinguishes qualities (by Quality.Id) from groups (by group Id)
 internal readonly record struct QualityItemKey(bool IsGroup, int? Id)
 {
-    public static QualityItemKey From(ProfileItemDto dto)
+    public static QualityItemKey From(ServiceProfileItem dto)
     {
         return dto.Quality is null
             ? new QualityItemKey(true, dto.Id)

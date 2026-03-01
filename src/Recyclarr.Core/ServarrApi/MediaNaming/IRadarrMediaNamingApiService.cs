@@ -2,6 +2,6 @@ namespace Recyclarr.ServarrApi.MediaNaming;
 
 public interface IRadarrMediaNamingApiService
 {
-    Task<RadarrMediaNamingDto> GetNaming(CancellationToken ct);
-    Task UpdateNaming(RadarrMediaNamingDto dto, CancellationToken ct);
+    Task<ServiceRadarrNamingData> GetNaming(CancellationToken ct);
+    Task UpdateNaming(ServiceRadarrNamingData dto, CancellationToken ct);
 }

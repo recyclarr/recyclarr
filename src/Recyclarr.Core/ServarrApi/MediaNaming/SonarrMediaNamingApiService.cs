@@ -10,12 +10,12 @@ public class SonarrMediaNamingApiService(IServarrRequestBuilder service)
         return service.Request("config", "naming");
     }
 
-    public async Task<SonarrMediaNamingDto> GetNaming(CancellationToken ct)
+    public async Task<ServiceSonarrNamingData> GetNaming(CancellationToken ct)
     {
-        return await Request().GetJsonAsync<SonarrMediaNamingDto>(cancellationToken: ct);
+        return await Request().GetJsonAsync<ServiceSonarrNamingData>(cancellationToken: ct);
     }
 
-    public async Task UpdateNaming(SonarrMediaNamingDto dto, CancellationToken ct)
+    public async Task UpdateNaming(ServiceSonarrNamingData dto, CancellationToken ct)
     {
         await Request().PutJsonAsync(dto, cancellationToken: ct);
     }

@@ -5,8 +5,8 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 
 internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQualityProfileService
 {
-    private readonly Dictionary<int, QualityProfileDto> _stashedProfiles = [];
-    private QualityProfileDto? _stashedSchema;
+    private readonly Dictionary<int, ServiceQualityProfileData> _stashedProfiles = [];
+    private ServiceQualityProfileData? _stashedSchema;
 
     public async Task<IReadOnlyList<QualityProfileData>> GetQualityProfiles(CancellationToken ct)
     {
@@ -53,7 +53,7 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
         await api.UpdateQualityProfile(dto, ct);
     }
 
-    private static QualityProfileData ToDomain(QualityProfileDto dto)
+    private static QualityProfileData ToDomain(ServiceQualityProfileData dto)
     {
         return new QualityProfileData
         {
@@ -70,7 +70,7 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
         };
     }
 
-    private static QualityProfileFormatItem FormatItemToDomain(ProfileFormatItemDto dto)
+    private static QualityProfileFormatItem FormatItemToDomain(ServiceProfileFormatItem dto)
     {
         return new QualityProfileFormatItem
         {
@@ -80,7 +80,7 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
         };
     }
 
-    private static QualityProfileItem ItemToDomain(ProfileItemDto dto)
+    private static QualityProfileItem ItemToDomain(ServiceProfileItem dto)
     {
         return new QualityProfileItem
         {
@@ -94,13 +94,13 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
         };
     }
 
-    private static ProfileLanguage LanguageToDomain(ProfileLanguageDto dto)
+    private static ProfileLanguage LanguageToDomain(ServiceProfileLanguage dto)
     {
         return new ProfileLanguage { Id = dto.Id, Name = dto.Name };
     }
 
     // Merges domain changes onto the stashed profile DTO for round-trip safety
-    private QualityProfileDto FromDomainForUpdate(QualityProfileData domain)
+    private ServiceQualityProfileData FromDomainForUpdate(QualityProfileData domain)
     {
         // non-null: update requires an Id, and stash is populated during GetQualityProfiles
         var stashed = _stashedProfiles[domain.Id!.Value];
@@ -108,14 +108,14 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
     }
 
     // Uses the stashed schema as base for new profiles (provides full quality hierarchy structure)
-    private QualityProfileDto FromDomainForCreate(QualityProfileData domain)
+    private ServiceQualityProfileData FromDomainForCreate(QualityProfileData domain)
     {
-        var baseDto = _stashedSchema ?? new QualityProfileDto();
+        var baseDto = _stashedSchema ?? new ServiceQualityProfileData();
         return MergeOntoDto(baseDto, domain);
     }
 
-    private static QualityProfileDto MergeOntoDto(
-        QualityProfileDto baseDto,
+    private static ServiceQualityProfileData MergeOntoDto(
+        ServiceQualityProfileData baseDto,
         QualityProfileData domain
     )
     {
@@ -134,14 +134,18 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
             FormatItems = domain.FormatItems.Select(f => MergeFormatItem(f, formatIndex)).ToList(),
             Items = domain.Items.Select(i => MergeItem(i, qualityIndex)).ToList(),
             Language = domain.Language is not null
-                ? new ProfileLanguageDto { Id = domain.Language.Id, Name = domain.Language.Name }
+                ? new ServiceProfileLanguage
+                {
+                    Id = domain.Language.Id,
+                    Name = domain.Language.Name,
+                }
                 : baseDto.Language,
         };
     }
 
-    private static ProfileFormatItemDto MergeFormatItem(
+    private static ServiceProfileFormatItem MergeFormatItem(
         QualityProfileFormatItem domain,
-        Dictionary<int, ProfileFormatItemDto> index
+        Dictionary<int, ServiceProfileFormatItem> index
     )
     {
         if (index.TryGetValue(domain.FormatId, out var stashed))
@@ -149,7 +153,7 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
             return stashed with { Score = domain.Score };
         }
 
-        return new ProfileFormatItemDto
+        return new ServiceProfileFormatItem
         {
             Format = domain.FormatId,
             Name = domain.Name,
@@ -157,9 +161,9 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
         };
     }
 
-    private static ProfileItemDto MergeItem(
+    private static ServiceProfileItem MergeItem(
         QualityProfileItem domain,
-        Dictionary<QualityItemKey, ProfileItemDto> index
+        Dictionary<QualityItemKey, ServiceProfileItem> index
     )
     {
         var key = QualityItemKey.From(domain);
@@ -173,13 +177,17 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
             };
         }
 
-        return new ProfileItemDto
+        return new ServiceProfileItem
         {
             Id = domain.Id,
             Name = domain.Name,
             Allowed = domain.Allowed,
             Quality = domain.Quality is not null
-                ? new ProfileItemQualityDto { Id = domain.Quality.Id, Name = domain.Quality.Name }
+                ? new ServiceProfileItemQuality
+                {
+                    Id = domain.Quality.Id,
+                    Name = domain.Quality.Name,
+                }
                 : null,
             Items = domain.Items.Select(i => MergeItem(i, index)).ToList(),
         };
@@ -187,11 +195,11 @@ internal class SonarrQualityProfileGateway(IQualityProfileApiService api) : IQua
 
     // Builds a flat index of all quality items for stash lookup.
     // Qualities are keyed by Quality.Id; groups are keyed by their own Id.
-    private static Dictionary<QualityItemKey, ProfileItemDto> BuildQualityItemIndex(
-        IEnumerable<ProfileItemDto> items
+    private static Dictionary<QualityItemKey, ServiceProfileItem> BuildQualityItemIndex(
+        IEnumerable<ServiceProfileItem> items
     )
     {
-        var index = new Dictionary<QualityItemKey, ProfileItemDto>();
+        var index = new Dictionary<QualityItemKey, ServiceProfileItem>();
         foreach (var item in items.Flatten(x => x.Items))
         {
             var key = QualityItemKey.From(item);

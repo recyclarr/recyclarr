@@ -605,7 +605,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         }
     }
 
-    private void SetupServiceQps(params QualityProfileDto[] qps)
+    private void SetupServiceQps(params ServiceQualityProfileData[] qps)
     {
         _qpApiService.GetQualityProfiles(Arg.Any<CancellationToken>()).Returns(qps.ToList());
     }
@@ -645,8 +645,8 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
             ("qp-trash-id-2", "UHD-2160p Profile")
         );
         SetupServiceQps(
-            new QualityProfileDto { Id = 10, Name = "HD-1080p Profile" },
-            new QualityProfileDto { Id = 20, Name = "uhd-2160p profile" } // Different case
+            new ServiceQualityProfileData { Id = 10, Name = "HD-1080p Profile" },
+            new ServiceQualityProfileData { Id = 20, Name = "uhd-2160p profile" } // Different case
         );
 
         var exitCode = await CliSetup.Run(
@@ -679,7 +679,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
     {
         SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null));
         SetupGuideQps("radarr", ("qp-trash-id-1", "Test Profile"));
-        SetupServiceQps(new QualityProfileDto { Id = 10, Name = "Test Profile" });
+        SetupServiceQps(new ServiceQualityProfileData { Id = 10, Name = "Test Profile" });
 
         var exitCode = await CliSetup.Run(
             Container,
@@ -700,7 +700,7 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         // Service profile uses the config name "SQP-3", so state repair must match using that.
         SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", "SQP-3"));
         SetupGuideQps("radarr", ("qp-trash-id-1", "[SQP] SQP-3"));
-        SetupServiceQps(new QualityProfileDto { Id = 11, Name = "SQP-3" });
+        SetupServiceQps(new ServiceQualityProfileData { Id = 11, Name = "SQP-3" });
 
         var exitCode = await CliSetup.Run(
             Container,
@@ -735,9 +735,9 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         );
         SetupGuideQps("radarr", ("shared-qp-id", "HD Bluray + WEB"));
         SetupServiceQps(
-            new QualityProfileDto { Id = 10, Name = "English" },
-            new QualityProfileDto { Id = 20, Name = "German" },
-            new QualityProfileDto { Id = 30, Name = "French" }
+            new ServiceQualityProfileData { Id = 10, Name = "English" },
+            new ServiceQualityProfileData { Id = 20, Name = "German" },
+            new ServiceQualityProfileData { Id = 30, Name = "French" }
         );
 
         var existingCache = new TestMappings
@@ -796,9 +796,9 @@ internal sealed class StateRepairIntegrationTest : CliIntegrationFixture
         SetupRadarrConfigWithQps("test-instance", ("qp-trash-id-1", null));
         SetupGuideQps("radarr", ("qp-trash-id-1", "Ambiguous Profile"));
         SetupServiceQps(
-            new QualityProfileDto { Id = 10, Name = "Ambiguous Profile" },
-            new QualityProfileDto { Id = 20, Name = "ambiguous profile" },
-            new QualityProfileDto { Id = 30, Name = "AMBIGUOUS PROFILE" }
+            new ServiceQualityProfileData { Id = 10, Name = "Ambiguous Profile" },
+            new ServiceQualityProfileData { Id = 20, Name = "ambiguous profile" },
+            new ServiceQualityProfileData { Id = 30, Name = "AMBIGUOUS PROFILE" }
         );
 
         var exitCode = await CliSetup.Run(

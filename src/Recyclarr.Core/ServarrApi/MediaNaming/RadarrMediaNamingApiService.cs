@@ -10,12 +10,12 @@ public class RadarrMediaNamingApiService(IServarrRequestBuilder service)
         return service.Request("config", "naming");
     }
 
-    public async Task<RadarrMediaNamingDto> GetNaming(CancellationToken ct)
+    public async Task<ServiceRadarrNamingData> GetNaming(CancellationToken ct)
     {
-        return await Request().GetJsonAsync<RadarrMediaNamingDto>(cancellationToken: ct);
+        return await Request().GetJsonAsync<ServiceRadarrNamingData>(cancellationToken: ct);
     }
 
-    public async Task UpdateNaming(RadarrMediaNamingDto dto, CancellationToken ct)
+    public async Task UpdateNaming(ServiceRadarrNamingData dto, CancellationToken ct)
     {
         await Request().PutJsonAsync(dto, cancellationToken: ct);
     }

@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-public record SonarrMediaNamingDto
+public record ServiceSonarrNamingData
 {
     public string? SeriesFolderFormat
     {

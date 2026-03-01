@@ -4,13 +4,13 @@ using Recyclarr.SyncState;
 namespace Recyclarr.ServarrApi.QualityProfile;
 
 [UsedImplicitly]
-public record QualityProfileDto : IServiceResource
+public record ServiceQualityProfileData : IServiceResource
 {
     public int? Id { get; set; }
 
     // Explicit interface implementation - only valid for profiles fetched from service (which always have Id)
     int IServiceResource.Id =>
-        Id ?? throw new InvalidOperationException("QualityProfileDto.Id is null");
+        Id ?? throw new InvalidOperationException("ServiceQualityProfileData.Id is null");
 
     public string Name { get; init; } = "";
 
@@ -44,9 +44,9 @@ public record QualityProfileDto : IServiceResource
         init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
-    public IReadOnlyCollection<ProfileFormatItemDto> FormatItems { get; init; } = [];
+    public IReadOnlyCollection<ServiceProfileFormatItem> FormatItems { get; init; } = [];
 
-    public IReadOnlyCollection<ProfileItemDto> Items
+    public IReadOnlyCollection<ServiceProfileItem> Items
     {
         get;
         set
@@ -58,7 +58,7 @@ public record QualityProfileDto : IServiceResource
         }
     } = [];
 
-    public ProfileLanguageDto? Language
+    public ServiceProfileLanguage? Language
     {
         get;
         init => DtoUtil.SetIfNotNull(ref field, value);
@@ -69,7 +69,7 @@ public record QualityProfileDto : IServiceResource
 }
 
 [UsedImplicitly]
-public record ProfileFormatItemDto
+public record ServiceProfileFormatItem
 {
     public int Format { get; init; }
     public string Name { get; init; } = "";
@@ -80,7 +80,7 @@ public record ProfileFormatItemDto
 }
 
 [UsedImplicitly]
-public record ProfileItemDto
+public record ServiceProfileItem
 {
     public int? Id { get; set; }
     public string? Name { get; init; }
@@ -91,15 +91,15 @@ public record ProfileItemDto
         init => DtoUtil.SetIfNotNull(ref field, value);
     }
 
-    public ProfileItemQualityDto? Quality { get; init; }
-    public ICollection<ProfileItemDto> Items { get; init; } = [];
+    public ServiceProfileItemQuality? Quality { get; init; }
+    public ICollection<ServiceProfileItem> Items { get; init; } = [];
 
     [UsedImplicitly, JsonExtensionData]
     public Dictionary<string, object> ExtraJson { get; init; } = [];
 }
 
 [UsedImplicitly]
-public record ProfileItemQualityDto
+public record ServiceProfileItemQuality
 {
     public int? Id { get; init; }
     public string? Name { get; init; }
@@ -109,7 +109,7 @@ public record ProfileItemQualityDto
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-public record ProfileLanguageDto
+public record ServiceProfileLanguage
 {
     public int Id { get; init; }
     public string Name { get; init; } = "";

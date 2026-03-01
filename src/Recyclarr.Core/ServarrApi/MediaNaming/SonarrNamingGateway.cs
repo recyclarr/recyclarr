@@ -4,7 +4,7 @@ namespace Recyclarr.ServarrApi.MediaNaming;
 
 internal class SonarrNamingGateway(ISonarrMediaNamingApiService api) : ISonarrNamingService
 {
-    private SonarrMediaNamingDto? _stashedDto;
+    private ServiceSonarrNamingData? _stashedDto;
 
     public async Task<SonarrNamingData> GetNaming(CancellationToken ct)
     {
@@ -19,7 +19,7 @@ internal class SonarrNamingGateway(ISonarrMediaNamingApiService api) : ISonarrNa
         await api.UpdateNaming(dto, ct);
     }
 
-    private static SonarrNamingData ToDomain(SonarrMediaNamingDto dto)
+    private static SonarrNamingData ToDomain(ServiceSonarrNamingData dto)
     {
         return new SonarrNamingData
         {
@@ -33,7 +33,7 @@ internal class SonarrNamingGateway(ISonarrMediaNamingApiService api) : ISonarrNa
     }
 
     // Merges domain changes onto the stashed DTO for round-trip safety
-    private SonarrMediaNamingDto FromDomain(SonarrNamingData data)
+    private ServiceSonarrNamingData FromDomain(SonarrNamingData data)
     {
         // non-null: GetNaming always called before UpdateNaming in pipeline
         var original = _stashedDto!;

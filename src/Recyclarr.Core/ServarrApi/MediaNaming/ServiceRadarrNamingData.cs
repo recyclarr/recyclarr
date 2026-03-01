@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-public record RadarrMediaNamingDto
+public record ServiceRadarrNamingData
 {
     public string? StandardMovieFormat
     {

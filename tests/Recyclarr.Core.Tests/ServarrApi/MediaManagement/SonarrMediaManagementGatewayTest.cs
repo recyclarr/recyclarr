@@ -11,7 +11,7 @@ internal sealed class SonarrMediaManagementGatewayTest
         SonarrMediaManagementGateway sut
     )
     {
-        var dto = new MediaManagementDto
+        var dto = new ServiceMediaManagementData
         {
             Id = 5,
             DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
@@ -30,7 +30,7 @@ internal sealed class SonarrMediaManagementGatewayTest
         SonarrMediaManagementGateway sut
     )
     {
-        var originalDto = new MediaManagementDto
+        var originalDto = new ServiceMediaManagementData
         {
             Id = 1,
             DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
@@ -50,7 +50,7 @@ internal sealed class SonarrMediaManagementGatewayTest
 
         await api.Received()
             .UpdateMediaManagement(
-                Arg.Is<MediaManagementDto>(d =>
+                Arg.Is<ServiceMediaManagementData>(d =>
                     d.DownloadPropersAndRepacks == PropersAndRepacksMode.DoNotPrefer
                     && d.ExtraJson.ContainsKey("someField")
                 ),

@@ -15,8 +15,8 @@ public static class ContainerBuilderExtensions
             configure(scoped);
         }
 
-        // Keyed adapter registration: registers one adapter per service (Sonarr, Radarr) and a
-        // non-keyed resolution that selects the correct adapter based on IServiceConfiguration.
+        // Keyed gateway registration: registers one gateway per service (Sonarr, Radarr) and a
+        // non-keyed resolution that selects the correct gateway based on IServiceConfiguration.
         public void RegisterServiceGateway<TPort, TSonarr, TRadarr>()
             where TPort : notnull
             where TSonarr : TPort

@@ -9,23 +9,23 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
         return service.Request(["qualityprofile", .. path]);
     }
 
-    public async Task<IList<QualityProfileDto>> GetQualityProfiles(CancellationToken ct)
+    public async Task<IList<ServiceQualityProfileData>> GetQualityProfiles(CancellationToken ct)
     {
         var response = await Request()
-            .GetJsonAsync<IList<QualityProfileDto>>(cancellationToken: ct);
+            .GetJsonAsync<IList<ServiceQualityProfileData>>(cancellationToken: ct);
 
         return response.Select(x => x.ReverseItems()).ToList();
     }
 
-    public async Task<QualityProfileDto> GetSchema(CancellationToken ct)
+    public async Task<ServiceQualityProfileData> GetSchema(CancellationToken ct)
     {
         var response = await Request("schema")
-            .GetJsonAsync<QualityProfileDto>(cancellationToken: ct);
+            .GetJsonAsync<ServiceQualityProfileData>(cancellationToken: ct);
 
         return response.ReverseItems();
     }
 
-    public async Task UpdateQualityProfile(QualityProfileDto profile, CancellationToken ct)
+    public async Task UpdateQualityProfile(ServiceQualityProfileData profile, CancellationToken ct)
     {
         if (profile.Id is null)
         {
@@ -35,22 +35,22 @@ internal class QualityProfileApiService(IServarrRequestBuilder service) : IQuali
         await Request(profile.Id).PutJsonAsync(profile.ReverseItems(), cancellationToken: ct);
     }
 
-    public async Task<QualityProfileDto> CreateQualityProfile(
-        QualityProfileDto profile,
+    public async Task<ServiceQualityProfileData> CreateQualityProfile(
+        ServiceQualityProfileData profile,
         CancellationToken ct
     )
     {
         var response = await Request()
             .PostJsonAsync(profile.ReverseItems(), cancellationToken: ct)
-            .ReceiveJson<QualityProfileDto>();
+            .ReceiveJson<ServiceQualityProfileData>();
 
         return response.ReverseItems();
     }
 
-    public async Task<IList<ProfileLanguageDto>> GetLanguages(CancellationToken ct)
+    public async Task<IList<ServiceProfileLanguage>> GetLanguages(CancellationToken ct)
     {
         return await service
             .Request("language")
-            .GetJsonAsync<IList<ProfileLanguageDto>>(cancellationToken: ct);
+            .GetJsonAsync<IList<ServiceProfileLanguage>>(cancellationToken: ct);
     }
 }

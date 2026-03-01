@@ -5,7 +5,7 @@ namespace Recyclarr.ServarrApi.MediaManagement;
 internal class SonarrMediaManagementGateway(IMediaManagementApiService api)
     : IMediaManagementService
 {
-    private MediaManagementDto? _stashedDto;
+    private ServiceMediaManagementData? _stashedDto;
 
     public async Task<MediaManagementData> GetMediaManagement(CancellationToken ct)
     {
@@ -20,7 +20,7 @@ internal class SonarrMediaManagementGateway(IMediaManagementApiService api)
         await api.UpdateMediaManagement(dto, ct);
     }
 
-    private static MediaManagementData ToDomain(MediaManagementDto dto)
+    private static MediaManagementData ToDomain(ServiceMediaManagementData dto)
     {
         return new MediaManagementData
         {
@@ -30,7 +30,7 @@ internal class SonarrMediaManagementGateway(IMediaManagementApiService api)
     }
 
     // Merges domain changes onto the stashed DTO for round-trip safety
-    private MediaManagementDto FromDomain(MediaManagementData data)
+    private ServiceMediaManagementData FromDomain(MediaManagementData data)
     {
         // non-null: GetMediaManagement always called before UpdateMediaManagement in pipeline
         var original = _stashedDto!;

@@ -3,7 +3,7 @@ using Recyclarr.Config.Models;
 
 namespace Recyclarr.ServarrApi.MediaManagement;
 
-public record MediaManagementDto
+public record ServiceMediaManagementData
 {
     public int Id { get; init; } = 1;
 
