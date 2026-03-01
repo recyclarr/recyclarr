@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
@@ -12,7 +12,7 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto { Name = "dto_name" },
+            Profile = new QualityProfileData { Name = "dto_name" },
             ProfileConfig = NewPlan.Qp("config_name"),
         };
 
@@ -24,7 +24,7 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto(),
+            Profile = new QualityProfileData { Name = "" },
             ProfileConfig = NewPlan.Qp("config_name"),
         };
 
@@ -36,7 +36,7 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
                 Id = 1,
                 Name = "dto_name",
@@ -61,24 +61,24 @@ internal sealed class UpdatedQualityProfileTest
                 NumWantedItems = 1,
                 Items =
                 [
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(
+                    NewQp.QualityItem(1, "Quality Item 1", true),
+                    NewQp.QualityItem(2, "Quality Item 2", true),
+                    NewQp.GroupItem(
                         3,
                         "Quality Item 3",
                         true,
-                        NewQp.QualityDto(4, "Quality Item 4", true)
+                        NewQp.QualityItem(4, "Quality Item 4", true)
                     ),
                 ],
             },
         };
 
-        var result = profile.BuildUpdatedDto();
+        var result = profile.BuildMergedProfile();
 
         result
             .Should()
             .BeEquivalentTo(
-                new QualityProfileDto
+                new QualityProfileData
                 {
                     // Config name takes precedence: with trash_id-based state matching,
                     // a profile can be renamed by changing the config/guide name.
@@ -99,12 +99,13 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
+                Name = "",
                 Items =
                 [
-                    NewQp.QualityDto(8, "Quality Item 8", true),
-                    NewQp.QualityDto(9, "Quality Item 9", true),
+                    NewQp.QualityItem(8, "Quality Item 8", true),
+                    NewQp.QualityItem(9, "Quality Item 9", true),
                 ],
             },
             ProfileConfig = NewPlan.Qp(""),
@@ -113,21 +114,21 @@ internal sealed class UpdatedQualityProfileTest
                 NumWantedItems = 0,
                 Items =
                 [
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(
+                    NewQp.QualityItem(1, "Quality Item 1", true),
+                    NewQp.QualityItem(2, "Quality Item 2", true),
+                    NewQp.GroupItem(
                         3,
                         "Quality Item 3",
                         true,
-                        NewQp.QualityDto(4, "Quality Item 4", true)
+                        NewQp.QualityItem(4, "Quality Item 4", true)
                     ),
                 ],
             },
         };
 
-        var result = profile.BuildUpdatedDto();
+        var result = profile.BuildMergedProfile();
 
-        result.Items.Should().BeEquivalentTo(profile.ProfileDto.Items);
+        result.Items.Should().BeEquivalentTo(profile.Profile.Items);
     }
 
     [Test]
@@ -135,12 +136,12 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto { Name = "" },
+            Profile = new QualityProfileData { Name = "" },
             ProfileConfig = NewPlan.Qp("config_name"),
-            UpdatedQualities = new UpdatedQualities { Items = [new ProfileItemDto()] },
+            UpdatedQualities = new UpdatedQualities { Items = [new QualityProfileItem()] },
         };
 
-        var dto = profile.BuildUpdatedDto();
+        var dto = profile.BuildMergedProfile();
 
         dto.Name.Should().Be("config_name");
     }
@@ -151,14 +152,15 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
+                Name = "",
                 // To verify that it gets overwritten because config specifies a cutoff
                 Cutoff = originalCutoff,
                 Items =
                 [
-                    NewQp.QualityDto(8, "Quality Item 8", true),
-                    NewQp.QualityDto(9, "Quality Item 9", true),
+                    NewQp.QualityItem(8, "Quality Item 8", true),
+                    NewQp.QualityItem(9, "Quality Item 9", true),
                 ],
             },
             ProfileConfig = NewPlan.Qp(
@@ -169,19 +171,19 @@ internal sealed class UpdatedQualityProfileTest
                 NumWantedItems = 1,
                 Items =
                 [
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(
+                    NewQp.QualityItem(1, "Quality Item 1", true),
+                    NewQp.QualityItem(2, "Quality Item 2", true),
+                    NewQp.GroupItem(
                         3,
                         "Quality Item 3",
                         true,
-                        NewQp.QualityDto(4, "Quality Item 4", true)
+                        NewQp.QualityItem(4, "Quality Item 4", true)
                     ),
                 ],
             },
         };
 
-        var dto = profile.BuildUpdatedDto();
+        var dto = profile.BuildMergedProfile();
 
         dto.Cutoff.Should().Be(2);
     }
@@ -192,14 +194,15 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
+                Name = "",
                 // To verify that it gets overwritten because config specifies a cutoff
                 Cutoff = originalCutoff,
                 Items =
                 [
-                    NewQp.QualityDto(8, "Quality Item 8", true),
-                    NewQp.QualityDto(9, "Quality Item 9", true),
+                    NewQp.QualityItem(8, "Quality Item 8", true),
+                    NewQp.QualityItem(9, "Quality Item 9", true),
                 ],
             },
             ProfileConfig = NewPlan.Qp(
@@ -210,19 +213,19 @@ internal sealed class UpdatedQualityProfileTest
                 NumWantedItems = 0, // zero forces cutoff search to fall back to original DTO items
                 Items =
                 [
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(
+                    NewQp.QualityItem(1, "Quality Item 1", true),
+                    NewQp.QualityItem(2, "Quality Item 2", true),
+                    NewQp.GroupItem(
                         3,
                         "Quality Item 3",
                         true,
-                        NewQp.QualityDto(4, "Quality Item 4", true)
+                        NewQp.QualityItem(4, "Quality Item 4", true)
                     ),
                 ],
             },
         };
 
-        var dto = profile.BuildUpdatedDto();
+        var dto = profile.BuildMergedProfile();
 
         dto.Cutoff.Should().Be(9);
     }
@@ -232,12 +235,13 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
+                Name = "",
                 Items =
                 [
-                    NewQp.QualityDto(8, "Quality Item 8", true),
-                    NewQp.QualityDto(9, "Quality Item 9", true),
+                    NewQp.QualityItem(8, "Quality Item 8", true),
+                    NewQp.QualityItem(9, "Quality Item 9", true),
                 ],
             },
             ProfileConfig = NewPlan.Qp(
@@ -251,19 +255,19 @@ internal sealed class UpdatedQualityProfileTest
                 NumWantedItems = 1,
                 Items =
                 [
-                    NewQp.QualityDto(1, "Quality Item 1", true),
-                    NewQp.QualityDto(2, "Quality Item 2", true),
-                    NewQp.GroupDto(
+                    NewQp.QualityItem(1, "Quality Item 1", true),
+                    NewQp.QualityItem(2, "Quality Item 2", true),
+                    NewQp.GroupItem(
                         3,
                         "Quality Item 3",
                         true,
-                        NewQp.QualityDto(4, "Quality Item 4", true)
+                        NewQp.QualityItem(4, "Quality Item 4", true)
                     ),
                 ],
             },
         };
 
-        var dto = profile.BuildUpdatedDto();
+        var dto = profile.BuildMergedProfile();
 
         dto.Cutoff.Should().Be(1);
     }
@@ -273,13 +277,14 @@ internal sealed class UpdatedQualityProfileTest
     {
         var profile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
+                Name = "",
                 Cutoff = 8,
                 Items =
                 [
-                    NewQp.QualityDto(8, "Quality Item 8", true),
-                    NewQp.QualityDto(9, "Quality Item 9", true),
+                    NewQp.QualityItem(8, "Quality Item 8", true),
+                    NewQp.QualityItem(9, "Quality Item 9", true),
                 ],
             },
             ProfileConfig = NewPlan.Qp(
@@ -291,7 +296,7 @@ internal sealed class UpdatedQualityProfileTest
             UpdatedQualities = new UpdatedQualities { NumWantedItems = 0 },
         };
 
-        var dto = profile.BuildUpdatedDto();
+        var dto = profile.BuildMergedProfile();
 
         dto.Cutoff.Should().Be(8);
     }

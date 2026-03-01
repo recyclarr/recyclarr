@@ -2,7 +2,7 @@ using FluentValidation.TestHelper;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
@@ -29,7 +29,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo3", 0, 200, FormatScoreUpdateReason.NoChange),
                 NewQp.UpdatedScore("foo4", 0, 100, FormatScoreUpdateReason.Reset),
             ],
-            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
+            Profile = new QualityProfileData { Id = 1, Name = "ProfileName" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
 
@@ -63,7 +63,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var updatedProfile = new UpdatedQualityProfile
         {
             UpdatedScores = [],
-            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
+            Profile = new QualityProfileData { Id = 1, Name = "ProfileName" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
 
@@ -81,7 +81,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var updatedProfile = new UpdatedQualityProfile
         {
             UpdatedScores = [],
-            ProfileDto = new QualityProfileDto { Id = 1, Name = "ProfileName" },
+            Profile = new QualityProfileData { Id = 1, Name = "ProfileName" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
 
@@ -108,7 +108,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
                 NewQp.UpdatedScore("foo1", 0, 0, FormatScoreUpdateReason.Reset),
                 NewQp.UpdatedScore("foo2", 0, -50, FormatScoreUpdateReason.Updated),
             ],
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
                 Id = 1,
                 Name = "SQP-1 (1080p)",
@@ -136,7 +136,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
         var updatedProfile = new UpdatedQualityProfile
         {
             UpdatedQualities = new UpdatedQualities { InvalidQualityNames = ["foo1"] },
-            ProfileDto = new QualityProfileDto(),
+            Profile = new QualityProfileData { Name = "" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
 
@@ -155,7 +155,7 @@ internal sealed class UpdatedQualityProfileValidatorTest
 
         var updatedProfile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto(),
+            Profile = new QualityProfileData { Name = "" },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };
 
@@ -174,9 +174,10 @@ internal sealed class UpdatedQualityProfileValidatorTest
 
         var updatedProfile = new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto
+            Profile = new QualityProfileData
             {
-                Items = [NewQp.QualityDto(1, "disabled_quality", false)],
+                Name = "",
+                Items = [NewQp.QualityItem(1, "disabled_quality", false)],
             },
             ProfileConfig = NewPlan.Qp(profileConfig),
         };

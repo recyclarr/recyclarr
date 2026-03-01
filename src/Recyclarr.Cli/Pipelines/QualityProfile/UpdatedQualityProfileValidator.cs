@@ -17,7 +17,7 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         // New profiles (those with no service ID) require qualities to be specified
         RuleFor(x => x.ProfileConfig.Config.Qualities)
             .NotEmpty()
-            .When(x => x.ProfileDto.Id is null)
+            .When(x => x.Profile.Id is null)
             .WithMessage("`qualities` is required when creating profiles for the first time");
     }
 
@@ -61,7 +61,7 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         var items =
             profile.UpdatedQualities.NumWantedItems > 0
                 ? profile.UpdatedQualities.Items
-                : profile.ProfileDto.Items;
+                : profile.Profile.Items;
 
         if (items.FindCutoff(untilQuality) is null)
         {

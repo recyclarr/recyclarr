@@ -4,7 +4,7 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
@@ -116,16 +116,16 @@ internal class QualityProfileTransactionPhase(
         {
             profile.InvalidExceptCfNames = GetInvalidExceptCfNames(
                 profile.ProfileConfig.Config.ResetUnmatchedScores,
-                profile.ProfileDto
+                profile.Profile
             );
 
-            profile.UpdatedScores = ProcessScoreUpdates(profile.ProfileConfig, profile.ProfileDto);
+            profile.UpdatedScores = ProcessScoreUpdates(profile.ProfileConfig, profile.Profile);
         }
     }
 
     private static List<string> GetInvalidExceptCfNames(
         ResetUnmatchedScoresConfig resetConfig,
-        QualityProfileDto profileDto
+        QualityProfileData profile
     )
     {
         var except = resetConfig.Except;
@@ -136,7 +136,7 @@ internal class QualityProfileTransactionPhase(
 
         return except
             .Except(
-                profileDto.FormatItems.Select(x => x.Name),
+                profile.FormatItems.Select(x => x.Name),
                 StringComparer.InvariantCultureIgnoreCase
             )
             .ToList();
@@ -149,14 +149,14 @@ internal class QualityProfileTransactionPhase(
     )]
     private static List<UpdatedFormatScore> ProcessScoreUpdates(
         PlannedQualityProfile profileData,
-        QualityProfileDto profileDto
+        QualityProfileData profile
     )
     {
         return profileData
             .CfScores.FullOuterHashJoin(
-                profileDto.FormatItems,
+                profile.FormatItems,
                 x => x.ServiceId,
-                x => x.Format,
+                x => x.FormatId,
                 // Exists in config, but not in service (these are unusual and should be errors)
                 // See `FormatScoreUpdateReason` for reason why we need this (it's preview mode)
                 l => UpdatedFormatScore.New(l),

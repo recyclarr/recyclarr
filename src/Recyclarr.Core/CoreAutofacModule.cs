@@ -24,6 +24,7 @@ using Recyclarr.Repo;
 using Recyclarr.Servarr.CustomFormat;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Servarr.MediaNaming;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Servarr.SystemStatus;
 using Recyclarr.ServarrApi;
@@ -228,6 +229,11 @@ public class CoreAutofacModule : Module
             .RegisterType<QualityProfileApiService>()
             .As<IQualityProfileApiService>()
             .InstancePerLifetimeScope();
+        builder.RegisterServiceGateway<
+            IQualityProfileService,
+            SonarrQualityProfileGateway,
+            RadarrQualityProfileGateway
+        >();
         builder
             .RegisterType<CustomFormatApiService>()
             .As<ICustomFormatApiService>()

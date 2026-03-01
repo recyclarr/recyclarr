@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -9,13 +9,15 @@ internal class QualityItemOrganizer
 {
     private readonly List<string> _invalidItemNames = [];
 
-    public UpdatedQualities OrganizeItems(QualityProfileDto dto, QualityProfileConfig config)
+    public UpdatedQualities OrganizeItems(
+        IReadOnlyCollection<QualityProfileItem> items,
+        QualityProfileConfig config
+    )
     {
-        var wanted = GetWantedItems(dto.Items, config.Qualities);
-        var unwanted = GetUnwantedItems(dto.Items, wanted);
+        var wanted = GetWantedItems(items, config.Qualities);
+        var unwanted = GetUnwantedItems(items, wanted);
         var combined = CombineAndSortItems(config.QualitySort, wanted, unwanted);
-
-        AssignMissingGroupIds(combined);
+        combined = AssignMissingGroupIds(combined);
 
         return new UpdatedQualities
         {
@@ -30,31 +32,31 @@ internal class QualityItemOrganizer
         "S1751",
         Justification = "'continue' used here is for separating local methods"
     )]
-    private List<ProfileItemDto> GetWantedItems(
-        IReadOnlyCollection<ProfileItemDto> dtoItems,
+    private List<QualityProfileItem> GetWantedItems(
+        IReadOnlyCollection<QualityProfileItem> sourceItems,
         IReadOnlyCollection<QualityProfileQualityConfig> configQualities
     )
     {
-        var updatedItems = new List<ProfileItemDto>();
+        var updatedItems = new List<QualityProfileItem>();
 
         foreach (var configQuality in configQualities)
         {
             // If the nested qualities list is NOT empty, then this is considered a quality group.
             if (configQuality.Qualities.IsNotEmpty())
             {
-                var dtoGroup =
-                    dtoItems.FindGroupByName(configQuality.Name)
-                    ?? new ProfileItemDto { Name = configQuality.Name };
+                var existingGroup =
+                    sourceItems.FindGroupByName(configQuality.Name)
+                    ?? new QualityProfileItem { Name = configQuality.Name };
 
-                var updatedGroupItems = new List<ProfileItemDto>();
+                var updatedGroupItems = new List<QualityProfileItem>();
 
                 foreach (var groupQuality in configQuality.Qualities)
                 {
-                    AddQualityFromDto(updatedGroupItems, groupQuality);
+                    AddQualityFromSource(updatedGroupItems, groupQuality);
                 }
 
                 updatedItems.Add(
-                    dtoGroup with
+                    existingGroup with
                     {
                         Allowed = configQuality.Enabled,
                         Items = updatedGroupItems,
@@ -64,37 +66,37 @@ internal class QualityItemOrganizer
                 continue;
             }
 
-            AddQualityFromDto(updatedItems, configQuality.Name);
+            AddQualityFromSource(updatedItems, configQuality.Name);
             continue;
 
-            void AddQualityFromDto(ICollection<ProfileItemDto> items, string name)
+            void AddQualityFromSource(ICollection<QualityProfileItem> items, string name)
             {
-                var dtoItem = dtoItems.FindQualityByName(name);
-                if (dtoItem is null)
+                var sourceItem = sourceItems.FindQualityByName(name);
+                if (sourceItem is null)
                 {
                     _invalidItemNames.Add(name);
                     return;
                 }
 
-                items.Add(dtoItem with { Allowed = configQuality.Enabled });
+                items.Add(sourceItem with { Allowed = configQuality.Enabled });
             }
         }
 
         return updatedItems;
     }
 
-    private static IEnumerable<ProfileItemDto> FilterUnwantedItems(
-        ProfileItemDto dto,
-        IReadOnlyCollection<ProfileItemDto> wantedItems
+    private static IEnumerable<QualityProfileItem> FilterUnwantedItems(
+        QualityProfileItem item,
+        IReadOnlyCollection<QualityProfileItem> wantedItems
     )
     {
         // Quality
-        if (dto.Quality is not null)
+        if (item.Quality is not null)
         {
-            if (wantedItems.FindQualityByName(dto.Quality.Name) is null)
+            if (wantedItems.FindQualityByName(item.Quality.Name) is null)
             {
                 // Not in wanted list, so we keep
-                return [dto];
+                return [item];
             }
         }
         // Group
@@ -102,12 +104,12 @@ internal class QualityItemOrganizer
         {
             // If this is actually a quality instead of a group, this will effectively be a no-op since the Items
             // array will already be empty.
-            var unwantedQualities = dto.Items.Where(y =>
+            var unwantedQualities = item.Items.Where(y =>
                 wantedItems.FindQualityByName(y.Quality?.Name) is null
             );
 
             // If the group is in the wanted list, then we only want to add qualities inside it that are NOT wanted
-            if (wantedItems.FindGroupByName(dto.Name) is not null)
+            if (wantedItems.FindGroupByName(item.Name) is not null)
             {
                 return unwantedQualities;
             }
@@ -115,7 +117,7 @@ internal class QualityItemOrganizer
             // If the group is NOT in the wanted list, keep the group and add its children (if they are not wanted)
             return
             [
-                dto with
+                item with
                 {
                     Items = unwantedQualities.Select(y => y with { Allowed = false }).ToList(),
                 },
@@ -125,24 +127,24 @@ internal class QualityItemOrganizer
         return [];
     }
 
-    private static IEnumerable<ProfileItemDto> GetUnwantedItems(
-        IEnumerable<ProfileItemDto> dtoItems,
-        IReadOnlyCollection<ProfileItemDto> wantedItems
+    private static IEnumerable<QualityProfileItem> GetUnwantedItems(
+        IEnumerable<QualityProfileItem> sourceItems,
+        IReadOnlyCollection<QualityProfileItem> wantedItems
     )
     {
-        return dtoItems
+        return sourceItems
             .SelectMany(x => FilterUnwantedItems(x, wantedItems))
             .Select(x => x with { Allowed = false })
             // Find item groups that have less than 2 nested qualities remaining in them. Those get flattened out.
             // If Count == 0, that gets handled by the `Where()` below.
-            .Select(x => x.Items.Count == 1 ? x.Items.First() : x)
+            .Select(x => x.Items.Count == 1 ? x.Items[0] : x)
             .Where(x => x is not { Quality: null, Items.Count: 0 });
     }
 
-    private static List<ProfileItemDto> CombineAndSortItems(
+    private static List<QualityProfileItem> CombineAndSortItems(
         QualitySortAlgorithm sortAlgorithm,
-        IEnumerable<ProfileItemDto> wantedItems,
-        IEnumerable<ProfileItemDto> unwantedItems
+        IEnumerable<QualityProfileItem> wantedItems,
+        IEnumerable<QualityProfileItem> unwantedItems
     )
     {
         return sortAlgorithm switch
@@ -155,13 +157,16 @@ internal class QualityItemOrganizer
         };
     }
 
-    private static void AssignMissingGroupIds(IReadOnlyCollection<ProfileItemDto> combinedItems)
+    private static List<QualityProfileItem> AssignMissingGroupIds(
+        List<QualityProfileItem> combinedItems
+    )
     {
         // Add the IDs at the very end since we need all groups to know which IDs are taken
         var nextItemId = combinedItems.NewItemId();
-        foreach (var item in combinedItems.Where(item => item is { Id: null, Quality: null }))
-        {
-            item.Id = nextItemId++;
-        }
+        return combinedItems
+            .Select(item =>
+                item is { Id: null, Quality: null } ? item with { Id = nextItemId++ } : item
+            )
+            .ToList();
     }
 }

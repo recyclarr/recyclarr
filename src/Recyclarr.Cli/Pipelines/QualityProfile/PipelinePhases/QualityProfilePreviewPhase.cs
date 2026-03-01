@@ -1,5 +1,5 @@
 using System.Globalization;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -65,39 +65,39 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
             .AddColumn("[bold]Current[/]")
             .AddColumn("[bold]New[/]");
 
-        var oldDto = profile.ProfileDto;
-        var newDto = profile.BuildUpdatedDto();
+        var oldProfile = profile.Profile;
+        var newProfile = profile.BuildMergedProfile();
 
-        table.AddRow("Name", Markup.Escape(oldDto.Name), Markup.Escape(newDto.Name));
+        table.AddRow("Name", Markup.Escape(oldProfile.Name), Markup.Escape(newProfile.Name));
         table.AddRow(
             "Upgrades Allowed?",
-            YesNo(oldDto.UpgradeAllowed),
-            YesNo(newDto.UpgradeAllowed)
+            YesNo(oldProfile.UpgradeAllowed),
+            YesNo(newProfile.UpgradeAllowed)
         );
         table.AddRow(
             "Minimum Format Score",
-            Null(oldDto.MinFormatScore),
-            Null(newDto.MinFormatScore)
+            Null(oldProfile.MinFormatScore),
+            Null(newProfile.MinFormatScore)
         );
         table.AddRow(
             "Minimum Format Upgrade Score",
-            Null(oldDto.MinUpgradeFormatScore),
-            Null(newDto.MinUpgradeFormatScore)
+            Null(oldProfile.MinUpgradeFormatScore),
+            Null(newProfile.MinUpgradeFormatScore)
         );
 
         // ReSharper disable once InvertIf
-        if (newDto.UpgradeAllowed is true)
+        if (newProfile.UpgradeAllowed is true)
         {
             table.AddRow(
                 "Upgrade Until Quality",
-                Null(oldDto.Items.FindCutoff(oldDto.Cutoff)),
-                Null(newDto.Items.FindCutoff(newDto.Cutoff))
+                Null(oldProfile.Items.FindCutoff(oldProfile.Cutoff)),
+                Null(newProfile.Items.FindCutoff(newProfile.Cutoff))
             );
 
             table.AddRow(
                 "Upgrade Until Score",
-                Null(oldDto.CutoffFormatScore),
-                Null(newDto.CutoffFormatScore)
+                Null(oldProfile.CutoffFormatScore),
+                Null(newProfile.CutoffFormatScore)
             );
         }
 
@@ -110,14 +110,14 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
 
     private static Rows SetupQualityItemTable(UpdatedQualityProfile profile)
     {
-        static IRenderable BuildName(ProfileItemDto item)
+        static IRenderable BuildName(QualityProfileItem item)
         {
             var allowedChar = item.Allowed is true ? ":check_mark:" : ":cross_mark:";
             var name = item.Quality?.Name ?? item.Name ?? "NO NAME!";
             return Markup.FromInterpolated(CultureInfo.InvariantCulture, $"{allowedChar} {name}");
         }
 
-        static IRenderable BuildTree(ProfileItemDto item)
+        static IRenderable BuildTree(QualityProfileItem item)
         {
             var tree = new Tree(BuildName(item));
             foreach (var childItem in item.Items)
@@ -128,12 +128,12 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
             return tree;
         }
 
-        static IRenderable MakeNode(ProfileItemDto item)
+        static IRenderable MakeNode(QualityProfileItem item)
         {
             return item.Quality is not null ? BuildName(item) : BuildTree(item);
         }
 
-        static IRenderable MakeTree(IEnumerable<ProfileItemDto> items, string header)
+        static IRenderable MakeTree(IEnumerable<QualityProfileItem> items, string header)
         {
             var headerMarkup = Markup.FromInterpolated(
                 CultureInfo.InvariantCulture,
@@ -146,7 +146,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         }
 
         var table = new Columns(
-            MakeTree(profile.ProfileDto.Items, "Current"),
+            MakeTree(profile.Profile.Items, "Current"),
             MakeTree(profile.UpdatedQualities.Items, "New")
         );
 
@@ -166,7 +166,7 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
     {
         var updatedScores = profile
             .UpdatedScores.Where(x =>
-                x.Reason != FormatScoreUpdateReason.NoChange && x.Dto.Score != x.NewScore
+                x.Reason != FormatScoreUpdateReason.NoChange && x.FormatItem.Score != x.NewScore
             )
             .ToList();
 
@@ -184,8 +184,8 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         foreach (var score in updatedScores)
         {
             table.AddRow(
-                Markup.Escape(score.Dto.Name),
-                score.Dto.Score.ToString(CultureInfo.InvariantCulture),
+                Markup.Escape(score.FormatItem.Name),
+                score.FormatItem.Score.ToString(CultureInfo.InvariantCulture),
                 score.NewScore.ToString(CultureInfo.InvariantCulture),
                 score.Reason.ToString()
             );

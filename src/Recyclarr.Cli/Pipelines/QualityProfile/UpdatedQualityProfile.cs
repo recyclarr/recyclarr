@@ -1,20 +1,20 @@
 using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 internal record UpdatedQualities
 {
     public ICollection<string> InvalidQualityNames { get; init; } = [];
-    public IReadOnlyCollection<ProfileItemDto> Items { get; init; } = [];
+    public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
     public int NumWantedItems { get; init; }
 }
 
 internal record UpdatedQualityProfile
 {
-    public required QualityProfileDto ProfileDto { get; set; }
+    public required QualityProfileData Profile { get; set; }
     public required PlannedQualityProfile ProfileConfig { get; init; }
-    public IReadOnlyList<ProfileLanguageDto> Languages { get; init; } = [];
+    public IReadOnlyList<ProfileLanguage> Languages { get; init; } = [];
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = [];
@@ -24,7 +24,7 @@ internal record UpdatedQualityProfile
     {
         get
         {
-            var name = ProfileDto.Name;
+            var name = Profile.Name;
             if (string.IsNullOrEmpty(name))
             {
                 name = ProfileConfig.Config.Name;
@@ -36,7 +36,7 @@ internal record UpdatedQualityProfile
 
     public string? TrashId => ProfileConfig.Resource?.TrashId;
 
-    // Effective value resolution: config override > guide resource > service DTO.
+    // Effective value resolution: config override > guide resource > service profile.
     // These are the single source of truth for what gets sent to the API and validated.
     public string EffectiveName
     {
@@ -46,45 +46,47 @@ internal record UpdatedQualityProfile
             var resource = ProfileConfig.Resource;
             return !string.IsNullOrEmpty(config.Name)
                 ? config.Name
-                : resource?.Name ?? ProfileDto.Name;
+                : resource?.Name ?? Profile.Name;
         }
     }
 
     public bool? EffectiveUpgradeAllowed =>
         ProfileConfig.Config.UpgradeAllowed
         ?? ProfileConfig.Resource?.UpgradeAllowed
-        ?? ProfileDto.UpgradeAllowed;
+        ?? Profile.UpgradeAllowed;
 
     public int? EffectiveMinFormatScore =>
         ProfileConfig.Config.MinFormatScore
         ?? ProfileConfig.Resource?.MinFormatScore
-        ?? ProfileDto.MinFormatScore;
+        ?? Profile.MinFormatScore;
 
     public int? EffectiveMinUpgradeFormatScore =>
         ProfileConfig.Config.MinUpgradeFormatScore
         ?? ProfileConfig.Resource?.MinUpgradeFormatScore
-        ?? ProfileDto.MinUpgradeFormatScore;
+        ?? Profile.MinUpgradeFormatScore;
 
     public int? EffectiveCutoffFormatScore =>
         ProfileConfig.Config.UpgradeUntilScore
         ?? ProfileConfig.Resource?.CutoffFormatScore
-        ?? ProfileDto.CutoffFormatScore;
+        ?? Profile.CutoffFormatScore;
 
-    public QualityProfileDto BuildUpdatedDto()
+    public QualityProfileData BuildMergedProfile()
     {
-        var newDto = ProfileDto with
+        var merged = Profile with
         {
             Name = EffectiveName,
             UpgradeAllowed = EffectiveUpgradeAllowed,
             MinFormatScore = EffectiveMinFormatScore,
             MinUpgradeFormatScore = EffectiveMinUpgradeFormatScore,
             CutoffFormatScore = EffectiveCutoffFormatScore,
-            FormatItems = UpdatedScores.Select(x => x.Dto with { Score = x.NewScore }).ToList(),
+            FormatItems = UpdatedScores
+                .Select(x => x.FormatItem with { Score = x.NewScore })
+                .ToList(),
         };
 
         if (UpdatedQualities.NumWantedItems > 0)
         {
-            newDto = newDto with { Items = UpdatedQualities.Items };
+            merged = merged with { Items = UpdatedQualities.Items };
         }
 
         // The `qualityprofile` API will still validate `cutoff` even when `upgradeAllowed` is set
@@ -102,11 +104,11 @@ internal record UpdatedQualityProfile
         // their config.
         var effectiveCutoff =
             ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.Resource?.Cutoff;
-        if (newDto.Cutoff is null || effectiveCutoff is not null)
+        if (merged.Cutoff is null || effectiveCutoff is not null)
         {
-            newDto = newDto with
+            merged = merged with
             {
-                Cutoff = newDto.Items.FindCutoff(effectiveCutoff) ?? newDto.Items.FirstCutoffId(),
+                Cutoff = merged.Items.FindCutoff(effectiveCutoff) ?? merged.Items.FirstCutoffId(),
             };
         }
 
@@ -119,10 +121,10 @@ internal record UpdatedQualityProfile
             );
             if (language is not null)
             {
-                newDto = newDto with { Language = language };
+                merged = merged with { Language = language };
             }
         }
 
-        return newDto;
+        return merged;
     }
 }

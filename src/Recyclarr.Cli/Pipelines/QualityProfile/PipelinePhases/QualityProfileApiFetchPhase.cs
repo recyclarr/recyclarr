@@ -1,11 +1,11 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiFetchPhase(
-    IQualityProfileApiService api,
+    IQualityProfileService service,
     IQualityProfileStatePersister statePersister
 ) : IPipelinePhase<QualityProfilePipelineContext>
 {
@@ -14,15 +14,15 @@ internal class QualityProfileApiFetchPhase(
         CancellationToken ct
     )
     {
-        var profilesTask = api.GetQualityProfiles(ct);
-        var schemaTask = api.GetSchema(ct);
-        var languagesTask = api.GetLanguages(ct);
+        var profilesTask = service.GetQualityProfiles(ct);
+        var schemaTask = service.GetSchema(ct);
+        var languagesTask = service.GetLanguages(ct);
         await Task.WhenAll(profilesTask, schemaTask, languagesTask);
 
         context.ApiFetchOutput = new QualityProfileServiceData(
-            (await profilesTask).AsReadOnly(),
+            await profilesTask,
             await schemaTask,
-            (await languagesTask).AsReadOnly()
+            await languagesTask
         );
         context.State = statePersister.Load();
         return PipelineFlow.Continue;

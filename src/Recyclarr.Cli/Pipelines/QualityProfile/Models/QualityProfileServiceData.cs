@@ -1,9 +1,9 @@
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.Models;
 
 internal record QualityProfileServiceData(
-    IReadOnlyList<QualityProfileDto> Profiles,
-    QualityProfileDto Schema,
-    IReadOnlyList<ProfileLanguageDto> Languages
+    IReadOnlyList<QualityProfileData> Profiles,
+    QualityProfileData Schema,
+    IReadOnlyList<ProfileLanguage> Languages
 );

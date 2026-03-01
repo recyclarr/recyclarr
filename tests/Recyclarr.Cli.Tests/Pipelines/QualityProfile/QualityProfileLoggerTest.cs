@@ -3,7 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
@@ -17,7 +17,7 @@ internal sealed class QualityProfileLoggerTest
     {
         return new UpdatedQualityProfile
         {
-            ProfileDto = new QualityProfileDto { Name = name },
+            Profile = new QualityProfileData { Name = name },
             ProfileConfig = NewPlan.Qp(name),
         };
     }

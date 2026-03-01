@@ -4,7 +4,7 @@ using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.PipelinePhases;
@@ -34,7 +34,7 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto { Id = 1, Name = "profile1" },
+            new QualityProfileData { Id = 1, Name = "profile1" },
         };
 
         var invalidProfile = NewPlan.Qp("invalid_profile_name", false);
@@ -57,14 +57,14 @@ internal sealed class QualityProfileTransactionPhaseTest
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
-                new UpdatedQualityProfile { ProfileConfig = validProfile, ProfileDto = dtos[0] }
+                new UpdatedQualityProfile { ProfileConfig = validProfile, Profile = dtos[0] }
             );
     }
 
     [Test, AutoMockData]
     public async Task New_profiles(QualityProfileTransactionPhase sut)
     {
-        var dtos = new[] { new QualityProfileDto { Name = "irrelevant_profile" } };
+        var dtos = new[] { new QualityProfileData { Name = "irrelevant_profile" } };
 
         var newProfile = NewPlan.Qp(
             new QualityProfileConfig
@@ -74,11 +74,15 @@ internal sealed class QualityProfileTransactionPhaseTest
             }
         );
 
-        var schema = new QualityProfileDto
+        var schema = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+                new QualityProfileItem
+                {
+                    Quality = new QualityProfileItemQuality { Name = "quality1" },
+                },
             ],
         };
 
@@ -99,16 +103,16 @@ internal sealed class QualityProfileTransactionPhaseTest
                 new UpdatedQualityProfile
                 {
                     ProfileConfig = newProfile,
-                    ProfileDto = schema,
+                    Profile = schema,
                     UpdatedQualities = new UpdatedQualities
                     {
                         NumWantedItems = 1,
                         Items =
                         [
-                            new ProfileItemDto
+                            new QualityProfileItem
                             {
                                 Allowed = true,
-                                Quality = new ProfileItemQualityDto { Name = "quality1" },
+                                Quality = new QualityProfileItemQuality { Name = "quality1" },
                             },
                         ],
                     },
@@ -121,22 +125,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -167,7 +171,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     NewQp.UpdatedScore("quality1", 200, 100, FormatScoreUpdateReason.Updated),
                     NewQp.UpdatedScore("quality2", 300, 500, FormatScoreUpdateReason.Updated),
                 ],
-                o => o.Excluding(x => x.Dto.Format)
+                o => o.Excluding(x => x.FormatItem.FormatId)
             );
     }
 
@@ -176,21 +180,21 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -214,22 +218,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -260,7 +264,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     NewQp.UpdatedScore("quality1", 200, 200, FormatScoreUpdateReason.NoChange),
                     NewQp.UpdatedScore("quality2", 300, 300, FormatScoreUpdateReason.NoChange),
                 ],
-                o => o.Excluding(x => x.Dto.Format)
+                o => o.Excluding(x => x.FormatItem.FormatId)
             );
     }
 
@@ -269,22 +273,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "quality2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -321,7 +325,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     NewQp.UpdatedScore("quality3", 0, 100, FormatScoreUpdateReason.New),
                     NewQp.UpdatedScore("quality4", 0, 500, FormatScoreUpdateReason.New),
                 ],
-                o => o.Excluding(x => x.Dto.Format)
+                o => o.Excluding(x => x.FormatItem.FormatId)
             );
     }
 
@@ -330,22 +334,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -386,7 +390,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
                     NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New),
                 ],
-                o => o.Excluding(x => x.Dto.Format)
+                o => o.Excluding(x => x.FormatItem.FormatId)
             );
     }
 
@@ -395,22 +399,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -451,7 +455,7 @@ internal sealed class QualityProfileTransactionPhaseTest
                     NewQp.UpdatedScore("cf3", 0, 100, FormatScoreUpdateReason.New),
                     NewQp.UpdatedScore("cf4", 0, 500, FormatScoreUpdateReason.New),
                 ],
-                o => o.Excluding(x => x.Dto.Format)
+                o => o.Excluding(x => x.FormatItem.FormatId)
             );
     }
 
@@ -462,22 +466,22 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 FormatItems =
                 [
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf1",
-                        Format = 1,
+                        FormatId = 1,
                         Score = 200,
                     },
-                    new ProfileFormatItemDto
+                    new QualityProfileFormatItem
                     {
                         Name = "cf2",
-                        Format = 2,
+                        FormatId = 2,
                         Score = 300,
                     },
                 ],
@@ -517,19 +521,19 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var dtos = new[]
         {
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "profile1",
                 Items =
                 [
-                    new ProfileItemDto
+                    new QualityProfileItem
                     {
-                        Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                        Quality = new QualityProfileItemQuality { Id = 1, Name = "One" },
                     },
-                    new ProfileItemDto
+                    new QualityProfileItem
                     {
-                        Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                        Quality = new QualityProfileItemQuality { Id = 2, Name = "Two" },
                     },
                 ],
             },
@@ -542,21 +546,22 @@ internal sealed class QualityProfileTransactionPhaseTest
             Plan = CreatePlan(profile),
             ApiFetchOutput = NewQp.ServiceData(
                 dtos,
-                schema: new QualityProfileDto
+                schema: new QualityProfileData
                 {
+                    Name = "",
                     Items =
                     [
-                        new ProfileItemDto
+                        new QualityProfileItem
                         {
-                            Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                            Quality = new QualityProfileItemQuality { Id = 1, Name = "One" },
                         },
-                        new ProfileItemDto
+                        new QualityProfileItem
                         {
-                            Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                            Quality = new QualityProfileItemQuality { Id = 2, Name = "Two" },
                         },
-                        new ProfileItemDto
+                        new QualityProfileItem
                         {
-                            Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
+                            Quality = new QualityProfileItemQuality { Id = 3, Name = "Three" },
                         },
                     ],
                 }
@@ -571,19 +576,19 @@ internal sealed class QualityProfileTransactionPhaseTest
         profiles.First().Profile.MissingQualities.Should().BeEquivalentTo("Three");
         profiles
             .First()
-            .Profile.ProfileDto.Items.Should()
+            .Profile.Profile.Items.Should()
             .BeEquivalentTo([
-                new ProfileItemDto
+                new QualityProfileItem
                 {
-                    Quality = new ProfileItemQualityDto { Id = 1, Name = "One" },
+                    Quality = new QualityProfileItemQuality { Id = 1, Name = "One" },
                 },
-                new ProfileItemDto
+                new QualityProfileItem
                 {
-                    Quality = new ProfileItemQualityDto { Id = 2, Name = "Two" },
+                    Quality = new QualityProfileItemQuality { Id = 2, Name = "Two" },
                 },
-                new ProfileItemDto
+                new QualityProfileItem
                 {
-                    Quality = new ProfileItemQualityDto { Id = 3, Name = "Three" },
+                    Quality = new QualityProfileItemQuality { Id = 3, Name = "Three" },
                 },
             ]);
     }
@@ -599,7 +604,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             resource
         );
 
-        var serviceDto = new QualityProfileDto { Id = 42, Name = "Guide Profile" };
+        var serviceDto = new QualityProfileData { Id = 42, Name = "Guide Profile" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -616,7 +621,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allUpdated.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
+        allUpdated.Should().ContainSingle().Which.Profile.Id.Should().Be(42);
     }
 
     [Test, AutoMockData]
@@ -630,7 +635,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             resource
         );
 
-        var serviceDto = new QualityProfileDto { Id = 42, Name = "Old Service Name" };
+        var serviceDto = new QualityProfileData { Id = 42, Name = "Old Service Name" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -646,7 +651,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allUpdated.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
+        allUpdated.Should().ContainSingle().Which.Profile.Id.Should().Be(42);
     }
 
     [Test, AutoMockData]
@@ -661,7 +666,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         );
 
         // Cached ID 999 doesn't exist in service, but a profile with matching name does
-        var serviceDtoWithName = new QualityProfileDto { Id = 50, Name = "Guide Profile" };
+        var serviceDtoWithName = new QualityProfileData { Id = 50, Name = "Guide Profile" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -688,7 +693,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             resource
         );
 
-        var existingDto = new QualityProfileDto { Id = 100, Name = "Existing Profile" };
+        var existingDto = new QualityProfileData { Id = 100, Name = "Existing Profile" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -720,11 +725,15 @@ internal sealed class QualityProfileTransactionPhaseTest
             resource
         );
 
-        var schema = new QualityProfileDto
+        var schema = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+                new QualityProfileItem
+                {
+                    Quality = new QualityProfileItemQuality { Name = "quality1" },
+                },
             ],
         };
 
@@ -752,8 +761,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         );
 
         // Two profiles with the same name (case-insensitive)
-        var dto1 = new QualityProfileDto { Id = 1, Name = "Duplicate Name" };
-        var dto2 = new QualityProfileDto { Id = 2, Name = "duplicate name" };
+        var dto1 = new QualityProfileData { Id = 1, Name = "Duplicate Name" };
+        var dto2 = new QualityProfileData { Id = 2, Name = "duplicate name" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -821,8 +830,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var profileA = GuideQp("A", "trash-id-1");
         var profileB = GuideQp("B", "trash-id-1");
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileData { Id = 43, Name = "B" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -842,7 +851,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allExisting.Select(p => p.ProfileDto.Id).Should().BeEquivalentTo([42, 43]);
+        allExisting.Select(p => p.Profile.Id).Should().BeEquivalentTo([42, 43]);
     }
 
     [Test, AutoMockData]
@@ -851,8 +860,8 @@ internal sealed class QualityProfileTransactionPhaseTest
         var profileA = GuideQp("A", "trash-id-1");
         var profileB2 = GuideQp("B2", "trash-id-1");
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileData { Id = 43, Name = "B" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -872,7 +881,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allExisting.Select(p => p.ProfileDto.Id).Should().BeEquivalentTo([42, 43]);
+        allExisting.Select(p => p.Profile.Id).Should().BeEquivalentTo([42, 43]);
     }
 
     [Test, AutoMockData]
@@ -890,12 +899,16 @@ internal sealed class QualityProfileTransactionPhaseTest
             }
         );
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var schema = new QualityProfileDto
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var schema = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+                new QualityProfileItem
+                {
+                    Quality = new QualityProfileItemQuality { Name = "quality1" },
+                },
             ],
         };
 
@@ -914,7 +927,7 @@ internal sealed class QualityProfileTransactionPhaseTest
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
             .ToList();
-        allExisting.Should().ContainSingle().Which.ProfileDto.Id.Should().Be(42);
+        allExisting.Should().ContainSingle().Which.Profile.Id.Should().Be(42);
     }
 
     [Test, AutoMockData]
@@ -943,13 +956,17 @@ internal sealed class QualityProfileTransactionPhaseTest
             }
         );
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var serviceDtoB = new QualityProfileDto { Id = 43, Name = "B" };
-        var schema = new QualityProfileDto
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var serviceDtoB = new QualityProfileData { Id = 43, Name = "B" };
+        var schema = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                new ProfileItemDto { Quality = new ProfileItemQualityDto { Name = "quality1" } },
+                new QualityProfileItem
+                {
+                    Quality = new QualityProfileItemQuality { Name = "quality1" },
+                },
             ],
         };
 
@@ -980,8 +997,8 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var profileC = GuideQp("C", "trash-id-1");
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var serviceDtoC = new QualityProfileDto { Id = 99, Name = "C" };
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var serviceDtoC = new QualityProfileData { Id = 99, Name = "C" };
 
         var context = new QualityProfilePipelineContext
         {
@@ -1004,9 +1021,9 @@ internal sealed class QualityProfileTransactionPhaseTest
     {
         var profileC = GuideQp("C", "trash-id-1");
 
-        var serviceDtoA = new QualityProfileDto { Id = 42, Name = "A" };
-        var serviceDtoC1 = new QualityProfileDto { Id = 98, Name = "C" };
-        var serviceDtoC2 = new QualityProfileDto { Id = 99, Name = "c" };
+        var serviceDtoA = new QualityProfileData { Id = 42, Name = "A" };
+        var serviceDtoC1 = new QualityProfileData { Id = 98, Name = "C" };
+        var serviceDtoC2 = new QualityProfileData { Id = 99, Name = "c" };
 
         var context = new QualityProfilePipelineContext
         {

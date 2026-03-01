@@ -1,10 +1,10 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
 internal class QualityProfileApiPersistencePhase(
-    IQualityProfileApiService api,
+    IQualityProfileService service,
     IQualityProfileStatePersister statePersister,
     QualityProfileLogger logger
 ) : IPipelinePhase<QualityProfilePipelineContext>
@@ -19,14 +19,14 @@ internal class QualityProfileApiPersistencePhase(
         // Create new profiles
         foreach (var profile in transactions.NewProfiles)
         {
-            profile.ProfileDto = await api.CreateQualityProfile(profile.BuildUpdatedDto(), ct);
+            profile.Profile = await service.CreateQualityProfile(profile.BuildMergedProfile(), ct);
         }
 
         // Update existing profiles with changes
         foreach (var profileWithStats in transactions.UpdatedProfiles)
         {
-            var dto = profileWithStats.Profile.BuildUpdatedDto();
-            await api.UpdateQualityProfile(dto, ct);
+            var merged = profileWithStats.Profile.BuildMergedProfile();
+            await service.UpdateQualityProfile(merged, ct);
         }
 
         context.State.Update(context);

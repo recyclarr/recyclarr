@@ -2,13 +2,13 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Processors.StateRepair;
 
 internal class QualityProfileResourceAdapter(
-    IQualityProfileApiService qpApi,
+    IQualityProfileService qpService,
     IQualityProfileStatePersister statePersister,
     QualityProfileResourceQuery qpQuery,
     IServiceConfiguration config
@@ -21,7 +21,7 @@ internal class QualityProfileResourceAdapter(
         CancellationToken ct
     )
     {
-        var serviceQps = await qpApi.GetQualityProfiles(ct);
+        var serviceQps = await qpService.GetQualityProfiles(ct);
         return serviceQps.Cast<IServiceResource>().ToList();
     }
 

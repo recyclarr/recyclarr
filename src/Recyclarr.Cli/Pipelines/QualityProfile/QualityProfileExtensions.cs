@@ -1,23 +1,28 @@
 using Recyclarr.Common.Extensions;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
 internal static class QualityProfileExtensions
 {
-    private static IEnumerable<ProfileItemDto> FlattenItems(IEnumerable<ProfileItemDto> items)
+    private static IEnumerable<QualityProfileItem> FlattenItems(
+        IEnumerable<QualityProfileItem> items
+    )
     {
         return items.Flatten(x => x.Items);
     }
 
-    public static IEnumerable<ProfileItemDto> FlattenQualities(
-        this IEnumerable<ProfileItemDto> items
+    public static IEnumerable<QualityProfileItem> FlattenQualities(
+        this IEnumerable<QualityProfileItem> items
     )
     {
         return FlattenItems(items).Where(x => x.Quality is not null);
     }
 
-    public static ProfileItemDto? FindGroupById(this IEnumerable<ProfileItemDto> items, int? id)
+    public static QualityProfileItem? FindGroupById(
+        this IEnumerable<QualityProfileItem> items,
+        int? id
+    )
     {
         if (id is null)
         {
@@ -27,8 +32,8 @@ internal static class QualityProfileExtensions
         return FlattenItems(items).Where(x => x.Quality is null).FirstOrDefault(x => x.Id == id);
     }
 
-    public static ProfileItemDto? FindGroupByName(
-        this IEnumerable<ProfileItemDto> items,
+    public static QualityProfileItem? FindGroupByName(
+        this IEnumerable<QualityProfileItem> items,
         string? name
     )
     {
@@ -42,7 +47,10 @@ internal static class QualityProfileExtensions
             .FirstOrDefault(x => x.Name.EqualsIgnoreCase(name));
     }
 
-    public static ProfileItemDto? FindQualityById(this IEnumerable<ProfileItemDto> items, int? id)
+    public static QualityProfileItem? FindQualityById(
+        this IEnumerable<QualityProfileItem> items,
+        int? id
+    )
     {
         if (id is null)
         {
@@ -54,8 +62,8 @@ internal static class QualityProfileExtensions
             .FirstOrDefault(x => x.Quality!.Id == id);
     }
 
-    public static ProfileItemDto? FindQualityByName(
-        this IEnumerable<ProfileItemDto> items,
+    public static QualityProfileItem? FindQualityByName(
+        this IEnumerable<QualityProfileItem> items,
         string? name
     )
     {
@@ -70,7 +78,7 @@ internal static class QualityProfileExtensions
     }
 
     private static IEnumerable<(string? Name, int? Id)> GetEligibleCutoffs(
-        IEnumerable<ProfileItemDto> items
+        IEnumerable<QualityProfileItem> items
     )
     {
         return items
@@ -79,7 +87,7 @@ internal static class QualityProfileExtensions
             .Where(x => x.Name is not null);
     }
 
-    public static int? FindCutoff(this IEnumerable<ProfileItemDto> items, string? name)
+    public static int? FindCutoff(this IEnumerable<QualityProfileItem> items, string? name)
     {
         if (name is null)
         {
@@ -91,7 +99,7 @@ internal static class QualityProfileExtensions
         return result.Id;
     }
 
-    public static string? FindCutoff(this IEnumerable<ProfileItemDto> items, int? id)
+    public static string? FindCutoff(this IEnumerable<QualityProfileItem> items, int? id)
     {
         if (id is null)
         {
@@ -103,12 +111,12 @@ internal static class QualityProfileExtensions
         return result.Name;
     }
 
-    public static int? FirstCutoffId(this IEnumerable<ProfileItemDto> items)
+    public static int? FirstCutoffId(this IEnumerable<QualityProfileItem> items)
     {
         return GetEligibleCutoffs(items).FirstOrDefault().Id;
     }
 
-    public static int NewItemId(this IEnumerable<ProfileItemDto> items)
+    public static int NewItemId(this IEnumerable<QualityProfileItem> items)
     {
         // This implementation is based on how the Radarr frontend calculates IDs.
         // This calculation will be applied to new quality item groups.

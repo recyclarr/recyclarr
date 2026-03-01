@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
@@ -16,20 +16,25 @@ internal static class NewQp
     )
     {
         return new UpdatedFormatScore(
-            new ProfileFormatItemDto { Name = name, Score = oldScore },
+            new QualityProfileFormatItem
+            {
+                FormatId = 0,
+                Name = name,
+                Score = oldScore,
+            },
             newScore,
             reason
         );
     }
 
-    public static ProfileItemDto GroupDto(
+    public static QualityProfileItem GroupItem(
         int itemId,
         string itemName,
         bool enabled,
-        params ProfileItemDto[] nestedItems
+        params QualityProfileItem[] nestedItems
     )
     {
-        return new ProfileItemDto
+        return new QualityProfileItem
         {
             Id = itemId,
             Name = itemName,
@@ -38,12 +43,12 @@ internal static class NewQp
         };
     }
 
-    public static ProfileItemDto QualityDto(int itemId, string itemName, bool enabled)
+    public static QualityProfileItem QualityItem(int itemId, string itemName, bool enabled)
     {
-        return new ProfileItemDto
+        return new QualityProfileItem
         {
             Allowed = enabled,
-            Quality = new ProfileItemQualityDto { Id = itemId, Name = itemName },
+            Quality = new QualityProfileItemQuality { Id = itemId, Name = itemName },
         };
     }
 
@@ -80,8 +85,8 @@ internal static class NewQp
     }
 
     public static QualityProfileServiceData ServiceData(
-        IReadOnlyList<QualityProfileDto>? profiles = null,
-        QualityProfileDto? schema = null,
-        IReadOnlyList<ProfileLanguageDto>? languages = null
-    ) => new(profiles ?? [], schema ?? new QualityProfileDto(), languages ?? []);
+        IReadOnlyList<QualityProfileData>? profiles = null,
+        QualityProfileData? schema = null,
+        IReadOnlyList<ProfileLanguage>? languages = null
+    ) => new(profiles ?? [], schema ?? new QualityProfileData { Name = "" }, languages ?? []);
 }

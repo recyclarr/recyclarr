@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.JsonDiffPatch;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -18,32 +18,36 @@ internal class QualityProfileStatCalculator(ILogger log)
     {
         log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
 
-        var oldDto = profile.ProfileDto;
-        var newDto = profile.BuildUpdatedDto();
+        var oldProfile = profile.Profile;
+        var newProfile = profile.BuildMergedProfile();
 
         return new ProfileWithStats
         {
             Profile = profile,
-            ProfileChanged = CheckProfileChanges(oldDto, newDto),
-            QualitiesChanged = CheckQualityChanges(profile, oldDto, newDto),
-            ScoresChanged = CheckScoreChanges(profile.ProfileDto, profile.UpdatedScores),
+            ProfileChanged = CheckProfileChanges(oldProfile, newProfile),
+            QualitiesChanged = CheckQualityChanges(profile, oldProfile, newProfile),
+            ScoresChanged = CheckScoreChanges(profile.Profile, profile.UpdatedScores),
         };
     }
 
-    private bool CheckProfileChanges(QualityProfileDto oldDto, QualityProfileDto newDto)
+    private bool CheckProfileChanges(QualityProfileData oldProfile, QualityProfileData newProfile)
     {
         var changed = false;
 
-        Check("Name", oldDto.Name, newDto.Name);
-        Check("Upgrade Allowed", oldDto.UpgradeAllowed, newDto.UpgradeAllowed);
+        Check("Name", oldProfile.Name, newProfile.Name);
+        Check("Upgrade Allowed", oldProfile.UpgradeAllowed, newProfile.UpgradeAllowed);
         Check(
             "Cutoff",
-            oldDto.Items.FindCutoff(oldDto.Cutoff),
-            newDto.Items.FindCutoff(newDto.Cutoff)
+            oldProfile.Items.FindCutoff(oldProfile.Cutoff),
+            newProfile.Items.FindCutoff(newProfile.Cutoff)
         );
-        Check("Cutoff Score", oldDto.CutoffFormatScore, newDto.CutoffFormatScore);
-        Check("Minimum Score", oldDto.MinFormatScore, newDto.MinFormatScore);
-        Check("Minimum Upgrade Score", oldDto.MinUpgradeFormatScore, newDto.MinUpgradeFormatScore);
+        Check("Cutoff Score", oldProfile.CutoffFormatScore, newProfile.CutoffFormatScore);
+        Check("Minimum Score", oldProfile.MinFormatScore, newProfile.MinFormatScore);
+        Check(
+            "Minimum Upgrade Score",
+            oldProfile.MinUpgradeFormatScore,
+            newProfile.MinUpgradeFormatScore
+        );
 
         return changed;
 
@@ -56,36 +60,36 @@ internal class QualityProfileStatCalculator(ILogger log)
 
     private static bool CheckQualityChanges(
         UpdatedQualityProfile profile,
-        QualityProfileDto oldDto,
-        QualityProfileDto newDto
+        QualityProfileData oldProfile,
+        QualityProfileData newProfile
     )
     {
-        using var oldJson = JsonSerializer.SerializeToDocument(oldDto.Items);
-        using var newJson = JsonSerializer.SerializeToDocument(newDto.Items);
+        using var oldJson = JsonSerializer.SerializeToDocument(oldProfile.Items);
+        using var newJson = JsonSerializer.SerializeToDocument(newProfile.Items);
         return profile.MissingQualities.Count > 0 || !oldJson.DeepEquals(newJson);
     }
 
     private bool CheckScoreChanges(
-        QualityProfileDto profileDto,
+        QualityProfileData profile,
         IReadOnlyCollection<UpdatedFormatScore> updatedScores
     )
     {
-        var scores = updatedScores.Where(y => y.Dto.Score != y.NewScore).ToList();
+        var scores = updatedScores.Where(y => y.FormatItem.Score != y.NewScore).ToList();
 
         if (scores.Count == 0)
         {
             return false;
         }
 
-        log.Debug("> Scores updated for quality profile: {ProfileName}", profileDto.Name);
+        log.Debug("> Scores updated for quality profile: {ProfileName}", profile.Name);
 
-        foreach (var (dto, newScore, reason) in scores)
+        foreach (var (formatItem, newScore, reason) in scores)
         {
             log.Debug(
                 "  - {Name} ({Id}): {OldScore} -> {NewScore} ({Reason})",
-                dto.Name,
-                dto.Format,
-                dto.Score,
+                formatItem.Name,
+                formatItem.FormatId,
+                formatItem.Score,
                 newScore,
                 reason
             );

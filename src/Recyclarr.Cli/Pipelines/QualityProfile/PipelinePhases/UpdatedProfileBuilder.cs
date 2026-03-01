@@ -2,7 +2,7 @@ using System.Globalization;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.Extensions;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
@@ -14,15 +14,15 @@ internal class UpdatedProfileBuilder(
     QualityProfileTransactionData transactions
 )
 {
-    private readonly Dictionary<int, QualityProfileDto> _serviceDtosById = serviceData
+    private readonly Dictionary<int, QualityProfileData> _serviceProfilesById = serviceData
         .Profiles.Where(p => p.Id.HasValue)
         .ToDictionary(p => p.Id!.Value);
 
-    private readonly ILookup<string, QualityProfileDto> _serviceDtosByName =
+    private readonly ILookup<string, QualityProfileData> _serviceProfilesByName =
         serviceData.Profiles.ToLookup(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
-    private readonly QualityProfileDto _schema = serviceData.Schema;
-    private readonly IReadOnlyList<ProfileLanguageDto> _languages = serviceData.Languages;
+    private readonly QualityProfileData _schema = serviceData.Schema;
+    private readonly IReadOnlyList<ProfileLanguage> _languages = serviceData.Languages;
     private readonly List<UpdatedQualityProfile> _existingProfiles = [];
 
     // Tracks which state mapping service_ids have been claimed during two-pass resolution.
@@ -128,7 +128,9 @@ internal class UpdatedProfileBuilder(
     {
         // Check if target name is already taken by a different service profile.
         // This catches renames that would collide with manually created profiles.
-        var nameConflicts = _serviceDtosByName[planned.Name].Where(p => p.Id != cachedId).ToList();
+        var nameConflicts = _serviceProfilesByName[planned.Name]
+            .Where(p => p.Id != cachedId)
+            .ToList();
 
         if (nameConflicts.Count == 1)
         {
@@ -149,20 +151,20 @@ internal class UpdatedProfileBuilder(
             return;
         }
 
-        if (_serviceDtosById.TryGetValue(cachedId, out var serviceDto))
+        if (_serviceProfilesById.TryGetValue(cachedId, out var serviceProfile))
         {
-            if (!serviceDto.Name.EqualsIgnoreCase(planned.Name))
+            if (!serviceProfile.Name.EqualsIgnoreCase(planned.Name))
             {
                 log.Debug(
                     "QP {TrashId} will be renamed from '{ServiceName}' to '{GuideName}'",
                     planned.Resource!.TrashId,
-                    serviceDto.Name,
+                    serviceProfile.Name,
                     planned.Name
                 );
             }
 
-            var missingQualities = FixupMissingQualities(serviceDto);
-            AddExistingProfile(planned, serviceDto, missingQualities);
+            var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
+            AddExistingProfile(planned, fixedProfile, missingQualities);
         }
         else
         {
@@ -178,7 +180,7 @@ internal class UpdatedProfileBuilder(
 
     private void ProcessNameCollision(PlannedQualityProfile planned)
     {
-        var nameMatches = _serviceDtosByName[planned.Name].ToList();
+        var nameMatches = _serviceProfilesByName[planned.Name].ToList();
 
         switch (nameMatches.Count)
         {
@@ -202,9 +204,9 @@ internal class UpdatedProfileBuilder(
                 }
                 else
                 {
-                    var serviceDto = nameMatches[0];
-                    var missingQualities = FixupMissingQualities(serviceDto);
-                    AddExistingProfile(planned, serviceDto, missingQualities);
+                    var serviceProfile = nameMatches[0];
+                    var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
+                    AddExistingProfile(planned, fixedProfile, missingQualities);
                 }
                 break;
 
@@ -221,7 +223,7 @@ internal class UpdatedProfileBuilder(
 
     private void ProcessUserDefinedProfile(PlannedQualityProfile planned)
     {
-        var nameMatches = _serviceDtosByName[planned.Name].ToList();
+        var nameMatches = _serviceProfilesByName[planned.Name].ToList();
 
         switch (nameMatches.Count)
         {
@@ -237,9 +239,9 @@ internal class UpdatedProfileBuilder(
                 break;
 
             case 1:
-                var serviceDto = nameMatches[0];
-                var missingQualities = FixupMissingQualities(serviceDto);
-                AddExistingProfile(planned, serviceDto, missingQualities);
+                var serviceProfile = nameMatches[0];
+                var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
+                AddExistingProfile(planned, fixedProfile, missingQualities);
                 break;
 
             default:
@@ -260,16 +262,16 @@ internal class UpdatedProfileBuilder(
             new UpdatedQualityProfile
             {
                 ProfileConfig = planned,
-                ProfileDto = _schema,
+                Profile = _schema,
                 Languages = _languages,
-                UpdatedQualities = organizer.OrganizeItems(_schema, planned.Config),
+                UpdatedQualities = organizer.OrganizeItems(_schema.Items, planned.Config),
             }
         );
     }
 
     private void AddExistingProfile(
         PlannedQualityProfile planned,
-        QualityProfileDto dto,
+        QualityProfileData profile,
         IReadOnlyCollection<string> missingQualities
     )
     {
@@ -278,26 +280,37 @@ internal class UpdatedProfileBuilder(
             new UpdatedQualityProfile
             {
                 ProfileConfig = planned,
-                ProfileDto = dto,
+                Profile = profile,
                 Languages = _languages,
-                UpdatedQualities = organizer.OrganizeItems(dto, planned.Config),
+                UpdatedQualities = organizer.OrganizeItems(profile.Items, planned.Config),
                 MissingQualities = missingQualities,
             }
         );
     }
 
-    private List<string> FixupMissingQualities(QualityProfileDto dto)
+    // Fixes a rare bug in Sonarr & Radarr where core qualities get lost in existing profiles.
+    // Returns a new profile with missing qualities appended, plus their names for diagnostics.
+    // See: https://github.com/Radarr/Radarr/issues/9738
+    private (QualityProfileData Profile, List<string> MissingNames) FixupMissingQualities(
+        QualityProfileData profile
+    )
     {
-        // There's a rare bug in Sonarr & Radarr where core qualities get lost in existing profiles.
-        // See: https://github.com/Radarr/Radarr/issues/9738
         var missingQualities = _schema
             .Items.FlattenQualities()
-            .LeftOuterHashJoin(dto.Items.FlattenQualities(), l => l.Quality!.Id, r => r.Quality!.Id)
+            .LeftOuterHashJoin(
+                profile.Items.FlattenQualities(),
+                l => l.Quality!.Id,
+                r => r.Quality!.Id
+            )
             .Where(x => x.Right is null)
             .Select(x => x.Left)
             .ToList();
 
-        dto.Items = dto.Items.Concat(missingQualities).ToList();
-        return missingQualities.Select(x => x.Quality!.Name ?? $"(id: {x.Quality.Id})").ToList();
+        var fixedProfile = profile with { Items = [.. profile.Items, .. missingQualities] };
+        var missingNames = missingQualities
+            .Select(x => x.Quality!.Name ?? $"(id: {x.Quality.Id})")
+            .ToList();
+
+        return (fixedProfile, missingNames);
     }
 }

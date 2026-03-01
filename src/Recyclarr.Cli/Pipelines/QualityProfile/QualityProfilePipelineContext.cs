@@ -21,8 +21,8 @@ internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource
         TransactionOutput
             .NewProfiles.Concat(TransactionOutput.UnchangedProfiles)
             .Concat(TransactionOutput.UpdatedProfiles.Select(x => x.Profile))
-            .Where(p => p.TrashId is not null && p.ProfileDto.Id is not null)
-            .Select(p => new TrashIdMapping(p.TrashId!, p.ProfileName, p.ProfileDto.Id!.Value));
+            .Where(p => p.TrashId is not null && p.Profile.Id is not null)
+            .Select(p => new TrashIdMapping(p.TrashId!, p.ProfileName, p.Profile.Id!.Value));
 
     // QP has no delete flag - entries removed only when service ID no longer exists
     public IEnumerable<int> DeletedIds => [];

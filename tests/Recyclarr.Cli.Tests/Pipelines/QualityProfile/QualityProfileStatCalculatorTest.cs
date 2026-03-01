@@ -1,21 +1,21 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
 internal sealed class QualityProfileStatCalculatorTest
 {
     private static UpdatedQualityProfile CreateProfile(
-        QualityProfileDto serviceDto,
+        QualityProfileData serviceDto,
         QualityProfileConfig? config = null
     )
     {
         config ??= new QualityProfileConfig { Name = serviceDto.Name };
         return new UpdatedQualityProfile
         {
-            ProfileDto = serviceDto,
+            Profile = serviceDto,
             ProfileConfig = NewPlan.Qp(config),
         };
     }
@@ -24,7 +24,7 @@ internal sealed class QualityProfileStatCalculatorTest
     public void Name_change_only_is_detected(QualityProfileStatCalculator sut)
     {
         var profile = CreateProfile(
-            new QualityProfileDto { Id = 1, Name = "Old Name" },
+            new QualityProfileData { Id = 1, Name = "Old Name" },
             new QualityProfileConfig { Name = "New Name" }
         );
 
@@ -37,7 +37,7 @@ internal sealed class QualityProfileStatCalculatorTest
     public void No_changes_detected_when_all_fields_match(QualityProfileStatCalculator sut)
     {
         var profile = CreateProfile(
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "Same Name",
@@ -65,7 +65,7 @@ internal sealed class QualityProfileStatCalculatorTest
     public void Upgrade_allowed_change_is_detected(QualityProfileStatCalculator sut)
     {
         var profile = CreateProfile(
-            new QualityProfileDto
+            new QualityProfileData
             {
                 Id = 1,
                 Name = "Profile",
@@ -83,11 +83,11 @@ internal sealed class QualityProfileStatCalculatorTest
     public void Build_updated_dto_applies_name_change()
     {
         var profile = CreateProfile(
-            new QualityProfileDto { Id = 42, Name = "Old Name" },
+            new QualityProfileData { Id = 42, Name = "Old Name" },
             new QualityProfileConfig { Name = "New Name" }
         );
 
-        var updatedDto = profile.BuildUpdatedDto();
+        var updatedDto = profile.BuildMergedProfile();
 
         updatedDto.Name.Should().Be("New Name");
     }

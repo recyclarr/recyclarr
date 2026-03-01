@@ -1,7 +1,7 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
@@ -22,35 +22,32 @@ internal sealed class QualityItemOrganizerTest
         ],
     };
 
-    private readonly QualityProfileDto _dto = new()
-    {
-        Items =
-        [
-            NewQp.QualityDto(1, "one", true),
-            NewQp.QualityDto(2, "two", true),
-            NewQp.QualityDto(3, "three", true),
-            NewQp.QualityDto(9, "nine", true),
-            NewQp.GroupDto(50, "group5", true, NewQp.QualityDto(11, "eleven", true)),
-            NewQp.QualityDto(10, "ten", true),
-            NewQp.QualityDto(4, "four", true),
-            NewQp.GroupDto(
-                1001,
-                "group1",
-                true,
-                NewQp.QualityDto(5, "five", true),
-                NewQp.QualityDto(6, "six", true)
-            ),
-            NewQp.GroupDto(1002, "group2", true, NewQp.QualityDto(7, "seven", true)),
-            NewQp.QualityDto(8, "eight", true),
-        ],
-    };
+    private readonly IReadOnlyCollection<QualityProfileItem> _items =
+    [
+        NewQp.QualityItem(1, "one", true),
+        NewQp.QualityItem(2, "two", true),
+        NewQp.QualityItem(3, "three", true),
+        NewQp.QualityItem(9, "nine", true),
+        NewQp.GroupItem(50, "group5", true, NewQp.QualityItem(11, "eleven", true)),
+        NewQp.QualityItem(10, "ten", true),
+        NewQp.QualityItem(4, "four", true),
+        NewQp.GroupItem(
+            1001,
+            "group1",
+            true,
+            NewQp.QualityItem(5, "five", true),
+            NewQp.QualityItem(6, "six", true)
+        ),
+        NewQp.GroupItem(1002, "group2", true, NewQp.QualityItem(7, "seven", true)),
+        NewQp.QualityItem(8, "eight", true),
+    ];
 
     [Test]
     public void Update_qualities_top_sort()
     {
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(
-            _dto,
+            _items,
             _config with
             {
                 QualitySort = QualitySortAlgorithm.Top,
@@ -67,23 +64,23 @@ internal sealed class QualityItemOrganizerTest
                     Items =
                     [
                         // ------ IN CONFIG ------
-                        NewQp.QualityDto(1, "one", true),
-                        NewQp.QualityDto(3, "three", true),
-                        NewQp.QualityDto(6, "six", false),
-                        NewQp.QualityDto(7, "seven", true),
-                        NewQp.GroupDto(1001, "group3", true, NewQp.QualityDto(8, "eight", true)),
-                        NewQp.GroupDto(
+                        NewQp.QualityItem(1, "one", true),
+                        NewQp.QualityItem(3, "three", true),
+                        NewQp.QualityItem(6, "six", false),
+                        NewQp.QualityItem(7, "seven", true),
+                        NewQp.GroupItem(1001, "group3", true, NewQp.QualityItem(8, "eight", true)),
+                        NewQp.GroupItem(
                             1002,
                             "group4",
                             false,
-                            NewQp.QualityDto(9, "nine", false),
-                            NewQp.QualityDto(10, "ten", false)
+                            NewQp.QualityItem(9, "nine", false),
+                            NewQp.QualityItem(10, "ten", false)
                         ),
-                        NewQp.GroupDto(50, "group5", true, NewQp.QualityDto(11, "eleven", true)),
+                        NewQp.GroupItem(50, "group5", true, NewQp.QualityItem(11, "eleven", true)),
                         // ------ NOT IN CONFIG ------
-                        NewQp.QualityDto(2, "two", false),
-                        NewQp.QualityDto(4, "four", false),
-                        NewQp.QualityDto(5, "five", false),
+                        NewQp.QualityItem(2, "two", false),
+                        NewQp.QualityItem(4, "four", false),
+                        NewQp.QualityItem(5, "five", false),
                     ],
                 }
             );
@@ -94,7 +91,7 @@ internal sealed class QualityItemOrganizerTest
     {
         var sut = new QualityItemOrganizer();
         var result = sut.OrganizeItems(
-            _dto,
+            _items,
             _config with
             {
                 QualitySort = QualitySortAlgorithm.Bottom,
@@ -111,23 +108,23 @@ internal sealed class QualityItemOrganizerTest
                     Items =
                     [
                         // ------ NOT IN CONFIG ------
-                        NewQp.QualityDto(2, "two", false),
-                        NewQp.QualityDto(4, "four", false),
-                        NewQp.QualityDto(5, "five", false),
+                        NewQp.QualityItem(2, "two", false),
+                        NewQp.QualityItem(4, "four", false),
+                        NewQp.QualityItem(5, "five", false),
                         // ------ IN CONFIG ------
-                        NewQp.QualityDto(1, "one", true),
-                        NewQp.QualityDto(3, "three", true),
-                        NewQp.QualityDto(6, "six", false),
-                        NewQp.QualityDto(7, "seven", true),
-                        NewQp.GroupDto(1001, "group3", true, NewQp.QualityDto(8, "eight", true)),
-                        NewQp.GroupDto(
+                        NewQp.QualityItem(1, "one", true),
+                        NewQp.QualityItem(3, "three", true),
+                        NewQp.QualityItem(6, "six", false),
+                        NewQp.QualityItem(7, "seven", true),
+                        NewQp.GroupItem(1001, "group3", true, NewQp.QualityItem(8, "eight", true)),
+                        NewQp.GroupItem(
                             1002,
                             "group4",
                             false,
-                            NewQp.QualityDto(9, "nine", false),
-                            NewQp.QualityDto(10, "ten", false)
+                            NewQp.QualityItem(9, "nine", false),
+                            NewQp.QualityItem(10, "ten", false)
                         ),
-                        NewQp.GroupDto(50, "group5", true, NewQp.QualityDto(11, "eleven", true)),
+                        NewQp.GroupItem(50, "group5", true, NewQp.QualityItem(11, "eleven", true)),
                     ],
                 }
             );
@@ -138,15 +135,15 @@ internal sealed class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig { Qualities = [NewQp.QualityConfig("one")] };
 
-        var dto = new QualityProfileDto
-        {
-            Items = [NewQp.GroupDto(1001, "group1", true, NewQp.QualityDto(1, "one", true))],
-        };
+        IReadOnlyCollection<QualityProfileItem> items =
+        [
+            NewQp.GroupItem(1001, "group1", true, NewQp.QualityItem(1, "one", true)),
+        ];
 
         var sut = new QualityItemOrganizer();
-        var result = sut.OrganizeItems(dto, config);
+        var result = sut.OrganizeItems(items, config);
 
-        result.Items.Should().BeEquivalentTo([NewQp.QualityDto(1, "one", true)]);
+        result.Items.Should().BeEquivalentTo([NewQp.QualityItem(1, "one", true)]);
     }
 
     [Test]
@@ -154,26 +151,26 @@ internal sealed class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig { Qualities = [NewQp.QualityConfig("one")] };
 
-        var dto = new QualityProfileDto
-        {
-            Items =
-            [
-                NewQp.GroupDto(
-                    1001,
-                    "group1",
-                    true,
-                    NewQp.QualityDto(1, "one", true),
-                    NewQp.QualityDto(2, "two", true)
-                ),
-            ],
-        };
+        IReadOnlyCollection<QualityProfileItem> items =
+        [
+            NewQp.GroupItem(
+                1001,
+                "group1",
+                true,
+                NewQp.QualityItem(1, "one", true),
+                NewQp.QualityItem(2, "two", true)
+            ),
+        ];
 
         var sut = new QualityItemOrganizer();
-        var result = sut.OrganizeItems(dto, config);
+        var result = sut.OrganizeItems(items, config);
 
         result
             .Items.Should()
-            .BeEquivalentTo([NewQp.QualityDto(1, "one", true), NewQp.QualityDto(2, "two", false)]);
+            .BeEquivalentTo([
+                NewQp.QualityItem(1, "one", true),
+                NewQp.QualityItem(2, "two", false),
+            ]);
     }
 
     [Test]
@@ -181,34 +178,31 @@ internal sealed class QualityItemOrganizerTest
     {
         var config = new QualityProfileConfig { Qualities = [NewQp.QualityConfig("one")] };
 
-        var dto = new QualityProfileDto
-        {
-            Items =
-            [
-                NewQp.GroupDto(
-                    1001,
-                    "group1",
-                    true,
-                    NewQp.QualityDto(1, "one", true),
-                    NewQp.QualityDto(2, "two", true),
-                    NewQp.QualityDto(3, "three", true)
-                ),
-            ],
-        };
+        IReadOnlyCollection<QualityProfileItem> items =
+        [
+            NewQp.GroupItem(
+                1001,
+                "group1",
+                true,
+                NewQp.QualityItem(1, "one", true),
+                NewQp.QualityItem(2, "two", true),
+                NewQp.QualityItem(3, "three", true)
+            ),
+        ];
 
         var sut = new QualityItemOrganizer();
-        var result = sut.OrganizeItems(dto, config);
+        var result = sut.OrganizeItems(items, config);
 
         result
             .Items.Should()
             .BeEquivalentTo([
-                NewQp.QualityDto(1, "one", true),
-                NewQp.GroupDto(
+                NewQp.QualityItem(1, "one", true),
+                NewQp.GroupItem(
                     1001,
                     "group1",
                     false,
-                    NewQp.QualityDto(2, "two", false),
-                    NewQp.QualityDto(3, "three", false)
+                    NewQp.QualityItem(2, "two", false),
+                    NewQp.QualityItem(3, "three", false)
                 ),
             ]);
     }
@@ -221,37 +215,34 @@ internal sealed class QualityItemOrganizerTest
             Qualities = [NewQp.GroupConfig("group1", "one", "two", "three")],
         };
 
-        var dto = new QualityProfileDto
-        {
-            Items =
-            [
-                NewQp.GroupDto(
-                    1001,
-                    "group1",
-                    true,
-                    NewQp.QualityDto(1, "one", true),
-                    NewQp.QualityDto(2, "two", true),
-                    NewQp.QualityDto(3, "three", true),
-                    NewQp.QualityDto(4, "four", true)
-                ),
-            ],
-        };
+        IReadOnlyCollection<QualityProfileItem> items =
+        [
+            NewQp.GroupItem(
+                1001,
+                "group1",
+                true,
+                NewQp.QualityItem(1, "one", true),
+                NewQp.QualityItem(2, "two", true),
+                NewQp.QualityItem(3, "three", true),
+                NewQp.QualityItem(4, "four", true)
+            ),
+        ];
 
         var sut = new QualityItemOrganizer();
-        var result = sut.OrganizeItems(dto, config);
+        var result = sut.OrganizeItems(items, config);
 
         result
             .Items.Should()
             .BeEquivalentTo([
-                NewQp.GroupDto(
+                NewQp.GroupItem(
                     1001,
                     "group1",
                     true,
-                    NewQp.QualityDto(1, "one", true),
-                    NewQp.QualityDto(2, "two", true),
-                    NewQp.QualityDto(3, "three", true)
+                    NewQp.QualityItem(1, "one", true),
+                    NewQp.QualityItem(2, "two", true),
+                    NewQp.QualityItem(3, "three", true)
                 ),
-                NewQp.QualityDto(4, "four", false),
+                NewQp.QualityItem(4, "four", false),
             ]);
     }
 }

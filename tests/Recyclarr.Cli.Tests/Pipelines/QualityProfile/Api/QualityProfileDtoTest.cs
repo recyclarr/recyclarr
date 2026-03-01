@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.ServarrApi.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile.Api;
@@ -65,7 +64,19 @@ internal sealed class QualityProfileDtoTest
     {
         var dto = new QualityProfileDto
         {
-            Items = [NewQp.QualityDto(1, "one", true), NewQp.QualityDto(2, "two", true)],
+            Items =
+            [
+                new ProfileItemDto
+                {
+                    Quality = new ProfileItemQualityDto { Id = 1, Name = "one" },
+                    Allowed = true,
+                },
+                new ProfileItemDto
+                {
+                    Quality = new ProfileItemQualityDto { Id = 2, Name = "two" },
+                    Allowed = true,
+                },
+            ],
         };
 
         var result = dto with { Items = [] };

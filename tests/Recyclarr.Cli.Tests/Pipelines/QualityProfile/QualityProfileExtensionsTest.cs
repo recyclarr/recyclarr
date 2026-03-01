@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 // ReSharper disable CollectionNeverUpdated.Local
 
@@ -11,7 +11,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_id_with_null_input()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindGroupById(null);
 
@@ -21,14 +21,14 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_id_with_match()
     {
-        var targetItem = NewQp.GroupDto(6, "Group 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.GroupItem(6, "Group 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true),
             targetItem,
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindGroupById(6);
@@ -39,13 +39,13 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_id_with_nested_match()
     {
-        var targetItem = NewQp.GroupDto(6, "Quality Item 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.GroupItem(6, "Quality Item 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true, targetItem),
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true, targetItem),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindGroupById(6);
@@ -56,7 +56,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_id_with_no_items()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindGroupById(5);
 
@@ -66,11 +66,11 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_id_with_no_match()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.QualityDto(5, "Quality 5", true),
-            NewQp.GroupDto(6, "Group 6", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.QualityItem(5, "Quality 5", true),
+            NewQp.GroupItem(6, "Group 6", true),
         ];
 
         var result = dto.FindGroupById(5);
@@ -81,7 +81,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_name_with_null_input()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindGroupByName(null);
 
@@ -91,14 +91,14 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_name_with_case_insensitive_match()
     {
-        var targetItem = NewQp.GroupDto(6, "Group 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.GroupItem(6, "Group 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true),
             targetItem,
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindGroupByName("grOUp 6");
@@ -109,13 +109,13 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_name_with_nested_match()
     {
-        var targetItem = NewQp.GroupDto(6, "Group 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.GroupItem(6, "Group 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true, targetItem),
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true, targetItem),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindGroupByName("Group 6");
@@ -126,7 +126,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_name_with_no_items()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindGroupByName("Group 5");
 
@@ -136,11 +136,11 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_group_by_name_with_no_match()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.QualityDto(5, "Group 5", true),
-            NewQp.GroupDto(6, "Group 6", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.QualityItem(5, "Group 5", true),
+            NewQp.GroupItem(6, "Group 6", true),
         ];
 
         var result = dto.FindGroupByName("Group 5");
@@ -151,7 +151,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_id_with_null_input()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindQualityById(null);
 
@@ -161,14 +161,14 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_id_with_match()
     {
-        var targetItem = NewQp.QualityDto(6, "Quality 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.QualityItem(6, "Quality 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true),
             targetItem,
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindQualityById(6);
@@ -179,13 +179,13 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_id_with_nested_match()
     {
-        var targetItem = NewQp.QualityDto(6, "Quality 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.QualityItem(6, "Quality 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true, targetItem),
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true, targetItem),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindQualityById(6);
@@ -196,7 +196,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_id_with_no_items()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindQualityById(5);
 
@@ -206,11 +206,11 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_id_with_no_match()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(5, "Group 5", true),
-            NewQp.GroupDto(6, "Group 6", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(5, "Group 5", true),
+            NewQp.GroupItem(6, "Group 6", true),
         ];
 
         var result = dto.FindQualityById(5);
@@ -223,7 +223,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_name_with_null_input()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindQualityByName(null);
 
@@ -233,14 +233,14 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_name_with_case_insensitive_match()
     {
-        var targetItem = NewQp.QualityDto(6, "Quality 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.QualityItem(6, "Quality 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true),
             targetItem,
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindQualityByName("quALIty 6");
@@ -251,13 +251,13 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_name_with_nested_match()
     {
-        var targetItem = NewQp.QualityDto(6, "Quality 6", true);
-        List<ProfileItemDto> dto =
+        var targetItem = NewQp.QualityItem(6, "Quality 6", true);
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(1, "Group 1", true, NewQp.QualityDto(5, "Quality 5", true)),
-            NewQp.GroupDto(2, "Group 2", true, targetItem),
-            NewQp.GroupDto(3, "Group 3", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(1, "Group 1", true, NewQp.QualityItem(5, "Quality 5", true)),
+            NewQp.GroupItem(2, "Group 2", true, targetItem),
+            NewQp.GroupItem(3, "Group 3", true),
         ];
 
         var result = dto.FindQualityByName("Quality 6");
@@ -268,7 +268,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_name_with_no_items()
     {
-        var dto = new List<ProfileItemDto>();
+        var dto = new List<QualityProfileItem>();
 
         var result = dto.FindQualityByName("Quality 5");
 
@@ -278,11 +278,11 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_quality_by_name_with_no_match()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.QualityDto(4, "Quality 4", true),
-            NewQp.GroupDto(5, "Quality 5", true),
-            NewQp.GroupDto(6, "Group 6", true),
+            NewQp.QualityItem(4, "Quality 4", true),
+            NewQp.GroupItem(5, "Quality 5", true),
+            NewQp.GroupItem(6, "Group 6", true),
         ];
 
         var result = dto.FindQualityByName("Quality 5");
@@ -293,7 +293,7 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Create_new_item_id_with_no_items()
     {
-        var dto = new QualityProfileDto { Items = [] };
+        var dto = new QualityProfileData { Name = "", Items = [] };
 
         var result = dto.Items.NewItemId();
 
@@ -303,18 +303,18 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Create_new_item_id_with_items_below_1000()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.GroupDto(1, "Group 1", true),
-            NewQp.QualityDto(2, "Quality 2", true),
-            NewQp.GroupDto(
+            NewQp.GroupItem(1, "Group 1", true),
+            NewQp.QualityItem(2, "Quality 2", true),
+            NewQp.GroupItem(
                 3,
                 "Group 3",
                 true,
-                NewQp.GroupDto(6, "Group 6", true),
-                NewQp.QualityDto(7, "Quality 7", true)
+                NewQp.GroupItem(6, "Group 6", true),
+                NewQp.QualityItem(7, "Quality 7", true)
             ),
-            NewQp.GroupDto(4, "Group 4", true, NewQp.QualityDto(5, "Quality 5", true)),
+            NewQp.GroupItem(4, "Group 4", true, NewQp.QualityItem(5, "Quality 5", true)),
         ];
 
         var result = dto.NewItemId();
@@ -325,18 +325,18 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Create_new_item_id_with_leaf_items_above_1000()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.GroupDto(1, "Group 1", true),
-            NewQp.QualityDto(2, "Quality 2", true),
-            NewQp.GroupDto(
+            NewQp.GroupItem(1, "Group 1", true),
+            NewQp.QualityItem(2, "Quality 2", true),
+            NewQp.GroupItem(
                 3,
                 "Group 3",
                 true,
-                NewQp.GroupDto(1006, "Group 6", true),
-                NewQp.QualityDto(1007, "Quality 7", true)
+                NewQp.GroupItem(1006, "Group 6", true),
+                NewQp.QualityItem(1007, "Quality 7", true)
             ),
-            NewQp.GroupDto(4, "Group 4", true, NewQp.QualityDto(5, "Quality 5", true)),
+            NewQp.GroupItem(4, "Group 4", true, NewQp.QualityItem(5, "Quality 5", true)),
         ];
 
         var result = dto.NewItemId();
@@ -347,18 +347,18 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Create_new_item_id_with_parent_items_above_1000()
     {
-        List<ProfileItemDto> dto =
+        List<QualityProfileItem> dto =
         [
-            NewQp.GroupDto(1, "Group 1", true),
-            NewQp.QualityDto(2, "Quality 2", true),
-            NewQp.GroupDto(
+            NewQp.GroupItem(1, "Group 1", true),
+            NewQp.QualityItem(2, "Quality 2", true),
+            NewQp.GroupItem(
                 1008,
                 "Group 3",
                 true,
-                NewQp.GroupDto(1006, "Group 6", true),
-                NewQp.QualityDto(1007, "Quality 7", true)
+                NewQp.GroupItem(1006, "Group 6", true),
+                NewQp.QualityItem(1007, "Quality 7", true)
             ),
-            NewQp.GroupDto(4, "Group 4", true, NewQp.QualityDto(5, "Quality 5", true)),
+            NewQp.GroupItem(4, "Group 4", true, NewQp.QualityItem(5, "Quality 5", true)),
         ];
 
         var result = dto.NewItemId();
@@ -367,60 +367,23 @@ internal sealed class QualityProfileExtensionsTest
     }
 
     [Test]
-    public void Reverse_items_works()
-    {
-        var dto = new QualityProfileDto
-        {
-            Items =
-            [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
-                    1002,
-                    "Group 2",
-                    true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
-                ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
-            ],
-        };
-
-        var result = dto.ReverseItems();
-
-        result
-            .Items.Should()
-            .BeEquivalentTo([
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
-                NewQp.GroupDto(
-                    1002,
-                    "Group 2",
-                    true,
-                    NewQp.QualityDto(3, "Quality 3", true),
-                    NewQp.QualityDto(2, "Quality 2", true)
-                ),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(1001, "Group 1", true),
-            ]);
-    }
-
-    [Test]
     public void Find_cutoff_id_with_group_name()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -432,20 +395,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_id_with_quality_name()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -457,20 +421,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_id_with_nested_quality_name()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -482,20 +447,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_id_with_null_name()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -507,20 +473,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_name_with_group_id()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -532,20 +499,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_name_with_quality_id()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -557,20 +525,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_name_with_nested_quality_id()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 
@@ -582,20 +551,21 @@ internal sealed class QualityProfileExtensionsTest
     [Test]
     public void Find_cutoff_name_with_null_id()
     {
-        var dto = new QualityProfileDto
+        var dto = new QualityProfileData
         {
+            Name = "",
             Items =
             [
-                NewQp.GroupDto(1001, "Group 1", true),
-                NewQp.QualityDto(1, "Quality 1", true),
-                NewQp.GroupDto(
+                NewQp.GroupItem(1001, "Group 1", true),
+                NewQp.QualityItem(1, "Quality 1", true),
+                NewQp.GroupItem(
                     1002,
                     "Group 2",
                     true,
-                    NewQp.QualityDto(2, "Quality 2", true),
-                    NewQp.QualityDto(3, "Quality 3", true)
+                    NewQp.QualityItem(2, "Quality 2", true),
+                    NewQp.QualityItem(3, "Quality 3", true)
                 ),
-                NewQp.GroupDto(1003, "Group 3", true, NewQp.QualityDto(4, "Quality 4", true)),
+                NewQp.GroupItem(1003, "Group 3", true, NewQp.QualityItem(4, "Quality 4", true)),
             ],
         };
 

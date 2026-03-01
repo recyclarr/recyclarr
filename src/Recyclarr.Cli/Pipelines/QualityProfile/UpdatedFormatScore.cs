@@ -1,6 +1,6 @@
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Common.Extensions;
-using Recyclarr.ServarrApi.QualityProfile;
+using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -30,36 +30,44 @@ internal enum FormatScoreUpdateReason
 }
 
 internal record UpdatedFormatScore(
-    ProfileFormatItemDto Dto,
+    QualityProfileFormatItem FormatItem,
     int NewScore,
     FormatScoreUpdateReason Reason
 )
 {
     public static UpdatedFormatScore New(PlannedCfScore score)
     {
-        var dto = new ProfileFormatItemDto { Format = score.ServiceId, Name = score.Name };
-        return new UpdatedFormatScore(dto, score.Score, FormatScoreUpdateReason.New);
+        var formatItem = new QualityProfileFormatItem
+        {
+            FormatId = score.ServiceId,
+            Name = score.Name,
+        };
+        return new UpdatedFormatScore(formatItem, score.Score, FormatScoreUpdateReason.New);
     }
 
     public static UpdatedFormatScore Reset(
-        ProfileFormatItemDto dto,
+        QualityProfileFormatItem formatItem,
         PlannedQualityProfile profileData
     )
     {
         var reset = profileData.Config.ResetUnmatchedScores;
-        var shouldReset = reset.Enabled && reset.Except.All(x => !dto.Name.EqualsIgnoreCase(x));
+        var shouldReset =
+            reset.Enabled && reset.Except.All(x => !formatItem.Name.EqualsIgnoreCase(x));
 
-        var score = shouldReset ? 0 : dto.Score;
+        var score = shouldReset ? 0 : formatItem.Score;
         var reason = shouldReset ? FormatScoreUpdateReason.Reset : FormatScoreUpdateReason.NoChange;
-        return new UpdatedFormatScore(dto, score, reason);
+        return new UpdatedFormatScore(formatItem, score, reason);
     }
 
-    public static UpdatedFormatScore Updated(ProfileFormatItemDto dto, PlannedCfScore score)
+    public static UpdatedFormatScore Updated(
+        QualityProfileFormatItem formatItem,
+        PlannedCfScore score
+    )
     {
         var reason =
-            dto.Score == score.Score
+            formatItem.Score == score.Score
                 ? FormatScoreUpdateReason.NoChange
                 : FormatScoreUpdateReason.Updated;
-        return new UpdatedFormatScore(dto, score.Score, reason);
+        return new UpdatedFormatScore(formatItem, score.Score, reason);
     }
 }
