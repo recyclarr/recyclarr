@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <RefitterNoLogging>true</RefitterNoLogging>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Refit.HttpClientFactory" />
+      <PackageReference Include="Refitter.MSBuild" />
+    </ItemGroup>
+
+</Project>

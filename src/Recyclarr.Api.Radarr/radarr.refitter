@@ -1,0 +1,21 @@
+{
+  "openApiPath": "./openapi.json",
+  "namespace": "Recyclarr.Api.Radarr",
+  "multipleInterfaces": "ByTag",
+  "includeTags": [
+    "CustomFormat",
+    "QualityProfile",
+    "QualityProfileSchema",
+    "QualityDefinition",
+    "MediaManagementConfig",
+    "NamingConfig",
+    "System",
+    "Language"
+  ],
+  "generateContracts": true,
+  "useCancellationTokens": true,
+  "trimUnusedSchema": true,
+  "operationNameGenerator": "MultipleClientsFromPathSegments",
+  "outputFolder": "./obj/Generated",
+  "outputFilename": "RadarrApi.g.cs"
+}
