@@ -26,8 +26,9 @@ repos:
         description: Install the .NET tools listed at .config/dotnet-tools.json.
       - id: csharpier
         name: Run CSharpier on C# files
-        entry: dotnet tool run csharpier format
+        entry: dotnet tool run csharpier format .
         language: system
+        pass_filenames: false
         types:
           - c#
         description: CSharpier is an opinionated C# formatter inspired by Prettier.
