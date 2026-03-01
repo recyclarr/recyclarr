@@ -27,9 +27,15 @@ public static partial class Sanitize
         return url;
     }
 
+    public static Uri Url(Uri url)
+    {
+        var builder = new UriBuilder(url) { Host = "REDACTED" };
+        return builder.Uri;
+    }
+
     private static string SanitizeMatch(Match match)
     {
-        return Url(match.Value).ToString() ?? match.Value;
+        return Url(new Uri(match.Value)).ToString();
     }
 
     [GeneratedRegex(@"\([-a-zA-Z0-9@:%._+~#=]{1,256}(?::[0-9]+)?\)")]
