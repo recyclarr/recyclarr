@@ -15,6 +15,7 @@
       <PackageReference Include="GitVersion.MsBuild" />
       <PackageReference Include="Microsoft.Extensions.Http" />
       <PackageReference Include="Refit.HttpClientFactory" />
+      <PackageReference Include="Riok.Mapperly" />
       <PackageReference Include="Serilog" />
       <PackageReference Include="Serilog.Expressions" />
       <PackageReference Include="SuperLinq" />
@@ -23,6 +24,11 @@
       <PackageReference Include="TestableIO.System.IO.Abstractions" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
       <PackageReference Include="YamlDotNet" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Recyclarr.Api.Sonarr\Recyclarr.Api.Sonarr.csproj" />
+      <ProjectReference Include="..\Recyclarr.Api.Radarr\Recyclarr.Api.Radarr.csproj" />
     </ItemGroup>
 
 </Project>

@@ -48,6 +48,8 @@ using Recyclarr.VersionControl;
 using Recyclarr.Yaml;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
+using RadarrApi = Recyclarr.Api.Radarr;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr;
 
@@ -63,7 +65,8 @@ public class CoreAutofacModule : Module
         RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
-        RegisterServarrApi(builder);
+        RegisterServarrApiClients(builder);
+        RegisterServarrGateways(builder);
         RegisterSettings(builder);
         RegisterTrashGuide(builder);
         RegisterYaml(builder);
@@ -262,60 +265,67 @@ public class CoreAutofacModule : Module
         builder.RegisterType<GitPath>().As<IGitPath>();
     }
 
-    private static void RegisterServarrApi(ContainerBuilder builder)
+    private static void RegisterServarrApiClients(ContainerBuilder builder)
     {
-        // This is used by all specific API service classes registered below.
+        // Flurl infrastructure (removed in Phase 17)
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
 
-        builder.RegisterType<SystemApiService>().As<ISystemApiService>().InstancePerLifetimeScope();
-        builder.RegisterServiceGateway<ISystemService, SonarrSystemGateway, RadarrSystemGateway>();
-
+        // Flurl API services (migrated to Refit per-pipeline in Phases 11-16)
+        builder
+            .RegisterType<SystemApiService>()
+            .As<ISystemApiService>()
+            .InstancePerLifetimeScope();
         builder
             .RegisterType<QualityProfileApiService>()
             .As<IQualityProfileApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterServiceGateway<
-            IQualityProfileService,
-            SonarrQualityProfileGateway,
-            RadarrQualityProfileGateway
-        >();
-        builder
-            .RegisterType<CustomFormatApiService>()
-            .As<ICustomFormatApiService>()
-            .InstancePerLifetimeScope();
-        builder.RegisterServiceGateway<
-            ICustomFormatService,
-            SonarrCustomFormatGateway,
-            RadarrCustomFormatGateway
-        >();
         builder
             .RegisterType<QualityDefinitionApiService>()
             .As<IQualityDefinitionApiService>()
             .InstancePerLifetimeScope();
-        builder.RegisterServiceGateway<
-            IQualityDefinitionService,
-            SonarrQualityDefinitionGateway,
-            RadarrQualityDefinitionGateway
-        >();
         builder
             .RegisterType<SonarrMediaNamingApiService>()
             .As<ISonarrMediaNamingApiService>()
-            .InstancePerLifetimeScope();
-        builder
-            .RegisterType<SonarrNamingGateway>()
-            .As<ISonarrNamingService>()
             .InstancePerLifetimeScope();
         builder
             .RegisterType<RadarrMediaNamingApiService>()
             .As<IRadarrMediaNamingApiService>()
             .InstancePerLifetimeScope();
         builder
-            .RegisterType<RadarrNamingGateway>()
-            .As<IRadarrNamingService>()
-            .InstancePerLifetimeScope();
-        builder
             .RegisterType<MediaManagementApiService>()
             .As<IMediaManagementApiService>()
+            .InstancePerLifetimeScope();
+
+        // Refit clients
+        builder.RegisterServarrRefitClient<SonarrApi.ICustomFormatApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.ICustomFormatApi>();
+    }
+
+    private static void RegisterServarrGateways(ContainerBuilder builder)
+    {
+        builder.RegisterServiceGateway<ISystemService, SonarrSystemGateway, RadarrSystemGateway>();
+        builder.RegisterServiceGateway<
+            IQualityProfileService,
+            SonarrQualityProfileGateway,
+            RadarrQualityProfileGateway
+        >();
+        builder.RegisterServiceGateway<
+            ICustomFormatService,
+            SonarrCustomFormatGateway,
+            RadarrCustomFormatGateway
+        >();
+        builder.RegisterServiceGateway<
+            IQualityDefinitionService,
+            SonarrQualityDefinitionGateway,
+            RadarrQualityDefinitionGateway
+        >();
+        builder
+            .RegisterType<SonarrNamingGateway>()
+            .As<ISonarrNamingService>()
+            .InstancePerLifetimeScope();
+        builder
+            .RegisterType<RadarrNamingGateway>()
+            .As<IRadarrNamingService>()
             .InstancePerLifetimeScope();
         builder.RegisterServiceGateway<
             IMediaManagementService,

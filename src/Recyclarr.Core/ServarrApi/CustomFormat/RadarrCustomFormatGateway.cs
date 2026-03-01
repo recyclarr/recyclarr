@@ -1,14 +1,16 @@
+using System.Globalization;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.CustomFormat;
+using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.ServarrApi.CustomFormat;
 
-internal class RadarrCustomFormatGateway(ICustomFormatApiService api) : ICustomFormatService
+internal class RadarrCustomFormatGateway(RadarrApi.ICustomFormatApi api) : ICustomFormatService
 {
     public async Task<IReadOnlyList<CustomFormatResource>> GetCustomFormats(CancellationToken ct)
     {
-        var result = await api.GetCustomFormats(ct);
-        return result.ToList();
+        var result = await api.CustomformatGet(ct);
+        return result.Select(RadarrCustomFormatMapper.ToDomain).ToList();
     }
 
     public async Task<CustomFormatResource?> CreateCustomFormat(
@@ -16,16 +18,21 @@ internal class RadarrCustomFormatGateway(ICustomFormatApiService api) : ICustomF
         CancellationToken ct
     )
     {
-        return await api.CreateCustomFormat(cf, ct);
+        var result = await api.CustomformatPost(RadarrCustomFormatMapper.FromDomain(cf), ct);
+        return RadarrCustomFormatMapper.ToDomain(result);
     }
 
     public async Task UpdateCustomFormat(CustomFormatResource cf, CancellationToken ct)
     {
-        await api.UpdateCustomFormat(cf, ct);
+        await api.CustomformatPut(
+            cf.Id.ToString(CultureInfo.InvariantCulture),
+            RadarrCustomFormatMapper.FromDomain(cf),
+            ct
+        );
     }
 
     public async Task DeleteCustomFormat(int customFormatId, CancellationToken ct)
     {
-        await api.DeleteCustomFormat(customFormatId, ct);
+        await api.CustomformatDelete(customFormatId, ct);
     }
 }

@@ -1,7 +1,12 @@
 # ADR-007: Custom Format Gateway Passthrough (Exception to DTO/Domain Split)
 
-- **Status:** accepted
+- **Status:** deprecated
 - **Date:** 2026-02-28
+
+> **Deprecated (2026-03-01):** The Refit migration (ADR-006) introduced generated DTOs as separate
+> C# types, breaking condition #2 (identical schemas). CF gateways now map between generated Refit
+> DTOs and domain types, following the standard DTO/domain split from ADR-005. One-way sync still
+> holds, so no stashed DTOs are needed.
 
 ## Context and Problem Statement
 
