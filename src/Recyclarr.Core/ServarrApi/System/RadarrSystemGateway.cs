@@ -1,17 +1,13 @@
 using Recyclarr.Servarr.SystemStatus;
+using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.ServarrApi.System;
 
-internal class RadarrSystemGateway(ISystemApiService api) : ISystemService
+internal class RadarrSystemGateway(RadarrApi.ISystemApi api) : ISystemService
 {
     public async Task<SystemServiceResult> GetStatus(CancellationToken ct)
     {
-        var dto = await api.GetStatus(ct);
-        return ToDomain(dto);
-    }
-
-    private static SystemServiceResult ToDomain(ServiceSystemStatus dto)
-    {
-        return new SystemServiceResult(dto.AppName, new Version(dto.Version));
+        var dto = await api.Status(ct);
+        return RadarrSystemMapper.ToDomain(dto);
     }
 }
