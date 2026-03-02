@@ -5,6 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Generated/**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Refit.HttpClientFactory" />
       <PackageReference Include="Refitter.MSBuild" />
     </ItemGroup>
