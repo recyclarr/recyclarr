@@ -17,5 +17,9 @@
   "trimUnusedSchema": true,
   "operationNameGenerator": "MultipleClientsFromPathSegments",
   "outputFolder": "./obj/Generated",
-  "outputFilename": "RadarrApi.g.cs"
+  "outputFilename": "RadarrApi.g.cs",
+  "codeGeneratorSettings": {
+    "generateOptionalPropertiesAsNullable": true,
+    "generateNullableReferenceTypes": true
+  }
 }

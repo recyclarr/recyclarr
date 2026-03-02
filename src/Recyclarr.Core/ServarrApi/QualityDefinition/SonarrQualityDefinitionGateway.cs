@@ -15,7 +15,10 @@ internal class SonarrQualityDefinitionGateway(SonarrApi.IQualityDefinitionApi ap
         var dtos = await api.QualitydefinitionGet(ct);
         foreach (var dto in dtos)
         {
-            _stashedDtos[dto.Id] = dto;
+            if (dto.Id is { } id)
+            {
+                _stashedDtos[id] = dto;
+            }
         }
 
         return dtos.Select(SonarrQualityDefinitionMapper.ToDomain).ToList();

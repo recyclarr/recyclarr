@@ -17,5 +17,9 @@
   "trimUnusedSchema": true,
   "operationNameGenerator": "MultipleClientsFromPathSegments",
   "outputFolder": "./obj/Generated",
-  "outputFilename": "SonarrApi.g.cs"
+  "outputFilename": "SonarrApi.g.cs",
+  "codeGeneratorSettings": {
+    "generateOptionalPropertiesAsNullable": true,
+    "generateNullableReferenceTypes": true
+  }
 }

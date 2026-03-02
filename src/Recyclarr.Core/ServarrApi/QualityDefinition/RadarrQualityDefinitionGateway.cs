@@ -15,7 +15,10 @@ internal class RadarrQualityDefinitionGateway(RadarrApi.IQualityDefinitionApi ap
         var dtos = await api.QualitydefinitionGet(ct);
         foreach (var dto in dtos)
         {
-            _stashedDtos[dto.Id] = dto;
+            if (dto.Id is { } id)
+            {
+                _stashedDtos[id] = dto;
+            }
         }
 
         return dtos.Select(RadarrQualityDefinitionMapper.ToDomain).ToList();
