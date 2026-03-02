@@ -40,6 +40,7 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
 - `changelog` - When updating CHANGELOG.md for format and conventions
 - `decisions` - Creating ADRs and PDRs in `docs/decisions/`
 - `linear-planning` - Creating or organizing Linear issues, projects, or initiatives
+- `mapperly` - Writing or modifying Mapperly mapper classes, debugging null-handling
 
 ## Project Context
 
