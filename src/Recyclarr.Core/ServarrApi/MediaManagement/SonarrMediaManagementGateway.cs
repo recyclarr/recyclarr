@@ -1,39 +1,30 @@
+using System.Globalization;
 using Recyclarr.Servarr.MediaManagement;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.ServarrApi.MediaManagement;
 
-internal class SonarrMediaManagementGateway(IMediaManagementApiService api)
+internal class SonarrMediaManagementGateway(SonarrApi.IMediaManagementConfigApi api)
     : IMediaManagementService
 {
-    private ServiceMediaManagementData? _stashedDto;
+    private SonarrApi.MediaManagementConfigResource? _stashedDto;
 
     public async Task<MediaManagementData> GetMediaManagement(CancellationToken ct)
     {
-        var dto = await api.GetMediaManagement(ct);
+        var dto = await api.MediamanagementGet(ct);
         _stashedDto = dto;
-        return ToDomain(dto);
+        return SonarrMediaManagementMapper.ToDomain(dto);
     }
 
     public async Task UpdateMediaManagement(MediaManagementData data, CancellationToken ct)
     {
-        var dto = FromDomain(data);
-        await api.UpdateMediaManagement(dto, ct);
-    }
-
-    private static MediaManagementData ToDomain(ServiceMediaManagementData dto)
-    {
-        return new MediaManagementData
-        {
-            Id = dto.Id,
-            PropersAndRepacks = dto.DownloadPropersAndRepacks,
-        };
-    }
-
-    // Merges domain changes onto the stashed DTO for round-trip safety
-    private ServiceMediaManagementData FromDomain(MediaManagementData data)
-    {
         // non-null: GetMediaManagement always called before UpdateMediaManagement in pipeline
         var original = _stashedDto!;
-        return original with { DownloadPropersAndRepacks = data.PropersAndRepacks };
+        SonarrMediaManagementMapper.UpdateDto(data, original);
+        await api.MediamanagementPut(
+            original.Id!.Value.ToString(CultureInfo.InvariantCulture),
+            original,
+            ct
+        );
     }
 }

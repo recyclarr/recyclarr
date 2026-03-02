@@ -1,5 +1,6 @@
 using Recyclarr.Config.Models;
 using Recyclarr.ServarrApi.MediaManagement;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.Core.Tests.ServarrApi.MediaManagement;
 
@@ -7,16 +8,16 @@ internal sealed class SonarrMediaManagementGatewayTest
 {
     [Test, AutoMockData]
     public async Task Get_returns_domain_data_with_correct_mapping(
-        [Frozen] IMediaManagementApiService api,
+        [Frozen] SonarrApi.IMediaManagementConfigApi api,
         SonarrMediaManagementGateway sut
     )
     {
-        var dto = new ServiceMediaManagementData
+        var dto = new SonarrApi.MediaManagementConfigResource
         {
             Id = 5,
-            DownloadPropersAndRepacks = PropersAndRepacksMode.DoNotUpgrade,
+            DownloadPropersAndRepacks = SonarrApi.ProperDownloadTypes.DoNotUpgrade,
         };
-        api.GetMediaManagement(Arg.Any<CancellationToken>()).Returns(dto);
+        api.MediamanagementGet(Arg.Any<CancellationToken>()).Returns(dto);
 
         var result = await sut.GetMediaManagement(CancellationToken.None);
 
@@ -26,17 +27,17 @@ internal sealed class SonarrMediaManagementGatewayTest
 
     [Test, AutoMockData]
     public async Task Update_merges_domain_changes_onto_stashed_dto(
-        [Frozen] IMediaManagementApiService api,
+        [Frozen] SonarrApi.IMediaManagementConfigApi api,
         SonarrMediaManagementGateway sut
     )
     {
-        var originalDto = new ServiceMediaManagementData
+        var originalDto = new SonarrApi.MediaManagementConfigResource
         {
             Id = 1,
-            DownloadPropersAndRepacks = PropersAndRepacksMode.PreferAndUpgrade,
+            DownloadPropersAndRepacks = SonarrApi.ProperDownloadTypes.PreferAndUpgrade,
+            RecycleBin = "/recycle",
         };
-        originalDto.ExtraJson["someField"] = "preserved";
-        api.GetMediaManagement(Arg.Any<CancellationToken>()).Returns(originalDto);
+        api.MediamanagementGet(Arg.Any<CancellationToken>()).Returns(originalDto);
 
         // Fetch to populate stashed state
         var fetched = await sut.GetMediaManagement(CancellationToken.None);
@@ -49,10 +50,11 @@ internal sealed class SonarrMediaManagementGatewayTest
         await sut.UpdateMediaManagement(updated, CancellationToken.None);
 
         await api.Received()
-            .UpdateMediaManagement(
-                Arg.Is<ServiceMediaManagementData>(d =>
-                    d.DownloadPropersAndRepacks == PropersAndRepacksMode.DoNotPrefer
-                    && d.ExtraJson.ContainsKey("someField")
+            .MediamanagementPut(
+                "1",
+                Arg.Is<SonarrApi.MediaManagementConfigResource>(d =>
+                    d.DownloadPropersAndRepacks == SonarrApi.ProperDownloadTypes.DoNotPrefer
+                    && d.RecycleBin == "/recycle"
                 ),
                 Arg.Any<CancellationToken>()
             );
