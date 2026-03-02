@@ -29,4 +29,7 @@ mise.local.toml
 
 # Schema deployment build output
 schemas-dist/
+
+# Generated C# Code
+*.g.cs
 "@ | Add-Content -Path $gitIgnorePath
