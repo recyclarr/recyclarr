@@ -1,15 +1,47 @@
-using Recyclarr.Common.Extensions;
+using RadarrApi = Recyclarr.Api.Radarr;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.ServarrApi.QualityProfile;
 
-public static class QualityProfileApiExtensions
+internal static class QualityProfileApiExtensions
 {
-    public static ServiceQualityProfileData ReverseItems(this ServiceQualityProfileData dto)
+    public static SonarrApi.QualityProfileResource ReverseItems(
+        this SonarrApi.QualityProfileResource dto
+    )
     {
-        return dto with { Items = ReverseItemsImpl(dto.Items).AsReadOnly() };
+        dto.Items = ReverseItemsImpl(dto.Items ?? []);
+        return dto;
 
-        static ICollection<ServiceProfileItem> ReverseItemsImpl(
-            IEnumerable<ServiceProfileItem> items
-        ) => items.Reverse().Select(x => x with { Items = ReverseItemsImpl(x.Items) }).ToList();
+        static ICollection<SonarrApi.QualityProfileQualityItemResource> ReverseItemsImpl(
+            IEnumerable<SonarrApi.QualityProfileQualityItemResource> items
+        ) =>
+            items
+                .Reverse()
+                .Select(x =>
+                {
+                    x.Items = ReverseItemsImpl(x.Items ?? []);
+                    return x;
+                })
+                .ToList();
+    }
+
+    public static RadarrApi.QualityProfileResource ReverseItems(
+        this RadarrApi.QualityProfileResource dto
+    )
+    {
+        dto.Items = ReverseItemsImpl(dto.Items ?? []);
+        return dto;
+
+        static ICollection<RadarrApi.QualityProfileQualityItemResource> ReverseItemsImpl(
+            IEnumerable<RadarrApi.QualityProfileQualityItemResource> items
+        ) =>
+            items
+                .Reverse()
+                .Select(x =>
+                {
+                    x.Items = ReverseItemsImpl(x.Items ?? []);
+                    return x;
+                })
+                .ToList();
     }
 }

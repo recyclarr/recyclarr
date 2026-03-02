@@ -275,10 +275,7 @@ public class CoreAutofacModule : Module
             .RegisterType<SystemApiService>()
             .As<ISystemApiService>()
             .InstancePerLifetimeScope();
-        builder
-            .RegisterType<QualityProfileApiService>()
-            .As<IQualityProfileApiService>()
-            .InstancePerLifetimeScope();
+
         builder
             .RegisterType<SonarrMediaNamingApiService>()
             .As<ISonarrMediaNamingApiService>()
@@ -297,6 +294,12 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<RadarrApi.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IQualityDefinitionApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IQualityDefinitionApi>();
+        builder.RegisterServarrRefitClient<SonarrApi.IQualityProfileApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileApi>();
+        builder.RegisterServarrRefitClient<SonarrApi.IQualityProfileSchemaApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileSchemaApi>();
+        builder.RegisterServarrRefitClient<SonarrApi.ILanguageApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.ILanguageApi>();
     }
 
     private static void RegisterServarrGateways(ContainerBuilder builder)
