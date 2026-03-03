@@ -1,44 +1,29 @@
+using System.Globalization;
 using Recyclarr.Servarr.MediaNaming;
+using RadarrApi = Recyclarr.Api.Radarr;
 
 namespace Recyclarr.ServarrApi.MediaNaming;
 
-internal class RadarrNamingGateway(IRadarrMediaNamingApiService api) : IRadarrNamingService
+internal class RadarrNamingGateway(RadarrApi.INamingConfigApi api) : IRadarrNamingService
 {
-    private ServiceRadarrNamingData? _stashedDto;
+    private RadarrApi.NamingConfigResource? _stashedDto;
 
     public async Task<RadarrNamingData> GetNaming(CancellationToken ct)
     {
-        var dto = await api.GetNaming(ct);
+        var dto = await api.NamingGet(ct);
         _stashedDto = dto;
-        return ToDomain(dto);
+        return RadarrNamingMapper.ToDomain(dto);
     }
 
     public async Task UpdateNaming(RadarrNamingData data, CancellationToken ct)
     {
-        var dto = FromDomain(data);
-        await api.UpdateNaming(dto, ct);
-    }
-
-    private static RadarrNamingData ToDomain(ServiceRadarrNamingData dto)
-    {
-        return new RadarrNamingData
-        {
-            RenameMovies = dto.RenameMovies,
-            StandardMovieFormat = dto.StandardMovieFormat,
-            MovieFolderFormat = dto.MovieFolderFormat,
-        };
-    }
-
-    // Merges domain changes onto the stashed DTO for round-trip safety
-    private ServiceRadarrNamingData FromDomain(RadarrNamingData data)
-    {
         // non-null: GetNaming always called before UpdateNaming in pipeline
         var original = _stashedDto!;
-        return original with
-        {
-            RenameMovies = data.RenameMovies,
-            StandardMovieFormat = data.StandardMovieFormat,
-            MovieFolderFormat = data.MovieFolderFormat,
-        };
+        RadarrNamingMapper.UpdateDto(data, original);
+        await api.NamingPut(
+            original.Id!.Value.ToString(CultureInfo.InvariantCulture),
+            original,
+            ct
+        );
     }
 }

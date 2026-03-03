@@ -270,15 +270,6 @@ public class CoreAutofacModule : Module
         // Flurl infrastructure (removed in Phase 17)
         builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
 
-        // Flurl API services (migrated to Refit per-pipeline in Phases 15-16)
-        builder
-            .RegisterType<SonarrMediaNamingApiService>()
-            .As<ISonarrMediaNamingApiService>()
-            .InstancePerLifetimeScope();
-        builder
-            .RegisterType<RadarrMediaNamingApiService>()
-            .As<IRadarrMediaNamingApiService>()
-            .InstancePerLifetimeScope();
         // Refit clients
         builder.RegisterServarrRefitClient<SonarrApi.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ICustomFormatApi>();
@@ -292,6 +283,8 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<RadarrApi.ILanguageApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IMediaManagementConfigApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IMediaManagementConfigApi>();
+        builder.RegisterServarrRefitClient<SonarrApi.INamingConfigApi>();
+        builder.RegisterServarrRefitClient<RadarrApi.INamingConfigApi>();
         builder.RegisterServarrRefitClient<SonarrApi.ISystemApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ISystemApi>();
     }
