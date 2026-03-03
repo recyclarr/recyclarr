@@ -38,7 +38,8 @@ public static class RefitClientExtensions
         }
 
         // Registers a Refit interface for the Apprise notification API. The HttpClient
-        // is configured per-scope with BaseAddress from notification settings.
+        // is configured with BaseAddress from notification settings. Not per-instance scoped
+        // because Apprise config is global (not per Sonarr/Radarr instance).
         public void RegisterAppriseRefitClient<T>()
             where T : class
         {
@@ -57,8 +58,7 @@ public static class RefitClientExtensions
                     client.BaseAddress = apprise.BaseUrl;
                     return RestService.For<T>(client, AppriseRefitSettings);
                 })
-                .As<T>()
-                .InstancePerMatchingLifetimeScope("instance");
+                .As<T>();
         }
     }
 

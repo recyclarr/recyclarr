@@ -231,7 +231,7 @@ public class CoreAutofacModule : Module
                 : new NoopNotificationService();
         });
 
-        builder.RegisterType<AppriseRequestBuilder>().As<IAppriseRequestBuilder>();
+        builder.RegisterAppriseRefitClient<IAppriseApi>();
 
         builder.Register(c =>
         {

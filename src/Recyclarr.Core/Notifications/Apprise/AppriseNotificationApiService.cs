@@ -1,4 +1,3 @@
-using Flurl.Http;
 using Recyclarr.Notifications.Apprise.Dto;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
@@ -6,7 +5,7 @@ using Recyclarr.Settings.Models;
 namespace Recyclarr.Notifications.Apprise;
 
 internal class AppriseNotificationApiService(
-    IAppriseRequestBuilder api,
+    IAppriseApi api,
     ISettings<NotificationSettings> settings
 ) : IAppriseNotificationApiService
 {
@@ -15,19 +14,24 @@ internal class AppriseNotificationApiService(
         // Guaranteed non-null: only constructed when INotificationService factory confirms Apprise is configured
         var apprise = settings.Value.Apprise!;
 
-        var (notification, request) = apprise.Mode switch
+        switch (apprise.Mode)
         {
-            AppriseMode.Stateful => (
-                notificationBuilder(new AppriseStatefulNotification { Tag = apprise.Tags }),
-                api.Request("notify", apprise.Key)
-            ),
-            AppriseMode.Stateless => (
-                notificationBuilder(new AppriseStatelessNotification { Urls = apprise.Urls }),
-                api.Request("notify")
-            ),
-            _ => throw new InvalidOperationException($"Unsupported Apprise mode: {apprise.Mode}"),
-        };
+            case AppriseMode.Stateful:
+                var stateful = (AppriseStatefulNotification)notificationBuilder(
+                    new AppriseStatefulNotification { Tag = apprise.Tags }
+                );
+                await api.Notify(apprise.Key, stateful);
+                break;
 
-        await request.PostJsonAsync(notification);
+            case AppriseMode.Stateless:
+                var stateless = (AppriseStatelessNotification)notificationBuilder(
+                    new AppriseStatelessNotification { Urls = apprise.Urls }
+                );
+                await api.Notify(stateless);
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unsupported Apprise mode: {apprise.Mode}");
+        }
     }
 }

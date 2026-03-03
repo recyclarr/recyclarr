@@ -2,11 +2,11 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Reactive.Disposables;
 using System.Text;
-using Flurl.Http;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Notifications.Apprise.Dto;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Refit;
 
 namespace Recyclarr.Notifications;
 
@@ -84,7 +84,7 @@ internal sealed class NotificationService : INotificationService, IDisposable
                 }
             );
         }
-        catch (FlurlHttpException e)
+        catch (ApiException e)
         {
             _log.Error(e, "Failed to send notification");
         }
