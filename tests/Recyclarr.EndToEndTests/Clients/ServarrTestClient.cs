@@ -63,6 +63,14 @@ internal sealed class ServarrTestClient(string baseUrl, string apiKey)
             .WithHeader("X-Api-Key", apiKey)
             .GetJsonAsync<FauxMediaManagement>(cancellationToken: ct);
     }
+
+    public async Task<FauxNamingConfig> GetNaming(CancellationToken ct = default)
+    {
+        return await baseUrl
+            .AppendPathSegment("api/v3/config/naming")
+            .WithHeader("X-Api-Key", apiKey)
+            .GetJsonAsync<FauxNamingConfig>(cancellationToken: ct);
+    }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
@@ -117,4 +125,23 @@ internal sealed record FauxMediaManagement
 {
     public int Id { get; init; }
     public string DownloadPropersAndRepacks { get; init; } = "";
+}
+
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+internal sealed record FauxNamingConfig
+{
+    public int Id { get; init; }
+
+    // Sonarr fields
+    public bool? RenameEpisodes { get; init; }
+    public string? StandardEpisodeFormat { get; init; }
+    public string? DailyEpisodeFormat { get; init; }
+    public string? AnimeEpisodeFormat { get; init; }
+    public string? SeriesFolderFormat { get; init; }
+    public string? SeasonFolderFormat { get; init; }
+
+    // Radarr fields
+    public bool? RenameMovies { get; init; }
+    public string? StandardMovieFormat { get; init; }
+    public string? MovieFolderFormat { get; init; }
 }

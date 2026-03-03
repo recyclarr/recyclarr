@@ -61,6 +61,15 @@ sonarr:
           max: 50
           preferred: 30
 
+    media_naming:
+      season: default
+      series: default
+      episodes:
+        rename: true
+        standard: default
+        daily: default
+        anime: default
+
     # Media management settings
     media_management:
       propers_and_repacks: do_not_upgrade

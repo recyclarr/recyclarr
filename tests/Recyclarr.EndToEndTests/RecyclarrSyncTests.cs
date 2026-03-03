@@ -333,6 +333,21 @@ internal sealed class RecyclarrSyncTests
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
         bluray1080P.MinSize.Should().Be(50.4m);
 
+        // Media naming settings
+        var sonarrNaming = await _sonarr.GetNaming(ct);
+        sonarrNaming.RenameEpisodes.Should().BeTrue("rename should be enabled");
+        sonarrNaming.SeasonFolderFormat.Should().Be("Season {season:00}");
+        sonarrNaming.SeriesFolderFormat.Should().Be("{Series TitleYear}");
+        sonarrNaming
+            .StandardEpisodeFormat.Should()
+            .Contain("S{season:00}E{episode:00}", "standard episode format should be set");
+        sonarrNaming
+            .DailyEpisodeFormat.Should()
+            .Contain("{Air-Date}", "daily episode format should be set");
+        sonarrNaming
+            .AnimeEpisodeFormat.Should()
+            .Contain("{absolute:000}", "anime episode format should be set");
+
         // Media management settings
         var mediaManagement = await _sonarr.GetMediaManagement(ct);
         mediaManagement
@@ -424,6 +439,19 @@ internal sealed class RecyclarrSyncTests
 
         var webdl1080P = qualityDefs.First(q => q.Title == "WEBDL-1080p");
         webdl1080P.MinSize.Should().Be(12.5m);
+
+        // Media naming settings
+        var radarrNaming = await _radarr.GetNaming(ct);
+        radarrNaming.RenameMovies.Should().BeTrue("rename should be enabled");
+        radarrNaming
+            .MovieFolderFormat.Should()
+            .Be(
+                "{Movie CleanTitle} ({Release Year})",
+                "folder format should match guide 'default'"
+            );
+        radarrNaming
+            .StandardMovieFormat.Should()
+            .Contain("{Movie CleanTitle}", "standard movie format should be set from guide");
 
         // Media management settings
         var mediaManagement = await _radarr.GetMediaManagement(ct);
