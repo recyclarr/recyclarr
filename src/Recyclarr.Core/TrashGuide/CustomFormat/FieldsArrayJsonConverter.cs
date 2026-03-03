@@ -36,14 +36,12 @@ public class FieldsArrayJsonConverter : JsonConverter<object>
         JsonSerializerOptions options
     )
     {
-        var valueOptions = new JsonSerializerOptions(options);
-        valueOptions.Converters.Add(new NondeterministicValueConverter());
         return JsonSerializer
             .Deserialize<Dictionary<string, JsonElement>>(ref reader, options)!
             .Select(x => new CustomFormatFieldData
             {
                 Name = x.Key,
-                Value = x.Value.Deserialize<object>(valueOptions),
+                Value = FieldValue.From(x.Value),
             })
             .ToArray();
     }

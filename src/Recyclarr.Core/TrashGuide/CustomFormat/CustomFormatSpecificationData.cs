@@ -45,7 +45,5 @@ public record CustomFormatSpecificationData
 public record CustomFormatFieldData
 {
     public string Name { get; init; } = "";
-
-    [JsonConverter(typeof(NondeterministicValueConverter))]
-    public object? Value { get; init; }
+    public FieldValue Value { get; init; }
 }

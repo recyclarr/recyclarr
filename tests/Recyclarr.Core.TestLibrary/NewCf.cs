@@ -1,9 +1,15 @@
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Core.TestLibrary;
 
 public static class NewCf
 {
+    public static CustomFormatFieldData Field(string name, object? value)
+    {
+        return new CustomFormatFieldData { Name = name, Value = FieldValue.From(value) };
+    }
+
     public static CustomFormatResource DataWithScore(
         string name,
         string trashId,

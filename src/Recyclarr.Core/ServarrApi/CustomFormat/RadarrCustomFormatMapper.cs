@@ -23,4 +23,9 @@ internal static partial class RadarrCustomFormatMapper
     private static partial CustomFormatFieldData FieldToDomain(RadarrApi.Field dto);
 
     private static partial RadarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+
+    // Normalizes object? (JsonElement from Refit) to FieldValue with proper equality semantics
+    private static FieldValue MapFieldValue(object? value) => FieldValue.From(value);
+
+    private static object? MapFieldValueToObject(FieldValue value) => value.Inner;
 }

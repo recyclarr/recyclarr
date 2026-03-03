@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
@@ -286,7 +287,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 Implementation = "ReleaseTitleSpecification",
                 Negate = false,
                 Required = true,
-                Fields = [new CustomFormatFieldData { Name = "value", Value = "test" }],
+                Fields = [NewCf.Field("value", "test")],
             },
         };
 
@@ -334,7 +335,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     Name = "TestSpec",
                     Implementation = "ReleaseTitleSpecification",
-                    Fields = [new CustomFormatFieldData { Name = "value", Value = "new-value" }],
+                    Fields = [NewCf.Field("value", "new-value")],
                 },
             ],
         };
@@ -349,7 +350,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     Name = "TestSpec",
                     Implementation = "ReleaseTitleSpecification",
-                    Fields = [new CustomFormatFieldData { Name = "value", Value = "old-value" }],
+                    Fields = [NewCf.Field("value", "old-value")],
                 },
             ],
         };
@@ -463,7 +464,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     Name = "TestSpec",
                     Implementation = "ReleaseTitleSpecification",
-                    Fields = [new CustomFormatFieldData { Name = "value", Value = "test" }],
+                    Fields = [NewCf.Field("value", "test")],
                 },
             ],
         };
@@ -478,11 +479,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
                 {
                     Name = "TestSpec",
                     Implementation = "ReleaseTitleSpecification",
-                    Fields =
-                    [
-                        new CustomFormatFieldData { Name = "value", Value = "test" },
-                        new CustomFormatFieldData { Name = "extraField", Value = "ignored" },
-                    ],
+                    Fields = [NewCf.Field("value", "test"), NewCf.Field("extraField", "ignored")],
                 },
             ],
         };
@@ -535,5 +532,115 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         // Sync should report the cache inconsistency as an error
         context.TransactionOutput.InvalidCacheEntries.Should().ContainSingle();
+    }
+
+    [Test]
+    public async Task Unchanged_when_field_values_are_json_elements_vs_clr_primitives()
+    {
+        // Simulates the Refit deserialization path: API responses deserialize object? fields
+        // as JsonElement, while guide CFs produce CLR primitives (string, int, bool).
+        // These represent identical values and should be treated as unchanged.
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        // Guide CF: field values are CLR primitives (from FieldValue's JsonConverter)
+        var guideCf = new CustomFormatResource
+        {
+            Name = "Test CF",
+            TrashId = "cf1",
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "TestSpec",
+                    Implementation = "ReleaseTitleSpecification",
+                    Fields = [NewCf.Field("value", "test-regex")],
+                },
+            ],
+        };
+
+        // Service CF: field values originate as JsonElement (from System.Text.Json deserializing object?)
+        var jsonElement = JsonSerializer.Deserialize<JsonElement>("\"test-regex\"");
+        var serviceCf = new CustomFormatResource
+        {
+            Name = "Test CF",
+            Id = 1,
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "TestSpec",
+                    Implementation = "ReleaseTitleSpecification",
+                    Fields = [NewCf.Field("value", jsonElement)],
+                },
+            ],
+        };
+
+        var context = new CustomFormatPipelineContext
+        {
+            State = CfCache.New(new TrashIdMapping("cf1", "Test CF", 1)),
+            ApiFetchOutput = [serviceCf],
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
+        context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Unchanged_when_numeric_field_values_are_json_elements_vs_clr_primitives()
+    {
+        // SizeSpecification uses double fields (min/max). Verifies numeric JsonElement
+        // values compare equal to their CLR double equivalents.
+        var scopeFactory = Resolve<LifetimeScopeFactory>();
+        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
+        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+
+        var guideCf = new CustomFormatResource
+        {
+            Name = "Size CF",
+            TrashId = "cf2",
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "SizeSpec",
+                    Implementation = "SizeSpecification",
+                    Fields = [NewCf.Field("min", 0.1), NewCf.Field("max", 0.9)],
+                },
+            ],
+        };
+
+        var minElement = JsonSerializer.Deserialize<JsonElement>("0.1");
+        var maxElement = JsonSerializer.Deserialize<JsonElement>("0.9");
+        var serviceCf = new CustomFormatResource
+        {
+            Name = "Size CF",
+            Id = 2,
+            Specifications =
+            [
+                new CustomFormatSpecificationData
+                {
+                    Name = "SizeSpec",
+                    Implementation = "SizeSpecification",
+                    Fields = [NewCf.Field("min", minElement), NewCf.Field("max", maxElement)],
+                },
+            ],
+        };
+
+        var context = new CustomFormatPipelineContext
+        {
+            State = CfCache.New(new TrashIdMapping("cf2", "Size CF", 2)),
+            ApiFetchOutput = [serviceCf],
+            Plan = CreatePlan(guideCf),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
+        context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
     }
 }

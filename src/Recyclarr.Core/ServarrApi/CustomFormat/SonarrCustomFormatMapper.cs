@@ -23,4 +23,9 @@ internal static partial class SonarrCustomFormatMapper
     private static partial CustomFormatFieldData FieldToDomain(SonarrApi.Field dto);
 
     private static partial SonarrApi.Field FieldFromDomain(CustomFormatFieldData domain);
+
+    // Normalizes object? (JsonElement from Refit) to FieldValue with proper equality semantics
+    private static FieldValue MapFieldValue(object? value) => FieldValue.From(value);
+
+    private static object? MapFieldValueToObject(FieldValue value) => value.Inner;
 }

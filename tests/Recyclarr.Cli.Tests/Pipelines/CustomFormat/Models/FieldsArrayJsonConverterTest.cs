@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.TrashGuide.CustomFormat;
 
@@ -41,12 +42,7 @@ internal sealed class FieldsArrayJsonConverterTest
             GlobalJsonSerializerSettings.Services
         );
 
-        result!
-            .Fields.Should()
-            .BeEquivalentTo([
-                new CustomFormatFieldData { Name = "min", Value = 25 },
-                new CustomFormatFieldData { Name = "max", Value = 40 },
-            ]);
+        result!.Fields.Should().BeEquivalentTo([NewCf.Field("min", 25), NewCf.Field("max", 40)]);
     }
 
     [Test]
@@ -67,10 +63,7 @@ internal sealed class FieldsArrayJsonConverterTest
 
         result!
             .Fields.Should()
-            .BeEquivalentTo([
-                new CustomFormatFieldData { Name = "value", Value = 8 },
-                new CustomFormatFieldData { Name = "exceptLanguage", Value = false },
-            ]);
+            .BeEquivalentTo([NewCf.Field("value", 8), NewCf.Field("exceptLanguage", false)]);
     }
 
     [Test]
