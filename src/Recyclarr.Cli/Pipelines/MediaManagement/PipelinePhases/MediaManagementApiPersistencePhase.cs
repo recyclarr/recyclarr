@@ -11,17 +11,11 @@ internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementS
         CancellationToken ct
     )
     {
-        await api.UpdateMediaManagement(context.TransactionOutput, ct);
-        LogPersistenceResults(context);
-        return PipelineFlow.Continue;
-    }
-
-    private void LogPersistenceResults(MediaManagementPipelineContext context)
-    {
         var differences = context.ApiFetchOutput.GetDifferences(context.TransactionOutput);
 
         if (differences.Count != 0)
         {
+            await api.UpdateMediaManagement(context.TransactionOutput, ct);
             log.Information("Media management has been updated");
             log.Debug("Media management differences: {Diff}", differences);
         }
@@ -31,5 +25,6 @@ internal class MediaManagementApiPersistencePhase(ILogger log, IMediaManagementS
         }
 
         context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
+        return PipelineFlow.Continue;
     }
 }
