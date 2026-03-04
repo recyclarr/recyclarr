@@ -19,6 +19,7 @@
     <PackageReference Include="SuperLinq" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
   </ItemGroup>
 

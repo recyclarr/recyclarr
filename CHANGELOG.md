@@ -14,6 +14,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sync: `select_all` option for custom format groups to include all CFs regardless of default
   status (#722)
 
+### Fixed
+
+- Migrate: Cache-to-state migration failure on cross-filesystem moves (e.g. Docker volume mounts)
+
 ## [8.3.2] - 2026-02-25
 
 ### Fixed

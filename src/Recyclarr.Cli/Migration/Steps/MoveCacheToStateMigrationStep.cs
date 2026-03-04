@@ -28,30 +28,49 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
 
     public void Execute(ILogger log)
     {
-        MoveServiceCaches(log, "sonarr");
-        MoveServiceCaches(log, "radarr");
+        var totalFiles = 0;
+        var services = new List<string>();
+
+        totalFiles += MoveServiceCaches(log, "sonarr", services);
+        totalFiles += MoveServiceCaches(log, "radarr", services);
         MoveResources(log);
         DeleteEmptyCacheDir(log);
+
+        if (totalFiles > 0)
+        {
+            log.Information(
+                "Cache migration complete: moved {FileCount} files across {Services}",
+                totalFiles,
+                string.Join(", ", services)
+            );
+        }
+        else
+        {
+            log.Warning("Cache directory exists but contains no service data to migrate");
+        }
     }
 
-    private void MoveServiceCaches(ILogger log, string serviceName)
+    private int MoveServiceCaches(ILogger log, string serviceName, List<string> services)
     {
         var sourceDir = CacheDir.SubDirectory(serviceName);
         if (!sourceDir.Exists)
         {
-            return;
+            return 0;
         }
 
         var targetDir = StateDir.SubDirectory(serviceName);
         targetDir.Create();
 
-        // Move each hash subdirectory
+        var fileCount = 0;
+        var hashDirCount = 0;
+
+        // Copy and rename files from each hash subdirectory, then delete originals
         foreach (var hashDir in sourceDir.EnumerateDirectories())
         {
             var targetHashDir = targetDir.SubDirectory(hashDir.Name);
             targetHashDir.Create();
+            hashDirCount++;
 
-            // Move and rename JSON files: *-cache.json -> *-mappings.json
             foreach (var file in hashDir.EnumerateFiles("*.json"))
             {
                 var newName = file.Name.Replace(
@@ -60,24 +79,38 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
                     StringComparison.Ordinal
                 );
                 var targetPath = targetHashDir.File(newName);
-                file.MoveTo(targetPath.FullName);
-                log.Debug("Moved {Source} to {Target}", file.FullName, targetPath.FullName);
+
+                // Copy then delete to handle cross-filesystem moves (e.g. Docker volume mounts)
+                file.CopyTo(targetPath.FullName);
+                file.Delete();
+                fileCount++;
+
+                log.Debug("Migrated {Source} to {Target}", file.FullName, targetPath.FullName);
             }
 
-            // Delete empty source hash directory
             if (!hashDir.EnumerateFileSystemInfos().Any())
             {
                 hashDir.Delete();
             }
         }
 
-        // Delete empty source service directory
         if (!sourceDir.EnumerateFileSystemInfos().Any())
         {
             sourceDir.Delete();
         }
 
-        log.Information("Migrated {Service} cache to state directory", serviceName);
+        if (fileCount > 0)
+        {
+            services.Add(serviceName);
+            log.Information(
+                "Migrated {Service}: {FileCount} files across {HashDirCount} instances",
+                serviceName,
+                fileCount,
+                hashDirCount
+            );
+        }
+
+        return fileCount;
     }
 
     private void MoveResources(ILogger log)
@@ -88,17 +121,17 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
             return;
         }
 
-        // Move resources to app data root (no longer under cache/state)
         if (ResourcesDir.Exists)
         {
-            // Target exists - delete source since we have newer resources
             sourceResourcesDir.RecursivelyDeleteReadOnly();
             log.Information("Deleted old cache/resources (target already exists)");
         }
         else
         {
-            sourceResourcesDir.MoveTo(ResourcesDir.FullName);
-            log.Information("Moved resources from cache to app data root");
+            // Copy then delete to handle cross-filesystem moves (e.g. Docker volume mounts)
+            sourceResourcesDir.CopyTo(ResourcesDir, recursive: true);
+            sourceResourcesDir.RecursivelyDeleteReadOnly();
+            log.Information("Moved resources from cache to {Target}", ResourcesDir.FullName);
         }
     }
 
@@ -107,7 +140,7 @@ internal class MoveCacheToStateMigrationStep(IAppPaths paths) : IMigrationStep
         if (CacheDir.Exists && !CacheDir.EnumerateFileSystemInfos().Any())
         {
             CacheDir.Delete();
-            log.Information("Deleted empty cache directory");
+            log.Debug("Deleted empty cache directory");
         }
     }
 }
