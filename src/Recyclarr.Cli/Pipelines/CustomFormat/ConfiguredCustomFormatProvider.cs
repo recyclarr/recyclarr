@@ -23,6 +23,12 @@ internal class ConfiguredCustomFormatProvider(
 
         var skipSet = config.CustomFormatGroups.Skip.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        // Warn about skip IDs that don't match any known CF group
+        foreach (var skipId in skipSet.Where(id => !cfGroupResources.ContainsKey(id)))
+        {
+            diagnostics.AddWarning($"Skip ID '{skipId}' does not match any known CF group");
+        }
+
         // From flat custom_formats
         foreach (var cfg in config.CustomFormats)
         {

@@ -219,6 +219,47 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Skip_list_warns_when_trash_id_does_not_match_any_group()
+    {
+        // Setup: One default CF group
+        SetupCustomFormatWithScores("CF One", "cf1", ("default", 100));
+        SetupQualityProfileGuideData("anime-qp", "Anime Profile", ("HDTV-1080p", true, null));
+
+        SetupCfGroupGuideData(
+            "default-group",
+            "Default Group",
+            [
+                new CfGroupCustomFormat
+                {
+                    TrashId = "cf1",
+                    Name = "CF One",
+                    Default = true,
+                },
+            ],
+            new Dictionary<string, string> { ["Anime Profile"] = "anime-qp" },
+            isDefault: true
+        );
+
+        // Skip list with one valid ID and one that doesn't match any group
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormatGroups = new CustomFormatGroupsConfig
+            {
+                Skip = ["default-group", "nonexistent-group"],
+            },
+            QualityProfiles = [new QualityProfileConfig { TrashId = "anime-qp" }],
+        };
+
+        var (sut, diagnostics) = CreateSut(config);
+
+        _ = sut.GetAll(diagnostics).ToList();
+
+        // Valid skip ID should work (no entries from default-group)
+        // Invalid skip ID should produce a warning
+        diagnostics.Received(1).AddWarning(Arg.Is<string>(s => s.Contains("nonexistent-group")));
+    }
+
+    [Test]
     public void CfSource_CfGroupExplicit_for_groups_in_add_list()
     {
         // Setup: Non-default CF group (must be in Add list to sync)
