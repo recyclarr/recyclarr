@@ -1,0 +1,52 @@
+name: OpenAPI Spec Sync
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Weekly on Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - name: Sonarr
+            upstream: https://raw.githubusercontent.com/Sonarr/Sonarr/develop/src/Sonarr.Api.V3/openapi.json
+            local: src/Recyclarr.Api.Sonarr/openapi.json
+            branch: upstream/sonarr-openapi
+          - name: Radarr
+            upstream: https://raw.githubusercontent.com/Radarr/Radarr/develop/src/Radarr.Api.V3/openapi.json
+            local: src/Recyclarr.Api.Radarr/openapi.json
+            branch: upstream/radarr-openapi
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Fetch upstream ${{ matrix.name }} OpenAPI spec
+        run: curl -fsSL "${{ matrix.upstream }}" -o "${{ matrix.local }}"
+
+      - name: Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: ${{ matrix.branch }}
+          add-paths: ${{ matrix.local }}
+          sign-commits: true
+          delete-branch: true
+          commit-message: "chore: update ${{ matrix.name }} OpenAPI spec"
+          title: "chore: update ${{ matrix.name }} OpenAPI spec"
+          body: |
+            Automated update of the ${{ matrix.name }} OpenAPI spec from upstream.
+
+            Source: ${{ matrix.upstream }}
+          assignees: rcdailey
