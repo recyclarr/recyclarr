@@ -10,11 +10,11 @@
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="CliWrap" />
-    <PackageReference Include="Flurl.Http" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit.Analyzers" />
     <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
     <PackageReference Include="Testcontainers" />
@@ -24,6 +24,11 @@
     <None Include="Fixtures\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Recyclarr.Api.Sonarr\Recyclarr.Api.Sonarr.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Api.Radarr\Recyclarr.Api.Radarr.csproj" />
   </ItemGroup>
 
 </Project>

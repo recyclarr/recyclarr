@@ -1,122 +1,28 @@
-using System.IO.Abstractions;
-using System.Reflection;
+using System.Globalization;
 using AwesomeAssertions;
 using CliWrap;
 using CliWrap.Buffered;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using NUnit.Framework;
-using Recyclarr.EndToEndTests.Clients;
+using RadarrApi = Recyclarr.Api.Radarr;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.EndToEndTests;
 
 [TestFixture(Category = "E2E"), Explicit, NonParallelizable]
 internal sealed class RecyclarrSyncTests
 {
-    private static readonly FileSystem FileSystem = new();
-    private static IContainer? _sonarrContainer;
-    private static IContainer? _radarrContainer;
-    private static ServarrTestClient _sonarr = null!;
-    private static ServarrTestClient _radarr = null!;
-    private static string _recyclarrBinaryPath = string.Empty;
-    private static IDirectoryInfo _tempAppDataDir = null!;
-    private static string _configPath = string.Empty;
-    private static string _configPathDeleteDisabled = string.Empty;
+    private static RecyclarrTestHarness _harness = null!;
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
     {
-        var ct = TestContext.CurrentContext.CancellationToken;
-
-        const string apiKey = "testkey";
-
-        var guid = Guid.NewGuid();
-        var publishPath = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), $"recyclarr-e2e-publish-{guid}")
-        );
-        _recyclarrBinaryPath = publishPath.File("recyclarr").FullName;
-        _tempAppDataDir = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), $"recyclarr-e2e-appdata-{guid}")
-        );
-        _tempAppDataDir.Create();
-
-        _configPath = Path.Combine(
-            TestContext.CurrentContext.TestDirectory,
-            "Fixtures",
-            "recyclarr.yml"
-        );
-
-        _configPathDeleteDisabled = Path.Combine(
-            TestContext.CurrentContext.TestDirectory,
-            "Fixtures",
-            "recyclarr-delete-disabled.yml"
-        );
-
-        await SetUpFixtures(ct);
-
-        var repositoryRoot = GetRepositoryRoot();
-        var cliProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Cli");
-
-        _sonarrContainer = new ContainerBuilder("linuxserver/sonarr:latest")
-            .WithPortBinding(8989, true)
-            .WithEnvironment("SONARR__AUTH__APIKEY", apiKey)
-            .WithTmpfsMount("/config")
-            .WithWaitStrategy(
-                Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(8989))
-            )
-            .WithCleanUp(true)
-            .Build();
-
-        _radarrContainer = new ContainerBuilder("linuxserver/radarr:latest")
-            .WithPortBinding(7878, true)
-            .WithEnvironment("RADARR__AUTH__APIKEY", apiKey)
-            .WithTmpfsMount("/config")
-            .WithWaitStrategy(
-                Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(7878))
-            )
-            .WithCleanUp(true)
-            .Build();
-
-        var sonarrStartTask = _sonarrContainer.StartAsync(ct);
-        var radarrStartTask = _radarrContainer.StartAsync(ct);
-        var publishTask = Cli.Wrap("dotnet")
-            .WithArguments([
-                "publish",
-                cliProjectPath,
-                "-c",
-                "Release",
-                "--self-contained",
-                "-o",
-                publishPath.FullName,
-            ])
-            .ExecuteAsync(ct);
-
-        await Task.WhenAll(sonarrStartTask, radarrStartTask, publishTask);
-
-        var sonarrUrl = $"http://localhost:{_sonarrContainer.GetMappedPublicPort(8989)}";
-        var radarrUrl = $"http://localhost:{_radarrContainer.GetMappedPublicPort(7878)}";
-
-        _sonarr = new ServarrTestClient(sonarrUrl, apiKey);
-        _radarr = new ServarrTestClient(radarrUrl, apiKey);
+        _harness = await RecyclarrTestHarness.StartAsync(TestContext.CurrentContext);
     }
 
     [OneTimeTearDown]
     public static async Task OneTimeTearDown()
     {
-        if (_sonarrContainer is not null)
-        {
-            await _sonarrContainer.DisposeAsync();
-        }
-
-        if (_radarrContainer is not null)
-        {
-            await _radarrContainer.DisposeAsync();
-        }
-
-        if (_tempAppDataDir.Exists)
-        {
-            _tempAppDataDir.Delete(true);
-        }
+        await _harness.DisposeAsync();
     }
 
     [Test, Order(1)]
@@ -143,7 +49,9 @@ internal sealed class RecyclarrSyncTests
         await LogOutput(result);
         result.ExitCode.Should().Be(0, "re-sync should succeed");
 
-        var sonarrCfNames = (await _sonarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        var sonarrCfNames = (
+            await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
+        ).Select(cf => cf.Name);
         sonarrCfNames
             .Should()
             .Contain(
@@ -151,7 +59,11 @@ internal sealed class RecyclarrSyncTests
                 "CFs should be unchanged after re-sync"
             );
 
-        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name).ToList();
+        var radarrCfNames = (
+            await _harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
+        )
+            .Select(cf => cf.Name)
+            .ToList();
         radarrCfNames
             .Should()
             .Contain(
@@ -174,13 +86,22 @@ internal sealed class RecyclarrSyncTests
     [CancelAfter(60_000)]
     public async Task Order3_resync_restores_renamed_custom_format(CancellationToken ct)
     {
+        var cfApi = _harness.SonarrApi<SonarrApi.ICustomFormatApi>();
+
         // Rename a CF directly in Sonarr (simulates manual edit or service-side change)
-        var sonarrCfs = await _sonarr.GetCustomFormats(ct);
-        var obfuscatedCf = sonarrCfs.First(cf => cf.Name == "Obfuscated");
-        await _sonarr.RenameCustomFormat(obfuscatedCf.Id, "Obfuscated-RENAMED", ct);
+        var sonarrCfs = await cfApi.CustomformatGet(ct);
+        var obfuscatedId = sonarrCfs.First(cf => cf.Name == "Obfuscated").Id!.Value;
+        // Fetch full resource by ID (list endpoint returns minimal data insufficient for PUT)
+        var obfuscatedCf = await cfApi.CustomformatGet(obfuscatedId, ct);
+        obfuscatedCf.Name = "Obfuscated-RENAMED";
+        await cfApi.CustomformatPut(
+            obfuscatedId.ToString(CultureInfo.InvariantCulture),
+            obfuscatedCf,
+            ct
+        );
 
         // Verify rename took effect
-        var renamedCfs = await _sonarr.GetCustomFormats(ct);
+        var renamedCfs = await cfApi.CustomformatGet(ct);
         renamedCfs.Should().Contain(cf => cf.Name == "Obfuscated-RENAMED");
 
         // Run sync - should restore original name via ID-first matching
@@ -189,7 +110,7 @@ internal sealed class RecyclarrSyncTests
         result.ExitCode.Should().Be(0, "sync should succeed and restore renamed CF");
 
         // Verify name restored
-        var restoredCfs = await _sonarr.GetCustomFormats(ct);
+        var restoredCfs = await cfApi.CustomformatGet(ct);
         restoredCfs
             .Should()
             .Contain(
@@ -203,13 +124,15 @@ internal sealed class RecyclarrSyncTests
     [CancelAfter(60_000)]
     public async Task Order4_resync_recreates_deleted_custom_format(CancellationToken ct)
     {
+        var cfApi = _harness.SonarrApi<SonarrApi.ICustomFormatApi>();
+
         // Delete a CF directly in Sonarr (simulates accidental deletion)
-        var sonarrCfs = await _sonarr.GetCustomFormats(ct);
+        var sonarrCfs = await cfApi.CustomformatGet(ct);
         var badDualCf = sonarrCfs.First(cf => cf.Name == "Bad Dual Groups");
-        await _sonarr.DeleteCustomFormat(badDualCf.Id, ct);
+        await cfApi.CustomformatDelete(badDualCf.Id!.Value, ct);
 
         // Verify deletion
-        var afterDelete = await _sonarr.GetCustomFormats(ct);
+        var afterDelete = await cfApi.CustomformatGet(ct);
         afterDelete.Should().NotContain(cf => cf.Name == "Bad Dual Groups");
 
         // Run sync - should detect stale cache and recreate CF
@@ -218,7 +141,7 @@ internal sealed class RecyclarrSyncTests
         result.ExitCode.Should().Be(0, "sync should succeed and recreate deleted CF");
 
         // Verify CF recreated
-        var recreated = await _sonarr.GetCustomFormats(ct);
+        var recreated = await cfApi.CustomformatGet(ct);
         recreated
             .Should()
             .Contain(cf => cf.Name == "Bad Dual Groups", "deleted CF should be recreated");
@@ -229,13 +152,13 @@ internal sealed class RecyclarrSyncTests
     public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
     {
         // Run sync with alternate config that has Obfuscated removed and delete_old_custom_formats: false
-        var result = await RunRecyclarrSync(ct, _configPathDeleteDisabled);
+        var result = await RunRecyclarrSync(ct, _harness.ConfigPathDeleteDisabled);
         await LogOutput(result);
         result.ExitCode.Should().Be(0, "sync should succeed with delete disabled");
 
         // Verify Obfuscated still exists even though it's not in the config
         // This proves the delete toggle prevents deletion of orphaned CFs
-        var sonarrCfs = await _sonarr.GetCustomFormats(ct);
+        var sonarrCfs = await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct);
         sonarrCfs
             .Should()
             .Contain(
@@ -249,20 +172,20 @@ internal sealed class RecyclarrSyncTests
         string? configPath = null
     )
     {
-        return await Cli.Wrap(_recyclarrBinaryPath)
-            .WithArguments(["sync", "--log", "debug", "--config", configPath ?? _configPath])
+        return await Cli.Wrap(_harness.RecyclarrBinaryPath)
+            .WithArguments([
+                "sync",
+                "--log",
+                "debug",
+                "--config",
+                configPath ?? _harness.ConfigPath,
+            ])
             .WithEnvironmentVariables(env =>
-                env.Set(
-                        "SONARR_URL",
-                        $"http://localhost:{_sonarrContainer!.GetMappedPublicPort(8989)}"
-                    )
+                env.Set("SONARR_URL", $"http://localhost:{_harness.SonarrPort}")
                     .Set("SONARR_API_KEY", "testkey")
-                    .Set(
-                        "RADARR_URL",
-                        $"http://localhost:{_radarrContainer!.GetMappedPublicPort(7878)}"
-                    )
+                    .Set("RADARR_URL", $"http://localhost:{_harness.RadarrPort}")
                     .Set("RADARR_API_KEY", "testkey")
-                    .Set("RECYCLARR_CONFIG_DIR", _tempAppDataDir.FullName)
+                    .Set("RECYCLARR_CONFIG_DIR", _harness.AppDataDir.FullName)
                     .Set("RECYCLARR_APP_DATA", "")
             )
             .WithValidation(CommandResultValidation.None)
@@ -282,7 +205,9 @@ internal sealed class RecyclarrSyncTests
 
     private static async Task VerifySonarrState(CancellationToken ct)
     {
-        var profiles = await _sonarr.GetQualityProfiles(ct);
+        var profiles = await _harness
+            .SonarrApi<SonarrApi.IQualityProfileApi>()
+            .QualityprofileGet(ct);
 
         // User-defined quality profile
         profiles.Select(p => p.Name).Should().Contain("HD-1080p");
@@ -309,7 +234,9 @@ internal sealed class RecyclarrSyncTests
         guideOnlyProfile.MinFormatScore.Should().Be(10, "guide minFormatScore should be inherited");
         guideOnlyProfile.UpgradeAllowed.Should().BeTrue("guide upgradeAllowed should be inherited");
 
-        var sonarrCfNames = (await _sonarr.GetCustomFormats(ct)).Select(cf => cf.Name);
+        var sonarrCfNames = (
+            await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
+        ).Select(cf => cf.Name);
         string[] expectedSonarrCfs =
         [
             // From YAML custom_formats section
@@ -324,17 +251,19 @@ internal sealed class RecyclarrSyncTests
         ];
         sonarrCfNames.Should().Contain(expectedSonarrCfs);
 
-        var qualityDefs = await _sonarr.GetQualityDefinitions(ct);
+        var qualityDefs = await _harness
+            .SonarrApi<SonarrApi.IQualityDefinitionApi>()
+            .QualitydefinitionGet(ct);
         var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
-        hdtv1080P.MinSize.Should().Be(5);
-        hdtv1080P.MaxSize.Should().Be(50);
-        hdtv1080P.PreferredSize.Should().Be(30);
+        hdtv1080P.MinSize.Should().BeApproximately(5, 0.1);
+        hdtv1080P.MaxSize.Should().BeApproximately(50, 0.1);
+        hdtv1080P.PreferredSize.Should().BeApproximately(30, 0.1);
 
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
-        bluray1080P.MinSize.Should().Be(50.4m);
+        bluray1080P.MinSize.Should().BeApproximately(50.4, 0.1);
 
         // Media naming settings
-        var sonarrNaming = await _sonarr.GetNaming(ct);
+        var sonarrNaming = await _harness.SonarrApi<SonarrApi.INamingConfigApi>().NamingGet(ct);
         sonarrNaming.RenameEpisodes.Should().BeTrue("rename should be enabled");
         sonarrNaming.SeasonFolderFormat.Should().Be("Season {season:00}");
         sonarrNaming.SeriesFolderFormat.Should().Be("{Series TitleYear}");
@@ -349,15 +278,22 @@ internal sealed class RecyclarrSyncTests
             .Contain("{absolute:000}", "anime episode format should be set");
 
         // Media management settings
-        var mediaManagement = await _sonarr.GetMediaManagement(ct);
+        var mediaManagement = await _harness
+            .SonarrApi<SonarrApi.IMediaManagementConfigApi>()
+            .MediamanagementGet(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be("doNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
+            .Be(
+                SonarrApi.ProperDownloadTypes.DoNotUpgrade,
+                "propers_and_repacks should be set to do_not_upgrade"
+            );
     }
 
     private static async Task VerifyRadarrState(CancellationToken ct)
     {
-        var profiles = await _radarr.GetQualityProfiles(ct);
+        var profiles = await _harness
+            .RadarrApi<RadarrApi.IQualityProfileApi>()
+            .QualityprofileGet(ct);
 
         // User-defined quality profile
         var hdProfile = profiles.First(p => p.Name == "HD-1080p");
@@ -366,7 +302,7 @@ internal sealed class RecyclarrSyncTests
         // CF group CFs should be scored on HD-1080p (tests name-based assign_scores_to)
         // CF1 (required) + CF3 (selected) are scored; CF2 (excluded) is not
         var hdScoredCfNames = hdProfile
-            .FormatItems.Where(fi => fi.Score != 0)
+            .FormatItems!.Where(fi => fi.Score != 0)
             .Select(fi => fi.Name)
             .ToList();
         hdScoredCfNames
@@ -395,12 +331,15 @@ internal sealed class RecyclarrSyncTests
             .Be("English", "language from guide resource should be applied");
 
         // Guide-synced quality profile (tests implicit CF group inclusion)
-        // Guide-synced quality profile (tests implicit CF group inclusion)
         var hdBlurayProfile = profiles.FirstOrDefault(p => p.Name == "HD Bluray + WEB");
         hdBlurayProfile.Should().NotBeNull("guide HD Bluray + WEB profile should be created");
         hdBlurayProfile.UpgradeAllowed.Should().BeTrue("guide value should be inherited");
 
-        var radarrCfNames = (await _radarr.GetCustomFormats(ct)).Select(cf => cf.Name).ToList();
+        var radarrCfNames = (
+            await _harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
+        )
+            .Select(cf => cf.Name)
+            .ToList();
         string[] expectedRadarrCfs =
         [
             // From YAML custom_formats section
@@ -427,21 +366,23 @@ internal sealed class RecyclarrSyncTests
             .Should()
             .NotContain("E2E-GroupCF2", "excluded default CF should not be synced");
 
-        var qualityDefs = await _radarr.GetQualityDefinitions(ct);
+        var qualityDefs = await _harness
+            .RadarrApi<RadarrApi.IQualityDefinitionApi>()
+            .QualitydefinitionGet(ct);
         var bluray1080P = qualityDefs.First(q => q.Title == "Bluray-1080p");
         bluray1080P.MaxSize.Should().BeNull();
         bluray1080P.PreferredSize.Should().BeNull();
 
         var hdtv1080P = qualityDefs.First(q => q.Title == "HDTV-1080p");
-        hdtv1080P.MinSize.Should().Be(0);
-        hdtv1080P.MaxSize.Should().Be(100);
-        hdtv1080P.PreferredSize.Should().Be(50);
+        hdtv1080P.MinSize.Should().BeApproximately(0, 0.1);
+        hdtv1080P.MaxSize.Should().BeApproximately(100, 0.1);
+        hdtv1080P.PreferredSize.Should().BeApproximately(50, 0.1);
 
         var webdl1080P = qualityDefs.First(q => q.Title == "WEBDL-1080p");
-        webdl1080P.MinSize.Should().Be(12.5m);
+        webdl1080P.MinSize.Should().BeApproximately(12.5, 0.1);
 
         // Media naming settings
-        var radarrNaming = await _radarr.GetNaming(ct);
+        var radarrNaming = await _harness.RadarrApi<RadarrApi.INamingConfigApi>().NamingGet(ct);
         radarrNaming.RenameMovies.Should().BeTrue("rename should be enabled");
         radarrNaming
             .MovieFolderFormat.Should()
@@ -454,10 +395,15 @@ internal sealed class RecyclarrSyncTests
             .Contain("{Movie CleanTitle}", "standard movie format should be set from guide");
 
         // Media management settings
-        var mediaManagement = await _radarr.GetMediaManagement(ct);
+        var mediaManagement = await _harness
+            .RadarrApi<RadarrApi.IMediaManagementConfigApi>()
+            .MediamanagementGet(ct);
         mediaManagement
             .DownloadPropersAndRepacks.Should()
-            .Be("doNotPrefer", "propers_and_repacks should be set to do_not_prefer");
+            .Be(
+                RadarrApi.ProperDownloadTypes.DoNotPrefer,
+                "propers_and_repacks should be set to do_not_prefer"
+            );
     }
 
     private static async Task WaitForQualityDefinitionUpdates(CancellationToken ct)
@@ -468,9 +414,11 @@ internal sealed class RecyclarrSyncTests
 
         while (DateTime.UtcNow < deadline)
         {
-            var sonarrDefs = await _sonarr.GetQualityDefinitions(ct);
+            var sonarrDefs = await _harness
+                .SonarrApi<SonarrApi.IQualityDefinitionApi>()
+                .QualitydefinitionGet(ct);
             var sonarrHdtv = sonarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
-            if (sonarrHdtv?.MinSize == 5)
+            if (sonarrHdtv?.MinSize is >= 4.9 and <= 5.1)
             {
                 break;
             }
@@ -480,103 +428,16 @@ internal sealed class RecyclarrSyncTests
 
         while (DateTime.UtcNow < deadline)
         {
-            var radarrDefs = await _radarr.GetQualityDefinitions(ct);
+            var radarrDefs = await _harness
+                .RadarrApi<RadarrApi.IQualityDefinitionApi>()
+                .QualitydefinitionGet(ct);
             var radarrHdtv = radarrDefs.FirstOrDefault(q => q.Title == "HDTV-1080p");
-            if (radarrHdtv?.MinSize == 0)
+            if (radarrHdtv?.MinSize is >= -0.1 and <= 0.1)
             {
                 break;
             }
 
             await Task.Delay(pollInterval, ct);
-        }
-    }
-
-    private static async Task SetUpFixtures(CancellationToken ct)
-    {
-        var fixturesDir = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(TestContext.CurrentContext.TestDirectory, "Fixtures")
-        );
-
-        var sonarrCfsSource = fixturesDir.SubDirectory("custom-formats-sonarr");
-        var sonarrCfsDest = _tempAppDataDir.SubDirectory("custom-formats-sonarr");
-        if (sonarrCfsSource.Exists)
-        {
-            CopyDirectory(sonarrCfsSource, sonarrCfsDest);
-        }
-
-        var radarrCfsSource = fixturesDir.SubDirectory("custom-formats-radarr");
-        var radarrCfsDest = _tempAppDataDir.SubDirectory("custom-formats-radarr");
-        if (radarrCfsSource.Exists)
-        {
-            CopyDirectory(radarrCfsSource, radarrCfsDest);
-        }
-
-        var overrideSource = fixturesDir.SubDirectory("trash-guides-override");
-        var overrideDest = _tempAppDataDir.SubDirectory("trash-guides-override");
-        if (overrideSource.Exists)
-        {
-            CopyDirectory(overrideSource, overrideDest);
-        }
-
-        var settingsSource = fixturesDir.File("settings.yml");
-        if (settingsSource.Exists)
-        {
-            var settingsContent = await FileSystem.File.ReadAllTextAsync(
-                settingsSource.FullName,
-                ct
-            );
-            settingsContent = settingsContent
-                .Replace(
-                    "PLACEHOLDER_SONARR_CFS_PATH",
-                    sonarrCfsDest.FullName,
-                    StringComparison.Ordinal
-                )
-                .Replace(
-                    "PLACEHOLDER_RADARR_CFS_PATH",
-                    radarrCfsDest.FullName,
-                    StringComparison.Ordinal
-                )
-                .Replace(
-                    "PLACEHOLDER_OVERRIDE_PATH",
-                    overrideDest.FullName,
-                    StringComparison.Ordinal
-                );
-            var settingsDest = _tempAppDataDir.File("settings.yml");
-            await FileSystem.File.WriteAllTextAsync(settingsDest.FullName, settingsContent, ct);
-        }
-    }
-
-    private static string GetRepositoryRoot()
-    {
-        var assembly = typeof(RecyclarrSyncTests).Assembly;
-        var attribute = assembly
-            .GetCustomAttributes<AssemblyMetadataAttribute>()
-            .FirstOrDefault(a => a.Key == "RecyclarrRepositoryRoot");
-
-        if (attribute?.Value is null)
-        {
-            throw new InvalidOperationException(
-                "RecyclarrRepositoryRoot assembly metadata not found."
-            );
-        }
-
-        return Path.GetFullPath(attribute.Value);
-    }
-
-    private static void CopyDirectory(IDirectoryInfo sourceDir, IDirectoryInfo destDir)
-    {
-        destDir.Create();
-
-        foreach (var file in sourceDir.GetFiles())
-        {
-            var destFile = destDir.File(file.Name);
-            file.CopyTo(destFile.FullName);
-        }
-
-        foreach (var dir in sourceDir.GetDirectories())
-        {
-            var destSubDir = destDir.SubDirectory(dir.Name);
-            CopyDirectory(dir, destSubDir);
         }
     }
 }

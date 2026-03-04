@@ -6,5 +6,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Remove="Serilog.Sinks.NUnit" />
+    <PackageReference Include="Refit.HttpClientFactory" />
   </ItemGroup>
 </Project>

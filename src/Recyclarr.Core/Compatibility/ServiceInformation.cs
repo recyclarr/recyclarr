@@ -1,4 +1,3 @@
-using Flurl.Http;
 using Recyclarr.Servarr.SystemStatus;
 
 namespace Recyclarr.Compatibility;
@@ -20,7 +19,7 @@ public class ServiceInformation(ISystemService api, ILogger log) : IServiceInfor
             log.Debug("{Service} Version: {Version}", result.AppName, result.Version);
             return result.Version;
         }
-        catch (FlurlHttpException)
+        catch (HttpRequestException)
         {
             log.Error("Unable to obtain service version information");
             throw;

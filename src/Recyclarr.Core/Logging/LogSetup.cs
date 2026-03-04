@@ -11,7 +11,7 @@ public static class LogSetup
         return new LoggerConfiguration()
             .MinimumLevel.Is(LogEventLevel.Verbose)
             .Enrich.FromLogContext()
-            .Enrich.With<FlurlExceptionSanitizingEnricher>();
+            .Enrich.With<ExceptionSanitizingEnricher>();
     }
 
     private static string GetBaseTemplateString()

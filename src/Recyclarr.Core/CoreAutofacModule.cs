@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.Ordering;
 using FluentValidation;
-using Flurl.Http.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Recyclarr.Common;
@@ -31,7 +30,6 @@ using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Servarr.SystemStatus;
-using Recyclarr.ServarrApi;
 using Recyclarr.ServarrApi.CustomFormat;
 using Recyclarr.ServarrApi.MediaManagement;
 using Recyclarr.ServarrApi.MediaNaming;
@@ -166,18 +164,6 @@ public class CoreAutofacModule : Module
 
     private static void RegisterHttp(ContainerBuilder builder)
     {
-        // Flurl infrastructure (still active; removed in Phase 17)
-        builder.RegisterType<FlurlClientCache>().As<IFlurlClientCache>().SingleInstance();
-
-        builder
-            .RegisterTypes(
-                typeof(FlurlAfterCallLogRedactor),
-                typeof(FlurlBeforeCallLogRedactor),
-                typeof(FlurlRedirectPreventer)
-            )
-            .As<FlurlSpecificEventHandler>();
-
-        // Refit/HttpClient infrastructure (used by generated Refit clients)
         RegisterHttpClientFactory(builder);
     }
 
@@ -267,9 +253,6 @@ public class CoreAutofacModule : Module
 
     private static void RegisterServarrApiClients(ContainerBuilder builder)
     {
-        // Flurl infrastructure (removed in Phase 17)
-        builder.RegisterType<ServarrRequestBuilder>().As<IServarrRequestBuilder>();
-
         // Refit clients
         builder.RegisterServarrRefitClient<SonarrApi.ICustomFormatApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ICustomFormatApi>();

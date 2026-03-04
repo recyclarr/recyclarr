@@ -1,60 +1,45 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text.Json;
-using Flurl.Http;
+using Refit;
 
 namespace Recyclarr.Cli.ErrorHandling.Strategies;
 
 internal class HttpExceptionStrategy : IExceptionStrategy
 {
-    public async Task<IReadOnlyList<string>?> HandleAsync(Exception exception)
+    public Task<IReadOnlyList<string>?> HandleAsync(Exception exception)
     {
-        if (exception is not FlurlHttpException e)
+        IReadOnlyList<string>? result = exception switch
         {
-            return null;
-        }
+            ApiException e => ExtractApiErrorMessages(e),
+            HttpRequestException => ["Connection failed - check your base_url"],
+            _ => null,
+        };
 
-        return await ExtractErrorMessages(e);
+        return Task.FromResult(result);
     }
 
-    private static async Task<IReadOnlyList<string>> ExtractErrorMessages(FlurlHttpException e)
+    private static List<string> ExtractApiErrorMessages(ApiException e)
     {
-        if (e.Message.Contains("task was canceled", StringComparison.Ordinal))
-        {
-            return ["Operation canceled by user"];
-        }
+        var statusCode = (int)e.StatusCode;
+        var statusText = $"HTTP {statusCode}";
 
-        var statusCode = e.StatusCode;
-        var statusText = statusCode.HasValue ? $"HTTP {statusCode}" : "Connection error";
-
-        return statusCode switch
+        return e.StatusCode switch
         {
-            401 => [$"{statusText}: Unauthorized - check your api_key"],
-            null => ["Connection failed - check your base_url"],
-            _ => await ParseResponseBody(e, statusText),
+            HttpStatusCode.Unauthorized => [$"{statusText}: Unauthorized - check your api_key"],
+            _ => ParseResponseBody(e.Content, statusText),
         };
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private static async Task<IReadOnlyList<string>> ParseResponseBody(
-        FlurlHttpException e,
-        string statusText
-    )
+    private static List<string> ParseResponseBody(string? body, string statusText)
     {
-        try
-        {
-            var body = await e.GetResponseStringAsync();
-            if (string.IsNullOrWhiteSpace(body))
-            {
-                return [statusText];
-            }
-
-            var parsed = TryParseErrorMessages(body, statusText);
-            return parsed.Count > 0 ? parsed : [statusText];
-        }
-        catch
+        if (string.IsNullOrWhiteSpace(body))
         {
             return [statusText];
         }
+
+        var parsed = TryParseErrorMessages(body, statusText);
+        return parsed.Count > 0 ? parsed : [statusText];
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
@@ -68,15 +53,7 @@ internal class HttpExceptionStrategy : IExceptionStrategy
             // Array of validation errors: [{"errorMessage":"..."}]
             if (root.ValueKind == JsonValueKind.Array)
             {
-                var messages = root.EnumerateArray()
-                    .Where(item =>
-                        item.TryGetProperty("errorMessage", out var errProp)
-                        && errProp.ValueKind == JsonValueKind.String
-                    )
-                    .Select(item => $"{statusText}: {item.GetProperty("errorMessage").GetString()}")
-                    .ToList();
-
-                return messages.Count > 0 ? messages : [];
+                return ParseValidationErrorArray(root, statusText);
             }
 
             // Single object with "message" property: {"message":"..."}
@@ -90,47 +67,62 @@ internal class HttpExceptionStrategy : IExceptionStrategy
             }
 
             // ServiceErrorsList format: {"Title":"...","Errors":{"field":["msg"]}}
-            if (
-                root.TryGetProperty("Title", out var titleProp)
-                && titleProp.ValueKind == JsonValueKind.String
-                && titleProp.GetString() is { } title
-            )
-            {
-                var messages = new List<string> { $"{statusText}: {title}" };
-
-                if (
-                    root.TryGetProperty("Errors", out var errorsProp)
-                    && errorsProp.ValueKind == JsonValueKind.Object
-                )
-                {
-                    foreach (var prop in errorsProp.EnumerateObject())
-                    {
-                        if (prop.Value.ValueKind != JsonValueKind.Array)
-                        {
-                            continue;
-                        }
-
-                        foreach (var errItem in prop.Value.EnumerateArray())
-                        {
-                            if (
-                                errItem.ValueKind == JsonValueKind.String
-                                && errItem.GetString() is { } errText
-                            )
-                            {
-                                messages.Add($"{prop.Name}: {errText}");
-                            }
-                        }
-                    }
-                }
-
-                return messages;
-            }
-
-            return [];
+            return ParseServiceErrorsList(root, statusText);
         }
         catch
         {
             return [];
         }
+    }
+
+    private static List<string> ParseValidationErrorArray(JsonElement root, string statusText)
+    {
+        return root.EnumerateArray()
+            .Where(item =>
+                item.TryGetProperty("errorMessage", out var errProp)
+                && errProp.ValueKind == JsonValueKind.String
+            )
+            .Select(item => $"{statusText}: {item.GetProperty("errorMessage").GetString()}")
+            .ToList();
+    }
+
+    private static List<string> ParseServiceErrorsList(JsonElement root, string statusText)
+    {
+        if (
+            !root.TryGetProperty("Title", out var titleProp)
+            || titleProp.ValueKind != JsonValueKind.String
+            || titleProp.GetString() is not { } title
+        )
+        {
+            return [];
+        }
+
+        var messages = new List<string> { $"{statusText}: {title}" };
+
+        if (
+            !root.TryGetProperty("Errors", out var errorsProp)
+            || errorsProp.ValueKind != JsonValueKind.Object
+        )
+        {
+            return messages;
+        }
+
+        foreach (var prop in errorsProp.EnumerateObject())
+        {
+            if (prop.Value.ValueKind != JsonValueKind.Array)
+            {
+                continue;
+            }
+
+            foreach (var errItem in prop.Value.EnumerateArray())
+            {
+                if (errItem.ValueKind == JsonValueKind.String && errItem.GetString() is { } errText)
+                {
+                    messages.Add($"{prop.Name}: {errText}");
+                }
+            }
+        }
+
+        return messages;
     }
 }

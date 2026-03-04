@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Flurl;
 
 namespace Recyclarr.Logging;
 
@@ -18,13 +17,6 @@ public static partial class Sanitize
     public static string ExceptionMessage(Exception exception)
     {
         return Message(exception.FullMessage());
-    }
-
-    public static Url Url(Url url)
-    {
-        // Replace hostname for user privacy
-        url.Host = "REDACTED";
-        return url;
     }
 
     public static Uri Url(Uri url)
