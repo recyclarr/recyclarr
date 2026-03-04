@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- CLI: `--details` flag for `list custom-format-groups` to show member CFs and their
+  required/default/optional status
 - Sync: `select_all` option for custom format groups to include all CFs regardless of default
   status (#722)
 
