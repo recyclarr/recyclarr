@@ -22,6 +22,11 @@ to these services from the TRaSH Guides. For a more detailed features list, see 
 - Media Naming Formats
 - Media Management (Propers/Repacks)
 
+> [!WARNING]
+> The `latest` Docker tag is no longer published. If you are using `recyclarr/recyclarr:latest` or
+> `ghcr.io/recyclarr/recyclarr:latest`, switch to a major version tag (e.g. `8`) to continue
+> receiving updates.
+
 ## Read the Documentation
 
 [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue?style=for-the-badge)](https://recyclarr.dev/)

@@ -16,6 +16,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sync: `select_all` option for custom format groups to include all CFs regardless of default
   status (#722)
 
+### Changed
+
+- Docker: The `latest` tag is no longer published to Docker Hub or GHCR. Use a major version tag
+  (e.g. `8`) instead to receive updates within a major version.
+
 ### Fixed
 
 - Sync: Unmatched trash_ids in `custom_format_groups.skip` silently ignored instead of warning
