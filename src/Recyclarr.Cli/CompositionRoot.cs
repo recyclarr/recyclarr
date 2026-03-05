@@ -13,7 +13,6 @@ using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
-using Recyclarr.Cli.Processors.StateRepair;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
@@ -73,9 +72,6 @@ internal static class CompositionRoot
         // Instance-level (resolved from "instance" child scope)
         builder.RegisterType<InstanceSyncProcessor>();
         builder.RegisterType<DeleteCustomFormatsProcessor>();
-        builder.RegisterType<StateRepairInstanceProcessor>();
-        builder.RegisterType<CustomFormatResourceAdapter>().As<IResourceAdapter>();
-        builder.RegisterType<QualityProfileResourceAdapter>().As<IResourceAdapter>();
 
         // Configuration
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();

@@ -30,7 +30,8 @@ internal class QualityProfileLogger(ILogger log)
             }
         }
 
-        LogConflictingProfiles(context, transactions);
+        LogReplacedProfiles(context, transactions);
+        LogRenameConflicts(context, transactions);
         LogAmbiguousProfiles(context, transactions);
 
         // Log warnings for new profiles
@@ -81,34 +82,31 @@ internal class QualityProfileLogger(ILogger log)
         }
     }
 
-    private void LogConflictingProfiles(
+    private static void LogReplacedProfiles(
         QualityProfilePipelineContext context,
         QualityProfileTransactionData transactions
     )
     {
-        if (transactions.ConflictingProfiles.Count == 0)
-        {
-            return;
-        }
-
-        foreach (var conflict in transactions.ConflictingProfiles)
+        foreach (var name in transactions.ReplacedProfiles)
         {
             var message =
-                $"Quality profile '{conflict.PlannedProfile.Name}' cannot be synced because a "
-                + $"profile with that name already exists (ID: {conflict.ConflictingId}). "
-                + "To adopt the existing profile, run: `recyclarr state repair --adopt`";
+                $"Quality profile '{name}' already existed in the service and was replaced by Recyclarr";
+            context.Publisher.AddWarning(message);
+        }
+    }
+
+    private static void LogRenameConflicts(
+        QualityProfilePipelineContext context,
+        QualityProfileTransactionData transactions
+    )
+    {
+        foreach (var name in transactions.RenameConflicts)
+        {
+            var message =
+                $"Quality profile cannot be renamed to '{name}' because a profile with that "
+                + "name already exists. Delete or rename the existing profile in the service";
             context.Publisher.AddError(message);
         }
-
-        log.Debug(
-            "Conflicting Quality Profiles: {@Conflicts}",
-            transactions.ConflictingProfiles.Select(x => new
-            {
-                x.PlannedProfile.Name,
-                x.PlannedProfile.Resource?.TrashId,
-                ServiceId = x.ConflictingId,
-            })
-        );
     }
 
     private void LogAmbiguousProfiles(
@@ -130,7 +128,7 @@ internal class QualityProfileLogger(ILogger log)
             var message =
                 $"Quality profile '{ambiguous.PlannedProfile.Name}' cannot be synced because "
                 + $"multiple profiles match this name: {matchList}. Delete or rename duplicate "
-                + "profiles in the service, then run: recyclarr state repair";
+                + "profiles in the service";
             context.Publisher.AddError(message);
         }
 
@@ -207,7 +205,7 @@ internal class QualityProfileLogger(ILogger log)
     {
         var hasErrors =
             transactions.InvalidProfiles.Count > 0
-            || transactions.ConflictingProfiles.Count > 0
+            || transactions.RenameConflicts.Count > 0
             || transactions.AmbiguousProfiles.Count > 0;
 
         if (!hasErrors)

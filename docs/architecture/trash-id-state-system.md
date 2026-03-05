@@ -20,11 +20,8 @@ layer, Recyclarr cannot reliably track which service resource corresponds to whi
 **Name Collision**: Service APIs allow duplicate or near-duplicate names (e.g., case variants).
 Name-based matching is unreliable and can cause "Must be unique" API errors.
 
-**Ownership Tracking**: Recyclarr must distinguish between:
-
-- Resources it created (safe to update/delete)
-- Resources created manually by users (should not modify without explicit adoption)
-- Resources removed from user's config (candidates for deletion)
+**Ownership Tracking**: Recyclarr must track which service resources it manages to support deletion
+of resources removed from config.
 
 ## State Architecture
 
@@ -67,6 +64,10 @@ matching.
 
 ### Decision Flow
 
+Config is authoritative: if a resource is in the user's YAML, Recyclarr owns it. Single name matches
+are adopted automatically; only ambiguous matches (2+ service resources with the same name) require
+manual resolution.
+
 ```txt
 Guide resource to sync
     ↓
@@ -76,36 +77,37 @@ State entry exists?
     │         └─ No  → Stale state, check name collision
     └─ No  → Name exists in service?
               ├─ No match      → CREATE new
-              ├─ Single match  → ERROR: name collision (suggest --adopt)
+              ├─ Single match  → ADOPT and UPDATE (warning emitted)
               └─ Multi match   → ERROR: ambiguous
 ```
 
 ### The Four Cases
 
-#### Case 1: Stored ID exists + service resource exists → UPDATE
+#### Case 1: Stored ID exists + service resource exists -> UPDATE
 
 The state provides a known-good ID. Update the service resource regardless of whether its name
 matches the guide name. This handles legitimate renames.
 
-#### Case 2: Stored ID exists + service resource deleted → check name collision
+#### Case 2: Stored ID exists + service resource deleted -> check name collision
 
-The state references a resource that no longer exists. Fall through to name collision checking.
+The state references a resource that no longer exists. Fall through to name collision checking (same
+logic as Case 3/4).
 
-#### Case 3: No state + name exists in service → ERROR
+#### Case 3: No state + name exists in service -> ADOPT
 
-A resource with this name exists but Recyclarr doesn't own it. Error with suggestion to run `state
-repair --adopt`.
+A resource with this name exists. Since config is authoritative, Recyclarr adopts it and emits a
+warning. The resource is updated with guide data going forward.
 
-#### Case 4: No state + no name match → CREATE
+#### Case 4: No state + no name match -> CREATE
 
-No ownership and no name conflict. Safe to create a new resource.
+No existing resource. Safe to create a new one.
 
 ### Ambiguous Match Detection
 
 When checking for name collisions, Recyclarr uses case-insensitive matching but counts all matches:
 
 - 0 matches: safe to create
-- 1 match: collision error, suggest adopt
+- 1 match: adopt automatically (warning emitted)
 - 2+ matches: ambiguous, user must resolve duplicates in service
 
 ## State Lifecycle
@@ -117,38 +119,22 @@ When checking for name collisions, Recyclarr uses case-insensitive matching but 
 3. **Update**: After API persistence, state refreshes mappings
 4. **Save**: Persists updated state
 
-### State Repair Command
+### State Repair Command (Deprecated)
 
-The `state repair` command provides explicit state reconstruction when missing, corrupted, or
-needing correction.
-
-**Use cases**:
-
-- Migration to new machine/instance
-- Recovery from state corruption
-- Adopting manually-created resources
-- Fixing incorrect mappings
-
-**Matching behavior** (name-first, inverse of sync):
-
-1. Load effective configuration (including QP-derived CFs)
-2. Fetch all resources from service
-3. Match by name (case-insensitive)
-4. Create/update state entries for matches
-
-**The `--adopt` flag**: By default, repair only updates entries for previously-owned resources.
-`--adopt` extends this to take ownership of untracked resources that match by name.
+The `state repair` command is deprecated. Sync now handles all state reconciliation automatically by
+adopting existing resources that match by name. The command outputs a deprecation warning and exits.
 
 ## Design Principles
 
-**Explicit Adoption**: Never silently take ownership of existing resources. Require explicit
-`--adopt` flag or manual state intervention.
+**Config is Authoritative**: If a resource is in the user's YAML config, Recyclarr owns it. Single
+name matches are adopted automatically with a warning. Users who want to manually manage a resource
+should remove it from their config.
 
-**ID Stability**: Once stored, a trash_id → service_id mapping persists across renames. The guide's
+**ID Stability**: Once stored, a trash_id to service_id mapping persists across renames. The guide's
 trash_id is the stable identifier.
 
-**Graceful Degradation**: Missing or corrupted state results in errors with clear remediation steps,
-not silent data corruption.
+**Graceful Degradation**: Ambiguous matches (2+ service resources with the same name) produce errors
+with clear remediation steps.
 
 **Scoped Ownership**: State only tracks what the user configures (directly or via QP formatItems).
 Unconfigured resources remain untouched.
@@ -162,17 +148,17 @@ service resource, which is impossible.
 **Immutable Trash IDs**: Trash IDs are stable identifiers from TRaSH Guides. They never change once
 assigned to a custom format or quality profile definition.
 
-## Responsibility Split: Sync vs State Repair
+## Self-Healing Sync
 
-The sync pipeline and state repair command have distinct responsibilities:
+The sync pipeline is self-healing. It handles state inconsistencies inline rather than requiring a
+separate repair step:
 
-**Sync Pipeline**: Simple and picky. Assumes the state is valid. If it detects state inconsistency
-(e.g., duplicate service IDs causing conflicting update+delete), it errors and tells the user to run
-`state repair`. Sync does NOT attempt to fix state problems.
-
-**State Repair**: The repair tool. Reconstructs state from current config + service state.
-Deduplicates by service ID (keeps config-backed entry, discards orphans). Produces a clean,
-consistent state.
+- **Stale IDs**: When a stored service ID no longer exists, sync falls through to name-based
+  matching and adopts automatically.
+- **Missing state**: When no state entry exists but a matching resource is in the service, sync
+  adopts it (single match) or errors (ambiguous match).
+- **Duplicate service IDs**: Detected and reported as invalid cache entries; cleaned up during state
+  update.
 
 ## Implementation
 

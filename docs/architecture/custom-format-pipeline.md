@@ -40,16 +40,9 @@ Non-equivalent CFs with the same stored ID trigger an update.
 - **Updated** - CFs to update (found by stored ID, content differs)
 - **Unchanged** - CFs matching service state
 - **Deleted** - CFs to delete (in state, not in config, `delete_old` enabled)
-- **Conflicting** - Name collision (suggest `--adopt`)
-- **Ambiguous** - Multiple name matches (user must resolve)
+- **Replaced** - CFs that already existed in service and were adopted by Recyclarr (warning emitted)
+- **Ambiguous** - Multiple name matches (user must resolve duplicates in service)
 
-## State Repair States
-
-CF state repair produces these states:
-
-**Changes**: Added, Adopted, Corrected, Removed
-
-**Informational**: NotInService, Unchanged, Preserved, Ambiguous
-
-The `Preserved` state keeps entries for deleted-from-config CFs, enabling the `delete_old` feature
-to clean them up on next sync.
+Config is authoritative: if a CF is in the user's config and a single matching name exists in the
+service, Recyclarr adopts it automatically. Only ambiguous matches (2+ service CFs with the same
+name) require manual resolution.

@@ -18,8 +18,11 @@ internal record QualityProfileTransactionData
     // Warning/info cases
     public Collection<string> NonExistentProfiles { get; } = [];
 
+    // Profiles that already existed in the service and were replaced (for diagnostic warnings)
+    public Collection<string> ReplacedProfiles { get; } = [];
+
     // Error cases
     public Collection<InvalidProfileData> InvalidProfiles { get; } = [];
-    public Collection<ConflictingQualityProfile> ConflictingProfiles { get; } = [];
+    public Collection<string> RenameConflicts { get; } = [];
     public Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
 }

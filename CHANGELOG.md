@@ -18,8 +18,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Sync: Custom formats and quality profiles that already exist in the service are now automatically
+  replaced by Recyclarr. The `state repair --adopt` workflow is no longer needed.
 - Docker: The `latest` tag is no longer published to Docker Hub or GHCR. Use a major version tag
   (e.g. `8`) instead to receive updates within a major version.
+
+### Deprecated
+
+- CLI: The `state repair` command is deprecated and will be removed in a future release. Sync now
+  handles all state reconciliation automatically.
 
 ### Fixed
 

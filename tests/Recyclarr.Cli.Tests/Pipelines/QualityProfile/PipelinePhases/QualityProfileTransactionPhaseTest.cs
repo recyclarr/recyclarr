@@ -655,7 +655,7 @@ internal sealed class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public async Task Guide_profile_with_stale_cache_falls_back_to_name_collision(
+    public async Task Guide_profile_with_stale_cache_adopts_existing_by_name(
         QualityProfileTransactionPhase sut
     )
     {
@@ -677,13 +677,21 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        // Stale state + name match for guide profile = conflict (needs state repair --adopt)
-        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
-        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(50);
+        // Config is authoritative: stale state + name match = adopt existing profile
+        context
+            .TransactionOutput.ReplacedProfiles.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be("Guide Profile");
+        var allExisting = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allExisting.Should().ContainSingle().Which.Profile.Id.Should().Be(50);
     }
 
     [Test, AutoMockData]
-    public async Task Guide_profile_no_cache_name_exists_creates_conflict(
+    public async Task Guide_profile_no_cache_name_exists_adopts_existing(
         QualityProfileTransactionPhase sut
     )
     {
@@ -704,9 +712,17 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
-        context.TransactionOutput.ConflictingProfiles[0].PlannedProfile.Should().Be(profile);
-        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(100);
+        // Config is authoritative: existing profile is adopted
+        context
+            .TransactionOutput.ReplacedProfiles.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be("Existing Profile");
+        var allExisting = context
+            .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
+            .Concat(context.TransactionOutput.UnchangedProfiles)
+            .ToList();
+        allExisting.Should().ContainSingle().Which.Profile.Id.Should().Be(100);
     }
 
     [Test, AutoMockData]
@@ -846,7 +862,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.NewProfiles.Should().BeEmpty();
-        context.TransactionOutput.ConflictingProfiles.Should().BeEmpty();
+        context.TransactionOutput.RenameConflicts.Should().BeEmpty();
         var allExisting = context
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
@@ -876,7 +892,7 @@ internal sealed class QualityProfileTransactionPhaseTest
         await sut.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.NewProfiles.Should().BeEmpty();
-        context.TransactionOutput.ConflictingProfiles.Should().BeEmpty();
+        context.TransactionOutput.RenameConflicts.Should().BeEmpty();
         var allExisting = context
             .TransactionOutput.UpdatedProfiles.Select(p => p.Profile)
             .Concat(context.TransactionOutput.UnchangedProfiles)
@@ -991,7 +1007,7 @@ internal sealed class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
-    public async Task Rename_to_name_taken_by_service_profile_creates_conflict(
+    public async Task Rename_to_name_taken_by_service_profile_creates_rename_conflict(
         QualityProfileTransactionPhase sut
     )
     {
@@ -1009,9 +1025,8 @@ internal sealed class QualityProfileTransactionPhaseTest
 
         await sut.Execute(context, CancellationToken.None);
 
-        // Rename detected in Pass 2, but ProcessCachedProfile sees "C" is taken by id 99
-        context.TransactionOutput.ConflictingProfiles.Should().ContainSingle();
-        context.TransactionOutput.ConflictingProfiles[0].ConflictingId.Should().Be(99);
+        // Rename detected in Pass 2, but target name "C" is occupied by id 99
+        context.TransactionOutput.RenameConflicts.Should().ContainSingle().Which.Should().Be("C");
     }
 
     [Test, AutoMockData]

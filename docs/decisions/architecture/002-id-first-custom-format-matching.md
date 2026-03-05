@@ -1,6 +1,6 @@
 # ADR-002: ID-First Custom Format Matching
 
-- **Status:** Accepted
+- **Status:** Superseded (adoption philosophy changed; see below)
 - **Date:** 2025-12-15
 
 ## Context and Problem Statement
@@ -49,3 +49,19 @@ via `state repair --adopt`.
 - Bad, because users with corrupted/missing state entries must run `state repair`
 - Bad, because `replace_existing_custom_formats` is deprecated (breaking change for users relying on
   it)
+
+## Superseded: Adoption Philosophy
+
+The ID-first matching algorithm from this ADR remains in effect. However, the explicit adoption
+requirement (Case 3: "No state + name exists -> ERROR, suggest `--adopt`") has been replaced with
+automatic adoption.
+
+**New behavior**: Config is authoritative. If a resource is in the user's YAML config and a single
+matching name exists in the service, Recyclarr adopts it automatically with a warning. The `state
+repair --adopt` workflow is no longer needed. Only ambiguous matches (2+ service resources with the
+same name) still require manual resolution.
+
+**Rationale**: The explicit adoption requirement caused significant friction, especially in
+Kubernetes cron job deployments where adhoc CLI commands are impractical. Support experience showed
+users nearly universally wanted adoption; the conservative approach was protecting against a
+scenario that the happy path (ID-based updates) didn't protect against anyway.

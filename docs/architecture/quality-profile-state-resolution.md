@@ -50,7 +50,7 @@ group, count unclaimed state mappings:
 - **1 unclaimed, 1 unmatched**: unambiguous rename. Claim the mapping and update the existing
   service profile (including its name).
 - **All other combinations**: fall through to name collision handling (same as base algorithm:
-  create new, report conflict, or report ambiguity).
+  create new, adopt existing, or report ambiguity).
 
 ## Rename Constraint
 
@@ -139,9 +139,6 @@ same guide default). When duplicates are detected, all conflicting entries are s
 error.
 
 ## Relationship to Other Systems
-
-**State repair**: not affected. State repair uses name-based matching via `TrashIdMappingMatcher`,
-not `FindId()`. The composite lookup changes don't alter repair behavior.
 
 **Custom Format pipeline**: not affected. CFs maintain 1:1 trash_id-to-service_id semantics and use
 the single-arg `FindId(trash_id)`.

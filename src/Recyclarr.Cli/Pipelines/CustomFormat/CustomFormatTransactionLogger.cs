@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
@@ -82,12 +81,12 @@ internal class CustomFormatTransactionLogger(ILogger log)
         return totalCount;
     }
 
-    private bool LogDiagnostics(
+    private static bool LogDiagnostics(
         IPipelinePublisher publisher,
         CustomFormatTransactionData transactions
     )
     {
-        LogConflictingCustomFormats(publisher, transactions.ConflictingCustomFormats);
+        LogReplacedCustomFormats(publisher, transactions);
 
         foreach (var ambiguous in transactions.AmbiguousCustomFormats)
         {
@@ -97,50 +96,23 @@ internal class CustomFormatTransactionLogger(ILogger log)
             );
             var message =
                 $"Custom Format '{ambiguous.GuideName}' cannot be synced because multiple CFs "
-                + $"match this name: {matchList}. Delete or rename duplicate CFs in the service, "
-                + "then run: recyclarr state repair";
+                + $"match this name: {matchList}. Delete or rename duplicate CFs in the service";
             publisher.AddError(message);
         }
 
-        var hasBlockingErrors =
-            transactions.ConflictingCustomFormats.Count > 0
-            || transactions.AmbiguousCustomFormats.Count > 0;
-        return hasBlockingErrors;
+        return transactions.AmbiguousCustomFormats.Count > 0;
     }
 
-    private void LogConflictingCustomFormats(
+    private static void LogReplacedCustomFormats(
         IPipelinePublisher publisher,
-        Collection<ConflictingCustomFormat> conflicts
+        CustomFormatTransactionData transactions
     )
     {
-        if (conflicts.Count == 0)
+        foreach (var name in transactions.ReplacedCustomFormats)
         {
-            return;
+            var message =
+                $"Custom Format '{name}' already existed in the service and was replaced by Recyclarr";
+            publisher.AddWarning(message);
         }
-
-        const int maxExamples = 3;
-        var examples = string.Join(
-            ", ",
-            conflicts.Select(x => x.GuideCf.Name).Order().Take(maxExamples).Select(n => $"'{n}'")
-        );
-
-        var remainingCount = conflicts.Count - maxExamples;
-        var suffix = remainingCount > 0 ? $", and {remainingCount} more" : "";
-
-        var message =
-            $"{conflicts.Count} Custom Formats cannot be synced because CFs with matching names "
-            + $"already exist (e.g., {examples}{suffix}). "
-            + "To adopt existing CFs, run: `recyclarr state repair --adopt`";
-        publisher.AddError(message);
-
-        log.Debug(
-            "Conflicting Custom Formats: {@Conflicts}",
-            conflicts.Select(x => new
-            {
-                x.GuideCf.Name,
-                x.GuideCf.TrashId,
-                ServiceId = x.ConflictingId,
-            })
-        );
     }
 }

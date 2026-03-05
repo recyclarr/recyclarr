@@ -46,7 +46,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Conflict_when_no_cache_and_single_name_match()
+    public async Task Adopt_existing_cf_when_no_cache_and_single_name_match()
     {
         using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
@@ -61,14 +61,14 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         await sut.Entry.Execute(context, CancellationToken.None);
 
+        // Config is authoritative: existing CF is adopted (content is equivalent, so unchanged)
         context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 5) },
-                }
-            );
+            .TransactionOutput.ReplacedCustomFormats.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be("one");
+        context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
+        context.TransactionOutput.UnchangedCustomFormats[0].Id.Should().Be(5);
     }
 
     [Test]
@@ -187,7 +187,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     }
 
     [Test]
-    public async Task Conflict_when_stale_cache_and_name_collision()
+    public async Task Adopt_existing_cf_when_stale_cache_and_name_match()
     {
         using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
@@ -202,14 +202,14 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
 
         await sut.Entry.Execute(context, CancellationToken.None);
 
+        // Config is authoritative: stale state + name match = adopt with new ID (content equivalent, so unchanged)
         context
-            .TransactionOutput.Should()
-            .BeEquivalentTo(
-                new CustomFormatTransactionData
-                {
-                    ConflictingCustomFormats = { new ConflictingCustomFormat(guideCf, 5) },
-                }
-            );
+            .TransactionOutput.ReplacedCustomFormats.Should()
+            .ContainSingle()
+            .Which.Should()
+            .Be("existing");
+        context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
+        context.TransactionOutput.UnchangedCustomFormats[0].Id.Should().Be(5);
     }
 
     [Test]
@@ -473,7 +473,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     {
         // Scenario: Cache corruption results in two trash_ids mapping to the same service ID.
         // One is in config (would be unchanged), one is orphaned (would be deleted).
-        // Expected: Sync detects the conflict and reports an error, telling user to run state repair.
+        // Expected: Sync detects the inconsistency and reports it as an invalid cache entry.
         // Sync should NOT silently delete a CF that's also being updated.
         using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(
             NewConfig.Radarr() with

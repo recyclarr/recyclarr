@@ -51,16 +51,15 @@ delete unwanted profiles.
 - **Unchanged** - profiles matching service state
 - **NonExistent** - implicit profiles that don't exist in service
 - **Invalid** - profiles failing validation
-- **Conflicting** - guide-backed profiles with name collision (suggest `--adopt`)
+- **Replaced** - profiles that already existed in service and were adopted by Recyclarr (warning
+  emitted)
+- **Rename conflict** - cached profile rename blocked because the target name is occupied
 - **Ambiguous** - multiple name matches
 
-## State Repair States
-
-QP state repair produces these states:
-
-**Changes**: Added, Adopted, Corrected, Removed
-
-**Informational**: NotInService, Unchanged, Preserved, Ambiguous
+Config is authoritative: if a guide-backed profile is in the user's config and a single matching
+name exists in the service, Recyclarr adopts it automatically. Rename conflicts (where the target
+name is occupied by a different profile) still require manual resolution because the API cannot
+merge two profiles.
 
 ## Future Work
 

@@ -1,12 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Processors;
-using Recyclarr.Cli.Processors.StateRepair;
-using Recyclarr.Config;
-using Recyclarr.Config.Filtering;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -14,14 +9,8 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Repair state by matching guide resources to service resources")]
 [UsedImplicitly]
-internal class StateRepairCommand(
-    IAnsiConsole console,
-    ILogger log,
-    ProviderProgressHandler providerProgressHandler,
-    ConfigurationRegistry configRegistry,
-    InstanceScopeFactory instanceScopeFactory,
-    ExceptionHandler exceptionHandler
-) : AsyncCommand<StateRepairCommand.CliSettings>
+internal class StateRepairCommand(IAnsiConsole console, ILogger log)
+    : AsyncCommand<StateRepairCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage(
@@ -29,7 +18,7 @@ internal class StateRepairCommand(
         "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it"
     )]
-    internal class CliSettings : BaseCommandSettings, IStateRepairSettings
+    internal class CliSettings : BaseCommandSettings
     {
         [CommandArgument(position: 0, "[resource]")]
         [EnumDescription<StatefulResourceType>(
@@ -65,62 +54,20 @@ internal class StateRepairCommand(
         public bool Adopt { get; init; }
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public override async Task<int> ExecuteAsync(
+    public override Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
+        const string message =
+            "The `state repair` command is deprecated and no longer necessary. "
+            + "Sync now automatically adopts existing resources that match by name. "
+            + "This command will be removed in a future release.";
 
-        var result = configRegistry.FindAndLoadConfigs(
-            new ConfigFilterCriteria { Instances = settings.Instances }
-        );
+        console.MarkupLine($"[darkorange bold][[DEPRECATED]][/] {message}");
+        log.Warning(message);
 
-        ConfigFailureRenderer.Render(console, log, result);
-
-        if (result.Configs.Count == 0)
-        {
-            console.MarkupLine("[yellow]No configurations found.[/]");
-            return (int)ExitStatus.Succeeded;
-        }
-
-        var succeeded = 0;
-        var failed = 0;
-
-        foreach (var config in result.Configs)
-        {
-            try
-            {
-                using var scope = instanceScopeFactory.Start<StateRepairInstanceProcessor>(config);
-                if (await scope.Entry.ProcessAsync(settings, ct))
-                {
-                    succeeded++;
-                }
-                else
-                {
-                    failed++;
-                }
-            }
-            catch (Exception e)
-            {
-                if (!await exceptionHandler.TryHandleAsync(e))
-                {
-                    throw;
-                }
-
-                failed++;
-            }
-        }
-
-        console.WriteLine();
-        console.Write(
-            new Rule($"[bold]State repair: {succeeded} succeeded, {failed} failed[/]").RuleStyle(
-                "dim"
-            )
-        );
-
-        return (int)(failed > 0 ? ExitStatus.Failed : ExitStatus.Succeeded);
+        return Task.FromResult((int)ExitStatus.Succeeded);
     }
 }

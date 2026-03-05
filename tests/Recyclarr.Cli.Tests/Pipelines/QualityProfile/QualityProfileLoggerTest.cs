@@ -72,13 +72,11 @@ internal sealed class QualityProfileLoggerTest
     }
 
     [Test]
-    public void Status_is_partial_with_conflicting_profiles_and_valid_profiles()
+    public void Status_is_partial_with_rename_conflicts_and_valid_profiles()
     {
         var context = CreateContext();
         context.TransactionOutput.NewProfiles.Add(CreateProfile("good"));
-        context.TransactionOutput.ConflictingProfiles.Add(
-            new ConflictingQualityProfile(NewPlan.Qp("conflict"), 99)
-        );
+        context.TransactionOutput.RenameConflicts.Add("conflict");
 
         _sut.LogPersistenceResults(context);
 

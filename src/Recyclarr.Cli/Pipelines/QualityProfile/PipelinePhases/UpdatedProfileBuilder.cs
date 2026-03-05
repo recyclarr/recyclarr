@@ -126,33 +126,30 @@ internal class UpdatedProfileBuilder(
 
     private void ProcessCachedProfile(PlannedQualityProfile planned, int cachedId)
     {
-        // Check if target name is already taken by a different service profile.
-        // This catches renames that would collide with manually created profiles.
-        var nameConflicts = _serviceProfilesByName[planned.Name]
-            .Where(p => p.Id != cachedId)
-            .ToList();
-
-        if (nameConflicts.Count == 1)
-        {
-            transactions.ConflictingProfiles.Add(
-                new ConflictingQualityProfile(planned, nameConflicts[0].Id!.Value)
-            );
-            return;
-        }
-
-        if (nameConflicts.Count > 1)
-        {
-            transactions.AmbiguousProfiles.Add(
-                new AmbiguousQualityProfile(
-                    planned,
-                    nameConflicts.Select(p => (p.Name, p.Id!.Value)).ToList()
-                )
-            );
-            return;
-        }
-
         if (_serviceProfilesById.TryGetValue(cachedId, out var serviceProfile))
         {
+            // Cached ID exists in service. Check for rename collisions before proceeding.
+            var nameConflicts = _serviceProfilesByName[planned.Name]
+                .Where(p => p.Id != cachedId)
+                .ToList();
+
+            if (nameConflicts.Count == 1)
+            {
+                transactions.RenameConflicts.Add(planned.Name);
+                return;
+            }
+
+            if (nameConflicts.Count > 1)
+            {
+                transactions.AmbiguousProfiles.Add(
+                    new AmbiguousQualityProfile(
+                        planned,
+                        nameConflicts.Select(p => (p.Name, p.Id!.Value)).ToList()
+                    )
+                );
+                return;
+            }
+
             if (!serviceProfile.Name.EqualsIgnoreCase(planned.Name))
             {
                 log.Debug(
@@ -168,6 +165,7 @@ internal class UpdatedProfileBuilder(
         }
         else
         {
+            // Stale state: cached ID no longer exists in service
             log.Debug(
                 "Cached service ID {CachedId} for QP {TrashId} no longer exists in service",
                 cachedId,
@@ -196,19 +194,19 @@ internal class UpdatedProfileBuilder(
                 break;
 
             case 1:
+            {
+                var serviceProfile = nameMatches[0];
+
+                // Config is authoritative: adopt the existing service profile
                 if (planned.Resource is not null)
                 {
-                    transactions.ConflictingProfiles.Add(
-                        new ConflictingQualityProfile(planned, nameMatches[0].Id!.Value)
-                    );
+                    transactions.ReplacedProfiles.Add(planned.Name);
                 }
-                else
-                {
-                    var serviceProfile = nameMatches[0];
-                    var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
-                    AddExistingProfile(planned, fixedProfile, missingQualities);
-                }
+
+                var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
+                AddExistingProfile(planned, fixedProfile, missingQualities);
                 break;
+            }
 
             default:
                 transactions.AmbiguousProfiles.Add(

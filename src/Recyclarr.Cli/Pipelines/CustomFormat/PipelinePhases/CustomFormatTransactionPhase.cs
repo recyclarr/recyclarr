@@ -144,10 +144,10 @@ internal class CustomFormatTransactionPhase(ILogger log)
                 break;
 
             case 1:
-                // Single match - conflict (user must run state repair --adopt)
-                transactions.ConflictingCustomFormats.Add(
-                    new ConflictingCustomFormat(guideCf, nameMatches[0].Id)
-                );
+                // Config is authoritative: adopt the existing service CF
+                guideCf.Id = nameMatches[0].Id;
+                transactions.ReplacedCustomFormats.Add(guideCf.Name);
+                AddUpdatedOrUnchanged(guideCf, nameMatches[0], transactions);
                 break;
 
             default:
