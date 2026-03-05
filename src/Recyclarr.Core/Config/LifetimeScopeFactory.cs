@@ -1,20 +1,17 @@
 using Autofac;
+using Recyclarr.Config.Models;
 
 namespace Recyclarr.Config;
 
-public class LifetimeScopeFactory(ILifetimeScope scope)
+public class InstanceScopeFactory(ILifetimeScope scope)
 {
-    public T Start<T>(object tag, Action<ContainerBuilder>? configure = null)
-        where T : LifetimeScopeWrapper
+    public LifetimeScopeWrapper<TEntry> Start<TEntry>(IServiceConfiguration config)
+        where TEntry : notnull
     {
-        var childScope = scope.BeginLifetimeScope(tag, c => configure?.Invoke(c));
-        return childScope.Resolve<T>();
-    }
-
-    public T Start<T>(Action<ContainerBuilder>? configure = null)
-        where T : LifetimeScopeWrapper
-    {
-        var childScope = scope.BeginLifetimeScope(c => configure?.Invoke(c));
-        return childScope.Resolve<T>();
+        var childScope = scope.BeginLifetimeScope(
+            "instance",
+            c => c.RegisterInstance(config).As<IServiceConfiguration>().As(config.GetType())
+        );
+        return new LifetimeScopeWrapper<TEntry>(childScope);
     }
 }

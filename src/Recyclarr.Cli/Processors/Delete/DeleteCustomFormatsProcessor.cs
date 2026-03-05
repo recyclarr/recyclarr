@@ -1,52 +1,23 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Settings;
-using Recyclarr.Config;
-using Recyclarr.Config.Filtering;
-using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.CustomFormat;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Delete;
 
-[UsedImplicitly]
-internal class CustomFormatConfigurationScope(ILifetimeScope scope) : LifetimeScopeWrapper(scope)
-{
-    public ICustomFormatService CustomFormatApi { get; } = scope.Resolve<ICustomFormatService>();
-}
-
 internal class DeleteCustomFormatsProcessor(
     ILogger log,
     IAnsiConsole console,
-    ConfigurationRegistry configRegistry,
-    LifetimeScopeFactory scopeFactory
+    ICustomFormatService customFormatApi
 )
 {
     public async Task Process(IDeleteCustomFormatSettings settings, CancellationToken ct)
     {
-        var result = configRegistry.FindAndLoadConfigs(
-            new ConfigFilterCriteria { Instances = [settings.InstanceName] }
-        );
-
-        ConfigFailureRenderer.Render(console, log, result);
-
-        if (result.Configs.Count != 1)
-        {
-            return;
-        }
-
-        var config = result.Configs.Single();
-        using var scope = scopeFactory.Start<CustomFormatConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<CustomFormatConfigurationScope>();
-        });
-
-        var cfs = await ObtainCustomFormats(scope.CustomFormatApi, ct);
+        var cfs = await ObtainCustomFormats(ct);
 
         if (!settings.All)
         {
@@ -86,14 +57,11 @@ internal class DeleteCustomFormatsProcessor(
             return;
         }
 
-        await DeleteCustomFormats(scope.CustomFormatApi, cfs);
+        await DeleteCustomFormats(cfs);
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private async Task DeleteCustomFormats(
-        ICustomFormatService api,
-        IReadOnlyCollection<CustomFormatResource> cfs
-    )
+    private async Task DeleteCustomFormats(IReadOnlyCollection<CustomFormatResource> cfs)
     {
         ConcurrentBag<string> successNames = [];
         ConcurrentBag<string> failedNames = [];
@@ -112,7 +80,7 @@ internal class DeleteCustomFormatsProcessor(
                     {
                         try
                         {
-                            await api.DeleteCustomFormat(cf.Id, token);
+                            await customFormatApi.DeleteCustomFormat(cf.Id, token);
                             successNames.Add(cf.Name);
                         }
                         catch (Exception)
@@ -158,7 +126,6 @@ internal class DeleteCustomFormatsProcessor(
     }
 
     private async Task<IReadOnlyList<CustomFormatResource>> ObtainCustomFormats(
-        ICustomFormatService api,
         CancellationToken ct
     )
     {
@@ -170,7 +137,7 @@ internal class DeleteCustomFormatsProcessor(
                 "Obtaining custom formats...",
                 async _ =>
                 {
-                    cfs = await api.GetCustomFormats(ct);
+                    cfs = await customFormatApi.GetCustomFormats(ct);
                 }
             );
 

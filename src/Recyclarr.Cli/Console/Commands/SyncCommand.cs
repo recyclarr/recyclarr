@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync;
-using Recyclarr.Config;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -13,7 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 [UsedImplicitly]
 internal class SyncCommand(
     ProviderProgressHandler providerProgressHandler,
-    LifetimeScopeFactory scopeFactory
+    SyncScopeFactory syncScopeFactory
 ) : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -63,7 +62,7 @@ internal class SyncCommand(
         // Sync scope owns the lifecycle of all sync-run-scoped services.
         // Disposing it fires OnCompleted on all observables, triggering
         // diagnostics rendering and notifications automatically.
-        using var syncScope = scopeFactory.Start<SyncScope>("sync");
-        return (int)await syncScope.Processor.Process(settings, ct);
+        using var syncScope = syncScopeFactory.Start<SyncProcessor>();
+        return (int)await syncScope.Entry.Process(settings, ct);
     }
 }

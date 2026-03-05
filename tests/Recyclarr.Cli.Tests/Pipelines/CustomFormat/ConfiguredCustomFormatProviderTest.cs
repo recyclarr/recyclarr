@@ -1,7 +1,6 @@
-using Autofac;
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Tests.Pipelines.Plan;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
@@ -11,18 +10,14 @@ namespace Recyclarr.Cli.Tests.Pipelines.CustomFormat;
 
 internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
 {
+    [SuppressMessage("Reliability", "CA2000", Justification = "Scope lives for the test duration")]
     private (ConfiguredCustomFormatProvider Sut, IDiagnosticPublisher Diagnostics) CreateSut(
         IServiceConfiguration config
     )
     {
         var diagnostics = Substitute.For<IDiagnosticPublisher>();
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        return (scope.Resolve<ConfiguredCustomFormatProvider>(), diagnostics);
+        var scope = ResolveWithConfig<ConfiguredCustomFormatProvider>(config);
+        return (scope.Entry, diagnostics);
     }
 
     [Test]

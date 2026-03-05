@@ -1,9 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Text.Json;
 using Autofac;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
@@ -164,18 +164,16 @@ internal abstract class PlanBuilderTestBase : CliIntegrationFixture
         registry.Register<RadarrCfGroupResource>([file]);
     }
 
+    [SuppressMessage("Reliability", "CA2000", Justification = "Scope lives for the test duration")]
     protected (PlanBuilder Sut, IInstancePublisher Publisher) CreatePlanBuilder(
         IServiceConfiguration config
     )
     {
         var publisher = Substitute.For<IInstancePublisher>();
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        var scope = scopeFactory.Start<TestConfigurationScope>(c =>
-        {
-            c.RegisterInstance(config).As(config.GetType()).As<IServiceConfiguration>();
-            c.RegisterInstance(publisher).As<IInstancePublisher>();
-            c.RegisterType<TestConfigurationScope>();
-        });
-        return (scope.Resolve<PlanBuilder>(), publisher);
+        var scope = ResolveWithConfig<PlanBuilder>(
+            config,
+            c => c.RegisterInstance(publisher).As<IInstancePublisher>()
+        );
+        return (scope.Entry, publisher);
     }
 }

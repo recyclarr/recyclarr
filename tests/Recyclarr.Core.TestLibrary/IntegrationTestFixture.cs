@@ -5,6 +5,8 @@ using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
 using NSubstitute;
 using Recyclarr.Compatibility;
+using Recyclarr.Config;
+using Recyclarr.Config.Models;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.TestLibrary;
@@ -87,6 +89,23 @@ public abstract class IntegrationTestFixture : IDisposable
         where T : notnull
     {
         return Container.Resolve<T>();
+    }
+
+    protected LifetimeScopeWrapper<T> ResolveWithConfig<T>(
+        IServiceConfiguration config,
+        Action<ContainerBuilder>? configure = null
+    )
+        where T : notnull
+    {
+        var childScope = Container.BeginLifetimeScope(
+            "instance",
+            c =>
+            {
+                c.RegisterInstance(config).As<IServiceConfiguration>().As(config.GetType());
+                configure?.Invoke(c);
+            }
+        );
+        return new LifetimeScopeWrapper<T>(childScope);
     }
 
     // ReSharper disable once VirtualMemberNeverOverridden.Global

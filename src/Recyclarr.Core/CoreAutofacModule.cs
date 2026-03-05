@@ -109,7 +109,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
-        builder.RegisterType<LifetimeScopeFactory>();
+        builder.RegisterType<InstanceScopeFactory>();
 
         // Filter Processors
         builder.RegisterType<ConfigFilterProcessor>();

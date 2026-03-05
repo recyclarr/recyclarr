@@ -1,4 +1,3 @@
-using Autofac;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
@@ -13,7 +12,7 @@ internal class SyncProcessor(
     IAnsiConsole console,
     ILogger log,
     ConfigurationRegistry configRegistry,
-    LifetimeScopeFactory scopeFactory,
+    InstanceScopeFactory instanceScopeFactory,
     INotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
     DiagnosticsLogger diagnosticsLogger,
@@ -72,15 +71,9 @@ internal class SyncProcessor(
 
         foreach (var config in configs)
         {
-            using var instanceScope = scopeFactory.Start<InstanceScope>(
-                "instance",
-                c =>
-                {
-                    c.RegisterInstance(config).AsSelf().As<IServiceConfiguration>();
-                }
-            );
+            using var instanceScope = instanceScopeFactory.Start<InstanceSyncProcessor>(config);
 
-            var result = await instanceScope.InstanceProcessor.Process(settings, ct);
+            var result = await instanceScope.Entry.Process(settings, ct);
             if (result == InstanceSyncResult.Failed)
             {
                 failureDetected = true;

@@ -2,7 +2,12 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Cli.ErrorHandling;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.StateRepair;
+using Recyclarr.Config;
+using Recyclarr.Config.Filtering;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -10,8 +15,12 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("Repair state by matching guide resources to service resources")]
 [UsedImplicitly]
 internal class StateRepairCommand(
+    IAnsiConsole console,
+    ILogger log,
     ProviderProgressHandler providerProgressHandler,
-    StateRepairProcessor processor
+    ConfigurationRegistry configRegistry,
+    InstanceScopeFactory instanceScopeFactory,
+    ExceptionHandler exceptionHandler
 ) : AsyncCommand<StateRepairCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -56,6 +65,7 @@ internal class StateRepairCommand(
         public bool Adopt { get; init; }
     }
 
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
@@ -64,6 +74,53 @@ internal class StateRepairCommand(
     {
         await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
-        return (int)await processor.Process(settings, ct);
+        var result = configRegistry.FindAndLoadConfigs(
+            new ConfigFilterCriteria { Instances = settings.Instances }
+        );
+
+        ConfigFailureRenderer.Render(console, log, result);
+
+        if (result.Configs.Count == 0)
+        {
+            console.MarkupLine("[yellow]No configurations found.[/]");
+            return (int)ExitStatus.Succeeded;
+        }
+
+        var succeeded = 0;
+        var failed = 0;
+
+        foreach (var config in result.Configs)
+        {
+            try
+            {
+                using var scope = instanceScopeFactory.Start<StateRepairInstanceProcessor>(config);
+                if (await scope.Entry.ProcessAsync(settings, ct))
+                {
+                    succeeded++;
+                }
+                else
+                {
+                    failed++;
+                }
+            }
+            catch (Exception e)
+            {
+                if (!await exceptionHandler.TryHandleAsync(e))
+                {
+                    throw;
+                }
+
+                failed++;
+            }
+        }
+
+        console.WriteLine();
+        console.Write(
+            new Rule($"[bold]State repair: {succeeded} succeeded, {failed} failed[/]").RuleStyle(
+                "dim"
+            )
+        );
+
+        return (int)(failed > 0 ? ExitStatus.Failed : ExitStatus.Succeeded);
     }
 }

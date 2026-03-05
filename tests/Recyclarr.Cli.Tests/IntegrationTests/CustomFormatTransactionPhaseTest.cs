@@ -4,7 +4,6 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Config;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.SyncState;
@@ -28,9 +27,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Create_new_cf_when_no_cache_and_no_name_match()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var context = new CustomFormatPipelineContext
         {
@@ -39,7 +36,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(NewCf.Data("one", "cf1")),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -51,9 +48,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Conflict_when_no_cache_and_single_name_match()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = NewCf.Data("one", "cf1");
 
@@ -64,7 +59,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -79,9 +74,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Ambiguous_when_no_cache_and_multiple_name_matches()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = NewCf.Data("HULU", "cf1");
 
@@ -96,7 +89,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -114,9 +107,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Update_cf_by_cached_id_when_service_name_differs()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -133,7 +124,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -154,9 +145,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_cf_when_cached_id_matches_and_content_same()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = NewCf.Data("one", "cf1");
 
@@ -167,7 +156,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -179,9 +168,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Create_new_cf_when_stale_cache_and_no_name_collision()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = NewCf.Data("two", "cf2");
 
@@ -192,7 +179,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -202,9 +189,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Conflict_when_stale_cache_and_name_collision()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = NewCf.Data("existing", "cf1");
 
@@ -215,7 +200,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -230,9 +215,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Deleted_cfs_populated_for_orphaned_cache_entries()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var context = new CustomFormatPipelineContext
         {
@@ -241,7 +224,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = new TestPlan(), // Empty plan - no CFs in config
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context
             .TransactionOutput.Should()
@@ -256,9 +239,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Deleted_cfs_excludes_cfs_in_config()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var context = new CustomFormatPipelineContext
         {
@@ -267,7 +248,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(NewCf.Data("two", "cf2")),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.DeletedCustomFormats.Should().BeEmpty();
     }
@@ -275,9 +256,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_specifications_match()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var specs = new CustomFormatSpecificationData[]
         {
@@ -312,7 +291,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
@@ -321,9 +300,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Updated_when_specification_differs()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -362,7 +339,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UpdatedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UnchangedCustomFormats.Should().BeEmpty();
@@ -371,9 +348,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Updated_when_specification_count_differs()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -400,7 +375,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UpdatedCustomFormats.Should().ContainSingle();
     }
@@ -408,9 +383,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_spec_order_differs()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -441,7 +414,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
@@ -450,9 +423,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     [Test]
     public async Task Unchanged_when_service_has_extra_fields()
     {
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -491,7 +462,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
@@ -504,15 +475,12 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         // One is in config (would be unchanged), one is orphaned (would be deleted).
         // Expected: Sync detects the conflict and reports an error, telling user to run state repair.
         // Sync should NOT silently delete a CF that's also being updated.
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(
             NewConfig.Radarr() with
             {
                 DeleteOldCustomFormats = true,
             }
         );
-
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
 
         var context = new CustomFormatPipelineContext
         {
@@ -524,7 +492,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(NewCf.Data("BR-DISK", "real-trash-id")),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         // Sync should detect the conflict and NOT proceed with the conflicting deletion
         context.TransactionOutput.DeletedCustomFormats.Should().BeEmpty();
@@ -540,9 +508,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
         // Simulates the Refit deserialization path: API responses deserialize object? fields
         // as JsonElement, while guide CFs produce CLR primitives (string, int, bool).
         // These represent identical values and should be treated as unchanged.
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         // Guide CF: field values are CLR primitives (from FieldValue's JsonConverter)
         var guideCf = new CustomFormatResource
@@ -584,7 +550,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();
@@ -595,9 +561,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
     {
         // SizeSpecification uses double fields (min/max). Verifies numeric JsonElement
         // values compare equal to their CLR double equivalents.
-        var scopeFactory = Resolve<LifetimeScopeFactory>();
-        using var scope = scopeFactory.Start<TestConfigurationScope>(NewConfig.Radarr());
-        var sut = scope.Resolve<CustomFormatTransactionPhase>();
+        using var sut = ResolveWithConfig<CustomFormatTransactionPhase>(NewConfig.Radarr());
 
         var guideCf = new CustomFormatResource
         {
@@ -638,7 +602,7 @@ internal sealed class CustomFormatTransactionPhaseTest : CliIntegrationFixture
             Plan = CreatePlan(guideCf),
         };
 
-        await sut.Execute(context, CancellationToken.None);
+        await sut.Entry.Execute(context, CancellationToken.None);
 
         context.TransactionOutput.UnchangedCustomFormats.Should().ContainSingle();
         context.TransactionOutput.UpdatedCustomFormats.Should().BeEmpty();

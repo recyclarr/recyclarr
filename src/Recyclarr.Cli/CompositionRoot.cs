@@ -55,12 +55,14 @@ internal static class CompositionRoot
     {
         RegisterErrorHandling(builder);
 
+        // Scope factories
+        builder.RegisterType<SyncScopeFactory>();
+
         // Sync (registered in named "sync" scope for lifecycle management)
         builder.RegisterMatchingScope(
             "sync",
             b =>
             {
-                b.RegisterType<SyncScope>();
                 b.RegisterType<SyncProcessor>();
                 b.RegisterType<SyncProgressRenderer>();
                 b.RegisterType<DiagnosticsRenderer>();
@@ -68,23 +70,17 @@ internal static class CompositionRoot
             }
         );
 
-        // Instance-level (resolved from "instance" child scope of "sync")
-        builder.RegisterType<InstanceScope>();
+        // Instance-level (resolved from "instance" child scope)
         builder.RegisterType<InstanceSyncProcessor>();
+        builder.RegisterType<DeleteCustomFormatsProcessor>();
+        builder.RegisterType<StateRepairInstanceProcessor>();
+        builder.RegisterType<CustomFormatResourceAdapter>().As<IResourceAdapter>();
+        builder.RegisterType<QualityProfileResourceAdapter>().As<IResourceAdapter>();
 
         // Configuration
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<ConfigListLocalProcessor>();
         builder.RegisterType<ConfigListTemplateProcessor>();
-
-        // Delete
-        builder.RegisterType<DeleteCustomFormatsProcessor>();
-
-        // State
-        builder.RegisterType<StateRepairProcessor>();
-        builder.RegisterType<StateRepairInstanceProcessor>();
-        builder.RegisterType<CustomFormatResourceAdapter>().As<IResourceAdapter>();
-        builder.RegisterType<QualityProfileResourceAdapter>().As<IResourceAdapter>();
 
         builder
             .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
