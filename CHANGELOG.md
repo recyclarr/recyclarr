@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- CLI: Show default/optional status for quality profiles in `list custom-format-groups --details`
+  (#725)
+
 ## [8.4.0] - 2026-03-05
 
 ### Added

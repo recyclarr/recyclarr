@@ -142,8 +142,16 @@ internal class ListCustomFormatGroupsCommand(
             var profileNames = group.QualityProfiles.Include.Keys.Order().ToList();
             if (profileNames.Count > 0)
             {
+                var groupDefault = string.Equals(
+                    group.Default,
+                    "true",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+                var tag = groupDefault ? "[green](default)[/]" : "[yellow](optional)[/]";
+
                 rows.Add(new Markup("\n[underline]Quality Profiles[/]"));
-                rows.AddRange(profileNames.Select(p => new Markup($"  {p.EscapeMarkup()}")));
+                rows.AddRange(profileNames.Select(p => new Markup($"  {p.EscapeMarkup()} {tag}")));
             }
 
             var panel = new Panel(new Rows(rows)).BorderColor(Color.Grey);
