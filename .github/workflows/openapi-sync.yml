@@ -29,6 +29,9 @@ jobs:
       - name: Fetch upstream ${{ matrix.name }} OpenAPI spec
         run: curl -fsSL "${{ matrix.upstream }}" -o "${{ matrix.local }}"
 
+      - name: Normalize formatting
+        run: npx -y prettier@latest --write "${{ matrix.local }}"
+
       - name: Generate App Token
         id: app-token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1

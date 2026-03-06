@@ -15,10 +15,7 @@
       "variables": {
         "protocol": {
           "default": "http",
-          "enum": [
-            "http",
-            "https"
-          ]
+          "enum": ["http", "https"]
         },
         "hostpath": {
           "default": "localhost:8989"
@@ -29,9 +26,7 @@
   "paths": {
     "/api": {
       "get": {
-        "tags": [
-          "ApiInfo"
-        ],
+        "tags": ["ApiInfo"],
         "responses": {
           "200": {
             "description": "OK"
@@ -41,9 +36,7 @@
     },
     "/login": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "parameters": [
           {
             "name": "returnUrl",
@@ -91,9 +84,7 @@
         }
       },
       "get": {
-        "tags": [
-          "StaticResource"
-        ],
+        "tags": ["StaticResource"],
         "responses": {
           "200": {
             "description": "OK"
@@ -103,9 +94,7 @@
     },
     "/logout": {
       "get": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "responses": {
           "200": {
             "description": "OK"
@@ -115,9 +104,7 @@
     },
     "/api/v3/autotagging": {
       "post": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -151,9 +138,7 @@
         }
       },
       "get": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "responses": {
           "200": {
             "description": "OK",
@@ -173,9 +158,7 @@
     },
     "/api/v3/autotagging/{id}": {
       "put": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "parameters": [
           {
             "name": "id",
@@ -219,9 +202,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "parameters": [
           {
             "name": "id",
@@ -240,9 +221,7 @@
         }
       },
       "get": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "parameters": [
           {
             "name": "id",
@@ -270,9 +249,7 @@
     },
     "/api/v3/autotagging/schema": {
       "get": {
-        "tags": [
-          "AutoTagging"
-        ],
+        "tags": ["AutoTagging"],
         "responses": {
           "200": {
             "description": "OK"
@@ -282,9 +259,7 @@
     },
     "/api/v3/system/backup": {
       "get": {
-        "tags": [
-          "Backup"
-        ],
+        "tags": ["Backup"],
         "responses": {
           "200": {
             "description": "OK",
@@ -320,9 +295,7 @@
     },
     "/api/v3/system/backup/{id}": {
       "delete": {
-        "tags": [
-          "Backup"
-        ],
+        "tags": ["Backup"],
         "parameters": [
           {
             "name": "id",
@@ -343,9 +316,7 @@
     },
     "/api/v3/system/backup/restore/{id}": {
       "post": {
-        "tags": [
-          "Backup"
-        ],
+        "tags": ["Backup"],
         "parameters": [
           {
             "name": "id",
@@ -366,9 +337,7 @@
     },
     "/api/v3/system/backup/restore/upload": {
       "post": {
-        "tags": [
-          "Backup"
-        ],
+        "tags": ["Backup"],
         "responses": {
           "200": {
             "description": "OK"
@@ -378,9 +347,7 @@
     },
     "/api/v3/blocklist": {
       "get": {
-        "tags": [
-          "Blocklist"
-        ],
+        "tags": ["Blocklist"],
         "parameters": [
           {
             "name": "page",
@@ -452,9 +419,7 @@
     },
     "/api/v3/blocklist/{id}": {
       "delete": {
-        "tags": [
-          "Blocklist"
-        ],
+        "tags": ["Blocklist"],
         "parameters": [
           {
             "name": "id",
@@ -475,9 +440,7 @@
     },
     "/api/v3/blocklist/bulk": {
       "delete": {
-        "tags": [
-          "Blocklist"
-        ],
+        "tags": ["Blocklist"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -506,9 +469,7 @@
     },
     "/api/v3/calendar": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "parameters": [
           {
             "name": "start",
@@ -586,9 +547,7 @@
     },
     "/api/v3/calendar/{id}": {
       "get": {
-        "tags": [
-          "Calendar"
-        ],
+        "tags": ["Calendar"],
         "parameters": [
           {
             "name": "id",
@@ -616,9 +575,7 @@
     },
     "/feed/v3/calendar/sonarr.ics": {
       "get": {
-        "tags": [
-          "CalendarFeed"
-        ],
+        "tags": ["CalendarFeed"],
         "parameters": [
           {
             "name": "pastDays",
@@ -680,9 +637,7 @@
     },
     "/api/v3/command": {
       "post": {
-        "tags": [
-          "Command"
-        ],
+        "tags": ["Command"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -706,9 +661,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Command"
-        ],
+        "tags": ["Command"],
         "responses": {
           "200": {
             "description": "OK",
@@ -728,9 +681,7 @@
     },
     "/api/v3/command/{id}": {
       "delete": {
-        "tags": [
-          "Command"
-        ],
+        "tags": ["Command"],
         "parameters": [
           {
             "name": "id",
@@ -749,9 +700,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Command"
-        ],
+        "tags": ["Command"],
         "parameters": [
           {
             "name": "id",
@@ -779,9 +728,7 @@
     },
     "/api/v3/customfilter": {
       "get": {
-        "tags": [
-          "CustomFilter"
-        ],
+        "tags": ["CustomFilter"],
         "responses": {
           "200": {
             "description": "OK",
@@ -799,9 +746,7 @@
         }
       },
       "post": {
-        "tags": [
-          "CustomFilter"
-        ],
+        "tags": ["CustomFilter"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -837,9 +782,7 @@
     },
     "/api/v3/customfilter/{id}": {
       "put": {
-        "tags": [
-          "CustomFilter"
-        ],
+        "tags": ["CustomFilter"],
         "parameters": [
           {
             "name": "id",
@@ -883,9 +826,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "CustomFilter"
-        ],
+        "tags": ["CustomFilter"],
         "parameters": [
           {
             "name": "id",
@@ -904,9 +845,7 @@
         }
       },
       "get": {
-        "tags": [
-          "CustomFilter"
-        ],
+        "tags": ["CustomFilter"],
         "parameters": [
           {
             "name": "id",
@@ -934,9 +873,7 @@
     },
     "/api/v3/customformat": {
       "get": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "responses": {
           "200": {
             "description": "OK",
@@ -954,9 +891,7 @@
         }
       },
       "post": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -992,9 +927,7 @@
     },
     "/api/v3/customformat/{id}": {
       "put": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "parameters": [
           {
             "name": "id",
@@ -1038,9 +971,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "parameters": [
           {
             "name": "id",
@@ -1059,9 +990,7 @@
         }
       },
       "get": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "parameters": [
           {
             "name": "id",
@@ -1089,9 +1018,7 @@
     },
     "/api/v3/customformat/bulk": {
       "put": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1115,9 +1042,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1136,9 +1061,7 @@
     },
     "/api/v3/customformat/schema": {
       "get": {
-        "tags": [
-          "CustomFormat"
-        ],
+        "tags": ["CustomFormat"],
         "responses": {
           "200": {
             "description": "OK"
@@ -1148,9 +1071,7 @@
     },
     "/api/v3/wanted/cutoff": {
       "get": {
-        "tags": [
-          "Cutoff"
-        ],
+        "tags": ["Cutoff"],
         "parameters": [
           {
             "name": "page",
@@ -1233,9 +1154,7 @@
     },
     "/api/v3/wanted/cutoff/{id}": {
       "get": {
-        "tags": [
-          "Cutoff"
-        ],
+        "tags": ["Cutoff"],
         "parameters": [
           {
             "name": "id",
@@ -1263,9 +1182,7 @@
     },
     "/api/v3/delayprofile": {
       "post": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1299,9 +1216,7 @@
         }
       },
       "get": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -1321,9 +1236,7 @@
     },
     "/api/v3/delayprofile/{id}": {
       "delete": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "parameters": [
           {
             "name": "id",
@@ -1342,9 +1255,7 @@
         }
       },
       "put": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "parameters": [
           {
             "name": "id",
@@ -1388,9 +1299,7 @@
         }
       },
       "get": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "parameters": [
           {
             "name": "id",
@@ -1418,9 +1327,7 @@
     },
     "/api/v3/delayprofile/reorder/{id}": {
       "put": {
-        "tags": [
-          "DelayProfile"
-        ],
+        "tags": ["DelayProfile"],
         "parameters": [
           {
             "name": "id",
@@ -1475,9 +1382,7 @@
     },
     "/api/v3/diskspace": {
       "get": {
-        "tags": [
-          "DiskSpace"
-        ],
+        "tags": ["DiskSpace"],
         "responses": {
           "200": {
             "description": "OK",
@@ -1497,9 +1402,7 @@
     },
     "/api/v3/downloadclient": {
       "get": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "responses": {
           "200": {
             "description": "OK",
@@ -1517,9 +1420,7 @@
         }
       },
       "post": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "forceSave",
@@ -1555,9 +1456,7 @@
     },
     "/api/v3/downloadclient/{id}": {
       "put": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "id",
@@ -1600,9 +1499,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "id",
@@ -1621,9 +1518,7 @@
         }
       },
       "get": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "id",
@@ -1651,9 +1546,7 @@
     },
     "/api/v3/downloadclient/bulk": {
       "put": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1677,9 +1570,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1698,9 +1589,7 @@
     },
     "/api/v3/downloadclient/schema": {
       "get": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "responses": {
           "200": {
             "description": "OK",
@@ -1720,9 +1609,7 @@
     },
     "/api/v3/downloadclient/test": {
       "post": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "forceTest",
@@ -1751,9 +1638,7 @@
     },
     "/api/v3/downloadclient/testall": {
       "post": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "responses": {
           "200": {
             "description": "OK"
@@ -1763,9 +1648,7 @@
     },
     "/api/v3/downloadclient/action/{name}": {
       "post": {
-        "tags": [
-          "DownloadClient"
-        ],
+        "tags": ["DownloadClient"],
         "parameters": [
           {
             "name": "name",
@@ -1794,9 +1677,7 @@
     },
     "/api/v3/config/downloadclient": {
       "get": {
-        "tags": [
-          "DownloadClientConfig"
-        ],
+        "tags": ["DownloadClientConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -1813,9 +1694,7 @@
     },
     "/api/v3/config/downloadclient/{id}": {
       "put": {
-        "tags": [
-          "DownloadClientConfig"
-        ],
+        "tags": ["DownloadClientConfig"],
         "parameters": [
           {
             "name": "id",
@@ -1859,9 +1738,7 @@
         }
       },
       "get": {
-        "tags": [
-          "DownloadClientConfig"
-        ],
+        "tags": ["DownloadClientConfig"],
         "parameters": [
           {
             "name": "id",
@@ -1889,9 +1766,7 @@
     },
     "/api/v3/episode": {
       "get": {
-        "tags": [
-          "Episode"
-        ],
+        "tags": ["Episode"],
         "parameters": [
           {
             "name": "seriesId",
@@ -1972,9 +1847,7 @@
     },
     "/api/v3/episode/{id}": {
       "put": {
-        "tags": [
-          "Episode"
-        ],
+        "tags": ["Episode"],
         "parameters": [
           {
             "name": "id",
@@ -2019,9 +1892,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Episode"
-        ],
+        "tags": ["Episode"],
         "parameters": [
           {
             "name": "id",
@@ -2049,9 +1920,7 @@
     },
     "/api/v3/episode/monitor": {
       "put": {
-        "tags": [
-          "Episode"
-        ],
+        "tags": ["Episode"],
         "parameters": [
           {
             "name": "includeImages",
@@ -2080,9 +1949,7 @@
     },
     "/api/v3/episodefile": {
       "get": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "parameters": [
           {
             "name": "seriesId",
@@ -2123,9 +1990,7 @@
     },
     "/api/v3/episodefile/{id}": {
       "put": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "parameters": [
           {
             "name": "id",
@@ -2169,9 +2034,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "parameters": [
           {
             "name": "id",
@@ -2190,9 +2053,7 @@
         }
       },
       "get": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "parameters": [
           {
             "name": "id",
@@ -2220,9 +2081,7 @@
     },
     "/api/v3/episodefile/editor": {
       "put": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2241,9 +2100,7 @@
     },
     "/api/v3/episodefile/bulk": {
       "delete": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2260,9 +2117,7 @@
         }
       },
       "put": {
-        "tags": [
-          "EpisodeFile"
-        ],
+        "tags": ["EpisodeFile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2284,9 +2139,7 @@
     },
     "/api/v3/filesystem": {
       "get": {
-        "tags": [
-          "FileSystem"
-        ],
+        "tags": ["FileSystem"],
         "parameters": [
           {
             "name": "path",
@@ -2321,9 +2174,7 @@
     },
     "/api/v3/filesystem/type": {
       "get": {
-        "tags": [
-          "FileSystem"
-        ],
+        "tags": ["FileSystem"],
         "parameters": [
           {
             "name": "path",
@@ -2342,9 +2193,7 @@
     },
     "/api/v3/filesystem/mediafiles": {
       "get": {
-        "tags": [
-          "FileSystem"
-        ],
+        "tags": ["FileSystem"],
         "parameters": [
           {
             "name": "path",
@@ -2363,9 +2212,7 @@
     },
     "/api/v3/health": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "responses": {
           "200": {
             "description": "OK",
@@ -2385,9 +2232,7 @@
     },
     "/api/v3/history": {
       "get": {
-        "tags": [
-          "History"
-        ],
+        "tags": ["History"],
         "parameters": [
           {
             "name": "page",
@@ -2511,9 +2356,7 @@
     },
     "/api/v3/history/since": {
       "get": {
-        "tags": [
-          "History"
-        ],
+        "tags": ["History"],
         "parameters": [
           {
             "name": "date",
@@ -2566,9 +2409,7 @@
     },
     "/api/v3/history/series": {
       "get": {
-        "tags": [
-          "History"
-        ],
+        "tags": ["History"],
         "parameters": [
           {
             "name": "seriesId",
@@ -2629,9 +2470,7 @@
     },
     "/api/v3/history/failed/{id}": {
       "post": {
-        "tags": [
-          "History"
-        ],
+        "tags": ["History"],
         "parameters": [
           {
             "name": "id",
@@ -2652,9 +2491,7 @@
     },
     "/api/v3/config/host": {
       "get": {
-        "tags": [
-          "HostConfig"
-        ],
+        "tags": ["HostConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -2681,9 +2518,7 @@
     },
     "/api/v3/config/host/{id}": {
       "put": {
-        "tags": [
-          "HostConfig"
-        ],
+        "tags": ["HostConfig"],
         "parameters": [
           {
             "name": "id",
@@ -2737,9 +2572,7 @@
         }
       },
       "get": {
-        "tags": [
-          "HostConfig"
-        ],
+        "tags": ["HostConfig"],
         "parameters": [
           {
             "name": "id",
@@ -2767,9 +2600,7 @@
     },
     "/api/v3/importlist": {
       "get": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "responses": {
           "200": {
             "description": "OK",
@@ -2787,9 +2618,7 @@
         }
       },
       "post": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "forceSave",
@@ -2825,9 +2654,7 @@
     },
     "/api/v3/importlist/{id}": {
       "put": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "id",
@@ -2870,9 +2697,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "id",
@@ -2891,9 +2716,7 @@
         }
       },
       "get": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "id",
@@ -2921,9 +2744,7 @@
     },
     "/api/v3/importlist/bulk": {
       "put": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2947,9 +2768,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2968,9 +2787,7 @@
     },
     "/api/v3/importlist/schema": {
       "get": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "responses": {
           "200": {
             "description": "OK",
@@ -2990,9 +2807,7 @@
     },
     "/api/v3/importlist/test": {
       "post": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "forceTest",
@@ -3021,9 +2836,7 @@
     },
     "/api/v3/importlist/testall": {
       "post": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "responses": {
           "200": {
             "description": "OK"
@@ -3033,9 +2846,7 @@
     },
     "/api/v3/importlist/action/{name}": {
       "post": {
-        "tags": [
-          "ImportList"
-        ],
+        "tags": ["ImportList"],
         "parameters": [
           {
             "name": "name",
@@ -3064,9 +2875,7 @@
     },
     "/api/v3/config/importlist": {
       "get": {
-        "tags": [
-          "ImportListConfig"
-        ],
+        "tags": ["ImportListConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3083,9 +2892,7 @@
     },
     "/api/v3/config/importlist/{id}": {
       "put": {
-        "tags": [
-          "ImportListConfig"
-        ],
+        "tags": ["ImportListConfig"],
         "parameters": [
           {
             "name": "id",
@@ -3129,9 +2936,7 @@
         }
       },
       "get": {
-        "tags": [
-          "ImportListConfig"
-        ],
+        "tags": ["ImportListConfig"],
         "parameters": [
           {
             "name": "id",
@@ -3159,9 +2964,7 @@
     },
     "/api/v3/importlistexclusion": {
       "get": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3180,9 +2983,7 @@
         "deprecated": true
       },
       "post": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3218,9 +3019,7 @@
     },
     "/api/v3/importlistexclusion/paged": {
       "get": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "parameters": [
           {
             "name": "page",
@@ -3271,9 +3070,7 @@
     },
     "/api/v3/importlistexclusion/{id}": {
       "put": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "parameters": [
           {
             "name": "id",
@@ -3317,9 +3114,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "parameters": [
           {
             "name": "id",
@@ -3338,9 +3133,7 @@
         }
       },
       "get": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "parameters": [
           {
             "name": "id",
@@ -3368,9 +3161,7 @@
     },
     "/api/v3/importlistexclusion/bulk": {
       "delete": {
-        "tags": [
-          "ImportListExclusion"
-        ],
+        "tags": ["ImportListExclusion"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3399,9 +3190,7 @@
     },
     "/api/v3/indexer": {
       "get": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3419,9 +3208,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "forceSave",
@@ -3457,9 +3244,7 @@
     },
     "/api/v3/indexer/{id}": {
       "put": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "id",
@@ -3502,9 +3287,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "id",
@@ -3523,9 +3306,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "id",
@@ -3553,9 +3334,7 @@
     },
     "/api/v3/indexer/bulk": {
       "put": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3579,9 +3358,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3600,9 +3377,7 @@
     },
     "/api/v3/indexer/schema": {
       "get": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3622,9 +3397,7 @@
     },
     "/api/v3/indexer/test": {
       "post": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "forceTest",
@@ -3653,9 +3426,7 @@
     },
     "/api/v3/indexer/testall": {
       "post": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "responses": {
           "200": {
             "description": "OK"
@@ -3665,9 +3436,7 @@
     },
     "/api/v3/indexer/action/{name}": {
       "post": {
-        "tags": [
-          "Indexer"
-        ],
+        "tags": ["Indexer"],
         "parameters": [
           {
             "name": "name",
@@ -3696,9 +3465,7 @@
     },
     "/api/v3/config/indexer": {
       "get": {
-        "tags": [
-          "IndexerConfig"
-        ],
+        "tags": ["IndexerConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3715,9 +3482,7 @@
     },
     "/api/v3/config/indexer/{id}": {
       "put": {
-        "tags": [
-          "IndexerConfig"
-        ],
+        "tags": ["IndexerConfig"],
         "parameters": [
           {
             "name": "id",
@@ -3761,9 +3526,7 @@
         }
       },
       "get": {
-        "tags": [
-          "IndexerConfig"
-        ],
+        "tags": ["IndexerConfig"],
         "parameters": [
           {
             "name": "id",
@@ -3791,9 +3554,7 @@
     },
     "/api/v3/indexerflag": {
       "get": {
-        "tags": [
-          "IndexerFlag"
-        ],
+        "tags": ["IndexerFlag"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3829,9 +3590,7 @@
     },
     "/api/v3/language": {
       "get": {
-        "tags": [
-          "Language"
-        ],
+        "tags": ["Language"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3867,9 +3626,7 @@
     },
     "/api/v3/language/{id}": {
       "get": {
-        "tags": [
-          "Language"
-        ],
+        "tags": ["Language"],
         "parameters": [
           {
             "name": "id",
@@ -3897,9 +3654,7 @@
     },
     "/api/v3/languageprofile": {
       "post": {
-        "tags": [
-          "LanguageProfile"
-        ],
+        "tags": ["LanguageProfile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3924,9 +3679,7 @@
         "deprecated": true
       },
       "get": {
-        "tags": [
-          "LanguageProfile"
-        ],
+        "tags": ["LanguageProfile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -3947,9 +3700,7 @@
     },
     "/api/v3/languageprofile/{id}": {
       "delete": {
-        "tags": [
-          "LanguageProfile"
-        ],
+        "tags": ["LanguageProfile"],
         "parameters": [
           {
             "name": "id",
@@ -3969,9 +3720,7 @@
         "deprecated": true
       },
       "put": {
-        "tags": [
-          "LanguageProfile"
-        ],
+        "tags": ["LanguageProfile"],
         "parameters": [
           {
             "name": "id",
@@ -4006,9 +3755,7 @@
         "deprecated": true
       },
       "get": {
-        "tags": [
-          "LanguageProfile"
-        ],
+        "tags": ["LanguageProfile"],
         "parameters": [
           {
             "name": "id",
@@ -4036,9 +3783,7 @@
     },
     "/api/v3/languageprofile/schema": {
       "get": {
-        "tags": [
-          "LanguageProfileSchema"
-        ],
+        "tags": ["LanguageProfileSchema"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4056,9 +3801,7 @@
     },
     "/api/v3/localization": {
       "get": {
-        "tags": [
-          "Localization"
-        ],
+        "tags": ["Localization"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4075,9 +3818,7 @@
     },
     "/api/v3/localization/language": {
       "get": {
-        "tags": [
-          "Localization"
-        ],
+        "tags": ["Localization"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4094,9 +3835,7 @@
     },
     "/api/v3/localization/{id}": {
       "get": {
-        "tags": [
-          "Localization"
-        ],
+        "tags": ["Localization"],
         "parameters": [
           {
             "name": "id",
@@ -4124,9 +3863,7 @@
     },
     "/api/v3/log": {
       "get": {
-        "tags": [
-          "Log"
-        ],
+        "tags": ["Log"],
         "parameters": [
           {
             "name": "page",
@@ -4184,9 +3921,7 @@
     },
     "/api/v3/log/file": {
       "get": {
-        "tags": [
-          "LogFile"
-        ],
+        "tags": ["LogFile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4206,9 +3941,7 @@
     },
     "/api/v3/log/file/{filename}": {
       "get": {
-        "tags": [
-          "LogFile"
-        ],
+        "tags": ["LogFile"],
         "parameters": [
           {
             "name": "filename",
@@ -4229,9 +3962,7 @@
     },
     "/api/v3/manualimport": {
       "get": {
-        "tags": [
-          "ManualImport"
-        ],
+        "tags": ["ManualImport"],
         "parameters": [
           {
             "name": "folder",
@@ -4289,9 +4020,7 @@
         }
       },
       "post": {
-        "tags": [
-          "ManualImport"
-        ],
+        "tags": ["ManualImport"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -4313,9 +4042,7 @@
     },
     "/api/v3/mediacover/{seriesId}/{filename}": {
       "get": {
-        "tags": [
-          "MediaCover"
-        ],
+        "tags": ["MediaCover"],
         "parameters": [
           {
             "name": "seriesId",
@@ -4345,9 +4072,7 @@
     },
     "/api/v3/config/mediamanagement": {
       "get": {
-        "tags": [
-          "MediaManagementConfig"
-        ],
+        "tags": ["MediaManagementConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4364,9 +4089,7 @@
     },
     "/api/v3/config/mediamanagement/{id}": {
       "put": {
-        "tags": [
-          "MediaManagementConfig"
-        ],
+        "tags": ["MediaManagementConfig"],
         "parameters": [
           {
             "name": "id",
@@ -4410,9 +4133,7 @@
         }
       },
       "get": {
-        "tags": [
-          "MediaManagementConfig"
-        ],
+        "tags": ["MediaManagementConfig"],
         "parameters": [
           {
             "name": "id",
@@ -4440,9 +4161,7 @@
     },
     "/api/v3/metadata": {
       "get": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4460,9 +4179,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "forceSave",
@@ -4498,9 +4215,7 @@
     },
     "/api/v3/metadata/{id}": {
       "put": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "id",
@@ -4543,9 +4258,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "id",
@@ -4564,9 +4277,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "id",
@@ -4594,9 +4305,7 @@
     },
     "/api/v3/metadata/schema": {
       "get": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4616,9 +4325,7 @@
     },
     "/api/v3/metadata/test": {
       "post": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "forceTest",
@@ -4647,9 +4354,7 @@
     },
     "/api/v3/metadata/testall": {
       "post": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "responses": {
           "200": {
             "description": "OK"
@@ -4659,9 +4364,7 @@
     },
     "/api/v3/metadata/action/{name}": {
       "post": {
-        "tags": [
-          "Metadata"
-        ],
+        "tags": ["Metadata"],
         "parameters": [
           {
             "name": "name",
@@ -4690,9 +4393,7 @@
     },
     "/api/v3/wanted/missing": {
       "get": {
-        "tags": [
-          "Missing"
-        ],
+        "tags": ["Missing"],
         "parameters": [
           {
             "name": "page",
@@ -4767,9 +4468,7 @@
     },
     "/api/v3/wanted/missing/{id}": {
       "get": {
-        "tags": [
-          "Missing"
-        ],
+        "tags": ["Missing"],
         "parameters": [
           {
             "name": "id",
@@ -4797,9 +4496,7 @@
     },
     "/api/v3/config/naming": {
       "get": {
-        "tags": [
-          "NamingConfig"
-        ],
+        "tags": ["NamingConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -4826,9 +4523,7 @@
     },
     "/api/v3/config/naming/{id}": {
       "put": {
-        "tags": [
-          "NamingConfig"
-        ],
+        "tags": ["NamingConfig"],
         "parameters": [
           {
             "name": "id",
@@ -4882,9 +4577,7 @@
         }
       },
       "get": {
-        "tags": [
-          "NamingConfig"
-        ],
+        "tags": ["NamingConfig"],
         "parameters": [
           {
             "name": "id",
@@ -4912,9 +4605,7 @@
     },
     "/api/v3/config/naming/examples": {
       "get": {
-        "tags": [
-          "NamingConfig"
-        ],
+        "tags": ["NamingConfig"],
         "parameters": [
           {
             "name": "renameEpisodes",
@@ -5020,9 +4711,7 @@
     },
     "/api/v3/notification": {
       "get": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5040,9 +4729,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "forceSave",
@@ -5078,9 +4765,7 @@
     },
     "/api/v3/notification/{id}": {
       "put": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "id",
@@ -5123,9 +4808,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "id",
@@ -5144,9 +4827,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "id",
@@ -5174,9 +4855,7 @@
     },
     "/api/v3/notification/schema": {
       "get": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5196,9 +4875,7 @@
     },
     "/api/v3/notification/test": {
       "post": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "forceTest",
@@ -5227,9 +4904,7 @@
     },
     "/api/v3/notification/testall": {
       "post": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "responses": {
           "200": {
             "description": "OK"
@@ -5239,9 +4914,7 @@
     },
     "/api/v3/notification/action/{name}": {
       "post": {
-        "tags": [
-          "Notification"
-        ],
+        "tags": ["Notification"],
         "parameters": [
           {
             "name": "name",
@@ -5270,9 +4943,7 @@
     },
     "/api/v3/parse": {
       "get": {
-        "tags": [
-          "Parse"
-        ],
+        "tags": ["Parse"],
         "parameters": [
           {
             "name": "title",
@@ -5305,9 +4976,7 @@
     },
     "/ping": {
       "get": {
-        "tags": [
-          "Ping"
-        ],
+        "tags": ["Ping"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5322,9 +4991,7 @@
         }
       },
       "head": {
-        "tags": [
-          "Ping"
-        ],
+        "tags": ["Ping"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5341,9 +5008,7 @@
     },
     "/api/v3/qualitydefinition/{id}": {
       "put": {
-        "tags": [
-          "QualityDefinition"
-        ],
+        "tags": ["QualityDefinition"],
         "parameters": [
           {
             "name": "id",
@@ -5397,9 +5062,7 @@
         }
       },
       "get": {
-        "tags": [
-          "QualityDefinition"
-        ],
+        "tags": ["QualityDefinition"],
         "parameters": [
           {
             "name": "id",
@@ -5427,9 +5090,7 @@
     },
     "/api/v3/qualitydefinition": {
       "get": {
-        "tags": [
-          "QualityDefinition"
-        ],
+        "tags": ["QualityDefinition"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5465,9 +5126,7 @@
     },
     "/api/v3/qualitydefinition/update": {
       "put": {
-        "tags": [
-          "QualityDefinition"
-        ],
+        "tags": ["QualityDefinition"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -5505,9 +5164,7 @@
     },
     "/api/v3/qualitydefinition/limits": {
       "get": {
-        "tags": [
-          "QualityDefinition"
-        ],
+        "tags": ["QualityDefinition"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5534,9 +5191,7 @@
     },
     "/api/v3/qualityprofile": {
       "post": {
-        "tags": [
-          "QualityProfile"
-        ],
+        "tags": ["QualityProfile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -5570,9 +5225,7 @@
         }
       },
       "get": {
-        "tags": [
-          "QualityProfile"
-        ],
+        "tags": ["QualityProfile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5592,9 +5245,7 @@
     },
     "/api/v3/qualityprofile/{id}": {
       "delete": {
-        "tags": [
-          "QualityProfile"
-        ],
+        "tags": ["QualityProfile"],
         "parameters": [
           {
             "name": "id",
@@ -5613,9 +5264,7 @@
         }
       },
       "put": {
-        "tags": [
-          "QualityProfile"
-        ],
+        "tags": ["QualityProfile"],
         "parameters": [
           {
             "name": "id",
@@ -5659,9 +5308,7 @@
         }
       },
       "get": {
-        "tags": [
-          "QualityProfile"
-        ],
+        "tags": ["QualityProfile"],
         "parameters": [
           {
             "name": "id",
@@ -5689,9 +5336,7 @@
     },
     "/api/v3/qualityprofile/schema": {
       "get": {
-        "tags": [
-          "QualityProfileSchema"
-        ],
+        "tags": ["QualityProfileSchema"],
         "responses": {
           "200": {
             "description": "OK",
@@ -5718,9 +5363,7 @@
     },
     "/api/v3/queue/{id}": {
       "delete": {
-        "tags": [
-          "Queue"
-        ],
+        "tags": ["Queue"],
         "parameters": [
           {
             "name": "id",
@@ -5773,9 +5416,7 @@
     },
     "/api/v3/queue/bulk": {
       "delete": {
-        "tags": [
-          "Queue"
-        ],
+        "tags": ["Queue"],
         "parameters": [
           {
             "name": "removeFromClient",
@@ -5838,9 +5479,7 @@
     },
     "/api/v3/queue": {
       "get": {
-        "tags": [
-          "Queue"
-        ],
+        "tags": ["Queue"],
         "parameters": [
           {
             "name": "page",
@@ -5965,9 +5604,7 @@
     },
     "/api/v3/queue/grab/{id}": {
       "post": {
-        "tags": [
-          "QueueAction"
-        ],
+        "tags": ["QueueAction"],
         "parameters": [
           {
             "name": "id",
@@ -5988,9 +5625,7 @@
     },
     "/api/v3/queue/grab/bulk": {
       "post": {
-        "tags": [
-          "QueueAction"
-        ],
+        "tags": ["QueueAction"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6009,9 +5644,7 @@
     },
     "/api/v3/queue/details": {
       "get": {
-        "tags": [
-          "QueueDetails"
-        ],
+        "tags": ["QueueDetails"],
         "parameters": [
           {
             "name": "seriesId",
@@ -6068,9 +5701,7 @@
     },
     "/api/v3/queue/status": {
       "get": {
-        "tags": [
-          "QueueStatus"
-        ],
+        "tags": ["QueueStatus"],
         "responses": {
           "200": {
             "description": "OK",
@@ -6087,9 +5718,7 @@
     },
     "/api/v3/release": {
       "post": {
-        "tags": [
-          "Release"
-        ],
+        "tags": ["Release"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6106,9 +5735,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Release"
-        ],
+        "tags": ["Release"],
         "parameters": [
           {
             "name": "seriesId",
@@ -6154,9 +5781,7 @@
     },
     "/api/v3/releaseprofile": {
       "post": {
-        "tags": [
-          "ReleaseProfile"
-        ],
+        "tags": ["ReleaseProfile"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6200,9 +5825,7 @@
         }
       },
       "get": {
-        "tags": [
-          "ReleaseProfile"
-        ],
+        "tags": ["ReleaseProfile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -6238,9 +5861,7 @@
     },
     "/api/v3/releaseprofile/{id}": {
       "delete": {
-        "tags": [
-          "ReleaseProfile"
-        ],
+        "tags": ["ReleaseProfile"],
         "parameters": [
           {
             "name": "id",
@@ -6259,9 +5880,7 @@
         }
       },
       "put": {
-        "tags": [
-          "ReleaseProfile"
-        ],
+        "tags": ["ReleaseProfile"],
         "parameters": [
           {
             "name": "id",
@@ -6315,9 +5934,7 @@
         }
       },
       "get": {
-        "tags": [
-          "ReleaseProfile"
-        ],
+        "tags": ["ReleaseProfile"],
         "parameters": [
           {
             "name": "id",
@@ -6345,9 +5962,7 @@
     },
     "/api/v3/release/push": {
       "post": {
-        "tags": [
-          "ReleasePush"
-        ],
+        "tags": ["ReleasePush"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6392,9 +6007,7 @@
     },
     "/api/v3/remotepathmapping": {
       "post": {
-        "tags": [
-          "RemotePathMapping"
-        ],
+        "tags": ["RemotePathMapping"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6428,9 +6041,7 @@
         }
       },
       "get": {
-        "tags": [
-          "RemotePathMapping"
-        ],
+        "tags": ["RemotePathMapping"],
         "responses": {
           "200": {
             "description": "OK",
@@ -6450,9 +6061,7 @@
     },
     "/api/v3/remotepathmapping/{id}": {
       "delete": {
-        "tags": [
-          "RemotePathMapping"
-        ],
+        "tags": ["RemotePathMapping"],
         "parameters": [
           {
             "name": "id",
@@ -6471,9 +6080,7 @@
         }
       },
       "put": {
-        "tags": [
-          "RemotePathMapping"
-        ],
+        "tags": ["RemotePathMapping"],
         "parameters": [
           {
             "name": "id",
@@ -6527,9 +6134,7 @@
         }
       },
       "get": {
-        "tags": [
-          "RemotePathMapping"
-        ],
+        "tags": ["RemotePathMapping"],
         "parameters": [
           {
             "name": "id",
@@ -6557,9 +6162,7 @@
     },
     "/api/v3/rename": {
       "get": {
-        "tags": [
-          "RenameEpisode"
-        ],
+        "tags": ["RenameEpisode"],
         "parameters": [
           {
             "name": "seriesId",
@@ -6597,9 +6200,7 @@
     },
     "/api/v3/rootfolder": {
       "post": {
-        "tags": [
-          "RootFolder"
-        ],
+        "tags": ["RootFolder"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6633,9 +6234,7 @@
         }
       },
       "get": {
-        "tags": [
-          "RootFolder"
-        ],
+        "tags": ["RootFolder"],
         "responses": {
           "200": {
             "description": "OK",
@@ -6655,9 +6254,7 @@
     },
     "/api/v3/rootfolder/{id}": {
       "delete": {
-        "tags": [
-          "RootFolder"
-        ],
+        "tags": ["RootFolder"],
         "parameters": [
           {
             "name": "id",
@@ -6676,9 +6273,7 @@
         }
       },
       "get": {
-        "tags": [
-          "RootFolder"
-        ],
+        "tags": ["RootFolder"],
         "parameters": [
           {
             "name": "id",
@@ -6706,9 +6301,7 @@
     },
     "/api/v3/seasonpass": {
       "post": {
-        "tags": [
-          "SeasonPass"
-        ],
+        "tags": ["SeasonPass"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6727,9 +6320,7 @@
     },
     "/api/v3/series": {
       "get": {
-        "tags": [
-          "Series"
-        ],
+        "tags": ["Series"],
         "parameters": [
           {
             "name": "tvdbId",
@@ -6765,9 +6356,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Series"
-        ],
+        "tags": ["Series"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6793,9 +6382,7 @@
     },
     "/api/v3/series/{id}": {
       "get": {
-        "tags": [
-          "Series"
-        ],
+        "tags": ["Series"],
         "parameters": [
           {
             "name": "id",
@@ -6829,9 +6416,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Series"
-        ],
+        "tags": ["Series"],
         "parameters": [
           {
             "name": "moveFiles",
@@ -6873,9 +6458,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Series"
-        ],
+        "tags": ["Series"],
         "parameters": [
           {
             "name": "id",
@@ -6912,9 +6495,7 @@
     },
     "/api/v3/series/editor": {
       "put": {
-        "tags": [
-          "SeriesEditor"
-        ],
+        "tags": ["SeriesEditor"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6941,9 +6522,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "SeriesEditor"
-        ],
+        "tags": ["SeriesEditor"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6972,9 +6551,7 @@
     },
     "/api/v3/series/{id}/folder": {
       "get": {
-        "tags": [
-          "SeriesFolder"
-        ],
+        "tags": ["SeriesFolder"],
         "parameters": [
           {
             "name": "id",
@@ -6995,9 +6572,7 @@
     },
     "/api/v3/series/import": {
       "post": {
-        "tags": [
-          "SeriesImport"
-        ],
+        "tags": ["SeriesImport"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -7035,9 +6610,7 @@
     },
     "/api/v3/series/lookup": {
       "get": {
-        "tags": [
-          "SeriesLookup"
-        ],
+        "tags": ["SeriesLookup"],
         "parameters": [
           {
             "name": "term",
@@ -7082,9 +6655,7 @@
     },
     "/content/{path}": {
       "get": {
-        "tags": [
-          "StaticResource"
-        ],
+        "tags": ["StaticResource"],
         "parameters": [
           {
             "name": "path",
@@ -7105,9 +6676,7 @@
     },
     "/": {
       "get": {
-        "tags": [
-          "StaticResource"
-        ],
+        "tags": ["StaticResource"],
         "parameters": [
           {
             "name": "path",
@@ -7127,9 +6696,7 @@
     },
     "/{path}": {
       "get": {
-        "tags": [
-          "StaticResource"
-        ],
+        "tags": ["StaticResource"],
         "parameters": [
           {
             "name": "path",
@@ -7150,9 +6717,7 @@
     },
     "/api/v3/system/status": {
       "get": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7169,9 +6734,7 @@
     },
     "/api/v3/system/routes": {
       "get": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "responses": {
           "200": {
             "description": "OK"
@@ -7181,9 +6744,7 @@
     },
     "/api/v3/system/routes/duplicate": {
       "get": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "responses": {
           "200": {
             "description": "OK"
@@ -7193,9 +6754,7 @@
     },
     "/api/v3/system/shutdown": {
       "post": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "responses": {
           "200": {
             "description": "OK"
@@ -7205,9 +6764,7 @@
     },
     "/api/v3/system/restart": {
       "post": {
-        "tags": [
-          "System"
-        ],
+        "tags": ["System"],
         "responses": {
           "200": {
             "description": "OK"
@@ -7217,9 +6774,7 @@
     },
     "/api/v3/tag": {
       "get": {
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7237,9 +6792,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -7275,9 +6828,7 @@
     },
     "/api/v3/tag/{id}": {
       "put": {
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -7321,9 +6872,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -7342,9 +6891,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Tag"
-        ],
+        "tags": ["Tag"],
         "parameters": [
           {
             "name": "id",
@@ -7372,9 +6919,7 @@
     },
     "/api/v3/tag/detail": {
       "get": {
-        "tags": [
-          "TagDetails"
-        ],
+        "tags": ["TagDetails"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7394,9 +6939,7 @@
     },
     "/api/v3/tag/detail/{id}": {
       "get": {
-        "tags": [
-          "TagDetails"
-        ],
+        "tags": ["TagDetails"],
         "parameters": [
           {
             "name": "id",
@@ -7424,9 +6967,7 @@
     },
     "/api/v3/system/task": {
       "get": {
-        "tags": [
-          "Task"
-        ],
+        "tags": ["Task"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7462,9 +7003,7 @@
     },
     "/api/v3/system/task/{id}": {
       "get": {
-        "tags": [
-          "Task"
-        ],
+        "tags": ["Task"],
         "parameters": [
           {
             "name": "id",
@@ -7492,9 +7031,7 @@
     },
     "/api/v3/config/ui/{id}": {
       "put": {
-        "tags": [
-          "UiConfig"
-        ],
+        "tags": ["UiConfig"],
         "parameters": [
           {
             "name": "id",
@@ -7538,9 +7075,7 @@
         }
       },
       "get": {
-        "tags": [
-          "UiConfig"
-        ],
+        "tags": ["UiConfig"],
         "parameters": [
           {
             "name": "id",
@@ -7568,9 +7103,7 @@
     },
     "/api/v3/config/ui": {
       "get": {
-        "tags": [
-          "UiConfig"
-        ],
+        "tags": ["UiConfig"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7587,9 +7120,7 @@
     },
     "/api/v3/update": {
       "get": {
-        "tags": [
-          "Update"
-        ],
+        "tags": ["Update"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7609,9 +7140,7 @@
     },
     "/api/v3/log/file/update": {
       "get": {
-        "tags": [
-          "UpdateLogFile"
-        ],
+        "tags": ["UpdateLogFile"],
         "responses": {
           "200": {
             "description": "OK",
@@ -7631,9 +7160,7 @@
     },
     "/api/v3/log/file/update/{filename}": {
       "get": {
-        "tags": [
-          "UpdateLogFile"
-        ],
+        "tags": ["UpdateLogFile"],
         "parameters": [
           {
             "name": "filename",
@@ -7705,27 +7232,15 @@
         "additionalProperties": false
       },
       "ApplyTags": {
-        "enum": [
-          "add",
-          "remove",
-          "replace"
-        ],
+        "enum": ["add", "remove", "replace"],
         "type": "string"
       },
       "AuthenticationRequiredType": {
-        "enum": [
-          "enabled",
-          "disabledForLocalAddresses"
-        ],
+        "enum": ["enabled", "disabledForLocalAddresses"],
         "type": "string"
       },
       "AuthenticationType": {
-        "enum": [
-          "none",
-          "basic",
-          "forms",
-          "external"
-        ],
+        "enum": ["none", "basic", "forms", "external"],
         "type": "string"
       },
       "AutoTaggingResource": {
@@ -7826,11 +7341,7 @@
         "additionalProperties": false
       },
       "BackupType": {
-        "enum": [
-          "scheduled",
-          "manual",
-          "update"
-        ],
+        "enum": ["scheduled", "manual", "update"],
         "type": "string"
       },
       "BlocklistBulkResource": {
@@ -7941,11 +7452,7 @@
         "additionalProperties": false
       },
       "CertificateValidationType": {
-        "enum": [
-          "enabled",
-          "disabledForLocalAddresses",
-          "disabled"
-        ],
+        "enum": ["enabled", "disabledForLocalAddresses", "disabled"],
         "type": "string"
       },
       "Command": {
@@ -8004,11 +7511,7 @@
         "additionalProperties": false
       },
       "CommandPriority": {
-        "enum": [
-          "normal",
-          "high",
-          "low"
-        ],
+        "enum": ["normal", "high", "low"],
         "type": "string"
       },
       "CommandResource": {
@@ -8092,11 +7595,7 @@
         "additionalProperties": false
       },
       "CommandResult": {
-        "enum": [
-          "unknown",
-          "successful",
-          "unsuccessful"
-        ],
+        "enum": ["unknown", "successful", "unsuccessful"],
         "type": "string"
       },
       "CommandStatus": {
@@ -8112,11 +7611,7 @@
         "type": "string"
       },
       "CommandTrigger": {
-        "enum": [
-          "unspecified",
-          "manual",
-          "scheduled"
-        ],
+        "enum": ["unspecified", "manual", "scheduled"],
         "type": "string"
       },
       "CustomFilterResource": {
@@ -8236,10 +7731,7 @@
         "additionalProperties": false
       },
       "DatabaseType": {
-        "enum": [
-          "sqLite",
-          "postgreSQL"
-        ],
+        "enum": ["sqLite", "postgreSQL"],
         "type": "string"
       },
       "DelayProfileResource": {
@@ -8456,11 +7948,7 @@
         "additionalProperties": false
       },
       "DownloadProtocol": {
-        "enum": [
-          "unknown",
-          "usenet",
-          "torrent"
-        ],
+        "enum": ["unknown", "usenet", "torrent"],
         "type": "string"
       },
       "EpisodeFileListResource": {
@@ -8730,11 +8218,7 @@
         "additionalProperties": false
       },
       "EpisodeTitleRequiredType": {
-        "enum": [
-          "always",
-          "bulkSeasonReleases",
-          "never"
-        ],
+        "enum": ["always", "bulkSeasonReleases", "never"],
         "type": "string"
       },
       "EpisodesMonitoredResource": {
@@ -8828,20 +8312,11 @@
         "additionalProperties": false
       },
       "FileDateType": {
-        "enum": [
-          "none",
-          "localAirDate",
-          "utcAirDate"
-        ],
+        "enum": ["none", "localAirDate", "utcAirDate"],
         "type": "string"
       },
       "HealthCheckResult": {
-        "enum": [
-          "ok",
-          "notice",
-          "warning",
-          "error"
-        ],
+        "enum": ["ok", "notice", "warning", "error"],
         "type": "string"
       },
       "HealthResource": {
@@ -9373,14 +8848,7 @@
         "additionalProperties": false
       },
       "ImportListType": {
-        "enum": [
-          "program",
-          "plex",
-          "trakt",
-          "simkl",
-          "other",
-          "advanced"
-        ],
+        "enum": ["program", "plex", "trakt", "simkl", "other", "advanced"],
         "type": "string"
       },
       "ImportRejectionResource": {
@@ -9646,12 +9114,7 @@
         "additionalProperties": false
       },
       "ListSyncLevelType": {
-        "enum": [
-          "disabled",
-          "logOnly",
-          "keepAndUnmonitor",
-          "keepAndTag"
-        ],
+        "enum": ["disabled", "logOnly", "keepAndUnmonitor", "keepAndTag"],
         "type": "string"
       },
       "LocalizationLanguageResource": {
@@ -10278,10 +9741,7 @@
         "additionalProperties": false
       },
       "NewItemMonitorTypes": {
-        "enum": [
-          "all",
-          "none"
-        ],
+        "enum": ["all", "none"],
         "type": "string"
       },
       "NotificationResource": {
@@ -10605,12 +10065,7 @@
         "additionalProperties": false
       },
       "PrivacyLevel": {
-        "enum": [
-          "normal",
-          "password",
-          "apiKey",
-          "userName"
-        ],
+        "enum": ["normal", "password", "apiKey", "userName"],
         "type": "string"
       },
       "ProfileFormatItemResource": {
@@ -10636,11 +10091,7 @@
         "additionalProperties": false
       },
       "ProperDownloadTypes": {
-        "enum": [
-          "preferAndUpgrade",
-          "doNotUpgrade",
-          "doNotPrefer"
-        ],
+        "enum": ["preferAndUpgrade", "doNotUpgrade", "doNotPrefer"],
         "type": "string"
       },
       "ProviderMessage": {
@@ -10657,19 +10108,11 @@
         "additionalProperties": false
       },
       "ProviderMessageType": {
-        "enum": [
-          "info",
-          "warning",
-          "error"
-        ],
+        "enum": ["info", "warning", "error"],
         "type": "string"
       },
       "ProxyType": {
-        "enum": [
-          "http",
-          "socks4",
-          "socks5"
-        ],
+        "enum": ["http", "socks4", "socks5"],
         "type": "string"
       },
       "Quality": {
@@ -11078,10 +10521,7 @@
         "additionalProperties": false
       },
       "RejectionType": {
-        "enum": [
-          "permanent",
-          "temporary"
-        ],
+        "enum": ["permanent", "temporary"],
         "type": "string"
       },
       "ReleaseEpisodeResource": {
@@ -11423,12 +10863,7 @@
         "additionalProperties": false
       },
       "ReleaseType": {
-        "enum": [
-          "unknown",
-          "singleEpisode",
-          "multiEpisode",
-          "seasonPack"
-        ],
+        "enum": ["unknown", "singleEpisode", "multiEpisode", "seasonPack"],
         "type": "string"
       },
       "RemotePathMappingResource": {
@@ -11492,11 +10927,7 @@
         "additionalProperties": false
       },
       "RescanAfterRefreshType": {
-        "enum": [
-          "always",
-          "afterManual",
-          "never"
-        ],
+        "enum": ["always", "afterManual", "never"],
         "type": "string"
       },
       "Revision": {
@@ -11546,11 +10977,7 @@
         "additionalProperties": false
       },
       "RuntimeMode": {
-        "enum": [
-          "console",
-          "service",
-          "tray"
-        ],
+        "enum": ["console", "service", "tray"],
         "type": "string"
       },
       "SeasonPassResource": {
@@ -11974,12 +11401,7 @@
         "additionalProperties": false
       },
       "SeriesStatusType": {
-        "enum": [
-          "continuing",
-          "ended",
-          "upcoming",
-          "deleted"
-        ],
+        "enum": ["continuing", "ended", "upcoming", "deleted"],
         "type": "string"
       },
       "SeriesTitleInfo": {
@@ -12008,19 +11430,11 @@
         "additionalProperties": false
       },
       "SeriesTypes": {
-        "enum": [
-          "standard",
-          "daily",
-          "anime"
-        ],
+        "enum": ["standard", "daily", "anime"],
         "type": "string"
       },
       "SortDirection": {
-        "enum": [
-          "default",
-          "ascending",
-          "descending"
-        ],
+        "enum": ["default", "ascending", "descending"],
         "type": "string"
       },
       "SystemResource": {
@@ -12289,11 +11703,7 @@
         "type": "string"
       },
       "TrackedDownloadStatus": {
-        "enum": [
-          "ok",
-          "warning",
-          "error"
-        ],
+        "enum": ["ok", "warning", "error"],
         "type": "string"
       },
       "TrackedDownloadStatusMessage": {
@@ -12396,13 +11806,7 @@
         "additionalProperties": false
       },
       "UpdateMechanism": {
-        "enum": [
-          "builtIn",
-          "script",
-          "external",
-          "apt",
-          "docker"
-        ],
+        "enum": ["builtIn", "script", "external", "apt", "docker"],
         "type": "string"
       },
       "UpdateResource": {
