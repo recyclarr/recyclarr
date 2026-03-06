@@ -30,7 +30,10 @@ jobs:
         run: curl -fsSL "${{ matrix.upstream }}" -o "${{ matrix.local }}"
 
       - name: Normalize formatting
-        run: npx -y prettier@latest --write "${{ matrix.local }}"
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+        with:
+          extra_args: prettier --files ${{ matrix.local }}
+        continue-on-error: true
 
       - name: Generate App Token
         id: app-token
