@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Sync;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines;
 
@@ -11,6 +12,7 @@ internal interface ISyncPipeline
 {
     PipelineType PipelineType { get; }
     IReadOnlyList<PipelineType> Dependencies { get; }
+    bool AppliesTo(SupportedServices serviceType);
 
     Task<PipelineResult> Execute(
         ISyncSettings settings,

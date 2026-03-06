@@ -135,9 +135,10 @@ Key behaviors:
 Runtime object, not DI-managed. Created by `InstancePublisher.ForPipeline()` for each pipeline
 during orchestration. Stamps both instance name and pipeline type on events.
 
-`CompositeSyncPipeline` creates one per pipeline and passes it to `GenericSyncPipeline.Execute()`,
-which sets it on `PipelineContext.Publisher`. Pipeline phases access the publisher through the
-context to emit status changes and diagnostics.
+`CompositeSyncPipeline` filters pipelines by service affinity (excluding pipelines that target a
+different service type), then creates one publisher per applicable pipeline and passes it to
+`GenericSyncPipeline.Execute()`, which sets it on `PipelineContext.Publisher`. Pipeline phases
+access the publisher through the context to emit status changes and diagnostics.
 
 ### Noop Implementations
 
@@ -164,8 +165,8 @@ producing immutable snapshots and `Subscribe` performing an atomic reference swa
 
 Subscribes to the `Diagnostics` stream and logs each event immediately via `ILogger` at the
 appropriate level (Error, Warning). This ensures diagnostic messages appear when `--log` is active
-(where `IAnsiConsole` output is suppressed). Has no explicit call site; activated by DI resolution in
-`SyncProcessor`.
+(where `IAnsiConsole` output is suppressed). Has no explicit call site; activated by DI resolution
+in `SyncProcessor`.
 
 ### DiagnosticsRenderer
 
@@ -234,7 +235,8 @@ Participants map to concrete types as follows:
 
 - **Processors**: `SyncCommand`, `SyncProcessor`, `InstanceSyncProcessor`, `CompositeSyncPipeline`
 - **Hub**: `SyncRunScope` (the three Subjects behind `ISyncRunScope` / `ISyncRunPublisher`)
-- **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`, `NotificationService`
+- **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`,
+  `NotificationService`
 - **Pipelines**: `GenericSyncPipeline<TContext>` and its phases
 
 ## Relationship to Pipeline Architecture

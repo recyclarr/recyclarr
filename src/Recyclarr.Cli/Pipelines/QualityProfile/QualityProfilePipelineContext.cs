@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
@@ -8,6 +9,7 @@ internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource
 {
     public static PipelineType PipelineType => PipelineType.QualityProfile;
     public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
+    public static SupportedServices? ServiceAffinity => null;
 
     public override string PipelineDescription => "Quality Profile";
 

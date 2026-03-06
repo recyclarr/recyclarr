@@ -14,6 +14,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CLI: Show default/optional status for quality profiles in `list custom-format-groups --details`
   (#725)
 
+### Fixed
+
+- Sync: Media naming status always showed as skipped for Radarr instances (#751)
+
 ## [8.4.0] - 2026-03-05
 
 ### Added

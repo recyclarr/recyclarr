@@ -3,7 +3,9 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -19,6 +21,10 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
 
         _executionOrder = [];
         _pipelinePublishers = [];
+
+        var config = Substitute.For<IServiceConfiguration>();
+        config.ServiceType.Returns(SupportedServices.Sonarr);
+        builder.RegisterInstance(config).As<IServiceConfiguration>();
 
         _instancePublisher = Substitute.For<IInstancePublisher>();
         _instancePublisher
@@ -41,6 +47,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var pipeline = Substitute.For<ISyncPipeline>();
         pipeline.PipelineType.Returns(type);
         pipeline.Dependencies.Returns(dependencies);
+        pipeline.AppliesTo(default).ReturnsForAnyArgs(true);
         pipeline
             .Execute(
                 Arg.Any<ISyncSettings>(),
@@ -74,7 +81,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
 
         var sut = CreateExecutor([qpPipeline, mnPipeline, cfPipeline, qsPipeline]);
 
@@ -97,7 +104,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
 
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 
@@ -116,7 +123,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             .BeEquivalentTo([
                 PipelineType.CustomFormat,
                 PipelineType.QualitySize,
-                PipelineType.SonarrMediaNaming,
+                PipelineType.MediaNaming,
             ]);
 
         // QP should be marked as skipped via its pipeline publisher
@@ -134,7 +141,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             [PipelineType.CustomFormat]
         );
         var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, [], PipelineResult.Failed);
-        var mnPipeline = CreateStubPipeline(PipelineType.SonarrMediaNaming, []);
+        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
 
         var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
 

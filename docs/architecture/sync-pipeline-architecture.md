@@ -38,31 +38,26 @@ from explicit dependency declarations:
 transparent. This choice prioritizes comprehension over architectural visibility.
 
 **Dependency Management**: Each pipeline declares its dependencies via `IPipelineMetadata`. The
-orchestrator (`CompositeSyncPipeline`) uses topological sort to determine execution order,
-ensuring dependencies run before dependents. When a pipeline fails, only its dependents are
-skipped - independent pipelines continue running.
+orchestrator (`CompositeSyncPipeline`) uses topological sort to determine execution order, ensuring
+dependencies run before dependents. When a pipeline fails, only its dependents are skipped -
+independent pipelines continue running.
 
 ### Pipeline Metadata and Orchestration
 
-Pipelines expose static metadata through `IPipelineMetadata`:
+Pipelines expose static metadata through `IPipelineMetadata`: pipeline type identity, dependency
+declarations, and service affinity. `GenericSyncPipeline<TContext>` bridges these static members to
+instance properties on `ISyncPipeline`, enabling the orchestrator to access metadata without knowing
+concrete types.
 
-```csharp
-internal interface IPipelineMetadata
-{
-    static abstract PipelineType PipelineType { get; }
-    static abstract IReadOnlyList<PipelineType> Dependencies { get; }
-}
-```
+### Service Affinity
 
-Context types implement this interface with their dependency declarations:
+Each pipeline declares an optional service affinity. Universal pipelines (Custom Formats, Quality
+Profiles, Quality Sizes, Media Management) have no affinity and run for any instance. Service-
+specific pipelines (Media Naming) declare their target service (Sonarr or Radarr).
 
-```csharp
-// QualityProfilePipelineContext declares dependency on CustomFormat
-public static IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
-```
-
-`GenericSyncPipeline<TContext>` bridges static metadata to instance properties on `ISyncPipeline`,
-enabling the orchestrator to access dependencies without knowing concrete types.
+`CompositeSyncPipeline` filters pipelines by affinity before the topological sort, so
+service-specific pipelines are never executed for the wrong instance type. This means each pipeline
+column in the progress table maps 1:1 to a `PipelineType` with no special-case logic.
 
 ### Failure Cascade Behavior
 
@@ -87,7 +82,8 @@ Pipelines fall into two categories based on dependency relationships:
 
 - Other pipelines depend on these (QP uses CFs for scoring)
 - ALL items must sync successfully or the entire pipeline fails
-- Partial sync would cause silent, non-deterministic behavior (incomplete CFs → incorrect QP scoring)
+- Partial sync would cause silent, non-deterministic behavior (incomplete CFs → incorrect QP
+  scoring)
 - Pipeline failure cascades to skip dependent pipelines
 
 This distinction ensures deterministic behavior: users get exactly what they configured for each
@@ -156,11 +152,11 @@ essential.
 
 **Minor Differences, Major Impact**: Sonarr and Radarr are similar but have key differences in areas
 like Media Naming formats and Quality Definition size limits. These differences require
-service-specific implementations that sometimes result in over-engineering.
+service-specific implementations.
 
-**Media Naming Over-Engineering**: Service differences in naming formats require complex abstraction
-layers. While functionally necessary, this represents an area where the architecture may be more
-complex than ideal.
+**Media Naming**: Sonarr and Radarr have distinct naming format APIs, requiring separate pipeline
+implementations. Both share the same `PipelineType.MediaNaming` identity; service affinity filtering
+ensures only the relevant implementation runs per instance.
 
 ### Architectural Evolution
 
@@ -201,8 +197,8 @@ objects.
 ### Conscious Compromises
 
 **Explicit Dependencies Over Implicit Ordering**: Dependencies are declared on context types via
-`IPipelineMetadata` rather than relying on registration order. This adds some ceremony but makes
-the dependency graph explicit and self-documenting.
+`IPipelineMetadata` rather than relying on registration order. This adds some ceremony but makes the
+dependency graph explicit and self-documenting.
 
 **Selective Cascade**: When a dependent pipeline (CF) fails, its dependents (QP) are skipped while
 independent pipelines continue. This reflects the atomicity model: independent resources can sync

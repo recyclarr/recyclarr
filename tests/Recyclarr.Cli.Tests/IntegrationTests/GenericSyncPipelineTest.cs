@@ -5,6 +5,7 @@ using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -148,6 +149,7 @@ internal sealed class TestPipelineContext : PipelineContext, IPipelineMetadata
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
+    public static SupportedServices? ServiceAffinity => null;
     public override string PipelineDescription => "Test Pipeline";
 }
 
@@ -155,6 +157,7 @@ internal sealed class SkippedTestPipelineContext : PipelineContext, IPipelineMet
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
+    public static SupportedServices? ServiceAffinity => null;
     public override string PipelineDescription => "Skipped Test Pipeline";
     public override bool ShouldSkip => true;
 }

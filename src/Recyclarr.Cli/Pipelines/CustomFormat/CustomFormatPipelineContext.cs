@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat;
 
@@ -9,6 +10,7 @@ internal class CustomFormatPipelineContext : PipelineContext, ISyncStateSource, 
 {
     public static PipelineType PipelineType => PipelineType.CustomFormat;
     public static IReadOnlyList<PipelineType> Dependencies => [];
+    public static SupportedServices? ServiceAffinity => null;
 
     public override string PipelineDescription => "Custom Format";
 

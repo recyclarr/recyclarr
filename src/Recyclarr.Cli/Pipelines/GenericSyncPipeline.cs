@@ -3,6 +3,7 @@ using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Cli.Pipelines;
 
@@ -15,6 +16,11 @@ internal class GenericSyncPipeline<TContext>(
 {
     public PipelineType PipelineType => TContext.PipelineType;
     public IReadOnlyList<PipelineType> Dependencies => TContext.Dependencies;
+
+    public bool AppliesTo(SupportedServices serviceType)
+    {
+        return TContext.ServiceAffinity is null || TContext.ServiceAffinity == serviceType;
+    }
 
     public async Task<PipelineResult> Execute(
         ISyncSettings settings,

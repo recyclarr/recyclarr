@@ -1,13 +1,17 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pipelines)
-    : IPipelineExecutor
+internal class CompositeSyncPipeline(
+    ILogger log,
+    IEnumerable<ISyncPipeline> pipelines,
+    IServiceConfiguration config
+) : IPipelineExecutor
 {
     public virtual async Task<PipelineResult> Execute(
         ISyncSettings settings,
@@ -16,7 +20,9 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pip
         CancellationToken ct
     )
     {
-        var sortedPipelines = TopologicalSort(pipelines);
+        // Exclude pipelines that target a different service type
+        var applicable = pipelines.Where(p => p.AppliesTo(config.ServiceType));
+        var sortedPipelines = TopologicalSort(applicable);
         log.Debug(
             "Pipeline execution order: {Order}",
             string.Join(" -> ", sortedPipelines.Select(p => p.PipelineType))
@@ -66,7 +72,7 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncPipeline> pip
 
     public void InterruptAll(IInstancePublisher instancePublisher)
     {
-        foreach (var pipeline in pipelines)
+        foreach (var pipeline in pipelines.Where(p => p.AppliesTo(config.ServiceType)))
         {
             instancePublisher
                 .ForPipeline(pipeline.PipelineType)

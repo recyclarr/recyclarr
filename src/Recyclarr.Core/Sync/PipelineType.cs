@@ -5,7 +5,6 @@ public enum PipelineType
     CustomFormat,
     QualityProfile,
     QualitySize,
-    SonarrMediaNaming,
-    RadarrMediaNaming,
+    MediaNaming,
     MediaManagement,
 }
