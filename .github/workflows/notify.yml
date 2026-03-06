@@ -17,6 +17,30 @@ env:
 permissions: read-all
 
 jobs:
+  release-comments:
+    name: Release Comments
+    # The commenter action requires release event context (workflow_dispatch has none)
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Generate App Token
+        id: app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+
+      - name: Comment on Released Issues
+        uses: apexskier/github-release-commenter@e7813a9625eabd79a875b4bc4046cfcae377ab34 # v1.4.1
+        with:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          comment-template: |
+            🎉 This is included in {release_link}.
+
   notify:
     name: Discord Notification
     runs-on: ubuntu-latest
