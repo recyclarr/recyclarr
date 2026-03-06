@@ -63,7 +63,8 @@ internal class StateRepairCommand(IAnsiConsole console, ILogger log)
         const string message =
             "The `state repair` command is deprecated and no longer necessary. "
             + "Sync now automatically adopts existing resources that match by name. "
-            + "This command will be removed in a future release.";
+            + "This command will be removed in a future release. "
+            + "See: https://next.recyclarr.dev/guide/upgrade-guide/v9.0/#state-repair-removed";
 
         console.MarkupLine($"[darkorange bold][[DEPRECATED]][/] {message}");
         log.Warning(message);

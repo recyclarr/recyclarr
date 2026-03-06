@@ -19,7 +19,7 @@ internal class NormalizeStateMappingsPropertyStep(IAppPaths paths) : IMigrationS
 
     public IReadOnlyCollection<string> Remediation =>
         [
-            "Run 'recyclarr state repair' to rebuild state files from scratch",
+            $"Delete JSON files under {paths.StateDirectory} and re-run sync (existing resources will be auto-adopted)",
             $"Manually edit JSON files under {paths.StateDirectory} and rename the top-level property to \"mappings\"",
         ];
 
