@@ -254,14 +254,35 @@ Use this priority order (highest to lowest) to determine commit type:
 
 ### Tier 1: User-Facing (require CHANGELOG)
 
-Ask: "Would this warrant a CHANGELOG line that non-technical users would understand and care about?"
+Conventional Commits serves semver (2 buckets: feat/fix). Keep a Changelog serves users (3 buckets:
+Added/Changed/Fixed). These are two separate decisions made in order.
 
-- `feat:` / `feat!:` -> CHANGELOG "Added" / "Removed/Changed" (new capability / breaking)
-- `fix:` / `fix!:` -> CHANGELOG "Fixed" / "Removed/Changed" (bug users would report / breaking)
-- `perf:` -> CHANGELOG "Changed" (significant performance improvement)
+**Step 1: Commit type (determines semver bump).**
+
+Ask: "Does this fix incorrect behavior?" If yes: `fix`. Otherwise, ask: "Does this change
+user-visible behavior (e.g. new capability, enhanced output, modified defaults)?" If yes: `feat`. If
+neither: skip to Tier 2.
+
+- `feat:` -> User-visible change that is not a bug fix (MINOR bump)
+- `fix:` -> Corrects incorrect behavior a user could report as broken (PATCH bump)
+- `perf:` -> Significant, measurable performance improvement (PATCH bump)
+- Append `!` for breaking changes regardless of type (MAJOR bump)
+
+**Step 2: Changelog category (describes the change for users).**
+
+Given a Tier 1 commit, pick the changelog section by what happened:
+
+- **Added**: A capability that did not exist before (e.g. new command, new flag, new config option)
+- **Changed**: Existing behavior now works differently (e.g. enhanced output, modified defaults,
+  adjusted limits, breaking changes, performance improvements)
+- **Fixed**: Something was broken and now it works correctly
+
+A single commit type can map to different changelog categories. `feat` produces either Added or
+Changed depending on whether the capability is new or an enhancement. `fix` almost always produces
+Fixed. Breaking changes (`!`) produce Changed or Removed.
 
 Multi-commit features: use `refactor` for infrastructure commits, `feat` only for the commit that
-enables the user-facing capability.
+enables the user-visible capability.
 
 ### Tier 2: Path-Based (no CHANGELOG)
 
