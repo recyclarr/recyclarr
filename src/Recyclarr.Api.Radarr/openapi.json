@@ -8334,15 +8334,7 @@
         "type": "string"
       },
       "CommandStatus": {
-        "enum": [
-          "queued",
-          "started",
-          "completed",
-          "failed",
-          "aborted",
-          "cancelled",
-          "orphaned"
-        ],
+        "enum": ["queued", "started", "completed", "failed", "aborted", "cancelled", "orphaned"],
         "type": "string"
       },
       "CommandTrigger": {
@@ -9404,15 +9396,7 @@
         "additionalProperties": false
       },
       "ImportListType": {
-        "enum": [
-          "program",
-          "tmdb",
-          "trakt",
-          "plex",
-          "simkl",
-          "other",
-          "advanced"
-        ],
+        "enum": ["program", "tmdb", "trakt", "plex", "simkl", "other", "advanced"],
         "type": "string"
       },
       "ImportRejectionResource": {
@@ -9911,15 +9895,7 @@
         "additionalProperties": false
       },
       "MediaCoverTypes": {
-        "enum": [
-          "unknown",
-          "poster",
-          "banner",
-          "fanart",
-          "screenshot",
-          "headshot",
-          "clearlogo"
-        ],
+        "enum": ["unknown", "poster", "banner", "fanart", "screenshot", "headshot", "clearlogo"],
         "type": "string"
       },
       "MediaInfoResource": {
@@ -11872,21 +11848,7 @@
         "additionalProperties": false
       },
       "TMDbCountryCode": {
-        "enum": [
-          "au",
-          "br",
-          "ca",
-          "fr",
-          "de",
-          "gb",
-          "in",
-          "ie",
-          "it",
-          "nz",
-          "ro",
-          "es",
-          "us"
-        ],
+        "enum": ["au", "br", "ca", "fr", "de", "gb", "in", "ie", "it", "nz", "ro", "es", "us"],
         "type": "string"
       },
       "TagDetailsResource": {
