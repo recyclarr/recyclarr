@@ -3,4 +3,5 @@ RECYCLARR_CONFIG_DIR = "../dev-configs/appdata"
 
 [tools]
 "github:santhosh-tekuri/jsonschema" = "latest"
+python = "latest"
 wrangler = "latest"
