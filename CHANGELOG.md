@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.4.0] - 2026-03-05
+
 ### Added
 
 - CLI: `--details` flag for `list custom-format-groups` to show member CFs and their
@@ -1319,7 +1321,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.3.2...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.4.0...HEAD
+[8.4.0]: https://github.com/recyclarr/recyclarr/compare/v8.3.2...v8.4.0
 [8.3.2]: https://github.com/recyclarr/recyclarr/compare/v8.3.1...v8.3.2
 [8.3.1]: https://github.com/recyclarr/recyclarr/compare/v8.3.0...v8.3.1
 [8.3.0]: https://github.com/recyclarr/recyclarr/compare/v8.2.1...v8.3.0
