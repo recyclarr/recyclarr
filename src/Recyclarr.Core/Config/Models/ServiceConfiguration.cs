@@ -92,6 +92,7 @@ public record ResetUnmatchedScoresConfig
 {
     public bool Enabled { get; init; }
     public IReadOnlyCollection<string> Except { get; init; } = [];
+    public IReadOnlyCollection<string> ExceptPatterns { get; init; } = [];
 }
 
 public record QualityProfileConfig

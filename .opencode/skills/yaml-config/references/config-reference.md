@@ -238,7 +238,8 @@ min_upgrade_format_score: number # (O) default: unchanged in service
 quality_sort: top|bottom        # (O) default: top
 reset_unmatched_scores:
   enabled: boolean              # (R) set unmanaged CF scores to 0
-  except: [string]              # (O) CF names excluded from reset
+  except: [string]              # (O) CF names excluded from reset (exact, case-insensitive)
+  except_patterns: [string]     # (O) regex patterns to exclude from reset (case-insensitive)
 upgrade:
   allowed: boolean              # (R) Upgrades Allowed checkbox
   until_quality: string         # (CR) required when qualities list is provided
@@ -345,7 +346,7 @@ Within `quality_profiles` join:
 
 - `upgrade` -- Union (each scalar replaces)
 - `qualities` -- Replace (complete list required; high-stakes, not Add)
-- `reset_unmatched_scores` -- Union (`except` uses Add)
+- `reset_unmatched_scores` -- Union (`except` and `except_patterns` use Add)
 - All scalars -- Replace
 
 Within `custom_format_groups` join:

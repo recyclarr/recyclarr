@@ -120,6 +120,7 @@ internal sealed class MergeQualityProfilesTest
                     {
                         Enabled = true,
                         Except = ["except1"],
+                        ExceptPatterns = [@"^pattern1$"],
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml
                     {
@@ -151,6 +152,7 @@ internal sealed class MergeQualityProfilesTest
                     ResetUnmatchedScores = new ResetUnmatchedScoresConfigYaml
                     {
                         Except = ["except2", "except3"],
+                        ExceptPatterns = [@"^pattern2$"],
                     },
                     Upgrade = new QualityProfileFormatUpgradeYaml { UntilQuality = "quality2" },
                     Qualities =
@@ -194,6 +196,7 @@ internal sealed class MergeQualityProfilesTest
                             {
                                 Enabled = true,
                                 Except = ["except1", "except2", "except3"],
+                                ExceptPatterns = [@"^pattern1$", @"^pattern2$"],
                             },
                             Upgrade = new QualityProfileFormatUpgradeYaml
                             {

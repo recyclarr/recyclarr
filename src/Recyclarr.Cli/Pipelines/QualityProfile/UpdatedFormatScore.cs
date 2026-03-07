@@ -1,5 +1,7 @@
+using System.Text.RegularExpressions;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Config.Models;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
@@ -51,12 +53,23 @@ internal record UpdatedFormatScore(
     )
     {
         var reset = profileData.Config.ResetUnmatchedScores;
-        var shouldReset =
-            reset.Enabled && reset.Except.All(x => !formatItem.Name.EqualsIgnoreCase(x));
+        var shouldReset = reset.Enabled && !IsExcepted(formatItem.Name, reset);
 
         var score = shouldReset ? 0 : formatItem.Score;
         var reason = shouldReset ? FormatScoreUpdateReason.Reset : FormatScoreUpdateReason.NoChange;
         return new UpdatedFormatScore(formatItem, score, reason);
+    }
+
+    private static bool IsExcepted(string name, ResetUnmatchedScoresConfig reset)
+    {
+        if (reset.Except.Any(x => name.EqualsIgnoreCase(x)))
+        {
+            return true;
+        }
+
+        return reset.ExceptPatterns.Any(pattern =>
+            Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase)
+        );
     }
 
     public static UpdatedFormatScore Updated(

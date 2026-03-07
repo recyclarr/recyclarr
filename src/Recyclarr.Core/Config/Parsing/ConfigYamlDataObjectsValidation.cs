@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Common.FluentValidation;
@@ -187,6 +188,25 @@ public class ResetUnmatchedScoresConfigYamlValidator
         RuleFor(x => x.Enabled)
             .NotNull()
             .WithMessage("Under `reset_unmatched_scores`, the `enabled` property is required.");
+
+        RuleForEach(x => x.ExceptPatterns)
+            .Must(IsValidRegex)
+            .WithMessage(
+                "Under `reset_unmatched_scores`, `except_patterns` contains an invalid regex: '{PropertyValue}'"
+            );
+    }
+
+    private static bool IsValidRegex(string pattern)
+    {
+        try
+        {
+            _ = new Regex(pattern);
+            return true;
+        }
+        catch (RegexParseException)
+        {
+            return false;
+        }
     }
 }
 

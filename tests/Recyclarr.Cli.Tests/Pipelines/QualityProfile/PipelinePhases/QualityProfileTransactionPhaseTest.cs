@@ -517,6 +517,216 @@ internal sealed class QualityProfileTransactionPhaseTest
     }
 
     [Test, AutoMockData]
+    public async Task Reset_scores_with_except_patterns(QualityProfileTransactionPhase sut)
+    {
+        var dtos = new[]
+        {
+            new QualityProfileData
+            {
+                Id = 1,
+                Name = "profile1",
+                FormatItems =
+                [
+                    new QualityProfileFormatItem
+                    {
+                        Name = "[Custom] My Format",
+                        FormatId = 1,
+                        Score = 200,
+                    },
+                    new QualityProfileFormatItem
+                    {
+                        Name = "[Custom] Other Format",
+                        FormatId = 2,
+                        Score = 300,
+                    },
+                    new QualityProfileFormatItem
+                    {
+                        Name = "Standard Format",
+                        FormatId = 3,
+                        Score = 400,
+                    },
+                ],
+            },
+        };
+
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    ExceptPatterns = [@"^\[Custom\]"],
+                },
+            }
+        );
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            State = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Pattern matches both [Custom] CFs; only "Standard Format" is reset
+        context
+            .TransactionOutput.UpdatedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore(
+                        "[Custom] My Format",
+                        200,
+                        200,
+                        FormatScoreUpdateReason.NoChange
+                    ),
+                    NewQp.UpdatedScore(
+                        "[Custom] Other Format",
+                        300,
+                        300,
+                        FormatScoreUpdateReason.NoChange
+                    ),
+                    NewQp.UpdatedScore("Standard Format", 400, 0, FormatScoreUpdateReason.Reset),
+                ],
+                o => o.Excluding(x => x.FormatItem.FormatId)
+            );
+    }
+
+    [Test, AutoMockData]
+    public async Task Reset_scores_with_combined_except_and_except_patterns(
+        QualityProfileTransactionPhase sut
+    )
+    {
+        var dtos = new[]
+        {
+            new QualityProfileData
+            {
+                Id = 1,
+                Name = "profile1",
+                FormatItems =
+                [
+                    new QualityProfileFormatItem
+                    {
+                        Name = "[Custom] My Format",
+                        FormatId = 1,
+                        Score = 200,
+                    },
+                    new QualityProfileFormatItem
+                    {
+                        Name = "Exact Match CF",
+                        FormatId = 2,
+                        Score = 300,
+                    },
+                    new QualityProfileFormatItem
+                    {
+                        Name = "Standard Format",
+                        FormatId = 3,
+                        Score = 400,
+                    },
+                ],
+            },
+        };
+
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    Except = ["Exact Match CF"],
+                    ExceptPatterns = [@"^\[Custom\]"],
+                },
+            }
+        );
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            State = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        context
+            .TransactionOutput.UpdatedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.UpdatedScores.Should()
+            .BeEquivalentTo(
+                [
+                    NewQp.UpdatedScore(
+                        "[Custom] My Format",
+                        200,
+                        200,
+                        FormatScoreUpdateReason.NoChange
+                    ),
+                    NewQp.UpdatedScore(
+                        "Exact Match CF",
+                        300,
+                        300,
+                        FormatScoreUpdateReason.NoChange
+                    ),
+                    NewQp.UpdatedScore("Standard Format", 400, 0, FormatScoreUpdateReason.Reset),
+                ],
+                o => o.Excluding(x => x.FormatItem.FormatId)
+            );
+    }
+
+    [Test, AutoMockData]
+    public async Task Reset_scores_with_invalid_except_patterns(QualityProfileTransactionPhase sut)
+    {
+        var dtos = new[]
+        {
+            new QualityProfileData
+            {
+                Id = 1,
+                Name = "profile1",
+                FormatItems =
+                [
+                    new QualityProfileFormatItem
+                    {
+                        Name = "cf1",
+                        FormatId = 1,
+                        Score = 200,
+                    },
+                ],
+            },
+        };
+
+        var profile = NewPlan.Qp(
+            new QualityProfileConfig
+            {
+                Name = "profile1",
+                ResetUnmatchedScores = new ResetUnmatchedScoresConfig
+                {
+                    Enabled = true,
+                    ExceptPatterns = [@"^\[NoMatch\]"],
+                },
+            }
+        );
+
+        var context = new QualityProfilePipelineContext
+        {
+            Plan = CreatePlan(profile),
+            ApiFetchOutput = NewQp.ServiceData(dtos),
+            State = CreateCache(),
+        };
+
+        await sut.Execute(context, CancellationToken.None);
+
+        // Pattern matches no CFs, so it's flagged as invalid
+        context
+            .TransactionOutput.UpdatedProfiles.Should()
+            .ContainSingle()
+            .Which.Profile.InvalidExceptCfPatterns.Should()
+            .BeEquivalentTo(@"^\[NoMatch\]");
+    }
+
+    [Test, AutoMockData]
     public async Task Missing_required_qualities_are_readded(QualityProfileTransactionPhase sut)
     {
         var dtos = new[]

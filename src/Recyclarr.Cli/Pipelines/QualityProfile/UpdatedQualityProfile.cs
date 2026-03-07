@@ -18,6 +18,7 @@ internal record UpdatedQualityProfile
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = [];
+    public IReadOnlyCollection<string> InvalidExceptCfPatterns { get; set; } = [];
     public IReadOnlyCollection<string> MissingQualities { get; set; } = [];
 
     public string ProfileName

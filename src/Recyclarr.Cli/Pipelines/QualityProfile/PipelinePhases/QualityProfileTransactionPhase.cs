@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
@@ -114,8 +115,11 @@ internal class QualityProfileTransactionPhase(
     {
         foreach (var profile in updatedProfiles)
         {
-            profile.InvalidExceptCfNames = GetInvalidExceptCfNames(
-                profile.ProfileConfig.Config.ResetUnmatchedScores,
+            var resetConfig = profile.ProfileConfig.Config.ResetUnmatchedScores;
+
+            profile.InvalidExceptCfNames = GetInvalidExceptCfNames(resetConfig, profile.Profile);
+            profile.InvalidExceptCfPatterns = GetInvalidExceptCfPatterns(
+                resetConfig,
                 profile.Profile
             );
 
@@ -138,6 +142,26 @@ internal class QualityProfileTransactionPhase(
             .Except(
                 profile.FormatItems.Select(x => x.Name),
                 StringComparer.InvariantCultureIgnoreCase
+            )
+            .ToList();
+    }
+
+    // Find patterns that don't match any CF in the profile
+    private static List<string> GetInvalidExceptCfPatterns(
+        ResetUnmatchedScoresConfig resetConfig,
+        QualityProfileData profile
+    )
+    {
+        var patterns = resetConfig.ExceptPatterns;
+        if (patterns.Count == 0)
+        {
+            return [];
+        }
+
+        var cfNames = profile.FormatItems.Select(x => x.Name).ToList();
+        return patterns
+            .Where(pattern =>
+                !cfNames.Any(name => Regex.IsMatch(name, pattern, RegexOptions.IgnoreCase))
             )
             .ToList();
     }

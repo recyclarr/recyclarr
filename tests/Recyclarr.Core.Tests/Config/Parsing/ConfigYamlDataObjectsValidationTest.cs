@@ -376,4 +376,38 @@ internal sealed class ConfigYamlDataObjectsValidationTest
 
         result.Errors.Should().ContainSingle().Which.ErrorMessage.Should().Contain("choose one");
     }
+
+    [Test]
+    public void Reset_unmatched_scores_rejects_invalid_regex_pattern()
+    {
+        var data = new ResetUnmatchedScoresConfigYaml
+        {
+            Enabled = true,
+            ExceptPatterns = [@"^valid$", "[invalid"],
+        };
+
+        var validator = new ResetUnmatchedScoresConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result
+            .ShouldHaveValidationErrorFor("ExceptPatterns[1]")
+            .WithErrorMessage(
+                "Under `reset_unmatched_scores`, `except_patterns` contains an invalid regex: '[invalid'"
+            );
+    }
+
+    [Test]
+    public void Reset_unmatched_scores_accepts_valid_regex_patterns()
+    {
+        var data = new ResetUnmatchedScoresConfigYaml
+        {
+            Enabled = true,
+            ExceptPatterns = [@"^\[Custom\]", @".*Audio.*"],
+        };
+
+        var validator = new ResetUnmatchedScoresConfigYamlValidator();
+        var result = validator.TestValidate(data);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.ExceptPatterns);
+    }
 }

@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Sync: `except_patterns` option for `reset_unmatched_scores` to exclude custom formats by regex
+  pattern (#235)
+
 ### Changed
 
 - CLI: Show default/optional status for quality profiles in `list custom-format-groups --details`

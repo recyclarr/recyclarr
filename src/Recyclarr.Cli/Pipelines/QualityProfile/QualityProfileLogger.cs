@@ -70,6 +70,15 @@ internal class QualityProfileLogger(ILogger log)
             context.Publisher.AddWarning(message);
         }
 
+        var invalidCfExceptPatterns = profile.InvalidExceptCfPatterns;
+        if (invalidCfExceptPatterns.Count != 0)
+        {
+            var message =
+                $"`except_patterns` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
+                + $"patterns matching no CFs: {string.Join(", ", invalidCfExceptPatterns)}";
+            context.Publisher.AddWarning(message);
+        }
+
         var missingQualities = profile.MissingQualities;
         if (missingQualities.Count != 0)
         {

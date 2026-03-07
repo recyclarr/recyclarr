@@ -252,6 +252,17 @@ public abstract class ServiceConfigMerger<T>
                                             .ToList()
                                 )
                         ),
+                        ExceptPatterns = Combine(
+                            a1.ExceptPatterns,
+                            b1.ExceptPatterns,
+                            (a2, b2) =>
+                                Combine(
+                                    a2,
+                                    b2,
+                                    (a3, b3) =>
+                                        a3.Concat(b3).Distinct(StringComparer.Ordinal).ToList()
+                                )
+                        ),
                     }
             ),
             Qualities = b.Qualities ?? a.Qualities,

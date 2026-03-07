@@ -93,6 +93,7 @@ internal static class ConfigYamlExtensions
         {
             Enabled = yaml?.Enabled ?? false,
             Except = yaml?.Except?.ToList() ?? [],
+            ExceptPatterns = yaml?.ExceptPatterns?.ToList() ?? [],
         };
     }
 
