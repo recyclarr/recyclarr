@@ -10,7 +10,8 @@ internal class CustomFormatPlanComponent(
     ConfiguredCustomFormatProvider cfProvider,
     CustomFormatResourceQuery cfQuery,
     IValidator<CustomFormatGroupConfig> cfGroupValidator,
-    IServiceConfiguration config
+    IServiceConfiguration config,
+    ILogger log
 ) : IPlanComponent
 {
     public void Process(PipelinePlan plan)
@@ -18,7 +19,7 @@ internal class CustomFormatPlanComponent(
         // Validate explicit CF group config before resolution
         foreach (var groupConfig in config.CustomFormatGroups.Add)
         {
-            cfGroupValidator.Validate(groupConfig).ForwardTo(plan);
+            cfGroupValidator.Validate(groupConfig).ForwardTo(plan, log);
         }
 
         var cfResources = cfQuery

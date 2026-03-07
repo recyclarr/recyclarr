@@ -1080,7 +1080,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
     }
 
     [Test]
-    public void Build_with_cf_group_selecting_default_cf_emits_warning()
+    public void Build_with_cf_group_selecting_default_cf_does_not_warn()
     {
         SetupCustomFormatWithScores("Default CF", "default-cf", ("default", 100));
         SetupQualityProfileGuideData("test-qp", "Test Profile", ("HDTV-1080p", true, null));
@@ -1115,12 +1115,12 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        // Default CF is still included (redundant selection)
+        // Default CF is still included; redundant selection is logged at debug level, not warned
         plan.CustomFormats.Should()
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("default-cf");
-        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("redundant")));
+        publisher.DidNotReceiveWithAnyArgs().AddWarning(default!);
         publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 }

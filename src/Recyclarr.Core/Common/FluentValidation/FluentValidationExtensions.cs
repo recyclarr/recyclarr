@@ -48,14 +48,22 @@ public static class FluentValidationExtensions
 
     /// <summary>
     /// Forwards validation failures to an <see cref="IDiagnosticPublisher"/> as errors or warnings
-    /// based on severity. Returns true if the result has no errors.
+    /// based on severity. Info-level failures are routed to <paramref name="log"/> at debug level
+    /// (suppressed when no logger is provided). Returns true if the result has no errors.
     /// </summary>
-    public static bool ForwardTo(this ValidationResult result, IDiagnosticPublisher publisher)
+    public static bool ForwardTo(
+        this ValidationResult result,
+        IDiagnosticPublisher publisher,
+        ILogger? log = null
+    )
     {
         foreach (var failure in result.Errors)
         {
             switch (failure.Severity)
             {
+                case Severity.Info:
+                    log?.Debug("{Message}", failure.ErrorMessage);
+                    break;
                 case Severity.Warning:
                     publisher.AddWarning(failure.ErrorMessage);
                     break;

@@ -70,7 +70,7 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
 
         RuleForEach(g => g.Select)
             .Must((g, selectId) => g.SelectAll || FindCf(g, selectId) is not { Default: true })
-            .WithSeverity(Severity.Warning)
+            .WithSeverity(Severity.Info)
             .WithMessage(
                 (g, selectId) =>
                     $"CF group '{g.TrashId}': Selecting default CF '{selectId}' is redundant "

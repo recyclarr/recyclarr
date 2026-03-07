@@ -21,6 +21,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Sync: Unnecessary warning when explicitly selecting default custom formats in CF groups
 - Sync: Media naming status always showed as skipped for Radarr instances (#751)
 
 ## [8.4.0] - 2026-03-05
