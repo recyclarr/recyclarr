@@ -1,5 +1,6 @@
 [env]
 RECYCLARR_CONFIG_DIR = "../dev-configs/appdata"
+OPENCODE_CONFIG_DIR = "{{config_root}}/../.opencode"
 
 [tools]
 "github:santhosh-tekuri/jsonschema" = "latest"
