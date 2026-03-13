@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Config: Trailing slash in `base_url` caused HTTP 401 errors
+
 ## [8.5.0] - 2026-03-13
 
 ### Added

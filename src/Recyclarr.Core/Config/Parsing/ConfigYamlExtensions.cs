@@ -243,6 +243,8 @@ internal static class ConfigYamlExtensions
 
     private static Uri ParseUri(string? baseUrl)
     {
-        return string.IsNullOrWhiteSpace(baseUrl) ? new Uri("about:empty") : new Uri(baseUrl);
+        return string.IsNullOrWhiteSpace(baseUrl)
+            ? new Uri("about:empty")
+            : new Uri(baseUrl.TrimEnd('/'));
     }
 }

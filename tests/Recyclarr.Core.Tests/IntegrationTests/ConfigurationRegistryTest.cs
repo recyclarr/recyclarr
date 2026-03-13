@@ -21,6 +21,34 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     }
 
     [Test]
+    public void Trailing_slash_stripped_from_base_url()
+    {
+        var sut = Resolve<ConfigurationRegistry>();
+
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878/radarr/
+                    api_key: asdf
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
+        );
+
+        result
+            .Configs.Should()
+            .ContainSingle()
+            .Which.BaseUrl.Should()
+            .Be(new Uri("http://localhost:7878/radarr"));
+    }
+
+    [Test]
     public void Use_explicit_paths_instead_of_default()
     {
         var sut = Resolve<ConfigurationRegistry>();
