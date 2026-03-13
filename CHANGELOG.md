@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.5.0] - 2026-03-13
+
 ### Added
 
 - Sync: `except_patterns` option for `reset_unmatched_scores` to exclude custom formats by regex
@@ -1336,7 +1338,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.4.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.5.0...HEAD
+[8.5.0]: https://github.com/recyclarr/recyclarr/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/recyclarr/recyclarr/compare/v8.3.2...v8.4.0
 [8.3.2]: https://github.com/recyclarr/recyclarr/compare/v8.3.1...v8.3.2
 [8.3.1]: https://github.com/recyclarr/recyclarr/compare/v8.3.0...v8.3.1
