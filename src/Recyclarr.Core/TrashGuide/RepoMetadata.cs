@@ -12,6 +12,8 @@ public record RadarrMetadata
     public IReadOnlyCollection<string> CfGroups { get; init; } = [];
 
     public IReadOnlyCollection<string> QualityProfiles { get; init; } = [];
+
+    public IReadOnlyCollection<string> QualityProfileGroups { get; init; } = [];
 }
 
 public record SonarrMetadata
@@ -24,6 +26,8 @@ public record SonarrMetadata
     public IReadOnlyCollection<string> CfGroups { get; init; } = [];
 
     public IReadOnlyCollection<string> QualityProfiles { get; init; } = [];
+
+    public IReadOnlyCollection<string> QualityProfileGroups { get; init; } = [];
 }
 
 public record JsonPaths
