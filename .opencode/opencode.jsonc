@@ -4,18 +4,23 @@
   "mcp": {
     "linear": {
       "type": "remote",
-      "url": "https://mcp.linear.app/mcp"
+      "url": "https://mcp.linear.app/mcp",
     },
     "mslearn": {
       "type": "remote",
-      "url": "https://learn.microsoft.com/api/mcp"
-    }
+      "url": "https://learn.microsoft.com/api/mcp",
+    },
   },
   "formatter": {
     "csharpier": {
       "command": ["dotnet", "csharpier", "format", "$FILE"],
-      "extensions": [".cs"]
-    }
+      "extensions": [".cs"],
+    },
+  },
+  "lsp": {
+    "csharp": {
+      "disabled": true,
+    },
   },
   "permission": {
     // Fine tune linear tools in context
