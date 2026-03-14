@@ -95,6 +95,13 @@ public class TrashGuidesStrategy(ResourceRegistry<IFileInfo> registry, ILogger l
         registry.Register<SonarrQualityProfileResource>(
             GlobJsonFiles(metadata.JsonPaths.Sonarr.QualityProfiles, rootPath)
         );
+
+        registry.Register<RadarrQualityProfileGroupResource>(
+            GlobJsonFiles(metadata.JsonPaths.Radarr.QualityProfileGroups, rootPath)
+        );
+        registry.Register<SonarrQualityProfileGroupResource>(
+            GlobJsonFiles(metadata.JsonPaths.Sonarr.QualityProfileGroups, rootPath)
+        );
     }
 
     private IEnumerable<IFileInfo> GlobJsonFiles(
