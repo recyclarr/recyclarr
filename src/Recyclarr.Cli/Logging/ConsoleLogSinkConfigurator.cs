@@ -16,7 +16,7 @@ internal class ConsoleLogSinkConfigurator(IEnvironment env, LoggingLevelSwitch l
 
     private ExpressionTemplate BuildExpressionTemplate()
     {
-        var template = "[{@l:u3}] " + LogSetup.BaseTemplate;
+        var template = "[{@l:u3}] " + LogSetup.BaseTemplate + "{Inspect(@x).StackTrace}";
         var raw = !string.IsNullOrEmpty(env.GetEnvironmentVariable("NO_COLOR"));
         return new ExpressionTemplate(template, theme: raw ? null : TemplateTheme.Code);
     }

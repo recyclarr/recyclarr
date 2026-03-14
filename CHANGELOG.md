@@ -17,6 +17,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- CLI: `config wizard` command with interactive TUI for building configuration files
 - Sync: `except_patterns` option for `reset_unmatched_scores` to exclude custom formats by regex
   pattern (#235)
 

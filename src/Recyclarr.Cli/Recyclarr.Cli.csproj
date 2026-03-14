@@ -9,6 +9,9 @@
     <PackageReference Include="Autofac.Extras.AggregateService" />
     <PackageReference Include="Autofac.Extras.Ordering" />
     <PackageReference Include="GitVersion.MsBuild" />
+    <PackageReference Include="ReactiveMarbles.ObservableEvents.SourceGenerator" PrivateAssets="All" />
+    <PackageReference Include="ReactiveUI" />
+    <PackageReference Include="ReactiveUI.SourceGenerators" PrivateAssets="All" />
     <PackageReference Include="Refit.HttpClientFactory" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Expressions" />
@@ -18,6 +21,7 @@
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="SuperLinq" />
     <PackageReference Include="SystemTextJson.JsonDiffPatch" />
+    <PackageReference Include="Terminal.Gui" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
