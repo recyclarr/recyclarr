@@ -45,7 +45,7 @@ internal partial class QualityProfileViewModel : WizardStepViewModel
         Disposables.Add(_syncSubscription);
     }
 
-    public void Activate()
+    public override void Activate()
     {
         PopulateSelector();
         RestoreSelections();

@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
-using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using Recyclarr.Cli.Console.Wizard.ViewModels;
 using Terminal.Gui.App;
@@ -91,47 +90,14 @@ internal sealed class ConnectionStepView : WizardStepViewBase<ConnectionViewMode
             categoryHint
         );
 
-        // VM -> View bindings
-        viewModel
-            .WhenAnyValue(x => x.Name)
-            .BindTo(nameField, x => x.Text)
-            .DisposeWith(Disposables);
-
-        viewModel
-            .WhenAnyValue(x => x.BaseUrl)
-            .BindTo(urlField, x => x.Text)
-            .DisposeWith(Disposables);
-
-        viewModel
-            .WhenAnyValue(x => x.ApiKey)
-            .BindTo(apiKeyField, x => x.Text)
-            .DisposeWith(Disposables);
+        // Two-way bindings
+        viewModel.Name.BindTwoWay(nameField).DisposeWith(Disposables);
+        viewModel.BaseUrl.BindTwoWay(urlField).DisposeWith(Disposables);
+        viewModel.ApiKey.BindTwoWay(apiKeyField).DisposeWith(Disposables);
 
         viewModel
             .WhenAnyValue(x => x.Category)
             .Subscribe(v => categorySelector.Value = v)
-            .DisposeWith(Disposables);
-
-        // View -> VM bindings
-        nameField
-            .Events()
-            .TextChanged.Select(_ => nameField.Text)
-            .DistinctUntilChanged()
-            .BindTo(viewModel, x => x.Name)
-            .DisposeWith(Disposables);
-
-        urlField
-            .Events()
-            .TextChanged.Select(_ => urlField.Text)
-            .DistinctUntilChanged()
-            .BindTo(viewModel, x => x.BaseUrl)
-            .DisposeWith(Disposables);
-
-        apiKeyField
-            .Events()
-            .TextChanged.Select(_ => apiKeyField.Text)
-            .DistinctUntilChanged()
-            .BindTo(viewModel, x => x.ApiKey)
             .DisposeWith(Disposables);
 
         // Manual event subscription because ReactiveMarbles
@@ -148,23 +114,23 @@ internal sealed class ConnectionStepView : WizardStepViewBase<ConnectionViewMode
 
         // Error display bindings
         viewModel
-            .WhenAnyValue(x => x.NameError)
+            .Name.ObserveValidationErrors()
             .Subscribe(err => ToggleError(nameError, err))
             .DisposeWith(Disposables);
 
         viewModel
-            .WhenAnyValue(x => x.UrlError)
+            .BaseUrl.ObserveValidationErrors()
             .Subscribe(err => ToggleError(urlError, err))
             .DisposeWith(Disposables);
 
         viewModel
-            .WhenAnyValue(x => x.ApiKeyError)
+            .ApiKey.ObserveValidationErrors()
             .Subscribe(err => ToggleError(apiKeyError, err))
             .DisposeWith(Disposables);
 
         return;
 
-        static void ToggleError(Label label, string error)
+        static void ToggleError(Label label, string? error)
         {
             if (string.IsNullOrEmpty(error))
             {

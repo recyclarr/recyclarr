@@ -13,6 +13,12 @@ internal abstract class WizardStepViewModel : ReactiveObject, IWizardStepViewMod
     public abstract string SectionName { get; }
     public virtual IObservable<bool> IsValid => Observable.Return(true);
 
+    public virtual void Activate() { }
+
+    // Called on submit attempt to reveal suppressed validation errors
+    // (e.g. fields using ignoreInitialError that the user never touched).
+    public virtual void ForceValidation() { }
+
     public void Dispose()
     {
         Disposables.Dispose();

@@ -1,4 +1,6 @@
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -10,26 +12,17 @@ internal partial class ConnectionViewModel : WizardStepViewModel
     private readonly WizardViewModel _wizard;
     private readonly SerialDisposable _syncSubscription = new();
 
-    [Reactive]
-    private string _name = "";
-
-    [Reactive]
-    private string _baseUrl = "";
-
-    [Reactive]
-    private string _apiKey = "";
+    // CurrentThreadScheduler ensures CheckValidation() propagates synchronously,
+    // so ForceValidation() + GoNextCommand.Execute() work in sequence.
+    public ReactiveProperty<string> Name { get; } =
+        new("", CurrentThreadScheduler.Instance, false, false);
+    public ReactiveProperty<string> BaseUrl { get; } =
+        new("", CurrentThreadScheduler.Instance, false, false);
+    public ReactiveProperty<string> ApiKey { get; } =
+        new("", CurrentThreadScheduler.Instance, false, false);
 
     [Reactive]
     private GuideCategory _category = GuideCategory.Standard;
-
-    // Validation error messages; empty string means valid
-    private readonly ObservableAsPropertyHelper<string> _nameError;
-    private readonly ObservableAsPropertyHelper<string> _urlError;
-    private readonly ObservableAsPropertyHelper<string> _apiKeyError;
-
-    public string NameError => _nameError.Value;
-    public string UrlError => _urlError.Value;
-    public string ApiKeyError => _apiKeyError.Value;
 
     public override string SectionName => "Instance";
     public override IObservable<bool> IsValid { get; }
@@ -38,11 +31,13 @@ internal partial class ConnectionViewModel : WizardStepViewModel
     {
         _wizard = wizard;
 
-        var nameValidation = this.WhenAnyValue(x => x.Name)
-            .Select(name => string.IsNullOrWhiteSpace(name) ? "Instance name is required." : "");
+        Name.AddValidationError(
+            name => string.IsNullOrWhiteSpace(name) ? "Instance name is required." : null,
+            ignoreInitialError: true
+        );
 
-        var urlValidation = this.WhenAnyValue(x => x.BaseUrl)
-            .Select(url =>
+        BaseUrl.AddValidationError(
+            url =>
             {
                 if (
                     string.IsNullOrWhiteSpace(url)
@@ -53,39 +48,46 @@ internal partial class ConnectionViewModel : WizardStepViewModel
                     return "Must be a valid HTTP or HTTPS URL.";
                 }
 
-                return "";
-            });
+                return null;
+            },
+            ignoreInitialError: true
+        );
 
-        var apiKeyValidation = this.WhenAnyValue(x => x.ApiKey)
-            .Select(key => string.IsNullOrEmpty(key) ? "API key is required." : "");
-
-        _nameError = nameValidation.ToProperty(this, x => x.NameError);
-        _urlError = urlValidation.ToProperty(this, x => x.UrlError);
-        _apiKeyError = apiKeyValidation.ToProperty(this, x => x.ApiKeyError);
+        ApiKey.AddValidationError(
+            key => string.IsNullOrEmpty(key) ? "API key is required." : null,
+            ignoreInitialError: true
+        );
 
         IsValid = Observable
-            .CombineLatest(nameValidation, urlValidation, apiKeyValidation)
-            .Select(errors => errors.All(string.IsNullOrEmpty));
+            .CombineLatest(Name.ObserveHasErrors, BaseUrl.ObserveHasErrors, ApiKey.ObserveHasErrors)
+            .Select(errors => errors.All(hasError => !hasError));
 
         // Sync local state back to wizard on every change
         _syncSubscription.Disposable = new CompositeDisposable(
-            this.WhenAnyValue(x => x.Name).Skip(1).Subscribe(v => wizard.InstanceName = v),
-            this.WhenAnyValue(x => x.BaseUrl).Skip(1).Subscribe(v => wizard.BaseUrl = v),
-            this.WhenAnyValue(x => x.ApiKey).Skip(1).Subscribe(v => wizard.ApiKey = v),
+            Name.Skip(1).Subscribe(v => wizard.InstanceName = v ?? ""),
+            BaseUrl.Skip(1).Subscribe(v => wizard.BaseUrl = v ?? ""),
+            ApiKey.Skip(1).Subscribe(v => wizard.ApiKey = v ?? ""),
             this.WhenAnyValue(x => x.Category).Skip(1).Subscribe(v => wizard.Category = v)
         );
 
         Disposables.Add(_syncSubscription);
-        Disposables.Add(_nameError);
-        Disposables.Add(_urlError);
-        Disposables.Add(_apiKeyError);
+        Name.DisposeWith(Disposables);
+        BaseUrl.DisposeWith(Disposables);
+        ApiKey.DisposeWith(Disposables);
     }
 
-    public void Activate()
+    public override void Activate()
     {
-        Name = _wizard.InstanceName;
-        BaseUrl = _wizard.BaseUrl;
-        ApiKey = _wizard.ApiKey;
+        Name.Value = _wizard.InstanceName;
+        BaseUrl.Value = _wizard.BaseUrl;
+        ApiKey.Value = _wizard.ApiKey;
         Category = _wizard.Category;
+    }
+
+    public override void ForceValidation()
+    {
+        Name.CheckValidation();
+        BaseUrl.CheckValidation();
+        ApiKey.CheckValidation();
     }
 }

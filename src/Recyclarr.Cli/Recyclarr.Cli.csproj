@@ -2,6 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr</AssemblyName>
+    <!-- C# 14 extension blocks generate public backing types that CA1515 flags in app projects -->
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -6,6 +6,6 @@ internal interface IWizardStepViewModel
     IObservable<bool> IsValid { get; }
     bool ShouldSkip() => false;
 
-    // Called when the step becomes the current step, for lazy data loading
-    void Activate() { }
+    void Activate();
+    void ForceValidation();
 }

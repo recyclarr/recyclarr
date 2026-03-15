@@ -1,4 +1,3 @@
-using System.Reactive;
 using System.Reactive.Concurrency;
 using ReactiveUI.Builder;
 using Recyclarr.Cli.Console.Wizard.Steps;
@@ -85,12 +84,12 @@ internal sealed class WizardApplication(
 
         if (key == Key.Enter)
         {
-            vm.GoNextCommand.Execute(Unit.Default).Subscribe();
+            vm.GoNext();
             key.Handled = true;
         }
         else if (key == Key.Esc)
         {
-            vm.GoBackCommand.Execute(Unit.Default).Subscribe();
+            vm.GoBack();
             key.Handled = true;
         }
     }

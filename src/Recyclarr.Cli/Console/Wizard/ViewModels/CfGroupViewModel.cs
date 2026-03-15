@@ -44,7 +44,7 @@ internal partial class CfGroupViewModel : WizardStepViewModel
 
     public bool ShouldSkip() => GetFilteredGroups().Count == 0;
 
-    public void Activate()
+    public override void Activate()
     {
         PopulateSelector();
         RestoreSelections();

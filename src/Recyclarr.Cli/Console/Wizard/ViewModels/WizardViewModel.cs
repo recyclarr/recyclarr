@@ -15,11 +15,6 @@ namespace Recyclarr.Cli.Console.Wizard.ViewModels;
     "CA2213",
     Justification = "Disposable fields are disposed via CompositeDisposable"
 )]
-[SuppressMessage(
-    "Reliability",
-    "CA2000",
-    Justification = "Disposable fields are disposed via CompositeDisposable"
-)]
 internal partial class WizardViewModel : ReactiveObject, IDisposable
 {
     private readonly CompositeDisposable _disposable = [];
@@ -83,20 +78,16 @@ internal partial class WizardViewModel : ReactiveObject, IDisposable
             .ToProperty(this, x => x.IsLastStep)
             .DisposeWith(_disposable);
 
-        // canExecute tracks the current step's IsValid observable,
-        // switching automatically when CurrentStepIndex changes.
-        var canGoNext = this.WhenAnyValue(x => x.CurrentStepIndex)
-            .Select(i => Steps.Count > 0 ? Steps[i].IsValid : Observable.Return(false))
-            .Switch();
-
-        GoNextCommand = ReactiveCommand.Create(GoNext, canGoNext).DisposeWith(_disposable);
-        GoBackCommand = ReactiveCommand.Create(GoBack).DisposeWith(_disposable);
+        // Not using ReactiveCommand here because its output scheduler
+        // (TerminalScheduler) defers execution via Application.Invoke,
+        // which breaks synchronous ForceValidation + IsValid reads.
 
         _finished.DisposeWith(_disposable);
     }
 
-    public ReactiveCommand<Unit, Unit> GoNextCommand { get; }
-    public ReactiveCommand<Unit, Unit> GoBackCommand { get; }
+    // Navigation is imperative (not ReactiveCommand) because validation
+    // via ForceValidation + synchronous IsValid read must complete within
+    // a single call stack, without scheduler deferral.
 
     // Signals when all steps are completed (no more steps to advance to)
     public IObservable<Unit> Finished => _finished.AsObservable();
@@ -137,8 +128,21 @@ internal partial class WizardViewModel : ReactiveObject, IDisposable
         this.RaisePropertyChanged(nameof(CurrentStepIndex));
     }
 
-    private void GoNext()
+    public void GoNext()
     {
+        var current = Steps[CurrentStepIndex];
+        current.ForceValidation();
+
+        // Read the latest validity synchronously (ForceValidation with
+        // CurrentThreadScheduler ensures the value is already propagated).
+        var isValid = false;
+        using var sub = current.IsValid.Subscribe(v => isValid = v);
+
+        if (!isValid)
+        {
+            return;
+        }
+
         for (var i = CurrentStepIndex + 1; i < Steps.Count; i++)
         {
             if (!Steps[i].ShouldSkip())
@@ -153,7 +157,7 @@ internal partial class WizardViewModel : ReactiveObject, IDisposable
         _finished.OnNext(Unit.Default);
     }
 
-    private void GoBack()
+    public void GoBack()
     {
         for (var i = CurrentStepIndex - 1; i >= 0; i--)
         {

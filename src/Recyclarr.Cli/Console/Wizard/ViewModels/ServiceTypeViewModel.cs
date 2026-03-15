@@ -25,7 +25,7 @@ internal partial class ServiceTypeViewModel : WizardStepViewModel
         Disposables.Add(_syncSubscription);
     }
 
-    public void Activate()
+    public override void Activate()
     {
         SelectedServiceType = _wizard.ServiceType;
 
