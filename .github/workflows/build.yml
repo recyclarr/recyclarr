@@ -226,7 +226,7 @@ jobs:
           private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
 
       - name: Create Release
-        uses: softprops/action-gh-release@71d29a04ae7c63895f38299d7a5e05d238f7f445 # v2.5.1
+        uses: softprops/action-gh-release@b25b93d384199fc0fc8c2e126b2d937a0cbeb2ae # v2.5.2
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         with:
