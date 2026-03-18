@@ -3,6 +3,7 @@ using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
 using Recyclarr.ConfigTemplates;
 using Recyclarr.Platform;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
 
@@ -28,19 +29,17 @@ internal class TemplateConfigCreator(
             .Get(SupportedServices.Radarr)
             .Concat(templates.Get(SupportedServices.Sonarr));
 
-        var matchingTemplateData = allTemplates
-            .IntersectBy(
-                settings.Templates,
-                path => path.Id,
-                StringComparer.CurrentCultureIgnoreCase
-            )
-            .Select(x => x.TemplateFile);
+        var matchingTemplateData = allTemplates.IntersectBy(
+            settings.Templates,
+            path => path.Id,
+            StringComparer.CurrentCultureIgnoreCase
+        );
 
-        foreach (var templateFile in matchingTemplateData)
+        foreach (var template in matchingTemplateData)
         {
             try
             {
-                CopyTemplate(templateFile, settings);
+                CopyTemplate(template, settings);
             }
             catch (FileLoadException)
             {
@@ -54,9 +53,9 @@ internal class TemplateConfigCreator(
         }
     }
 
-    private void CopyTemplate(IFileInfo templateFile, ICreateConfigSettings settings)
+    private void CopyTemplate(ConfigTemplateResource template, ICreateConfigSettings settings)
     {
-        var destinationFile = paths.YamlConfigDirectory.File(templateFile.Name);
+        var destinationFile = paths.YamlConfigDirectory.File($"{template.Id}.yml");
         var alreadyExists = destinationFile.Exists;
 
         if (alreadyExists && !settings.Force)
@@ -65,7 +64,7 @@ internal class TemplateConfigCreator(
         }
 
         destinationFile.CreateParentDirectory();
-        templateFile.CopyTo(destinationFile.FullName, true);
+        template.TemplateFile.CopyTo(destinationFile.FullName, true);
 
         if (alreadyExists)
         {

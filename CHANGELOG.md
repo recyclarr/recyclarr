@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- CLI: `config create -t` named output files after repo filename instead of template ID, causing
+  collisions between Radarr and Sonarr variants (#772)
 - Config: Trailing slash in `base_url` caused HTTP 401 errors
 - Sync: Quality group rename from TRaSH Guides not applied, causing unnecessary profile updates
   every sync (#774)

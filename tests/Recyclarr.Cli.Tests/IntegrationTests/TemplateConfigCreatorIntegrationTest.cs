@@ -106,4 +106,47 @@ internal sealed class TemplateConfigCreatorIntegrationTest : CliIntegrationFixtu
 
         (await Fs.File.ReadAllTextAsync(existingFile.FullName)).Should().Be("new content");
     }
+
+    [Test]
+    public async Task Output_filename_uses_template_id_not_repo_filename()
+    {
+        const string templatesJson = """
+            {
+              "radarr": [
+                {
+                  "template": "radarr/templates/anime-remux-1080p.yml",
+                  "id": "radarr-anime-remux-1080p"
+                }
+              ],
+              "sonarr": [
+                {
+                  "template": "sonarr/templates/anime-remux-1080p.yml",
+                  "id": "sonarr-anime-remux-1080p"
+                }
+              ]
+            }
+            """;
+
+        var mockRepoPath = SetupTemplateRepo(templatesJson);
+        var radarrDir = mockRepoPath.SubDirectory("radarr").SubDirectory("templates");
+        var sonarrDir = mockRepoPath.SubDirectory("sonarr").SubDirectory("templates");
+        Fs.AddEmptyFile(radarrDir.File("anime-remux-1080p.yml"));
+        Fs.AddEmptyFile(sonarrDir.File("anime-remux-1080p.yml"));
+
+        var factory = Resolve<ProviderInitializationFactory>();
+        await factory.InitializeProvidersAsync(null, CancellationToken.None);
+
+        var settings = Substitute.For<ICreateConfigSettings>();
+        settings.Templates.Returns(["radarr-anime-remux-1080p", "sonarr-anime-remux-1080p"]);
+
+        var sut = Resolve<TemplateConfigCreator>();
+        sut.Create(settings);
+
+        // Both templates should produce distinct files named after their IDs
+        Fs.AllFiles.Should()
+            .Contain([
+                Paths.YamlConfigDirectory.File("radarr-anime-remux-1080p.yml").FullName,
+                Paths.YamlConfigDirectory.File("sonarr-anime-remux-1080p.yml").FullName,
+            ]);
+    }
 }
