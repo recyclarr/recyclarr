@@ -6,6 +6,7 @@ using SonarrApi = Recyclarr.Api.Sonarr;
 namespace Recyclarr.ServarrApi.QualityProfile;
 
 internal class SonarrQualityProfileGateway(
+    ILogger log,
     SonarrApi.IQualityProfileApi profileApi,
     SonarrApi.IQualityProfileSchemaApi schemaApi,
     SonarrApi.ILanguageApi languageApi
@@ -83,7 +84,7 @@ internal class SonarrQualityProfileGateway(
         return MergeOntoDto(baseDto, domain);
     }
 
-    private static SonarrApi.QualityProfileResource MergeOntoDto(
+    private SonarrApi.QualityProfileResource MergeOntoDto(
         SonarrApi.QualityProfileResource baseDto,
         QualityProfileData domain
     )
@@ -129,7 +130,7 @@ internal class SonarrQualityProfileGateway(
         };
     }
 
-    private static SonarrApi.QualityProfileQualityItemResource MergeItem(
+    private SonarrApi.QualityProfileQualityItemResource MergeItem(
         QualityProfileItem domain,
         Dictionary<QualityItemKey, SonarrApi.QualityProfileQualityItemResource> index
     )
@@ -137,7 +138,20 @@ internal class SonarrQualityProfileGateway(
         var key = QualityItemKey.From(domain);
         if (index.TryGetValue(key, out var stashed))
         {
+            // Log group stash hits where the name changed (helps diagnose rename issues)
+            if (key.IsGroup && stashed.Name != domain.Name)
+            {
+                log.Debug(
+                    "MergeItem: Group Id {GroupId} stash hit with name mismatch: "
+                        + "stashed '{StashedName}' vs domain '{DomainName}'",
+                    key.Id,
+                    stashed.Name,
+                    domain.Name
+                );
+            }
+
             stashed.Id = domain.Id ?? stashed.Id;
+            stashed.Name = domain.Name ?? stashed.Name;
             stashed.Allowed = domain.Allowed ?? stashed.Allowed;
             stashed.Items = domain.Items.Select(i => MergeItem(i, index)).ToList();
             return stashed;

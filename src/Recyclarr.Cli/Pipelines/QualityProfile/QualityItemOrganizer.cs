@@ -5,7 +5,7 @@ using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
 
-internal class QualityItemOrganizer
+internal class QualityItemOrganizer(ILogger log)
 {
     private readonly List<string> _invalidItemNames = [];
 
@@ -44,9 +44,23 @@ internal class QualityItemOrganizer
             // If the nested qualities list is NOT empty, then this is considered a quality group.
             if (configQuality.Qualities.IsNotEmpty())
             {
-                var existingGroup =
-                    sourceItems.FindGroupByName(configQuality.Name)
-                    ?? new QualityProfileItem { Name = configQuality.Name };
+                var existingGroup = sourceItems.FindGroupByName(configQuality.Name);
+                if (existingGroup is not null)
+                {
+                    log.Debug(
+                        "Quality group '{GroupName}' matched existing group (Id: {GroupId})",
+                        configQuality.Name,
+                        existingGroup.Id
+                    );
+                }
+                else
+                {
+                    log.Debug(
+                        "Quality group '{GroupName}' not found in service; creating new group",
+                        configQuality.Name
+                    );
+                    existingGroup = new QualityProfileItem { Name = configQuality.Name };
+                }
 
                 var updatedGroupItems = new List<QualityProfileItem>();
 

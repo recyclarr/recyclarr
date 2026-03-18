@@ -26,7 +26,11 @@
       "allowed": true,
       "items": ["WEBDL-1080p", "WEBRip-1080p"]
     },
-    { "name": "Bluray-1080p", "allowed": true },
+    {
+      "name": "Bluray-1080p",
+      "allowed": true,
+      "items": ["Bluray-1080p Remux", "Bluray-1080p"]
+    },
     { "name": "Raw-HD", "allowed": false }
   ],
   "formatItems": {}

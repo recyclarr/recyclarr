@@ -2,6 +2,7 @@ using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Servarr.QualityProfile;
+using Recyclarr.TestLibrary;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;
 
@@ -45,7 +46,7 @@ internal sealed class QualityItemOrganizerTest
     [Test]
     public void Update_qualities_top_sort()
     {
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(
             _items,
             _config with
@@ -89,7 +90,7 @@ internal sealed class QualityItemOrganizerTest
     [Test]
     public void Update_qualities_bottom_sort()
     {
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(
             _items,
             _config with
@@ -140,7 +141,7 @@ internal sealed class QualityItemOrganizerTest
             NewQp.GroupItem(1001, "group1", true, NewQp.QualityItem(1, "one", true)),
         ];
 
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(items, config);
 
         result.Items.Should().BeEquivalentTo([NewQp.QualityItem(1, "one", true)]);
@@ -162,7 +163,7 @@ internal sealed class QualityItemOrganizerTest
             ),
         ];
 
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(items, config);
 
         result
@@ -190,7 +191,7 @@ internal sealed class QualityItemOrganizerTest
             ),
         ];
 
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(items, config);
 
         result
@@ -228,7 +229,7 @@ internal sealed class QualityItemOrganizerTest
             ),
         ];
 
-        var sut = new QualityItemOrganizer();
+        var sut = new QualityItemOrganizer(new TestableLogger());
         var result = sut.OrganizeItems(items, config);
 
         result

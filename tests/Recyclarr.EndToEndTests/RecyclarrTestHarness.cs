@@ -89,7 +89,6 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
             "Fixtures",
             "recyclarr-delete-disabled.yml"
         );
-
         await SetUpFixtures(appDataDir, testContext.TestDirectory, ct);
 
         var repositoryRoot = GetRepositoryRoot();

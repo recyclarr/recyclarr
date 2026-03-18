@@ -41,6 +41,11 @@ internal class QualityProfileStatCalculator(ILogger log)
             oldProfile.Items.FindCutoff(oldProfile.Cutoff),
             newProfile.Items.FindCutoff(newProfile.Cutoff)
         );
+        log.Debug(
+            "Cutoff ID: {OldCutoffId} -> {NewCutoffId}",
+            oldProfile.Cutoff,
+            newProfile.Cutoff
+        );
         Check("Cutoff Score", oldProfile.CutoffFormatScore, newProfile.CutoffFormatScore);
         Check("Minimum Score", oldProfile.MinFormatScore, newProfile.MinFormatScore);
         Check(

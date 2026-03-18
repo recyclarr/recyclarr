@@ -255,7 +255,7 @@ internal class UpdatedProfileBuilder(
 
     private void AddNewProfile(PlannedQualityProfile planned)
     {
-        var organizer = new QualityItemOrganizer();
+        var organizer = new QualityItemOrganizer(log);
         transactions.NewProfiles.Add(
             new UpdatedQualityProfile
             {
@@ -273,7 +273,7 @@ internal class UpdatedProfileBuilder(
         IReadOnlyCollection<string> missingQualities
     )
     {
-        var organizer = new QualityItemOrganizer();
+        var organizer = new QualityItemOrganizer(log);
         _existingProfiles.Add(
             new UpdatedQualityProfile
             {

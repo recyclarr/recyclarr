@@ -167,6 +167,122 @@ internal sealed class RecyclarrSyncTests
             );
     }
 
+    [Test, Order(6)]
+    [CancelAfter(60_000)]
+    public async Task Order6_guide_quality_group_rename_is_idempotent(CancellationToken ct)
+    {
+        // Replicates the real-world bug: TRaSH Guides renamed a quality group in a guide-synced
+        // profile (e.g., "Bluray-1080p" -> "Bluray 1080p") and updated the cutoff to match.
+        // Users reported that every sync detected a change and pushed an update, even though
+        // Sonarr persisted the rename correctly.
+        //
+        // The guide profile e2e00000000000000000000000000002 is referenced by trash_id in the
+        // YAML config (no explicit qualities: section). The quality items come entirely from the
+        // guide JSON. We simulate an upstream guide change by modifying the JSON between syncs.
+
+        var profileApi = _harness.SonarrApi<SonarrApi.IQualityProfileApi>();
+
+        // Verify current state: guide profile has group "Bluray-1080p" from initial sync.
+        // This group name collides with the individual quality name "Bluray-1080p" inside it,
+        // which is the exact pattern from the TRaSH Guides anime profile.
+        var profilesBefore = await profileApi.QualityprofileGet(ct);
+        var guideProfile = profilesBefore.First(p => p.Name == "E2E-SonarrGuideOverride");
+        guideProfile
+            .Items!.Should()
+            .Contain(
+                i => i.Quality == null && i.Name == "Bluray-1080p",
+                "guide profile should have 'Bluray-1080p' group before guide update"
+            );
+
+        // Simulate upstream guide change: rename group and update cutoff (exactly what
+        // TRaSH Guides commit 68b78c23d + c84cdb71b did for the anime profile)
+        var guideJsonPath = Path.Combine(
+            _harness.AppDataDir.FullName,
+            "trash-guides-override",
+            "docs",
+            "Sonarr",
+            "quality-profiles",
+            "e2e-test-profile.json"
+        );
+        // Rename the group from "Bluray-1080p" (hyphen, same as the quality name)
+        // to "Bluray 1080p" (space, distinct from quality name). This is exactly what
+        // TRaSH Guides commits 68b78c23d + c84cdb71b did for the anime profile.
+        var updatedGuideJson = """
+            {
+              "trash_id": "e2e00000000000000000000000000002",
+              "name": "E2E-GuideSonarrProfile",
+              "trash_description": "E2E test quality profile for Sonarr guide-synced QP testing",
+              "group": 1,
+              "upgradeAllowed": true,
+              "cutoff": "Bluray 1080p",
+              "minFormatScore": 0,
+              "cutoffFormatScore": 10000,
+              "minUpgradeFormatScore": 75,
+              "language": "Original",
+              "items": [
+                { "name": "Unknown", "allowed": false },
+                { "name": "SDTV", "allowed": false },
+                { "name": "DVD", "allowed": false },
+                { "name": "HDTV-720p", "allowed": false },
+                {
+                  "name": "WEB 720p",
+                  "allowed": false,
+                  "items": ["WEBDL-720p", "WEBRip-720p"]
+                },
+                { "name": "Bluray-720p", "allowed": false },
+                { "name": "HDTV-1080p", "allowed": true },
+                {
+                  "name": "WEB 1080p",
+                  "allowed": true,
+                  "items": ["WEBDL-1080p", "WEBRip-1080p"]
+                },
+                {
+                  "name": "Bluray 1080p",
+                  "allowed": true,
+                  "items": ["Bluray-1080p Remux", "Bluray-1080p"]
+                },
+                { "name": "Raw-HD", "allowed": false }
+              ],
+              "formatItems": {}
+            }
+            """;
+        await File.WriteAllTextAsync(guideJsonPath, updatedGuideJson, ct);
+
+        // First sync after guide change: should detect and apply the group rename
+        var result = await RunRecyclarrSync(ct);
+        await LogOutput(result);
+        result.ExitCode.Should().Be(0, "sync after guide update should succeed");
+
+        // Verify the group rename persisted in Sonarr
+        var profilesAfter = await profileApi.QualityprofileGet(ct);
+        var updatedProfile = profilesAfter.First(p => p.Name == "E2E-SonarrGuideOverride");
+        updatedProfile
+            .Items!.Should()
+            .Contain(
+                i => i.Quality == null && i.Name == "Bluray 1080p",
+                "Sonarr should persist the group rename from 'Bluray-1080p' to 'Bluray 1080p'"
+            );
+        updatedProfile
+            .Items!.Should()
+            .NotContain(
+                i => i.Quality == null && i.Name == "Bluray-1080p",
+                "old group name 'Bluray-1080p' should no longer exist as a group"
+            );
+
+        // Second sync (same guide data): should detect NO changes (idempotency).
+        // This is the actual bug: if the comparison logic doesn't stabilize after
+        // a guide-driven group rename, every sync pushes an unnecessary update.
+        var resyncResult = await RunRecyclarrSync(ct);
+        await LogOutput(resyncResult);
+        resyncResult.ExitCode.Should().Be(0, "re-sync should succeed");
+        resyncResult
+            .StandardOutput.Should()
+            .Contain(
+                "All quality profiles are up to date",
+                "re-sync should detect no changes after guide-driven group rename"
+            );
+    }
+
     private static async Task<BufferedCommandResult> RunRecyclarrSync(
         CancellationToken ct,
         string? configPath = null

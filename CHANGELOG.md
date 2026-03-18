@@ -12,6 +12,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Config: Trailing slash in `base_url` caused HTTP 401 errors
+- Sync: Quality group rename from TRaSH Guides not applied, causing unnecessary profile updates
+  every sync (#774)
 
 ## [8.5.0] - 2026-03-13
 

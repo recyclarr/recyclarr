@@ -6,6 +6,7 @@ using RadarrApi = Recyclarr.Api.Radarr;
 namespace Recyclarr.ServarrApi.QualityProfile;
 
 internal class RadarrQualityProfileGateway(
+    ILogger log,
     RadarrApi.IQualityProfileApi profileApi,
     RadarrApi.IQualityProfileSchemaApi schemaApi,
     RadarrApi.ILanguageApi languageApi
@@ -83,7 +84,7 @@ internal class RadarrQualityProfileGateway(
         return MergeOntoDto(baseDto, domain);
     }
 
-    private static RadarrApi.QualityProfileResource MergeOntoDto(
+    private RadarrApi.QualityProfileResource MergeOntoDto(
         RadarrApi.QualityProfileResource baseDto,
         QualityProfileData domain
     )
@@ -139,7 +140,7 @@ internal class RadarrQualityProfileGateway(
         };
     }
 
-    private static RadarrApi.QualityProfileQualityItemResource MergeItem(
+    private RadarrApi.QualityProfileQualityItemResource MergeItem(
         QualityProfileItem domain,
         Dictionary<QualityItemKey, RadarrApi.QualityProfileQualityItemResource> index
     )
@@ -147,7 +148,19 @@ internal class RadarrQualityProfileGateway(
         var key = QualityItemKey.From(domain);
         if (index.TryGetValue(key, out var stashed))
         {
+            if (key.IsGroup && stashed.Name != domain.Name)
+            {
+                log.Debug(
+                    "MergeItem: Group Id {GroupId} stash hit with name mismatch: "
+                        + "stashed '{StashedName}' vs domain '{DomainName}'",
+                    key.Id,
+                    stashed.Name,
+                    domain.Name
+                );
+            }
+
             stashed.Id = domain.Id ?? stashed.Id;
+            stashed.Name = domain.Name ?? stashed.Name;
             stashed.Allowed = domain.Allowed ?? stashed.Allowed;
             stashed.Items = domain.Items.Select(i => MergeItem(i, index)).ToList();
             return stashed;
