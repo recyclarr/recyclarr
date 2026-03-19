@@ -18,7 +18,7 @@ runs:
       uses: gittools/actions/gitversion/setup@e0d584e657c606912e8fd522aeed29025975705f # v4.4.2
       with:
         # renovate: datasource=github-tags depName=GitTools/GitVersion
-        versionSpec: 6.6.0
+        versionSpec: 6.6.2
 
     - name: Determine Version
       uses: gittools/actions/gitversion/execute@e0d584e657c606912e8fd522aeed29025975705f # v4.4.2
