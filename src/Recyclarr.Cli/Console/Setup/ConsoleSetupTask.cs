@@ -8,7 +8,7 @@ internal class ConsoleSetupTask(IAnsiConsole console) : IGlobalSetupTask
     public void OnStart(BaseCommandSettings cmd)
     {
         // Log mode: redirect console output to null (Serilog takes over)
-        if (cmd.LogLevel.IsSet)
+        if (cmd.IsLogMode)
         {
             console.Profile.Out = new AnsiConsoleOutput(TextWriter.Null);
         }

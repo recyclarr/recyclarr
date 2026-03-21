@@ -14,9 +14,9 @@ internal class LoggerSetupTask(
 {
     public void OnStart(BaseCommandSettings cmd)
     {
-        loggingLevelSwitch.MinimumLevel = cmd.LogLevel.Value.ToLogEventLevel();
+        loggingLevelSwitch.MinimumLevel = cmd.EffectiveLogLevel.ToLogEventLevel();
 
-        if (cmd.LogLevel.IsSet)
+        if (cmd.IsLogMode)
         {
             logConfigurators.Add(consoleLogSinkConfigurator);
         }

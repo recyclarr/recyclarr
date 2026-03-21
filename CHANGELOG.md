@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- CLI: Garbled output when stdout is redirected (e.g. cron jobs, piped commands)
+
 ## [8.5.1] - 2026-03-18
 
 ### Fixed
