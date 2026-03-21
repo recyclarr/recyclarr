@@ -259,12 +259,13 @@ Added/Changed/Fixed). These are two separate decisions made in order.
 
 **Step 1: Commit type (determines semver bump).**
 
-Ask: "Does this fix incorrect behavior?" If yes: `fix`. Otherwise, ask: "Does this change
-user-visible behavior (e.g. new capability, enhanced output, modified defaults)?" If yes: `feat`. If
-neither: skip to Tier 2.
+Ask: "Could a user report this as broken?" This includes crashes, garbled output, wrong results,
+missing data, or any behavior that fails to meet reasonable expectations. If yes: `fix`. Otherwise,
+ask: "Does this change user-visible behavior (e.g. new capability, enhanced output, modified
+defaults)?" If yes: `feat`. If neither: skip to Tier 2.
 
+- `fix:` -> Corrects behavior a user could report as broken (PATCH bump)
 - `feat:` -> User-visible change that is not a bug fix (MINOR bump)
-- `fix:` -> Corrects incorrect behavior a user could report as broken (PATCH bump)
 - `perf:` -> Significant, measurable performance improvement (PATCH bump)
 - Append `!` for breaking changes regardless of type (MAJOR bump)
 
