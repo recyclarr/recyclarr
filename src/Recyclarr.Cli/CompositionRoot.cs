@@ -5,6 +5,7 @@ using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Setup;
+using Recyclarr.Cli.Console.Wizard;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
@@ -40,6 +41,7 @@ internal static class CompositionRoot
         builder.RegisterModule<CoreAutofacModule>();
         builder.RegisterModule<PipelineAutofacModule>();
         builder.RegisterModule<ResourceProviderAutofacModule>();
+        builder.RegisterModule<WizardAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();

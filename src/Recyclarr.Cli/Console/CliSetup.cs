@@ -36,6 +36,7 @@ internal static class CliSetup
             {
                 config.SetDescription("Operations for configuration files");
                 config.AddCommand<ConfigCreateCommand>("create");
+                config.AddCommand<ConfigWizardCommand>("wizard");
                 config.AddBranch(
                     "list",
                     list =>
