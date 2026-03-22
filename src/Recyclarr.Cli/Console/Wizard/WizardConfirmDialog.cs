@@ -8,6 +8,8 @@ namespace Recyclarr.Cli.Console.Wizard;
 
 internal static class WizardConfirmDialog
 {
+    private const int DialogWidth = 60;
+
     [SuppressMessage(
         "Reliability",
         "CA2000",
@@ -18,6 +20,7 @@ internal static class WizardConfirmDialog
         using var dialog = new Dialog
         {
             Title = title,
+            Width = DialogWidth,
             BorderStyle = LineStyle.Rounded,
             ShadowStyle = ShadowStyle.None,
             ButtonAlignment = Alignment.Center,
@@ -28,15 +31,19 @@ internal static class WizardConfirmDialog
             new Label
             {
                 Text = message,
-                X = 1,
+                X = 2,
                 Y = 1,
-                Width = Dim.Fill(1),
+                Width = DialogWidth - 8,
                 TextAlignment = Alignment.Center,
             }
         );
 
-        dialog.AddButton(new Button { Title = "_Yes" });
-        dialog.AddButton(new Button { Title = "_No" });
+        dialog.AddButton(
+            new Button { Title = "_Yes", SchemeName = WizardSchemes.ConfirmDialogButton }
+        );
+        dialog.AddButton(
+            new Button { Title = "_No", SchemeName = WizardSchemes.ConfirmDialogButton }
+        );
 
         // Prevent the arrow chrome that Dialog auto-applies to the
         // last button via IsDefault

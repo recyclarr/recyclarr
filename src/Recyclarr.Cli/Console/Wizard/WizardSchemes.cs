@@ -18,7 +18,7 @@ internal static class WizardSchemes
     private static readonly Color Muted = new(0x7F, 0x84, 0x9C); // secondary text
     private static readonly Color Faint = new(0x58, 0x5B, 0x70); // hints, disabled
 
-    // Surfaces: elevated backgrounds for overlays
+    // Surfaces: elevated backgrounds for dialog overlays
     private static readonly Color Surface = new(0x31, 0x32, 0x44);
 
     // Borders: dim by default, accent on focus
@@ -40,6 +40,7 @@ internal static class WizardSchemes
     public const string ProgressDone = "ProgressDone";
     public const string ProgressFuture = "ProgressFuture";
     public const string ConfirmDialog = "ConfirmDialog";
+    public const string ConfirmDialogButton = "ConfirmDialogButton";
 
     public static void Register()
     {
@@ -168,6 +169,19 @@ internal static class WizardSchemes
                 Focus = new Attribute(Accent, Surface),
                 HotNormal = new Attribute(Accent, Surface),
                 HotFocus = new Attribute(Accent, Surface),
+                Disabled = new Attribute(Faint, Surface),
+            }
+        );
+
+        // Dialog buttons: inverted accent highlight on focus for clear contrast
+        SchemeManager.AddScheme(
+            ConfirmDialogButton,
+            new Scheme
+            {
+                Normal = new Attribute(Foreground, Surface),
+                Focus = new Attribute(Surface, Accent),
+                HotNormal = new Attribute(Foreground, Surface),
+                HotFocus = new Attribute(Surface, Accent),
                 Disabled = new Attribute(Faint, Surface),
             }
         );
