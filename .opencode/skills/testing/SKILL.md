@@ -20,19 +20,6 @@ description: >
 - **Integration**: Complete workflows with mocked externals (Git, HTTP, filesystem)
 - **Unit**: Edge cases integration cannot reach
 
-## Integration-First TDD Workflow
-
-1. Write a failing integration test for the happy path (red)
-2. Implement until it passes (green)
-3. Check coverage (see Coverage Analysis section); add integration tests for uncovered edge cases
-4. Use unit tests only when integration tests cannot reach specific code paths
-
-## What NOT to Test
-
-- Console output, log messages, UI formatting
-- Auto-properties, DTOs, simple data containers
-- Implementation details that could change without affecting behavior
-
 ## Naming
 
 - Classes: `{Component}Test` or `{Component}IntegrationTest`
@@ -73,24 +60,11 @@ dependency.Method().Returns([item1, item2]);
 Verify.That<T>(x => x.Property.Should().Be(expected));
 ```
 
-**Assert on observable outcomes, not mock interactions.** Verify the result, side effect, or state
-change rather than asserting a method was called. Tests that assert `Received()` are coupled to
-implementation; they break when internals are refactored even if behavior is correct.
+**Last resort interaction verification** (when no observable outcome exists):
 
 ```csharp
-// Good: assert on the outcome
-result.Should().BeEquivalentTo(expected);
-fileSystem.AllFiles.Should().Contain(expectedPath);
-
-// Last resort: verify interaction only when there is no observable outcome
 mock.ReceivedWithAnyArgs().SetStatus(default, default);
 ```
-
-If `Received()` feels like the only option, **challenge the design first**. Needing mock
-verification often signals a testability problem (void method hiding a meaningful result, missing
-return value, side effect with no observable state change). Flag this to the user as a potential
-design improvement even if it is outside the current scope of work; do not silently accommodate
-untestable designs.
 
 **Argument matching** (returns setup and received verification): Prefer
 `ReceivedWithAnyArgs()`/`ReturnsForAnyArgs()` with `default` over `Arg.Any<T>()`:
@@ -160,37 +134,6 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 // Bad
 "/absolute/path/file.json"
 ```
-
-## Debugging Test Failures
-
-**Gather evidence before changing code.** Avoid guess-and-check cycles.
-
-1. **Read assertion output carefully** - Diff output often reveals the issue immediately
-2. **Add adhoc logs** - Trace execution in tests or production code; remove when done
-3. **Compare with passing tests** - Diff similar working tests to spot differences
-4. **Add intermediate assertions** - Verify state at each step to pinpoint divergence
-5. **Simplify to minimal reproduction** - Strip test down, add back until failure
-6. **Write adhoc granular tests** - Isolate suspected areas; remove when done
-7. **Check test isolation** - Run alone (`--filter`) vs. suite to detect state leakage
-
-## Test Framing
-
-Tests serve as documentation. Choose framing based on what the test documents:
-
-- **Positive tests** (expected behavior): Lead with what SHOULD happen, then verify absence of
-  unintended side effects
-- **Negative tests** (error conditions): Assert the error/rejection IS raised; essential for
-  validating error paths
-
-Both are equally important. The distinction is about clarity, not preference.
-
-## Anti-Patterns
-
-- Over-mocking or mocking business logic
-- Tests coupled to implementation details
-- Duplicate coverage for same logical paths
-- Production code added solely for testing
-- Unexplained magic constants
 
 ## Running Tests
 
