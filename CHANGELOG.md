@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Sync: Error when the service type at `base_url` does not match the configuration type (e.g. Radarr
+  config pointed at a Sonarr instance)
+
 ### Fixed
 
 - CLI: Garbled output when stdout is redirected (e.g. cron jobs, piped commands) (#779)
