@@ -17,7 +17,7 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="6.6.1" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
-    <PackageVersion Include="Refit.HttpClientFactory" Version="10.0.1" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="10.1.6" />
     <PackageVersion Include="Refitter.MSBuild" Version="1.7.3" PrivateAssets="all" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Serilog" Version="4.3.1" />
