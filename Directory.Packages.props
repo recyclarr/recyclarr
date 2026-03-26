@@ -12,7 +12,7 @@
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
-    <PackageVersion Include="CliWrap" Version="3.10.0" />
+    <PackageVersion Include="CliWrap" Version="3.10.1" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.6.1" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
