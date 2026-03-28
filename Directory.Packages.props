@@ -14,7 +14,7 @@
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
     <PackageVersion Include="CliWrap" Version="3.10.1" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
-    <PackageVersion Include="GitVersion.MsBuild" Version="6.6.1" PrivateAssets="all" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="6.7.0" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.5" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="10.1.6" />
