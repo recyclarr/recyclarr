@@ -6,7 +6,6 @@ on:
   push:
     branches: [master]
     paths:
-      - README.md
       - .github/workflows/sponsors.yml
 
 permissions:
