@@ -54,6 +54,12 @@ For help with using Recyclarr, please join the [TRaSH-Guides Discord][discord] a
 >
 > Please do not use GitHub Issues for general support questions or configuration help.
 
+## Sponsors
+
+Thank you to all who have supported Recyclarr!
+
+<!-- sponsors --><!-- sponsors -->
+
 ## Powered By
 
 <!-- markdownlint-disable MD033 MD013 -->
