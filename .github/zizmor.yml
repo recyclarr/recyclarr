@@ -1,0 +1,13 @@
+rules:
+  secrets-outside-env:
+    disable: true
+  secrets-inherit:
+    disable: true
+  superfluous-actions:
+    disable: true
+  template-injection:
+    disable: true
+  artipacked:
+    ignore:
+      # git-auto-commit-action needs persisted credentials to push
+      - sponsors.yml

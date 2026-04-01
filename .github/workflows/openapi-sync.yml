@@ -5,6 +5,9 @@ on:
     - cron: "0 6 * * 1" # Weekly on Monday at 06:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   sync:
     name: ${{ matrix.name }}
@@ -25,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Fetch upstream ${{ matrix.name }} OpenAPI spec
         run: curl -fsSL "${{ matrix.upstream }}" -o "${{ matrix.local }}"

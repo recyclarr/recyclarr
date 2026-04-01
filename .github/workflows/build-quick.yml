@@ -10,7 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   #############################################
@@ -33,6 +35,7 @@ jobs:
     name: Docker Validation
     needs: [build-validation]
     permissions:
+      contents: read
       packages: write
     uses: ./.github/workflows/reusable-docker.yml
     secrets: inherit

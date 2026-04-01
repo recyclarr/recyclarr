@@ -38,7 +38,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   #############################################
@@ -105,6 +106,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Download Artifacts
         uses: ./.github/actions/download-tar
@@ -153,6 +156,7 @@ jobs:
     # Wait on builds only to verify tests pass
     needs: [build-win, build-linux, build-osx, build-musl]
     permissions:
+      contents: read
       packages: write
     uses: ./.github/workflows/reusable-docker.yml
     secrets: inherit
@@ -172,6 +176,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Download Artifacts
         uses: ./.github/actions/download-tar
@@ -197,6 +203,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
+          persist-credentials: false
 
       - name: Setup GitVersion
         uses: ./.github/actions/setup-gitversion

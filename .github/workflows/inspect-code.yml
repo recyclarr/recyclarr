@@ -22,7 +22,9 @@ env:
     ${{ github.ref == 'refs/heads/master' && github.event.before ||
     (github.event.base_ref || github.event.pull_request.base.ref || 'master') }}
 
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   #############################################
@@ -52,6 +54,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0 # avoid shallow clone for GitVersion
+          persist-credentials: false
 
       - name: Setup .NET & Tools
         uses: ./.github/actions/setup-dotnet
@@ -88,6 +91,8 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup .NET & Tools
         uses: ./.github/actions/setup-dotnet
