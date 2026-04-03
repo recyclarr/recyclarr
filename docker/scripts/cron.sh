@@ -4,4 +4,5 @@ echo "-------------------------------------------------------------"
 echo " Executing Tasks: $(date)"
 echo "-------------------------------------------------------------"
 
-recyclarr sync
+log_arg="--log${RECYCLARR_LOG_LEVEL:+ $RECYCLARR_LOG_LEVEL}"
+recyclarr sync $log_arg
