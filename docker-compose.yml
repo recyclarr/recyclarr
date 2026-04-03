@@ -36,10 +36,14 @@ services:
       #   - linux/arm64
       #   - linux/amd64
     volumes:
-      - ./docker/debugging/recyclarr:/config
+      - ${RECYCLARR_CONFIG_DIR:?RECYCLARR_CONFIG_DIR must be set}:/config
     environment:
       CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
+      RADARR_URL: http://radarr_develop2:7878
+      SONARR_URL: http://sonarr_develop2:8989
+      SHOWS_URL: http://sonarr_develop1:8989
+      APPRISE_URL: http://apprise:8000
 
   radarr_develop1:
     <<: *radarr
