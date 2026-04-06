@@ -4,5 +4,6 @@ OPENCODE_CONFIG_DIR = "{{config_root}}/../.opencode"
 
 [tools]
 "github:santhosh-tekuri/jsonschema" = "latest"
+"npm:@microsoft/learn-cli" = "latest"
 python = "latest"
 wrangler = "latest"

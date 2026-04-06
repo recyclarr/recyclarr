@@ -1,16 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": ["../AGENTS.md"],
-  "mcp": {
-    "linear": {
-      "type": "remote",
-      "url": "https://mcp.linear.app/mcp",
-    },
-    "mslearn": {
-      "type": "remote",
-      "url": "https://learn.microsoft.com/api/mcp",
-    },
-  },
   "formatter": {
     "csharpier": {
       "command": ["dotnet", "csharpier", "format", "$FILE"],
@@ -21,12 +11,5 @@
     "csharp": {
       "disabled": true,
     },
-  },
-  "permission": {
-    // Fine tune linear tools in context
-    "*linear_*": "deny",
-    "*linear_*_comment*": "allow",
-    "*linear_*_issue*": "allow",
-    "*linear_*_project*": "allow",
   },
 }
