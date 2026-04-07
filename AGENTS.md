@@ -41,7 +41,6 @@ ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on do
 - `decisions` - Creating ADRs and PDRs in `docs/decisions/`
 - `linear-planning` - Creating or organizing Linear issues, projects, or initiatives
 - `mapperly` - Writing or modifying Mapperly mapper classes, debugging null-handling
-- `yaml-config` - Writing, modifying, or reviewing Recyclarr YAML config/settings files
 
 ## Project Context
 
@@ -110,18 +109,13 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - **EXCEPTION**: Backward compatibility *NOT REQUIRED* if modifying unreleased functionality (use
   git logs since latest tag to determine; also check `[Unreleased]` section of `CHANGELOG.md`)
 
-## YAML Schema and Reference Maintenance
+## YAML Schema Maintenance
 
-When changes affect the structure of config YAML (`recyclarr.yml`) or settings YAML
-(`settings.yml`), you MUST update all three of these together:
-
-1. JSON schemas in `schemas/` (the source of truth for validation)
-2. `.opencode/skills/yaml-config/references/config-reference.md` (config changes)
-3. `.opencode/skills/yaml-config/references/settings-reference.md` (settings changes)
-
-This includes adding, removing, or renaming properties; changing types, defaults, or constraints;
-and modifying enum values. Stale schemas cause user validation failures; stale skill references
-cause agents to generate invalid YAML.
+The JSON schemas in `schemas/` are the single source of truth for the structure and validation of
+`recyclarr.yml` and `settings.yml`. When adding, removing, or renaming properties, changing types,
+defaults, or constraints, or modifying enum values, you MUST update the relevant schema in
+`schemas/` alongside the code change. Consult the schemas directly when you need to understand or
+generate valid YAML; there is no separate reference document to keep in sync.
 
 ## Sync Philosophy
 
