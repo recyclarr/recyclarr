@@ -17,6 +17,13 @@
       minimumGroupSize: 2,
     },
     {
+      description: "Spectre.Console monorepo packages",
+      groupName: "Spectre.Console Packages",
+      matchManagers: ["nuget"],
+      matchPackageNames: ["Spectre.Console*"],
+      minimumGroupSize: 2,
+    },
+    {
       description: ".NET SDK and runtime major version upgrades (replaces built-in dotnet monorepo preset)",
       groupName: "dotnet monorepo",
       matchDatasources: ["docker", "dotnet-version"],
