@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Autofac;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
+using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
@@ -359,6 +360,68 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
                     },
                     Select = new[] { "cf-to-select-1", "cf-to-select-2" },
                 },
+            ]);
+    }
+
+    [Test]
+    public void Entry_level_score_default_resolves_in_runtime_config()
+    {
+        // End-to-end: YAML parse -> include merge -> runtime mapping. The entry-level `score`
+        // under `custom_formats` must land on every per-profile entry that did not define its
+        // own score, and per-profile scores must still override.
+        var sut = Resolve<ConfigurationRegistry>();
+
+        var templatePath = Paths.YamlIncludeDirectory.File("template.yml");
+        Fs.AddFile(
+            templatePath,
+            new MockFileData(
+                """
+                custom_formats:
+                  - trash_ids:
+                      - dc98083864ea246d05a42df0d05f81cc
+                    score: 0
+                    assign_scores_to:
+                      - name: MULTi-VF-HD
+                      - name: MULTi-VO-HD
+                      - name: REMUX-MULTi-VF-HD
+                        score: 100
+                """
+            )
+        );
+
+        Fs.AddFile(
+            "config.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: test-key
+                    include:
+                      - config: template.yml
+                """
+            )
+        );
+
+        var result = sut.FindAndLoadConfigs(
+            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
+        );
+
+        result.Failures.Should().BeEmpty();
+
+        var cf = result
+            .Configs.Should()
+            .ContainSingle()
+            .Which.CustomFormats.Should()
+            .ContainSingle()
+            .Subject;
+
+        cf.TrashIds.Should().BeEquivalentTo("dc98083864ea246d05a42df0d05f81cc");
+        cf.AssignScoresTo.Should()
+            .BeEquivalentTo([
+                new AssignScoresToConfig { Name = "MULTi-VF-HD", Score = 0 },
+                new AssignScoresToConfig { Name = "MULTi-VO-HD", Score = 0 },
+                new AssignScoresToConfig { Name = "REMUX-MULTi-VF-HD", Score = 100 },
             ]);
     }
 }

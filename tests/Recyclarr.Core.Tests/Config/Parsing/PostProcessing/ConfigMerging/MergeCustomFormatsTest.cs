@@ -1,3 +1,4 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
@@ -170,6 +171,204 @@ internal sealed class MergeCustomFormatsTest
                     ],
                 }
             );
+    }
+
+    [Test]
+    public void Entry_level_score_is_resolved_during_merge()
+    {
+        // Side A uses an entry-level default score; side B targets the same profile with a
+        // matching per-profile score. After flattening, both sides should dedupe to the right
+        // side only (since right wins), proving the default was correctly resolved.
+        var leftConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1", "cf2"],
+                    Score = 42,
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "Profile A" }],
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A", Score = 42 },
+                    ],
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        // Left entry has had cf1 removed because right targets the same profile/score
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
+                {
+                    CustomFormats =
+                    [
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf2"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "Profile A", Score = 42 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf1"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "Profile A", Score = 42 },
+                            ],
+                        },
+                    ],
+                }
+            );
+    }
+
+    [Test]
+    public void Entry_level_score_overridden_by_per_profile_score_during_merge()
+    {
+        // Entry-level default of 100, but Profile B has an override of 200. After merge the
+        // flattened entries should show the effective scores in the per-profile output.
+        var leftConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    Score = 100,
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A" },
+                        new QualityScoreConfigYaml { Name = "Profile B", Score = 200 },
+                    ],
+                },
+            ],
+        };
+
+        // Right side targets Profile A with the same effective score (100) for cf1, so that
+        // trash id should be removed from the left entry. Profile B (score 200) should be
+        // untouched.
+        var rightConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A", Score = 100 },
+                    ],
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        result
+            .Should()
+            .BeEquivalentTo(
+                new SonarrConfigYaml
+                {
+                    CustomFormats =
+                    [
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = [],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "Profile A", Score = 100 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf1"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "Profile B", Score = 200 },
+                            ],
+                        },
+                        new CustomFormatConfigYaml
+                        {
+                            TrashIds = ["cf1"],
+                            AssignScoresTo =
+                            [
+                                new QualityScoreConfigYaml { Name = "Profile A", Score = 100 },
+                            ],
+                        },
+                    ],
+                }
+            );
+    }
+
+    [Test]
+    public void Entry_level_score_on_right_side_survives_merge()
+    {
+        // Right-side entry-level score must be preserved through the merge, mirroring how the
+        // left side handles it. Left targets Profile A with a per-profile score; right uses an
+        // entry-level default for Profile B. Nothing dedupes between them.
+        var leftConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A", Score = 50 },
+                    ],
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf2"],
+                    Score = 75,
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "Profile B" }],
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        // After the runtime conversion, Profile B on the right entry should resolve to score 75
+        // from the entry-level default. Structurally, the right entry is concatenated verbatim.
+        var radarrConfig = result.ToSonarrConfiguration("test", null);
+
+        radarrConfig
+            .CustomFormats.SelectMany(cf => cf.AssignScoresTo)
+            .Should()
+            .BeEquivalentTo([
+                new AssignScoresToConfig { Name = "Profile A", Score = 50 },
+                new AssignScoresToConfig { Name = "Profile B", Score = 75 },
+            ]);
     }
 
     [Test]

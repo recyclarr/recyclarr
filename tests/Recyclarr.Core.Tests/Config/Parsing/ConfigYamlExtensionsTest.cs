@@ -80,4 +80,121 @@ internal sealed class ConfigYamlExtensionsTest
 
         result.MediaManagement.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotPrefer);
     }
+
+    [Test]
+    public void Entry_level_score_applies_as_default_to_all_profiles()
+    {
+        var serviceYaml = new RadarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    Score = 42,
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A" },
+                        new QualityScoreConfigYaml { Name = "Profile B" },
+                    ],
+                },
+            ],
+        };
+
+        var result = serviceYaml.ToRadarrConfiguration("test", null);
+
+        result
+            .CustomFormats.Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .BeEquivalentTo([
+                new AssignScoresToConfig { Name = "Profile A", Score = 42 },
+                new AssignScoresToConfig { Name = "Profile B", Score = 42 },
+            ]);
+    }
+
+    [Test]
+    public void Per_profile_score_overrides_entry_level_score()
+    {
+        var serviceYaml = new RadarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    Score = 42,
+                    AssignScoresTo =
+                    [
+                        new QualityScoreConfigYaml { Name = "Profile A" },
+                        new QualityScoreConfigYaml { Name = "Profile B", Score = 100 },
+                    ],
+                },
+            ],
+        };
+
+        var result = serviceYaml.ToRadarrConfiguration("test", null);
+
+        result
+            .CustomFormats.Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .BeEquivalentTo([
+                new AssignScoresToConfig { Name = "Profile A", Score = 42 },
+                new AssignScoresToConfig { Name = "Profile B", Score = 100 },
+            ]);
+    }
+
+    [Test]
+    public void Omitted_entry_level_score_leaves_per_profile_score_null()
+    {
+        var serviceYaml = new RadarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "Profile A" }],
+                },
+            ],
+        };
+
+        var result = serviceYaml.ToRadarrConfiguration("test", null);
+
+        result
+            .CustomFormats.Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Score.Should()
+            .BeNull();
+    }
+
+    [Test]
+    public void Entry_level_score_works_for_sonarr()
+    {
+        var serviceYaml = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1"],
+                    Score = -10,
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "Profile A" }],
+                },
+            ],
+        };
+
+        var result = serviceYaml.ToSonarrConfiguration("test", null);
+
+        result
+            .CustomFormats.Should()
+            .ContainSingle()
+            .Which.AssignScoresTo.Should()
+            .ContainSingle()
+            .Which.Score.Should()
+            .Be(-10);
+    }
 }

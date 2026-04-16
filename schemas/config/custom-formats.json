@@ -15,6 +15,10 @@
           "type": "string"
         }
       },
+      "score": {
+        "type": "integer",
+        "description": "Default score applied to every profile under 'assign_scores_to' that does not define its own 'score'. Per-profile scores still override this default."
+      },
       "assign_scores_to": {
         "type": ["null", "array"],
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",
@@ -23,7 +27,7 @@
           "properties": {
             "score": {
               "type": "integer",
-              "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list."
+              "description": "A positive or negative number representing the score to apply to *all* custom formats listed in the trash_ids list. Overrides the entry-level 'score' when both are present."
             }
           }
         }

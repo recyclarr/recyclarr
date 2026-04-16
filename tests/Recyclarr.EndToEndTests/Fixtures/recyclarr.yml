@@ -123,8 +123,14 @@ radarr:
           - db9b4c4b53d312a3ca5f1378f6440fc9 # Vinegar Syndrome
           - 957d0f44b592285f26449575e8b1167e # Special Edition
           - cf000000000000000000000000000001 # E2E-TestFormat
+        # Entry-level default: applies to every profile below that does not
+        # define its own `score` (GitHub #736).
+        score: 500
         assign_scores_to:
           - name: HD-1080p
+          # Inherits entry-level 500
+          - trash_id: e2e00000000000000000000000000001 # E2E-RadarrGuideOverride
+            score: 750 # Per-profile override wins over entry-level default
 
     # CF groups - tests explicit profile assignment with select+exclude composition
     # Group has: CF1 (required), CF2 (default), CF3 (non-default)

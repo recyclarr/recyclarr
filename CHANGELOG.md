@@ -11,6 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Config: Entry-level `score` on `custom_formats` entries sets a default score for every profile
+  under `assign_scores_to` that does not define its own `score` (#736)
 - Sync: Error when the service type at `base_url` does not match the configuration type (e.g. Radarr
   config pointed at a Sonarr instance)
 - Notifications: New `verbose` verbosity level that includes per-item Custom Format change

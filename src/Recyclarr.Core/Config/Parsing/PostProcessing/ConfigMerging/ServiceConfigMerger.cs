@@ -112,10 +112,11 @@ public abstract class ServiceConfigMerger<T>
             return cfs.Where(x => x.TrashIds is not null)
                 .SelectMany(x =>
                     x is { AssignScoresTo.Count: > 0 }
+                        // Entry-level score acts as a default when per-profile score is absent
                         ? x.AssignScoresTo.Select(y => new FlattenedCfs(
                             y.TrashId,
                             y.Name,
-                            y.Score,
+                            y.Score ?? x.Score,
                             x.TrashIds!
                         ))
                         : [new FlattenedCfs(null, null, null, x.TrashIds!)]

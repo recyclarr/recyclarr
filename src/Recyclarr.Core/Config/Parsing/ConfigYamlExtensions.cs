@@ -6,13 +6,16 @@ namespace Recyclarr.Config.Parsing;
 
 internal static class ConfigYamlExtensions
 {
-    private static AssignScoresToConfig ToAssignScoresToConfig(this QualityScoreConfigYaml yaml)
+    private static AssignScoresToConfig ToAssignScoresToConfig(
+        this QualityScoreConfigYaml yaml,
+        int? defaultScore
+    )
     {
         return new AssignScoresToConfig
         {
             TrashId = yaml.TrashId,
             Name = yaml.Name ?? "",
-            Score = yaml.Score,
+            Score = yaml.Score ?? defaultScore,
         };
     }
 
@@ -22,7 +25,8 @@ internal static class ConfigYamlExtensions
         {
             TrashIds = yaml.TrashIds?.ToList() ?? [],
             AssignScoresTo =
-                yaml.AssignScoresTo?.Select(x => x.ToAssignScoresToConfig()).ToList() ?? [],
+                yaml.AssignScoresTo?.Select(x => x.ToAssignScoresToConfig(yaml.Score)).ToList()
+                ?? [],
         };
     }
 

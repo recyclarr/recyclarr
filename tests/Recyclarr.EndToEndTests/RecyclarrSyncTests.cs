@@ -415,21 +415,30 @@ internal sealed class RecyclarrSyncTests
         var hdProfile = profiles.First(p => p.Name == "HD-1080p");
         hdProfile.MinUpgradeFormatScore.Should().Be(200);
 
-        // CF group CFs should be scored on HD-1080p (tests name-based assign_scores_to)
-        // CF1 (required) + CF3 (selected) are scored; CF2 (excluded) is not
-        var hdScoredCfNames = hdProfile
-            .FormatItems!.Where(fi => fi.Score != 0)
-            .Select(fi => fi.Name)
-            .ToList();
-        hdScoredCfNames
+        // CFs from entry-level score block (8 CFs assigned via assign_scores_to)
+        string[] entryLevelCfNames =
+        [
+            "Hybrid-OVERRIDE",
+            "Remaster",
+            "4K Remaster",
+            "Criterion Collection",
+            "Masters of Cinema",
+            "Vinegar Syndrome",
+            "Special Edition",
+            "E2E-TestFormat",
+        ];
+
+        // Entry-level default score (500) on HD-1080p profile
+        hdProfile
+            .FormatItems!.Where(fi => entryLevelCfNames.Contains(fi.Name))
+            .Select(fi => new { fi.Name, fi.Score })
             .Should()
-            .Contain(
-                ["E2E-GroupCF1", "E2E-GroupCF3"],
-                "CF group: required + selected CFs should be scored via name-based assignment"
+            .BeEquivalentTo(
+                entryLevelCfNames.Select(n => new { Name = n, Score = 500 }),
+                "entry-level score default should apply when profile has no per-profile score"
             );
-        hdScoredCfNames
-            .Should()
-            .NotContain("E2E-GroupCF2", "CF group: excluded default CF should not be scored");
+
+        AssertCfGroupGuideDefaultScores(hdProfile);
 
         // Guide-synced quality profile with config overrides
         var guideRadarrProfile = profiles.FirstOrDefault(p => p.Name == "E2E-RadarrGuideOverride");
@@ -445,6 +454,18 @@ internal sealed class RecyclarrSyncTests
         guideRadarrProfile
             .Language?.Name.Should()
             .Be("English", "language from guide resource should be applied");
+
+        // Per-profile score override (750) wins over entry-level default (500)
+        guideRadarrProfile
+            .FormatItems!.Where(fi => entryLevelCfNames.Contains(fi.Name))
+            .Select(fi => new { fi.Name, fi.Score })
+            .Should()
+            .BeEquivalentTo(
+                entryLevelCfNames.Select(n => new { Name = n, Score = 750 }),
+                "per-profile score should override entry-level default"
+            );
+
+        AssertCfGroupGuideDefaultScores(guideRadarrProfile);
 
         // Guide-synced quality profile (tests implicit CF group inclusion)
         var hdBlurayProfile = profiles.FirstOrDefault(p => p.Name == "HD Bluray + WEB");
@@ -519,6 +540,31 @@ internal sealed class RecyclarrSyncTests
             .Be(
                 RadarrApi.ProperDownloadTypes.DoNotPrefer,
                 "propers_and_repacks should be set to do_not_prefer"
+            );
+    }
+
+    // CF group assigns required (CF1) + selected (CF3) to this profile with no explicit
+    // score, so both fall back to `trash_scores.default` from their CF JSON fixtures.
+    private static void AssertCfGroupGuideDefaultScores(RadarrApi.QualityProfileResource profile)
+    {
+        profile
+            .FormatItems!.Where(fi => fi.Name is "E2E-GroupCF1" or "E2E-GroupCF3")
+            .Select(fi => new { fi.Name, fi.Score })
+            .Should()
+            .BeEquivalentTo(
+                [
+                    new { Name = "E2E-GroupCF1", Score = 150 },
+                    new { Name = "E2E-GroupCF3", Score = 350 },
+                ],
+                "guide default score should apply when assign_scores_to omits score"
+            );
+
+        // CF group excludes CF2 via the `exclude` list, so it must not be scored on this profile
+        profile
+            .FormatItems!.Should()
+            .NotContain(
+                fi => fi.Name == "E2E-GroupCF2" && fi.Score != 0,
+                "CF group: excluded default CF should not be scored"
             );
     }
 
