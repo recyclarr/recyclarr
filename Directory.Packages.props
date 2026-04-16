@@ -26,7 +26,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="Serilog.Sinks.TextWriter" Version="3.0.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
-    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
     <PackageVersion Include="SuperLinq" Version="6.4.1" />
     <PackageVersion Include="System.Data.HashFunction.FNV" Version="2.0.0" />
     <PackageVersion Include="System.Reactive.Linq" Version="6.1.0" />
@@ -57,7 +57,7 @@
     <PackageVersion Include="NUnit" Version="4.5.1" PrivateAssets="all" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.12.0" PrivateAssets="all" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.2.0" PrivateAssets="all" />
-    <PackageVersion Include="Spectre.Console.Testing" Version="0.54.0" PrivateAssets="all" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.55.0" PrivateAssets="all" />
     <PackageVersion Include="Testcontainers" Version="4.11.0" PrivateAssets="all" />
     <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.1" PrivateAssets="all" />
   </ItemGroup>
