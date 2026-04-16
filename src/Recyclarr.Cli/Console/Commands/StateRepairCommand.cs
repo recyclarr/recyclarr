@@ -54,7 +54,7 @@ internal class StateRepairCommand(IAnsiConsole console, ILogger log)
         public bool Adopt { get; init; }
     }
 
-    public override Task<int> ExecuteAsync(
+    protected override Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

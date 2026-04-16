@@ -26,7 +26,7 @@ internal class ConfigListTemplatesCommand(
         public bool Includes { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

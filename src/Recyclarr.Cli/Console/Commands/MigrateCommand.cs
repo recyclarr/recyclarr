@@ -15,7 +15,11 @@ internal class MigrateCommand(IAnsiConsole console, ILogger log)
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : BaseCommandSettings;
 
-    public override int Execute(CommandContext context, CliSettings settings, CancellationToken ct)
+    protected override int Execute(
+        CommandContext context,
+        CliSettings settings,
+        CancellationToken ct
+    )
     {
         const string message =
             "The migrate command is deprecated. " + "Migrations now run automatically at startup.";

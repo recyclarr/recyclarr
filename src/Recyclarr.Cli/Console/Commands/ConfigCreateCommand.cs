@@ -46,7 +46,7 @@ internal class ConfigCreateCommand(
         public bool Force { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

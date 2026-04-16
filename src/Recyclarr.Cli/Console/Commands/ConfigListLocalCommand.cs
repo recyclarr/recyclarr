@@ -17,7 +17,7 @@ internal class ConfigListLocalCommand(
     [SuppressMessage("Design", "CA1034:Nested types should not be visible")]
     internal class CliSettings : BaseCommandSettings;
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

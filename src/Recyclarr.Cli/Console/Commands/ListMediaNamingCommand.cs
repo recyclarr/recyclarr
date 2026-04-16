@@ -29,7 +29,7 @@ internal class ListMediaNamingCommand(
         public SupportedServices Service { get; init; }
     }
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct

@@ -51,7 +51,7 @@ internal class SyncCommand(
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
