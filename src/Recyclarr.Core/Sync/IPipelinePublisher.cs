@@ -6,14 +6,22 @@ public interface IPipelinePublisher : IDiagnosticPublisher
 {
     static IPipelinePublisher Noop { get; } = new NoopPipelinePublisher();
 
-    void SetStatus(PipelineProgressStatus status, int? count = null);
+    void SetStatus(
+        PipelineProgressStatus status,
+        int? count = null,
+        PipelineItemChanges? changes = null
+    );
 }
 
 internal sealed class NoopPipelinePublisher : IPipelinePublisher
 {
     public static NoopPipelinePublisher Instance { get; } = new();
 
-    public void SetStatus(PipelineProgressStatus status, int? count = null) { }
+    public void SetStatus(
+        PipelineProgressStatus status,
+        int? count = null,
+        PipelineItemChanges? changes = null
+    ) { }
 
     public void AddError(string message) { }
 

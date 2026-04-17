@@ -8,9 +8,13 @@ internal class PipelinePublisher(
     ISyncRunPublisher publisher
 ) : IPipelinePublisher
 {
-    public void SetStatus(PipelineProgressStatus status, int? count = null)
+    public void SetStatus(
+        PipelineProgressStatus status,
+        int? count = null,
+        PipelineItemChanges? changes = null
+    )
     {
-        publisher.Publish(new PipelineEvent(instance, pipeline, status, count));
+        publisher.Publish(new PipelineEvent(instance, pipeline, status, count, changes));
     }
 
     public void AddError(string message)

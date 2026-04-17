@@ -107,7 +107,7 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
 
         var pipelines = instance.Pipelines.SetItem(
             evt.Type,
-            new PipelineSnapshot(evt.Status, evt.Count)
+            new PipelineSnapshot(evt.Status, evt.Count, evt.Changes)
         );
         var updated = instance with
         {

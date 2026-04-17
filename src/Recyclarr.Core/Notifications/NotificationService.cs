@@ -13,6 +13,7 @@ namespace Recyclarr.Notifications;
 internal sealed class NotificationService : INotificationService, IDisposable
 {
     private const string NoInstance = "[no instance]";
+    private const int MaxItemsPerAction = 20;
 
     private readonly ILogger _log;
     private readonly IAppriseNotificationApiService _api;
@@ -159,6 +160,11 @@ internal sealed class NotificationService : INotificationService, IDisposable
                         CultureInfo.InvariantCulture,
                         $"- {description}: {result!.Value.Count}"
                     );
+
+                    if (_verbosity.SendItemDetails && result.Value.Changes is not null)
+                    {
+                        AppendItemChanges(section, result.Value.Changes);
+                    }
                 }
 
                 section.AppendLine();
@@ -226,6 +232,42 @@ internal sealed class NotificationService : INotificationService, IDisposable
         };
     }
 
+    private static void AppendItemChanges(StringBuilder section, PipelineItemChanges changes)
+    {
+        AppendActionItems(section, "Created", changes.Created);
+        AppendActionItems(section, "Updated", changes.Updated);
+        AppendActionItems(section, "Deleted", changes.Deleted);
+    }
+
+    private static void AppendActionItems(
+        StringBuilder section,
+        string action,
+        IReadOnlyList<string> items
+    )
+    {
+        if (items.Count == 0)
+        {
+            return;
+        }
+
+        // Items arrive pre-sorted from the producer (see CustomFormatTransactionLogger).
+        var displayItems = items.Take(MaxItemsPerAction);
+
+        var line = new StringBuilder();
+        line.Append("  - ");
+        line.Append(action);
+        line.Append(": ");
+        line.Append(string.Join(", ", displayItems));
+
+        if (items.Count > MaxItemsPerAction)
+        {
+            var remaining = items.Count - MaxItemsPerAction;
+            line.Append(CultureInfo.InvariantCulture, $" (and {remaining} more)");
+        }
+
+        section.AppendLine(line.ToString());
+    }
+
     // Groups pipeline events by instance, taking the last event per pipeline type as the final
     // status
     private Dictionary<
@@ -245,7 +287,7 @@ internal sealed class NotificationService : INotificationService, IDisposable
     private static PipelineSnapshot ToSnapshot(IGrouping<PipelineType, PipelineEvent> g)
     {
         var last = g.Last();
-        return new PipelineSnapshot(last.Status, last.Count);
+        return new PipelineSnapshot(last.Status, last.Count, last.Changes);
     }
 
     public void Dispose() => _subscriptions.Dispose();

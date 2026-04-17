@@ -26,6 +26,7 @@ public enum NotificationVerbosity
     Minimal,
     Normal,
     Detailed,
+    Verbose,
 }
 
 public enum AppriseMode

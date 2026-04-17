@@ -31,9 +31,16 @@ internal sealed class NotificationServiceTest
         return new NotificationService(new TestableLogger(), _api, _scope, verbosity);
     }
 
-    private void PublishSucceeded(string instance, PipelineType type, int count)
+    private void PublishSucceeded(
+        string instance,
+        PipelineType type,
+        int count,
+        PipelineItemChanges? changes = null
+    )
     {
-        _scope.Publish(new PipelineEvent(instance, type, PipelineProgressStatus.Succeeded, count));
+        _scope.Publish(
+            new PipelineEvent(instance, type, PipelineProgressStatus.Succeeded, count, changes)
+        );
     }
 
     private void PublishDiagnostic(string? instance, SyncDiagnosticLevel level, string message)
@@ -133,5 +140,72 @@ internal sealed class NotificationServiceTest
         await _api.ReceivedWithAnyArgs(1).Notify(default!);
         _capturedNotification!.Body.Should().NotContain("Custom Formats Synced");
         _capturedNotification.Body.Should().Contain("Deprecated feature");
+    }
+
+    [Test]
+    public async Task Verbose_verbosity_includes_per_item_changes()
+    {
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Verbose));
+
+        var changes = new PipelineItemChanges(["NewCF"], ["UpdatedCF"], ["DeletedCF"]);
+        PublishSucceeded("Radarr", PipelineType.CustomFormat, 3, changes);
+
+        await sut.SendNotification();
+
+        await _api.ReceivedWithAnyArgs(1).Notify(default!);
+        _capturedNotification!.Body.Should().Contain("Custom Formats Synced: 3");
+        _capturedNotification.Body.Should().Contain("- Created: NewCF");
+        _capturedNotification.Body.Should().Contain("- Updated: UpdatedCF");
+        _capturedNotification.Body.Should().Contain("- Deleted: DeletedCF");
+    }
+
+    [Test]
+    public async Task Verbose_verbosity_caps_long_lists()
+    {
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Verbose));
+
+        var updatedItems = Enumerable.Range(1, 25).Select(i => $"CF{i:D2}").ToList();
+        var changes = new PipelineItemChanges([], updatedItems, []);
+        PublishSucceeded("Radarr", PipelineType.CustomFormat, 25, changes);
+
+        await sut.SendNotification();
+
+        await _api.ReceivedWithAnyArgs(1).Notify(default!);
+        _capturedNotification!.Body.Should().Contain("- Updated: CF01, CF02, CF03");
+        _capturedNotification.Body.Should().Contain("(and 5 more)");
+        _capturedNotification.Body.Should().NotContain("CF21");
+    }
+
+    [Test]
+    public async Task Verbose_verbosity_omits_empty_action_groups()
+    {
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Verbose));
+
+        var changes = new PipelineItemChanges([], ["OnlyUpdated"], []);
+        PublishSucceeded("Radarr", PipelineType.CustomFormat, 1, changes);
+
+        await sut.SendNotification();
+
+        await _api.ReceivedWithAnyArgs(1).Notify(default!);
+        _capturedNotification!.Body.Should().Contain("- Updated: OnlyUpdated");
+        _capturedNotification.Body.Should().NotContain("- Created:");
+        _capturedNotification.Body.Should().NotContain("- Deleted:");
+    }
+
+    [Test]
+    public async Task Normal_verbosity_suppresses_item_details()
+    {
+        using var sut = CreateSut(VerbosityOptions.From(NotificationVerbosity.Normal));
+
+        var changes = new PipelineItemChanges(["NewCF"], ["UpdatedCF"], ["DeletedCF"]);
+        PublishSucceeded("Radarr", PipelineType.CustomFormat, 3, changes);
+
+        await sut.SendNotification();
+
+        await _api.ReceivedWithAnyArgs(1).Notify(default!);
+        _capturedNotification!.Body.Should().Contain("Custom Formats Synced: 3");
+        _capturedNotification.Body.Should().NotContain("- Created:");
+        _capturedNotification.Body.Should().NotContain("- Updated:");
+        _capturedNotification.Body.Should().NotContain("- Deleted:");
     }
 }

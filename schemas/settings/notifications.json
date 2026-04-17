@@ -53,6 +53,10 @@
         {
           "const": "minimal",
           "description": "Only errors and warnings."
+        },
+        {
+          "const": "verbose",
+          "description": "Everything in detailed, plus per-item change details for each pipeline."
         }
       ]
     }

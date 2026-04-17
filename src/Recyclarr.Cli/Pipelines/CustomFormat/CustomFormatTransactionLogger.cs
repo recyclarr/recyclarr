@@ -17,8 +17,29 @@ internal class CustomFormatTransactionLogger(ILogger log)
         }
 
         var totalCount = LogResults(transactions);
+        var changes = BuildItemChanges(transactions);
 
-        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount);
+        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount, changes);
+    }
+
+    private static PipelineItemChanges BuildItemChanges(CustomFormatTransactionData transactions)
+    {
+        var created = transactions
+            .NewCustomFormats.Select(cf => cf.Name)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+
+        var updated = transactions
+            .UpdatedCustomFormats.Select(cf => cf.Name)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+
+        var deleted = transactions
+            .DeletedCustomFormats.Select(m => m.Name)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+
+        return new PipelineItemChanges(created, updated, deleted);
     }
 
     private int LogResults(CustomFormatTransactionData transactions)

@@ -13,6 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Sync: Error when the service type at `base_url` does not match the configuration type (e.g. Radarr
   config pointed at a Sonarr instance)
+- Notifications: New `verbose` verbosity level that includes per-item Custom Format change
+  details (created/updated/deleted names) in the notification body (#541)
 
 ### Changed
 
