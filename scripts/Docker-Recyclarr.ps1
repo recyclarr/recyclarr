@@ -23,7 +23,12 @@ if ($stat -ne "$env:DOCKER_UID`:$env:DOCKER_GID") {
 }
 
 # Start the corresponding radarr/sonarr docker containers for testing/debugging
-& $PSScriptRoot/Docker-Debug.ps1
+docker compose -f $recyclarrYaml up -d
+if ($LASTEXITCODE -ne 0) {
+    throw "docker compose up failed (debug)"
+}
+
+Write-Host "ntfy: http://localhost:8090/recyclarr"
 
 docker compose -f $recyclarrYaml --profile recyclarr run --rm --build recyclarr @args
 if ($LASTEXITCODE -ne 0) {

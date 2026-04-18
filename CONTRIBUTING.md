@@ -87,11 +87,11 @@ The root `docker-compose.yml` provides configuration for services used when debu
 To start these services:
 
 ```powershell
-./scripts/Docker-Debug.ps1
+docker compose up -d
 ```
 
-This runs `docker compose up -d --pull always` to start services in detached mode with the latest
-images.
+Each service sets `pull_policy: always` in `docker-compose.yml`, so `up -d` refreshes images on
+every start.
 
 Service endpoints are mapped to:
 
@@ -141,7 +141,7 @@ To run Recyclarr inside a Docker container with your local code changes:
 
 This script:
 
-1. Calls `Docker-Debug.ps1` to ensure dependent services are running
+1. Runs `docker compose up -d` to ensure dependent services are running
 1. Builds a local Recyclarr image with your current code
 1. Uses `docker compose run` with the `recyclarr` profile
 1. Forwards all arguments to the Recyclarr container

@@ -2,6 +2,7 @@ name: recyclarr
 
 x-radarr: &radarr
   image: ghcr.io/home-operations/radarr:rolling
+  pull_policy: always
   environment:
     TZ: America/Chicago
     RADARR__AUTH__APIKEY: testkey
@@ -10,6 +11,7 @@ x-radarr: &radarr
 
 x-sonarr: &sonarr
   image: ghcr.io/home-operations/sonarr:rolling
+  pull_policy: always
   environment:
     TZ: America/Chicago
     SONARR__AUTH__APIKEY: testkey
@@ -67,6 +69,7 @@ services:
 
   sqlite:
     image: keinos/sqlite3
+    pull_policy: always
     profiles: [manual]
     entrypoint: [sqlite3]
     volumes:
@@ -78,6 +81,7 @@ services:
   # http://localhost:8090/recyclarr
   ntfy:
     image: binwiederhier/ntfy
+    pull_policy: always
     ports: [8090:80]
     command: serve --base-url=http://localhost:8090
     environment:
@@ -86,6 +90,7 @@ services:
   # http://localhost:8000
   apprise:
     image: caronc/apprise
+    pull_policy: always
     ports: [8000:8000]
     init: true
     tmpfs:
