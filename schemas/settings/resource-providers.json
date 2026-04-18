@@ -49,8 +49,7 @@
             "service": true,
             "clone_url": {
               "type": "string",
-              "title": "Git clone URL for the repository",
-              "format": "uri"
+              "title": "Git clone URL for the repository"
             },
             "reference": {
               "type": "string",

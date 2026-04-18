@@ -16,8 +16,7 @@
         },
         "base_url": {
           "description": "The base URL for the Apprise API",
-          "type": "string",
-          "format": "uri"
+          "type": "string"
         },
         "key": {
           "description": "A key identifying the configuration (urls) to use in your Apprise instance. Required in 'stateful' mode, ignored in 'stateless' mode.",
@@ -31,8 +30,7 @@
           "description": "List of notification service URLs. Used in 'stateless' mode, ignored in 'stateful' mode.",
           "type": ["null", "array"],
           "items": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           }
         }
       }
