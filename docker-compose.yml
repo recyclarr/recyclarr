@@ -25,28 +25,6 @@ volumes:
   sonarr_develop2:
 
 services:
-  recyclarr:
-    image: ghcr.io/recyclarr/recyclarr:edge
-    user: ${DOCKER_UID:-1000}:${DOCKER_GID:-1000}
-    profiles: [recyclarr]
-    read_only: true
-    tmpfs: /tmp
-    build:
-      context: .
-      # platforms:
-      #   - linux/arm/v7
-      #   - linux/arm64
-      #   - linux/amd64
-    volumes:
-      - ${RECYCLARR_CONFIG_DIR:?RECYCLARR_CONFIG_DIR must be set}:/config
-    environment:
-      CRON_SCHEDULE: "* * * * *"
-      TZ: America/Chicago
-      RADARR_URL: http://radarr_develop2:7878
-      SONARR_URL: http://sonarr_develop2:8989
-      SHOWS_URL: http://sonarr_develop1:8989
-      APPRISE_URL: http://apprise:8000
-
   radarr_develop1:
     <<: *radarr
     ports: [7890:7878]
@@ -66,17 +44,6 @@ services:
     <<: *sonarr
     ports: [8991:8989]
     volumes: [sonarr_develop2:/config]
-
-  sqlite:
-    image: keinos/sqlite3
-    pull_policy: always
-    profiles: [manual]
-    entrypoint: [sqlite3]
-    volumes:
-      - radarr_develop1:/radarr/develop1
-      - radarr_develop2:/radarr/develop2
-      - sonarr_develop1:/sonarr/develop1
-      - sonarr_develop2:/sonarr/develop2
 
   # http://localhost:8090/recyclarr
   ntfy:
@@ -103,3 +70,36 @@ services:
       APPRISE_DEFAULT_THEM: dark
       APPRISE_STATEFUL_MODE: simple
       DEBUG: yes
+
+  sqlite:
+    image: keinos/sqlite3
+    pull_policy: always
+    profiles: [manual]
+    entrypoint: [sqlite3]
+    volumes:
+      - radarr_develop1:/radarr/develop1
+      - radarr_develop2:/radarr/develop2
+      - sonarr_develop1:/sonarr/develop1
+      - sonarr_develop2:/sonarr/develop2
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:edge
+    user: ${DOCKER_UID:-1000}:${DOCKER_GID:-1000}
+    profiles: [recyclarr]
+    read_only: true
+    tmpfs: /tmp
+    build:
+      context: .
+      # platforms:
+      #   - linux/arm/v7
+      #   - linux/arm64
+      #   - linux/amd64
+    volumes:
+      - ${RECYCLARR_CONFIG_DIR:?RECYCLARR_CONFIG_DIR must be set}:/config
+    environment:
+      CRON_SCHEDULE: "* * * * *"
+      TZ: America/Chicago
+      RADARR_URL: http://radarr_develop2:7878
+      SONARR_URL: http://sonarr_develop2:8989
+      SHOWS_URL: http://sonarr_develop1:8989
+      APPRISE_URL: http://apprise:8000
