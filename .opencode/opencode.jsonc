@@ -24,6 +24,5 @@
     "linear_*_comment*": "allow",
     "linear_*_issue*": "allow",
     "linear_*_project*": "allow",
-    "linear_research": "allow",
   },
 }
