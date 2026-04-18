@@ -1,8 +1,19 @@
 ---
 name: rx-observables
 description: >-
-  Use when writing or modifying code that uses System.Reactive (Rx.NET),
-  IObservable<T>, subjects, or reactive/observable patterns in C#
+  Use when writing, editing, or reviewing C# code that uses System.Reactive
+  (Rx.NET); working with `IObservable`, `IObserver`, `Subject`,
+  `BehaviorSubject`, `ReplaySubject`, or `AsyncSubject`; composing operators
+  like `Select`, `Where`, `Merge`, `Switch`, `Publish`, `RefCount`, `Catch`,
+  `Retry`, `ObserveOn`, or `SubscribeOn`; managing subscription lifecycle
+  with `CompositeDisposable`, `SerialDisposable`, or `DisposeWith`; testing
+  time-dependent reactive code with `TestScheduler` from
+  `Microsoft.Reactive.Testing`; designing hot vs cold observables or
+  enforcing the Rx serial-notification contract. Triggers on phrases like
+  "observable stream", "reactive pipeline", "Rx.NET", "subject leak",
+  "OnNext on wrong thread", "test scheduler", or edits touching files that
+  import `System.Reactive`. Do NOT use for plain `IEnumerable` LINQ,
+  `IAsyncEnumerable`, or TPL `Task`-based async.
 ---
 
 # Rx.NET Patterns and Practices

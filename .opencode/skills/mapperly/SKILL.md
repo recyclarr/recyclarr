@@ -1,8 +1,18 @@
 ---
 name: mapperly
 description: >-
-  Use when writing or modifying Mapperly mapper classes, debugging null-handling
-  in generated mapping code, or adding new DTO-to-domain mappings
+  Use when writing, editing, or reviewing Mapperly (`Riok.Mapperly`) mapper
+  classes; adding or changing a `[Mapper]`-attributed partial class;
+  configuring `RequiredMappingStrategy`, `[MapProperty]`, `[MapperIgnore]`,
+  or other Mapperly attributes; mapping between nullable Refit/OpenAPI DTOs
+  and non-nullable domain records; debugging null-handling in generated
+  mapping code (positional records, `required init`, initializer defaults);
+  investigating Mapperly diagnostics such as RMG001, RMG020, or RMG089;
+  inspecting source-generated output under
+  `obj/Debug/*/generated/Riok.Mapperly/`. Triggers on phrases like "add a
+  Mapperly mapper", "Mapperly null handling", "DTO to domain mapping",
+  "generated mapper", or edits to files ending in `*Mapper.cs` under
+  `ServarrApi/`. Do NOT use for hand-written mapping code or AutoMapper.
 ---
 
 # Mapperly

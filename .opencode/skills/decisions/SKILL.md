@@ -1,6 +1,16 @@
 ---
 name: decisions
-description: Use when creating or editing ADRs or PDRs in docs/decisions/
+description: >-
+  Use when creating, editing, superseding, or reviewing Architecture Decision
+  Records (ADRs) or Product Decision Records (PDRs) under `docs/decisions/`
+  (including `docs/decisions/architecture/` and `docs/decisions/product/`);
+  writing MADR-formatted decision documents; recording rationale for an
+  architectural or upstream-driven choice; linking a decision to a TRaSH
+  Guides upstream source; changing a decision's status (proposed, accepted,
+  deprecated, superseded). Triggers on phrases like "write an ADR", "new
+  PDR", "document this decision", "decision record", "add an architecture
+  decision", or any edit to files matching `docs/decisions/**/*.md`. Do NOT
+  use for general architecture documentation under `docs/architecture/`.
 ---
 
 # Decision Records

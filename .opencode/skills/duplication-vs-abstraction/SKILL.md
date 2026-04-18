@@ -1,8 +1,18 @@
 ---
 name: duplication-vs-abstraction
 description: >-
-  Use when deciding whether to extract shared abstractions across similar-but-independent types,
-  code-generated clients, or parallel implementations serving different external systems
+  Use when weighing whether to extract a shared abstraction, base class,
+  interface, or generic helper versus keeping code duplicated; evaluating
+  DRY tradeoffs across parallel Sonarr and Radarr implementations, Refit or
+  other code-generated API clients, OpenAPI/gRPC/GraphQL DTOs, or
+  anti-corruption layers over distinct external systems; reviewing a PR that
+  introduces a new shared abstraction spanning independent bounded contexts;
+  considering unwinding a wrong abstraction back into duplicated copies.
+  Triggers on phrases like "should I abstract this", "extract a base class",
+  "these look duplicated", "DRY this up", "unify Sonarr and Radarr", "refactor
+  to share", "rule of three", "wrong abstraction". Do NOT use for mechanical
+  refactors within a single type or for trivial helper extraction inside one
+  module.
 ---
 
 # Duplication vs Abstraction

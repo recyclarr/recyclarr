@@ -39,15 +39,22 @@ Single primary agent with direct access to all files and tools. Subagents for bo
 
 ## Skills
 
-ABSOLUTE REQUIREMENT: Load skills for procedural knowledge on-demand based on domain area:
+Per-skill triggers. MUST load before acting on the governed task; a skill loaded in parallel with
+that action arrives too late.
 
-- `csharp-coding` - C# 14/.NET 10 patterns and idioms
-- `testing` - Any test related work (e.g. code coverage, running and editing tests, end to end
-  tests)
-- `changelog` - When updating CHANGELOG.md for format and conventions
-- `decisions` - Creating ADRs and PDRs in `docs/decisions/`
-- `linear-planning` - Creating or organizing Linear issues, projects, or initiatives
-- `mapperly` - Writing or modifying Mapperly mapper classes, debugging null-handling
+- `testing`: MUST load for any work under `tests/**`, including authoring tests, updating E2E
+  fixtures, debugging failures, or running `coverage.py` / `Run-E2ETests.ps1`.
+- `changelog`: MUST load when adding, editing, or reorganizing entries in `CHANGELOG.md`, or when
+  drafting release notes.
+- `decisions`: MUST load when creating, editing, or superseding ADRs or PDRs under
+  `docs/decisions/`.
+- `mapperly`: MUST load when writing, editing, or debugging `Riok.Mapperly` mapper classes
+  (`[Mapper]`-attributed partials, `*Mapper.cs` under `ServarrApi/`, RMG-prefixed diagnostics).
+- `duplication-vs-abstraction`: MUST load when weighing whether to extract a shared abstraction,
+  base class, or generic helper, particularly across Sonarr/Radarr parallels, Refit-generated
+  clients, or anti-corruption layers over distinct external systems.
+- `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
+  (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
 
 ## Project Context
 
@@ -85,8 +92,11 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - Search existing code first: `rg "pattern"` before writing new code. Holistically and
   comprehensively make changes, don't just do it in isolation which ignores other important areas of
   code that might be in-scope or indirectly affected by a change.
-- Reuse/extend existing implementations - zero duplication tolerance
-- CRITICAL: Follow SOLID, DRY, YAGNI principles
+- Reuse or extend existing implementations before adding parallel ones. DRY targets knowledge
+  duplication, not incidental syntactic similarity; when weighing extraction of a shared abstraction
+  (base class, generic helper, unified interface), load the `duplication-vs-abstraction` skill
+  first.
+- CRITICAL: Follow SOLID, YAGNI principles
 - .NET 10.0 + nullable reference types
 - Comment guidelines (implements global "comments must earn their place"). Examples:
   - LINQ chains (3+ operations): Brief comment stating transformation goal
@@ -230,7 +240,7 @@ Some key files and directories:
 
 **Development and Testing:**
 
-All under `./scripts`. MUST use `testing` skill for test-related work.
+All under `./scripts`.
 
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)

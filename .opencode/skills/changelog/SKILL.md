@@ -1,6 +1,16 @@
 ---
 name: changelog
-description: Use when updating CHANGELOG.md for a release or user-facing change
+description: >-
+  Use when adding, editing, or reorganizing entries in `CHANGELOG.md`; drafting
+  release notes for Recyclarr; deciding which Keep a Changelog section (Added,
+  Changed, Deprecated, Removed, Fixed, Security) a change belongs under;
+  wording user-facing entries for `feat`, `fix`, `perf`, or breaking commits;
+  phrasing deprecation notices or migration guidance; preparing the
+  `[Unreleased]` section for cut. Triggers on phrases like "update the
+  changelog", "add a changelog entry", "bump the changelog", "release notes",
+  or any edit touching `CHANGELOG.md`. Do NOT use for commit message wording
+  (see commit agent) or for internal `refactor`/`chore`/`test`/`ci`/`build`
+  commits that do not require a changelog entry.
 ---
 
 # Changelog Skill

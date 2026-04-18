@@ -1,8 +1,20 @@
 ---
 name: testing
-description: >
-  Use when writing or modifying tests, improving coverage, debugging test failures, updating E2E
-  fixtures, or working in tests/** directories.
+description: >-
+  Use when writing, editing, refactoring, or debugging tests anywhere under
+  `tests/**` (unit, integration, or end-to-end); authoring NUnit 4 test
+  classes (`*Test`, `*IntegrationTest`); using NSubstitute mocks,
+  AutoFixture with `[AutoMockData]` / `[InlineAutoMockData]` / `[Frozen]`,
+  or AwesomeAssertions (NOT FluentAssertions); working with
+  `CliIntegrationFixture`, `IntegrationTestFixture`, `MockFileSystem`,
+  `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
+  updating E2E fixtures under `tests/Recyclarr.Cli.IntegrationTests.E2E/`;
+  editing `Fixtures/recyclarr.yml`, `metadata.json`, `cf/`, `cf-groups/`,
+  or `quality-profiles/` fixture folders; running `Run-E2ETests.ps1` or
+  `scripts/coverage.py`; investigating flaky tests, coverage gaps, or
+  Testcontainers setup. Triggers on phrases like "write a test", "fix this
+  test", "improve coverage", "add an E2E case", "mock this dependency", or
+  any edit to `*.Tests.csproj` or files under `tests/**`.
 ---
 
 # Testing Patterns and Infrastructure
