@@ -1,0 +1,6 @@
+# linear cli
+# https://github.com/schpet/linear-cli
+
+workspace = "recyclarr"
+team_id = "REC"
+issue_sort = "priority"

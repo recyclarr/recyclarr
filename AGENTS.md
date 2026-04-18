@@ -21,6 +21,13 @@ Project lifecycle:
 - MUST transition to "Completed" when all issues are done
 - SHOULD transition to "Canceled" if the project is abandoned
 
+Scope separation:
+
+- Linear tracks work items and progress; the repo tracks design and architectural knowledge
+  (`docs/architecture/`, `docs/decisions/`). MUST NOT duplicate between them.
+- Linear project descriptions SHOULD link to relevant ADRs and architecture docs.
+- MUST NOT put design rationale, decision records, or living design reference into Linear.
+
 ## Agent Architecture
 
 Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
