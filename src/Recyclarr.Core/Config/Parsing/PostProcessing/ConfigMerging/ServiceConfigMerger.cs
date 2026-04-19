@@ -1,5 +1,3 @@
-using Recyclarr.Common.Extensions;
-
 namespace Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 public abstract class ServiceConfigMerger<T>
@@ -56,78 +54,113 @@ public abstract class ServiceConfigMerger<T>
         };
     }
 
-    private sealed record FlattenedCfs(
-        string? ProfileTrashId,
-        string? ProfileName,
-        int? Score,
-        IReadOnlyCollection<string> TrashIds
-    )
-    {
-        public string? ProfileKey => ProfileTrashId ?? ProfileName;
-    }
-
     private static IReadOnlyCollection<CustomFormatConfigYaml> MergeCustomFormats(
         IReadOnlyCollection<CustomFormatConfigYaml> a,
         IReadOnlyCollection<CustomFormatConfigYaml> b
     )
     {
-        var flattenedA = FlattenCfs(a);
-        var flattenedB = FlattenCfs(b);
+        // Two-pass merge: first normalize entry-level scores to per-profile scores on both sides,
+        // then subtract B's trash IDs from A's entries for matching profile keys.
+        var normalizedA = NormalizeEntryScores(a);
+        var normalizedB = NormalizeEntryScores(b);
 
-        return flattenedA
-            // This builds a list of TrashIds in side B that are assigned to matching profiles in A
-            .Select(x =>
-                (
-                    A: x,
-                    B: flattenedB
-                        .Where(y => y.ProfileKey.EqualsIgnoreCase(x.ProfileKey)) // Ignore score
-                        .SelectMany(y => y.TrashIds)
-                        .Distinct(StringComparer.InvariantCultureIgnoreCase)
-                        .ToList()
+        // Build lookup of trash IDs per profile key from side B
+        var trashIdsByProfileB = normalizedB
+            .Where(x => x.AssignScoresTo is not null)
+            .SelectMany(x =>
+                x.AssignScoresTo!.Select(profile => // non-null: filtered by Where above
+                    (ProfileKey: GetProfileKey(profile), x.TrashIds)
                 )
             )
-            // Add everything on side A that isn't on side B
-            .Select(x => new CustomFormatConfigYaml
-            {
-                TrashIds = x
-                    .A.TrashIds.Except(x.B, StringComparer.InvariantCultureIgnoreCase)
-                    .ToList(),
-                AssignScoresTo = x.A.ProfileKey is not null
-                    ? new[]
-                    {
-                        new QualityScoreConfigYaml
-                        {
-                            TrashId = x.A.ProfileTrashId,
-                            Name = x.A.ProfileName,
-                            Score = x.A.Score,
-                        },
-                    }
-                    : null,
-            })
-            .Concat(b)
-            .ToList();
+            .Where(x => x.ProfileKey is not null)
+            .GroupBy(x => x.ProfileKey!, StringComparer.InvariantCultureIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                    g.SelectMany(x => x.TrashIds ?? [])
+                        .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                        .ToList(),
+                StringComparer.InvariantCultureIgnoreCase
+            );
 
-        static List<FlattenedCfs> FlattenCfs(IEnumerable<CustomFormatConfigYaml> cfs)
+        // For each normalized A entry, subtract matching B trash IDs
+        var mergedA = normalizedA.Select(x =>
+        {
+            // NormalizeEntryScores guarantees exactly one profile per entry with AssignScoresTo
+            var profile = x.AssignScoresTo?.SingleOrDefault();
+            if (profile is null)
+            {
+                return x;
+            }
+
+            var profileKey = GetProfileKey(profile);
+
+            if (
+                profileKey is null
+                || !trashIdsByProfileB.TryGetValue(profileKey, out var bTrashIds)
+            )
+            {
+                return x;
+            }
+
+            var remainingTrashIds = x
+                .TrashIds?.Except(bTrashIds, StringComparer.InvariantCultureIgnoreCase)
+                .ToList();
+
+            return x with
+            {
+                TrashIds = remainingTrashIds,
+            };
+        });
+
+        return [.. mergedA, .. normalizedB];
+
+        static string? GetProfileKey(QualityScoreConfigYaml? profile) =>
+            profile?.TrashId ?? profile?.Name;
+
+        static List<CustomFormatConfigYaml> NormalizeEntryScores(
+            IEnumerable<CustomFormatConfigYaml> cfs
+        )
         {
             return cfs.Where(x => x.TrashIds is not null)
                 .SelectMany(x =>
                     x is { AssignScoresTo.Count: > 0 }
-                        // Entry-level score acts as a default when per-profile score is absent
-                        ? x.AssignScoresTo.Select(y => new FlattenedCfs(
-                            y.TrashId,
-                            y.Name,
-                            y.Score ?? x.Score,
-                            x.TrashIds!
-                        ))
-                        : [new FlattenedCfs(null, null, null, x.TrashIds!)]
+                        ? x.AssignScoresTo.Select(profile => new CustomFormatConfigYaml
+                        {
+                            TrashIds = x.TrashIds,
+                            AssignScoresTo = [profile with { Score = profile.Score ?? x.Score }],
+                        })
+                        : [x]
                 )
-                .GroupBy(x => (x.ProfileTrashId, x.ProfileName, x.Score))
-                .Select(x => new FlattenedCfs(
-                    x.Key.ProfileTrashId,
-                    x.Key.ProfileName,
-                    x.Key.Score,
-                    x.SelectMany(y => y.TrashIds).ToList()
-                ))
+                // Consolidate trash IDs when multiple entries target the same profile-key/score
+                .GroupBy(x =>
+                {
+                    var profile = x.AssignScoresTo?.SingleOrDefault();
+                    return (
+                        profileKey: GetProfileKey(profile),
+                        trashId: profile?.TrashId,
+                        name: profile?.Name,
+                        score: profile?.Score
+                    );
+                })
+                .Select(g => new CustomFormatConfigYaml
+                {
+                    TrashIds = g.SelectMany(x => x.TrashIds ?? [])
+                        .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                        .ToList(),
+                    AssignScoresTo = g.Key.profileKey is not null
+                        ?
+                        [
+                            new QualityScoreConfigYaml
+                            {
+                                TrashId = g.Key.trashId,
+                                Name = g.Key.name,
+                                Score = g.Key.score,
+                            },
+                        ]
+                        // No profile key: preserve original value (null stays null, [] stays [])
+                        : g.First().AssignScoresTo,
+                })
                 .ToList();
         }
     }
