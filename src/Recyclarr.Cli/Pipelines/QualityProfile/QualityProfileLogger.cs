@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync.Progress;
 
@@ -146,7 +147,7 @@ internal class QualityProfileLogger(ILogger log)
             transactions.AmbiguousProfiles.Select(x => new
             {
                 x.PlannedProfile.Name,
-                x.PlannedProfile.Resource?.TrashId,
+                x.PlannedProfile.GuideResource?.TrashId,
                 Matches = x.ServiceMatches,
             })
         );

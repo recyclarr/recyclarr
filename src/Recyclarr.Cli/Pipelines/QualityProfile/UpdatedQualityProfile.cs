@@ -35,8 +35,6 @@ internal record UpdatedQualityProfile
         }
     }
 
-    public string? TrashId => ProfileConfig.Resource?.TrashId;
-
     // Effective value resolution: config override > guide resource > service profile.
     // These are the single source of truth for what gets sent to the API and validated.
     public string EffectiveName
@@ -44,7 +42,7 @@ internal record UpdatedQualityProfile
         get
         {
             var config = ProfileConfig.Config;
-            var resource = ProfileConfig.Resource;
+            var resource = ProfileConfig.GuideResource;
             return !string.IsNullOrEmpty(config.Name)
                 ? config.Name
                 : resource?.Name ?? Profile.Name;
@@ -53,22 +51,22 @@ internal record UpdatedQualityProfile
 
     public bool? EffectiveUpgradeAllowed =>
         ProfileConfig.Config.UpgradeAllowed
-        ?? ProfileConfig.Resource?.UpgradeAllowed
+        ?? ProfileConfig.GuideResource?.UpgradeAllowed
         ?? Profile.UpgradeAllowed;
 
     public int? EffectiveMinFormatScore =>
         ProfileConfig.Config.MinFormatScore
-        ?? ProfileConfig.Resource?.MinFormatScore
+        ?? ProfileConfig.GuideResource?.MinFormatScore
         ?? Profile.MinFormatScore;
 
     public int? EffectiveMinUpgradeFormatScore =>
         ProfileConfig.Config.MinUpgradeFormatScore
-        ?? ProfileConfig.Resource?.MinUpgradeFormatScore
+        ?? ProfileConfig.GuideResource?.MinUpgradeFormatScore
         ?? Profile.MinUpgradeFormatScore;
 
     public int? EffectiveCutoffFormatScore =>
         ProfileConfig.Config.UpgradeUntilScore
-        ?? ProfileConfig.Resource?.CutoffFormatScore
+        ?? ProfileConfig.GuideResource?.CutoffFormatScore
         ?? Profile.CutoffFormatScore;
 
     public QualityProfileData BuildMergedProfile()
@@ -104,7 +102,7 @@ internal record UpdatedQualityProfile
         // Additionally, there's no point in assigning a cutoff if the user didn't specify one in
         // their config.
         var effectiveCutoff =
-            ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.Resource?.Cutoff;
+            ProfileConfig.Config.UpgradeUntilQuality ?? ProfileConfig.GuideResource?.Cutoff;
         if (merged.Cutoff is null || effectiveCutoff is not null)
         {
             merged = merged with
@@ -114,7 +112,7 @@ internal record UpdatedQualityProfile
         }
 
         // Language passthrough from guide resource
-        var resourceLanguage = ProfileConfig.Resource?.Language;
+        var resourceLanguage = ProfileConfig.GuideResource?.Language;
         if (!string.IsNullOrEmpty(resourceLanguage))
         {
             var language = Languages.FirstOrDefault(l =>

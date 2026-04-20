@@ -56,14 +56,22 @@ internal static class NewPlan
         params PlannedCfScore[] scores
     )
     {
-        return new PlannedQualityProfile
-        {
-            Name = resource?.Name ?? config.Name,
-            Config = config,
-            ShouldCreate = shouldCreate,
-            Resource = resource,
-            CfScores = scores.ToList(),
-        };
+        return resource is not null
+            ? new PlannedQualityProfile.GuideBacked
+            {
+                Name = resource.Name,
+                Config = config,
+                ShouldCreate = shouldCreate,
+                Resource = resource,
+                CfScores = scores.ToList(),
+            }
+            : new PlannedQualityProfile.UserDefined
+            {
+                Name = config.Name,
+                Config = config,
+                ShouldCreate = shouldCreate,
+                CfScores = scores.ToList(),
+            };
     }
 
     public static QualityProfileResource QpResource(string trashId, string name)

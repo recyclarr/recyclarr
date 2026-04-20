@@ -48,7 +48,7 @@ internal class QualityProfilePlanComponent(
             if (!allProfiles.TryGetValue(scoreConfig.Name, out var profile))
             {
                 // Implicitly add profile if only referenced via assign_scores_to
-                allProfiles[scoreConfig.Name] = profile = new PlannedQualityProfile
+                allProfiles[scoreConfig.Name] = profile = new PlannedQualityProfile.UserDefined
                 {
                     Name = scoreConfig.Name,
                     Config = new QualityProfileConfig { Name = scoreConfig.Name },
@@ -195,13 +195,14 @@ internal class QualityProfilePlanComponent(
         // Build effective config: inherit qualities and score_set from resource if not specified
         var effectiveConfig = BuildEffectiveConfig(config, resource);
 
-        return new PlannedQualityProfile
-        {
-            Name = name,
-            Config = effectiveConfig,
-            Resource = resource,
-            ShouldCreate = true,
-        };
+        return resource is not null
+            ? new PlannedQualityProfile.GuideBacked
+            {
+                Name = name,
+                Config = effectiveConfig,
+                Resource = resource,
+            }
+            : new PlannedQualityProfile.UserDefined { Name = name, Config = effectiveConfig };
     }
 
     private static QualityProfileConfig BuildEffectiveConfig(

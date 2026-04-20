@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
@@ -18,13 +19,22 @@ internal class QualityProfilePipelineContext : PipelineContext, ISyncStateSource
     public TrashIdMappingStore State { get; set; } = null!;
 
     // ISyncStateSource implementation
-    // Only store guide-backed profiles (those with TrashId and valid service ID)
+    // Only store guide-backed profiles (those with a valid service ID).
     public IEnumerable<TrashIdMapping> SyncedMappings =>
         TransactionOutput
             .NewProfiles.Concat(TransactionOutput.UnchangedProfiles)
             .Concat(TransactionOutput.UpdatedProfiles.Select(x => x.Profile))
-            .Where(p => p.TrashId is not null && p.Profile.Id is not null)
-            .Select(p => new TrashIdMapping(p.TrashId!, p.ProfileName, p.Profile.Id!.Value));
+            .Select(ToMapping)
+            .OfType<TrashIdMapping>();
+
+    private static TrashIdMapping? ToMapping(UpdatedQualityProfile p) =>
+        p
+            is {
+                Profile.Id: { } serviceId,
+                ProfileConfig: PlannedQualityProfile.GuideBacked guideBacked,
+            }
+            ? new TrashIdMapping(guideBacked.Resource.TrashId, p.ProfileName, serviceId)
+            : null;
 
     // QP has no delete flag - entries removed only when service ID no longer exists
     public IEnumerable<int> DeletedIds => [];

@@ -19,7 +19,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
         var cf = new PlannedCustomFormat(NewCf.Data("Test", "cf1"));
         plan.AddCustomFormat(cf);
 
-        var qp = new PlannedQualityProfile
+        var qp = new PlannedQualityProfile.UserDefined
         {
             Name = "Test Profile",
             Config = new QualityProfileConfig { Name = "Test Profile" },
@@ -56,8 +56,8 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
 
         plan.QualityProfiles.Should().ContainSingle();
         plan.QualityProfiles.First().Name.Should().Be("Guide QP Name");
-        plan.QualityProfiles.First().Resource.Should().NotBeNull();
-        plan.QualityProfiles.First().Resource!.TrashId.Should().Be("qp-trash-id");
+        plan.QualityProfiles.First().GuideResource.Should().NotBeNull();
+        plan.QualityProfiles.First().GuideResource!.TrashId.Should().Be("qp-trash-id");
     }
 
     [Test]
@@ -394,6 +394,10 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
 
         plan.QualityProfiles.Should().HaveCount(2);
         plan.QualityProfiles.Select(p => p.Name).Should().BeEquivalentTo("Any", "Arabic");
-        plan.QualityProfiles.Should().OnlyContain(p => p.Resource!.TrashId == "qp-shared");
+        plan.QualityProfiles.Should()
+            .AllBeOfType<PlannedQualityProfile.GuideBacked>()
+            .And.OnlyContain(p =>
+                ((PlannedQualityProfile.GuideBacked)p).Resource.TrashId == "qp-shared"
+            );
     }
 }

@@ -1032,14 +1032,14 @@ internal sealed class QualityProfileTransactionPhaseTest
     // Helper to create a guide-backed PlannedQualityProfile with explicit Name control.
     // NewPlan.Qp uses resource.Name which doesn't work when testing multiple profiles
     // sharing one resource with different names.
-    private static PlannedQualityProfile GuideQp(
+    private static PlannedQualityProfile.GuideBacked GuideQp(
         string name,
         string trashId,
         QualityProfileConfig? config = null
     )
     {
         var resource = NewPlan.QpResource(trashId, "Guide Default Name");
-        return new PlannedQualityProfile
+        return new PlannedQualityProfile.GuideBacked
         {
             Name = name,
             Config = config ?? new QualityProfileConfig { Name = name, TrashId = trashId },

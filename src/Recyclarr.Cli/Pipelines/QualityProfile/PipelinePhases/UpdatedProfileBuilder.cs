@@ -32,8 +32,8 @@ internal class UpdatedProfileBuilder(
     public List<UpdatedQualityProfile> BuildFrom(IEnumerable<PlannedQualityProfile> plannedProfiles)
     {
         var profileList = plannedProfiles.ToList();
-        var guideBacked = profileList.Where(p => p.Resource is not null).ToList();
-        var userDefined = profileList.Where(p => p.Resource is null);
+        var guideBacked = profileList.GuideBacked().ToList();
+        var userDefined = profileList.UserDefined();
 
         // Two-pass resolution for guide-backed profiles to support multiple profiles
         // sharing the same trash_id (see docs/architecture/quality-profile-state-resolution.md)
@@ -50,13 +50,15 @@ internal class UpdatedProfileBuilder(
 
     // Pass 1: exact match by (trash_id, name). Profiles that match are claimed
     // and processed immediately. Returns profiles that didn't find an exact match.
-    private List<PlannedQualityProfile> ResolveExactMatches(List<PlannedQualityProfile> guideBacked)
+    private List<PlannedQualityProfile.GuideBacked> ResolveExactMatches(
+        List<PlannedQualityProfile.GuideBacked> guideBacked
+    )
     {
-        List<PlannedQualityProfile> unmatched = [];
+        List<PlannedQualityProfile.GuideBacked> unmatched = [];
 
         foreach (var planned in guideBacked)
         {
-            var trashId = planned.Resource!.TrashId;
+            var trashId = planned.Resource.TrashId;
             var cachedId = state.FindId(new MappingKey(trashId, planned.Name));
 
             log.Debug(
@@ -83,11 +85,11 @@ internal class UpdatedProfileBuilder(
     // Pass 2: for each unmatched profile, check unclaimed state mappings with the same trash_id.
     // A rename is resolved only when exactly 1 unclaimed mapping and 1 unmatched profile exist
     // for that trash_id. All other combinations fall through to ProcessNameCollision.
-    private void ResolveRenames(List<PlannedQualityProfile> unmatched)
+    private void ResolveRenames(List<PlannedQualityProfile.GuideBacked> unmatched)
     {
         // Group unmatched profiles by trash_id to evaluate rename eligibility per group
         var unmatchedByTrashId = unmatched
-            .GroupBy(p => p.Resource!.TrashId, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(p => p.Resource.TrashId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
         foreach (var (trashId, profiles) in unmatchedByTrashId)
@@ -124,7 +126,7 @@ internal class UpdatedProfileBuilder(
         }
     }
 
-    private void ProcessCachedProfile(PlannedQualityProfile planned, int cachedId)
+    private void ProcessCachedProfile(PlannedQualityProfile.GuideBacked planned, int cachedId)
     {
         if (_serviceProfilesById.TryGetValue(cachedId, out var serviceProfile))
         {
@@ -154,7 +156,7 @@ internal class UpdatedProfileBuilder(
             {
                 log.Debug(
                     "QP {TrashId} will be renamed from '{ServiceName}' to '{GuideName}'",
-                    planned.Resource!.TrashId,
+                    planned.Resource.TrashId,
                     serviceProfile.Name,
                     planned.Name
                 );
@@ -169,14 +171,14 @@ internal class UpdatedProfileBuilder(
             log.Debug(
                 "Cached service ID {CachedId} for QP {TrashId} no longer exists in service",
                 cachedId,
-                planned.Resource!.TrashId
+                planned.Resource.TrashId
             );
 
             ProcessNameCollision(planned);
         }
     }
 
-    private void ProcessNameCollision(PlannedQualityProfile planned)
+    private void ProcessNameCollision(PlannedQualityProfile.GuideBacked planned)
     {
         var nameMatches = _serviceProfilesByName[planned.Name].ToList();
 
@@ -198,10 +200,7 @@ internal class UpdatedProfileBuilder(
                 var serviceProfile = nameMatches[0];
 
                 // Config is authoritative: adopt the existing service profile
-                if (planned.Resource is not null)
-                {
-                    transactions.ReplacedProfiles.Add(planned.Name);
-                }
+                transactions.ReplacedProfiles.Add(planned.Name);
 
                 var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
                 AddExistingProfile(planned, fixedProfile, missingQualities);
@@ -219,7 +218,7 @@ internal class UpdatedProfileBuilder(
         }
     }
 
-    private void ProcessUserDefinedProfile(PlannedQualityProfile planned)
+    private void ProcessUserDefinedProfile(PlannedQualityProfile.UserDefined planned)
     {
         var nameMatches = _serviceProfilesByName[planned.Name].ToList();
 
