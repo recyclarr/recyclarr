@@ -24,6 +24,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Notifications: Notification body too large when many custom formats or quality profiles are
+  adopted on first sync
 - CLI: Garbled output when stdout is redirected (e.g. cron jobs, piped commands) (#779)
 
 ## [8.5.1] - 2026-03-18

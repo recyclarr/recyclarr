@@ -129,11 +129,18 @@ internal class CustomFormatTransactionLogger(ILogger log)
         CustomFormatTransactionData transactions
     )
     {
-        foreach (var name in transactions.ReplacedCustomFormats)
+        var replaced = transactions.ReplacedCustomFormats;
+        if (replaced.Count == 0)
         {
-            var message =
-                $"Custom Format '{name}' already existed in the service and was replaced by Recyclarr";
-            publisher.AddWarning(message);
+            return;
         }
+
+        const int maxNames = 20;
+        var names = string.Join(", ", replaced.Take(maxNames));
+        var overflow = replaced.Count > maxNames ? $" and {replaced.Count - maxNames} more" : "";
+        publisher.AddWarning(
+            $"{replaced.Count} custom format(s) already existed in the service and were replaced "
+                + $"by Recyclarr: {names}{overflow}"
+        );
     }
 }

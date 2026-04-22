@@ -97,12 +97,19 @@ internal class QualityProfileLogger(ILogger log)
         QualityProfileTransactionData transactions
     )
     {
-        foreach (var name in transactions.ReplacedProfiles)
+        var replaced = transactions.ReplacedProfiles;
+        if (replaced.Count == 0)
         {
-            var message =
-                $"Quality profile '{name}' already existed in the service and was replaced by Recyclarr";
-            context.Publisher.AddWarning(message);
+            return;
         }
+
+        const int maxNames = 20;
+        var names = string.Join(", ", replaced.Take(maxNames));
+        var overflow = replaced.Count > maxNames ? $" and {replaced.Count - maxNames} more" : "";
+        context.Publisher.AddWarning(
+            $"{replaced.Count} quality profile(s) already existed in the service and were replaced "
+                + $"by Recyclarr: {names}{overflow}"
+        );
     }
 
     private static void LogRenameConflicts(
