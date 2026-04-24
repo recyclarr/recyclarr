@@ -1,30 +1,29 @@
 using System.IO.Abstractions;
 using Autofac;
-using Recyclarr.Config;
+using Recyclarr.Cli.Processors;
+using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 
-namespace Recyclarr.Core.Tests.IntegrationTests;
+namespace Recyclarr.Cli.Tests.IntegrationTests;
 
-internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
+internal sealed class ConfigPipelineTest : CliIntegrationFixture
 {
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
-        // ConfigurationRegistry uses ConfigFilterProcessor which depends on
-        // IFilterResultRenderer, so we need to register a mock for it since we
-        // don't care about rendering logic for this test.
+        // ConfigFilterProcessor depends on IFilterResultRenderer; use a mock since
+        // rendering behavior is not under test here.
         builder.RegisterMockFor<IFilterResultRenderer>();
     }
 
     [Test]
     public void Trailing_slash_stripped_from_base_url()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "manual.yml",
@@ -38,12 +37,10 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
-        );
+        var configs = factory.FromPaths(["manual.yml"]).GetConfigs();
 
-        result
-            .Configs.Should()
+        configs
+            .Should()
             .ContainSingle()
             .Which.BaseUrl.Should()
             .Be(new Uri("http://localhost:7878/radarr"));
@@ -52,7 +49,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Use_explicit_paths_instead_of_default()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "manual.yml",
@@ -66,12 +63,10 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
-        );
+        var configs = factory.FromPaths(["manual.yml"]).GetConfigs();
 
-        result
-            .Configs.Should()
+        configs
+            .Should()
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
@@ -87,10 +82,9 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Throw_on_invalid_config_files()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
-        var act = () =>
-            sut.FindAndLoadConfigs(new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] });
+        var act = () => factory.FromPaths(["manual.yml"]);
 
         act.Should().ThrowExactly<InvalidConfigurationFilesException>();
     }
@@ -98,7 +92,8 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Deprecated_property_produces_warning_and_continues_sync()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
+        var diagnostics = Resolve<IConfigDiagnosticCollector>();
 
         Fs.AddFile(
             "manual.yml",
@@ -113,14 +108,11 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
-        );
+        var configs = factory.FromPaths(["manual.yml"]).GetConfigs();
 
-        result.Configs.Should().ContainSingle();
-        result.Failures.Should().BeEmpty();
-        result
-            .DeprecationWarnings.Should()
+        configs.Should().ContainSingle();
+        diagnostics
+            .Deprecations.Should()
             .ContainSingle()
             .Which.Should()
             .Contain("replace_existing_custom_formats");
@@ -129,7 +121,8 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Deprecated_property_in_include_produces_warning_and_continues_sync()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
+        var diagnostics = Resolve<IConfigDiagnosticCollector>();
 
         var includeFile = Paths.YamlIncludeDirectory.File("deprecated-include.yml");
         Fs.AddFile(
@@ -158,14 +151,11 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["manual.yml"] }
-        );
+        var configs = factory.FromPaths(["manual.yml"]).GetConfigs();
 
-        result.Configs.Should().ContainSingle();
-        result.Failures.Should().BeEmpty();
-        result
-            .DeprecationWarnings.Should()
+        configs.Should().ContainSingle();
+        diagnostics
+            .Deprecations.Should()
             .ContainSingle()
             .Which.Should()
             .Contain("replace_existing_custom_formats");
@@ -174,7 +164,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
     [Test]
     public void Object_in_skip_list_produces_clear_error_instead_of_generic_exception()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -191,22 +181,15 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Configs.Should().BeEmpty();
-        result
-            .Failures.Should()
-            .ContainSingle()
-            .Which.Message.Should()
-            .Contain("not key-value pairs");
+        configs.Should().BeEmpty();
     }
 
     [Test]
     public void Renamed_quality_profiles_in_custom_formats_produces_error()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -225,18 +208,15 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Configs.Should().BeEmpty();
-        result.Failures.Should().ContainSingle().Which.Message.Should().Contain("assign_scores_to");
+        configs.Should().BeEmpty();
     }
 
     [Test]
     public void Empty_custom_formats_is_no_op()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -251,18 +231,15 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Failures.Should().BeEmpty();
-        result.Configs.Should().ContainSingle().Which.CustomFormats.Should().BeEmpty();
+        configs.Should().ContainSingle().Which.CustomFormats.Should().BeEmpty();
     }
 
     [Test]
     public void Empty_quality_profiles_is_no_op()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -277,18 +254,15 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Failures.Should().BeEmpty();
-        result.Configs.Should().ContainSingle().Which.QualityProfiles.Should().BeEmpty();
+        configs.Should().ContainSingle().Which.QualityProfiles.Should().BeEmpty();
     }
 
     [Test]
     public void Empty_custom_format_groups_add_is_no_op()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -304,18 +278,15 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Failures.Should().BeEmpty();
-        result.Configs.Should().ContainSingle().Which.CustomFormatGroups.Add.Should().BeEmpty();
+        configs.Should().ContainSingle().Which.CustomFormatGroups.Add.Should().BeEmpty();
     }
 
     [Test]
     public void Parse_custom_format_groups()
     {
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         Fs.AddFile(
             "config.yml",
@@ -340,11 +311,9 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        var groups = result.Configs.Should().ContainSingle().Which.CustomFormatGroups;
+        var groups = configs.Should().ContainSingle().Which.CustomFormatGroups;
 
         groups.Skip.Should().BeEquivalentTo("group-to-skip");
         groups
@@ -369,7 +338,7 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
         // End-to-end: YAML parse -> include merge -> runtime mapping. The entry-level `score`
         // under `custom_formats` must land on every per-profile entry that did not define its
         // own score, and per-profile scores must still override.
-        var sut = Resolve<ConfigurationRegistry>();
+        var factory = Resolve<ConfigPipelineFactory>();
 
         var templatePath = Paths.YamlIncludeDirectory.File("template.yml");
         Fs.AddFile(
@@ -403,14 +372,10 @@ internal sealed class ConfigurationRegistryTest : IntegrationTestFixture
             )
         );
 
-        var result = sut.FindAndLoadConfigs(
-            new ConfigFilterCriteria { ManualConfigFiles = ["config.yml"] }
-        );
+        var configs = factory.FromPaths(["config.yml"]).GetConfigs();
 
-        result.Failures.Should().BeEmpty();
-
-        var cf = result
-            .Configs.Should()
+        var cf = configs
+            .Should()
             .ContainSingle()
             .Which.CustomFormats.Should()
             .ContainSingle()

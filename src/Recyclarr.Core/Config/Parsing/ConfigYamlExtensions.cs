@@ -4,7 +4,7 @@ using YamlDotNet.Core;
 
 namespace Recyclarr.Config.Parsing;
 
-internal static class ConfigYamlExtensions
+public static class ConfigYamlExtensions
 {
     private static AssignScoresToConfig ToAssignScoresToConfig(
         this QualityScoreConfigYaml yaml,

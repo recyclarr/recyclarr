@@ -11,6 +11,7 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.Sync;
@@ -73,7 +74,9 @@ internal static class CompositionRoot
         builder.RegisterType<InstanceSyncProcessor>();
         builder.RegisterType<DeleteCustomFormatsProcessor>();
 
-        // Configuration
+        // Configuration pipeline
+        builder.RegisterType<ConfigPipelineFactory>();
+
         builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<ConfigListLocalProcessor>();
         builder.RegisterType<ConfigListTemplateProcessor>();

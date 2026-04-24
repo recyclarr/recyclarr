@@ -1,17 +1,13 @@
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
-using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
-using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 internal class SyncProcessor(
-    IAnsiConsole console,
-    ILogger log,
-    ConfigurationRegistry configRegistry,
+    ConfigPipelineFactory configPipelineFactory,
     InstanceScopeFactory instanceScopeFactory,
     INotificationService notify,
     DiagnosticsRenderer diagnosticsRenderer,
@@ -48,17 +44,16 @@ internal class SyncProcessor(
 
     private List<IServiceConfiguration> LoadConfigs(ISyncSettings settings)
     {
-        var result = configRegistry.FindAndLoadConfigs(
-            new ConfigFilterCriteria
-            {
-                ManualConfigFiles = settings.Configs,
-                Instances = settings.Instances ?? [],
-                Service = settings.Service,
-            }
-        );
+        var pipeline =
+            settings.Configs.Count > 0
+                ? configPipelineFactory.FromPaths(settings.Configs)
+                : configPipelineFactory.FromDefaultPaths();
 
-        ConfigFailureRenderer.Render(console, log, result);
-        return result.Configs.ToList();
+        return pipeline
+            .FilterByInstance(settings.Instances)
+            .FilterByService(settings.Service)
+            .GetConfigs()
+            .ToList();
     }
 
     private async Task<ExitStatus> ProcessConfigs(

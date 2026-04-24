@@ -104,7 +104,6 @@ public class CoreAutofacModule : Module
     {
         builder.RegisterType<SecretsProvider>().As<ISecretsProvider>().SingleInstance();
         builder.RegisterType<YamlIncludeResolver>().As<IYamlIncludeResolver>();
-        builder.RegisterType<ConfigurationRegistry>();
         builder.RegisterType<ConfigurationLoader>();
         builder.RegisterType<ConfigurationFinder>().As<IConfigurationFinder>();
         builder.RegisterType<ConfigValidationExecutor>();
@@ -158,7 +157,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<RadarrConfigYamlValidator>().As<IValidator>();
         builder.RegisterType<SonarrConfigYamlValidator>().As<IValidator>();
 
-        // Required by ConfigurationRegistry
         builder.RegisterType<ServiceConfigYamlValidator>().As<IValidator<ServiceConfigYaml>>();
     }
 

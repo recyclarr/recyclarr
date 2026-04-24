@@ -4,9 +4,6 @@ using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
-using Recyclarr.Config;
-using Recyclarr.Config.Filtering;
-using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -14,11 +11,8 @@ namespace Recyclarr.Cli.Console.Commands;
 [Description("Delete things from services like Radarr and Sonarr")]
 [UsedImplicitly]
 internal class DeleteCustomFormatsCommand(
-    IAnsiConsole console,
-    ILogger log,
     ProviderProgressHandler providerProgressHandler,
-    ConfigurationRegistry configRegistry,
-    InstanceScopeFactory instanceScopeFactory
+    ConfigPipelineFactory configPipelineFactory
 ) : AsyncCommand<DeleteCustomFormatsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -62,21 +56,14 @@ internal class DeleteCustomFormatsCommand(
     {
         await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
 
-        var result = configRegistry.FindAndLoadConfigs(
-            new ConfigFilterCriteria { Instances = [settings.InstanceName] }
-        );
+        await configPipelineFactory
+            .FromDefaultPaths()
+            .FilterByInstance([settings.InstanceName])
+            .ProcessEach<DeleteCustomFormatsProcessor>(
+                (processor, token) => processor.Process(settings, token),
+                ct
+            );
 
-        ConfigFailureRenderer.Render(console, log, result);
-
-        if (result.Configs.Count != 1)
-        {
-            return (int)ExitStatus.Succeeded;
-        }
-
-        var config = result.Configs.Single();
-        using var scope = instanceScopeFactory.Start<DeleteCustomFormatsProcessor>(config);
-
-        await scope.Entry.Process(settings, ct);
         return (int)ExitStatus.Succeeded;
     }
 }

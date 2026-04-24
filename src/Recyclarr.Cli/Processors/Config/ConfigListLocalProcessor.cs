@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.IO.Abstractions;
-using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
 using Recyclarr.TrashGuide;
@@ -12,16 +11,13 @@ namespace Recyclarr.Cli.Processors.Config;
 internal class ConfigListLocalProcessor(
     ILogger log,
     IAnsiConsole console,
-    ConfigurationRegistry configRegistry,
+    ConfigPipelineFactory configPipelineFactory,
     IAppPaths paths
 )
 {
     public void Process()
     {
-        var result = configRegistry.FindAndLoadConfigs();
-        ConfigFailureRenderer.Render(console, log, result);
-
-        var allConfigs = result.Configs.ToList();
+        var allConfigs = configPipelineFactory.FromDefaultPaths().GetConfigs().ToList();
         var configsByFile = allConfigs.ToLookup(x => MakeRelative(x.YamlPath));
 
         var radarrCount = allConfigs.Count(x => x.ServiceType == SupportedServices.Radarr);
