@@ -325,6 +325,10 @@ Derive scope from primary file path:
 
 ### CHANGELOG Format
 
+MUST NEVER read the entire `CHANGELOG.md`; the file is massive. MUST read only from the top with a
+limited line range (e.g. 50 lines) to capture the `[Unreleased]` section. The file follows Keep a
+Changelog, so the newest entries are always at the top.
+
 MUST load the `changelog` skill for detailed CHANGELOG format and conventions.
 
 **IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
