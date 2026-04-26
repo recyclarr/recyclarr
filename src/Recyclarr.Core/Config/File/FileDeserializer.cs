@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Platform;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -7,7 +8,7 @@ namespace Recyclarr.Config.File;
 
 public record FileTag;
 
-public class FileDeserializer(IFileSystem fs) : INodeDeserializer
+public class FileDeserializer(IFileSystem fs, IAppPaths paths) : INodeDeserializer
 {
     public bool Deserialize(
         IParser reader,
@@ -24,8 +25,19 @@ public class FileDeserializer(IFileSystem fs) : INodeDeserializer
             return false;
         }
 
-        var filePath = reader.Consume<Scalar>();
-        value = fs.File.ReadAllText(filePath.Value).Trim();
+        var scalar = reader.Consume<Scalar>();
+        var resolvedPath = ResolveFilePath(scalar.Value);
+        value = fs.File.ReadAllText(resolvedPath).Trim();
         return true;
+    }
+
+    private string ResolveFilePath(string path)
+    {
+        if (fs.Path.IsPathRooted(path))
+        {
+            return path;
+        }
+
+        return paths.ConfigDirectory.File(path).FullName;
     }
 }

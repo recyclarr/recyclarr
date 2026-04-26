@@ -29,6 +29,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CLI: Garbled output when stdout is redirected (e.g. cron jobs, piped commands) (#779)
 - CLI: Crash when a resource provider error message contains special characters
 - Config: `!file` references failed with an error when the file contained a trailing newline
+- Config: `!file` relative paths resolved against the working directory instead of the configuration
+  directory
 
 ## [8.5.1] - 2026-03-18
 
