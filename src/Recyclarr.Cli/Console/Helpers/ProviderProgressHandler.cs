@@ -50,10 +50,10 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
                     break;
 
                 case ProviderStatus.Failed:
+                    var name = Markup.Escape(value.ProviderName);
+                    var error = Markup.Escape(value.ErrorMessage ?? "");
                     task.Increment(1);
-                    console.MarkupLine(
-                        $"[red]Failed: {value.ProviderName} - {value.ErrorMessage}[/]"
-                    );
+                    console.MarkupLine($"[red]Failed: {name} - {error}[/]");
                     break;
             }
         }
