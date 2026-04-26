@@ -17,7 +17,7 @@ public class FileDeserializer(IFileSystem fs) : INodeDeserializer
         ObjectDeserializer rootDeserializer
     )
     {
-        // Only process items flagged as Secrets
+        // Only process items flagged as File references
         if (expectedType != typeof(FileTag))
         {
             value = null;
@@ -25,7 +25,7 @@ public class FileDeserializer(IFileSystem fs) : INodeDeserializer
         }
 
         var filePath = reader.Consume<Scalar>();
-        value = fs.File.ReadAllText(filePath.Value);
+        value = fs.File.ReadAllText(filePath.Value).Trim();
         return true;
     }
 }

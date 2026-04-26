@@ -15,8 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   under `assign_scores_to` that does not define its own `score` (#736)
 - Sync: Error when the service type at `base_url` does not match the configuration type (e.g. Radarr
   config pointed at a Sonarr instance)
-- Notifications: New `verbose` verbosity level that includes per-item Custom Format change
-  details (created/updated/deleted names) in the notification body (#541)
+- Notifications: New `verbose` verbosity level that includes per-item Custom Format change details
+  (created/updated/deleted names) in the notification body (#541)
 
 ### Changed
 
@@ -28,6 +28,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   adopted on first sync
 - CLI: Garbled output when stdout is redirected (e.g. cron jobs, piped commands) (#779)
 - CLI: Crash when a resource provider error message contains special characters
+- Config: `!file` references failed with an error when the file contained a trailing newline
 
 ## [8.5.1] - 2026-03-18
 
@@ -62,8 +63,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: `--details` flag for `list custom-format-groups` to show member CFs and their
   required/default/optional status
-- Sync: `select_all` option for custom format groups to include all CFs regardless of default
-  status (#722)
+- Sync: `select_all` option for custom format groups to include all CFs regardless of default status
+  (#722)
 
 ### Changed
 
@@ -157,10 +158,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   produces nothing; a warning is now shown advising to use `select`.
 - Sync: Diagnostic messages (errors, warnings, deprecations) were invisible when using `--log`,
   including the `state repair --adopt` suggestion for quality profile conflicts.
-- Config: Helpful migration messages for removed config properties (e.g. `replace_existing_custom_formats`,
-  `quality_profiles`) were never shown due to an internal wiring mistake.
-- Config: YAML parsing errors (unknown properties, bad values) were silently swallowed, causing
-  sync to produce no output instead of reporting the problem.
+- Config: Helpful migration messages for removed config properties (e.g.
+  `replace_existing_custom_formats`, `quality_profiles`) were never shown due to an internal wiring
+  mistake.
+- Config: YAML parsing errors (unknown properties, bad values) were silently swallowed, causing sync
+  to produce no output instead of reporting the problem.
 
 ### Changed
 
