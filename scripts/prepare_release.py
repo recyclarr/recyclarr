@@ -2,6 +2,7 @@
 """Prepare a Recyclarr release: update CHANGELOG.md, commit, tag, and optionally push."""
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -47,21 +48,26 @@ def run_quiet(
     return subprocess.run(args, capture_output=True, text=True, cwd=cwd)
 
 
-def resolve_version(explicit: str | None) -> str:
-    """Return the release version from the CLI arg or gitversion."""
-    if explicit:
-        if not SEMVER_RE.match(explicit):
-            error(f"invalid version format: {explicit} (expected X.Y.Z)")
-            sys.exit(1)
-        return explicit
-
-    result = run_quiet(["dotnet", "gitversion", "/showvariable", "MajorMinorPatch"])
+def run_or_die(
+    args: list[str], msg: str, *, cwd: Path = REPO_ROOT
+) -> subprocess.CompletedProcess[str]:
+    """Run a subprocess; exit with an error message if it fails."""
+    result = run_quiet(args, cwd=cwd)
     if result.returncode != 0:
-        error("dotnet gitversion failed")
+        error(msg)
         stderr = result.stderr.strip()
         if stderr:
             print(f"  {DIM}{stderr}{RESET}", file=sys.stderr)
         sys.exit(1)
+    return result
+
+
+def resolve_version() -> str:
+    """Return the release version from gitversion."""
+    result = run_or_die(
+        ["dotnet", "gitversion", "/showvariable", "MajorMinorPatch"],
+        "dotnet gitversion failed",
+    )
 
     version = result.stdout.strip()
     if not version or not SEMVER_RE.match(version):
@@ -103,6 +109,33 @@ def parse_changelog(lines: list[str]) -> tuple[int, int, str | None]:
     return unreleased_idx, next_heading_idx, prev_version
 
 
+def parse_version_section(
+    lines: list[str], version: str
+) -> tuple[int, int, str | None] | None:
+    """Find a specific version's section boundaries and its predecessor.
+
+    Returns (heading_index, next_heading_index, previous_version) or None if not found.
+    """
+    version_idx: int | None = None
+
+    for i, line in enumerate(lines):
+        m = VERSION_HEADING_RE.match(line)
+        if not m:
+            continue
+
+        if version_idx is not None:
+            # This is the next version heading after the one we found
+            return version_idx, i, m.group(1)
+
+        if m.group(1) == version:
+            version_idx = i
+
+    if version_idx is not None:
+        return version_idx, len(lines), None
+
+    return None
+
+
 def unreleased_has_content(lines: list[str], start: int, end: int) -> bool:
     """Check whether there are meaningful entries between the Unreleased heading and the next."""
     for line in lines[start + 1 : end]:
@@ -110,16 +143,6 @@ def unreleased_has_content(lines: list[str], start: int, end: int) -> bool:
         if stripped and not stripped.startswith("###"):
             return True
     return False
-
-
-def extract_sections(lines: list[str], start: int, end: int) -> list[str]:
-    """Return the ### section names (Added, Fixed, etc.) under the Unreleased heading."""
-    sections = []
-    for line in lines[start + 1 : end]:
-        stripped = line.strip()
-        if stripped.startswith("### "):
-            sections.append(stripped.removeprefix("### "))
-    return sections
 
 
 def extract_repo_url(lines: list[str]) -> str | None:
@@ -194,7 +217,7 @@ def update_link_references(
 
 def git_commit(version: str) -> str:
     """Commit the changelog and return the abbreviated commit SHA."""
-    result = run_quiet(
+    run_or_die(
         [
             "git",
             "commit",
@@ -203,14 +226,9 @@ def git_commit(version: str) -> str:
             "--no-verify",
             "--",
             "CHANGELOG.md",
-        ]
+        ],
+        "git commit failed",
     )
-    if result.returncode != 0:
-        error("git commit failed")
-        stderr = result.stderr.strip()
-        if stderr:
-            print(f"  {DIM}{stderr}{RESET}", file=sys.stderr)
-        sys.exit(1)
 
     # Get abbreviated SHA of the new commit
     sha_result = run_quiet(["git", "rev-parse", "--short", "HEAD"])
@@ -219,13 +237,10 @@ def git_commit(version: str) -> str:
 
 def git_tag(version: str) -> None:
     """Create an annotated tag for the release."""
-    result = run_quiet(["git", "tag", "-fm", f"release v{version}", f"v{version}"])
-    if result.returncode != 0:
-        error("git tag failed")
-        stderr = result.stderr.strip()
-        if stderr:
-            print(f"  {DIM}{stderr}{RESET}", file=sys.stderr)
-        sys.exit(1)
+    run_or_die(
+        ["git", "tag", "-fm", f"release v{version}", f"v{version}"],
+        "git tag failed",
+    )
 
 
 def detect_mainline() -> str:
@@ -259,15 +274,80 @@ def require_up_to_date(mainline: str) -> None:
         sys.exit(1)
 
 
+def require_workflows_healthy(mainline: str) -> None:
+    """Exit if any workflow runs on the mainline branch are pending or failed."""
+    # Check for in-progress or queued runs
+    pending = []
+    for status in ("in_progress", "queued"):
+        result = run_or_die(
+            [
+                "gh",
+                "run",
+                "list",
+                "--branch",
+                mainline,
+                "--status",
+                status,
+                "--json",
+                "databaseId,name,status",
+            ],
+            "failed to query GitHub workflow runs",
+        )
+        pending += json.loads(result.stdout)
+
+    if pending:
+        error(f"there are pending workflow runs on {mainline}:")
+        for run in pending:
+            print(f"  {DIM}- {run['name']} ({run['status']}){RESET}", file=sys.stderr)
+        sys.exit(1)
+
+    # Check that the latest run for each workflow has not failed
+    result = run_or_die(
+        [
+            "gh",
+            "run",
+            "list",
+            "--branch",
+            mainline,
+            "--json",
+            "databaseId,name,conclusion,workflowName",
+            "--limit",
+            "20",
+        ],
+        "failed to query GitHub workflow runs",
+    )
+
+    runs = json.loads(result.stdout)
+
+    # Group by workflow name; the first occurrence is the latest
+    latest_by_workflow: dict[str, dict] = {}
+    for run in runs:
+        wf = run["workflowName"]
+        if wf not in latest_by_workflow:
+            latest_by_workflow[wf] = run
+
+    failed = [
+        r
+        for r in latest_by_workflow.values()
+        if r["conclusion"] in ("failure", "timed_out", "cancelled")
+    ]
+
+    if failed:
+        error(f"latest workflow runs on {mainline} have failures:")
+        for run in failed:
+            print(
+                f"  {DIM}- {run['workflowName']} ({run['conclusion']}){RESET}",
+                file=sys.stderr,
+            )
+        sys.exit(1)
+
+
 def git_push(version: str, mainline: str) -> None:
     """Push the mainline branch and the release tag."""
-    result = run_quiet(["git", "push", "origin", mainline, f"v{version}"])
-    if result.returncode != 0:
-        error("git push failed")
-        stderr = result.stderr.strip()
-        if stderr:
-            print(f"  {DIM}{stderr}{RESET}", file=sys.stderr)
-        sys.exit(1)
+    run_or_die(
+        ["git", "push", "origin", mainline, f"v{version}"],
+        "git push failed",
+    )
 
 
 def require_clean_worktree() -> None:
@@ -336,15 +416,24 @@ SEPARATOR = f"{DIM}{'─' * 60}{RESET}"
 
 
 def print_changelog_preview(
-    lines: list[str], version: str, prev_version: str | None
+    lines: list[str],
+    version: str,
+    prev_version: str | None,
+    start: int | None = None,
+    end: int | None = None,
 ) -> None:
-    """Print the release content as it will appear in the changelog."""
-    unreleased_idx, next_heading_idx, _ = parse_changelog(lines)
+    """Print the release content as it will appear in the changelog.
+
+    When start/end are provided, use those section boundaries directly (retroactive mode).
+    Otherwise, locate the Unreleased section.
+    """
+    if start is None or end is None:
+        start, end, _ = parse_changelog(lines)
     today = date.today().isoformat()
 
     print(SEPARATOR)
     print(f"{CYAN}## [{version}] - {today}{RESET}")
-    for line in lines[unreleased_idx + 1 : next_heading_idx]:
+    for line in lines[start + 1 : end]:
         print(line)
     print(f"{DIM}Links:{RESET}")
     print(f"  {DIM}[Unreleased]: ...compare/v{version}...HEAD{RESET}")
@@ -356,12 +445,16 @@ def print_changelog_preview(
 
 
 def print_dry_run(
-    lines: list[str], version: str, prev_version: str | None, sections: list[str]
+    lines: list[str],
+    version: str,
+    prev_version: str | None,
+    start: int | None = None,
+    end: int | None = None,
 ) -> None:
     """Show a preview of the release that would be created."""
     print(f"{BOLD}Dry run: {format_version_label(version, prev_version)}{RESET}")
     print()
-    print_changelog_preview(lines, version, prev_version)
+    print_changelog_preview(lines, version, prev_version, start, end)
     print()
     print(f"{DIM}No files were modified.{RESET}")
 
@@ -385,12 +478,12 @@ def prompt_action(version: str, mainline: str) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare a Recyclarr release.")
     parser.add_argument(
-        "--version", help="release version (X.Y.Z); defaults to gitversion"
-    )
-    parser.add_argument(
         "--dry-run",
-        action="store_true",
-        help="print transformed changelog without writing",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="VERSION",
+        help="preview without writing; optionally replay a previous release (e.g. --dry-run 8.6.0)",
     )
     parser.add_argument(
         "--undo",
@@ -405,9 +498,29 @@ def main() -> None:
         undo_release()
         return
 
+    # --dry-run VERSION replays a previous release retroactively
+    if args.dry_run and args.dry_run is not True:
+        replay_version = args.dry_run
+        if not SEMVER_RE.match(replay_version):
+            error(f"invalid version format: {replay_version} (expected X.Y.Z)")
+            sys.exit(1)
+
+        text = CHANGELOG_PATH.read_text()
+        lines = text.splitlines()
+
+        existing = parse_version_section(lines, replay_version)
+        if not existing:
+            error(f"version {replay_version} not found in CHANGELOG.md")
+            sys.exit(1)
+
+        heading_idx, next_idx, prev_version = existing
+        print_dry_run(lines, replay_version, prev_version, heading_idx, next_idx)
+        require_workflows_healthy(mainline)
+        return
+
     require_mainline_branch(mainline)
 
-    version = resolve_version(args.version)
+    version = resolve_version()
 
     text = CHANGELOG_PATH.read_text()
     lines = text.splitlines()
@@ -430,14 +543,13 @@ def main() -> None:
         error("could not determine repository URL from [Unreleased] link reference")
         sys.exit(1)
 
-    sections = extract_sections(lines, unreleased_idx, next_heading_idx)
-
     # Transform
     new_lines = transform_changelog(lines, version, prev_version, repo_url)
     new_text = "\n".join(new_lines)
 
     if args.dry_run:
-        print_dry_run(lines, version, prev_version, sections)
+        print_dry_run(lines, version, prev_version)
+        require_workflows_healthy(mainline)
         return
 
     require_clean_worktree()
@@ -462,6 +574,7 @@ def main() -> None:
     success(f"committed {sha} and tagged v{version}")
 
     if choice == 2:
+        require_workflows_healthy(mainline)
         git_push(version, mainline)
         success(f"pushed {mainline} and v{version} to origin")
     else:
