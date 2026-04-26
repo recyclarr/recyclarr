@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.6.0] - 2026-04-26
+
 ### Added
 
 - Config: Entry-level `score` on `custom_formats` entries sets a default score for every profile
@@ -1372,7 +1374,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.5.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.6.0...HEAD
+[8.6.0]: https://github.com/recyclarr/recyclarr/compare/v8.5.1...v8.6.0
 [8.5.1]: https://github.com/recyclarr/recyclarr/compare/v8.5.0...v8.5.1
 [8.5.0]: https://github.com/recyclarr/recyclarr/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/recyclarr/recyclarr/compare/v8.3.2...v8.4.0
