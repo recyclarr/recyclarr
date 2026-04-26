@@ -20,7 +20,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Docker: Cron mode now uses log output instead of the interactive console UI
+- Docker: Cron mode now uses log output instead of the interactive console UI (#779)
 
 ### Fixed
 
