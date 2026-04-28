@@ -7,12 +7,10 @@ namespace Recyclarr.VersionControl;
 public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo workDir)
     : IGitRepository
 {
-    private Task RunGitCmd(CancellationToken token, params string[] args)
-    {
-        return RunGitCmd(args, token);
-    }
+    private Task<string> RunGitCmd(CancellationToken token, params string[] args) =>
+        RunGitCmdCore(args, token);
 
-    private async Task RunGitCmd(ICollection<string> args, CancellationToken token)
+    private async Task<string> RunGitCmdCore(ICollection<string> args, CancellationToken token)
     {
         log.Debug("Executing git command with args: {Args}", args);
 
@@ -30,12 +28,15 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
 
         var result = await cli.ExecuteAsync(token);
 
-        log.Debug("Command Output: {Output}", output.ToString().Trim());
+        var outputStr = output.ToString().Trim();
+        log.Debug("Command Output: {Output}", outputStr);
 
         if (result.ExitCode != 0)
         {
             throw new GitCmdException(result.ExitCode, error.ToString());
         }
+
+        return outputStr;
     }
 
     public void Dispose()
@@ -93,7 +94,7 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         }
 
         args.AddRange([cloneUrl.ToString(), reference]);
-        await RunGitCmd(args, token);
+        await RunGitCmdCore(args, token);
     }
 
     public async Task Status(CancellationToken token)
@@ -104,5 +105,27 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
     public async Task ResetHard(string toBranchOrSha1, CancellationToken token)
     {
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
+    }
+
+    public async Task RunMaintenance(CancellationToken token)
+    {
+        // Trim .git/shallow to only the current HEAD so prior depth-1 fetches don't keep old
+        // root commits reachable (git gc alone won't remove them while they appear in shallow).
+        var headSha = await RunGitCmdCore(["rev-parse", "HEAD"], token);
+        var shallowFile = workDir.SubDirectory(".git").File("shallow");
+        await workDir.FileSystem.File.WriteAllTextAsync(
+            shallowFile.FullName,
+            headSha + "\n",
+            token
+        );
+
+        // Expire all reflog entries so they don't pin unreachable objects.
+        await RunGitCmd(token, "reflog", "expire", "--expire=now", "--all");
+
+        // -A: unpack unreachable packed objects into loose objects so gc can prune them.
+        await RunGitCmd(token, "repack", "-Ad");
+
+        // Prune the now-loose unreachable objects.
+        await RunGitCmd(token, "gc", "--prune=now");
     }
 }

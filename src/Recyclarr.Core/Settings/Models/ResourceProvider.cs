@@ -1,3 +1,5 @@
+using Recyclarr.Common;
+
 namespace Recyclarr.Settings.Models;
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
@@ -14,6 +16,7 @@ public record GitResourceProvider : ResourceProvider
 {
     public required Uri CloneUrl { get; init; }
     public string? Reference { get; init; }
+    public DataSize CacheLimit { get; init; } = DataSize.Default;
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

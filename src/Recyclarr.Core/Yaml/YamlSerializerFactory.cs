@@ -22,6 +22,7 @@ internal class YamlSerializerFactory(
             .IgnoreFields()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeConverter(new YamlNullableEnumTypeConverter())
+            .WithTypeConverter(new DataSizeYamlTypeConverter())
             .WithNodeDeserializer(new ForceEmptySequences(objectFactory))
             .WithNodeDeserializer(new ScalarMismatchDeserializer())
             .WithNodeTypeResolver(new ReadOnlyCollectionNodeTypeResolver())

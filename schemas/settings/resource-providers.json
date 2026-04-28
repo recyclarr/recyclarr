@@ -55,6 +55,13 @@
               "type": "string",
               "title": "Branch name, tag, or SHA1 commit hash to check out",
               "description": "If omitted, config-templates providers use version-aware fallback (v{major} then master); other types default to master."
+            },
+            "cache_limit": {
+              "type": "string",
+              "title": "Maximum .git directory size before automatic cleanup",
+              "description": "When the .git directory exceeds this size after a fetch, accumulated shallow objects are pruned. Use a number followed by KB, MB, or GB (e.g. 512KB, 100MB, 1GB). Set to 0MB to always run cleanup.",
+              "pattern": "^[0-9]+([KkMmGg][Bb])$",
+              "default": "100MB"
             }
           }
         }

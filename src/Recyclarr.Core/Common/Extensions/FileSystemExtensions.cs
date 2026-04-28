@@ -39,6 +39,9 @@ public static class FileSystemExtensions
         dir.Delete(true);
     }
 
+    public static long DirectorySize(this IDirectoryInfo dir) =>
+        dir.EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length);
+
     public static void DeleteReadOnlyDirectory(this IDirectoryInfo directory)
     {
         if (!directory.Exists)

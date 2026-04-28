@@ -9,6 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Git resource providers automatically clean up accumulated storage when the `.git` directory
+  exceeds a configurable size threshold (`cache_limit`, default `100MB`) (#815)
+
 ## [8.6.0] - 2026-04-26
 
 ### Added
