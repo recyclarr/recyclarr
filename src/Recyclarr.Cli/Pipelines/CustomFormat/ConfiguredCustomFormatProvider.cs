@@ -210,7 +210,11 @@ internal class ConfiguredCustomFormatProvider(
 
             if (assignScoresTo.Count == 0)
             {
-                log.Debug("CF group {TrashId} has no profiles to assign to", groupConfig.TrashId);
+                diagnostics.AddWarning(
+                    $"CF group '{groupResource.Name}' ({groupConfig.TrashId}) was skipped because none"
+                        + " of your quality profiles are in its compatibility list. Add `assign_scores_to`"
+                        + " to explicitly target a profile."
+                );
                 continue;
             }
 
