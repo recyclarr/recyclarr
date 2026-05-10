@@ -1,6 +1,7 @@
 # Qodana analysis is configured by qodana.yaml file
 # https://www.jetbrains.com/help/qodana/qodana-yaml.html
 version: "1.0"
+# renovate: datasource=docker depName=jetbrains/qodana-dotnet
 linter: "jetbrains/qodana-dotnet:2025.2"
 profile:
   name: qodana.recommended

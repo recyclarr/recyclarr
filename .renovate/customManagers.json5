@@ -4,7 +4,7 @@
     {
       description: "Update GitVersion versionSpec in GitHub Actions workflows",
       customType: "regex",
-      fileMatch: ["^\\.github/.+\\.ya?ml$"],
+      managerFilePatterns: ["^\\.github/.+\\.ya?ml$"],
       matchStrings: [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+versionSpec:\\s*(?<currentValue>.+)",
       ],
@@ -12,7 +12,7 @@
     {
       description: "Update TargetFramework in MSBuild props files",
       customType: "regex",
-      fileMatch: ["\\.props$"],
+      managerFilePatterns: ["\\.props$"],
       matchStrings: [
         "<TargetFramework>net(?<currentValue>\\d+\\.\\d+)</TargetFramework>",
       ],
@@ -23,11 +23,19 @@
     {
       description: "Update dotnet-version input in setup-dotnet action",
       customType: "regex",
-      fileMatch: ["^\\.github/.+\\.ya?ml$"],
+      managerFilePatterns: ["^\\.github/.+\\.ya?ml$"],
       matchStrings: ["dotnet-version:\\s*(?<currentValue>\\d+\\.\\d+)\\.x"],
       depNameTemplate: "dotnet-sdk",
       datasourceTemplate: "dotnet-version",
       extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
+    },
+    {
+      description: "Update Qodana linter image in qodana.yaml",
+      customType: "regex",
+      managerFilePatterns: ["^qodana\\.ya?ml$"],
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.+?)\\s+linter:\\s*"[^:]+:(?<currentValue>[^"]+)"',
+      ],
     },
   ],
 }
