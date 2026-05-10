@@ -41,6 +41,7 @@ internal static class WizardSchemes
     public const string ProgressFuture = "ProgressFuture";
     public const string ConfirmDialog = "ConfirmDialog";
     public const string ConfirmDialogButton = "ConfirmDialogButton";
+    public const string ReviewValue = "ReviewValue";
 
     public static void Register()
     {
@@ -183,6 +184,19 @@ internal static class WizardSchemes
                 HotNormal = new Attribute(Foreground, Surface),
                 HotFocus = new Attribute(Surface, Accent),
                 Disabled = new Attribute(Faint, Surface),
+            }
+        );
+
+        // Review step: teal values for user choices
+        SchemeManager.AddScheme(
+            ReviewValue,
+            new Scheme
+            {
+                Normal = new Attribute(Accent, Color.None),
+                Focus = new Attribute(Accent, Color.None),
+                HotNormal = new Attribute(Accent, Color.None),
+                HotFocus = new Attribute(Accent, Color.None),
+                Disabled = new Attribute(Faint, Color.None),
             }
         );
 

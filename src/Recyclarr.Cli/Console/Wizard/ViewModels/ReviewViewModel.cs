@@ -2,99 +2,138 @@ using ReactiveUI.SourceGenerators;
 
 namespace Recyclarr.Cli.Console.Wizard.ViewModels;
 
+// Structured data for the review step's colored multi-widget layout
+internal record ReviewSection(string Header, IReadOnlyList<ReviewItem> Items);
+
+internal record ReviewItem
+{
+    // Key-value row: "Name:" in default color, "movies" in accent
+    public static ReviewItem KeyValue(string label, string value) =>
+        new() { Label = label, Value = value };
+
+    // Value-only row: entire text in accent
+    public static ReviewItem ValueOnly(string value) => new() { Value = value };
+
+    // Sub-header row: dimmed text for grouping within a section
+    public static ReviewItem SubHeader(string text) => new() { Value = text, IsSubHeader = true };
+
+    public string? Label { get; private init; }
+    public required string Value { get; init; }
+    public bool IsSubHeader { get; private init; }
+}
+
 internal partial class ReviewViewModel(WizardViewModel wizard) : WizardStepViewModel
 {
     [Reactive]
-    private string _summary = "";
+    private IReadOnlyList<ReviewSection> _sections = [];
 
     public override string SectionName => "Review & Generate";
 
     public override void Activate()
     {
-        Summary = BuildSummary();
+        Sections = BuildSections();
     }
 
-    private string BuildSummary()
+    private List<ReviewSection> BuildSections()
     {
-        var lines = new List<string>
+        var sections = new List<ReviewSection>
         {
-            "Configuration Summary",
-            "",
-            "Service:",
-            $"  Type: {wizard.ServiceType}",
-            $"  Name: {wizard.InstanceName}",
-            $"  URL: {wizard.BaseUrl}",
-            "",
-            $"Category: {wizard.Category}",
-            "",
-            "Quality Profiles:",
+            new(
+                "Service",
+                [
+                    ReviewItem.KeyValue("Name:", wizard.InstanceName),
+                    ReviewItem.KeyValue("URL:", wizard.BaseUrl),
+                ]
+            ),
+            new("Category", [ReviewItem.ValueOnly($"{wizard.Category}")]),
+            BuildProfilesSection(),
+            BuildCfGroupsSection(),
+            BuildQualitySizesSection(),
+            BuildMediaNamingSection(),
         };
 
-        var profiles = wizard.SelectedProfiles;
-        if (profiles.Count > 0)
-        {
-            foreach (var profile in profiles)
-            {
-                lines.Add($"  - {profile.Label}");
-            }
-        }
-        else
-        {
-            lines.Add("  None selected");
-        }
-        lines.Add("");
+        return sections;
+    }
 
-        lines.Add("Custom Format Groups:");
+    private ReviewSection BuildProfilesSection()
+    {
+        var profiles = wizard.SelectedProfiles;
+        var items =
+            profiles.Count > 0
+                ? profiles.Select(p => ReviewItem.ValueOnly(p.Label)).ToList()
+                : [ReviewItem.ValueOnly("None selected")];
+
+        return new ReviewSection("Quality Profiles", items);
+    }
+
+    private ReviewSection BuildCfGroupsSection()
+    {
+        var items = new List<ReviewItem>();
 
         var skippedGroups = wizard.SkippedCfGroups;
-        lines.Add("  Skipped (defaults):");
+        items.Add(ReviewItem.SubHeader("Skipped (defaults):"));
         if (skippedGroups.Count > 0)
         {
-            foreach (var group in skippedGroups)
-            {
-                lines.Add($"    - {group.Label}");
-            }
+            items.AddRange(skippedGroups.Select(g => ReviewItem.ValueOnly(g.Label)));
         }
         else
         {
-            lines.Add("    None");
+            items.Add(ReviewItem.ValueOnly("None"));
         }
 
         var addedGroups = wizard.AddedCfGroups;
-        lines.Add("  Added (optional):");
+        items.Add(ReviewItem.SubHeader("Added (optional):"));
         if (addedGroups.Count > 0)
         {
-            foreach (var group in addedGroups)
-            {
-                lines.Add($"    - {group.Label}");
-            }
+            items.AddRange(addedGroups.Select(g => ReviewItem.ValueOnly(g.Label)));
         }
         else
         {
-            lines.Add("    None");
+            items.Add(ReviewItem.ValueOnly("None"));
         }
-        lines.Add("");
 
-        var qualitySizeType = WizardViewModel.QualitySizeType(wizard.ServiceType, wizard.Category);
-        lines.Add($"Quality Sizes: {(wizard.UseQualitySizes ? "Yes" : "No")}");
-        if (wizard.UseQualitySizes)
+        return new ReviewSection("Custom Format Groups", items);
+    }
+
+    private ReviewSection BuildQualitySizesSection()
+    {
+        var enabled = wizard.UseQualitySizes;
+        var items = new List<ReviewItem>
         {
-            lines.Add($"  Type: {qualitySizeType}");
-        }
-        lines.Add("");
+            ReviewItem.KeyValue("Enabled:", enabled ? "Yes" : "No"),
+        };
 
-        lines.Add($"Media Naming: {(wizard.UseMediaNaming ? "Yes" : "No")}");
-        if (wizard.UseMediaNaming)
+        if (enabled)
+        {
+            var qualitySizeType = WizardViewModel.QualitySizeType(
+                wizard.ServiceType,
+                wizard.Category
+            );
+            items.Add(ReviewItem.KeyValue("Type:", qualitySizeType));
+        }
+
+        return new ReviewSection("Quality Sizes", items);
+    }
+
+    private ReviewSection BuildMediaNamingSection()
+    {
+        var enabled = wizard.UseMediaNaming;
+        var items = new List<ReviewItem>
+        {
+            ReviewItem.KeyValue("Enabled:", enabled ? "Yes" : "No"),
+        };
+
+        if (enabled)
         {
             var server = wizard.MediaServer;
-            lines.Add($"  Server: {server}");
+            items.Add(ReviewItem.KeyValue("Server:", $"{server}"));
 
             if (server != MediaServer.None && wizard.NamingIdType is { } idType)
             {
-                lines.Add($"  ID Type: {idType.DisplayName}");
+                items.Add(ReviewItem.KeyValue("ID Type:", idType.DisplayName));
             }
         }
 
-        return string.Join("\n", lines);
+        return new ReviewSection("Media Naming", items);
     }
 }
