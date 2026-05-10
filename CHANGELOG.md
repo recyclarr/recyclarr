@@ -14,6 +14,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Sync: No warning when an explicitly-added CF group is skipped because the profile is not in its
   compatibility list (#822)
 
+### Fixed
+
+- CLI: Error messages not visible when stdout is redirected (e.g. piped commands, cron jobs, CI)
+
 ## [8.6.0] - 2026-04-26
 
 ### Added

@@ -23,12 +23,7 @@ internal class ExceptionHandler(
                 continue;
             }
 
-            var outputStrategy = output ?? defaultOutput;
-            foreach (var message in messages)
-            {
-                outputStrategy.WriteError(message);
-            }
-
+            (output ?? defaultOutput).Write(messages, actualException);
             return true;
         }
 

@@ -2,10 +2,16 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.ErrorHandling;
 
-internal class FatalErrorOutputStrategy(IAnsiConsole console) : IErrorOutputStrategy
+internal class FatalErrorOutputStrategy(IAnsiConsole console, ILogger log) : IErrorOutputStrategy
 {
-    public void WriteError(string message)
+    public void Write(IReadOnlyList<string> messages, Exception exception)
     {
-        console.MarkupLine($"[red]Error:[/] {Markup.Escape(message)}");
+        foreach (var message in messages)
+        {
+            console.MarkupLine($"[red]Error:[/] {Markup.Escape(message)}");
+            log.Error("{Message}", message);
+        }
+
+        log.Error(exception, "Exiting due to fatal error");
     }
 }
