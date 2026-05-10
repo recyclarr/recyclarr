@@ -19,6 +19,10 @@
         "type": "integer",
         "description": "Default score applied to every profile under 'assign_scores_to' that does not define its own 'score'. Per-profile scores still override this default."
       },
+      "include_custom_format_when_renaming": {
+        "type": "boolean",
+        "description": "Override the 'Include Custom Format when Renaming' setting for every custom format listed under 'trash_ids'. When omitted, the value from TRaSH Guides is used."
+      },
       "assign_scores_to": {
         "type": ["null", "array"],
         "description": "One or more quality profiles to update with the scores from the specified custom formats.",

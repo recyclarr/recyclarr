@@ -40,8 +40,21 @@ internal class CustomFormatPlanComponent(
             }
 
             var first = group.First();
+
+            // First non-null override wins when a trash_id appears more than once
+            var renameOverride = group
+                .Select(x => x.IncludeCustomFormatWhenRenaming)
+                .FirstOrDefault(v => v.HasValue);
+
+            var resolvedResource = renameOverride.HasValue
+                ? resource with
+                {
+                    IncludeCustomFormatWhenRenaming = renameOverride.Value,
+                }
+                : resource;
+
             plan.AddCustomFormat(
-                new PlannedCustomFormat(resource)
+                new PlannedCustomFormat(resolvedResource)
                 {
                     AssignScoresTo = group.SelectMany(x => x.AssignScoresTo).ToList(),
                     GroupName = first.GroupName,

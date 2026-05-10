@@ -30,6 +30,8 @@ public record CustomFormatConfig
     public ICollection<string> TrashIds { get; init; } = [];
 
     public ICollection<AssignScoresToConfig> AssignScoresTo { get; init; } = [];
+
+    public bool? IncludeCustomFormatWhenRenaming { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

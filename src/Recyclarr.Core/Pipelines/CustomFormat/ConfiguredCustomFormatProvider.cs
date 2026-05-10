@@ -39,7 +39,12 @@ internal class ConfiguredCustomFormatProvider(
             );
             foreach (var trashId in cfg.TrashIds)
             {
-                yield return new ConfiguredCfEntry(trashId, resolvedScores, null);
+                yield return new ConfiguredCfEntry(
+                    trashId,
+                    resolvedScores,
+                    null,
+                    IncludeCustomFormatWhenRenaming: cfg.IncludeCustomFormatWhenRenaming
+                );
             }
         }
 

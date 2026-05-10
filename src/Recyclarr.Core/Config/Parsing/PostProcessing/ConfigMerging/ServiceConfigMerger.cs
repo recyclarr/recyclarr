@@ -129,10 +129,12 @@ public abstract class ServiceConfigMerger<T>
                         {
                             TrashIds = x.TrashIds,
                             AssignScoresTo = [profile with { Score = profile.Score ?? x.Score }],
+                            IncludeCustomFormatWhenRenaming = x.IncludeCustomFormatWhenRenaming,
                         })
                         : [x]
                 )
                 // Consolidate trash IDs when multiple entries target the same profile-key/score
+                // and have the same IncludeCustomFormatWhenRenaming override.
                 .GroupBy(x =>
                 {
                     var profile = x.AssignScoresTo?.SingleOrDefault();
@@ -140,7 +142,8 @@ public abstract class ServiceConfigMerger<T>
                         profileKey: GetProfileKey(profile),
                         trashId: profile?.TrashId,
                         name: profile?.Name,
-                        score: profile?.Score
+                        score: profile?.Score,
+                        includeCustomFormatWhenRenaming: x.IncludeCustomFormatWhenRenaming
                     );
                 })
                 .Select(g => new CustomFormatConfigYaml
@@ -160,6 +163,7 @@ public abstract class ServiceConfigMerger<T>
                         ]
                         // No profile key: preserve original value (null stays null, [] stays [])
                         : g.First().AssignScoresTo,
+                    IncludeCustomFormatWhenRenaming = g.Key.includeCustomFormatWhenRenaming,
                 })
                 .ToList();
         }

@@ -20,6 +20,7 @@ public record CustomFormatConfigYaml
     public IReadOnlyCollection<string>? TrashIds { get; init; }
     public int? Score { get; init; }
     public IReadOnlyCollection<QualityScoreConfigYaml>? AssignScoresTo { get; init; }
+    public bool? IncludeCustomFormatWhenRenaming { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]

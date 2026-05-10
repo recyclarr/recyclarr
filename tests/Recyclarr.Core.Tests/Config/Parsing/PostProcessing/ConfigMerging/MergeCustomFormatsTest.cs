@@ -674,4 +674,57 @@ internal sealed class MergeCustomFormatsTest
                 }
             );
     }
+
+    [Test]
+    public void Include_when_renaming_override_is_preserved_through_merge()
+    {
+        var leftConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf1", "cf2"],
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "p", Score = 100 }],
+                    IncludeCustomFormatWhenRenaming = true,
+                },
+            ],
+        };
+
+        var rightConfig = new SonarrConfigYaml
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfigYaml
+                {
+                    TrashIds = ["cf3"],
+                    AssignScoresTo = [new QualityScoreConfigYaml { Name = "p", Score = 100 }],
+                    IncludeCustomFormatWhenRenaming = false,
+                },
+            ],
+        };
+
+        var sut = new SonarrConfigMerger();
+
+        var result = sut.Merge(leftConfig, rightConfig);
+
+        // Different override values keep entries separate; override is preserved on both sides.
+        CustomFormatConfigYaml[] expected =
+        [
+            new()
+            {
+                TrashIds = ["cf1", "cf2"],
+                AssignScoresTo = [new QualityScoreConfigYaml { Name = "p", Score = 100 }],
+                IncludeCustomFormatWhenRenaming = true,
+            },
+            new()
+            {
+                TrashIds = ["cf3"],
+                AssignScoresTo = [new QualityScoreConfigYaml { Name = "p", Score = 100 }],
+                IncludeCustomFormatWhenRenaming = false,
+            },
+        ];
+
+        result.CustomFormats.Should().BeEquivalentTo(expected);
+    }
 }

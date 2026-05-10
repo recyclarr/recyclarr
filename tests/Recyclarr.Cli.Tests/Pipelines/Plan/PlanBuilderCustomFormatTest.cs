@@ -43,6 +43,36 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
     }
 
     [Test]
+    public void Build_applies_include_custom_format_when_renaming_override_to_planned_resource()
+    {
+        // Guide CF defaults to false; override to true via config
+        SetupCustomFormatGuideData(("Test CF One", "cf1"), ("Test CF Two", "cf2"));
+
+        var config = NewConfig.Radarr() with
+        {
+            CustomFormats =
+            [
+                new CustomFormatConfig { TrashIds = ["cf1"], IncludeCustomFormatWhenRenaming = true },
+                new CustomFormatConfig { TrashIds = ["cf2"] },
+            ],
+        };
+
+        var (sut, publisher) = CreatePlanBuilder(config);
+
+        var plan = sut.Build();
+
+        plan.CustomFormats.Should().HaveCount(2);
+
+        var cf1 = plan.CustomFormats.Single(x => x.Resource.TrashId == "cf1");
+        cf1.Resource.IncludeCustomFormatWhenRenaming.Should().BeTrue();
+
+        var cf2 = plan.CustomFormats.Single(x => x.Resource.TrashId == "cf2");
+        cf2.Resource.IncludeCustomFormatWhenRenaming.Should().BeFalse();
+
+        publisher.DidNotReceiveWithAnyArgs().AddError(default!);
+    }
+
+    [Test]
     public void Build_with_no_config_produces_empty_plan()
     {
         var config = NewConfig.Radarr();

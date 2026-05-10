@@ -27,6 +27,7 @@ public static class ConfigYamlExtensions
             AssignScoresTo =
                 yaml.AssignScoresTo?.Select(x => x.ToAssignScoresToConfig(yaml.Score)).ToList()
                 ?? [],
+            IncludeCustomFormatWhenRenaming = yaml.IncludeCustomFormatWhenRenaming,
         };
     }
 

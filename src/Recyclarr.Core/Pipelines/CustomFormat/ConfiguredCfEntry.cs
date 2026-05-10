@@ -7,5 +7,6 @@ internal record ConfiguredCfEntry(
     ICollection<AssignScoresToConfig> AssignScoresTo,
     string? GroupName,
     CfSource Source = CfSource.FlatConfig,
-    CfInclusionReason InclusionReason = CfInclusionReason.None
+    CfInclusionReason InclusionReason = CfInclusionReason.None,
+    bool? IncludeCustomFormatWhenRenaming = null
 );
