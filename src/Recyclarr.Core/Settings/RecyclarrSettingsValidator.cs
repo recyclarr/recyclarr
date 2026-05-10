@@ -111,6 +111,10 @@ public class GitResourceProviderValidator : AbstractValidator<GitResourceProvide
             .NotNull()
             .Must(uri => uri.IsAbsoluteUri && uri.Scheme is "http" or "https")
             .WithMessage(x => $"Provider '{x.Name}': clone_url must be a valid HTTP/HTTPS URL");
+
+        RuleFor(x => x.CacheLimit)
+            .Must(d => d.Bytes >= 0)
+            .WithMessage(x => $"Provider '{x.Name}': cache_limit must be >= 0");
     }
 }
 

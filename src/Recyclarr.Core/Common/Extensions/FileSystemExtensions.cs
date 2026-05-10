@@ -12,51 +12,57 @@ public static class FileSystemExtensions
         parent?.Create();
     }
 
-    public static IFileInfo? YamlFile(this IDirectoryInfo dir, string yamlFilenameNoExtension)
+    extension(IDirectoryInfo dir)
     {
-        var supportedFiles = new[]
+        public IFileInfo? YamlFile(string yamlFilenameNoExtension)
         {
-            $"{yamlFilenameNoExtension}.yml",
-            $"{yamlFilenameNoExtension}.yaml",
-        };
-        var configs = supportedFiles.Select(dir.File).Where(x => x.Exists).ToList();
+            var supportedFiles = new[]
+            {
+                $"{yamlFilenameNoExtension}.yml",
+                $"{yamlFilenameNoExtension}.yaml",
+            };
+            var configs = supportedFiles.Select(dir.File).Where(x => x.Exists).ToList();
 
-        if (configs.Count > 1)
-        {
-            throw new ConflictingYamlFilesException(supportedFiles);
+            if (configs.Count > 1)
+            {
+                throw new ConflictingYamlFilesException(supportedFiles);
+            }
+
+            return configs.FirstOrDefault();
         }
 
-        return configs.FirstOrDefault();
-    }
-
-    public static void RecursivelyDeleteReadOnly(this IDirectoryInfo dir)
-    {
-        foreach (var info in dir.GetFileSystemInfos("*", SearchOption.AllDirectories))
+        public void RecursivelyDeleteReadOnly()
         {
-            info.Attributes = FileAttributes.Normal;
+            foreach (var info in dir.GetFileSystemInfos("*", SearchOption.AllDirectories))
+            {
+                info.Attributes = FileAttributes.Normal;
+            }
+
+            dir.Delete(true);
         }
 
-        dir.Delete(true);
-    }
+        public long DirectorySize() =>
+            dir.EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length);
 
-    public static void DeleteReadOnlyDirectory(this IDirectoryInfo directory)
-    {
-        if (!directory.Exists)
+        public void DeleteReadOnlyDirectory()
         {
-            return;
-        }
+            if (!dir.Exists)
+            {
+                return;
+            }
 
-        foreach (var subdirectory in directory.EnumerateDirectories())
-        {
-            subdirectory.DeleteReadOnlyDirectory();
-        }
+            foreach (var subdirectory in dir.EnumerateDirectories())
+            {
+                subdirectory.DeleteReadOnlyDirectory();
+            }
 
-        foreach (var fileInfo in directory.EnumerateFiles())
-        {
-            fileInfo.Attributes = FileAttributes.Normal;
-            fileInfo.Delete();
-        }
+            foreach (var fileInfo in dir.EnumerateFiles())
+            {
+                fileInfo.Attributes = FileAttributes.Normal;
+                fileInfo.Delete();
+            }
 
-        directory.Delete();
+            dir.Delete();
+        }
     }
 }

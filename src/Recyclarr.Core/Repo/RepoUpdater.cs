@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.VersionControl;
@@ -76,6 +77,57 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         }
 
         await repo.ResetHard("FETCH_HEAD", token);
+        await MaybeRunMaintenanceAsync(repo, repositorySource, token);
+    }
+
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Maintenance is best-effort; any failure must not propagate to fail the sync."
+    )]
+    private async Task MaybeRunMaintenanceAsync(
+        IGitRepository repo,
+        GitRepositorySource repositorySource,
+        CancellationToken token
+    )
+    {
+        var limitBytes = repositorySource.CacheLimit.Bytes;
+        if (limitBytes <= 0)
+        {
+            return;
+        }
+
+        var gitDir = repositorySource.Path.SubDirectory(".git");
+        if (!gitDir.Exists)
+        {
+            return;
+        }
+
+        try
+        {
+            var currentSize = gitDir.DirectorySize();
+            if (currentSize <= limitBytes)
+            {
+                return;
+            }
+
+            log.Information(
+                "Git cache for {Name} is {SizeMb:F1} MB (limit: {LimitMb:F1} MB); running maintenance",
+                repositorySource.Name,
+                currentSize / (1024.0 * 1024.0),
+                limitBytes / (1024.0 * 1024.0)
+            );
+
+            await repo.RunMaintenance(token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            log.Warning(e, "Git cache maintenance failed for {Name}", repositorySource.Name);
+        }
     }
 
     private static void ValidateGitDirectory(IDirectoryInfo repoPath)
