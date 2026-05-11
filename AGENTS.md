@@ -55,6 +55,9 @@ that action arrives too late.
   clients, or anti-corruption layers over distinct external systems.
 - `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
   (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
+- `minimal-apis`: MUST load when writing, editing, or reviewing ASP.NET Core Minimal API endpoints,
+  route handlers, route groups, endpoint filters, OpenAPI configuration, or embedded Kestrel server
+  code.
 
 ## Project Context
 
