@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync.Progress;
 

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide;

@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;

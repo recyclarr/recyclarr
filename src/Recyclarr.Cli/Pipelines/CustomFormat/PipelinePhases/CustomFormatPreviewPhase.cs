@@ -1,4 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Pipelines.CustomFormat;
+using Recyclarr.Pipelines.Plan;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
