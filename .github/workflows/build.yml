@@ -12,9 +12,10 @@ on:
       - "tests/**"
 
       # Build configuration
-      - "*.props"
-      - "*.csproj"
-      - "*.slnx"
+      - "**.props"
+      - "**.targets"
+      - "**.csproj"
+      - "**.slnx"
       - ".config/dotnet-tools.json"
 
       # CI/CD infrastructure

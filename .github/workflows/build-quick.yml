@@ -3,8 +3,65 @@ name: Quick Build & Test
 
 on:
   pull_request:
+    paths:
+      # Source code and tests
+      - "src/**"
+      - "tests/**"
+
+      # Build configuration
+      - "**.props"
+      - "**.targets"
+      - "**.slnx"
+      - ".config/dotnet-tools.json"
+
+      # CI/CD infrastructure
+      - ".github/workflows/build-quick.yml"
+      - ".github/workflows/reusable-build.yml"
+      - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-precheck.yml"
+      - ".github/actions/**"
+      - "ci/**"
+
+      # Docker
+      - "Dockerfile"
+      - "docker/**"
+
+      # Versioning (affects build outputs)
+      - "GitVersion.yml"
+
+      # YAML schemas (runtime validation of user configs)
+      - "schemas/**"
+
   push:
     branches-ignore: [master]
+    paths:
+      # Source code and tests
+      - "src/**"
+      - "tests/**"
+
+      # Build configuration
+      - "**.props"
+      - "**.targets"
+      - "**.slnx"
+      - ".config/dotnet-tools.json"
+
+      # CI/CD infrastructure
+      - ".github/workflows/build-quick.yml"
+      - ".github/workflows/reusable-build.yml"
+      - ".github/workflows/reusable-docker.yml"
+      - ".github/workflows/reusable-precheck.yml"
+      - ".github/actions/**"
+      - "ci/**"
+
+      # Docker
+      - "Dockerfile"
+      - "docker/**"
+
+      # Versioning (affects build outputs)
+      - "GitVersion.yml"
+
+      # YAML schemas (runtime validation of user configs)
+      - "schemas/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
