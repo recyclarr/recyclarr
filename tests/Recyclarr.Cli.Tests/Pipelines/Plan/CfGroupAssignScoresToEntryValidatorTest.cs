@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.Plan.Components;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Tests.Pipelines.Plan;

@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Tests.Pipelines.Plan;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
 

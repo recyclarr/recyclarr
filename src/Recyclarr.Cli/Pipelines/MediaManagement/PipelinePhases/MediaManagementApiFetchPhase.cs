@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.MediaManagement;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;

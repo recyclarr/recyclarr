@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync.Progress;
 

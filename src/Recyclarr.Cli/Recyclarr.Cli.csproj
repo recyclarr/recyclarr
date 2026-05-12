@@ -2,6 +2,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr</AssemblyName>
+    <!-- GitVersion.MsBuild generates an internal GitVersionInformation class in every project.
+         InternalsVisibleTo from Core exposes its copy, causing CS0436. The local copy is used. -->
+    <NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.CustomFormat;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;

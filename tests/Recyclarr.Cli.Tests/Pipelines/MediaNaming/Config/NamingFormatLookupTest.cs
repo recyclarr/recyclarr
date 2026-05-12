@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.MediaNaming;
+using Recyclarr.Pipelines.MediaNaming;
 
 namespace Recyclarr.Cli.Tests.Pipelines.MediaNaming.Config;
 

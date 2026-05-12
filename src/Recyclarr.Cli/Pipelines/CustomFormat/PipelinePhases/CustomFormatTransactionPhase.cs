@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Pipelines;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.SyncState;
 

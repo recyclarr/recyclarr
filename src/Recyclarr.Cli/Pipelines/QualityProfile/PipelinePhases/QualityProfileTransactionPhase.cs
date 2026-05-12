@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
