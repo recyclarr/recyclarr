@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Console;
+using Recyclarr.Common;
 using Recyclarr.Compatibility;
 using Spectre.Console.Cli;
 

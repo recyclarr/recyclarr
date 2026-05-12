@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Config;
 using Recyclarr.Platform;
 using Spectre.Console;
 

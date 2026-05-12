@@ -1,8 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Recyclarr.Cli.Console;
-using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Common;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.CustomFormat;
 using Spectre.Console;
