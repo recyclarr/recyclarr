@@ -4,7 +4,30 @@ on:
   push:
     branches:
       - "**"
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "**.props"
+      - "**.targets"
+      - "**.slnx"
+      - ".config/dotnet-tools.json"
+      - "schemas/**"
+      - ".github/workflows/e2e-tests.yml"
+      - ".github/workflows/reusable-precheck.yml"
+      - ".github/actions/**"
+
   pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "**.props"
+      - "**.targets"
+      - "**.slnx"
+      - ".config/dotnet-tools.json"
+      - "schemas/**"
+      - ".github/workflows/e2e-tests.yml"
+      - ".github/workflows/reusable-precheck.yml"
+      - ".github/actions/**"
 
 permissions:
   pull-requests: read

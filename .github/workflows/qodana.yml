@@ -11,6 +11,7 @@ on:
       - .github/workflows/qodana.yml
       - qodana.yaml
       - "**.props"
+      - "**.targets"
       - "src/**"
       - "tests/**"
       - "ci/**"
@@ -20,6 +21,7 @@ on:
       - .github/workflows/qodana.yml
       - qodana.yaml
       - "**.props"
+      - "**.targets"
       - "src/**"
       - "tests/**"
       - "ci/**"
