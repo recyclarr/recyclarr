@@ -8,7 +8,8 @@
 
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <!-- Packages that apply to all tests -->
-    <PackageReference Include="AgileObjects.ReadableExpressions" />
+    <!-- TreatAsUsed: consumed at runtime by AwesomeAssertions, not directly by test code -->
+    <PackageReference Include="AgileObjects.ReadableExpressions" TreatAsUsed="true" />
     <PackageReference Include="AutofacContrib.NSubstitute" />
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="AutoFixture.AutoNSubstitute" />
