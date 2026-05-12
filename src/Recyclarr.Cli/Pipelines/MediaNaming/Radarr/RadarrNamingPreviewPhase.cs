@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
