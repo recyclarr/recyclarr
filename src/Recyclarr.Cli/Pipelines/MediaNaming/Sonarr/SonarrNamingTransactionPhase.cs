@@ -1,3 +1,5 @@
+using Recyclarr.Pipelines;
+
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 
 internal class SonarrNamingTransactionPhase : IPipelinePhase<SonarrNamingPipelineContext>

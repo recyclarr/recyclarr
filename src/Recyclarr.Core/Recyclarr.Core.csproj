@@ -25,6 +25,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <!-- Required until REC-146 moves pipeline phases/contexts from Cli to Core -->
+      <InternalsVisibleTo Include="recyclarr" />
+      <InternalsVisibleTo Include="Recyclarr.Cli.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\Recyclarr.Api.Sonarr\Recyclarr.Api.Sonarr.csproj" />
       <ProjectReference Include="..\Recyclarr.Api.Radarr\Recyclarr.Api.Radarr.csproj" />
     </ItemGroup>

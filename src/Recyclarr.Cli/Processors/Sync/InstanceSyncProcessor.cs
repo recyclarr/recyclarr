@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.ErrorHandling;
-using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
 using Recyclarr.Logging;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Serilog.Context;
 using Spectre.Console;

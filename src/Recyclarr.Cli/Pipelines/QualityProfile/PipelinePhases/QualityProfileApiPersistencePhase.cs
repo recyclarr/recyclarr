@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;

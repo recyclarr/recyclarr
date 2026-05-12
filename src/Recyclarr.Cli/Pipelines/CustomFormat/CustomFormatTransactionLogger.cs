@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Pipelines;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 

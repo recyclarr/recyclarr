@@ -1,4 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.TrashGuide.QualitySize;
 

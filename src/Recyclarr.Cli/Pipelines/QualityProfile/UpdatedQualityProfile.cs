@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;
