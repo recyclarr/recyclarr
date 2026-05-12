@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Delete;
+using Recyclarr.Servarr.CustomFormat;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;

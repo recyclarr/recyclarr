@@ -1,8 +1,8 @@
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
