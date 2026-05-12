@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide;

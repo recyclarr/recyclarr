@@ -1,8 +1,8 @@
 using Autofac;
-using Recyclarr.Cli.Pipelines;
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 

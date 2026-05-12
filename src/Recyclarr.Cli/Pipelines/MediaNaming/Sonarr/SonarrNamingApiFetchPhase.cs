@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;

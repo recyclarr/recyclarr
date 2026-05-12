@@ -1,3 +1,5 @@
+using Recyclarr.Pipelines;
+
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 
 internal class MediaManagementTransactionPhase : IPipelinePhase<MediaManagementPipelineContext>

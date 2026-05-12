@@ -1,5 +1,6 @@
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines;
 using Recyclarr.Servarr.QualitySize;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
