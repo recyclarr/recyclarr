@@ -1,9 +1,9 @@
-using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
-using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
+using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Pipelines.QualityProfile.Models;
+using Recyclarr.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.SyncState;
 
