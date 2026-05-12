@@ -1,4 +1,5 @@
 using System.Globalization;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;

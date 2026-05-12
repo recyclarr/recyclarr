@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Models;
+using Recyclarr.Pipelines.CustomFormat.Models;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.SyncState;
 

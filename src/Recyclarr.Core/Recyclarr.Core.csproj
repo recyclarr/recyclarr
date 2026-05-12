@@ -19,13 +19,15 @@
       <PackageReference Include="SuperLinq" />
       <PackageReference Include="System.Data.HashFunction.FNV" />
       <PackageReference Include="System.Reactive.Linq" />
+      <PackageReference Include="SystemTextJson.JsonDiffPatch" />
       <PackageReference Include="TestableIO.System.IO.Abstractions" />
       <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
       <PackageReference Include="YamlDotNet" />
     </ItemGroup>
 
     <ItemGroup>
-      <!-- Required until REC-146 moves pipeline phases/contexts from Cli to Core -->
+      <!-- Preview phases in Cli implement IPipelinePhase<T> and extend PipelineContext.
+           Removable after REC-137 decouples preview from pipeline phase interfaces. -->
       <InternalsVisibleTo Include="recyclarr" />
       <InternalsVisibleTo Include="Recyclarr.Cli.Tests" />
     </ItemGroup>
