@@ -1,6 +1,5 @@
 using Autofac;
 using Autofac.Extras.Ordering;
-using FluentValidation;
 using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Pipelines.CustomFormat.State;
@@ -8,8 +7,6 @@ using Recyclarr.Cli.Pipelines.MediaManagement;
 using Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
 using Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
-using Recyclarr.Cli.Pipelines.Plan;
-using Recyclarr.Cli.Pipelines.Plan.Components;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualityProfile.State;
@@ -17,7 +14,7 @@ using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Cli.Processors.Sync;
-using Recyclarr.Config.Models;
+using Recyclarr.Pipelines;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -27,6 +24,8 @@ internal class PipelineAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
+        builder.RegisterModule<Recyclarr.Pipelines.PipelineAutofacModule>();
+
         builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
 
         // Execution order is derived from pipeline dependencies via topological sort in
@@ -42,33 +41,12 @@ internal class PipelineAutofacModule : Module
             )
             .As<ISyncPipeline>();
 
-        RegisterPlan(builder);
         RegisterQualityProfile(builder);
         RegisterQualitySize(builder);
         RegisterCustomFormat(builder);
         RegisterSonarrMediaNaming(builder);
         RegisterRadarrMediaNaming(builder);
         RegisterMediaManagement(builder);
-    }
-
-    private static void RegisterPlan(ContainerBuilder builder)
-    {
-        builder.RegisterType<PlanBuilder>();
-        builder.RegisterType<ExplicitCfGroupValidator>().As<IValidator<CustomFormatGroupConfig>>();
-
-        // ORDER HERE IS IMPORTANT!
-        // CF must run before QP (QP references CFs from plan)
-        builder
-            .RegisterTypes(
-                typeof(CustomFormatPlanComponent),
-                typeof(QualityProfilePlanComponent),
-                typeof(QualitySizePlanComponent),
-                typeof(SonarrMediaNamingPlanComponent),
-                typeof(RadarrMediaNamingPlanComponent),
-                typeof(MediaManagementPlanComponent)
-            )
-            .As<IPlanComponent>()
-            .OrderByRegistration();
     }
 
     private static void RegisterSonarrMediaNaming(ContainerBuilder builder)
@@ -140,7 +118,6 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterCustomFormat(ContainerBuilder builder)
     {
-        builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
         builder.RegisterType<CategorizedCustomFormatProvider>();
         builder.RegisterType<CustomFormatStatePersister>().As<ICustomFormatStatePersister>();
         builder.RegisterType<CustomFormatTransactionLogger>();

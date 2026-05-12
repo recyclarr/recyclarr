@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines;

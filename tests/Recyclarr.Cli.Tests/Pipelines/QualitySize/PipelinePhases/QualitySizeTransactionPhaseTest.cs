@@ -1,7 +1,7 @@
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualitySize;
 using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualitySize.PipelinePhases;

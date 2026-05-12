@@ -1,5 +1,5 @@
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile;

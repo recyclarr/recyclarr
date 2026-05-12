@@ -1,3 +1,5 @@
+using Recyclarr.Pipelines;
+
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
 
 internal class RadarrNamingTransactionPhase : IPipelinePhase<RadarrNamingPipelineContext>
