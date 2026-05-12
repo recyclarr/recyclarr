@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
