@@ -235,8 +235,8 @@ Some key files and directories:
   is enabled via `Directory.Packages.props`.
 - Avoid `--no-build` or `--no-restore` flags. Rely on simple invocations: `dotnet test` will always
   restore + build, so there's no need to do `dotnet build` followed by `dotnet test`.
-- Use minimal verbosity for build/test commands to show only warnings and errors: `dotnet build -v m
-  --no-incremental` and `dotnet test -v m`. Informational logs consume valuable context. When
+- Use quiet verbosity for build/test commands to show only warnings and errors: `dotnet build -v q
+  --no-incremental` and `dotnet test -v q`. Informational logs consume valuable context. When
   verbose output is needed for debugging, pipe to a log file (`dotnet test -v d 2>&1 >
   /tmp/test.log`) (do NOT use `tee`) and read from it with targeted searches (`rg "pattern"
   /tmp/test.log`).
