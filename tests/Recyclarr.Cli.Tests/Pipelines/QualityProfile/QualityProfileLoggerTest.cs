@@ -1,5 +1,4 @@
 using FluentValidation.Results;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Tests.Reusable;

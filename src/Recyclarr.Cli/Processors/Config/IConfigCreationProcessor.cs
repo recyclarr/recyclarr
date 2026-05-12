@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Console.Settings;
+using Recyclarr.Config;
 
 namespace Recyclarr.Cli.Processors.Config;
 

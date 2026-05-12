@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Common.Extensions;
+using Recyclarr.Config;
 using Recyclarr.ConfigTemplates;
 using Recyclarr.Platform;
 using Recyclarr.ResourceProviders.Domain;

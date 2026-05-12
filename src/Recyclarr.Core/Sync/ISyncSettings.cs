@@ -1,8 +1,8 @@
 using Recyclarr.TrashGuide;
 
-namespace Recyclarr.Cli.Console.Settings;
+namespace Recyclarr.Sync;
 
-internal interface ISyncSettings
+public interface ISyncSettings
 {
     SupportedServices? Service { get; }
     IReadOnlyCollection<string> Configs { get; }
