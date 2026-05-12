@@ -1,9 +1,9 @@
 using System.Text.Json;
-using Recyclarr.Cli.Pipelines.CustomFormat;
-using Recyclarr.Cli.Pipelines.CustomFormat.Models;
-using Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.CustomFormat;
+using Recyclarr.Pipelines.CustomFormat.Models;
+using Recyclarr.Pipelines.CustomFormat.PipelinePhases;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.SyncState;

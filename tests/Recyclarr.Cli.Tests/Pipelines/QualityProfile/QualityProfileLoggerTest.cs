@@ -1,7 +1,7 @@
 using FluentValidation.Results;
-using Recyclarr.Cli.Pipelines.QualityProfile;
-using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Pipelines.QualityProfile.Models;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
