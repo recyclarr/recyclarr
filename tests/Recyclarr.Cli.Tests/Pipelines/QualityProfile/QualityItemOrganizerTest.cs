@@ -1,6 +1,6 @@
-using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.TestLibrary;
 

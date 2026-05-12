@@ -1,3 +1,4 @@
+using Recyclarr.Pipelines.MediaManagement;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;

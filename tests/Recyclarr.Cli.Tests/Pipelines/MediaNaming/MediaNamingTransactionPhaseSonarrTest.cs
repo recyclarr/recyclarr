@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
 

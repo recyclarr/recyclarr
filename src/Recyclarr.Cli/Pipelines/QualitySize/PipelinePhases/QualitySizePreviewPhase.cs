@@ -1,4 +1,5 @@
 using System.Globalization;
+using Recyclarr.Pipelines.QualitySize;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;

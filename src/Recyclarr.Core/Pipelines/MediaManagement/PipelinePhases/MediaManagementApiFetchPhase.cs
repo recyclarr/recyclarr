@@ -1,0 +1,16 @@
+using Recyclarr.Servarr.MediaManagement;
+
+namespace Recyclarr.Pipelines.MediaManagement.PipelinePhases;
+
+internal class MediaManagementApiFetchPhase(IMediaManagementService api)
+    : IPipelinePhase<MediaManagementPipelineContext>
+{
+    public async Task<PipelineFlow> Execute(
+        MediaManagementPipelineContext context,
+        CancellationToken ct
+    )
+    {
+        context.ApiFetchOutput = await api.GetMediaManagement(ct);
+        return PipelineFlow.Continue;
+    }
+}
