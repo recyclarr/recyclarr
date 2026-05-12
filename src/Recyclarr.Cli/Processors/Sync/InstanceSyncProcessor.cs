@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;

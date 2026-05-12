@@ -1,6 +1,6 @@
-namespace Recyclarr.Cli.Console.Settings;
+namespace Recyclarr.Servarr.CustomFormat;
 
-internal interface IDeleteCustomFormatSettings
+public interface IDeleteCustomFormatSettings
 {
     string InstanceName { get; }
     IReadOnlyCollection<string> CustomFormatNames { get; }

@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Config.Models;

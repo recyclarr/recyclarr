@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
+using Recyclarr.Config;
 using Recyclarr.ResourceProviders.Infrastructure;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;

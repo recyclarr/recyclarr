@@ -1,5 +1,4 @@
 using Autofac;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Pipelines;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
