@@ -2,7 +2,7 @@ using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.Plan;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
+namespace Recyclarr.Cli.Preview;
 
 internal class CustomFormatPreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<CustomFormatPreviewData>(console)
@@ -16,38 +16,6 @@ internal class CustomFormatPreviewRenderer(IAnsiConsole console)
             Console.MarkupLine("[dim]No changes[/]");
             return;
         }
-
-        PlannedCustomFormat? GetPlanned(string trashId) => data.Plan.GetCustomFormat(trashId);
-
-        string GetSourceDisplay(PlannedCustomFormat? planned)
-        {
-            if (planned is null)
-            {
-                return "(from custom_formats)";
-            }
-
-            return planned.Source switch
-            {
-                CfSource.FlatConfig => "(from custom_formats)",
-                CfSource.ProfileFormatItems => $"(from profile: {GetProfileNames(planned)})",
-                CfSource.CfGroupImplicit =>
-                    $"(from group: {planned.GroupName} [implicit via: {GetProfileNames(planned)}])",
-                CfSource.CfGroupExplicit => $"(from group: {planned.GroupName} [explicit])",
-                _ => planned.GroupName ?? "(from custom_formats)",
-            };
-
-            static string GetProfileNames(PlannedCustomFormat planned) =>
-                string.Join(", ", planned.AssignScoresTo.Select(a => a.Name));
-        }
-
-        string GetInclusionDisplay(PlannedCustomFormat? planned) =>
-            planned?.InclusionReason switch
-            {
-                CfInclusionReason.Required => "required",
-                CfInclusionReason.Default => "default",
-                CfInclusionReason.Selected => "selected",
-                _ => "",
-            };
 
         // Build tuples for all changes
         var allChanges = transactions
@@ -145,5 +113,39 @@ internal class CustomFormatPreviewRenderer(IAnsiConsole console)
         {
             Console.MarkupLine($"[dim]Unchanged: {unchanged}[/]");
         }
+
+        return;
+
+        PlannedCustomFormat? GetPlanned(string trashId) => data.Plan.GetCustomFormat(trashId);
+
+        string GetSourceDisplay(PlannedCustomFormat? planned)
+        {
+            if (planned is null)
+            {
+                return "(from custom_formats)";
+            }
+
+            return planned.Source switch
+            {
+                CfSource.FlatConfig => "(from custom_formats)",
+                CfSource.ProfileFormatItems => $"(from profile: {GetProfileNames(planned)})",
+                CfSource.CfGroupImplicit =>
+                    $"(from group: {planned.GroupName} [implicit via: {GetProfileNames(planned)}])",
+                CfSource.CfGroupExplicit => $"(from group: {planned.GroupName} [explicit])",
+                _ => planned.GroupName ?? "(from custom_formats)",
+            };
+
+            static string GetProfileNames(PlannedCustomFormat planned) =>
+                string.Join(", ", planned.AssignScoresTo.Select(a => a.Name));
+        }
+
+        string GetInclusionDisplay(PlannedCustomFormat? planned) =>
+            planned?.InclusionReason switch
+            {
+                CfInclusionReason.Required => "required",
+                CfInclusionReason.Default => "default",
+                CfInclusionReason.Selected => "selected",
+                _ => "",
+            };
     }
 }
