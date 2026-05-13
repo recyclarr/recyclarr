@@ -2,7 +2,7 @@ using Recyclarr.Config.Parsing.ErrorHandling;
 using Recyclarr.Logging;
 using YamlDotNet.Core;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class YamlExceptionStrategy : IExceptionStrategy
 {

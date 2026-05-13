@@ -1,6 +1,6 @@
 using Recyclarr.VersionControl;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class GitExceptionStrategy : IExceptionStrategy
 {

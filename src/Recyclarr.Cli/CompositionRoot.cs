@@ -19,6 +19,7 @@ using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Filtering;
+using Recyclarr.ErrorHandling;
 using Recyclarr.Logging;
 using Recyclarr.ResourceProviders;
 using Serilog.Core;
@@ -89,15 +90,9 @@ internal static class CompositionRoot
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
     {
-        // Exception strategies (dispatch)
-        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
+        // CLI-specific exception strategies
         builder.RegisterType<ServiceExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
         builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
 
         // Output strategies (routing)
         builder.RegisterType<FatalErrorOutputStrategy>();

@@ -1,4 +1,5 @@
 using Recyclarr.Cli.Migration;
+using Recyclarr.ErrorHandling;
 
 namespace Recyclarr.Cli.ErrorHandling.Strategies;
 
