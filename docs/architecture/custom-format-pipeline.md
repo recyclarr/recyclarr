@@ -1,7 +1,7 @@
 # Custom Format Sync
 
-Custom Format synchronization follows the standard pipeline pattern. This document covers
-CF-specific behaviors in transaction and persistence phases. For plan phase details, see
+Custom Format synchronization is handled by `CustomFormatSyncOperation`. This document covers
+CF-specific behaviors in compute and persist. For plan phase details, see
 [sync-plan-phase.md](sync-plan-phase.md). For the ID-first matching algorithm, see
 [trash-id-state-system.md](trash-id-state-system.md).
 

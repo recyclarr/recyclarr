@@ -8,7 +8,7 @@ namespace Recyclarr.Cli.Processors.Sync;
 
 internal class CompositeSyncPipeline(
     ILogger log,
-    IEnumerable<ISyncPipeline> pipelines,
+    IEnumerable<ISyncOperation> operations,
     IServiceConfiguration config
 ) : IPipelineExecutor
 {
@@ -19,21 +19,19 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
-        // Exclude pipelines that target a different service type
-        var applicable = pipelines.Where(p => p.AppliesTo(config.ServiceType));
-        var sortedPipelines = TopologicalSort(applicable);
+        var sortedOperations = TopologicalSort(operations);
         log.Debug(
-            "Pipeline execution order: {Order}",
-            string.Join(" -> ", sortedPipelines.Select(p => p.PipelineType))
+            "Sync operation order: {Order}",
+            string.Join(" -> ", sortedOperations.Select(o => o.Type))
         );
 
-        var failedPipelines = new HashSet<PipelineType>();
+        var failedOperations = new HashSet<PipelineType>();
 
-        foreach (var pipeline in sortedPipelines)
+        foreach (var operation in sortedOperations)
         {
-            var publisher = instancePublisher.ForPipeline(pipeline.PipelineType);
+            var publisher = instancePublisher.ForPipeline(operation.Type);
 
-            // Plan errors mean nothing can run; mark all pipelines skipped so the progress
+            // Plan errors mean nothing can run; mark all operations skipped so the progress
             // table shows `--` across the row and DeriveStatus infers instance Failed.
             if (plan.HasErrors)
             {
@@ -41,83 +39,105 @@ internal class CompositeSyncPipeline(
                 continue;
             }
 
-            var failedDependencies = pipeline.Dependencies.Where(failedPipelines.Contains).ToList();
+            var failedDependencies = operation
+                .Dependencies.Where(failedOperations.Contains)
+                .ToList();
             if (failedDependencies.Count > 0)
             {
                 log.Debug(
-                    "Skipping {Pipeline}: dependency {Dependency} failed",
-                    pipeline.PipelineType,
+                    "Skipping {Operation}: dependency {Dependency} failed",
+                    operation.Type,
                     failedDependencies[0]
                 );
                 publisher.SetStatus(PipelineProgressStatus.Skipped);
                 continue;
             }
 
-            var result = await pipeline.Execute(settings, plan, publisher, ct);
-            log.Debug("Pipeline {Pipeline} result: {Result}", pipeline.PipelineType, result);
-
-            if (result == PipelineResult.Failed)
+            if (operation.ShouldSkip(plan, config.ServiceType))
             {
-                failedPipelines.Add(pipeline.PipelineType);
+                publisher.SetStatus(PipelineProgressStatus.Skipped);
+                continue;
+            }
+
+            publisher.SetStatus(PipelineProgressStatus.Running);
+
+            try
+            {
+                await operation.Compute(plan, publisher, ct);
+
+                if (settings.Preview)
+                {
+                    operation.RenderPreview(config.InstanceName);
+                }
+                else
+                {
+                    await operation.Persist(publisher, ct);
+                }
+            }
+            catch (PipelineInterruptException)
+            {
+                publisher.SetStatus(PipelineProgressStatus.Failed);
+                failedOperations.Add(operation.Type);
+            }
+            catch
+            {
+                publisher.SetStatus(PipelineProgressStatus.Failed);
+                throw;
             }
         }
 
         log.Information("Completed at {Date}", DateTime.Now);
 
-        return failedPipelines.Count > 0 || plan.HasErrors
+        return failedOperations.Count > 0 || plan.HasErrors
             ? PipelineResult.Failed
             : PipelineResult.Completed;
     }
 
     public void InterruptAll(IInstancePublisher instancePublisher)
     {
-        foreach (var pipeline in pipelines.Where(p => p.AppliesTo(config.ServiceType)))
+        foreach (var operation in operations)
         {
             instancePublisher
-                .ForPipeline(pipeline.PipelineType)
+                .ForPipeline(operation.Type)
                 .SetStatus(PipelineProgressStatus.Interrupted);
         }
     }
 
-    private static List<ISyncPipeline> TopologicalSort(IEnumerable<ISyncPipeline> pipelines)
+    private static List<ISyncOperation> TopologicalSort(IEnumerable<ISyncOperation> operations)
     {
-        var pipelineList = pipelines.ToList();
-        var pipelinesByType = pipelineList.ToDictionary(p => p.PipelineType);
+        var operationList = operations.ToList();
+        var operationsByType = operationList.ToDictionary(o => o.Type);
 
-        // Calculate in-degrees (number of dependencies each pipeline has that are in our set)
-        var inDegree = pipelineList.ToDictionary(
-            p => p.PipelineType,
-            p => p.Dependencies.Count(d => pipelinesByType.ContainsKey(d))
+        // Calculate in-degrees (number of dependencies each operation has that are in our set)
+        var inDegree = operationList.ToDictionary(
+            o => o.Type,
+            o => o.Dependencies.Count(d => operationsByType.ContainsKey(d))
         );
 
-        // Start with pipelines that have no dependencies
-        var queue = new Queue<ISyncPipeline>(
-            pipelineList.Where(p => inDegree[p.PipelineType] == 0)
-        );
+        // Start with operations that have no dependencies
+        var queue = new Queue<ISyncOperation>(operationList.Where(o => inDegree[o.Type] == 0));
 
-        var result = new List<ISyncPipeline>();
+        var result = new List<ISyncOperation>();
 
         while (queue.Count > 0)
         {
             var current = queue.Dequeue();
             result.Add(current);
 
-            // Find pipelines that depend on the current one and decrement their in-degree
+            // Find operations that depend on the current one and decrement their in-degree
             foreach (
-                var dependent in pipelineList.Where(p =>
-                    p.Dependencies.Contains(current.PipelineType)
-                )
+                var dependent in operationList.Where(o => o.Dependencies.Contains(current.Type))
             )
             {
-                inDegree[dependent.PipelineType]--;
-                if (inDegree[dependent.PipelineType] == 0)
+                inDegree[dependent.Type]--;
+                if (inDegree[dependent.Type] == 0)
                 {
                     queue.Enqueue(dependent);
                 }
             }
         }
 
-        return result.Count != pipelineList.Count
+        return result.Count != operationList.Count
             ? throw new InvalidOperationException("Cycle detected in pipeline dependencies")
             : result;
     }

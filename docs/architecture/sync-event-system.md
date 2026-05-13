@@ -27,10 +27,10 @@ Root Container (singletons, shared infrastructure)
        |     InstancePublisher (IInstancePublisher)
        |     InstanceSyncProcessor, CompositeSyncPipeline
        |     IServiceConfiguration (the specific instance config)
-       |     Pipeline services (GenericSyncPipeline<T>, phases, API services)
+        |     Sync operations (ISyncOperation implementations, API services)
        |
-       +-- PipelinePublisher (runtime object, not a scope)
-             Created per pipeline by InstancePublisher.ForPipeline()
+        +-- PipelinePublisher (runtime object, not a scope)
+              Created per sync operation by InstancePublisher.ForPipeline()
 ```
 
 ### Scope Wrappers
@@ -132,19 +132,17 @@ Key behaviors:
 
 ### IPipelinePublisher
 
-Runtime object, not DI-managed. Created by `InstancePublisher.ForPipeline()` for each pipeline
-during orchestration. Stamps both instance name and pipeline type on events.
+Runtime object, not DI-managed. Created by `InstancePublisher.ForPipeline()` for each sync
+operation during orchestration. Stamps both instance name and pipeline type on events.
 
-`CompositeSyncPipeline` filters pipelines by service affinity (excluding pipelines that target a
-different service type), then creates one publisher per applicable pipeline and passes it to
-`GenericSyncPipeline.Execute()`, which sets it on `PipelineContext.Publisher`. Pipeline phases
-access the publisher through the context to emit status changes and diagnostics.
+`CompositeSyncPipeline` creates one publisher per sync operation and passes it as a parameter to
+`Compute()` and `Persist()`. Operations use the publisher to emit status changes and diagnostics.
 
-### Noop Implementations
+### Noop implementations
 
 Both interfaces provide static `Noop` properties (`IInstancePublisher.Noop`,
 `IPipelinePublisher.Noop`) for contexts where event emission is unnecessary (tests, code paths
-outside sync scope). `PipelineContext.Publisher` defaults to `IPipelinePublisher.Noop`.
+outside sync scope).
 
 ## Consumers
 
@@ -211,8 +209,8 @@ sequenceDiagram
         Proc->>Hub: InstanceEvent Running
         Hub-->>Con: Instances stream
 
-        loop Each pipeline
-            Proc->>Pipe: Execute with PipelinePublisher
+        loop Each sync operation
+            Proc->>Pipe: Compute/Persist with PipelinePublisher
             activate Pipe
             Pipe->>Hub: PipelineEvent Running
             Pipe->>Hub: SyncDiagnosticEvent
@@ -237,10 +235,10 @@ Participants map to concrete types as follows:
 - **Hub**: `SyncRunScope` (the three Subjects behind `ISyncRunScope` / `ISyncRunPublisher`)
 - **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`,
   `NotificationService`
-- **Pipelines**: `GenericSyncPipeline<TContext>` and its phases
+- **Sync operations**: `ISyncOperation` implementations (one per resource type)
 
-## Relationship to Pipeline Architecture
+## Relationship to sync architecture
 
-This system handles status tracking and diagnostics for the sync run. It does not control pipeline
-execution flow. For pipeline ordering, dependency cascading, phase execution, and the plan/pipeline
-split, see [Sync Pipeline Architecture](sync-pipeline-architecture.md).
+This system handles status tracking and diagnostics for the sync run. It does not control sync
+execution flow. For operation ordering, dependency cascading, and the plan/sync split, see
+[Sync architecture](sync-pipeline-architecture.md).

@@ -26,8 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <!-- Preview phases in Cli implement IPipelinePhase<T> and extend PipelineContext.
-           Removable after REC-137 decouples preview from pipeline phase interfaces. -->
       <InternalsVisibleTo Include="recyclarr" />
       <InternalsVisibleTo Include="Recyclarr.Cli.Tests" />
     </ItemGroup>

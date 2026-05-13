@@ -1,20 +1,18 @@
 using System.Globalization;
 using Recyclarr.Pipelines.QualityProfile;
+using Recyclarr.Pipelines.QualityProfile.Models;
 using Recyclarr.Servarr.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
 
-internal class QualityProfilePreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<QualityProfilePipelineContext>(console)
+internal class QualityProfilePreviewRenderer(IAnsiConsole console)
+    : PreviewRenderer<QualityProfileTransactionData>(console)
 {
-    protected override void RenderPreview(QualityProfilePipelineContext context)
+    protected override void RenderData(QualityProfileTransactionData data)
     {
-        RenderTitle(context);
-
-        var transactions = context.TransactionOutput;
-        var totalChanges = transactions.NewProfiles.Count + transactions.UpdatedProfiles.Count;
+        var totalChanges = data.NewProfiles.Count + data.UpdatedProfiles.Count;
 
         if (totalChanges == 0)
         {
@@ -23,13 +21,13 @@ internal class QualityProfilePreviewPhase(IAnsiConsole console)
         }
 
         // Render new profiles
-        foreach (var profile in transactions.NewProfiles)
+        foreach (var profile in data.NewProfiles)
         {
             RenderProfileTree(profile, "New");
         }
 
         // Render updated profiles
-        foreach (var profileWithStats in transactions.UpdatedProfiles)
+        foreach (var profileWithStats in data.UpdatedProfiles)
         {
             RenderProfileTree(profileWithStats.Profile, "Changed");
         }

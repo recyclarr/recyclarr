@@ -206,20 +206,20 @@ generate valid YAML; there is no separate reference document to keep in sync.
 
 All sync operations must be deterministic.
 
-**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
+**Independent operations** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
-- Items sync independently; partial sync within pipeline is acceptable
+- Items sync independently; partial sync within an operation is acceptable
 - Invalid items are skipped with errors; valid items proceed
 
-**Dependent pipelines** (Custom Formats):
+**Dependent operations** (Custom Formats):
 
-- All items must sync or the entire pipeline fails
-- Failure cascades to skip dependent pipelines (CF failure → QP skipped)
+- All items must sync or the entire operation fails
+- Failure cascades to skip dependent operations (CF failure → QP skipped)
 - Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
 
 **Diagnostics:**
 
-- `AddError()`: Issues that cause items or pipelines to be skipped
+- `AddError()`: Issues that cause items or operations to be skipped
 - `AddWarning()`: Deprecations and informational messages only
 
 ## YAML Error Handling
