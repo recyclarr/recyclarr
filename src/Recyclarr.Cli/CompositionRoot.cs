@@ -8,8 +8,6 @@ using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
-using Recyclarr.Cli.Migration;
-using Recyclarr.Cli.Migration.Steps;
 using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
@@ -55,7 +53,6 @@ internal static class CompositionRoot
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         CliRegistrations(builder);
-        RegisterMigrations(builder);
         RegisterServiceProcessors(builder);
         RegisterConfigServices(builder);
     }
@@ -124,7 +121,6 @@ internal static class CompositionRoot
     {
         // CLI-specific exception strategies
         builder.RegisterType<ServiceExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
 
         // Output strategies (routing)
         builder.RegisterType<FatalErrorOutputStrategy>();
@@ -132,20 +128,6 @@ internal static class CompositionRoot
 
         // Handler (orchestrator)
         builder.RegisterType<ExceptionHandler>();
-    }
-
-    private static void RegisterMigrations(ContainerBuilder builder)
-    {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
-        builder.RegisterType<MigrationExecutor>();
-
-        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
-        builder
-            .RegisterAssemblyTypes(thisAssembly)
-            .AssignableTo<IMigrationStep>()
-            .As<IMigrationStep>()
-            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)

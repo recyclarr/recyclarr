@@ -1,7 +1,6 @@
-using Recyclarr.Cli.Migration;
-using Recyclarr.ErrorHandling;
+using Recyclarr.Migration;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class MigrationExceptionStrategy : IExceptionStrategy
 {

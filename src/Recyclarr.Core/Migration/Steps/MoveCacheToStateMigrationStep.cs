@@ -2,7 +2,7 @@ using System.IO.Abstractions;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Platform;
 
-namespace Recyclarr.Cli.Migration.Steps;
+namespace Recyclarr.Migration.Steps;
 
 [UsedImplicitly]
 [MigrationOrder(2)]

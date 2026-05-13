@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Recyclarr.Platform;
 
-namespace Recyclarr.Cli.Migration.Steps;
+namespace Recyclarr.Migration.Steps;
 
 /// <summary>
 /// Renames the top-level JSON property in state mapping files from the old per-type names

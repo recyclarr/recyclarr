@@ -21,6 +21,8 @@ using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
 using Recyclarr.ErrorHandling;
 using Recyclarr.Http;
+using Recyclarr.Migration;
+using Recyclarr.Migration.Steps;
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
@@ -72,6 +74,7 @@ public class CoreAutofacModule : Module
         RegisterYaml(builder);
         RegisterVersionControl(builder);
         RegisterSyncEvents(builder);
+        RegisterMigrations(builder);
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
@@ -82,6 +85,19 @@ public class CoreAutofacModule : Module
         builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
         builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
         builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
+    }
+
+    private void RegisterMigrations(ContainerBuilder builder)
+    {
+        builder.RegisterType<MigrationExecutor>();
+
+        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
+        builder
+            .RegisterAssemblyTypes(ThisAssembly)
+            .AssignableTo<IMigrationStep>()
+            .As<IMigrationStep>()
+            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterCache(ContainerBuilder builder)

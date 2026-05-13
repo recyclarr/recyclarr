@@ -2,8 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
-using Recyclarr.Cli.Migration;
 using Recyclarr.Cli.Processors;
+using Recyclarr.Migration;
 using Spectre.Console;
 
 namespace Recyclarr.Cli;
