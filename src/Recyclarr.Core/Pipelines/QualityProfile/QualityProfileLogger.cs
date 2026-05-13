@@ -1,15 +1,17 @@
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile.Models;
+using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Pipelines.QualityProfile;
 
 internal class QualityProfileLogger(ILogger log)
 {
-    public void LogTransactionNotices(QualityProfilePipelineContext context)
+    public void LogTransactionNotices(
+        QualityProfileTransactionData transactions,
+        IPipelinePublisher publisher
+    )
     {
-        var transactions = context.TransactionOutput;
-
         if (transactions.NonExistentProfiles.Count > 0)
         {
             var message =
@@ -19,7 +21,7 @@ internal class QualityProfileLogger(ILogger log)
                 + "`quality_profiles` section so that Recyclarr can create the profiles for "
                 + $"you: {string.Join(", ", transactions.NonExistentProfiles)}";
 
-            context.Publisher.AddWarning(message);
+            publisher.AddWarning(message);
         }
 
         foreach (var (profile, errors) in transactions.InvalidProfiles)
@@ -27,31 +29,28 @@ internal class QualityProfileLogger(ILogger log)
             foreach (var error in errors)
             {
                 var message = $"Profile '{profile.ProfileName}': {error.ErrorMessage}";
-                context.Publisher.AddError(message);
+                publisher.AddError(message);
             }
         }
 
-        LogReplacedProfiles(context, transactions);
-        LogRenameConflicts(context, transactions);
-        LogAmbiguousProfiles(context, transactions);
+        LogReplacedProfiles(publisher, transactions);
+        LogRenameConflicts(publisher, transactions);
+        LogAmbiguousProfiles(publisher, transactions);
 
         // Log warnings for new profiles
         foreach (var profile in transactions.NewProfiles)
         {
-            LogProfileWarnings(context, profile);
+            LogProfileWarnings(publisher, profile);
         }
 
         // Log warnings for updated profiles
         foreach (var profileWithStats in transactions.UpdatedProfiles)
         {
-            LogProfileWarnings(context, profileWithStats.Profile);
+            LogProfileWarnings(publisher, profileWithStats.Profile);
         }
     }
 
-    private void LogProfileWarnings(
-        QualityProfilePipelineContext context,
-        UpdatedQualityProfile profile
-    )
+    private void LogProfileWarnings(IPipelinePublisher publisher, UpdatedQualityProfile profile)
     {
         var invalidQualityNames = profile.UpdatedQualities.InvalidQualityNames;
         if (invalidQualityNames.Count != 0)
@@ -59,7 +58,7 @@ internal class QualityProfileLogger(ILogger log)
             var message =
                 $"Quality profile '{profile.ProfileName}' references invalid quality names: "
                 + string.Join(", ", invalidQualityNames);
-            context.Publisher.AddWarning(message);
+            publisher.AddWarning(message);
         }
 
         var invalidCfExceptNames = profile.InvalidExceptCfNames;
@@ -68,7 +67,7 @@ internal class QualityProfileLogger(ILogger log)
             var message =
                 $"`except` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
                 + $"invalid CF names: {string.Join(", ", invalidCfExceptNames)}";
-            context.Publisher.AddWarning(message);
+            publisher.AddWarning(message);
         }
 
         var invalidCfExceptPatterns = profile.InvalidExceptCfPatterns;
@@ -77,7 +76,7 @@ internal class QualityProfileLogger(ILogger log)
             var message =
                 $"`except_patterns` under `reset_unmatched_scores` in quality profile '{profile.ProfileName}' has "
                 + $"patterns matching no CFs: {string.Join(", ", invalidCfExceptPatterns)}";
-            context.Publisher.AddWarning(message);
+            publisher.AddWarning(message);
         }
 
         var missingQualities = profile.MissingQualities;
@@ -93,7 +92,7 @@ internal class QualityProfileLogger(ILogger log)
     }
 
     private static void LogReplacedProfiles(
-        QualityProfilePipelineContext context,
+        IPipelinePublisher publisher,
         QualityProfileTransactionData transactions
     )
     {
@@ -106,14 +105,14 @@ internal class QualityProfileLogger(ILogger log)
         const int maxNames = 20;
         var names = string.Join(", ", replaced.Take(maxNames));
         var overflow = replaced.Count > maxNames ? $" and {replaced.Count - maxNames} more" : "";
-        context.Publisher.AddWarning(
+        publisher.AddWarning(
             $"{replaced.Count} quality profile(s) already existed in the service and were replaced "
                 + $"by Recyclarr: {names}{overflow}"
         );
     }
 
     private static void LogRenameConflicts(
-        QualityProfilePipelineContext context,
+        IPipelinePublisher publisher,
         QualityProfileTransactionData transactions
     )
     {
@@ -122,12 +121,12 @@ internal class QualityProfileLogger(ILogger log)
             var message =
                 $"Quality profile cannot be renamed to '{name}' because a profile with that "
                 + "name already exists. Delete or rename the existing profile in the service";
-            context.Publisher.AddError(message);
+            publisher.AddError(message);
         }
     }
 
     private void LogAmbiguousProfiles(
-        QualityProfilePipelineContext context,
+        IPipelinePublisher publisher,
         QualityProfileTransactionData transactions
     )
     {
@@ -146,7 +145,7 @@ internal class QualityProfileLogger(ILogger log)
                 $"Quality profile '{ambiguous.PlannedProfile.Name}' cannot be synced because "
                 + $"multiple profiles match this name: {matchList}. Delete or rename duplicate "
                 + "profiles in the service";
-            context.Publisher.AddError(message);
+            publisher.AddError(message);
         }
 
         log.Debug(
@@ -160,10 +159,11 @@ internal class QualityProfileLogger(ILogger log)
         );
     }
 
-    public void LogPersistenceResults(QualityProfilePipelineContext context)
+    public void LogPersistenceResults(
+        QualityProfileTransactionData transactions,
+        IPipelinePublisher publisher
+    )
     {
-        var transactions = context.TransactionOutput;
-
         // Profiles without changes get logged
         if (transactions.UnchangedProfiles.Count != 0)
         {
@@ -213,7 +213,7 @@ internal class QualityProfileLogger(ILogger log)
         }
 
         var status = DetermineStatus(transactions);
-        context.Publisher.SetStatus(status, totalChanged);
+        publisher.SetStatus(status, totalChanged);
     }
 
     private static PipelineProgressStatus DetermineStatus(

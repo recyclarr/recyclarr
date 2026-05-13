@@ -5,28 +5,83 @@ using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile.Models;
+using Recyclarr.Pipelines.QualityProfile.PipelinePhases;
+using Recyclarr.Pipelines.QualityProfile.State;
 using Recyclarr.Servarr.QualityProfile;
+using Recyclarr.Sync;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide;
 
-namespace Recyclarr.Pipelines.QualityProfile.PipelinePhases;
+namespace Recyclarr.Pipelines.QualityProfile;
 
-internal class QualityProfileTransactionPhase(
+internal class QualityProfileSyncOperation(
     ILogger log,
+    IQualityProfileService service,
+    IQualityProfileStatePersister statePersister,
     QualityProfileStatCalculator statCalculator,
-    QualityProfileLogger logger
-) : IPipelinePhase<QualityProfilePipelineContext>
+    QualityProfileLogger logger,
+    IEnumerable<IPreviewRenderer<QualityProfileTransactionData>> previewRenderers
+) : ISyncOperation, ISyncStateSource
 {
-    public Task<PipelineFlow> Execute(QualityProfilePipelineContext context, CancellationToken ct)
+    private QualityProfileServiceData _apiFetchOutput = null!;
+    private QualityProfileTransactionData _transactionOutput = null!;
+    private TrashIdMappingStore _state = null!;
+
+    public PipelineType Type => PipelineType.QualityProfile;
+    public string Description => "Quality Profile";
+    public IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
+
+    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) => false;
+
+    // ISyncStateSource implementation
+    // Only store guide-backed profiles (those with a valid service ID).
+    public IEnumerable<TrashIdMapping> SyncedMappings =>
+        _transactionOutput
+            .NewProfiles.Concat(_transactionOutput.UnchangedProfiles)
+            .Concat(_transactionOutput.UpdatedProfiles.Select(x => x.Profile))
+            .Select(ToMapping)
+            .OfType<TrashIdMapping>();
+
+    private static TrashIdMapping? ToMapping(UpdatedQualityProfile p) =>
+        p
+            is {
+                Profile.Id: { } serviceId,
+                ProfileConfig: PlannedQualityProfile.GuideBacked guideBacked,
+            }
+            ? new TrashIdMapping(guideBacked.Resource.TrashId, p.ProfileName, serviceId)
+            : null;
+
+    // QP has no delete flag - entries removed only when service ID no longer exists
+    public IEnumerable<int> DeletedIds => [];
+
+    public IEnumerable<int> ValidServiceIds =>
+        _apiFetchOutput.Profiles.Where(p => p.Id.HasValue).Select(p => p.Id!.Value);
+
+    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {
+        // Fetch phase
+        var profilesTask = service.GetQualityProfiles(ct);
+        var schemaTask = service.GetSchema(ct);
+        var languagesTask = service.GetLanguages(ct);
+        await Task.WhenAll(profilesTask, schemaTask, languagesTask);
+
+        _apiFetchOutput = new QualityProfileServiceData(
+            await profilesTask,
+            await schemaTask,
+            await languagesTask
+        );
+        _state = statePersister.Load();
+
+        // Transaction phase
         var transactions = new QualityProfileTransactionData();
 
         // Build profiles: new profiles go directly to transactions.NewProfiles,
         // existing profiles are returned for change detection
         var existingProfiles = BuildExistingProfiles(
             transactions,
-            context.Plan.QualityProfiles,
-            context.ApiFetchOutput,
-            context.State
+            plan.QualityProfiles,
+            _apiFetchOutput,
+            _state
         );
 
         // Process new profiles: update scores, validate (remove invalid from collection)
@@ -38,10 +93,38 @@ internal class QualityProfileTransactionPhase(
         existingProfiles = FilterValidProfiles(existingProfiles, transactions.InvalidProfiles);
         AssignExistingProfiles(transactions, existingProfiles);
 
-        context.TransactionOutput = transactions;
+        _transactionOutput = transactions;
 
-        logger.LogTransactionNotices(context);
-        return Task.FromResult(PipelineFlow.Continue);
+        logger.LogTransactionNotices(_transactionOutput, publisher);
+    }
+
+    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    {
+        var transactions = _transactionOutput;
+
+        // Create new profiles
+        foreach (var profile in transactions.NewProfiles)
+        {
+            profile.Profile = await service.CreateQualityProfile(profile.BuildMergedProfile(), ct);
+        }
+
+        // Update existing profiles with changes
+        foreach (var profileWithStats in transactions.UpdatedProfiles)
+        {
+            var merged = profileWithStats.Profile.BuildMergedProfile();
+            await service.UpdateQualityProfile(merged, ct);
+        }
+
+        _state.Update(this);
+        statePersister.Save(_state);
+
+        logger.LogPersistenceResults(_transactionOutput, publisher);
+    }
+
+    public void RenderPreview(string instanceName)
+    {
+        var renderer = previewRenderers.FirstOrDefault();
+        renderer?.Render(Description, instanceName, _transactionOutput);
     }
 
     private void AssignExistingProfiles(
