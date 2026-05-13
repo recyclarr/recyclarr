@@ -3,7 +3,7 @@ using System.Net;
 using System.Text.Json;
 using Refit;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class HttpExceptionStrategy : IExceptionStrategy
 {

@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using Recyclarr.Cli.ErrorHandling.Strategies;
+using Recyclarr.ErrorHandling;
 using Refit;
 
-namespace Recyclarr.Cli.Tests.ErrorHandling;
+namespace Recyclarr.Core.Tests.ErrorHandling;
 
 [TestFixture]
 internal class HttpExceptionStrategyTest

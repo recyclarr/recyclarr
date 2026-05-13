@@ -1,6 +1,6 @@
 using Recyclarr.Platform;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class EnvironmentExceptionStrategy : IExceptionStrategy
 {
