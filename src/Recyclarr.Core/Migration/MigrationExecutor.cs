@@ -1,14 +1,9 @@
 using Autofac.Features.Metadata;
-using Recyclarr.Cli.Migration.Steps;
-using Spectre.Console;
+using Recyclarr.Migration.Steps;
 
-namespace Recyclarr.Cli.Migration;
+namespace Recyclarr.Migration;
 
-internal class MigrationExecutor(
-    IEnumerable<Meta<IMigrationStep>> migrationSteps,
-    IAnsiConsole console,
-    ILogger log
-)
+internal class MigrationExecutor(IEnumerable<Meta<IMigrationStep>> migrationSteps, ILogger log)
 {
     // Sort migration steps by Order metadata at resolution time
     private IEnumerable<IMigrationStep> MigrationSteps { get; } =
@@ -46,7 +41,6 @@ internal class MigrationExecutor(
             }
 
             log.Information("Migration step completed: {Description}", step.Description);
-            console.MarkupLineInterpolated($"[dim]Migrate:[/] {step.Description}");
         }
     }
 }

@@ -1,6 +1,6 @@
-namespace Recyclarr.Cli.Migration;
+namespace Recyclarr.Migration;
 
-internal class MigrationException(
+public class MigrationException(
     Exception originalException,
     string operationDescription,
     IReadOnlyCollection<string> remediation
