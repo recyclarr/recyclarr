@@ -1,7 +1,7 @@
 using Recyclarr.Servarr.MediaManagement;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines.MediaManagement.PipelinePhases;
+namespace Recyclarr.Cli.Preview;
 
 internal class MediaManagementPreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<MediaManagementData>(console)
