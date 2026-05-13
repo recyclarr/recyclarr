@@ -1,7 +1,7 @@
 using Recyclarr.Pipelines;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines;
+namespace Recyclarr.Cli.Preview;
 
 internal abstract class PreviewRenderer<T>(IAnsiConsole console) : IPreviewRenderer<T>
 {
