@@ -1,4 +1,4 @@
-namespace Recyclarr.Cli.Migration.Steps;
+namespace Recyclarr.Migration.Steps;
 
 /// <summary>
 /// Specifies the execution order for a migration step. Lower values run first.

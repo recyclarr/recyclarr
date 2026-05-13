@@ -1,4 +1,4 @@
-namespace Recyclarr.Cli.Migration.Steps;
+namespace Recyclarr.Migration.Steps;
 
 internal interface IMigrationStep
 {
