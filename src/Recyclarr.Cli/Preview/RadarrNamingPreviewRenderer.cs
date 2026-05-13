@@ -1,7 +1,7 @@
 using Recyclarr.Servarr.MediaNaming;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines.MediaNaming.Radarr;
+namespace Recyclarr.Cli.Preview;
 
 internal class RadarrNamingPreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<RadarrNamingData>(console)

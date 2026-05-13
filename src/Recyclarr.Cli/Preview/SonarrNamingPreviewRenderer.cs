@@ -1,7 +1,7 @@
 using Recyclarr.Servarr.MediaNaming;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
+namespace Recyclarr.Cli.Preview;
 
 internal class SonarrNamingPreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<SonarrNamingData>(console)

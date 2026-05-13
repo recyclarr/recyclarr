@@ -2,7 +2,7 @@ using System.Globalization;
 using Recyclarr.Pipelines.QualitySize;
 using Spectre.Console;
 
-namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
+namespace Recyclarr.Cli.Preview;
 
 internal class QualitySizePreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<QualitySizePreviewData>(console)

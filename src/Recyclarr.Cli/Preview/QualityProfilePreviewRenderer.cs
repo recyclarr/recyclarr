@@ -5,7 +5,7 @@ using Recyclarr.Servarr.QualityProfile;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
-namespace Recyclarr.Cli.Pipelines.QualityProfile.PipelinePhases;
+namespace Recyclarr.Cli.Preview;
 
 internal class QualityProfilePreviewRenderer(IAnsiConsole console)
     : PreviewRenderer<QualityProfileTransactionData>(console)
@@ -109,6 +109,22 @@ internal class QualityProfilePreviewRenderer(IAnsiConsole console)
 
     private static Rows SetupQualityItemTable(UpdatedQualityProfile profile)
     {
+        var table = new Columns(
+            MakeTree(profile.Profile.Items, "Current"),
+            MakeTree(profile.UpdatedQualities.Items, "New")
+        );
+
+        table.Collapse();
+
+        var sortMode = profile.ProfileConfig.Config.QualitySort;
+        return new Rows(
+            Markup.FromInterpolated(
+                CultureInfo.InvariantCulture,
+                $"[b]Quality Updates (Sort Mode: [green]{sortMode}[/])[/]"
+            ),
+            table
+        );
+
         static IRenderable BuildName(QualityProfileItem item)
         {
             var allowedChar = item.Allowed is true ? ":check_mark:" : ":cross_mark:";
@@ -143,22 +159,6 @@ internal class QualityProfilePreviewRenderer(IAnsiConsole console)
             panel.Width = 23;
             return panel;
         }
-
-        var table = new Columns(
-            MakeTree(profile.Profile.Items, "Current"),
-            MakeTree(profile.UpdatedQualities.Items, "New")
-        );
-
-        table.Collapse();
-
-        var sortMode = profile.ProfileConfig.Config.QualitySort;
-        return new Rows(
-            Markup.FromInterpolated(
-                CultureInfo.InvariantCulture,
-                $"[b]Quality Updates (Sort Mode: [green]{sortMode}[/])[/]"
-            ),
-            table
-        );
     }
 
     private static IRenderable SetupScoreTable(UpdatedQualityProfile profile)
