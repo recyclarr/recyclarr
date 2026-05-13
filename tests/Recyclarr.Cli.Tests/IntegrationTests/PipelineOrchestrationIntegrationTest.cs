@@ -37,36 +37,40 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             });
     }
 
-    private ISyncPipeline CreateStubPipeline(
+    private ISyncOperation CreateStubOperation(
         PipelineType type,
         IReadOnlyList<PipelineType> dependencies,
-        PipelineResult result = PipelineResult.Completed
+        bool shouldFail = false
     )
     {
-        var pipeline = Substitute.For<ISyncPipeline>();
-        pipeline.PipelineType.Returns(type);
-        pipeline.Dependencies.Returns(dependencies);
-        pipeline.AppliesTo(default).ReturnsForAnyArgs(true);
-        pipeline
-            .Execute(
-                Arg.Any<ISyncSettings>(),
+        var operation = Substitute.For<ISyncOperation>();
+        operation.Type.Returns(type);
+        operation.Dependencies.Returns(dependencies);
+        operation.ShouldSkip(default!, default).ReturnsForAnyArgs(false);
+        operation
+            .Compute(
                 Arg.Any<PipelinePlan>(),
                 Arg.Any<IPipelinePublisher>(),
                 Arg.Any<CancellationToken>()
             )
             .Returns(_ =>
             {
+                if (shouldFail)
+                {
+                    throw new PipelineInterruptException();
+                }
+
                 _executionOrder.Add(type);
-                return Task.FromResult(result);
+                return Task.CompletedTask;
             });
-        return pipeline;
+        return operation;
     }
 
-    private IPipelineExecutor CreateExecutor(IEnumerable<ISyncPipeline> pipelines)
+    private IPipelineExecutor CreateExecutor(IEnumerable<ISyncOperation> ops)
     {
         var scope = Container.BeginLifetimeScope(builder =>
         {
-            builder.RegisterInstance(pipelines).As<IEnumerable<ISyncPipeline>>();
+            builder.RegisterInstance(ops).As<IEnumerable<ISyncOperation>>();
         });
         return scope.Resolve<IPipelineExecutor>();
     }
@@ -74,15 +78,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public async Task Pipelines_execute_in_topological_order()
     {
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
-        var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
+        var qsOp = CreateStubOperation(PipelineType.QualitySize, []);
+        var mnOp = CreateStubOperation(PipelineType.MediaNaming, []);
 
-        var sut = CreateExecutor([qpPipeline, mnPipeline, cfPipeline, qsPipeline]);
+        var sut = CreateExecutor([qpOp, mnOp, cfOp, qsOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         await sut.Execute(settings, new TestPlan(), _instancePublisher, CancellationToken.None);
@@ -97,15 +98,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public async Task Failed_pipeline_causes_dependents_to_be_skipped()
     {
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, [], PipelineResult.Failed);
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
-        var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, []);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, [], shouldFail: true);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
+        var qsOp = CreateStubOperation(PipelineType.QualitySize, []);
+        var mnOp = CreateStubOperation(PipelineType.MediaNaming, []);
 
-        var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
+        var sut = CreateExecutor([cfOp, qpOp, qsOp, mnOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
@@ -119,11 +117,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
 
         _executionOrder
             .Should()
-            .BeEquivalentTo([
-                PipelineType.CustomFormat,
-                PipelineType.QualitySize,
-                PipelineType.MediaNaming,
-            ]);
+            .BeEquivalentTo([PipelineType.QualitySize, PipelineType.MediaNaming]);
 
         // QP should be marked as skipped via its pipeline publisher
         _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
@@ -134,15 +128,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public async Task Independent_pipelines_run_even_when_others_fail()
     {
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
-        var qsPipeline = CreateStubPipeline(PipelineType.QualitySize, [], PipelineResult.Failed);
-        var mnPipeline = CreateStubPipeline(PipelineType.MediaNaming, []);
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
+        var qsOp = CreateStubOperation(PipelineType.QualitySize, [], shouldFail: true);
+        var mnOp = CreateStubOperation(PipelineType.MediaNaming, []);
 
-        var sut = CreateExecutor([cfPipeline, qpPipeline, qsPipeline, mnPipeline]);
+        var sut = CreateExecutor([cfOp, qpOp, qsOp, mnOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
@@ -152,20 +143,19 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             CancellationToken.None
         );
 
-        _executionOrder.Should().HaveCount(4);
+        // CF, QP, MN should succeed; QS fails (but doesn't get counted in _executionOrder since
+        // it throws before adding to the list)
+        _executionOrder.Should().HaveCount(3);
         result.Should().Be(PipelineResult.Failed);
     }
 
     [Test]
     public async Task All_successful_returns_completed()
     {
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
 
-        var sut = CreateExecutor([cfPipeline, qpPipeline]);
+        var sut = CreateExecutor([cfOp, qpOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
@@ -181,13 +171,10 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public async Task Plan_errors_skip_all_pipelines_and_return_Failed()
     {
-        var cfPipeline = CreateStubPipeline(PipelineType.CustomFormat, []);
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
 
-        var sut = CreateExecutor([cfPipeline, qpPipeline]);
+        var sut = CreateExecutor([cfOp, qpOp]);
 
         var plan = new TestPlan();
         plan.AddError("Simulated plan error");
@@ -195,7 +182,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(settings, plan, _instancePublisher, CancellationToken.None);
 
-        _executionOrder.Should().BeEmpty("no pipelines should execute when plan has errors");
+        _executionOrder.Should().BeEmpty("no operations should execute when plan has errors");
 
         _pipelinePublishers[PipelineType.CustomFormat].ReceivedWithAnyArgs().SetStatus(default);
 
@@ -207,16 +194,10 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     [Test]
     public void Circular_dependency_throws_InvalidOperationException()
     {
-        var cfPipeline = CreateStubPipeline(
-            PipelineType.CustomFormat,
-            [PipelineType.QualityProfile]
-        );
-        var qpPipeline = CreateStubPipeline(
-            PipelineType.QualityProfile,
-            [PipelineType.CustomFormat]
-        );
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, [PipelineType.QualityProfile]);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
 
-        var sut = CreateExecutor([cfPipeline, qpPipeline]);
+        var sut = CreateExecutor([cfOp, qpOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         var act = () =>

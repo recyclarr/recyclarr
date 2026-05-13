@@ -1,21 +1,69 @@
 using Recyclarr.Common.Extensions;
+using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.CustomFormat.Models;
+using Recyclarr.Pipelines.CustomFormat.State;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Servarr.CustomFormat;
+using Recyclarr.Sync;
 using Recyclarr.SyncState;
+using Recyclarr.TrashGuide;
 
-namespace Recyclarr.Pipelines.CustomFormat.PipelinePhases;
+namespace Recyclarr.Pipelines.CustomFormat;
 
-internal class CustomFormatTransactionPhase(ILogger log)
-    : IPipelinePhase<CustomFormatPipelineContext>
+internal record CustomFormatPreviewData(
+    CustomFormatTransactionData Transactions,
+    PipelinePlan Plan
+);
+
+internal class CustomFormatSyncOperation(
+    ILogger log,
+    ICustomFormatService api,
+    ICustomFormatStatePersister statePersister,
+    CustomFormatTransactionLogger cfLogger,
+    IServiceConfiguration config,
+    IEnumerable<IPreviewRenderer<CustomFormatPreviewData>> previewRenderers
+) : ISyncOperation, ISyncStateSource
 {
-    public Task<PipelineFlow> Execute(CustomFormatPipelineContext context, CancellationToken ct)
+    private readonly List<CustomFormatResource> _apiFetchOutput = [];
+    private CustomFormatTransactionData _transactionOutput = null!;
+    private TrashIdMappingStore _state = null!;
+    private PipelinePlan _plan = null!;
+
+    public PipelineType Type => PipelineType.CustomFormat;
+    public string Description => "Custom Format";
+    public IReadOnlyList<PipelineType> Dependencies => [];
+
+    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) => false;
+
+    // ISyncStateSource implementation
+    public IEnumerable<TrashIdMapping> SyncedMappings =>
+        _transactionOutput
+            .NewCustomFormats.Concat(_transactionOutput.UpdatedCustomFormats)
+            .Concat(_transactionOutput.UnchangedCustomFormats)
+            .Select(cf => new TrashIdMapping(cf.TrashId, cf.Name, cf.Id));
+
+    public IEnumerable<int> DeletedIds =>
+        _transactionOutput.DeletedCustomFormats.Select(m => m.ServiceId);
+
+    public IEnumerable<int> ValidServiceIds => _apiFetchOutput.Select(cf => cf.Id);
+
+    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {
-        var plannedCfs = context.Plan.CustomFormats;
+        _plan = plan;
+
+        // Fetch phase
+        _state = statePersister.Load();
+        var result = await api.GetCustomFormats(ct);
+        _apiFetchOutput.AddRange(result);
+
+        // Transaction phase
+        var plannedCfs = plan.CustomFormats;
         var transactions = new CustomFormatTransactionData();
 
         // Build lookups for O(1) access
-        var serviceCfsById = context.ApiFetchOutput.ToDictionary(cf => cf.Id);
-        var serviceCfsByName = context.ApiFetchOutput.ToLookup(
+        var serviceCfsById = _apiFetchOutput.ToDictionary(cf => cf.Id);
+        var serviceCfsByName = _apiFetchOutput.ToLookup(
             cf => cf.Name,
             StringComparer.OrdinalIgnoreCase
         );
@@ -29,7 +77,7 @@ internal class CustomFormatTransactionPhase(ILogger log)
                 guideCf.Name
             );
 
-            var storedId = context.State.FindId(guideCf.MappingKey);
+            var storedId = _state.FindId(guideCf.MappingKey);
 
             if (storedId.HasValue)
             {
@@ -48,8 +96,8 @@ internal class CustomFormatTransactionPhase(ILogger log)
         }
 
         // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
-        var deletionCandidates = context
-            .State.Mappings
+        var deletionCandidates = _state
+            .Mappings
             // Custom format must be in the state but NOT in the user's config
             .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
             // Also, that state-only CF must exist in the service (otherwise there is nothing to delete)
@@ -76,8 +124,49 @@ internal class CustomFormatTransactionPhase(ILogger log)
             }
         }
 
-        context.TransactionOutput = transactions;
-        return Task.FromResult(PipelineFlow.Continue);
+        _transactionOutput = transactions;
+    }
+
+    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    {
+        cfLogger.LogTransactions(_transactionOutput, publisher);
+
+        var transactions = _transactionOutput;
+
+        foreach (var cf in transactions.NewCustomFormats)
+        {
+            var response = await api.CreateCustomFormat(cf, ct);
+            if (response is not null)
+            {
+                cf.Id = response.Id;
+            }
+        }
+
+        foreach (var dto in transactions.UpdatedCustomFormats)
+        {
+            await api.UpdateCustomFormat(dto, ct);
+        }
+
+        if (config.DeleteOldCustomFormats)
+        {
+            foreach (var map in transactions.DeletedCustomFormats)
+            {
+                await api.DeleteCustomFormat(map.ServiceId, ct);
+            }
+        }
+
+        _state.Update(this);
+        statePersister.Save(_state);
+    }
+
+    public void RenderPreview(string instanceName)
+    {
+        var renderer = previewRenderers.FirstOrDefault();
+        renderer?.Render(
+            Description,
+            instanceName,
+            new CustomFormatPreviewData(_transactionOutput, _plan)
+        );
     }
 
     private void ProcessCachedCf(

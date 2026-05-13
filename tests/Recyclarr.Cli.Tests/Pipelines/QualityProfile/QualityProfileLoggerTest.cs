@@ -21,93 +21,88 @@ internal sealed class QualityProfileLoggerTest
         };
     }
 
-    private static QualityProfilePipelineContext CreateContext()
-    {
-        return new QualityProfilePipelineContext
-        {
-            InstanceName = "test",
-            SyncSettings = Substitute.For<ISyncSettings>(),
-            Publisher = Substitute.For<IPipelinePublisher>(),
-            TransactionOutput = new QualityProfileTransactionData(),
-        };
-    }
-
     [Test]
     public void Status_is_succeeded_when_no_errors()
     {
-        var context = CreateContext();
-        context.TransactionOutput.UnchangedProfiles.Add(CreateProfile("good"));
+        var transactions = new QualityProfileTransactionData();
+        transactions.UnchangedProfiles.Add(CreateProfile("good"));
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Succeeded, 0);
+        publisher.Received().SetStatus(PipelineProgressStatus.Succeeded, 0);
     }
 
     [Test]
     public void Status_is_partial_when_errors_and_valid_profiles_exist()
     {
-        var context = CreateContext();
-        context.TransactionOutput.UnchangedProfiles.Add(CreateProfile("good"));
-        context.TransactionOutput.InvalidProfiles.Add(
+        var transactions = new QualityProfileTransactionData();
+        transactions.UnchangedProfiles.Add(CreateProfile("good"));
+        transactions.InvalidProfiles.Add(
             new InvalidProfileData(CreateProfile("bad"), [new ValidationFailure("x", "error")])
         );
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Partial, 0);
+        publisher.Received().SetStatus(PipelineProgressStatus.Partial, 0);
     }
 
     [Test]
     public void Status_is_failed_when_all_profiles_have_errors()
     {
-        var context = CreateContext();
-        context.TransactionOutput.InvalidProfiles.Add(
+        var transactions = new QualityProfileTransactionData();
+        transactions.InvalidProfiles.Add(
             new InvalidProfileData(CreateProfile("bad"), [new ValidationFailure("x", "error")])
         );
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Failed, 0);
+        publisher.Received().SetStatus(PipelineProgressStatus.Failed, 0);
     }
 
     [Test]
     public void Status_is_partial_with_rename_conflicts_and_valid_profiles()
     {
-        var context = CreateContext();
-        context.TransactionOutput.NewProfiles.Add(CreateProfile("good"));
-        context.TransactionOutput.RenameConflicts.Add("conflict");
+        var transactions = new QualityProfileTransactionData();
+        transactions.NewProfiles.Add(CreateProfile("good"));
+        transactions.RenameConflicts.Add("conflict");
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Partial, 1);
+        publisher.Received().SetStatus(PipelineProgressStatus.Partial, 1);
     }
 
     [Test]
     public void Status_is_failed_with_only_ambiguous_profiles()
     {
-        var context = CreateContext();
-        context.TransactionOutput.AmbiguousProfiles.Add(
+        var transactions = new QualityProfileTransactionData();
+        transactions.AmbiguousProfiles.Add(
             new AmbiguousQualityProfile(NewPlan.Qp("ambiguous"), [("dup1", 1), ("dup2", 2)])
         );
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Failed, 0);
+        publisher.Received().SetStatus(PipelineProgressStatus.Failed, 0);
     }
 
     [Test]
     public void Status_is_partial_with_updated_profiles_and_errors()
     {
-        var context = CreateContext();
-        context.TransactionOutput.UpdatedProfiles.Add(
+        var transactions = new QualityProfileTransactionData();
+        transactions.UpdatedProfiles.Add(
             new ProfileWithStats { Profile = CreateProfile("updated") }
         );
-        context.TransactionOutput.InvalidProfiles.Add(
+        transactions.InvalidProfiles.Add(
             new InvalidProfileData(CreateProfile("bad"), [new ValidationFailure("x", "error")])
         );
+        var publisher = Substitute.For<IPipelinePublisher>();
 
-        _sut.LogPersistenceResults(context);
+        _sut.LogPersistenceResults(transactions, publisher);
 
-        context.Publisher.Received().SetStatus(PipelineProgressStatus.Partial, 1);
+        publisher.Received().SetStatus(PipelineProgressStatus.Partial, 1);
     }
 }

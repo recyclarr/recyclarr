@@ -4,14 +4,12 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases;
 
-internal class QualitySizePreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<QualitySizePipelineContext>(console)
+internal class QualitySizePreviewRenderer(IAnsiConsole console)
+    : PreviewRenderer<QualitySizePreviewData>(console)
 {
-    protected override void RenderPreview(QualitySizePipelineContext context)
+    protected override void RenderData(QualitySizePreviewData data)
     {
-        RenderTitle(context);
-
-        var changedItems = context.TransactionOutput.Where(x => x.IsDifferent).ToList();
+        var changedItems = data.Items.Where(x => x.IsDifferent).ToList();
 
         if (changedItems.Count == 0)
         {
@@ -19,7 +17,7 @@ internal class QualitySizePreviewPhase(IAnsiConsole console)
             return;
         }
 
-        var limits = context.Limits;
+        var limits = data.Limits;
         var table = new Table();
         table.AddColumn("[bold]Quality[/]");
         table.AddColumn("[bold]Min[/]");

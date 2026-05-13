@@ -63,7 +63,8 @@ that action arrives too late.
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
 - Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
-- Pipeline: `GenericSyncPipeline<TContext>` - Config -> Fetch -> Transaction -> Persist -> Preview
+- Sync: `ISyncOperation` per resource type (Compute + Persist), orchestrated by
+  `CompositeSyncPipeline`
 - DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
   gets its own Autofac Module to keep DI registration modular.
 - Config: YAML + `schemas/config-schema.json` validation
@@ -141,20 +142,20 @@ generate valid YAML; there is no separate reference document to keep in sync.
 
 All sync operations must be deterministic.
 
-**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
+**Independent operations** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
-- Items sync independently; partial sync within pipeline is acceptable
+- Items sync independently; partial sync within an operation is acceptable
 - Invalid items are skipped with errors; valid items proceed
 
-**Dependent pipelines** (Custom Formats):
+**Dependent operations** (Custom Formats):
 
-- All items must sync or the entire pipeline fails
-- Failure cascades to skip dependent pipelines (CF failure → QP skipped)
+- All items must sync or the entire operation fails
+- Failure cascades to skip dependent operations (CF failure → QP skipped)
 - Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
 
 **Diagnostics:**
 
-- `AddError()`: Issues that cause items or pipelines to be skipped
+- `AddError()`: Issues that cause items or operations to be skipped
 - `AddWarning()`: Deprecations and informational messages only
 
 ## YAML Error Handling
