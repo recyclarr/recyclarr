@@ -1,7 +1,7 @@
-using Recyclarr.Cli.Migration.Steps;
+using Recyclarr.Migration.Steps;
 using Recyclarr.Platform;
 
-namespace Recyclarr.Cli.Tests.Migration.Steps;
+namespace Recyclarr.Core.Tests.Migration.Steps;
 
 internal sealed class NormalizeStateMappingsPropertyStepTest
 {
