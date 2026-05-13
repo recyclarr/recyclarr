@@ -25,7 +25,7 @@ internal class PipelineAutofacModule : Module
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
 
         RegisterPlan(builder);
-        RegisterSyncPipelines(builder);
+        RegisterSyncOperations(builder);
         RegisterCustomFormatSupport(builder);
         RegisterQualityProfileSupport(builder);
         RegisterQualitySizeSupport(builder);
@@ -51,20 +51,20 @@ internal class PipelineAutofacModule : Module
             .OrderByRegistration();
     }
 
-    // Execution order is derived from pipeline dependencies via topological sort in
-    // CompositeSyncPipeline, not registration order. See IPipelineMetadata.Dependencies.
-    private static void RegisterSyncPipelines(ContainerBuilder builder)
+    // Execution order is derived from operation dependencies via topological sort in
+    // CompositeSyncPipeline, not registration order. See ISyncOperation.Dependencies.
+    private static void RegisterSyncOperations(ContainerBuilder builder)
     {
         builder
             .RegisterTypes(
-                typeof(GenericSyncPipeline<CustomFormatPipelineContext>),
-                typeof(GenericSyncPipeline<QualityProfilePipelineContext>),
-                typeof(GenericSyncPipeline<QualitySizePipelineContext>),
-                typeof(GenericSyncPipeline<SonarrNamingPipelineContext>),
-                typeof(GenericSyncPipeline<RadarrNamingPipelineContext>),
-                typeof(GenericSyncPipeline<MediaManagementPipelineContext>)
+                typeof(CustomFormatSyncOperation),
+                typeof(QualityProfileSyncOperation),
+                typeof(QualitySizeSyncOperation),
+                typeof(SonarrNamingSyncOperation),
+                typeof(RadarrNamingSyncOperation),
+                typeof(MediaManagementSyncOperation)
             )
-            .As<ISyncPipeline>();
+            .As<ISyncOperation>();
     }
 
     private static void RegisterCustomFormatSupport(ContainerBuilder builder)

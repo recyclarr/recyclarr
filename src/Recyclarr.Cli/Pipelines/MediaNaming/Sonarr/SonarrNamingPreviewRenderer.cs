@@ -1,16 +1,13 @@
-using Recyclarr.Pipelines.MediaNaming.Sonarr;
+using Recyclarr.Servarr.MediaNaming;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.MediaNaming.Sonarr;
 
-internal class SonarrNamingPreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<SonarrNamingPipelineContext>(console)
+internal class SonarrNamingPreviewRenderer(IAnsiConsole console)
+    : PreviewRenderer<SonarrNamingData>(console)
 {
-    protected override void RenderPreview(SonarrNamingPipelineContext context)
+    protected override void RenderData(SonarrNamingData data)
     {
-        RenderTitle(context);
-
-        var data = context.TransactionOutput;
         var table = new Table().AddColumns("[b]Field[/]", "[b]Value[/]");
         AddRow(table, "Enable Episode Renames?", data.RenameEpisodes);
         AddRow(table, "Series Folder", data.SeriesFolderFormat);

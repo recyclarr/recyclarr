@@ -1,245 +1,159 @@
-# Sync Pipeline Architecture
+# Sync architecture
 
-## Design Philosophy and Context
+## Why this architecture exists
 
-Recyclarr's sync pipeline architecture addresses the fundamental challenge of synchronizing complex,
-interdependent data between TRaSH Guides and Servarr applications. The design evolved from practical
-experience with user pain points and the inherent complexity of media management synchronization.
+Sync processing contains the majority of Recyclarr's business logic. The complexity comes from
+validating user configuration, reconciling server state, handling dependencies between data types
+(Quality Profiles reference Custom Formats), and managing service differences between Sonarr and
+Radarr.
 
-### Why This Architecture Exists
+The original service-first design (Radarr processing, then Sonarr processing) created significant
+code duplication since Custom Format processing is nearly identical between services. The current
+resource-first approach (Custom Formats, then Quality Profiles, etc.) eliminates this duplication
+while handling service differences through targeted injection points.
 
-**Complexity Reality**: Sync processing contains the majority of Recyclarr's business logic. The
-complexity stems from validating user configuration, reconciling server state, handling dependencies
-between data types (Quality Profiles reference Custom Formats), and managing service differences
-between Sonarr and Radarr.
+Most user errors come from configuration mistakes and server-side conflicts. The architecture
+prioritizes comprehensive error collection and user-friendly reporting over fail-fast approaches,
+explaining problems in YAML terms rather than technical internals.
 
-**User Experience Priority**: Most errors come from configuration mistakes and server-side
-conflicts. The architecture prioritizes comprehensive error collection and user-friendly reporting
-over fail-fast approaches, following a "spoon feeding" philosophy that explains problems in YAML
-terms rather than technical internals.
+## Overview
 
-**Evolution from Service-First**: The original service-first design (Radarr processing → Sonarr
-processing) created significant code duplication since Custom Format processing is nearly identical
-between services. The current category-first approach (Custom Formats → Quality Profiles → etc.)
-eliminates this duplication while handling service differences through targeted injection points.
-
-## Architecture Overview
-
-The system processes four sync categories within each server instance, with execution order derived
+The system processes five sync categories within each server instance. Execution order is derived
 from explicit dependency declarations:
 
-1. **Custom Formats** (foundation, no dependencies)
-2. **Quality Profiles** (depends on Custom Formats)
-3. **Quality Definitions** (independent)
-4. **Media Naming** (independent)
-5. **Media Management** (independent)
+1. Custom Formats (foundation, no dependencies)
+2. Quality Profiles (depends on Custom Formats)
+3. Quality Definitions (independent)
+4. Media Naming (independent)
+5. Media Management (independent)
 
-**User Experience**: Users see clear per-server processing markers, but pipeline internals remain
-transparent. This choice prioritizes comprehension over architectural visibility.
+Each category is a self-contained `ISyncOperation` class that owns its full lifecycle: fetching
+current state from the service, computing what needs to change, and persisting changes. The
+orchestrator (`CompositeSyncPipeline`) controls sequencing, dependency tracking, and the
+preview/persist decision.
 
-**Dependency Management**: Each pipeline declares its dependencies via `IPipelineMetadata`. The
-orchestrator (`CompositeSyncPipeline`) uses topological sort to determine execution order, ensuring
-dependencies run before dependents. When a pipeline fails, only its dependents are skipped -
-independent pipelines continue running.
+## Sync operations
 
-### Pipeline Metadata and Orchestration
+Each resource type implements `ISyncOperation` with two main methods:
 
-Pipelines expose static metadata through `IPipelineMetadata`: pipeline type identity, dependency
-declarations, and service affinity. `GenericSyncPipeline<TContext>` bridges these static members to
-instance properties on `ISyncPipeline`, enabling the orchestrator to access metadata without knowing
-concrete types.
+- `Compute()` fetches current state from the Servarr API and computes the diff against the plan. All
+  validation and conflict detection happens here.
+- `Persist()` applies the computed changes to the service. Only called when not in preview mode.
 
-### Service Affinity
+The orchestrator calls these separately:
 
-Each pipeline declares an optional service affinity. Universal pipelines (Custom Formats, Quality
-Profiles, Quality Sizes, Media Management) have no affinity and run for any instance. Service-
-specific pipelines (Media Naming) declare their target service (Sonarr or Radarr).
+```csharp
+await operation.Compute(plan, publisher, ct);
 
-`CompositeSyncPipeline` filters pipelines by affinity before the topological sort, so
-service-specific pipelines are never executed for the wrong instance type. This means each pipeline
-column in the progress table maps 1:1 to a `PipelineType` with no special-case logic.
+if (settings.Preview)
+    operation.RenderPreview(config.InstanceName);
+else
+    await operation.Persist(publisher, ct);
+```
 
-### Failure Cascade Behavior
+Operations store compute results as internal state, used by both `Persist()` and `RenderPreview()`.
+Each operation instance is scoped to one sync run for one service instance and discarded afterward.
 
-Pipeline execution returns `PipelineResult` (Completed or Failed). The orchestrator tracks failures
-and skips pipelines whose dependencies failed:
+### Skipping operations
 
-- **CF fails** → QP skipped (depends on CF), QS, MN, and MM continue (independent)
-- **QS fails** → All others continue (nothing depends on QS)
+Each operation declares whether it should skip via `ShouldSkip(plan, serviceType)`. This covers both
+service affinity (Sonarr naming doesn't run against Radarr) and config presence (no `quality_sizes`
+section means the quality size operation skips). The orchestrator checks this before calling
+`Compute()`.
 
-### Sync Atomicity
+## Dependency management
 
-Pipelines fall into two categories based on dependency relationships:
+Operations declare dependencies via `ISyncOperation.Dependencies`. The orchestrator uses topological
+sort to determine execution order. When an operation fails, only its dependents are skipped;
+independent operations continue.
 
-**Independent Pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
+- CF fails: QP skipped (depends on CF), QS/MN/MM continue (independent)
+- QS fails: all others continue (nothing depends on QS)
 
-- No other pipeline depends on these resources
-- Individual items can sync independently within the pipeline
-- If item A fails validation, item B can still sync
-- Partial sync is acceptable because each item is self-contained
+## Sync atomicity
 
-**Dependent Pipelines** (Custom Formats):
+Operations fall into two categories based on dependency relationships:
 
-- Other pipelines depend on these (QP uses CFs for scoring)
-- ALL items must sync successfully or the entire pipeline fails
-- Partial sync would cause silent, non-deterministic behavior (incomplete CFs → incorrect QP
-  scoring)
-- Pipeline failure cascades to skip dependent pipelines
+**Independent operations** (Quality Profiles, Quality Sizes, Media Naming, Media Management): no
+other operation depends on these resources. Individual items can sync independently. If item A fails
+validation, item B can still sync. Partial sync is acceptable because each item is self-contained.
 
-This distinction ensures deterministic behavior: users get exactly what they configured for each
-independent resource, while dependent resources enforce all-or-nothing semantics to prevent
-downstream corruption.
+**Dependent operations** (Custom Formats): other operations depend on these (QP uses CFs for
+scoring). ALL items must sync successfully or the entire operation fails. Partial sync would cause
+silent, non-deterministic behavior (incomplete CFs lead to incorrect QP scoring). Operation failure
+cascades to skip dependent operations.
 
-## Processing Model
+## Processing model
 
-Each sync category follows an identical pattern that separates concerns and enables comprehensive
-error collection. Processing happens in two stages:
+Each sync category follows an identical pattern in two stages:
 
-**Plan Phase** (pre-pipeline) → **Pipeline Phases**: ApiFetch → Transaction → Preview →
-ApiPersistence
+Plan (pre-sync) then Sync: Compute (fetch + diff) then Persist
 
-### Plan Phase (Pre-Pipeline)
+### Plan (pre-sync)
 
-The Plan phase validates configuration against TRaSH Guides data, catching invalid TrashIds and
-resource conflicts before any server interaction. Plan components execute sequentially because some
-depend on others (QP planning reads from the CF plan to build score assignments). The output is a
-`PipelinePlan` consumed by subsequent phases.
+The plan validates configuration against TRaSH Guides data, catching invalid TrashIds and resource
+conflicts before any server interaction. Plan components execute sequentially because some depend on
+others (QP planning reads from the CF plan to build score assignments). The output is a
+`PipelinePlan` consumed by sync operations.
 
-### Pipeline Phases
+### Compute
 
-**ApiFetch**: Server state is non-deterministic and changes independently. Fresh data is required
-for accurate comparison and change planning.
+Fetches current state from the Servarr API (non-deterministic, changes independently) and computes
+the transaction: what to create, update, delete, or skip. This is where validation complexity lives,
+handling naming conflicts, dependency validation, and update-vs-create decisions.
 
-**Transaction**: This is where complexity lives. Server-side validation requires runtime checks
-against current state. Change planning must handle naming conflicts, dependency validation, and
-update-vs-create decisions.
+### Persist
 
-**Preview**: Users need to understand planned changes before committing, especially in production.
-This implements dry-run by terminating the pipeline after displaying the transaction plan.
+Applies the computed changes. All validation is complete by this point, so this focuses on execution
+reliability and state maintenance. Skipped entirely in preview mode.
 
-**ApiPersistence**: Execute changes with proper error handling and state maintenance. All validation
-is complete, so this focuses on execution reliability.
+## Preview rendering
 
-### Error Collection Strategy
+Preview (dry-run) is a CLI adapter concern, not a sync engine concern. Each operation has an
+optional `IPreviewRenderer<T>` injected via DI. The renderer is defined as an interface in Core (no
+Spectre.Console dependency) and implemented in the CLI project using Spectre tables and trees.
+
+The orchestrator calls `operation.RenderPreview(instanceName)` instead of `Persist()` when in
+preview mode. If no renderer is registered (as would be the case for a future HTTP server), the call
+is a no-op.
+
+## Error collection
 
 The "collect and report later" pattern categorizes errors by source and timing:
 
-- **Configuration Errors** (Plan phase): Invalid TrashIds, malformed YAML, resource provider
-  conflicts
-- **Server Validation Errors** (Transaction phase): Naming conflicts, missing dependencies, API
-  constraint violations
-- **Runtime Errors** (ApiPersistence phase): Network issues, authentication failures, service
-  unavailability
+- Configuration errors (plan): invalid TrashIds, malformed YAML, resource provider conflicts
+- Server validation errors (compute): naming conflicts, missing dependencies, API constraint
+  violations
+- Runtime errors (persist): network issues, authentication failures, service unavailability
 
-**Context Objects**: Strongly-typed contexts carry all data and errors between phases, providing
-complete audit trails without direct phase communication.
+Diagnostics flow through `IPipelinePublisher`, which operations receive as a parameter. Operations
+call `publisher.AddError()` and `publisher.AddWarning()` during compute, and `publisher.SetStatus()`
+during persist.
 
-## Complexity and Challenges
+## Service abstraction
 
-### Real-World Complexity Example: Quality Profiles
+Sonarr and Radarr are similar but have differences in areas like Media Naming formats and Quality
+Definition size limits. These differences are handled through service-specific implementations
+behind domain interfaces (see [service-gateway-layer.md](service-gateway-layer.md)).
 
-Quality Profiles demonstrate why the pipeline architecture is necessary:
+Media Naming has separate sync operations for Sonarr and Radarr since the APIs are completely
+different. Both share the same `PipelineType.MediaNaming` identity; the `ShouldSkip` check ensures
+only the relevant operation runs per instance.
 
-- **Multi-layered Dependencies**: Profiles reference Custom Formats that must exist first
-- **Complex Scoring Logic**: Score assignment based on various TRaSH rule sets
-- **State Reconciliation**: Merging user preferences with existing server configurations
-- **Statistics Calculation**: Performance metrics and reporting requirements
+## Extensibility
 
-This complexity would be unmanageable in a monolithic processor, making phase-based separation
-essential.
+Adding a new sync category: implement a plan component (`IPlanComponent`) and an `ISyncOperation`
+class. Declare dependencies in the operation. The orchestrator handles ordering automatically via
+topological sort.
 
-### Service Abstraction Challenges
+Handling service differences: use dependency injection for service-specific implementations rather
+than duplicating processing paths.
 
-**Minor Differences, Major Impact**: Sonarr and Radarr are similar but have key differences in areas
-like Media Naming formats and Quality Definition size limits. These differences require
-service-specific implementations.
+## Architecture evolution
 
-**Media Naming**: Sonarr and Radarr have distinct naming format APIs, requiring separate pipeline
-implementations. Both share the same `PipelineType.MediaNaming` identity; service affinity filtering
-ensures only the relevant implementation runs per instance.
-
-### Architectural Evolution
-
-**Iterative Refinement**: The pipeline system originally started more complex than necessary and has
-been simplified over time. This evolution demonstrates the architecture's flexibility and capacity
-for improvement.
-
-**Ongoing Opportunities**: Current implementation likely still contains areas that could be
-simplified, particularly around service-specific abstractions that could be more targeted.
-
-## User Experience and Error Reporting
-
-The architecture prioritizes user comprehension through a "spoon feeding" approach that translates
-technical complexity into actionable guidance.
-
-### Error Presentation Strategy
-
-- **YAML-centric language**: Reference user-visible configuration rather than internal objects
-- **Simple explanations**: Avoid technical jargon in favor of clear problem descriptions
-- **Actionable guidance**: Provide specific steps and documentation links for resolution
-- **Comprehensive collection**: Present all issues at once rather than fail-fast on first error
-
-### Information Processing vs. UI Rendering
-
-Clear separation between **what happened** (information processing) and **how to present it** (UI
-rendering) enables:
-
-- Comprehensive error collection without UI concerns
-- Consistent presentation across output formats
-- Testable diagnostic logic independent of presentation
-
-This separation supports the debugging philosophy: every failure includes sufficient context for
-understanding root causes without code inspection, with audit trails maintained through context
-objects.
-
-## Design Trade-offs and Future Considerations
-
-### Conscious Compromises
-
-**Explicit Dependencies Over Implicit Ordering**: Dependencies are declared on context types via
-`IPipelineMetadata` rather than relying on registration order. This adds some ceremony but makes the
-dependency graph explicit and self-documenting.
-
-**Selective Cascade**: When a dependent pipeline (CF) fails, its dependents (QP) are skipped while
-independent pipelines continue. This reflects the atomicity model: independent resources can sync
-partially, while dependent resources enforce all-or-nothing to prevent downstream corruption.
-
-**Transparency vs. Simplicity**: Users have limited visibility into pipeline internals, prioritizing
-comprehension over detailed progress reporting. Skipped pipelines show as "--" in progress without
-explicit explanation (errors from the failed dependency explain the root cause).
-
-**Safety Over Speed**: Strongly-typed contexts and comprehensive validation add overhead but provide
-auditability and error prevention.
-
-### Extensibility Model
-
-**Adding New Sync Categories**: Implement a plan component (`IPlanComponent`) and the four pipeline
-phases with category-specific context. Declare dependencies in `IPipelineMetadata` - the
-orchestrator handles ordering automatically via topological sort.
-
-**Handling Service Differences**: Use dependency injection for service-specific implementations
-rather than duplicating entire processing paths.
-
-**Phase Pattern Flexibility**: The current model works well for existing needs but may require
-adaptation for future sync types with different processing requirements.
-
-## Conclusion
-
-The sync pipeline architecture represents a pragmatic solution that evolved from real-world
-experience with the complexity of TRaSH Guides synchronization. The design successfully manages
-substantial business logic through two-tier modularization (categories → phases) while prioritizing
-user experience through comprehensive error reporting.
-
-**Key Success Factors**:
-
-- **Category-first structure** eliminates service duplication while handling differences through
-  targeted injection
-- **Plan + pipeline phases** separates concerns effectively and enables comprehensive validation
-- **Context-driven communication** provides auditability and error accumulation without tight
-  coupling
-- **User-centric error reporting** translates technical complexity into actionable YAML-focused
-  guidance
-
-The architecture demonstrates resilience through its evolution from over-engineered origins to its
-current refined state, suggesting the core patterns will continue serving future requirements as
-Recyclarr's synchronization needs evolve.
+The sync system originally used a pipeline-of-phases architecture where each resource type had
+separate fetch, transaction, preview, and persistence phase classes sharing mutable state through
+context objects. Over time, phases were pulled out one by one (config became the plan system,
+preview became a CLI concern, persistence became conditional). What remained was a complicated shell
+around what is really just "fetch, diff, persist." The pipeline was replaced with self-contained
+`ISyncOperation` classes that own their full lifecycle.

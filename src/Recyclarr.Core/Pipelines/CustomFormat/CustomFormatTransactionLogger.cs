@@ -6,11 +6,12 @@ namespace Recyclarr.Pipelines.CustomFormat;
 
 internal class CustomFormatTransactionLogger(ILogger log)
 {
-    public void LogTransactions(CustomFormatPipelineContext context)
+    public void LogTransactions(
+        CustomFormatTransactionData transactions,
+        IPipelinePublisher publisher
+    )
     {
-        var transactions = context.TransactionOutput;
-
-        var hasBlockingErrors = LogDiagnostics(context.Publisher, transactions);
+        var hasBlockingErrors = LogDiagnostics(publisher, transactions);
         if (hasBlockingErrors)
         {
             throw new PipelineInterruptException();
@@ -19,7 +20,7 @@ internal class CustomFormatTransactionLogger(ILogger log)
         var totalCount = LogResults(transactions);
         var changes = BuildItemChanges(transactions);
 
-        context.Publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount, changes);
+        publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount, changes);
     }
 
     private static PipelineItemChanges BuildItemChanges(CustomFormatTransactionData transactions)

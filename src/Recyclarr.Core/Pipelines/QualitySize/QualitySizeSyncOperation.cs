@@ -1,16 +1,50 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
+using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Servarr.QualitySize;
+using Recyclarr.Sync;
+using Recyclarr.Sync.Progress;
+using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
-namespace Recyclarr.Pipelines.QualitySize.PipelinePhases;
+namespace Recyclarr.Pipelines.QualitySize;
 
-internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<QualitySizePipelineContext>
+internal record QualitySizePreviewData(
+    IReadOnlyCollection<UpdatedQualityItem> Items,
+    QualityItemLimits Limits,
+    string QualityDefinitionType
+);
+
+internal class QualitySizeSyncOperation(
+    ILogger log,
+    IQualityDefinitionService api,
+    IQualityItemLimitFactory limitFactory,
+    IServiceConfiguration config,
+    IEnumerable<IPreviewRenderer<QualitySizePreviewData>> previewRenderers
+) : ISyncOperation
 {
-    public Task<PipelineFlow> Execute(QualitySizePipelineContext context, CancellationToken ct)
+    private IReadOnlyList<QualityDefinitionItem> _apiFetchOutput = null!;
+    private QualityItemLimits _limits = null!;
+    private string _qualityDefinitionType = null!;
+    private IReadOnlyCollection<UpdatedQualityItem> _transactionOutput = [];
+
+    public PipelineType Type => PipelineType.QualitySize;
+    public string Description => "Quality Definition";
+    public IReadOnlyList<PipelineType> Dependencies => [];
+
+    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) =>
+        !plan.QualitySizesAvailable;
+
+    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {
-        var planned = context.Plan.QualitySizes;
-        var limits = context.Limits;
-        var serverQuality = context.ApiFetchOutput;
+        // Fetch phase
+        _apiFetchOutput = await api.GetQualityDefinitions(ct);
+        _limits = await limitFactory.Create(config.ServiceType, ct);
+
+        // Transaction phase
+        var planned = plan.QualitySizes;
+        var limits = _limits;
+        var serverQuality = _apiFetchOutput;
 
         var updatedItems = new List<UpdatedQualityItem>();
         foreach (var plannedQuality in planned.Qualities)
@@ -22,7 +56,7 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
             {
                 var message =
                     $"Server lacks quality definition for {plannedQuality.Quality}; it will be skipped";
-                context.Publisher.AddWarning(message);
+                publisher.AddWarning(message);
                 continue;
             }
 
@@ -58,10 +92,45 @@ internal class QualitySizeTransactionPhase(ILogger log) : IPipelinePhase<Quality
             updatedItems.Add(item);
         }
 
-        context.TransactionOutput = updatedItems;
-        context.QualityDefinitionType = planned.Type;
+        _transactionOutput = updatedItems;
+        _qualityDefinitionType = planned.Type;
+    }
 
-        return Task.FromResult(PipelineFlow.Continue);
+    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    {
+        var itemsToUpdate = _transactionOutput
+            .Where(x => x.IsDifferent)
+            .Select(x => x.BuildUpdatedItem(_limits))
+            .ToList();
+
+        if (itemsToUpdate.Count == 0)
+        {
+            log.Information(
+                "All sizes for quality definition {Name} are already up to date!",
+                _qualityDefinitionType
+            );
+            publisher.SetStatus(PipelineProgressStatus.Succeeded, 0);
+            return;
+        }
+
+        await api.UpdateQualityDefinitions(itemsToUpdate, ct);
+
+        log.Information(
+            "Total of {Count} sizes were synced for quality definition {Name}",
+            itemsToUpdate.Count,
+            _qualityDefinitionType
+        );
+        publisher.SetStatus(PipelineProgressStatus.Succeeded, itemsToUpdate.Count);
+    }
+
+    public void RenderPreview(string instanceName)
+    {
+        var renderer = previewRenderers.FirstOrDefault();
+        renderer?.Render(
+            Description,
+            instanceName,
+            new QualitySizePreviewData(_transactionOutput, _limits, _qualityDefinitionType)
+        );
     }
 
     private static (decimal Min, decimal Max, decimal Preferred) ResolveValues(
