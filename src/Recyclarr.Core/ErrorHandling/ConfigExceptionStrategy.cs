@@ -1,7 +1,7 @@
 using Recyclarr.Config.ExceptionTypes;
 using Recyclarr.Config.Parsing.ErrorHandling;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class ConfigExceptionStrategy : IExceptionStrategy
 {

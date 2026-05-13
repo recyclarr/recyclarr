@@ -19,6 +19,7 @@ using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
+using Recyclarr.ErrorHandling;
 using Recyclarr.Http;
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
@@ -59,6 +60,7 @@ public class CoreAutofacModule : Module
         RegisterCommon(builder);
         RegisterCompatibility(builder);
         RegisterConfig(builder);
+        RegisterErrorHandling(builder);
         RegisterHttp(builder);
         RegisterNotifications(builder);
         RegisterPlatform(builder);
@@ -70,6 +72,16 @@ public class CoreAutofacModule : Module
         RegisterYaml(builder);
         RegisterVersionControl(builder);
         RegisterSyncEvents(builder);
+    }
+
+    private static void RegisterErrorHandling(ContainerBuilder builder)
+    {
+        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
     }
 
     private static void RegisterCache(ContainerBuilder builder)

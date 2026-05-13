@@ -1,6 +1,6 @@
 using Recyclarr.Common.FluentValidation;
 
-namespace Recyclarr.Cli.ErrorHandling.Strategies;
+namespace Recyclarr.ErrorHandling;
 
 internal class ValidationExceptionStrategy : IExceptionStrategy
 {
