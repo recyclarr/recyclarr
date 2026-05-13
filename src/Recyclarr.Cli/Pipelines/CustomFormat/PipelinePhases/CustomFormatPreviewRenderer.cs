@@ -4,14 +4,12 @@ using Spectre.Console;
 
 namespace Recyclarr.Cli.Pipelines.CustomFormat.PipelinePhases;
 
-internal class CustomFormatPreviewPhase(IAnsiConsole console)
-    : PreviewPipelinePhase<CustomFormatPipelineContext>(console)
+internal class CustomFormatPreviewRenderer(IAnsiConsole console)
+    : PreviewRenderer<CustomFormatPreviewData>(console)
 {
-    protected override void RenderPreview(CustomFormatPipelineContext context)
+    protected override void RenderData(CustomFormatPreviewData data)
     {
-        RenderTitle(context);
-
-        var transactions = context.TransactionOutput;
+        var transactions = data.Transactions;
 
         if (transactions.TotalCustomFormatChanges == 0)
         {
@@ -19,7 +17,7 @@ internal class CustomFormatPreviewPhase(IAnsiConsole console)
             return;
         }
 
-        PlannedCustomFormat? GetPlanned(string trashId) => context.Plan.GetCustomFormat(trashId);
+        PlannedCustomFormat? GetPlanned(string trashId) => data.Plan.GetCustomFormat(trashId);
 
         string GetSourceDisplay(PlannedCustomFormat? planned)
         {

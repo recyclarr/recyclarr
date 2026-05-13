@@ -1,7 +1,7 @@
 # Trash ID State System
 
-> Part of the [Sync Pipeline Architecture](sync-pipeline-architecture.md). For decision rationale,
-> see [ADR-002](../decisions/architecture/002-id-first-custom-format-matching.md).
+> Part of the [Sync architecture](sync-pipeline-architecture.md). For decision rationale, see
+> [ADR-002](../decisions/architecture/002-id-first-custom-format-matching.md).
 
 ## Overview
 
@@ -150,7 +150,7 @@ assigned to a custom format or quality profile definition.
 
 ## Self-Healing Sync
 
-The sync pipeline is self-healing. It handles state inconsistencies inline rather than requiring a
+The sync system is self-healing. It handles state inconsistencies inline rather than requiring a
 separate repair step:
 
 - **Stale IDs**: When a stored service ID no longer exists, sync falls through to name-based
@@ -190,12 +190,13 @@ QualityProfileStatePersister : SyncStatePersister<QualityProfileMappings>
 
 ### ISyncStateSource Integration
 
-Pipeline context objects implement `ISyncStateSource` directly because they already aggregate
-`TransactionOutput` and `ApiFetchOutput`. This provides a clean interface for state updates:
+Sync operation classes implement `ISyncStateSource` directly because they already hold the
+transaction output and fetch output as internal state. This provides a clean interface for state
+updates:
 
 ```csharp
-// In persistence phase:
-state.Update(context);  // context implements ISyncStateSource
+// In Persist():
+state.Update(this);  // sync operation implements ISyncStateSource
 statePersister.Save(state);
 ```
 
