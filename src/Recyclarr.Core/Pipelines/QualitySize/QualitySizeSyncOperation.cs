@@ -4,7 +4,6 @@ using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Pipelines.QualitySize;
@@ -32,8 +31,7 @@ internal class QualitySizeSyncOperation(
     public string Description => "Quality Definition";
     public IReadOnlyList<PipelineType> Dependencies => [];
 
-    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) =>
-        !plan.QualitySizesAvailable;
+    public bool ShouldSkip(PipelinePlan plan) => !plan.QualitySizesAvailable;
 
     public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {
