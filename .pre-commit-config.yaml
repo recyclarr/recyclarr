@@ -50,7 +50,7 @@ repos:
         types: [c#]
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.25.0
+    rev: v1.25.1
     hooks:
       - id: zizmor
 
