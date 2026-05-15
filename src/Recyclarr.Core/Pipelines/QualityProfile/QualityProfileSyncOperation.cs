@@ -10,7 +10,6 @@ using Recyclarr.Pipelines.QualityProfile.State;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Pipelines.QualityProfile;
 
@@ -31,7 +30,7 @@ internal class QualityProfileSyncOperation(
     public string Description => "Quality Profile";
     public IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
 
-    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) => false;
+    public bool ShouldSkip(PipelinePlan plan) => false;
 
     // ISyncStateSource implementation
     // Only store guide-backed profiles (those with a valid service ID).

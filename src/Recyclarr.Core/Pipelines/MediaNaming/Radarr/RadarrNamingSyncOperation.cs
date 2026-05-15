@@ -2,7 +2,6 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Pipelines.MediaNaming.Radarr;
 
@@ -19,8 +18,7 @@ internal class RadarrNamingSyncOperation(
     public string Description => "Radarr Media Naming";
     public IReadOnlyList<PipelineType> Dependencies => [];
 
-    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) =>
-        serviceType != SupportedServices.Radarr || !plan.RadarrMediaNamingAvailable;
+    public bool ShouldSkip(PipelinePlan plan) => !plan.RadarrMediaNamingAvailable;
 
     public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {

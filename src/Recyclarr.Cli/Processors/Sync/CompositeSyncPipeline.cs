@@ -19,7 +19,17 @@ internal class CompositeSyncPipeline(
         CancellationToken ct
     )
     {
-        var sortedOperations = TopologicalSort(operations);
+        // Filter before TopologicalSort: plan components already encode service affinity
+        // (e.g. SonarrMediaNamingAvailable is false for Radarr instances), so ShouldSkip
+        // resolves duplicate PipelineType keys (both naming ops share MediaNaming).
+        var (applicable, skipped) = PartitionBySkip(operations, plan);
+
+        foreach (var operation in skipped)
+        {
+            instancePublisher.ForPipeline(operation.Type).SetStatus(PipelineProgressStatus.Skipped);
+        }
+
+        var sortedOperations = TopologicalSort(applicable);
         log.Debug(
             "Sync operation order: {Order}",
             string.Join(" -> ", sortedOperations.Select(o => o.Type))
@@ -49,12 +59,6 @@ internal class CompositeSyncPipeline(
                     operation.Type,
                     failedDependencies[0]
                 );
-                publisher.SetStatus(PipelineProgressStatus.Skipped);
-                continue;
-            }
-
-            if (operation.ShouldSkip(plan, config.ServiceType))
-            {
                 publisher.SetStatus(PipelineProgressStatus.Skipped);
                 continue;
             }
@@ -101,6 +105,22 @@ internal class CompositeSyncPipeline(
                 .ForPipeline(operation.Type)
                 .SetStatus(PipelineProgressStatus.Interrupted);
         }
+    }
+
+    private static (List<ISyncOperation> Applicable, List<ISyncOperation> Skipped) PartitionBySkip(
+        IEnumerable<ISyncOperation> operations,
+        PipelinePlan plan
+    )
+    {
+        var applicable = new List<ISyncOperation>();
+        var skipped = new List<ISyncOperation>();
+
+        foreach (var op in operations)
+        {
+            (op.ShouldSkip(plan) ? skipped : applicable).Add(op);
+        }
+
+        return (applicable, skipped);
     }
 
     private static List<ISyncOperation> TopologicalSort(IEnumerable<ISyncOperation> operations)
