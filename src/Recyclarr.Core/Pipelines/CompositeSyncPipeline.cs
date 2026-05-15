@@ -1,10 +1,9 @@
 using Recyclarr.Config.Models;
-using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
-namespace Recyclarr.Cli.Processors.Sync;
+namespace Recyclarr.Pipelines;
 
 internal class CompositeSyncPipeline(
     ILogger log,

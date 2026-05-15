@@ -1,6 +1,4 @@
-using Recyclarr.Sync;
-
-namespace Recyclarr.Cli.Processors.Sync;
+namespace Recyclarr.Sync;
 
 internal class DiagnosticsLogger(ILogger log, ISyncRunScope run) : IDisposable
 {

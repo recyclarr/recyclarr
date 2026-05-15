@@ -11,7 +11,6 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Common;
@@ -83,38 +82,22 @@ internal static class CompositionRoot
     {
         RegisterErrorHandling(builder);
 
-        // Scope factories
-        builder.RegisterType<SyncScopeFactory>();
-
-        builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
-
         // Sync (registered in named "sync" scope for lifecycle management)
         builder.RegisterMatchingScope(
             "sync",
             b =>
             {
-                b.RegisterType<SyncProcessor>();
+                b.RegisterType<SyncCommandHandler>();
                 b.RegisterType<SyncProgressRenderer>();
                 b.RegisterType<DiagnosticsRenderer>();
-                b.RegisterType<DiagnosticsLogger>();
             }
         );
-
-        // Instance-level (resolved from "instance" child scope)
-        builder.RegisterType<InstanceSyncProcessor>();
-        builder.RegisterType<DeleteCustomFormatsProcessor>();
 
         // Configuration pipeline
         builder.RegisterType<ConfigPipelineFactory>();
 
-        builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<ConfigListLocalProcessor>();
         builder.RegisterType<ConfigListTemplateProcessor>();
-
-        builder
-            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
-            .As<IConfigCreator>()
-            .OrderByRegistration();
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
@@ -124,7 +107,6 @@ internal static class CompositionRoot
 
         // Output strategies (routing)
         builder.RegisterType<FatalErrorOutputStrategy>();
-        builder.RegisterType<SyncEventOutputStrategy>();
 
         // Handler (orchestrator)
         builder.RegisterType<ExceptionHandler>();
