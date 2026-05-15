@@ -7,7 +7,6 @@ using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.CustomFormat;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
@@ -34,7 +33,7 @@ internal class CustomFormatSyncOperation(
     public string Description => "Custom Format";
     public IReadOnlyList<PipelineType> Dependencies => [];
 
-    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) => false;
+    public bool ShouldSkip(PipelinePlan plan) => false;
 
     // ISyncStateSource implementation
     public IEnumerable<TrashIdMapping> SyncedMappings =>

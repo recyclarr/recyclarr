@@ -40,13 +40,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
     private ISyncOperation CreateStubOperation(
         PipelineType type,
         IReadOnlyList<PipelineType> dependencies,
-        bool shouldFail = false
+        bool shouldFail = false,
+        bool shouldSkip = false
     )
     {
         var operation = Substitute.For<ISyncOperation>();
         operation.Type.Returns(type);
         operation.Dependencies.Returns(dependencies);
-        operation.ShouldSkip(default!, default).ReturnsForAnyArgs(false);
+        operation.ShouldSkip(default!).ReturnsForAnyArgs(shouldSkip);
         operation
             .Compute(
                 Arg.Any<PipelinePlan>(),
@@ -189,6 +190,26 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
 
         result.Should().Be(PipelineResult.Failed);
+    }
+
+    [Test]
+    public async Task Duplicate_pipeline_type_runs_applicable_and_skips_other()
+    {
+        var applicableOp = CreateStubOperation(PipelineType.MediaNaming, []);
+        var skippedOp = CreateStubOperation(PipelineType.MediaNaming, [], shouldSkip: true);
+
+        var sut = CreateExecutor([applicableOp, skippedOp]);
+
+        var settings = Substitute.For<ISyncSettings>();
+        var result = await sut.Execute(
+            settings,
+            new TestPlan(),
+            _instancePublisher,
+            CancellationToken.None
+        );
+
+        _executionOrder.Should().BeEquivalentTo([PipelineType.MediaNaming]);
+        result.Should().Be(PipelineResult.Completed);
     }
 
     [Test]
