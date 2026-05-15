@@ -75,6 +75,7 @@ public class CoreAutofacModule : Module
         RegisterVersionControl(builder);
         RegisterSyncEvents(builder);
         RegisterMigrations(builder);
+        RegisterPorts(builder);
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
@@ -137,6 +138,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
         builder.RegisterType<InstanceScopeFactory>();
+        builder.RegisterType<InstanceSyncProcessor>();
 
         // Filter Processors
         builder.RegisterType<ConfigFilterProcessor>();
@@ -386,5 +388,27 @@ public class CoreAutofacModule : Module
             .RegisterType<InstancePublisher>()
             .As<IInstancePublisher>()
             .InstancePerMatchingLifetimeScope("instance");
+
+        builder.RegisterType<DiagnosticsLogger>().InstancePerMatchingLifetimeScope("sync");
+
+        builder
+            .RegisterType<SyncOrchestrator>()
+            .As<ISyncOrchestrator>()
+            .InstancePerMatchingLifetimeScope("sync");
+
+        builder.RegisterType<SyncScopeFactory>();
+    }
+
+    private static void RegisterPorts(ContainerBuilder builder)
+    {
+        // Custom format deletion port
+        builder.RegisterType<CustomFormatDeleter>().As<ICustomFormatDeleter>();
+
+        // Config file creation port
+        builder.RegisterType<ConfigFileCreator>().As<IConfigFileCreator>();
+        builder
+            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
+            .As<IConfigCreator>()
+            .OrderByRegistration();
     }
 }

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.TrashGuide;
 using Spectre.Console;

@@ -24,6 +24,7 @@ internal class PipelineAutofacModule : Module
     {
         builder.RegisterType<ConfiguredCustomFormatProvider>().InstancePerLifetimeScope();
 
+        RegisterPipelineExecutor(builder);
         RegisterPlan(builder);
         RegisterSyncOperations(builder);
         RegisterCustomFormatSupport(builder);
@@ -49,6 +50,11 @@ internal class PipelineAutofacModule : Module
             )
             .As<IPlanComponent>()
             .OrderByRegistration();
+    }
+
+    private static void RegisterPipelineExecutor(ContainerBuilder builder)
+    {
+        builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
     }
 
     // Execution order is derived from operation dependencies via topological sort in
