@@ -1,8 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Processors;
-using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Config;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -14,7 +12,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ConfigCreateCommand(
     ILogger log,
     IAnsiConsole console,
-    IConfigCreationProcessor processor,
+    IConfigFileCreator creator,
     ProviderProgressHandler providerProgressHandler
 ) : AsyncCommand<ConfigCreateCommand.CliSettings>
 {
@@ -55,7 +53,20 @@ internal class ConfigCreateCommand(
         try
         {
             await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
-            processor.Process(settings);
+            var createdFiles = creator.Create(settings);
+
+            foreach (var file in createdFiles)
+            {
+                if (file.Replaced)
+                {
+                    console.MarkupLineInterpolated($"[yellow]Replaced:[/] {file.Path}");
+                }
+                else
+                {
+                    console.MarkupLineInterpolated($"[green]Created:[/] {file.Path}");
+                }
+            }
+
             return (int)ExitStatus.Succeeded;
         }
         catch (FileExistsException e)

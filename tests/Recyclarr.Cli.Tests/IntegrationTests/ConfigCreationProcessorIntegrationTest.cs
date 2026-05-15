@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Recyclarr.Cli.Console.Commands;
-using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config;
 using Recyclarr.ResourceProviders.Infrastructure;
@@ -12,9 +11,9 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Config_file_created_when_using_default_path()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
+        var sut = Resolve<ConfigFileCreator>();
 
-        sut.Process(new ConfigCreateCommand.CliSettings { Path = null });
+        sut.Create(new ConfigCreateCommand.CliSettings { Path = null });
 
         var file = Fs.GetFile(Paths.ConfigDirectory.File("recyclarr.yml"));
         file.Should().NotBeNull();
@@ -24,7 +23,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Config_file_created_when_using_user_specified_path()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
+        var sut = Resolve<ConfigFileCreator>();
 
         var settings = new ConfigCreateCommand.CliSettings
         {
@@ -35,7 +34,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
                 .FullName,
         };
 
-        sut.Process(settings);
+        sut.Create(settings);
 
         var file = Fs.GetFile(settings.Path);
         file.Should().NotBeNull();
@@ -45,7 +44,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
     [Test]
     public void Should_throw_if_file_already_exists()
     {
-        var sut = Resolve<ConfigCreationProcessor>();
+        var sut = Resolve<ConfigFileCreator>();
 
         var settings = new ConfigCreateCommand.CliSettings
         {
@@ -54,7 +53,7 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
 
         Fs.AddEmptyFile(settings.Path);
 
-        var act = () => sut.Process(settings);
+        var act = () => sut.Create(settings);
 
         act.Should().Throw<FileExistsException>();
     }
@@ -108,8 +107,8 @@ internal sealed class ConfigCreationProcessorIntegrationTest : CliIntegrationFix
             "template-file4",
         ]);
 
-        var sut = Resolve<ConfigCreationProcessor>();
-        sut.Process(settings);
+        var sut = Resolve<ConfigFileCreator>();
+        sut.Create(settings);
 
         Fs.AllFiles.Should()
             .Contain([

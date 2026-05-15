@@ -1,6 +1,6 @@
-namespace Recyclarr.Cli.Processors.Config;
+namespace Recyclarr.Config;
 
-internal class FileExistsException(string attemptedPath)
+public class FileExistsException(string attemptedPath)
     : Exception($"File already exists: {attemptedPath}")
 {
     public string AttemptedPath { get; } = attemptedPath;

@@ -1,9 +1,8 @@
 using Autofac;
-using Recyclarr.Config;
 
-namespace Recyclarr.Cli.Processors.Sync;
+namespace Recyclarr.Config;
 
-internal class SyncScopeFactory(ILifetimeScope scope)
+public class SyncScopeFactory(ILifetimeScope scope)
 {
     public LifetimeScopeWrapper<TEntry> Start<TEntry>()
         where TEntry : notnull

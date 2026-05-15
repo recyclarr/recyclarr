@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Config;
 using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
@@ -62,7 +63,7 @@ internal class SyncCommand(
         // Sync scope owns the lifecycle of all sync-run-scoped services.
         // Disposing it fires OnCompleted on all observables, triggering
         // diagnostics rendering and notifications automatically.
-        using var syncScope = syncScopeFactory.Start<SyncProcessor>();
-        return (int)await syncScope.Entry.Process(settings, ct);
+        using var syncScope = syncScopeFactory.Start<SyncCommandHandler>();
+        return (int)await syncScope.Entry.RunAsync(settings, ct);
     }
 }
