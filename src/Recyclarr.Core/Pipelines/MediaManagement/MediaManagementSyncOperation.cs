@@ -2,7 +2,6 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
-using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Pipelines.MediaManagement;
 
@@ -19,8 +18,7 @@ internal class MediaManagementSyncOperation(
     public string Description => "Media Management";
     public IReadOnlyList<PipelineType> Dependencies => [];
 
-    public bool ShouldSkip(PipelinePlan plan, SupportedServices serviceType) =>
-        !plan.MediaManagementAvailable;
+    public bool ShouldSkip(PipelinePlan plan) => !plan.MediaManagementAvailable;
 
     public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
     {
