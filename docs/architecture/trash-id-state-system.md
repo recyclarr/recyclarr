@@ -114,10 +114,10 @@ When checking for name collisions, Recyclarr uses case-insensitive matching but 
 
 ### During Sync
 
-1. **Load**: State loaded in ApiFetch phase
-2. **Match**: Transaction phase uses state for ID-first matching
-3. **Update**: After API persistence, state refreshes mappings
-4. **Save**: Persists updated state
+1. **Load**: State loaded during Compute
+2. **Match**: Compute uses state for ID-first matching when building the transaction
+3. **Update**: After Persist, state refreshes mappings
+4. **Save**: Updated state written to disk
 
 ### State Repair Command (Deprecated)
 
