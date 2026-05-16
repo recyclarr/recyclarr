@@ -9,6 +9,8 @@ internal interface IPipelineExecutor
         ISyncSettings settings,
         PipelinePlan plan,
         IInstancePublisher instancePublisher,
+        JobId jobId,
+        string instanceName,
         CancellationToken ct
     );
 
