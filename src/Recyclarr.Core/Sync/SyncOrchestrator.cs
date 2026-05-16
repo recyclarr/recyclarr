@@ -10,7 +10,7 @@ internal class SyncOrchestrator(
     DiagnosticsLogger diagnosticsLogger // activate diagnostic logging subscription
 ) : ISyncOrchestrator
 {
-    public async Task<ExitStatus> RunAsync(
+    public async Task<SyncJobResult> RunAsync(
         IReadOnlyList<IServiceConfiguration> configs,
         ISyncSettings settings,
         CancellationToken ct
@@ -19,12 +19,13 @@ internal class SyncOrchestrator(
         // Injected to activate its diagnostic subscription; no callable API
         _ = diagnosticsLogger;
 
+        var jobId = JobId.New();
         var failureDetected = false;
 
         foreach (var config in configs)
         {
             using var instanceScope = instanceScopeFactory.Start<InstanceSyncProcessor>(config);
-            var result = await instanceScope.Entry.Process(settings, ct);
+            var result = await instanceScope.Entry.Process(settings, jobId, ct);
             if (result == ExitStatus.Failed)
             {
                 failureDetected = true;
@@ -33,6 +34,7 @@ internal class SyncOrchestrator(
 
         await notify.SendNotification();
 
-        return failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
+        var status = failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
+        return new SyncJobResult(jobId, status);
     }
 }

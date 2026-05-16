@@ -13,6 +13,7 @@ using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualityProfile.State;
 using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -54,6 +55,7 @@ internal class PipelineAutofacModule : Module
 
     private static void RegisterPipelineExecutor(ContainerBuilder builder)
     {
+        builder.RegisterType<InMemoryJobStorage>().As<IJobStorage>().InstancePerLifetimeScope();
         builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
     }
 
