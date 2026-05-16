@@ -87,7 +87,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var sut = CreateExecutor([qpOp, mnOp, cfOp, qsOp]);
 
         var settings = Substitute.For<ISyncSettings>();
-        await sut.Execute(settings, new TestPlan(), _instancePublisher, CancellationToken.None);
+        await sut.Execute(
+            settings,
+            new TestPlan(),
+            _instancePublisher,
+            JobId.New(),
+            "test-instance",
+            CancellationToken.None
+        );
 
         var cfIndex = _executionOrder.IndexOf(PipelineType.CustomFormat);
         var qpIndex = _executionOrder.IndexOf(PipelineType.QualityProfile);
@@ -111,6 +118,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             settings,
             new TestPlan(),
             _instancePublisher,
+            JobId.New(),
+            "test-instance",
             CancellationToken.None
         );
 
@@ -141,6 +150,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             settings,
             new TestPlan(),
             _instancePublisher,
+            JobId.New(),
+            "test-instance",
             CancellationToken.None
         );
 
@@ -163,6 +174,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             settings,
             new TestPlan(),
             _instancePublisher,
+            JobId.New(),
+            "test-instance",
             CancellationToken.None
         );
 
@@ -181,7 +194,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         plan.AddError("Simulated plan error");
 
         var settings = Substitute.For<ISyncSettings>();
-        var result = await sut.Execute(settings, plan, _instancePublisher, CancellationToken.None);
+        var result = await sut.Execute(
+            settings,
+            plan,
+            _instancePublisher,
+            JobId.New(),
+            "test-instance",
+            CancellationToken.None
+        );
 
         _executionOrder.Should().BeEmpty("no operations should execute when plan has errors");
 
@@ -205,6 +225,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
             settings,
             new TestPlan(),
             _instancePublisher,
+            JobId.New(),
+            "test-instance",
             CancellationToken.None
         );
 
@@ -222,7 +244,14 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
 
         var settings = Substitute.For<ISyncSettings>();
         var act = () =>
-            sut.Execute(settings, new TestPlan(), _instancePublisher, CancellationToken.None);
+            sut.Execute(
+                settings,
+                new TestPlan(),
+                _instancePublisher,
+                JobId.New(),
+                "test-instance",
+                CancellationToken.None
+            );
 
         act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Cycle*");
     }

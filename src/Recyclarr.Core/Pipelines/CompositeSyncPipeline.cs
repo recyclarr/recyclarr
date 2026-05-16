@@ -4,13 +4,18 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Pipelines;
 
-internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncOperation> operations)
-    : IPipelineExecutor
+internal class CompositeSyncPipeline(
+    ILogger log,
+    IEnumerable<ISyncOperation> operations,
+    IJobStorage storage
+) : IPipelineExecutor
 {
     public virtual async Task<PipelineResult> Execute(
         ISyncSettings settings,
         PipelinePlan plan,
         IInstancePublisher instancePublisher,
+        JobId jobId,
+        string instanceName,
         CancellationToken ct
     )
     {
@@ -63,6 +68,7 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncOperation> op
             try
             {
                 var result = await operation.Compute(plan, publisher, ct);
+                storage.Store(jobId, instanceName, operation.Type, result);
 
                 if (!settings.Preview)
                 {
