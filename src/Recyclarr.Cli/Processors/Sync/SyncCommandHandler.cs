@@ -19,13 +19,13 @@ internal class SyncCommandHandler(
         var result = ExitStatus.Succeeded;
         if (settings.Preview)
         {
-            result = await orchestrator.RunAsync(configs, settings, ct);
+            result = (await orchestrator.RunAsync(configs, settings, ct)).Status;
         }
         else
         {
             await progressRenderer.RenderProgressAsync(
                 instanceNames,
-                async () => result = await orchestrator.RunAsync(configs, settings, ct),
+                async () => result = (await orchestrator.RunAsync(configs, settings, ct)).Status,
                 ct
             );
         }

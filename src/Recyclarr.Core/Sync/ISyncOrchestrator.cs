@@ -4,7 +4,7 @@ namespace Recyclarr.Sync;
 
 public interface ISyncOrchestrator
 {
-    Task<ExitStatus> RunAsync(
+    Task<SyncJobResult> RunAsync(
         IReadOnlyList<IServiceConfiguration> configs,
         ISyncSettings settings,
         CancellationToken ct

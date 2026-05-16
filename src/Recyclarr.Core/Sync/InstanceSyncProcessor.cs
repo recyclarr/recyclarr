@@ -21,7 +21,7 @@ internal class InstanceSyncProcessor(
     IEnumerable<IExceptionStrategy> strategies
 )
 {
-    public async Task<ExitStatus> Process(ISyncSettings settings, CancellationToken ct)
+    public async Task<ExitStatus> Process(ISyncSettings settings, JobId jobId, CancellationToken ct)
     {
         using var _ = LogContext.PushProperty(LogProperty.Scope, config.InstanceName);
 
@@ -36,7 +36,14 @@ internal class InstanceSyncProcessor(
             await enforcer.Check(config, ct);
 
             var plan = planBuilder.Build();
-            var result = await pipelines.Execute(settings, plan, instancePublisher, ct);
+            var result = await pipelines.Execute(
+                settings,
+                plan,
+                instancePublisher,
+                jobId,
+                config.InstanceName,
+                ct
+            );
             return result == PipelineResult.Failed ? ExitStatus.Failed : ExitStatus.Succeeded;
         }
         catch (Exception e)
