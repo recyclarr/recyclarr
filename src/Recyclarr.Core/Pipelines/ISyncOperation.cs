@@ -10,7 +10,6 @@ internal interface ISyncOperation
     IReadOnlyList<PipelineType> Dependencies { get; }
     bool ShouldSkip(PipelinePlan plan);
 
-    Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct);
-    Task Persist(IPipelinePublisher publisher, CancellationToken ct);
-    void RenderPreview(string instanceName);
+    Task<object?> Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct);
+    Task Persist(object? computeResult, IPipelinePublisher publisher, CancellationToken ct);
 }

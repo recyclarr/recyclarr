@@ -5,44 +5,44 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Pipelines.MediaNaming.Radarr;
 
-internal class RadarrNamingSyncOperation(
-    ILogger log,
-    IRadarrNamingService api,
-    IEnumerable<IPreviewRenderer<RadarrNamingData>> previewRenderers
-) : ISyncOperation
+internal class RadarrNamingSyncOperation(ILogger log, IRadarrNamingService api)
+    : SyncOperation<RadarrNamingComputeResult>
 {
-    private RadarrNamingData _apiFetchOutput = null!;
-    private RadarrNamingData _transactionOutput = null!;
+    public override PipelineType Type => PipelineType.MediaNaming;
+    public override string Description => "Radarr Media Naming";
 
-    public PipelineType Type => PipelineType.MediaNaming;
-    public string Description => "Radarr Media Naming";
-    public IReadOnlyList<PipelineType> Dependencies => [];
+    public override bool ShouldSkip(PipelinePlan plan) => !plan.RadarrMediaNamingAvailable;
 
-    public bool ShouldSkip(PipelinePlan plan) => !plan.RadarrMediaNamingAvailable;
-
-    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task<RadarrNamingComputeResult> Compute(
+        PipelinePlan plan,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        // Fetch phase
-        _apiFetchOutput = await api.GetNaming(ct);
-
-        // Transaction phase
+        var current = await api.GetNaming(ct);
         var planned = plan.RadarrMediaNaming.Data;
-        var fetched = _apiFetchOutput;
 
         // Overlay only non-null planned values; null means "don't change"
-        _transactionOutput = fetched with
+        var desired = current with
         {
-            RenameMovies = planned.RenameMovies ?? fetched.RenameMovies,
-            StandardMovieFormat = planned.StandardMovieFormat ?? fetched.StandardMovieFormat,
-            MovieFolderFormat = planned.MovieFolderFormat ?? fetched.MovieFolderFormat,
+            RenameMovies = planned.RenameMovies ?? current.RenameMovies,
+            StandardMovieFormat = planned.StandardMovieFormat ?? current.StandardMovieFormat,
+            MovieFolderFormat = planned.MovieFolderFormat ?? current.MovieFolderFormat,
         };
+
+        return new RadarrNamingComputeResult(current, desired);
     }
 
-    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task Persist(
+        RadarrNamingComputeResult computeResult,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        await api.UpdateNaming(_transactionOutput, ct);
+        var (current, desired) = computeResult;
+        await api.UpdateNaming(desired, ct);
 
-        var differences = _apiFetchOutput.GetDifferences(_transactionOutput);
+        var differences = current.GetDifferences(desired);
 
         if (differences.Count != 0)
         {
@@ -55,11 +55,5 @@ internal class RadarrNamingSyncOperation(
         }
 
         publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
-    }
-
-    public void RenderPreview(string instanceName)
-    {
-        var renderer = previewRenderers.FirstOrDefault();
-        renderer?.Render(Description, instanceName, _transactionOutput);
     }
 }

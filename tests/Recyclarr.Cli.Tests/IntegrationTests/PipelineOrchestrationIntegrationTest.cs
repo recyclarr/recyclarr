@@ -62,7 +62,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
                 }
 
                 _executionOrder.Add(type);
-                return Task.CompletedTask;
+                return (object?)null;
             });
         return operation;
     }
