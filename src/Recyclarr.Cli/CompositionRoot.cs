@@ -8,7 +8,6 @@ using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
-using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Sync;
@@ -19,12 +18,7 @@ using Recyclarr.Config.Filtering;
 using Recyclarr.ErrorHandling;
 using Recyclarr.Logging;
 using Recyclarr.Pipelines;
-using Recyclarr.Pipelines.CustomFormat;
-using Recyclarr.Pipelines.QualityProfile.Models;
-using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.ResourceProviders;
-using Recyclarr.Servarr.MediaManagement;
-using Recyclarr.Servarr.MediaNaming;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -46,36 +40,12 @@ internal static class CompositionRoot
         builder.RegisterModule<PipelineAutofacModule>();
         builder.RegisterModule<ResourceProviderAutofacModule>();
 
-        RegisterPreviewRenderers(builder);
-
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         CliRegistrations(builder);
         RegisterServiceProcessors(builder);
         RegisterConfigServices(builder);
-    }
-
-    private static void RegisterPreviewRenderers(ContainerBuilder builder)
-    {
-        builder
-            .RegisterType<CustomFormatPreviewRenderer>()
-            .As<IPreviewRenderer<CustomFormatPreviewData>>();
-        builder
-            .RegisterType<QualityProfilePreviewRenderer>()
-            .As<IPreviewRenderer<QualityProfileTransactionData>>();
-        builder
-            .RegisterType<QualitySizePreviewRenderer>()
-            .As<IPreviewRenderer<QualitySizePreviewData>>();
-        builder
-            .RegisterType<SonarrNamingPreviewRenderer>()
-            .As<IPreviewRenderer<SonarrNamingData>>();
-        builder
-            .RegisterType<RadarrNamingPreviewRenderer>()
-            .As<IPreviewRenderer<RadarrNamingData>>();
-        builder
-            .RegisterType<MediaManagementPreviewRenderer>()
-            .As<IPreviewRenderer<MediaManagementData>>();
     }
 
     private static void RegisterServiceProcessors(ContainerBuilder builder)

@@ -5,47 +5,47 @@ using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Pipelines.MediaNaming.Sonarr;
 
-internal class SonarrNamingSyncOperation(
-    ILogger log,
-    ISonarrNamingService api,
-    IEnumerable<IPreviewRenderer<SonarrNamingData>> previewRenderers
-) : ISyncOperation
+internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
+    : SyncOperation<SonarrNamingComputeResult>
 {
-    private SonarrNamingData _apiFetchOutput = null!;
-    private SonarrNamingData _transactionOutput = null!;
+    public override PipelineType Type => PipelineType.MediaNaming;
+    public override string Description => "Sonarr Media Naming";
 
-    public PipelineType Type => PipelineType.MediaNaming;
-    public string Description => "Sonarr Media Naming";
-    public IReadOnlyList<PipelineType> Dependencies => [];
+    public override bool ShouldSkip(PipelinePlan plan) => !plan.SonarrMediaNamingAvailable;
 
-    public bool ShouldSkip(PipelinePlan plan) => !plan.SonarrMediaNamingAvailable;
-
-    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task<SonarrNamingComputeResult> Compute(
+        PipelinePlan plan,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        // Fetch phase
-        _apiFetchOutput = await api.GetNaming(ct);
-
-        // Transaction phase
+        var current = await api.GetNaming(ct);
         var planned = plan.SonarrMediaNaming.Data;
-        var fetched = _apiFetchOutput;
 
         // Overlay only non-null planned values; null means "don't change"
-        _transactionOutput = fetched with
+        var desired = current with
         {
-            RenameEpisodes = planned.RenameEpisodes ?? fetched.RenameEpisodes,
-            SeriesFolderFormat = planned.SeriesFolderFormat ?? fetched.SeriesFolderFormat,
-            SeasonFolderFormat = planned.SeasonFolderFormat ?? fetched.SeasonFolderFormat,
-            StandardEpisodeFormat = planned.StandardEpisodeFormat ?? fetched.StandardEpisodeFormat,
-            DailyEpisodeFormat = planned.DailyEpisodeFormat ?? fetched.DailyEpisodeFormat,
-            AnimeEpisodeFormat = planned.AnimeEpisodeFormat ?? fetched.AnimeEpisodeFormat,
+            RenameEpisodes = planned.RenameEpisodes ?? current.RenameEpisodes,
+            SeriesFolderFormat = planned.SeriesFolderFormat ?? current.SeriesFolderFormat,
+            SeasonFolderFormat = planned.SeasonFolderFormat ?? current.SeasonFolderFormat,
+            StandardEpisodeFormat = planned.StandardEpisodeFormat ?? current.StandardEpisodeFormat,
+            DailyEpisodeFormat = planned.DailyEpisodeFormat ?? current.DailyEpisodeFormat,
+            AnimeEpisodeFormat = planned.AnimeEpisodeFormat ?? current.AnimeEpisodeFormat,
         };
+
+        return new SonarrNamingComputeResult(current, desired);
     }
 
-    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task Persist(
+        SonarrNamingComputeResult computeResult,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        await api.UpdateNaming(_transactionOutput, ct);
+        var (current, desired) = computeResult;
+        await api.UpdateNaming(desired, ct);
 
-        var differences = _apiFetchOutput.GetDifferences(_transactionOutput);
+        var differences = current.GetDifferences(desired);
 
         if (differences.Count != 0)
         {
@@ -58,11 +58,5 @@ internal class SonarrNamingSyncOperation(
         }
 
         publisher.SetStatus(PipelineProgressStatus.Succeeded, differences.Count);
-    }
-
-    public void RenderPreview(string instanceName)
-    {
-        var renderer = previewRenderers.FirstOrDefault();
-        renderer?.Render(Description, instanceName, _transactionOutput);
     }
 }

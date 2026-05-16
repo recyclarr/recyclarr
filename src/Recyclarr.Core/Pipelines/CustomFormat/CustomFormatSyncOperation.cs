@@ -10,59 +10,34 @@ using Recyclarr.SyncState;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
-internal record CustomFormatPreviewData(
-    CustomFormatTransactionData Transactions,
-    PipelinePlan Plan
-);
-
 internal class CustomFormatSyncOperation(
     ILogger log,
     ICustomFormatService api,
     ICustomFormatStatePersister statePersister,
     CustomFormatTransactionLogger cfLogger,
-    IServiceConfiguration config,
-    IEnumerable<IPreviewRenderer<CustomFormatPreviewData>> previewRenderers
-) : ISyncOperation, ISyncStateSource
+    IServiceConfiguration config
+) : SyncOperation<CustomFormatComputeResult>
 {
-    private readonly List<CustomFormatResource> _apiFetchOutput = [];
-    private CustomFormatTransactionData _transactionOutput = null!;
-    private TrashIdMappingStore _state = null!;
-    private PipelinePlan _plan = null!;
+    public override PipelineType Type => PipelineType.CustomFormat;
+    public override string Description => "Custom Format";
 
-    public PipelineType Type => PipelineType.CustomFormat;
-    public string Description => "Custom Format";
-    public IReadOnlyList<PipelineType> Dependencies => [];
-
-    public bool ShouldSkip(PipelinePlan plan) => false;
-
-    // ISyncStateSource implementation
-    public IEnumerable<TrashIdMapping> SyncedMappings =>
-        _transactionOutput
-            .NewCustomFormats.Concat(_transactionOutput.UpdatedCustomFormats)
-            .Concat(_transactionOutput.UnchangedCustomFormats)
-            .Select(cf => new TrashIdMapping(cf.TrashId, cf.Name, cf.Id));
-
-    public IEnumerable<int> DeletedIds =>
-        _transactionOutput.DeletedCustomFormats.Select(m => m.ServiceId);
-
-    public IEnumerable<int> ValidServiceIds => _apiFetchOutput.Select(cf => cf.Id);
-
-    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task<CustomFormatComputeResult> Compute(
+        PipelinePlan plan,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        _plan = plan;
-
         // Fetch phase
-        _state = statePersister.Load();
-        var result = await api.GetCustomFormats(ct);
-        _apiFetchOutput.AddRange(result);
+        var state = statePersister.Load();
+        var apiFetchOutput = await api.GetCustomFormats(ct);
 
         // Transaction phase
         var plannedCfs = plan.CustomFormats;
         var transactions = new CustomFormatTransactionData();
 
         // Build lookups for O(1) access
-        var serviceCfsById = _apiFetchOutput.ToDictionary(cf => cf.Id);
-        var serviceCfsByName = _apiFetchOutput.ToLookup(
+        var serviceCfsById = apiFetchOutput.ToDictionary(cf => cf.Id);
+        var serviceCfsByName = apiFetchOutput.ToLookup(
             cf => cf.Name,
             StringComparer.OrdinalIgnoreCase
         );
@@ -76,7 +51,7 @@ internal class CustomFormatSyncOperation(
                 guideCf.Name
             );
 
-            var storedId = _state.FindId(guideCf.MappingKey);
+            var storedId = state.FindId(guideCf.MappingKey);
 
             if (storedId.HasValue)
             {
@@ -95,7 +70,7 @@ internal class CustomFormatSyncOperation(
         }
 
         // Always identify deletion candidates (regardless of delete toggle - checked in persistence)
-        var deletionCandidates = _state
+        var deletionCandidates = state
             .Mappings
             // Custom format must be in the state but NOT in the user's config
             .Where(map => plannedCfs.All(cf => cf.Resource.TrashId != map.TrashId))
@@ -123,14 +98,19 @@ internal class CustomFormatSyncOperation(
             }
         }
 
-        _transactionOutput = transactions;
+        var validServiceIds = apiFetchOutput.Select(cf => cf.Id).ToList();
+        return new CustomFormatComputeResult(transactions, validServiceIds, state);
     }
 
-    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task Persist(
+        CustomFormatComputeResult computeResult,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        cfLogger.LogTransactions(_transactionOutput, publisher);
+        cfLogger.LogTransactions(computeResult.Transactions, publisher);
 
-        var transactions = _transactionOutput;
+        var transactions = computeResult.Transactions;
 
         foreach (var cf in transactions.NewCustomFormats)
         {
@@ -154,18 +134,8 @@ internal class CustomFormatSyncOperation(
             }
         }
 
-        _state.Update(this);
-        statePersister.Save(_state);
-    }
-
-    public void RenderPreview(string instanceName)
-    {
-        var renderer = previewRenderers.FirstOrDefault();
-        renderer?.Render(
-            Description,
-            instanceName,
-            new CustomFormatPreviewData(_transactionOutput, _plan)
-        );
+        computeResult.State.Update(computeResult);
+        statePersister.Save(computeResult.State);
     }
 
     private void ProcessCachedCf(
