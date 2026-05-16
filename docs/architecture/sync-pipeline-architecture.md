@@ -56,10 +56,11 @@ Each operation instance is scoped to one sync run for one service instance and d
 
 ### Skipping operations
 
-Each operation declares whether it should skip via `ShouldSkip(plan, serviceType)`. This covers both
-service affinity (Sonarr naming doesn't run against Radarr) and config presence (no `quality_sizes`
-section means the quality size operation skips). The orchestrator checks this before calling
-`Compute()`.
+Each operation declares whether it should skip via `ShouldSkip(plan)`. Service affinity is encoded
+in the plan components themselves (e.g. the Sonarr naming plan component produces nothing for Radarr
+instances), and config presence is checked against the plan (no `quality_sizes` section means the
+quality size operation skips). The orchestrator partitions operations by skip status before
+topological sorting.
 
 ## Dependency management
 

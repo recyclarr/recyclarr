@@ -63,8 +63,8 @@ that action arrives too late.
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
 - Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
-- Sync: `ISyncOperation` per resource type (Compute + Persist), orchestrated by
-  `CompositeSyncPipeline`
+- Sync: `ISyncOperation` per resource type (Compute + Persist), orchestrated by `IPipelineExecutor`;
+  ports: `ISyncOrchestrator`, `ICustomFormatDeleter`, `IConfigFileCreator`
 - DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
   gets its own Autofac Module to keep DI registration modular.
 - Config: YAML + `schemas/config-schema.json` validation
