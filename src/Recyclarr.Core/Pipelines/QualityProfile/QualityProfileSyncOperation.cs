@@ -18,45 +18,18 @@ internal class QualityProfileSyncOperation(
     IQualityProfileService service,
     IQualityProfileStatePersister statePersister,
     QualityProfileStatCalculator statCalculator,
-    QualityProfileLogger logger,
-    IEnumerable<IPreviewRenderer<QualityProfileTransactionData>> previewRenderers
-) : ISyncOperation, ISyncStateSource
+    QualityProfileLogger logger
+) : SyncOperation<QualityProfileComputeResult>
 {
-    private QualityProfileServiceData _apiFetchOutput = null!;
-    private QualityProfileTransactionData _transactionOutput = null!;
-    private TrashIdMappingStore _state = null!;
+    public override PipelineType Type => PipelineType.QualityProfile;
+    public override string Description => "Quality Profile";
+    public override IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
 
-    public PipelineType Type => PipelineType.QualityProfile;
-    public string Description => "Quality Profile";
-    public IReadOnlyList<PipelineType> Dependencies => [PipelineType.CustomFormat];
-
-    public bool ShouldSkip(PipelinePlan plan) => false;
-
-    // ISyncStateSource implementation
-    // Only store guide-backed profiles (those with a valid service ID).
-    public IEnumerable<TrashIdMapping> SyncedMappings =>
-        _transactionOutput
-            .NewProfiles.Concat(_transactionOutput.UnchangedProfiles)
-            .Concat(_transactionOutput.UpdatedProfiles.Select(x => x.Profile))
-            .Select(ToMapping)
-            .OfType<TrashIdMapping>();
-
-    private static TrashIdMapping? ToMapping(UpdatedQualityProfile p) =>
-        p
-            is {
-                Profile.Id: { } serviceId,
-                ProfileConfig: PlannedQualityProfile.GuideBacked guideBacked,
-            }
-            ? new TrashIdMapping(guideBacked.Resource.TrashId, p.ProfileName, serviceId)
-            : null;
-
-    // QP has no delete flag - entries removed only when service ID no longer exists
-    public IEnumerable<int> DeletedIds => [];
-
-    public IEnumerable<int> ValidServiceIds =>
-        _apiFetchOutput.Profiles.Where(p => p.Id.HasValue).Select(p => p.Id!.Value);
-
-    public async Task Compute(PipelinePlan plan, IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task<QualityProfileComputeResult> Compute(
+        PipelinePlan plan,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
         // Fetch phase
         var profilesTask = service.GetQualityProfiles(ct);
@@ -64,12 +37,12 @@ internal class QualityProfileSyncOperation(
         var languagesTask = service.GetLanguages(ct);
         await Task.WhenAll(profilesTask, schemaTask, languagesTask);
 
-        _apiFetchOutput = new QualityProfileServiceData(
+        var apiFetchOutput = new QualityProfileServiceData(
             await profilesTask,
             await schemaTask,
             await languagesTask
         );
-        _state = statePersister.Load();
+        var state = statePersister.Load();
 
         // Transaction phase
         var transactions = new QualityProfileTransactionData();
@@ -79,8 +52,8 @@ internal class QualityProfileSyncOperation(
         var existingProfiles = BuildExistingProfiles(
             transactions,
             plan.QualityProfiles,
-            _apiFetchOutput,
-            _state
+            apiFetchOutput,
+            state
         );
 
         // Process new profiles: update scores, validate (remove invalid from collection)
@@ -92,14 +65,22 @@ internal class QualityProfileSyncOperation(
         existingProfiles = FilterValidProfiles(existingProfiles, transactions.InvalidProfiles);
         AssignExistingProfiles(transactions, existingProfiles);
 
-        _transactionOutput = transactions;
+        logger.LogTransactionNotices(transactions, publisher);
 
-        logger.LogTransactionNotices(_transactionOutput, publisher);
+        return new QualityProfileComputeResult(
+            transactions,
+            apiFetchOutput.Profiles.Where(p => p.Id.HasValue).Select(p => p.Id!.Value),
+            state
+        );
     }
 
-    public async Task Persist(IPipelinePublisher publisher, CancellationToken ct)
+    protected override async Task Persist(
+        QualityProfileComputeResult computeResult,
+        IPipelinePublisher publisher,
+        CancellationToken ct
+    )
     {
-        var transactions = _transactionOutput;
+        var transactions = computeResult.Transactions;
 
         // Create new profiles
         foreach (var profile in transactions.NewProfiles)
@@ -114,16 +95,10 @@ internal class QualityProfileSyncOperation(
             await service.UpdateQualityProfile(merged, ct);
         }
 
-        _state.Update(this);
-        statePersister.Save(_state);
+        computeResult.State.Update(computeResult);
+        statePersister.Save(computeResult.State);
 
-        logger.LogPersistenceResults(_transactionOutput, publisher);
-    }
-
-    public void RenderPreview(string instanceName)
-    {
-        var renderer = previewRenderers.FirstOrDefault();
-        renderer?.Render(Description, instanceName, _transactionOutput);
+        logger.LogPersistenceResults(transactions, publisher);
     }
 
     private void AssignExistingProfiles(

@@ -1,15 +1,11 @@
-using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 
 namespace Recyclarr.Pipelines;
 
-internal class CompositeSyncPipeline(
-    ILogger log,
-    IEnumerable<ISyncOperation> operations,
-    IServiceConfiguration config
-) : IPipelineExecutor
+internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncOperation> operations)
+    : IPipelineExecutor
 {
     public virtual async Task<PipelineResult> Execute(
         ISyncSettings settings,
@@ -66,15 +62,11 @@ internal class CompositeSyncPipeline(
 
             try
             {
-                await operation.Compute(plan, publisher, ct);
+                var result = await operation.Compute(plan, publisher, ct);
 
-                if (settings.Preview)
+                if (!settings.Preview)
                 {
-                    operation.RenderPreview(config.InstanceName);
-                }
-                else
-                {
-                    await operation.Persist(publisher, ct);
+                    await operation.Persist(result, publisher, ct);
                 }
             }
             catch (PipelineInterruptException)
