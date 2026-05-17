@@ -91,7 +91,7 @@ public class CoreAutofacModule : Module
 
     private void RegisterMigrations(ContainerBuilder builder)
     {
-        builder.RegisterType<MigrationExecutor>();
+        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
 
         // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
         builder
