@@ -5,9 +5,9 @@ using Recyclarr.TrashGuide.CustomFormat;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
-internal record CategorizedCustomFormat(CustomFormatResource Resource, string? Category);
+public record CategorizedCustomFormat(CustomFormatResource Resource, string? Category);
 
-internal class CategorizedCustomFormatProvider(
+public class CategorizedCustomFormatProvider(
     CustomFormatResourceQuery cfQuery,
     CategoryResourceQuery categoryQuery
 )
