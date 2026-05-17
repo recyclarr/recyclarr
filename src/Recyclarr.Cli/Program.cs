@@ -22,7 +22,7 @@ internal static class Program
 
         try
         {
-            scope.Resolve<MigrationExecutor>().PerformAllMigrationSteps();
+            scope.Resolve<IMigrationExecutor>().PerformAllMigrationSteps();
             return await CliSetup.Run(scope, args);
         }
         catch (Exception e)

@@ -19,7 +19,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Pipelines;
 
-internal class PipelineAutofacModule : Module
+public class PipelineAutofacModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
