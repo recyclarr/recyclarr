@@ -3,7 +3,7 @@ using Recyclarr.TrashGuide.QualitySize;
 
 namespace Recyclarr.Pipelines.QualitySize;
 
-internal record UpdatedQualityItem
+public record UpdatedQualityItem
 {
     public required string Quality { get; init; }
     public required decimal Min { get; init; }

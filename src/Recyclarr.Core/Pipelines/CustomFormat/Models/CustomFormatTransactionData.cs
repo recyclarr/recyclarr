@@ -4,7 +4,7 @@ using Recyclarr.SyncState;
 
 namespace Recyclarr.Pipelines.CustomFormat.Models;
 
-internal record CustomFormatTransactionData
+public record CustomFormatTransactionData
 {
     public Collection<TrashIdMapping> DeletedCustomFormats { get; } = [];
     public Collection<CustomFormatResource> NewCustomFormats { get; } = [];

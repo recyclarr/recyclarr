@@ -6,7 +6,7 @@ using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Pipelines.QualityProfile;
 
-internal enum FormatScoreUpdateReason
+public enum FormatScoreUpdateReason
 {
     /// <summary>
     /// A score who's value did not change.
@@ -31,13 +31,13 @@ internal enum FormatScoreUpdateReason
     New,
 }
 
-internal record UpdatedFormatScore(
+public record UpdatedFormatScore(
     QualityProfileFormatItem FormatItem,
     int NewScore,
     FormatScoreUpdateReason Reason
 )
 {
-    public static UpdatedFormatScore New(PlannedCfScore score)
+    internal static UpdatedFormatScore New(PlannedCfScore score)
     {
         var formatItem = new QualityProfileFormatItem
         {
@@ -47,7 +47,7 @@ internal record UpdatedFormatScore(
         return new UpdatedFormatScore(formatItem, score.Score, FormatScoreUpdateReason.New);
     }
 
-    public static UpdatedFormatScore Reset(
+    internal static UpdatedFormatScore Reset(
         QualityProfileFormatItem formatItem,
         PlannedQualityProfile profileData
     )
@@ -72,7 +72,7 @@ internal record UpdatedFormatScore(
         );
     }
 
-    public static UpdatedFormatScore Updated(
+    internal static UpdatedFormatScore Updated(
         QualityProfileFormatItem formatItem,
         PlannedCfScore score
     )

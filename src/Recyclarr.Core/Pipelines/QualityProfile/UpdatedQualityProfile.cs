@@ -1,25 +1,29 @@
+using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Pipelines.QualityProfile;
 
-internal record UpdatedQualities
+public record UpdatedQualities
 {
     public ICollection<string> InvalidQualityNames { get; init; } = [];
     public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
     public int NumWantedItems { get; init; }
 }
 
-internal record UpdatedQualityProfile
+public record UpdatedQualityProfile
 {
     public required QualityProfileData Profile { get; set; }
-    public required PlannedQualityProfile ProfileConfig { get; init; }
+    internal PlannedQualityProfile ProfileConfig { get; init; } = null!;
     public IReadOnlyList<ProfileLanguage> Languages { get; init; } = [];
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = [];
     public IReadOnlyCollection<string> InvalidExceptCfPatterns { get; set; } = [];
     public IReadOnlyCollection<string> MissingQualities { get; set; } = [];
+
+    public bool HasQualityOverrides => ProfileConfig.Config.Qualities.Count != 0;
+    public QualitySortAlgorithm QualitySort => ProfileConfig.Config.QualitySort;
 
     public string ProfileName
     {
