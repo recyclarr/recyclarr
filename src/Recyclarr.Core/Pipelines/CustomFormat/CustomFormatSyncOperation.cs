@@ -98,8 +98,21 @@ internal class CustomFormatSyncOperation(
             }
         }
 
+        // Capture plan-level metadata (source, group, inclusion reason) for each CF
+        // so adapters can display provenance without accessing the plan directly
+        var sourceInfo = plannedCfs.ToDictionary(
+            cf => cf.Resource.TrashId,
+            cf => new CustomFormatSourceInfo(
+                cf.Source,
+                cf.GroupName,
+                cf.InclusionReason,
+                cf.AssignScoresTo.Select(a => a.Name).ToList()
+            ),
+            StringComparer.OrdinalIgnoreCase
+        );
+
         var validServiceIds = apiFetchOutput.Select(cf => cf.Id).ToList();
-        return new CustomFormatComputeResult(transactions, validServiceIds, state);
+        return new CustomFormatComputeResult(transactions, validServiceIds, state, sourceInfo);
     }
 
     protected override async Task Persist(
