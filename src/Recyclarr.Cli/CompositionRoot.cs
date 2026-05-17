@@ -8,6 +8,7 @@ using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
+using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Sync;
@@ -60,6 +61,7 @@ internal static class CompositionRoot
                 b.RegisterType<SyncCommandHandler>();
                 b.RegisterType<SyncProgressRenderer>();
                 b.RegisterType<DiagnosticsRenderer>();
+                b.RegisterType<PreviewRenderer>();
             }
         );
 
