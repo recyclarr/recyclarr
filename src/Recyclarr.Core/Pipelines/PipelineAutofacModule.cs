@@ -59,6 +59,7 @@ internal class PipelineAutofacModule : Module
             .RegisterType<InMemoryJobStorage>()
             .As<IJobStorage>()
             .InstancePerMatchingLifetimeScope("sync");
+        builder.RegisterType<SyncJobResultProvider>().As<ISyncJobResults>();
         builder.RegisterType<CompositeSyncPipeline>().As<IPipelineExecutor>();
     }
 
