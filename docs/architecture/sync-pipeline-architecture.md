@@ -110,13 +110,14 @@ reliability and state maintenance. Skipped entirely in preview mode.
 
 ## Preview rendering
 
-Preview (dry-run) is a CLI adapter concern, not a sync engine concern. Each operation has an
-optional `IPreviewRenderer<T>` injected via DI. The renderer is defined as an interface in Core (no
-Spectre.Console dependency) and implemented in the CLI project using Spectre tables and trees.
+Preview (dry-run) is a CLI adapter concern, not a sync engine concern. In preview mode, the pipeline
+runs `Compute()` for every operation but skips `Persist()`. Compute results are stored in job storage
+and retrieved after the sync run completes.
 
-The orchestrator calls `operation.RenderPreview(instanceName)` instead of `Persist()` when in
-preview mode. If no renderer is registered (as would be the case for a future HTTP server), the call
-is a no-op.
+The CLI adapter (`PreviewRenderer`) calls `ISyncJobResults.GetInstanceResult()` to retrieve typed
+per-operation results, then dispatches to per-operation renderer classes that format the output using
+Spectre.Console tables and trees. The HTTP server adapter will map the same results to JSON DTOs via
+Mapperly.
 
 ## Error collection
 
