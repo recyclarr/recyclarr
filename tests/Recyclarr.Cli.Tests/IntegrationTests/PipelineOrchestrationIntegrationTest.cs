@@ -72,6 +72,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CliIntegrationFixtu
         var scope = Container.BeginLifetimeScope(builder =>
         {
             builder.RegisterInstance(ops).As<IEnumerable<ISyncOperation>>();
+            builder.RegisterInstance(Substitute.For<IJobStorage>()).As<IJobStorage>();
         });
         return scope.Resolve<IPipelineExecutor>();
     }
