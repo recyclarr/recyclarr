@@ -1,12 +1,16 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
 using Recyclarr.Sync;
+using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
 internal class SyncCommandHandler(
+    ILogger log,
+    IAnsiConsole console,
     ISyncOrchestrator orchestrator,
     ConfigPipelineFactory configPipelineFactory,
     SyncProgressRenderer progressRenderer,
@@ -15,6 +19,7 @@ internal class SyncCommandHandler(
     INotificationService notify
 )
 {
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     public async Task<ExitStatus> RunAsync(ISyncSettings settings, CancellationToken ct)
     {
         var configs = LoadConfigs(settings);
@@ -37,7 +42,19 @@ internal class SyncCommandHandler(
         }
 
         diagnosticsRenderer.Report();
-        await notify.SendNotification();
+
+        try
+        {
+            await notify.SendNotification();
+        }
+        catch (Exception e)
+        {
+            console.MarkupLine(
+                $"[yellow]Warning:[/] Failed to send notification: {e.Message.EscapeMarkup()}"
+            );
+            log.Warning(e, "Failed to send notification");
+        }
+
         return result;
     }
 
