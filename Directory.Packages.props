@@ -16,7 +16,7 @@
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.7.0" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.8" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="10.1.6" />
     <PackageVersion Include="Refitter.MSBuild" Version="2.0.0" PrivateAssets="all" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
