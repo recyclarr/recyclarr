@@ -4,6 +4,7 @@ using Recyclarr.Migration.Steps;
 namespace Recyclarr.Migration;
 
 internal class MigrationExecutor(IEnumerable<Meta<IMigrationStep>> migrationSteps, ILogger log)
+    : IMigrationExecutor
 {
     // Sort migration steps by Order metadata at resolution time
     private IEnumerable<IMigrationStep> MigrationSteps { get; } =
