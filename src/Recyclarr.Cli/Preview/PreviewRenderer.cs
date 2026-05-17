@@ -9,6 +9,9 @@ internal class PreviewRenderer(IAnsiConsole console, ISyncJobResults results)
     {
         foreach (var instanceName in instanceNames)
         {
+            console.WriteLine();
+            console.Write(new Rule($"[bold]{instanceName.EscapeMarkup()}[/]").LeftJustified());
+
             var instanceResult = results.GetInstanceResult(jobId, instanceName);
 
             if (instanceResult.CustomFormats is { } cf)
