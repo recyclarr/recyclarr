@@ -1,6 +1,6 @@
 namespace Recyclarr.Pipelines.CustomFormat;
 
-internal record CustomFormatSourceInfo(
+public record CustomFormatSourceInfo(
     CfSource Source,
     string? GroupName,
     CfInclusionReason InclusionReason,

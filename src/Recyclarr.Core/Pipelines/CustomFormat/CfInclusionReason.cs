@@ -1,6 +1,6 @@
 namespace Recyclarr.Pipelines.CustomFormat;
 
-internal enum CfInclusionReason
+public enum CfInclusionReason
 {
     None,
     Required,
