@@ -8,7 +8,7 @@ internal record InvalidProfileData(
     IReadOnlyCollection<ValidationFailure> Errors
 );
 
-internal record QualityProfileTransactionData
+public record QualityProfileTransactionData
 {
     // Success cases - collection membership indicates the "reason"
     public Collection<UpdatedQualityProfile> NewProfiles { get; } = [];
@@ -22,7 +22,7 @@ internal record QualityProfileTransactionData
     public Collection<string> ReplacedProfiles { get; } = [];
 
     // Error cases
-    public Collection<InvalidProfileData> InvalidProfiles { get; } = [];
+    internal Collection<InvalidProfileData> InvalidProfiles { get; } = [];
     public Collection<string> RenameConflicts { get; } = [];
-    public Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
+    internal Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
 }
