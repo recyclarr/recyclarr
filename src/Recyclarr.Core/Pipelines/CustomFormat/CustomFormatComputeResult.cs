@@ -6,7 +6,8 @@ namespace Recyclarr.Pipelines.CustomFormat;
 internal record CustomFormatComputeResult(
     CustomFormatTransactionData Transactions,
     IEnumerable<int> ValidServiceIds,
-    TrashIdMappingStore State
+    TrashIdMappingStore State,
+    IReadOnlyDictionary<string, CustomFormatSourceInfo> SourceInfo
 ) : ISyncStateSource
 {
     public IEnumerable<TrashIdMapping> SyncedMappings =>
