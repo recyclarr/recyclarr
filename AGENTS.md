@@ -228,18 +228,13 @@ Some key files and directories:
 ## Tooling Requirements
 
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.
-- MUST run `pre-commit run <file1> <file2> ...` for all changes
-- Use `dotnet test` at solution level to verify all tests pass
+- MUST run `pre-commit run --files <file1> <file2> ...` for all changes
+- Use `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
+  when a clean rebuild is needed.
 - You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
   Prioritize the CLI for all project-specific modifications if possible. Central package management
   is enabled via `Directory.Packages.props`.
-- Avoid `--no-build` or `--no-restore` flags. Rely on simple invocations: `dotnet test` will always
-  restore + build, so there's no need to do `dotnet build` followed by `dotnet test`.
-- Use quiet verbosity for build/test commands to show only warnings and errors: `dotnet build -v q
-  --no-incremental` and `dotnet test -v q`. Informational logs consume valuable context. When
-  verbose output is needed for debugging, pipe to a log file (`dotnet test -v d 2>&1 >
-  /tmp/test.log`) (do NOT use `tee`) and read from it with targeted searches (`rg "pattern"
-  /tmp/test.log`).
+- When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**
 

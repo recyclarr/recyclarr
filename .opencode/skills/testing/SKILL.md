@@ -127,7 +127,8 @@ grab-bag classes mixing unrelated types.
 **Rules:**
 
 - Methods return one type. Use overloads or optional parameters for variants, not separate classes.
-- Accept only test-relevant parameters with sensible defaults. This shields tests from model changes.
+- Accept only test-relevant parameters with sensible defaults. This shields tests from model
+  changes.
 - Location: `Core.TestLibrary` for types in Core; `Cli.Tests/Reusable` for types in Cli. Hard
   constraint from project dependency direction (see REC-90).
 - Overhaul existing helpers when their types are touched. No legacy pattern preservation.
@@ -151,13 +152,13 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 
 ```bash
 # Unit and integration tests
-dotnet test -v q
+dotnet test
 
 # Specific test project
-dotnet test -v q tests/Recyclarr.Cli.Tests/
+dotnet test tests/Recyclarr.Cli.Tests/
 
 # Single test by name
-dotnet test -v q --filter "FullyQualifiedName~TestMethodName"
+dotnet test --filter "FullyQualifiedName~TestMethodName"
 
 # E2E tests (requires Docker services)
 ./scripts/Run-E2ETests.ps1
