@@ -1,6 +1,6 @@
 namespace Recyclarr.Pipelines.CustomFormat;
 
-internal enum CfSource
+public enum CfSource
 {
     FlatConfig,
     ProfileFormatItems,
