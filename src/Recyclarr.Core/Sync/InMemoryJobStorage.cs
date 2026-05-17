@@ -13,8 +13,9 @@ internal sealed class InMemoryJobStorage : IJobStorage
         object? result
     ) => _storage[(jobId, instanceName, operationType)] = result;
 
+    public object? Retrieve(JobId jobId, string instanceName, PipelineType operationType) =>
+        _storage.TryGetValue((jobId, instanceName, operationType), out var result) ? result : null;
+
     public T? Retrieve<T>(JobId jobId, string instanceName, PipelineType operationType) =>
-        _storage.TryGetValue((jobId, instanceName, operationType), out var result)
-            ? (T?)result
-            : default;
+        Retrieve(jobId, instanceName, operationType) is T typed ? typed : default;
 }
