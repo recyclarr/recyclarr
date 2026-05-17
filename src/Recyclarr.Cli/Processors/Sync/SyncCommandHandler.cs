@@ -1,3 +1,4 @@
+using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config.Models;
 using Recyclarr.Sync;
@@ -8,7 +9,8 @@ internal class SyncCommandHandler(
     ISyncOrchestrator orchestrator,
     ConfigPipelineFactory configPipelineFactory,
     SyncProgressRenderer progressRenderer,
-    DiagnosticsRenderer diagnosticsRenderer
+    DiagnosticsRenderer diagnosticsRenderer,
+    PreviewRenderer previewRenderer
 )
 {
     public async Task<ExitStatus> RunAsync(ISyncSettings settings, CancellationToken ct)
@@ -19,7 +21,9 @@ internal class SyncCommandHandler(
         var result = ExitStatus.Succeeded;
         if (settings.Preview)
         {
-            result = (await orchestrator.RunAsync(configs, settings, ct)).Status;
+            var jobResult = await orchestrator.RunAsync(configs, settings, ct);
+            result = jobResult.Status;
+            previewRenderer.Render(jobResult.JobId, instanceNames);
         }
         else
         {
