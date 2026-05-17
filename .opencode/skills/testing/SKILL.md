@@ -152,13 +152,13 @@ Fs.CurrentDirectory().SubDirectory("a", "b").File("c.json")
 
 ```bash
 # Unit and integration tests
-dotnet test
+dotnet test -v q
 
 # Specific test project
-dotnet test tests/Recyclarr.Cli.Tests/
+dotnet test -v q tests/Recyclarr.Cli.Tests/
 
 # Single test by name
-dotnet test --filter "FullyQualifiedName~TestMethodName"
+dotnet test -v q --filter "FullyQualifiedName~TestMethodName"
 
 # E2E tests (requires Docker services)
 ./scripts/Run-E2ETests.ps1

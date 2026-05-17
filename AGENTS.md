@@ -231,6 +231,7 @@ Some key files and directories:
 - MUST run `pre-commit run --files <file1> <file2> ...` for all changes
 - Use `dotnet test` at solution level to verify all tests pass. Use `dotnet build --no-incremental`
   when a clean rebuild is needed.
+- Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
 - You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
   Prioritize the CLI for all project-specific modifications if possible. Central package management
   is enabled via `Directory.Packages.props`.
