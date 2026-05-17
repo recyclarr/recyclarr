@@ -1,12 +1,10 @@
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.Notifications;
 
 namespace Recyclarr.Sync;
 
 internal class SyncOrchestrator(
     InstanceScopeFactory instanceScopeFactory,
-    INotificationService notify,
     DiagnosticsLogger diagnosticsLogger // activate diagnostic logging subscription
 ) : ISyncOrchestrator
 {
@@ -31,8 +29,6 @@ internal class SyncOrchestrator(
                 failureDetected = true;
             }
         }
-
-        await notify.SendNotification();
 
         var status = failureDetected ? ExitStatus.Failed : ExitStatus.Succeeded;
         return new SyncJobResult(jobId, status);

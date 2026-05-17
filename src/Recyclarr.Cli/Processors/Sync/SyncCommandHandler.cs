@@ -1,6 +1,7 @@
 using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Config.Models;
+using Recyclarr.Notifications;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -10,7 +11,8 @@ internal class SyncCommandHandler(
     ConfigPipelineFactory configPipelineFactory,
     SyncProgressRenderer progressRenderer,
     DiagnosticsRenderer diagnosticsRenderer,
-    PreviewRenderer previewRenderer
+    PreviewRenderer previewRenderer,
+    INotificationService notify
 )
 {
     public async Task<ExitStatus> RunAsync(ISyncSettings settings, CancellationToken ct)
@@ -35,6 +37,7 @@ internal class SyncCommandHandler(
         }
 
         diagnosticsRenderer.Report();
+        await notify.SendNotification();
         return result;
     }
 
