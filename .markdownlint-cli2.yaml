@@ -4,6 +4,7 @@ ignores:
   - docs/memory-bank/**
   - tests/**
   - src/**
+  - .github/pull_request_template.md
 
 config:
   default: true

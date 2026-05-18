@@ -3,11 +3,49 @@
 Thank you for your interest in contributing to Recyclarr! This document outlines the requirements
 and expectations for all contributors.
 
-## Before Contributing
+## Contribution workflow
 
-- **Open an issue first**: Always open an issue (feature request) before starting any work. This
-  ensures ideas are discussed first and prevents the potential rejection of work already done in a
-  pull request. This practice respects your valuable time as an open source contributor.
+### Design before code
+
+All non-trivial contributions require an issue with design discussion **before** any code is
+written. Open a new issue or comment on an existing one, and wait for maintainer approval of the
+approach before starting a PR. Maintainers need to agree on the design before implementation
+begins.
+
+**PRs submitted without prior design approval will be closed.** This is not personal. Feel free to
+open an issue and discuss the approach; the PR can come after.
+
+### Trivial contributions
+
+Typo fixes, broken links, and minor documentation corrections don't need design discussion. Just
+open the PR with a clear description of what you're fixing.
+
+### Review expectations
+
+Maintainers will ask questions about design choices and implementation details during review.
+Contributors are expected to engage substantively with these questions.
+
+## AI-assisted contributions
+
+AI-assisted development tooling is welcome. Recyclarr itself is developed with AI assistance, so
+there's no stigma around using these tools.
+
+The standard is **comprehension and accountability**: every contributor must understand and be able
+to explain every change they submit, regardless of how it was produced. The project doesn't police
+what tools people use. It holds all contributions to the same quality and comprehension bar. A
+contributor who used AI to draft code they fully understand and can defend is treated no differently
+from one who typed every character by hand.
+
+### Development setup
+
+Recyclarr's AI-augmented development environment uses [OpenCode][opencode] as the primary agentic
+coding tool, configured with Claude Opus and extended thinking enabled. The repository's `AGENTS.md`
+file contains project conventions, architecture context, coding standards, and pipeline
+documentation. Contributors using AI agents should point them at this file; it's the instruction set
+for any AI working in the codebase and is also useful reading for human contributors who want to
+understand the project's conventions quickly.
+
+[opencode]: https://opencode.ai
 
 ## Code & Documentation Standards
 
