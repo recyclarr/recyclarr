@@ -89,7 +89,8 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 ## Coding Standards & Development Requirements
 
 - You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
-  code.
+  code. Concrete implementations get injected; tests can substitute. Search existing registrations
+  before adding new ones.
 - Search existing code first: `rg "pattern"` before writing new code. Holistically and
   comprehensively make changes, don't just do it in isolation which ignores other important areas of
   code that might be in-scope or indirectly affected by a change.
@@ -97,24 +98,86 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   duplication, not incidental syntactic similarity; when weighing extraction of a shared abstraction
   (base class, generic helper, unified interface), load the `duplication-vs-abstraction` skill
   first.
-- CRITICAL: Follow SOLID, YAGNI principles
-- .NET 10.0 + nullable reference types
-- Comment guidelines (implements global "comments must earn their place"). Examples:
-  - LINQ chains (3+ operations): Brief comment stating transformation goal
-  - Conditional blocks with non-obvious purpose: One-line comment (e.g., `// Explicit: user
-    specified`)
-  - Private methods: Block comment if name + parameters don't make purpose self-evident
-  - Early returns/continues: Include reason if not obvious from context
-  - Complex algorithms: Comment explaining approach at top, not line-by-line
-  - General: Any code where a reader would pause and wonder "why?" or "what's happening here?"
-  - XML doc comments (`/// <summary>`): Use for public/internal interfaces, classes, and non-obvious
-    members where IntelliSense tooltips add value. Skip for private implementation details.
-  - NEVER: Commented-out code, restating what code literally does
-- Zero warnings/analysis issues
+- CRITICAL: Follow SOLID, YAGNI principles. Every abstraction must justify its existence with
+  concrete current needs.
+- .NET 10.0 (C# 14) + nullable reference types
+- Zero warnings/analysis issues — treat warnings as errors
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
   polymorphism tradeoffs for discussion rather than defaulting to enums.
+- Avoid interface pollution: not every service class needs an interface. Add interfaces when
+  justified (testability, more than one implementation).
 - When registering types as themselves in Autofac, `RegisterType<>()` already registers "as self",
   so don't use `.AsSelf()`; it is redundant.
+
+### Language Features
+
+All features below are available on net10.0 / C# 14. Use for new code; opportunistically refactor
+existing code when revisiting.
+
+- File-scoped namespaces: `namespace MyApp.Core;`
+- Primary constructors: `class Service(IDep dep, ILogger logger)`
+- Collection expressions: `[]`, `[item]`, `[..first, ..second]`
+  - NEVER use `new[]`, `new List<T>()`, `Array.Empty<T>()`
+  - For type inference, prefer `[new T { }, new T { }]` over casts
+  - Use `T[] x = [...]` only when simpler forms fail
+- `field` keyword in properties: `public string Name { get; set => field = value ?? throw new
+  ArgumentNullException(); } = "";`
+  - NEVER use explicit backing fields when `field` suffices
+- Extension members via `extension` blocks in a top-level nongeneric `static class`
+  - NEVER use `this` parameter syntax for new extension methods
+- Null-conditional assignment: `obj?.Prop = value;` over null checks wrapping assignment
+- Lambda modifiers without types: `(text, out result) => int.TryParse(text, out result)`
+  - NEVER add redundant parameter types when modifiers alone suffice
+- Pattern matching: `is not null`, switch expressions, property patterns
+  - Property patterns: `obj is Type { Prop: value }` over `obj is Type t && t.Prop == value`
+  - Extended property pattern: `obj is { Outer.Inner: value }`
+  - Empty property pattern: `{ } name` matches non-null and binds
+- `[GeneratedRegex]` on `static partial` properties returning `Regex`
+  - NEVER use `new Regex()`, `static readonly Regex` fields, or static `Regex.IsMatch()`/
+    `Regex.Replace()` methods
+
+### Code Idioms
+
+- `internal` for implementation classes; `public` only for genuine external APIs. Concrete classes
+  implementing public interfaces should be `internal`.
+- Records for data models; favor immutability; use `IReadOnlyCollection`, `IReadOnlyDictionary`,
+  `init` setters
+- JSON serialization: configure naming policy, converters, and style via `JsonSerializerOptions` (or
+  source-generated `JsonSerializerContext`). Check for existing options before creating new
+  instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
+  convention.
+- `[UsedImplicitly]` for runtime-used members (deserialization, reflection, DI). Common for DTOs:
+  `[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]`
+- Warning suppression: `[SuppressMessage]` with `Justification` on class/method level; prefer
+  class-level when multiple members need same suppression. NEVER use `#pragma warning disable`.
+- LINQ method syntax only; NEVER use query syntax (`from`/`where`/`select` keywords). Prefer method
+  chaining over loops.
+- Named arguments for boolean literals: `new Options(SendInfo: false, SendEmpty: true)`. Also use
+  named arguments for consecutive same-type parameters to clarify intent.
+- `ValueTask` for hot paths; `CancellationToken` everywhere (variable name: `ct`)
+- Local functions go after `return`/`continue` statements; add explicit `return;`/`continue;` if
+  needed to separate main logic from local function definitions
+
+### Comment Guidelines
+
+Comments must earn their place by reducing cognitive load.
+
+When to comment:
+
+- LINQ chains (3+ operations): Brief comment stating transformation goal
+- Conditional blocks with non-obvious purpose: One-line comment (e.g., `// Explicit: user
+  specified`)
+- Private methods: Block comment if name + parameters don't make purpose self-evident
+- Early returns/continues: Include reason if not obvious from context
+- Complex algorithms: Comment explaining approach at top, not line-by-line
+- Null-suppression operator (`!`): Every use MUST have an inline comment explaining why null is
+  impossible at that point (e.g., `// non-null: validated above`). The comment documents the runtime
+  guarantee so reviewers can verify it and future maintainers can detect if the invariant breaks.
+- General: Any code where a reader would pause and wonder "why?" or "what's happening here?"
+- XML doc comments (`/// <summary>`): Use for public/internal interfaces, classes, and non-obvious
+  members where IntelliSense tooltips add value. Skip for private implementation details.
+
+NEVER: Commented-out code, restating what code literally does
 
 ## Backward Compatibility
 
@@ -231,6 +294,8 @@ Key files:
 - Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
 - You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
   Prioritize the CLI for all project-specific modifications if possible.
+- Central package management: specify versions in `Directory.Packages.props`, not in individual
+  csproj files.
 - When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**
