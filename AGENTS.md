@@ -1,6 +1,6 @@
 # AGENTS
 
-.NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr.
+.NET CLI tool for synchronizing TRaSH Guides to Sonarr/Radarr. Mainline branch: `master`.
 
 ## Linear
 
@@ -63,10 +63,8 @@ that action arrives too late.
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
 - Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
-- Pipeline: `GenericSyncPipeline<TContext>` - Config -> Fetch -> Transaction -> Persist -> Preview
-- DI: Autofac via `CompositionRoot`, `CoreAutofacModule`, `PipelineAutofacModule`. Every library
-  gets its own Autofac Module to keep DI registration modular.
-- Config: YAML + `schemas/config-schema.json` validation
+- DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
+- Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
 - Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
 - Dotnet tools in `.config/dotnet-tools.json`
 - CLI: `Spectre.Console` package for CLI framework
@@ -189,8 +187,9 @@ Output channel usage:
 
 User-visible information must go to both console and log:
 
-- Sync command: Use `ISyncEventPublisher` methods which handle both channels automatically via the
-  diagnostics system (`SyncEventStorage`, `DiagnosticsRenderer`).
+- Sync command: Diagnostics flow through a publisher/subscriber system that handles both channels
+  automatically. Use `AddError()`/`AddWarning()` on the publisher; the framework routes to console
+  and log.
 - Other commands: Must output to both channels manually:
 
 ```csharp
@@ -217,13 +216,11 @@ log.Warning(message);
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
 
-Some key files and directories:
+Key files:
 
-- Primary CLI project is `src/Recyclarr.Cli/`
-- `src/Recyclarr.Cli/CompositionRoot.cs` - DI setup
-- `src/Recyclarr.Core/CoreAutofacModule.cs` - Service registration
-- `Directory.Packages.props` - Package versions (Nuget central package management enabled)
-- `schemas/**.json` - Schemas for different Recyclarr YAML files
+- `src/Recyclarr.Cli/` - Primary CLI project (entry point)
+- `Directory.Packages.props` - NuGet central package management
+- `schemas/` - JSON Schemas for Recyclarr YAML files
 
 ## Tooling Requirements
 
@@ -233,8 +230,7 @@ Some key files and directories:
   when a clean rebuild is needed.
 - Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
 - You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
-  Prioritize the CLI for all project-specific modifications if possible. Central package management
-  is enabled via `Directory.Packages.props`.
+  Prioritize the CLI for all project-specific modifications if possible.
 - When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**
@@ -328,7 +324,7 @@ MUST NEVER read the entire `CHANGELOG.md`; the file is massive. MUST read only f
 limited line range (e.g. 50 lines) to capture the `[Unreleased]` section. The file follows Keep a
 Changelog, so the newest entries are always at the top.
 
-MUST load the `changelog` skill for detailed CHANGELOG format and conventions.
+The `changelog` skill has detailed format and conventions.
 
 **IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
 `CHANGELOG.md` in scope. Verify changelog updates are part of the implementation plan before
