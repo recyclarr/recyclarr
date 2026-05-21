@@ -16,10 +16,12 @@
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.7.0" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.8" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="11.0.1" />
     <PackageVersion Include="Refitter.MSBuild" Version="2.0.0" PrivateAssets="all" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.14.14" />
     <PackageVersion Include="Serilog" Version="4.3.1" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
