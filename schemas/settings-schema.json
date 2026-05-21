@@ -33,6 +33,26 @@
     "notifications": {
       "$ref": "settings/notifications.json"
     },
+    "server": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "title": "Settings for the Recyclarr HTTP server",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 7982,
+          "title": "Port number for the HTTP server to listen on"
+        },
+        "bind_address": {
+          "type": "string",
+          "default": "localhost",
+          "title": "Address for the HTTP server to bind to",
+          "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces."
+        }
+      }
+    },
     "resource_providers": {
       "type": ["null", "array"],
       "title": "Resource providers for various content types",

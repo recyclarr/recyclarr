@@ -342,6 +342,7 @@ public class CoreAutofacModule : Module
         builder.RegisterSettings(x => x.LogJanitor);
         builder.RegisterSettings(x => x.Notifications);
         builder.RegisterSettings(x => x.ResourceProviders);
+        builder.RegisterSettings(x => x.Server);
     }
 
     private static void RegisterTrashGuide(ContainerBuilder builder)

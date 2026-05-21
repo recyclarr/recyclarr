@@ -22,4 +22,5 @@
   <Project Path="src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj" />
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
+  <Project Path="src/Recyclarr.Server/Recyclarr.Server.csproj" />
 </Solution>
