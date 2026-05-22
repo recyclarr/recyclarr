@@ -1,0 +1,20 @@
+version = 1
+
+[indexing]
+indexed_paths = ["."]
+
+[languages.csharp]
+config_files = [
+    "src/Recyclarr.Cli/Recyclarr.Cli.csproj",
+    "src/Recyclarr.Core/Recyclarr.Core.csproj",
+    "src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj",
+    "src/Recyclarr.Api.Radarr/Recyclarr.Api.Radarr.csproj",
+    "src/Recyclarr.Core/Compatibility/Recyclarr.Compatibility.csproj",
+]
+
+[documents]
+enabled = true
+
+[documents.collections.docs]
+paths = ["docs/"]
+patterns = ["**/*.md"]
