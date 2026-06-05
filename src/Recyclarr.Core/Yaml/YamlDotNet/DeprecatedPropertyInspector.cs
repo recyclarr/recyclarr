@@ -73,4 +73,14 @@ internal sealed class DeprecatedPropertyInspector(
     {
         return inner.GetEnumValue(enumValue);
     }
+
+    public bool HasParseMethod(Type type)
+    {
+        return inner.HasParseMethod(type);
+    }
+
+    public object? Parse(string value, Type type)
+    {
+        return inner.Parse(value, type);
+    }
 }
