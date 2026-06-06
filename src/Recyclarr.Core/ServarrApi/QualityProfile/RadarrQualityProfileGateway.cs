@@ -90,10 +90,16 @@ internal class RadarrQualityProfileGateway(
     )
     {
         var qualityIndex = BuildQualityItemIndex(baseDto.Items ?? []);
-        // Filter null Format keys: API resources always have a Format Id
-        var formatIndex = (baseDto.FormatItems ?? [])
-            .Where(f => f.Format is not null)
-            .ToDictionary(f => f.Format!.Value);
+        // Build format index, tolerating duplicates that can occur if the service
+        // stored a corrupted profile (e.g. two FormatItems with the same CF ID).
+        var formatIndex = new Dictionary<int, RadarrApi.ProfileFormatItemResource>();
+        foreach (var f in baseDto.FormatItems ?? [])
+        {
+            if (f.Format is { } formatId)
+            {
+                formatIndex.TryAdd(formatId, f);
+            }
+        }
 
         baseDto.Id = domain.Id ?? baseDto.Id;
         baseDto.Name = domain.Name;

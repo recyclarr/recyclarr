@@ -56,7 +56,7 @@ internal class QualityProfilePlanComponent(
                 };
             }
 
-            AddCustomFormatScore(profile, scoreConfig, cf);
+            AddCustomFormatScore(profile, scoreConfig, cf, plan);
         }
 
         // Add all profiles to the plan
@@ -111,7 +111,8 @@ internal class QualityProfilePlanComponent(
     private void AddCustomFormatScore(
         PlannedQualityProfile profile,
         AssignScoresToConfig scoreConfig,
-        PlannedCustomFormat cf
+        PlannedCustomFormat cf,
+        PipelinePlan plan
     )
     {
         var scoreToUse = DetermineScore(profile.Config, scoreConfig, cf);
@@ -120,7 +121,7 @@ internal class QualityProfilePlanComponent(
             return;
         }
 
-        // Check for duplicate
+        // Check for exact duplicate (same trash_id)
         var existingScore = profile.CfScores.FirstOrDefault(x =>
             x.TrashId.EqualsIgnoreCase(cf.Resource.TrashId)
         );
@@ -140,6 +141,27 @@ internal class QualityProfilePlanComponent(
                     scoreToUse
                 );
             }
+
+            return;
+        }
+
+        // Different trash_ids that resolved to the same service CF are a conflict.
+        // This happens when a custom provider CF duplicates a TRaSH guide CF by name.
+        // Only check when the CF has been matched to a service CF (Id > 0).
+        var serviceIdConflict =
+            cf.Resource.Id > 0
+                ? profile.CfScores.FirstOrDefault(x => x.ServiceId == cf.Resource.Id)
+                : null;
+
+        if (serviceIdConflict is not null)
+        {
+            plan.AddError(
+                $"Custom formats '{serviceIdConflict.Name}' ({serviceIdConflict.TrashId}) and "
+                    + $"'{cf.Resource.Name}' ({cf.Resource.TrashId}) both resolve to the same "
+                    + $"custom format in the service (ID {cf.Resource.Id}). "
+                    + "Remove one from your config or resource provider."
+            );
+
             return;
         }
 
