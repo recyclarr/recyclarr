@@ -4,13 +4,20 @@ param (
     [string] $Runtime,
     [string] $OutputDir,
     [string] $Configuration = "Release",
-    [string] $BuildPath = "src\Recyclarr.Cli",
     [switch] $NoSingleFile,
     [switch] $NoCompress,
     [switch] $ReadyToRun
 )
 
 $ErrorActionPreference = "Stop"
+
+# Both executable projects are published to the same output directory so they
+# ship together in a single archive. Shared library builds are reused via
+# MSBuild's incremental compilation between the two publish calls.
+$projects = @(
+    "src\Recyclarr.Cli"
+    "src\Recyclarr.Server"
+)
 
 $extraArgs = @()
 
@@ -48,12 +55,15 @@ if (-not $OutputDir) {
 
 "Extra Args: $extraArgs"
 
-dotnet publish $BuildPath `
-    --output $OutputDir `
-    --configuration $Configuration `
-    --runtime $Runtime `
-    @extraArgs
+foreach ($project in $projects) {
+    "> Publishing: $project"
+    dotnet publish $project `
+        --output $OutputDir `
+        --configuration $Configuration `
+        --runtime $Runtime `
+        @extraArgs
 
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed"
+    if ($LASTEXITCODE -ne 0) {
+        throw "dotnet publish failed for $project"
+    }
 }

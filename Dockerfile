@@ -10,11 +10,13 @@ WORKDIR /source
 # copy csproj and restore as distinct layers. Typically, packages change less often than code, so
 # this cached layer is expected to be reused in the majority of cases.
 COPY --link --parents *.props src/*/*.csproj ./
-RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH
+RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH \
+ && dotnet restore src/Recyclarr.Server -a $TARGETARCH
 
 # copy and publish app and libraries
 COPY --link . .
-RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app
+RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app \
+ && dotnet publish src/Recyclarr.Server -a $TARGETARCH --no-restore -o /app
 
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
