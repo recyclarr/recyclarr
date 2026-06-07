@@ -23,7 +23,13 @@ function log() {
     "$1"
 }
 
-tar -cvf recyclarr.tar -C "$(dirname "$archivePath")" "$(basename "$archivePath")"
+# archivePath may be a single file or a directory containing multiple binaries.
+# Apple notarization requires a zip; we tar first to preserve permissions.
+if [[ -d "$archivePath" ]]; then
+  tar -cvf recyclarr.tar -C "$archivePath" .
+else
+  tar -cvf recyclarr.tar -C "$(dirname "$archivePath")" "$(basename "$archivePath")"
+fi
 zip recyclarr.zip recyclarr.tar
 submissionId="$(submit)"
 rm recyclarr.zip recyclarr.tar
