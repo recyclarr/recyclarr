@@ -2,26 +2,13 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Options;
 using Recyclarr.Server;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-var parsedArgs = ServerArgsParser.Parse(args);
-
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(CompositionRoot.Setup);
-
-// Make parsed CLI args available for DI (used by KestrelSettingsConfigurator)
-builder.Services.AddSingleton(parsedArgs);
-
-// Kestrel listens on the address/port from ServerSettings, with CLI args taking precedence
-builder.Services.AddSingleton<
-    IConfigureOptions<KestrelServerOptions>,
-    KestrelSettingsConfigurator
->();
 
 builder.Services.AddOpenApi(options =>
 {
@@ -38,8 +25,9 @@ builder.Services.AddHealthChecks();
 
 // Only activate the lifeline monitor when launched with --parent-pid={pid} (ephemeral mode).
 // Standalone invocations (e.g. foreground `serve` command) omit this flag and manage their own
-// lifecycle.
-if (parsedArgs.ParentPid is { } parentPid)
+// lifecycle via SIGTERM.
+var parentPidStr = builder.Configuration["parent-pid"];
+if (parentPidStr is not null && int.TryParse(parentPidStr, out var parentPid))
 {
     builder.Services.AddHostedService(sp => new StdinLifelineMonitor(
         sp.GetRequiredService<IHostApplicationLifetime>(),

@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
+using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Cli;
 
@@ -9,7 +11,10 @@ namespace Recyclarr.Cli;
 /// is kept open as a lifeline: disposing this launcher closes stdin, triggering the server's
 /// <c>StdinLifelineMonitor</c> to shut down the process cleanly.
 /// </summary>
-internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
+internal sealed class EphemeralServerLauncher(
+    IFileSystem fs,
+    ISettings<ServerSettings> serverSettings
+) : IAsyncDisposable
 {
     private Process? _process;
     private StreamWriter? _stdinWriter;
@@ -29,7 +34,8 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
     /// </exception>
     public async Task StartAsync(CancellationToken ct = default)
     {
-        var serverBinary = GetServerBinary();
+        var serverBinary = ServerBinaryLocator.GetServerBinary(fs);
+        var urls = ServerUrlBuilder.Build(serverSettings.Value);
 
         _process = new Process
         {
@@ -38,7 +44,7 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
-                Arguments = $"--parent-pid={Environment.ProcessId}",
+                Arguments = $"--urls={urls} --parent-pid={Environment.ProcessId}",
             },
         };
 
@@ -69,7 +75,7 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
     {
         if (_stdinWriter is not null)
         {
-            // Close stdin to signal EOF → server's StdinLifelineMonitor calls StopApplication()
+            // Close stdin to signal EOF -> server's StdinLifelineMonitor calls StopApplication()
             await _stdinWriter.DisposeAsync();
         }
 
@@ -78,13 +84,5 @@ internal sealed class EphemeralServerLauncher(IFileSystem fs) : IAsyncDisposable
             await _process.WaitForExitAsync();
             _process.Dispose();
         }
-    }
-
-    private IFileInfo GetServerBinary()
-    {
-        // non-null: ProcessPath is only null in bundled single-file hosts without apphost
-        var processDir = fs.FileInfo.New(Environment.ProcessPath!).Directory!;
-        var name = OperatingSystem.IsWindows() ? "recyclarr-server.exe" : "recyclarr-server";
-        return processDir.File(name);
     }
 }
