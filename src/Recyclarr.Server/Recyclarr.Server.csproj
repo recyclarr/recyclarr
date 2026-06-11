@@ -5,6 +5,9 @@
     <AssemblyName>recyclarr-server</AssemblyName>
     <NoWarn>$(NoWarn);CS0436</NoWarn>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
+    <!-- Disable build-time spec generation during publish: cross-compilation can't load the
+         target-arch binary on the build host. The spec is committed; regenerate manually. -->
+    <OpenApiGenerateDocumentsOnBuild Condition="'$(RuntimeIdentifier)' != ''">false</OpenApiGenerateDocumentsOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
