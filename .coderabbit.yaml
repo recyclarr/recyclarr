@@ -9,6 +9,8 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    base_branches:
+      - ".*"
     ignore_usernames:
       - renovate[bot]
   path_filters:
