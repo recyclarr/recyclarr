@@ -16,6 +16,10 @@
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" PrivateAssets="all" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.10" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="13.1.0" />
     <PackageVersion Include="Refitter.MSBuild" Version="2.0.0" PrivateAssets="all" />
