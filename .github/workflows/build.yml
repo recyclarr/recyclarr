@@ -232,6 +232,7 @@ jobs:
         with:
           app-id: ${{ secrets.RECYCLARR_APP_ID }}
           private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          permission-contents: write
 
       - name: Create Release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
@@ -253,6 +254,7 @@ jobs:
           app-id: ${{ secrets.RECYCLARR_APP_ID }}
           private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
           repositories: homebrew-recyclarr
+          permission-actions: write
 
       - name: Update Homebrew Tap
         if: steps.gitversion.outputs.preReleaseTag == ''

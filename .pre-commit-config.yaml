@@ -58,6 +58,10 @@ repos:
     rev: v1.7.12
     hooks:
       - id: actionlint
+        # Disable actionlint's built-in shellcheck integration for run: blocks.
+        # The dedicated shellcheck hook above handles shell scripts separately,
+        # and actionlint's subprocess call conflicts with mise shims locally.
+        args: [-shellcheck=]
 
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.25.2
