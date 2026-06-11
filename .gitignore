@@ -573,6 +573,9 @@ schemas-dist/
 # Generated C# Code
 *.g.cs
 
+# Kiota generation logs
+.kiota.log
+
 # Codanna code intelligence (index is rebuilt locally)
 .codanna/index/
 .codanna/.project-id

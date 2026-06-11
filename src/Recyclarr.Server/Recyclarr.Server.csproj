@@ -25,4 +25,9 @@
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyOpenApiSpec" AfterTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\obj\Recyclarr.Server.json')">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\obj\Recyclarr.Server.json"
+          DestinationFiles="$(MSBuildProjectDirectory)\..\Recyclarr.Client\openapi.json" />
+  </Target>
+
 </Project>

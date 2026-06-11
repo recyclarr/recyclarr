@@ -21,7 +21,6 @@ builder.Services.AddOpenApi(options =>
         }
     );
 });
-builder.Services.AddHealthChecks();
 
 // Only activate the lifeline monitor when launched with --parent-pid={pid} (ephemeral mode).
 // Standalone invocations (e.g. foreground `serve` command) omit this flag and manage their own
@@ -39,7 +38,7 @@ var app = builder.Build();
 
 app.MapOpenApi();
 app.MapScalarApiReference();
-app.MapHealthChecks("/health");
+app.MapGet("/health", () => TypedResults.Ok(new HealthResponse("healthy"))).WithTags("Health");
 
 // Placeholder route group for REC-141 API endpoints
 app.MapGroup("/api");
