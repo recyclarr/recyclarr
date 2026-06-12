@@ -1,6 +1,6 @@
 {
   "descriptionHash": "95AFCBF1D8A8E040E63236B75682A7FB88E2140B53500C48226D5A69BD2593A0CB8B83A33422294206433DF4A127C94218DE5A3799B04F19CE9A6CA1EC44E1C6",
-  "descriptionLocation": "../openapi.json",
+  "descriptionLocation": "../../Recyclarr.Server/obj/Recyclarr.Server.json",
   "lockFileVersion": "1.0.0",
   "kiotaVersion": "1.32.2",
   "clientClassName": "RecyclarrApiClient",

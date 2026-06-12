@@ -6,7 +6,7 @@
     <NoWarn>$(NoWarn);CS0436</NoWarn>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
     <!-- Disable build-time spec generation during publish: cross-compilation can't load the
-         target-arch binary on the build host. The spec is committed; regenerate manually. -->
+         target-arch binary on the build host. CI builds generate the spec in a prior step. -->
     <OpenApiGenerateDocumentsOnBuild Condition="'$(RuntimeIdentifier)' != ''">false</OpenApiGenerateDocumentsOnBuild>
   </PropertyGroup>
 
@@ -28,9 +28,5 @@
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
 
-  <Target Name="CopyOpenApiSpec" AfterTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)/obj/Recyclarr.Server.json')">
-    <Copy SourceFiles="$(MSBuildProjectDirectory)/obj/Recyclarr.Server.json"
-          DestinationFiles="$(MSBuildProjectDirectory)/../Recyclarr.Client/openapi.json" />
-  </Target>
 
 </Project>
