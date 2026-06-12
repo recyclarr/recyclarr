@@ -14,12 +14,17 @@ namespace Recyclarr.Client;
     "CA2000",
     Justification = "Adapter lifetime is tied to the client; both live for the CLI command duration"
 )]
+[SuppressMessage(
+    "Performance",
+    "CA1822",
+    Justification = "Resolved through DI as an instance; static would prevent container resolution"
+)]
 public class RecyclarrClientFactory
 {
     /// <summary>
     /// Creates a new <see cref="RecyclarrApiClient"/> targeting the given base address.
     /// </summary>
-    public virtual RecyclarrApiClient Create(string baseAddress)
+    public RecyclarrApiClient Create(string baseAddress)
     {
         var authProvider = new AnonymousAuthenticationProvider();
         var adapter = new HttpClientRequestAdapter(authProvider)
