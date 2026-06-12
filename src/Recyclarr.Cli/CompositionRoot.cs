@@ -13,6 +13,7 @@ using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
+using Recyclarr.Client;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Filtering;
@@ -43,6 +44,8 @@ internal static class CompositionRoot
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
+
+        builder.RegisterType<RecyclarrClientFactory>();
 
         CliRegistrations(builder);
         RegisterServiceProcessors(builder);
