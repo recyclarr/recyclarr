@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
+    <ProjectReference Include="..\Recyclarr.Client\Recyclarr.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
