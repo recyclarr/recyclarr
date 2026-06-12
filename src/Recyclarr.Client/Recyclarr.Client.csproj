@@ -4,4 +4,26 @@
     <PackageReference Include="Microsoft.Kiota.Bundle" />
   </ItemGroup>
 
+  <!-- Exclude Generated/ from the default SDK glob; files are added back after generation. -->
+  <ItemGroup>
+    <Compile Remove="Generated/**" />
+  </ItemGroup>
+
+  <!-- Generate Kiota client from the OpenAPI spec at build time.
+       The spec is the source of truth; generated code is gitignored. -->
+  <Target Name="GenerateKiotaClient"
+          BeforeTargets="BeforeCompile"
+          Inputs="openapi.json"
+          Outputs="Generated/RecyclarrApiClient.cs">
+    <Exec Command="dotnet kiota generate -d openapi.json -l CSharp -c RecyclarrApiClient -n Recyclarr.Client -o Generated --ebc --ad --co --ll Error"
+          WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <ItemGroup>
+      <Compile Include="Generated/**/*.cs" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CleanKiotaClient" AfterTargets="CoreClean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/Generated" />
+  </Target>
+
 </Project>
