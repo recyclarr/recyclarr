@@ -15,7 +15,7 @@
     <PackageVersion Include="CliWrap" Version="3.10.2" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.7.0" PrivateAssets="all" />
-    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" PrivateAssets="all" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" PrivateAssets="all" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.9" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="11.0.1" />
     <PackageVersion Include="Refitter.MSBuild" Version="2.0.0" PrivateAssets="all" />
