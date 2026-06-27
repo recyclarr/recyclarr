@@ -34,7 +34,9 @@ else {
     )
 }
 
-if (-not $NoCompress) {
+# Workaround for dotnet/runtime#112167: EnableCompressionInSingleFile causes intermittent
+# AccessViolationException on macOS ARM64. Disable until the fix is backported to .NET 10.
+if (-not $NoCompress -and $Runtime -ne "osx-arm64") {
     $extraArgs += @(
         "-p:EnableCompressionInSingleFile=true"
     )
