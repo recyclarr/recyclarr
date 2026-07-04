@@ -14,6 +14,7 @@ public static class RefitClientExtensions
         ContentSerializer = new SystemTextJsonContentSerializer(
             GlobalJsonSerializerSettings.Services
         ),
+        CaptureRequestContent = true,
     };
 
     extension(ContainerBuilder builder)
@@ -67,5 +68,6 @@ public static class RefitClientExtensions
         ContentSerializer = new SystemTextJsonContentSerializer(
             GlobalJsonSerializerSettings.Apprise
         ),
+        CaptureRequestContent = true,
     };
 }

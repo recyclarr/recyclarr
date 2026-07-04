@@ -24,11 +24,18 @@ internal class HttpExceptionStrategy : IExceptionStrategy
         var statusCode = (int)e.StatusCode;
         var statusText = $"HTTP {statusCode}";
 
-        return e.StatusCode switch
+        var messages = e.StatusCode switch
         {
             HttpStatusCode.Unauthorized => [$"{statusText}: Unauthorized - check your api_key"],
             _ => ParseResponseBody(e.Content, statusText),
         };
+
+        if (e.HasRequestContent)
+        {
+            messages.Add($"Request body: {e.RequestContent}");
+        }
+
+        return messages;
     }
 
     private static List<string> ParseResponseBody(string? body, string statusText)
