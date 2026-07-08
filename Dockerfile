@@ -16,7 +16,8 @@ RUN dotnet restore src/Recyclarr.Cli -a $TARGETARCH \
 # copy and publish app and libraries
 COPY --link . .
 RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app \
- && dotnet publish src/Recyclarr.Server -a $TARGETARCH --no-restore -o /app
+ && dotnet publish src/Recyclarr.Server -a $TARGETARCH --no-restore -o /app \
+    -p:OpenApiGenerateDocuments=false
 
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
