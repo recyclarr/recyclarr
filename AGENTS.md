@@ -154,6 +154,10 @@ existing code when revisiting.
   chaining over loops.
 - Named arguments for boolean literals: `new Options(SendInfo: false, SendEmpty: true)`. Also use
   named arguments for consecutive same-type parameters to clarify intent.
+- Filesystem operations: use `IDirectoryInfo`/`IFileInfo` extension methods (`.File()`,
+  `.SubDirectory()`, `.IsAncestorOf()`) over raw `IFileSystem` access (`fs.Path.Combine`,
+  `fs.FileInfo.New`). The extensions handle path joining idiomatically and keep `IFileSystem` out of
+  method signatures.
 - `ValueTask` for hot paths; `CancellationToken` everywhere (variable name: `ct`)
 - Local functions go after `return`/`continue` statements; add explicit `return;`/`continue;` if
   needed to separate main logic from local function definitions
