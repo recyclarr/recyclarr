@@ -6,7 +6,7 @@
   <!-- Central Package Versions -->
   <ItemGroup>
     <PackageVersion Include="Autofac" Version="9.3.0" />
-    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="11.0.1" />
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageVersion Include="Autofac.Extras.Ordering" Version="4.0.0" />
     <PackageVersion Include="AutofacSerilogIntegration" Version="5.0.0" />
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
