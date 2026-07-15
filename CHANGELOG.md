@@ -12,6 +12,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Git resource providers automatically clean up accumulated storage when the `.git` directory
   exceeds a configurable size threshold (`cache_limit`, default `100MB`) (#815)
 
+### Security
+
+- Config: Template manifest entries from resource providers could escape the intended directories
+  via path traversal, enabling arbitrary file read and write outside the config directory
+  (GHSA-9wh7-8wrf-9x8r)
+
 ### Fixed
 
 - Sync: Crash when two custom formats from different providers resolve to the same service custom
