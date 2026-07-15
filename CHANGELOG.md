@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.7.0] - 2026-07-15
+
 ### Added
 
 - Git resource providers automatically clean up accumulated storage when the `.git` directory
@@ -1391,7 +1393,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.6.0...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.7.0...HEAD
+[8.7.0]: https://github.com/recyclarr/recyclarr/compare/v8.6.0...v8.7.0
 [8.6.0]: https://github.com/recyclarr/recyclarr/compare/v8.5.1...v8.6.0
 [8.5.1]: https://github.com/recyclarr/recyclarr/compare/v8.5.0...v8.5.1
 [8.5.0]: https://github.com/recyclarr/recyclarr/compare/v8.4.0...v8.5.0
