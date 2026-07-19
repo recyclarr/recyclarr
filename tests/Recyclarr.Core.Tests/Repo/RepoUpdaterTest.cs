@@ -15,6 +15,7 @@ internal sealed class RepoUpdaterTest
     {
         // 200MB .git dir with 100MB limit
         var repoPath = fs.WithGitDir(200 * 1024 * 1024);
+        repo.HasRemoteReferences(CancellationToken.None).ReturnsForAnyArgs(false);
 
         var source = new GitRepositorySource
         {
@@ -30,6 +31,33 @@ internal sealed class RepoUpdaterTest
         await sut.UpdateRepo(source, CancellationToken.None);
 
         await repo.ReceivedWithAnyArgs().RunMaintenance(default);
+    }
+
+    [Test, AutoMockData]
+    public async Task Oversized_legacy_cache_is_reinitialized(
+        [Frozen] IGitRepository repo,
+        [Frozen] MockFileSystem fs
+    )
+    {
+        var repoPath = fs.WithGitDir(200 * 1024 * 1024);
+        repo.HasRemoteReferences(CancellationToken.None).ReturnsForAnyArgs(true);
+
+        var source = new GitRepositorySource
+        {
+            Name = "test",
+            CloneUrl = new Uri("https://example.com/repo.git"),
+            References = ["master"],
+            Path = repoPath,
+            CacheLimit = DataSize.FromMegabytes(100),
+        };
+
+        var sut = new RepoUpdater(Substitute.For<ILogger>(), _ => repo);
+
+        await sut.UpdateRepo(source, CancellationToken.None);
+
+        await repo.ReceivedWithAnyArgs().HasRemoteReferences(default);
+        await repo.ReceivedWithAnyArgs().Init(default);
+        await repo.DidNotReceiveWithAnyArgs().RunMaintenance(default);
     }
 
     [Test, AutoMockData]
@@ -89,8 +117,8 @@ internal sealed class RepoUpdaterTest
     )
     {
         var repoPath = fs.WithGitDir(200 * 1024 * 1024);
-
-        repo.RunMaintenance(default!)
+        repo.HasRemoteReferences(CancellationToken.None).ReturnsForAnyArgs(false);
+        repo.RunMaintenance(CancellationToken.None)
             .ReturnsForAnyArgs(_ => throw new GitCmdException(1, "gc failed"));
 
         var source = new GitRepositorySource

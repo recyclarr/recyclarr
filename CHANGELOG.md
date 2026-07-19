@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Sync: Automatic cleanup now reduces oversized resource provider caches created by older versions
+  (#907)
+
 ## [8.7.0] - 2026-07-15
 
 ### Added

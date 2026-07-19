@@ -107,6 +107,15 @@ public sealed class GitRepository(ILogger log, IGitPath gitPath, IDirectoryInfo 
         await RunGitCmd(token, "reset", "--hard", toBranchOrSha1);
     }
 
+    public async Task<bool> HasRemoteReferences(CancellationToken token)
+    {
+        var refs = await RunGitCmdCore(
+            ["for-each-ref", "--format=%(refname)", "refs/remotes"],
+            token
+        );
+        return refs.Length > 0;
+    }
+
     public async Task RunMaintenance(CancellationToken token)
     {
         // Trim .git/shallow to only the current HEAD so prior depth-1 fetches don't keep old

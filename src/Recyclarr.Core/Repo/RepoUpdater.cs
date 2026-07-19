@@ -8,19 +8,29 @@ namespace Recyclarr.Repo;
 public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoFactory)
     : IRepoUpdater
 {
+    private const double BytesPerMegabyte = 1024.0 * 1024.0;
     private static readonly string[] ValidGitPaths = [".git/config", ".git/index", ".git/HEAD"];
 
     public async Task UpdateRepo(GitRepositorySource repositorySource, CancellationToken token)
     {
         // Assume failure until it succeeds, to simplify the catch handlers.
         var succeeded = false;
+        var rebuildLegacyCache = false;
 
         // Retry only once if there's a failure. This gives us an opportunity to delete the git repository and start
         // fresh.
         try
         {
-            await CheckoutAndUpdateRepo(repositorySource, token);
-            succeeded = true;
+            rebuildLegacyCache = await CheckoutAndUpdateRepo(repositorySource, token);
+            succeeded = !rebuildLegacyCache;
+
+            if (rebuildLegacyCache)
+            {
+                log.Information(
+                    "Rebuilding legacy git cache for {Name} because stale references prevent storage cleanup",
+                    repositorySource.Name
+                );
+            }
         }
         catch (GitCmdException e)
         {
@@ -33,13 +43,18 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
 
         if (!succeeded)
         {
-            log.Warning("Deleting local git repo and retrying git operation due to error");
+            if (!rebuildLegacyCache)
+            {
+                log.Warning("Deleting local git repo and retrying git operation due to error");
+            }
+
             repositorySource.Path.DeleteReadOnlyDirectory();
-            await CheckoutAndUpdateRepo(repositorySource, token);
+            _ = await CheckoutAndUpdateRepo(repositorySource, token);
         }
     }
 
-    private async Task CheckoutAndUpdateRepo(
+    // Returns whether the cache must be rebuilt to remove legacy Git references.
+    private async Task<bool> CheckoutAndUpdateRepo(
         GitRepositorySource repositorySource,
         CancellationToken token
     )
@@ -77,7 +92,7 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         }
 
         await repo.ResetHard("FETCH_HEAD", token);
-        await MaybeRunMaintenanceAsync(repo, repositorySource, token);
+        return await MaybeRunMaintenanceAsync(repo, repositorySource, token);
     }
 
     [SuppressMessage(
@@ -85,7 +100,7 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         "CA1031:Do not catch general exception types",
         Justification = "Maintenance is best-effort; any failure must not propagate to fail the sync."
     )]
-    private async Task MaybeRunMaintenanceAsync(
+    private async Task<bool> MaybeRunMaintenanceAsync(
         IGitRepository repo,
         GitRepositorySource repositorySource,
         CancellationToken token
@@ -94,13 +109,13 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         var limitBytes = repositorySource.CacheLimit.Bytes;
         if (limitBytes <= 0)
         {
-            return;
+            return false;
         }
 
         var gitDir = repositorySource.Path.SubDirectory(".git");
         if (!gitDir.Exists)
         {
-            return;
+            return false;
         }
 
         try
@@ -108,17 +123,40 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
             var currentSize = gitDir.DirectorySize();
             if (currentSize <= limitBytes)
             {
-                return;
+                return false;
             }
 
             log.Information(
                 "Git cache for {Name} is {SizeMb:F1} MB (limit: {LimitMb:F1} MB); running maintenance",
                 repositorySource.Name,
-                currentSize / (1024.0 * 1024.0),
-                limitBytes / (1024.0 * 1024.0)
+                currentSize / BytesPerMegabyte,
+                limitBytes / BytesPerMegabyte
             );
 
+            if (await repo.HasRemoteReferences(token))
+            {
+                return true;
+            }
+
             await repo.RunMaintenance(token);
+
+            var finalSize = gitDir.DirectorySize();
+            log.Information(
+                "Git cache maintenance for {Name} completed: {PreviousSizeMb:F1} MB -> {FinalSizeMb:F1} MB",
+                repositorySource.Name,
+                currentSize / BytesPerMegabyte,
+                finalSize / BytesPerMegabyte
+            );
+
+            if (finalSize > limitBytes)
+            {
+                log.Warning(
+                    "Git cache for {Name} remains above the cleanup threshold: {SizeMb:F1} MB (limit: {LimitMb:F1} MB)",
+                    repositorySource.Name,
+                    finalSize / BytesPerMegabyte,
+                    limitBytes / BytesPerMegabyte
+                );
+            }
         }
         catch (OperationCanceledException)
         {
@@ -128,6 +166,8 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
         {
             log.Warning(e, "Git cache maintenance failed for {Name}", repositorySource.Name);
         }
+
+        return false;
     }
 
     private static void ValidateGitDirectory(IDirectoryInfo repoPath)

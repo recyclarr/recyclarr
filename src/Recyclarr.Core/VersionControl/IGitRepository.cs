@@ -13,5 +13,6 @@ public interface IGitRepository : IDisposable
 
     Task ResetHard(string toBranchOrSha1, CancellationToken token);
     Task Status(CancellationToken token);
+    Task<bool> HasRemoteReferences(CancellationToken token);
     Task RunMaintenance(CancellationToken token);
 }
