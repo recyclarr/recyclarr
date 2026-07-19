@@ -126,17 +126,17 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
                 return false;
             }
 
+            if (await repo.HasRemoteReferences(token))
+            {
+                return true;
+            }
+
             log.Information(
                 "Git cache for {Name} is {SizeMb:F1} MB (limit: {LimitMb:F1} MB); running maintenance",
                 repositorySource.Name,
                 currentSize / BytesPerMegabyte,
                 limitBytes / BytesPerMegabyte
             );
-
-            if (await repo.HasRemoteReferences(token))
-            {
-                return true;
-            }
 
             await repo.RunMaintenance(token);
 

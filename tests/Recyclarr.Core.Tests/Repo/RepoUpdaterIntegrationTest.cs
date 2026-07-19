@@ -1,5 +1,6 @@
-using System.Diagnostics;
 using System.IO.Abstractions;
+using System.Text;
+using CliWrap;
 using Recyclarr.Common;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Repo;
@@ -133,34 +134,21 @@ internal sealed class RepoUpdaterIntegrationTest
         CancellationToken ct
     )
     {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "git",
-            WorkingDirectory = repository.FullName,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-        };
+        var output = new StringBuilder();
+        var error = new StringBuilder();
 
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
-
-        using var process = new Process { StartInfo = startInfo };
-        if (!process.Start())
-        {
-            throw new InvalidOperationException("Failed to start git");
-        }
-
-        var outputTask = process.StandardOutput.ReadToEndAsync(ct);
-        var errorTask = process.StandardError.ReadToEndAsync(ct);
-        await process.WaitForExitAsync(ct);
+        var result = await Cli.Wrap("git")
+            .WithArguments(arguments)
+            .WithValidation(CommandResultValidation.None)
+            .WithWorkingDirectory(repository.FullName)
+            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(output))
+            .WithStandardErrorPipe(PipeTarget.ToStringBuilder(error))
+            .ExecuteAsync(ct);
 
         return new GitCommandResult(
-            process.ExitCode,
-            (await outputTask).Trim(),
-            (await errorTask).Trim()
+            result.ExitCode,
+            output.ToString().Trim(),
+            error.ToString().Trim()
         );
     }
 
