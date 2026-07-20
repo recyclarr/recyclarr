@@ -32,6 +32,8 @@ public static class MockFileSystemExtensions
                 fs.AddFile(packFile, new MockFileData(new byte[sizeBytes]));
             }
 
+            // MockDirectoryInfo snapshots state at construction (before the files above existed)
+            repoPath.Refresh();
             return repoPath;
         }
 

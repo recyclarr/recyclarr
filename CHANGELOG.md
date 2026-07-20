@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Git resource providers now rebuild the local cache from scratch when it exceeds `cache_limit`,
+  rather than running maintenance that could not shrink legacy caches from before v8.0 (#907)
+
 ## [8.7.0] - 2026-07-15
 
 ### Added
