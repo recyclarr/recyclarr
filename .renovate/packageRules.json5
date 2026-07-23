@@ -29,6 +29,7 @@
       matchDatasources: ["docker"],
       matchPackageNames: ["jetbrains/qodana-dotnet"],
       versioning: "loose",
+      allowedVersions: "!/eap/",
     },
     {
       description: "Add changelog URLs for GitHub Actions digest updates",
