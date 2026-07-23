@@ -55,14 +55,15 @@ that action arrives too late.
   clients, or anti-corruption layers over distinct external systems.
 - `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
   (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
-- `minimal-apis`: MUST load when writing, editing, or reviewing ASP.NET Core Minimal API endpoints,
-  route handlers, route groups, endpoint filters, OpenAPI configuration, or embedded Kestrel server
-  code.
+- `http-server`: MUST load when writing, editing, or reviewing FastEndpoints endpoint classes,
+  API versioning, OpenAPI spec generation, or Kestrel server configuration in `Recyclarr.Server`.
 
 ## Project Context
 
 - Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
-- Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
+- Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations), Server (HTTP
+  API via FastEndpoints) -> Core, Client (Kiota-generated typed HTTP client from Server's OpenAPI
+  spec)
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
 - Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
