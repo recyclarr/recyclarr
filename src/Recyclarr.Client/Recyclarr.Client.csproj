@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <KiotaSpecFile>$(MSBuildProjectDirectory)/../Recyclarr.Server/obj/Recyclarr.Server.json</KiotaSpecFile>
+    <KiotaSpecFile>$(MSBuildProjectDirectory)/../Recyclarr.Server/Recyclarr.Server.json</KiotaSpecFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Kiota.Bundle" />
   </ItemGroup>
 
-  <!-- Build-order dependency: server must build first to produce the OpenAPI spec. -->
+  <!-- Build-order dependency: ensures the server's spec generation completes before Kiota reads it. -->
   <ItemGroup>
     <ProjectReference Include="../Recyclarr.Server/Recyclarr.Server.csproj"
                       ReferenceOutputAssembly="false" />
@@ -19,24 +19,26 @@
     <Compile Remove="Generated/**" />
   </ItemGroup>
 
-  <!-- Generate Kiota client at build time from the server's OpenAPI spec.
-       Server source code is the single source of truth; generated code is gitignored.
-       The spec file is regenerated on every server build (timestamp always changes), so we
-       compare content via a hash stamp to avoid unnecessary Kiota re-runs. -->
+  <!-- Generate Kiota client at build time from the committed OpenAPI spec.
+       Hash stamp avoids unnecessary Kiota re-runs when the spec hasn't changed. -->
   <Target Name="GenerateKiotaClient"
           BeforeTargets="BeforeCompile">
-    <Hash ItemsToHash="$([System.IO.File]::ReadAllText('$(KiotaSpecFile)'))">
-      <Output TaskParameter="HashResult" PropertyName="_KiotaSpecHash" />
-    </Hash>
+    <Error Condition="'$(DesignTimeBuild)' != 'true' AND !Exists('$(KiotaSpecFile)')"
+           Text="OpenAPI spec not found at $(KiotaSpecFile). Build Recyclarr.Server without a RuntimeIdentifier to regenerate it." />
+    <GetFileHash Files="$(KiotaSpecFile)" Condition="Exists('$(KiotaSpecFile)')">
+      <Output TaskParameter="Hash" PropertyName="_KiotaSpecHash" />
+    </GetFileHash>
     <PropertyGroup>
       <_KiotaStampFile>$(IntermediateOutputPath)kiota.stamp</_KiotaStampFile>
       <_KiotaPreviousHash Condition="Exists('$(_KiotaStampFile)')">$([System.IO.File]::ReadAllText('$(_KiotaStampFile)').Trim())</_KiotaPreviousHash>
+      <_KiotaShouldGenerate>false</_KiotaShouldGenerate>
+      <_KiotaShouldGenerate Condition="'$(DesignTimeBuild)' != 'true' AND Exists('$(KiotaSpecFile)') AND ('$(_KiotaSpecHash)' != '$(_KiotaPreviousHash)' OR !Exists('Generated/RecyclarrApiClient.cs'))">true</_KiotaShouldGenerate>
     </PropertyGroup>
     <Exec Command="dotnet kiota generate -d $(KiotaSpecFile) -l CSharp -c RecyclarrApiClient -n Recyclarr.Client -o Generated --ebc --ad --ll Error"
           WorkingDirectory="$(MSBuildProjectDirectory)"
-          Condition="'$(_KiotaSpecHash)' != '$(_KiotaPreviousHash)' OR !Exists('Generated/RecyclarrApiClient.cs')" />
+          Condition="'$(_KiotaShouldGenerate)' == 'true'" />
     <WriteLinesToFile File="$(_KiotaStampFile)" Lines="$(_KiotaSpecHash)" Overwrite="true"
-                     Condition="'$(_KiotaSpecHash)' != '$(_KiotaPreviousHash)' OR !Exists('Generated/RecyclarrApiClient.cs')" />
+                     Condition="'$(_KiotaShouldGenerate)' == 'true'" />
     <ItemGroup>
       <Compile Include="Generated/**/*.cs" />
     </ItemGroup>

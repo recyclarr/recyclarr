@@ -9,9 +9,6 @@
     <File Path="renovate.json5" />
     <File Path="scratch.ignored.md" />
   </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/Recyclarr.Client/Recyclarr.Client.csproj" />
-  </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Recyclarr.Cli.Tests/Recyclarr.Cli.Tests.csproj" />
     <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
@@ -24,6 +21,7 @@
   <Project Path="src/Recyclarr.Api.Radarr/Recyclarr.Api.Radarr.csproj" />
   <Project Path="src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj" />
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
+  <Project Path="src/Recyclarr.Client/Recyclarr.Client.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
   <Project Path="src/Recyclarr.Server/Recyclarr.Server.csproj" />
 </Solution>

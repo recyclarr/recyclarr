@@ -19,10 +19,8 @@ public class RecyclarrClientFactory
     public RecyclarrApiClient Create(string baseAddress)
     {
         var authProvider = new AnonymousAuthenticationProvider();
-        var adapter = new HttpClientRequestAdapter(authProvider)
-        {
-            BaseUrl = baseAddress.TrimEnd('/'),
-        };
+        // Kiota's BaseUrl setter normalizes trailing slashes
+        var adapter = new HttpClientRequestAdapter(authProvider) { BaseUrl = baseAddress };
         return new RecyclarrApiClient(adapter);
     }
 }

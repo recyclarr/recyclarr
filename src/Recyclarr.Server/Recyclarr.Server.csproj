@@ -5,8 +5,9 @@
     <AssemblyName>recyclarr-server</AssemblyName>
     <NoWarn>$(NoWarn);CS0436</NoWarn>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
-    <!-- Disable build-time spec generation during publish: cross-compilation can't load the
-         target-arch binary on the build host. CI builds generate the spec in a prior step. -->
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
+    <!-- Spec generation loads the compiled assembly, which fails during cross-compilation.
+         The committed spec file makes build-time generation unnecessary in CI. -->
     <OpenApiGenerateDocumentsOnBuild Condition="'$(RuntimeIdentifier)' != ''">false</OpenApiGenerateDocumentsOnBuild>
   </PropertyGroup>
 
@@ -27,6 +28,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
   </ItemGroup>
-
 
 </Project>
