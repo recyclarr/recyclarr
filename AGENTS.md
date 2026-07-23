@@ -289,21 +289,6 @@ Key files:
 - `Directory.Packages.props` - NuGet central package management
 - `schemas/` - JSON Schemas for Recyclarr YAML files
 
-## Codanna
-
-Code intelligence MCP server. Config: `.codanna/settings.toml`. Index: `.codanna/index/`
-(gitignored, rebuilt locally).
-
-MUST NOT pass path arguments to `codanna index` or use `codanna add-dir`/`codanna remove-dir`; these
-mutate `settings.toml` by regenerating the full file with absolute paths and boilerplate. Use
-`codanna index` (no args) or `codanna index --force` to (re)build from `indexed_paths` in config
-without mutation.
-
-MUST prefer Codanna tools over grep/glob/file reading for codebase exploration. Use
-`semantic_search_with_context` and `analyze_impact` first; narrow with `find_symbol`, `get_calls`,
-`find_callers`. Fall back to file tools only when Codanna lacks the needed context (e.g. reading
-full file contents, searching non-code files, exact string matching).
-
 ## Tooling Requirements
 
 - CSharpier is the ONLY formatting tool. Never use `dotnet format` or other formatters.

@@ -12,11 +12,4 @@
       "disabled": true,
     },
   },
-  "mcp": {
-    "codanna": {
-      "type": "local",
-      "command": ["codanna", "--config", ".codanna/settings.toml", "serve", "--watch"],
-      "enabled": true,
-    },
-  },
 }
