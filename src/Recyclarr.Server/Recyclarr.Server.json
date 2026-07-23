@@ -5,12 +5,13 @@
     "version": "v1"
   },
   "paths": {
-    "/health": {
+    "/v1/health": {
       "get": {
         "tags": ["Health"],
+        "operationId": "RecyclarrServerFeaturesHealthEndpoint",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -35,10 +36,5 @@
         }
       }
     }
-  },
-  "tags": [
-    {
-      "name": "Health"
-    }
-  ]
+  }
 }

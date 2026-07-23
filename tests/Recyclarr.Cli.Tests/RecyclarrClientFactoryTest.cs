@@ -11,6 +11,6 @@ internal sealed class RecyclarrClientFactoryTest
 
         var client = factory.Create("http://localhost:7982");
 
-        client.Health.Should().NotBeNull();
+        client.V1.Health.Should().NotBeNull();
     }
 }

@@ -1,5 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using FastEndpoints;
+using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Recyclarr.Server;
@@ -10,17 +12,17 @@ var builder = WebApplication.CreateSlimBuilder(args);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 builder.Host.ConfigureContainer<ContainerBuilder>(CompositionRoot.Setup);
 
-builder.Services.AddOpenApi(options =>
-{
-    options.AddDocumentTransformer(
-        (document, _, _) =>
-        {
-            document.Info.Title = "Recyclarr API";
-            document.Info.Version = "v1";
-            return Task.CompletedTask;
-        }
-    );
-});
+builder
+    .Services.AddFastEndpoints()
+    .OpenApiDocument(o =>
+    {
+        o.MaxEndpointVersion = 1;
+        o.DocumentName = "v1";
+        o.Title = "Recyclarr API";
+        o.Version = "v1";
+        o.ShortSchemaNames = true;
+        o.EnableJWTBearerAuth = false;
+    });
 
 // Only activate the lifeline monitor when launched with --parent-pid={pid} (ephemeral mode).
 // Standalone invocations (e.g. foreground `serve` command) omit this flag and manage their own
@@ -36,12 +38,13 @@ if (parentPidStr is not null && int.TryParse(parentPidStr, out var parentPid))
 
 var app = builder.Build();
 
+app.UseFastEndpoints(c =>
+{
+    c.Versioning.Prefix = "v";
+    c.Versioning.PrependToRoute = true;
+});
 app.MapOpenApi();
 app.MapScalarApiReference();
-app.MapGet("/health", () => TypedResults.Ok(new HealthResponse("healthy"))).WithTags("Health");
-
-// Placeholder route group for REC-141 API endpoints
-app.MapGroup("/api");
 
 await app.StartAsync();
 

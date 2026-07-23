@@ -12,10 +12,11 @@
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
     <PackageVersion Include="CliWrap" Version="3.10.2" />
+    <PackageVersion Include="FastEndpoints.OpenApi" Version="8.2.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" PrivateAssets="all" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" PrivateAssets="all" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Kiota.Bundle" Version="2.0.0" />
     <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
