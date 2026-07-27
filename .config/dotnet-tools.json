@@ -10,7 +10,7 @@
       "rollForward": false
     },
     "jetbrains.resharper.globaltools": {
-      "version": "2026.1.4",
+      "version": "2026.2.0",
       "commands": [
         "jb"
       ],
