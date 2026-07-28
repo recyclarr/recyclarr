@@ -379,13 +379,27 @@ If neither Tier 1 nor Tier 2 applies:
 
 ### Scopes
 
-Derive scope from primary file path:
+A scope names a durable boundary a user or maintainer would filter the log by, never a type and
+never a directory. MUST use one of these or omit the scope entirely:
 
-- `src/*/Pipelines/*` -> `(sync)`
-- `src/*/Config/*` -> `(config)`
-- `src/*/Console/Commands/*` -> `(cli)`
-- `src/*/Cache/*` -> `(cache)`
-- `schemas/*` -> `(yaml)`
+- `deps` -> dependency updates (Renovate)
+- `sync` -> `src/*/Pipelines/*`, sync orchestration
+- `config` -> `src/*/Config/*`
+- `cache` -> `src/*/Cache/*`
+- `yaml` -> `schemas/*`
+- `cli` -> `src/Recyclarr.Cli/*`
+- `server` -> `src/Recyclarr.Server/*`
+- `client` -> `src/Recyclarr.Client/*`
+- `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`
+- `docker` -> Dockerfile and image assets (NOT Docker-related workflows; those are `ci:`)
+- `agents` -> `AGENTS.md`, `.opencode/*`, skills, agent definitions
+
+MUST NOT restate the type as a scope: `ci(ci)`, `docs(readme)`, `test(e2e)`, `docs(changelog)` and
+similar add nothing. Scopeless `chore:` beats a one-off scope.
+
+A new scope is justified only when all three hold: 3+ commits fit nothing existing, the name
+survives a refactor (`server` does, `di` and `http` do not), and it partitions rather than nests (no
+`sync` plus `sync-qp`). Retire a scope by the same test once its boundary dissolves.
 
 ### CHANGELOG Format
 
