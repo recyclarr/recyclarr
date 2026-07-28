@@ -28,14 +28,10 @@ Scope separation:
 - Linear project descriptions SHOULD link to relevant ADRs and architecture docs.
 - MUST NOT put design rationale, decision records, or living design reference into Linear.
 
-## Agent Architecture
+## Agents
 
-Single primary agent with direct access to all files and tools. Subagents for bounded contexts:
-
-- **trash-guides**: Read-only research against the TRaSH Guides repo (uses haiku for cost). MUST use
-  this subagent for any question about TRaSH Guides content (custom formats, quality profiles,
-  naming, quality sizes, trash_ids). NEVER use the generic explore agent for guides research.
-- **commit**: Git operations after user approval
+MUST use the `trash-guides` subagent for any question about TRaSH Guides content (custom formats,
+quality profiles, naming, quality sizes, trash_ids). NEVER use `explore` for guides research.
 
 ## Skills
 
@@ -55,19 +51,18 @@ that action arrives too late.
   clients, or anti-corruption layers over distinct external systems.
 - `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
   (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
-- `minimal-apis`: MUST load when writing, editing, or reviewing ASP.NET Core Minimal API endpoints,
-  route handlers, route groups, endpoint filters, OpenAPI configuration, or embedded Kestrel server
-  code.
 
 ## Project Context
 
-- Uses SLNX format (`Recyclarr.slnx`) instead of traditional SLN files.
-- Components: Cli (entry) -> Core (logic) -> TrashGuide/ServarrApi (integrations)
+Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
+`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (Refitter-
+generated clients from vendored `openapi.json`; `Generated/` is excluded from source control).
+Solution is SLNX (`Recyclarr.slnx`), not SLN.
+
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
 - Testing: NUnit 4 + NSubstitute + AutoFixture + parallel execution
-- Dotnet tools in `.config/dotnet-tools.json`
-- CLI: `Spectre.Console` package for CLI framework
+- CLI framework: `Spectre.Console`. Dotnet tools in `.config/dotnet-tools.json`.
 
 ## Code Review Comments
 
@@ -91,15 +86,10 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
   code. Concrete implementations get injected; tests can substitute. Search existing registrations
   before adding new ones.
-- Search existing code first: `rg "pattern"` before writing new code. Holistically and
-  comprehensively make changes, don't just do it in isolation which ignores other important areas of
-  code that might be in-scope or indirectly affected by a change.
+- Search before writing: a change is rarely isolated. Find every call site and parallel
+  implementation that the change affects, and update them together.
 - Reuse or extend existing implementations before adding parallel ones. DRY targets knowledge
-  duplication, not incidental syntactic similarity; when weighing extraction of a shared abstraction
-  (base class, generic helper, unified interface), load the `duplication-vs-abstraction` skill
-  first.
-- CRITICAL: Follow SOLID, YAGNI principles. Every abstraction must justify its existence with
-  concrete current needs.
+  duplication, not incidental syntactic similarity.
 - .NET 10.0 (C# 14) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
@@ -162,26 +152,13 @@ existing code when revisiting.
 - Local functions go after `return`/`continue` statements; add explicit `return;`/`continue;` if
   needed to separate main logic from local function definitions
 
-### Comment Guidelines
+### Comments
 
-Comments must earn their place by reducing cognitive load.
-
-When to comment:
-
-- LINQ chains (3+ operations): Brief comment stating transformation goal
-- Conditional blocks with non-obvious purpose: One-line comment (e.g., `// Explicit: user
-  specified`)
-- Private methods: Block comment if name + parameters don't make purpose self-evident
-- Early returns/continues: Include reason if not obvious from context
-- Complex algorithms: Comment explaining approach at top, not line-by-line
-- Null-suppression operator (`!`): Every use MUST have an inline comment explaining why null is
-  impossible at that point (e.g., `// non-null: validated above`). The comment documents the runtime
-  guarantee so reviewers can verify it and future maintainers can detect if the invariant breaks.
-- General: Any code where a reader would pause and wonder "why?" or "what's happening here?"
-- XML doc comments (`/// <summary>`): Use for public/internal interfaces, classes, and non-obvious
-  members where IntelliSense tooltips add value. Skip for private implementation details.
-
-NEVER: Commented-out code, restating what code literally does
+- Null-suppression (`!`): every use MUST carry an inline comment naming the runtime guarantee (e.g.
+  `// non-null: validated above`), so a broken invariant is detectable later.
+- XML docs (`/// <summary>`): public/internal types and non-obvious members where the IntelliSense
+  tooltip adds value; skip private implementation details.
+- NEVER commit commented-out code.
 
 ## Backward Compatibility
 
@@ -283,11 +260,8 @@ log.Warning(message);
     - `product/`: Strategic and upstream-driven decisions (PDRs)
   - `reference/`: External reference materials (Discord summaries, upstream docs)
 
-Key files:
-
-- `src/Recyclarr.Cli/` - Primary CLI project (entry point)
-- `Directory.Packages.props` - NuGet central package management
-- `schemas/` - JSON Schemas for Recyclarr YAML files
+- `schemas/`: JSON Schemas for `recyclarr.yml` and `settings.yml`
+- `Directory.Packages.props`: NuGet central package management
 
 ## Tooling Requirements
 
@@ -383,14 +357,11 @@ A scope names a durable boundary a user or maintainer would filter the log by, n
 never a directory. MUST use one of these or omit the scope entirely:
 
 - `deps` -> dependency updates (Renovate)
-- `sync` -> `src/*/Pipelines/*`, sync orchestration
-- `config` -> `src/*/Config/*`
-- `cache` -> `src/*/Cache/*`
+- `sync` -> `src/Recyclarr.Cli/Pipelines/*`, sync orchestration
+- `config` -> `src/Recyclarr.Core/Config/*`
 - `yaml` -> `schemas/*`
-- `cli` -> `src/Recyclarr.Cli/*`
-- `server` -> `src/Recyclarr.Server/*`
-- `client` -> `src/Recyclarr.Client/*`
-- `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`
+- `cli` -> `src/Recyclarr.Cli/*` outside `Pipelines/`
+- `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`, `src/Recyclarr.Core/ServarrApi/*`
 - `docker` -> Dockerfile and image assets (NOT Docker-related workflows; those are `ci:`)
 - `agents` -> `AGENTS.md`, `.opencode/*`, skills, agent definitions
 
@@ -398,7 +369,7 @@ MUST NOT restate the type as a scope: `ci(ci)`, `docs(readme)`, `test(e2e)`, `do
 similar add nothing. Scopeless `chore:` beats a one-off scope.
 
 A new scope is justified only when all three hold: 3+ commits fit nothing existing, the name
-survives a refactor (`server` does, `di` and `http` do not), and it partitions rather than nests (no
+survives a refactor (`docker` does, `di` and `http` do not), and it partitions rather than nests (no
 `sync` plus `sync-qp`). Retire a scope by the same test once its boundary dissolves.
 
 ### CHANGELOG Format

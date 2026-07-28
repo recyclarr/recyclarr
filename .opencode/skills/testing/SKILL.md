@@ -8,9 +8,9 @@ description: >-
   or AwesomeAssertions (NOT FluentAssertions); working with
   `CliIntegrationFixture`, `IntegrationTestFixture`, `MockFileSystem`,
   `TestableLogger`, `NUnitAnsiConsole`, or `New*` factory helpers; adding or
-  updating E2E fixtures under `tests/Recyclarr.Cli.IntegrationTests.E2E/`;
-  editing `Fixtures/recyclarr.yml`, `metadata.json`, `cf/`, `cf-groups/`,
-  or `quality-profiles/` fixture folders; running `Run-E2ETests.ps1` or
+  updating E2E fixtures under `tests/Recyclarr.EndToEndTests/Fixtures/`
+  (`recyclarr.yml`, `settings.yml`, `custom-formats-*`,
+  `trash-guides-override/`); running `Run-E2ETests.ps1` or
   `scripts/coverage.py`; investigating flaky tests, coverage gaps, or
   Testcontainers setup. Triggers on phrases like "write a test", "fix this
   test", "improve coverage", "add an E2E case", "mock this dependency", or
