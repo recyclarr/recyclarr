@@ -4,7 +4,6 @@ param (
     [string] $Runtime,
     [string] $OutputDir,
     [string] $Configuration = "Release",
-    [string] $BuildPath = "src\Recyclarr.Cli",
     [switch] $NoSingleFile,
     [switch] $NoCompress,
     [switch] $ReadyToRun
@@ -48,12 +47,13 @@ if (-not $OutputDir) {
 
 "Extra Args: $extraArgs"
 
-dotnet publish $BuildPath `
+"> Publishing: src\Recyclarr.Server"
+dotnet publish "src\Recyclarr.Server" `
     --output $OutputDir `
     --configuration $Configuration `
     --runtime $Runtime `
     @extraArgs
 
 if ($LASTEXITCODE -ne 0) {
-    throw "dotnet publish failed"
+    throw "dotnet publish failed for src\Recyclarr.Server"
 }

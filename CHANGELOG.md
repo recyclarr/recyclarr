@@ -10,7 +10,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - CLI: Raw list output was replaced by log messages when redirected or piped to another process
-- Sync: Crash on Windows when output is redirected to a file or piped to another process
 
 ## [8.7.2] - 2026-09-02
 

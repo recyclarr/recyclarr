@@ -1,11 +1,10 @@
 using System.IO.Abstractions;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.Json;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class CfGroupLoaderIntegrationTest : IntegrationTestFixture
+internal sealed class CfGroupLoaderIntegrationTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Load_cf_group_json_with_snake_case_works()

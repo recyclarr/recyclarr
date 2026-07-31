@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Common.FluentValidation;
@@ -65,15 +66,27 @@ public static class FluentValidationExtensions
                     log?.Debug("{Message}", failure.ErrorMessage);
                     break;
                 case Severity.Warning:
-                    publisher.AddWarning(failure.ErrorMessage);
+                    publisher.Add(ToOutcome(failure, SyncDiagnosticLevel.Warning));
                     break;
                 default:
-                    publisher.AddError(failure.ErrorMessage);
+                    publisher.Add(ToOutcome(failure, SyncDiagnosticLevel.Error));
                     break;
             }
         }
 
         return result.IsValid;
+
+        static RuleValidationOutcome ToOutcome(
+            ValidationFailure failure,
+            SyncDiagnosticLevel severity
+        ) =>
+            new(
+                severity,
+                failure.PropertyName,
+                failure.ErrorMessage,
+                failure.AttemptedValue?.ToString(),
+                failure.ErrorCode
+            );
     }
 
     public static IEnumerable<TSource> IsValid<TSource, TValidator>(
