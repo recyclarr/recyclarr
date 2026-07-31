@@ -30,6 +30,15 @@
       extractVersionTemplate: "^(?<version>\\d+\\.\\d+)",
     },
     {
+      description: "Update the .NET SDK major version in mise configuration",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)mise\\.toml$/"],
+      matchStrings: ['dotnet\\s*=\\s*"(?<currentValue>\\d+)"'],
+      depNameTemplate: "dotnet-sdk",
+      datasourceTemplate: "dotnet-version",
+      extractVersionTemplate: "^(?<version>\\d+)",
+    },
+    {
       description: "Update Qodana linter image in qodana.yaml",
       customType: "regex",
       managerFilePatterns: ["/^qodana\\.ya?ml$/"],

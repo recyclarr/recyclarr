@@ -30,7 +30,7 @@
       matchPackagePatterns: ["^mcr\\.microsoft\\.com/dotnet/", "^dotnet-sdk$"],
       matchUpdateTypes: ["major"],
       commitMessagePrefix: "build(deps):",
-      minimumGroupSize: 3,
+      minimumGroupSize: 4,
     },
     {
       description: "Qodana action and linter image updated together",

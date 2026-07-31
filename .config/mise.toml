@@ -3,6 +3,7 @@ RECYCLARR_CONFIG_DIR = "{{ [config_root, '..', 'dev-configs', 'appdata'] | join_
 LINEAR_CLIENT_ID = "356e0c82210f6ddb8641c5aa96e63b22"
 
 [tools]
+dotnet = "10"
 "github:santhosh-tekuri/jsonschema" = "latest"
 "npm:@microsoft/learn-cli" = "latest"
 python = "latest"
