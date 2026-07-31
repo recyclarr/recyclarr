@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RefitterNoLogging>true</RefitterNoLogging>
+    <SelfApiSpecFile>$(MSBuildProjectDirectory)/../Recyclarr.Server/Recyclarr.Server.json</SelfApiSpecFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Generated/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Refit.HttpClientFactory" />
+    <PackageReference Include="Refitter.MSBuild" />
+  </ItemGroup>
+
+  <!-- Build-order dependency: ensures the server's spec generation completes before Refitter reads it. -->
+  <ItemGroup>
+    <ProjectReference Include="../Recyclarr.Server/Recyclarr.Server.csproj"
+                      Condition="'$(RuntimeIdentifier)' == ''"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="CheckSelfApiSpecExists" BeforeTargets="RefitterGenerate">
+    <Error Condition="'$(DesignTimeBuild)' != 'true' AND !Exists('$(SelfApiSpecFile)')"
+           Text="OpenAPI spec not found at $(SelfApiSpecFile). Build Recyclarr.Server without a RuntimeIdentifier to regenerate it." />
+  </Target>
+
+</Project>

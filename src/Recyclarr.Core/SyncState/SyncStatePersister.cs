@@ -14,8 +14,15 @@ public abstract class SyncStatePersister(
 
     public TrashIdMappingStore Load()
     {
-        var mappings = LoadFromJson();
-        return new TrashIdMappingStore(mappings);
+        try
+        {
+            var mappings = LoadFromJson();
+            return new TrashIdMappingStore(mappings);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            throw new SyncStateUnavailableException(e);
+        }
     }
 
     private List<TrashIdMapping> LoadFromJson()
@@ -44,17 +51,22 @@ public abstract class SyncStatePersister(
 
     public void Save(TrashIdMappingStore store)
     {
-        var path = storagePath.CalculatePath(stateName);
-        log.Debug("Saving {StateName} to path {Path}", DisplayName, path);
+        try
+        {
+            var path = storagePath.CalculatePath(stateName);
+            log.Debug("Saving {StateName} to path {Path}", DisplayName, path);
 
-        path.CreateParentDirectory();
+            path.CreateParentDirectory();
 
-        using var stream = path.Create();
-        var container = new MappingsContainer { Mappings = store.Mappings };
-        JsonSerializer.Serialize(stream, container, _jsonSettings);
+            using var stream = path.Create();
+            var container = new MappingsContainer { Mappings = store.Mappings };
+            JsonSerializer.Serialize(stream, container, _jsonSettings);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            throw new SyncStateUnavailableException(e);
+        }
     }
-
-    public string StateFilePath => storagePath.CalculatePath(stateName).FullName;
 
     protected abstract string DisplayName { get; }
 
