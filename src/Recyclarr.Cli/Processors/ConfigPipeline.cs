@@ -1,3 +1,4 @@
+using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
@@ -13,6 +14,7 @@ internal class ConfigPipeline(
     IReadOnlyList<ConfigParsingException> failures,
     IConfigDiagnosticCollector diagnosticCollector,
     ConfigFilterProcessor filterProcessor,
+    ConsoleFilterResultRenderer filterRenderer,
     InstanceScopeFactory instanceScopeFactory,
     IAnsiConsole console,
     ILogger log
@@ -52,15 +54,16 @@ internal class ConfigPipeline(
             .ToList();
 
         var matchedConfigs = allConfigs.Where(criteria.InstanceMatchesCriteria).ToList();
-        var filteredConfigs = filterProcessor.FilterAndRender(
-            criteria,
-            matchedConfigs,
-            allInstanceNames
-        );
+        var filterResult = filterProcessor.Filter(criteria, matchedConfigs, allInstanceNames);
+
+        if (filterResult.FilterResults.Count > 0)
+        {
+            filterRenderer.RenderResults(filterResult.FilterResults);
+        }
 
         // Convert from YAML data objects to runtime service configurations
-        var configs = filteredConfigs
-            .Select(x =>
+        var configs = filterResult
+            .Configs.Select(x =>
                 x.Yaml switch
                 {
                     RadarrConfigYaml radarr => radarr.ToRadarrConfiguration(

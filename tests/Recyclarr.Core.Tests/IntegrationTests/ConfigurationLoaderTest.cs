@@ -6,13 +6,12 @@ using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TestLibrary.Autofac;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderTest : CoreIntegrationTestFixture
 {
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {

@@ -1,11 +1,10 @@
 using System.IO.Abstractions;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.ResourceProviders.Storage;
 using Recyclarr.Settings.Models;
 
 namespace Recyclarr.Core.Tests.IntegrationTests.ResourceProviders;
 
-internal sealed class LocalProviderLocationTest : IntegrationTestFixture
+internal sealed class LocalProviderLocationTest : CoreIntegrationTestFixture
 {
     [Test]
     public async Task Resolve_relative_path_against_app_data_directory()

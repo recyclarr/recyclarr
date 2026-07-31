@@ -1,0 +1,686 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Recyclarr API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/sync/jobs": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncListJobs",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSyncJobsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncCreateJob",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSyncJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSyncJobResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSyncJobProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sync/jobs/{id}": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncGetJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfigDiagnosticsResponse": {
+        "type": "object",
+        "properties": {
+          "missingConfigFiles": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "parseFailures": {
+            "$ref": "#/components/schemas/IReadOnlyListOfConfigParseFailureResponse"
+          },
+          "unknownInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "availableInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "invalidInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfInvalidInstanceResponse"
+          },
+          "duplicateInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "splitInstanceGroups": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSplitInstanceGroupResponse"
+          },
+          "deprecationWarnings": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "ConfigParseFailureResponse": {
+        "required": [
+          "fileName",
+          "line",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "line": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateSyncJobProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyCollectionOfProblemErrorDetail"
+          },
+          "diagnostics": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
+              }
+            ]
+          }
+        }
+      },
+      "CreateSyncJobRequest": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SupportedServices"
+              }
+            ]
+          },
+          "instances": {
+            "const": null,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "const": null,
+              "type": "string"
+            }
+          },
+          "preview": {
+            "type": "boolean"
+          },
+          "configs": {
+            "const": null,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "const": null,
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateSyncJobResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiagnosticEventResponse": {
+        "required": [
+          "level",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "GetSyncJobResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "instances",
+          "preview",
+          "progress",
+          "diagnostics"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "service": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SupportedServices"
+              }
+            ]
+          },
+          "instances": {
+            "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
+          },
+          "preview": {
+            "type": "boolean"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/IReadOnlyListOfDiagnosticEventResponse"
+          },
+          "configDiagnostics": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
+              }
+            ]
+          }
+        }
+      },
+      "InstanceSnapshotResponse": {
+        "required": [
+          "name",
+          "status",
+          "pipelines"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "pipelines": {
+            "$ref": "#/components/schemas/IReadOnlyListOfPipelineSnapshotResponse"
+          }
+        }
+      },
+      "InvalidInstanceResponse": {
+        "required": [
+          "instanceName",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "instanceName": {
+            "type": "string"
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "IReadOnlyCollectionOfProblemErrorDetail": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProblemErrorDetail"
+        }
+      },
+      "IReadOnlyCollectionOfString": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "IReadOnlyListOfConfigParseFailureResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ConfigParseFailureResponse"
+        }
+      },
+      "IReadOnlyListOfDiagnosticEventResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DiagnosticEventResponse"
+        }
+      },
+      "IReadOnlyListOfInstanceSnapshotResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/InstanceSnapshotResponse"
+        }
+      },
+      "IReadOnlyListOfInvalidInstanceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/InvalidInstanceResponse"
+        }
+      },
+      "IReadOnlyListOfPipelineSnapshotResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PipelineSnapshotResponse"
+        }
+      },
+      "IReadOnlyListOfSplitInstanceGroupResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SplitInstanceGroupResponse"
+        }
+      },
+      "IReadOnlyListOfString": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "IReadOnlyListOfSyncJobSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SyncJobSummaryResponse"
+        }
+      },
+      "ListSyncJobsResponse": {
+        "required": [
+          "jobs"
+        ],
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSyncJobSummaryResponse"
+          }
+        }
+      },
+      "PipelineItemChangesResponse": {
+        "required": [
+          "created",
+          "updated",
+          "deleted"
+        ],
+        "type": "object",
+        "properties": {
+          "created": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "updated": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "PipelineSnapshotResponse": {
+        "required": [
+          "type",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "changes": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PipelineItemChangesResponse"
+              }
+            ]
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1"
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "default": "One or more validation errors occurred."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "instance": {
+            "type": "string",
+            "default": "/api/route"
+          },
+          "traceId": {
+            "type": "string",
+            "default": "0HMPNHL0JHL76:00000001"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "the details of the error"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "the name of the error or property of the dto that caused the error",
+                  "default": "Error or field name"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "the reason for the error",
+                  "default": "Error reason"
+                },
+                "code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "description": "the code of the error"
+                },
+                "severity": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "description": "the severity of the error"
+                }
+              },
+              "description": "the error details object"
+            }
+          }
+        },
+        "description": "RFC9457 compatible problem details/ error response class. this can be used by configuring startup like so:\n```app.UseFastEndpoints(c =&gt; c.Errors.UseProblemDetails())```"
+      },
+      "ProblemErrorDetail": {
+        "required": [
+          "name",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "severity": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SplitInstanceGroupResponse": {
+        "required": [
+          "baseUrl",
+          "instanceNames"
+        ],
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "instanceNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "SupportedServices": {
+        "enum": [
+          "radarr",
+          "sonarr"
+        ],
+        "type": "string"
+      },
+      "SyncJobSummaryResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

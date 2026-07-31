@@ -7,10 +7,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Fixed
-
-- Sync: Crash on Windows when output is redirected to a file or piped to another process
-
 ## [8.7.2] - 2026-09-02
 
 ### Fixed

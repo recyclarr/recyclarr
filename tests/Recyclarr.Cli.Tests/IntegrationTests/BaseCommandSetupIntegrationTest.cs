@@ -25,13 +25,18 @@ internal sealed class BaseCommandSetupIntegrationTest : CliIntegrationFixture
 
         for (var i = 0; i < maxFiles + 20; ++i)
         {
-            Fs.AddFile(Paths.LogDirectory.File($"logfile-{i}.log").FullName, new MockFileData(""));
+            Fs.AddFile(
+                Paths.CliLogDirectory.File($"logfile-{i}.log").FullName,
+                new MockFileData("")
+            );
         }
 
         var sut = Resolve<JanitorCleanupTask>();
         sut.OnFinish();
 
-        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName, StringComparison.Ordinal))
+        Fs.AllFiles.Where(x =>
+                x.StartsWith(Paths.CliLogDirectory.FullName, StringComparison.Ordinal)
+            )
             .Should()
             .HaveCount(maxFiles);
     }
@@ -43,14 +48,19 @@ internal sealed class BaseCommandSetupIntegrationTest : CliIntegrationFixture
 
         for (var i = 0; i < maxFiles + 20; ++i)
         {
-            Fs.AddFile(Paths.LogDirectory.File($"logfile-{i}.log").FullName, new MockFileData(""));
+            Fs.AddFile(
+                Paths.CliLogDirectory.File($"logfile-{i}.log").FullName,
+                new MockFileData("")
+            );
         }
 
         var sut = Resolve<JanitorCleanupTask>();
         sut.OnFinish();
 
         maxFiles.Should().BePositive();
-        Fs.AllFiles.Where(x => x.StartsWith(Paths.LogDirectory.FullName, StringComparison.Ordinal))
+        Fs.AllFiles.Where(x =>
+                x.StartsWith(Paths.CliLogDirectory.FullName, StringComparison.Ordinal)
+            )
             .Should()
             .HaveCount(maxFiles);
     }
