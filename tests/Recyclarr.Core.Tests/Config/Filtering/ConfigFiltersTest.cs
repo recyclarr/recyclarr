@@ -1,11 +1,10 @@
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Parsing;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.Config.Filtering;
 
-internal sealed class ConfigFiltersTest : IntegrationTestFixture
+internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Filter_out_invalid_instances()

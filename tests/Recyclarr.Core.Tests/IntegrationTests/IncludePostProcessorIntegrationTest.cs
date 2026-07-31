@@ -2,11 +2,10 @@ using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
-using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class IncludePostProcessorIntegrationTest : IntegrationTestFixture
+internal sealed class IncludePostProcessorIntegrationTest : CoreIntegrationTestFixture
 {
     [Test]
     public void No_change_when_no_includes()

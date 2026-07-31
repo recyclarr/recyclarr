@@ -1,33 +1,23 @@
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
-using Autofac.Extras.Ordering;
 using Autofac.Features.ResolveAnything;
-using NSubstitute;
-using Recyclarr.Compatibility;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Platform;
-using Recyclarr.Repo;
-using Recyclarr.TestLibrary;
-using Recyclarr.TestLibrary.Autofac;
-using Recyclarr.VersionControl;
-using Serilog;
-using Spectre.Console;
 
 namespace Recyclarr.Core.TestLibrary;
 
 public abstract class IntegrationTestFixture : IDisposable
 {
     private readonly Lazy<ILifetimeScope> _container;
+    private readonly TestStubsModule _stubs = new();
+
     protected ILifetimeScope Container => _container.Value;
-    protected MockFileSystem Fs { get; }
-    protected IAppPaths Paths => Resolve<IAppPaths>();
+    protected MockFileSystem Fs => _stubs.Fs;
+    protected IAppPaths Paths => _stubs.Paths;
 
     protected IntegrationTestFixture()
     {
-        Fs = new MockFileSystem(new MockFileSystemOptions { CreateDefaultTempDir = false });
-
         // Use Lazy because we shouldn't invoke virtual methods at construction time
         _container = new Lazy<ILifetimeScope>(() =>
         {
@@ -40,15 +30,10 @@ public abstract class IntegrationTestFixture : IDisposable
     }
 
     /// <summary>
-    /// Register "real" types (usually Module-derived classes from other projects). This call
-    /// happens before RegisterStubsAndMocks().
+    /// Register the production composition under test. This call happens before
+    /// RegisterStubsAndMocks().
     /// </summary>
-    protected virtual void RegisterTypes(ContainerBuilder builder)
-    {
-        // Needed for Autofac.Extras.Ordering
-        builder.RegisterSource<OrderedRegistrationSource>();
-        builder.RegisterModule<CoreAutofacModule>();
-    }
+    protected abstract void RegisterTypes(ContainerBuilder builder);
 
     /// <summary>
     /// Override registrations made in the RegisterTypes() method. This method is called after
@@ -56,33 +41,7 @@ public abstract class IntegrationTestFixture : IDisposable
     /// </summary>
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder)
     {
-        builder.RegisterInstance(Fs).As<IFileSystem>().AsSelf();
-
-        builder.Register(_ => NUnitAnsiConsole.Create()).As<IAnsiConsole>().SingleInstance();
-        builder.RegisterType<TestableLogger>().As<ILogger>().SingleInstance();
-        builder.RegisterType<StubRepoUpdater>().As<IRepoUpdater>().SingleInstance();
-
-        var testRoot = Fs.CurrentDirectory().SubDirectory("test").SubDirectory("recyclarr");
-        var paths = new AppPaths(testRoot, testRoot);
-        paths.CreateTopDirectories();
-        builder.RegisterInstance(paths).As<IAppPaths>();
-
-        builder.RegisterMockFor<IEnvironment>(m =>
-        {
-            m.GetFolderPath(Arg.Any<Environment.SpecialFolder>()).Returns("/mock/home");
-        });
-        builder.RegisterMockFor<IGitRepository>();
-        builder.RegisterMockFor<IServiceInformation>(m =>
-        {
-            // By default, choose some extremely high number so that all the newest features are enabled.
-            m.GetVersion(CancellationToken.None).ReturnsForAnyArgs(_ => new Version("99.0.0.0"));
-        });
-
-        // Create empty settings.yml to avoid SettingsLoader creating one and triggering YAML errors
-        Fs.AddFile(
-            Fs.Path.Combine(testRoot.FullName, "settings.yml"),
-            new MockFileData("# Empty settings for tests\n")
-        );
+        builder.RegisterModule(_stubs);
     }
 
     protected T Resolve<T>()

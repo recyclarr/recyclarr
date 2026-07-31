@@ -1,12 +1,11 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.TrashGuide;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderSecretsTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderSecretsTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Test_secret_loading()

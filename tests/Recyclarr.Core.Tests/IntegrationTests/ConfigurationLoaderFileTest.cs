@@ -1,11 +1,10 @@
 using System.IO.Abstractions;
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderFileTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderFileTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Relative_path_resolves_against_config_directory()
