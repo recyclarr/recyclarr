@@ -2,12 +2,14 @@ using Recyclarr.Config.Parsing;
 
 namespace Recyclarr.Config.Filtering;
 
-public class ConfigFilterProcessor(
-    IFilterResultRenderer renderer,
-    IEnumerable<IConfigFilter> filters
-)
+public record ConfigFilterProcessorResult(
+    IReadOnlyCollection<LoadedConfigYaml> Configs,
+    IReadOnlyCollection<IFilterResult> FilterResults
+);
+
+public class ConfigFilterProcessor(IEnumerable<IConfigFilter> filters)
 {
-    public IReadOnlyCollection<LoadedConfigYaml> FilterAndRender(
+    public ConfigFilterProcessorResult Filter(
         ConfigFilterCriteria criteria,
         IReadOnlyCollection<LoadedConfigYaml> configs,
         IReadOnlyCollection<string> allAvailableInstances
@@ -20,11 +22,6 @@ public class ConfigFilterProcessor(
             (current, filter) => filter.Filter(criteria, current, context)
         );
 
-        if (context.Results.Count > 0)
-        {
-            renderer.RenderResults(context.Results);
-        }
-
-        return filteredConfigs;
+        return new ConfigFilterProcessorResult(filteredConfigs, context.Results);
     }
 }

@@ -1,45 +1,34 @@
 using Recyclarr.Cli.Console.Widgets;
-using Recyclarr.Sync;
+using Recyclarr.Client.V1;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync;
 
-internal class DiagnosticsRenderer : IDisposable
+internal class DiagnosticsRenderer(IAnsiConsole console)
 {
-    private readonly IAnsiConsole _console;
-    private readonly List<SyncDiagnosticEvent> _diagnostics = [];
-    private readonly IDisposable _subscription;
-
-    public DiagnosticsRenderer(IAnsiConsole console, ISyncRunScope run)
-    {
-        _console = console;
-        _subscription = run.Diagnostics.Subscribe(_diagnostics.Add);
-    }
-
-    public void Report()
+    public void Render(IReadOnlyCollection<DiagnosticEventResponse> diagnostics)
     {
         var panel = new DiagnosticPanel("Sync Diagnostics");
 
-        foreach (var d in _diagnostics)
+        foreach (var d in diagnostics)
         {
             var prefix = string.IsNullOrEmpty(d.Instance) ? null : d.Instance;
 
             switch (d.Level)
             {
-                case SyncDiagnosticLevel.Error:
+                case "Error":
                     panel.AddError(prefix, d.Message);
                     break;
-                case SyncDiagnosticLevel.Warning:
-                    panel.AddWarning(prefix, d.Message);
-                    break;
-                case SyncDiagnosticLevel.Deprecation:
+                case "Deprecation":
                     panel.AddDeprecation(prefix, d.Message);
+                    break;
+                // A level this CLI doesn't know is still worth showing.
+                default:
+                    panel.AddWarning(prefix, d.Message);
                     break;
             }
         }
 
-        panel.Render(_console);
+        panel.Render(console);
     }
-
-    public void Dispose() => _subscription.Dispose();
 }

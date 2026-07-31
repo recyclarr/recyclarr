@@ -1,11 +1,10 @@
 using Recyclarr.Config.Parsing;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.Core.TestLibrary;
 using Recyclarr.Platform;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
-internal sealed class ConfigurationLoaderEnvVarTest : IntegrationTestFixture
+internal sealed class ConfigurationLoaderEnvVarTest : CoreIntegrationTestFixture
 {
     [Test]
     public void Test_successful_environment_variable_loading()

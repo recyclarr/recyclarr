@@ -1,5 +1,4 @@
 using System.Globalization;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.ConfigTemplates;
 using Recyclarr.TrashGuide;
 using Spectre.Console;
