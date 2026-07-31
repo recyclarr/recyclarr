@@ -11,7 +11,7 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
     public void Configure(LoggerConfiguration config)
     {
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
-        var logDir = paths.LogDirectory;
+        var logDir = paths.CliLogDirectory;
         var template = BuildExpressionTemplate();
 
         config

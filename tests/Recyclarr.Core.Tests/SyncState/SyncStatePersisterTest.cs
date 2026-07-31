@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
+using NSubstitute.ExceptionExtensions;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
@@ -67,5 +69,23 @@ internal sealed class SyncStatePersisterTest
         var result = sut.Load();
 
         result.Mappings.Should().BeEquivalentTo([new TrashIdMapping("abc", "Test", 42)]);
+    }
+
+    [Test]
+    public void Load_classifies_storage_access_failure()
+    {
+        var file = Substitute.For<IFileInfo>();
+        file.Exists.Returns(true);
+        file.OpenRead().Throws(new IOException("unavailable"));
+        var storage = Substitute.For<ISyncStateStoragePath>();
+        storage.CalculatePath("test-state").Returns(file);
+        var sut = new TestSyncStatePersister(Substitute.For<ILogger>(), storage);
+
+        var act = sut.Load;
+
+        act.Should()
+            .Throw<SyncStateUnavailableException>()
+            .WithInnerException<IOException>()
+            .WithMessage("unavailable");
     }
 }

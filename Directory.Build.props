@@ -29,8 +29,12 @@
   </ItemGroup>
 
   <!-- For only NON-TEST projects -->
-  <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('Tests'))">
+  <ItemGroup
+    Condition="!$(MSBuildProjectName.EndsWith('Tests'))
+      and !$(MSBuildProjectName.EndsWith('TestLibrary'))"
+  >
     <InternalsVisibleTo Include="$(MSBuildProjectName).Tests" />
+    <InternalsVisibleTo Include="$(MSBuildProjectName).TestLibrary" />
     <!-- For NSubstitute -->
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>

@@ -17,6 +17,23 @@ internal class PipelinePublisher(
         publisher.Publish(new PipelineEvent(instance, pipeline, status, count, changes));
     }
 
+    public void Add(SyncOutcome outcome)
+    {
+        var retainOutcome = true;
+        foreach (var message in SyncOutcomeFormatter.Format(outcome))
+        {
+            publisher.Publish(
+                new SyncDiagnosticEvent(
+                    instance,
+                    outcome.Level,
+                    message,
+                    retainOutcome ? outcome : null
+                )
+            );
+            retainOutcome = false;
+        }
+    }
+
     public void AddError(string message)
     {
         publisher.Publish(new SyncDiagnosticEvent(instance, SyncDiagnosticLevel.Error, message));
