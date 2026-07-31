@@ -2,4 +2,34 @@
   <ItemGroup Condition="$(ProjectName.EndsWith('.Tests'))">
     <None Remove="TestResults/**/*" />
   </ItemGroup>
+
+  <!-- PackageVersion only centralizes versions; private dependency metadata belongs here. -->
+  <ItemGroup>
+    <PackageReference Update="AgileObjects.ReadableExpressions" PrivateAssets="all" />
+    <PackageReference Update="AutofacContrib.NSubstitute" PrivateAssets="all" />
+    <PackageReference Update="AutoFixture" PrivateAssets="all" />
+    <PackageReference Update="AutoFixture.AutoNSubstitute" PrivateAssets="all" />
+    <PackageReference Update="AutoFixture.NUnit4" PrivateAssets="all" />
+    <PackageReference Update="AwesomeAssertions" PrivateAssets="all" />
+    <PackageReference Update="AwesomeAssertions.Analyzers" PrivateAssets="all" />
+    <PackageReference Update="coverlet.collector" PrivateAssets="all" />
+    <PackageReference Update="GitVersion.MsBuild" PrivateAssets="all" />
+    <PackageReference Update="JetBrains.Annotations" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
+    <PackageReference Update="NSubstitute" PrivateAssets="all" />
+    <PackageReference Update="NSubstitute.Analyzers.CSharp" PrivateAssets="all" />
+    <PackageReference Update="NUnit" PrivateAssets="all" />
+    <PackageReference Update="NUnit.Analyzers" PrivateAssets="all" />
+    <PackageReference Update="NUnit3TestAdapter" PrivateAssets="all" />
+    <PackageReference Update="Refitter.MSBuild" PrivateAssets="all" />
+    <PackageReference Update="Riok.Mapperly" PrivateAssets="all" />
+    <PackageReference Update="Serilog.Sinks.NUnit" PrivateAssets="all" />
+    <PackageReference Update="Spectre.Console.Analyzer" PrivateAssets="all" />
+    <PackageReference Update="Spectre.Console.Testing" PrivateAssets="all" />
+    <PackageReference Update="Testcontainers" PrivateAssets="all" />
+    <PackageReference
+      Update="TestableIO.System.IO.Abstractions.TestingHelpers"
+      PrivateAssets="all"
+    />
+  </ItemGroup>
 </Project>

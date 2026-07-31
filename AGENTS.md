@@ -272,8 +272,9 @@ log.Warning(message);
 - Use `-v q` for `dotnet test` and `dotnet build` to show only warnings and errors.
 - You MUST use the dotnet CLI when: adding packages, removing packages, adding projects to solution.
   Prioritize the CLI for all project-specific modifications if possible.
-- Central package management: specify versions in `Directory.Packages.props`, not in individual
-  csproj files.
+- Central package management: `Directory.Packages.props` contains versions only. Private packages
+  MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
+  synchronized when adding, renaming, removing, or changing package privacy.
 - When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**

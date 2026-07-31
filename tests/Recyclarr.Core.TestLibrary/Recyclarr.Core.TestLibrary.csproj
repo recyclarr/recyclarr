@@ -4,8 +4,10 @@
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="NSubstitute" />
     <PackageReference Include="NUnit" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Spectre.Console.Testing" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 </Project>
