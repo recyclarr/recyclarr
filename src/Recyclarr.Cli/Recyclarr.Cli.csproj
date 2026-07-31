@@ -2,6 +2,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr</AssemblyName>
+    <!-- GitVersion.MsBuild generates an internal GitVersionInformation class in every project.
+         InternalsVisibleTo from Core exposes its copy, causing CS0436. The local copy is used. -->
+    <!-- CA1515: Refit's source generator emits a public client stub into this assembly for every
+         RestService.For<T>() call site. The generated type has no file to suppress it on. -->
+    <NoWarn>$(NoWarn);CS0436;CA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +21,6 @@
     <PackageReference Include="Spectre.Console.Analyzer" />
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="SuperLinq" />
-    <PackageReference Include="SystemTextJson.JsonDiffPatch" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
@@ -24,7 +28,27 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
+    <ProjectReference Include="..\Recyclarr.Client\Recyclarr.Client.csproj" />
+    <!-- The server is a sibling executable the CLI launches, never an assembly it links against
+         (ADR-010). Runtime packaging publishes it separately. -->
+    <ProjectReference Include="..\Recyclarr.Server\Recyclarr.Server.csproj"
+                      Condition="'$(RuntimeIdentifier)' == ''"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <!-- Development convenience: `dotnet run`/`dotnet test` output dirs have no recyclarr-server, so
+       ephemeral launch would fail to find one. Release packaging composes the two binaries itself,
+       hence Build only. -->
+  <Target Name="CopyServerBinaryForDevelopment" AfterTargets="Build"
+          Condition="'$(RuntimeIdentifier)' == ''">
+    <ItemGroup>
+      <ServerBuildOutput Include="$(MSBuildProjectDirectory)/../Recyclarr.Server/bin/$(Configuration)/$(TargetFramework)/**/*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ServerBuildOutput)"
+          DestinationFolder="$(OutDir)%(RecursiveDir)"
+          SkipUnchangedFiles="true"
+          OverwriteReadOnlyFiles="true" />
+  </Target>
 
   <ItemGroup>
     <EmbeddedResource Include="config-template.yml" />

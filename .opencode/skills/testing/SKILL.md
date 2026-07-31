@@ -121,21 +121,21 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `TestableLogger`: Capture log messages
 - `NUnitAnsiConsole`: Console output verification
 - `MockFileSystem`: Filesystem testing (avoid absolute paths)
-- Factory classes: `NewCf`, `NewConfig`, `NewQualitySize`, `NewPlannedCf`, etc.
+- Factory classes: `NewCf`, `NewConfig`, `NewQp`, etc.
 
 ## Test Factory Helpers (`New*` Classes)
 
-One `New{DomainType}` class per domain type (e.g. `NewQualityDefinition`, `NewCustomFormat`). No
-grab-bag classes mixing unrelated types.
+`New*` helpers isolate tests from model-construction churn. When a model changes an initialization
+value most tests ignore, update the helper instead of every caller.
 
 **Rules:**
 
-- Methods return one type. Use overloads or optional parameters for variants, not separate classes.
-- Accept only test-relevant parameters with sensible defaults. This shields tests from model
-  changes.
-- Location: `Core.TestLibrary` for types in Core; `Cli.Tests/Reusable` for types in Cli. Hard
-  constraint from project dependency direction (see REC-90).
-- Overhaul existing helpers when their types are touched. No legacy pattern preservation.
+- Group related constructions under a concise domain-area name. Split concepts with different
+  ownership or change cadence; related return types do not require separate classes.
+- Use overloads or optional parameters for variants.
+- Accept only test-relevant parameters, with sensible defaults for the rest.
+- Test projects may depend on test-library projects, never the reverse. Shared test-library APIs
+  must be public; helpers exposing internal production types stay in the owning test project.
 
 **When to skip:** If a domain type is trivial (few properties, no `required` fields, natural
 defaults), direct construction in tests is acceptable. Include a brief justification when skipping.

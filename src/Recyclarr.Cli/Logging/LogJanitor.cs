@@ -8,7 +8,7 @@ internal class LogJanitor(IAppPaths paths)
     {
         foreach (
             var file in paths
-                .LogDirectory.GetFiles()
+                .CliLogDirectory.GetFiles()
                 .OrderByDescending(f => f.Name)
                 .Skip(numberOfNewestToKeep)
         )

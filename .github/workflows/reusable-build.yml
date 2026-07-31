@@ -44,7 +44,7 @@ jobs:
       - name: Smoke
         if: endsWith(inputs.runtime, 'x64') && !inputs.skip-test
         shell: pwsh
-        run: ci/SmokeTest.ps1 publish/${{ inputs.runtime }}/recyclarr
+        run: ci/SmokeTest.ps1 publish/${{ inputs.runtime }}/recyclarr-server
 
       - name: Upload Artifact
         uses: $/.github/actions/upload-tar

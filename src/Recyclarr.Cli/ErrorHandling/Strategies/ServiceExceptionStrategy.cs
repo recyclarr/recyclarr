@@ -1,12 +1,13 @@
-using Recyclarr.Cli.Console;
+using Recyclarr.Common;
 using Recyclarr.Compatibility;
+using Recyclarr.ErrorHandling;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.ErrorHandling.Strategies;
 
 internal class ServiceExceptionStrategy : IExceptionStrategy
 {
-    public Task<IReadOnlyList<string>?> HandleAsync(Exception exception)
+    public Task<HandledInstanceFailure?> HandleAsync(Exception exception)
     {
         return
             exception
@@ -15,7 +16,7 @@ internal class ServiceExceptionStrategy : IExceptionStrategy
                     or CommandException
                     or CommandRuntimeException
                 )
-            ? Task.FromResult<IReadOnlyList<string>?>(null)
-            : Task.FromResult<IReadOnlyList<string>?>([exception.Message]);
+            ? Task.FromResult<HandledInstanceFailure?>(null)
+            : Task.FromResult<HandledInstanceFailure?>(new ServiceFailure(exception.Message));
     }
 }

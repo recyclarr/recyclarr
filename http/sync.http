@@ -1,0 +1,49 @@
+# @name createSyncJob
+POST {{baseUrl}}/api/v1/sync/jobs
+Content-Type: application/json
+
+{
+  "service": "{{service}}",
+  "preview": {{preview}}
+}
+
+?? status == 202
+?? body $.id isString
+
+{{response
+  exports.pollResponse = { statusCode: 202 };
+  exports.pollAttempts = 0;
+  exports.pollDeadline = Date.now() + 60_000;
+}}
+
+###
+
+# @name poll
+# @loop while pollResponse.statusCode === 202 && pollAttempts++ < 60 && Date.now() < pollDeadline
+# @sleep 1000
+GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
+
+{{response
+  const assert = require("assert");
+
+  test("poll status is accepted", () => {
+    assert.ok(
+      response.statusCode === 202 || response.statusCode === 200,
+      `expected 202 or 200; got ${response.statusCode}`
+    );
+  });
+}}
+
+###
+
+{{
+  const assert = require("assert");
+  assert.equal(pollResponse.statusCode, 200, "sync did not finish within 60 seconds");
+  assert.notEqual(poll.status, "Failed", "sync job failed");
+}}
+
+# @name getSyncJobResults
+GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}/results
+
+?? status == 200
+?? body $.id isString

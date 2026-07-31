@@ -1,8 +1,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Cli.Console.Settings;
 using Recyclarr.Cli.Processors.Sync;
+using Recyclarr.Cli.Server;
+using Recyclarr.Sync;
 using Recyclarr.TrashGuide;
 using Spectre.Console.Cli;
 
@@ -10,10 +11,8 @@ namespace Recyclarr.Cli.Console.Commands;
 
 [Description("Sync the guide to services")]
 [UsedImplicitly]
-internal class SyncCommand(
-    ProviderProgressHandler providerProgressHandler,
-    SyncScopeFactory syncScopeFactory
-) : AsyncCommand<SyncCommand.CliSettings>
+internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandler handler)
+    : AsyncCommand<SyncCommand.CliSettings>
 {
     [UsedImplicitly]
     [SuppressMessage(
@@ -50,19 +49,15 @@ internal class SyncCommand(
         public IReadOnlyCollection<string> Instances => InstancesOption;
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CliSettings settings,
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(silent: false, ct);
-
-        // Sync scope owns the lifecycle of all sync-run-scoped services.
-        // Disposing it fires OnCompleted on all observables, triggering
-        // diagnostics rendering and notifications automatically.
-        using var syncScope = syncScopeFactory.Start<SyncProcessor>();
-        return (int)await syncScope.Entry.Process(settings, ct);
+        // Resource providers are initialized by the server as part of its startup, so there is
+        // nothing to prepare here. Disposing the connection stops an ephemeral server.
+        await using var connection = await connections.ConnectAsync(ct);
+        return (int)await handler.RunAsync(connection.Sync, settings, ct);
     }
 }

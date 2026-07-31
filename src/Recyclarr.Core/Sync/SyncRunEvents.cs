@@ -16,7 +16,12 @@ public record PipelineItemChanges(
     IReadOnlyList<string> Deleted
 );
 
-public record SyncDiagnosticEvent(string? Instance, SyncDiagnosticLevel Level, string Message);
+public record SyncDiagnosticEvent(
+    string? Instance,
+    SyncDiagnosticLevel Level,
+    string Message,
+    SyncOutcome? Outcome = null
+);
 
 public enum SyncDiagnosticLevel
 {

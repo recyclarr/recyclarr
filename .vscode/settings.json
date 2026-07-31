@@ -2,5 +2,12 @@
   "dotnet-test-explorer.testProjectPath": "tests/**/*.Tests.csproj",
   "files.trimFinalNewlines": true,
   "files.insertFinalNewline": true,
+  "httpyac.logRequest": true,
+  "httpyac.logOutputChannelOptions": {
+    "useShort": false,
+    "responseBodyLength": 10000,
+    "responseBodyPrettyPrint": true,
+    "onlyFailed": true
+  },
   "recyclarr.runtime": "linux-musl-x64"
 }

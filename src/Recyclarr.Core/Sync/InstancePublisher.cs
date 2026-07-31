@@ -5,6 +5,23 @@ namespace Recyclarr.Sync;
 internal class InstancePublisher(IServiceConfiguration config, ISyncRunPublisher publisher)
     : IInstancePublisher
 {
+    public void Add(SyncOutcome outcome)
+    {
+        var retainOutcome = true;
+        foreach (var message in SyncOutcomeFormatter.Format(outcome))
+        {
+            publisher.Publish(
+                new SyncDiagnosticEvent(
+                    config.InstanceName,
+                    outcome.Level,
+                    message,
+                    retainOutcome ? outcome : null
+                )
+            );
+            retainOutcome = false;
+        }
+    }
+
     public void AddError(string message)
     {
         publisher.Publish(

@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using Recyclarr.Cli.ConfigFilterRendering;
 using Recyclarr.Config;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Parsing;
@@ -13,6 +14,7 @@ internal class ConfigPipelineFactory(
     IConfigurationFinder finder,
     IFileSystem fs,
     ConfigFilterProcessor filterProcessor,
+    ConsoleFilterResultRenderer filterRenderer,
     IConfigDiagnosticCollector diagnosticCollector,
     InstanceScopeFactory instanceScopeFactory,
     IAnsiConsole console,
@@ -64,6 +66,7 @@ internal class ConfigPipelineFactory(
             failures,
             diagnosticCollector,
             filterProcessor,
+            filterRenderer,
             instanceScopeFactory,
             console,
             log

@@ -23,6 +23,8 @@ internal sealed class NoopPipelinePublisher : IPipelinePublisher
         PipelineItemChanges? changes = null
     ) { }
 
+    public void Add(SyncOutcome outcome) { }
+
     public void AddError(string message) { }
 
     public void AddWarning(string message) { }

@@ -3,6 +3,7 @@
     <ProjectReference Include="..\..\src\Recyclarr.Cli\Recyclarr.Cli.csproj" />
     <ProjectReference Include="..\Recyclarr.Core.TestLibrary\Recyclarr.Core.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.TestLibrary\Recyclarr.TestLibrary.csproj" />
+    <ProjectReference Include="..\Recyclarr.Server.TestLibrary\Recyclarr.Server.TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Remove="Serilog.Sinks.NUnit" />
