@@ -9,6 +9,8 @@ internal static class CliSetup
 {
     private static void AddCommands(IConfigurator cli)
     {
+        cli.AddCommand<ServeCommand>("serve");
+
         cli.AddCommand<SyncCommand>("sync")
             .WithExample("sync", "radarr", "--instance", "movies")
             .WithExample("sync", "-i", "instance1", "-i", "instance2")

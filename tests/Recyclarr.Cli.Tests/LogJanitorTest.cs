@@ -20,16 +20,21 @@ internal sealed class LogJanitorTest
             "trash_2021-05-15_21-00-00.log",
             "trash_2021-05-15_22-00-00.log",
         }
-            .Select(x => paths.LogDirectory.File(x))
+            .Select(x => paths.CliLogDirectory.File(x))
             .ToList();
+
+        var serverLog = paths.ServerLogDirectory.File("recyclarr-server.log");
 
         foreach (var file in testFiles)
         {
             fs.AddEmptyFile(file);
         }
 
+        fs.AddEmptyFile(serverLog);
+
         janitor.DeleteOldestLogFiles(2);
 
-        fs.AllFiles.Should().BeEquivalentTo(testFiles[2].FullName, testFiles[3].FullName);
+        fs.AllFiles.Should()
+            .BeEquivalentTo(testFiles[2].FullName, testFiles[3].FullName, serverLog.FullName);
     }
 }

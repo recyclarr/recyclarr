@@ -6,7 +6,7 @@ namespace Recyclarr.Cli.ConfigFilterRendering;
 internal class ConsoleFilterResultRenderer(
     IAnsiConsole console,
     IReadOnlyCollection<IConsoleFilterResultRenderer> renderers
-) : IFilterResultRenderer
+)
 {
     private Dictionary<Type, IConsoleFilterResultRenderer> RenderersByType { get; } =
         renderers.ToDictionary(x => x.CompatibleFilterResult);

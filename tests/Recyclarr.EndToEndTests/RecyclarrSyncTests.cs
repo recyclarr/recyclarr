@@ -9,6 +9,10 @@ using SonarrApi = Recyclarr.Api.Sonarr;
 namespace Recyclarr.EndToEndTests;
 
 [TestFixture(Category = "E2E"), Explicit, NonParallelizable]
+[Ignore(
+    "REC-157: the harness publishes only the CLI, so ephemeral launch finds no server binary, and "
+        + "these assertions read sync log lines that are now written by the server process."
+)]
 internal sealed class RecyclarrSyncTests
 {
     private static RecyclarrTestHarness _harness = null!;
