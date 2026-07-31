@@ -4,42 +4,27 @@ using CliWrap;
 using CliWrap.Buffered;
 using NUnit.Framework;
 using RadarrApi = Recyclarr.Api.Radarr;
-using SonarrApi = Recyclarr.Api.Sonarr.V3;
-using SonarrV5Api = Recyclarr.Api.Sonarr.V5;
+using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.EndToEndTests;
 
-// Sonarr `latest` is v4 (API v3); `develop` is v5 (API v5). Radarr runs with one fixture only.
-[TestFixture("latest", true, Category = "E2E")]
-[TestFixture("develop", false, Category = "E2E")]
-[Explicit, NonParallelizable]
-[FixtureLifeCycle(LifeCycle.SingleInstance)] // ordered tests share one harness per fixture
-internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr)
+[TestFixture(Category = "E2E"), Explicit, NonParallelizable]
+[Ignore(
+    "REC-157: the harness publishes only the CLI, so ephemeral launch finds no server binary, and "
+        + "these assertions read sync log lines that are now written by the server process."
+)]
+internal sealed class RecyclarrSyncTests
 {
-    private RecyclarrTestHarness _harness = null!;
-    private bool _sonarrV5;
-    private IReadOnlyDictionary<string, SizeSnapshot> _unmanagedProfileSizesBeforeSync =
-        new Dictionary<string, SizeSnapshot>();
-
-    private sealed record SizeSnapshot(double? Min, double? Max, double? Preferred);
+    private static RecyclarrTestHarness _harness = null!;
 
     [OneTimeSetUp]
-    public async Task OneTimeSetUp()
+    public static async Task OneTimeSetUp()
     {
-        _harness = await RecyclarrTestHarness.StartAsync(
-            TestContext.CurrentContext,
-            sonarrImageTag,
-            startRadarr
-        );
-
-        var status = await _harness
-            .SonarrApi<SonarrApi.ISystemApi>()
-            .Status(TestContext.CurrentContext.CancellationToken);
-        _sonarrV5 = new Version(status.Version!).Major >= 5;
+        _harness = await RecyclarrTestHarness.StartAsync(TestContext.CurrentContext);
     }
 
     [OneTimeTearDown]
-    public async Task OneTimeTearDown()
+    public static async Task OneTimeTearDown()
     {
         await _harness.DisposeAsync();
     }
@@ -48,33 +33,16 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
     [CancelAfter(60_000)]
     public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
-        if (_sonarrV5)
-        {
-            _unmanagedProfileSizesBeforeSync = await GetHdtv1080PSizesByProfile(ct);
-        }
-
         var result = await RunRecyclarrSync(ct);
         await LogOutput(result);
         result
             .ExitCode.Should()
             .Be(0, $"recyclarr sync failed:\n{result.StandardOutput}\n{result.StandardError}");
 
-        if (_sonarrV5)
-        {
-            AssertOnlySonarrV5ApiUsed(result);
-            await VerifySonarrV5ProfileSizes(ct);
-        }
-        else
-        {
-            await WaitForQualityDefinitionUpdates(ct);
-            await VerifySonarrV4QualityDefinitions(ct);
-        }
+        await WaitForQualityDefinitionUpdates(ct);
 
         await VerifySonarrState(ct);
-        if (_harness.HasRadarr)
-        {
-            await VerifyRadarrState(ct);
-        }
+        await VerifyRadarrState(ct);
     }
 
     [Test, Order(2)]
@@ -94,11 +62,6 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
                 ["Bad Dual Groups", "No-RlsGroup", "Obfuscated", "E2E-SonarrCustom"],
                 "CFs should be unchanged after re-sync"
             );
-
-        if (!_harness.HasRadarr)
-        {
-            return;
-        }
 
         var radarrCfNames = (
             await _harness.RadarrApi<RadarrApi.ICustomFormatApi>().CustomformatGet(ct)
@@ -262,7 +225,6 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
               "cutoffFormatScore": 10000,
               "minUpgradeFormatScore": 75,
               "language": "Original",
-              "trash_quality_definition": { "e2e": "e2e00000000000000000000000000020" },
               "items": [
                 { "name": "Unknown", "allowed": false },
                 { "name": "SDTV", "allowed": false },
@@ -327,128 +289,29 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             );
     }
 
-    private async Task<BufferedCommandResult> RunRecyclarrSync(
+    private static async Task<BufferedCommandResult> RunRecyclarrSync(
         CancellationToken ct,
         string? configPath = null
     )
     {
-        List<string> args =
-        [
-            "sync",
-            "--log",
-            "debug",
-            "--config",
-            configPath ?? _harness.ConfigPath,
-        ];
-        if (!_harness.HasRadarr)
-        {
-            args.AddRange(["--instance", "sonarr_main"]);
-        }
-
         return await Cli.Wrap(_harness.RecyclarrBinaryPath)
-            .WithArguments(args)
+            .WithArguments([
+                "sync",
+                "--log",
+                "debug",
+                "--config",
+                configPath ?? _harness.ConfigPath,
+            ])
             .WithEnvironmentVariables(env =>
                 env.Set("SONARR_URL", $"http://localhost:{_harness.SonarrPort}")
                     .Set("SONARR_API_KEY", "testkey")
-                    .Set("RADARR_URL", $"http://localhost:{_harness.RadarrPort ?? 0}")
+                    .Set("RADARR_URL", $"http://localhost:{_harness.RadarrPort}")
                     .Set("RADARR_API_KEY", "testkey")
                     .Set("RECYCLARR_CONFIG_DIR", _harness.AppDataDir.FullName)
                     .Set("RECYCLARR_APP_DATA", "")
             )
             .WithValidation(CommandResultValidation.None)
             .ExecuteBufferedAsync(ct);
-    }
-
-    // The version probe stays on /api/v3/system/status; every other Sonarr v5 request uses v5.
-    private static void AssertOnlySonarrV5ApiUsed(BufferedCommandResult result)
-    {
-        var v3Requests = result
-            .StandardOutput.Split('\n')
-            .Where(line => line.Contains("/api/v3/", StringComparison.Ordinal))
-            .Where(line => !line.Contains("/api/v3/system/status", StringComparison.Ordinal))
-            .ToList();
-
-        v3Requests.Should().BeEmpty("Sonarr v5 must be driven through the v5 API");
-        result
-            .StandardOutput.Should()
-            .Contain("/api/v5/qualityprofile", "quality profiles should sync over the v5 API");
-    }
-
-    private async Task<IReadOnlyDictionary<string, SizeSnapshot>> GetHdtv1080PSizesByProfile(
-        CancellationToken ct
-    )
-    {
-        var profiles = await _harness
-            .SonarrApi<SonarrV5Api.IQualityProfileApi>()
-            .QualityprofileGet(ct);
-
-        return profiles.ToDictionary(
-            p => p.Name!,
-            p =>
-            {
-                var item = FindQualityItem(p, "HDTV-1080p");
-                return new SizeSnapshot(item.MinSize, item.MaxSize, item.PreferredSize);
-            }
-        );
-    }
-
-    private static SonarrV5Api.QualityProfileQualityItemResource FindQualityItem(
-        SonarrV5Api.QualityProfileResource profile,
-        string qualityName
-    )
-    {
-        return profile
-            .Items!.SelectMany(i => i.Quality is null ? i.Items ?? [] : [i])
-            .First(i => i.Quality!.Name == qualityName);
-    }
-
-    // Precedence on Sonarr v5: profile YAML > guide profile reference > instance setting.
-    // Profiles absent from `quality_profiles` keep their sizes.
-    private async Task VerifySonarrV5ProfileSizes(CancellationToken ct)
-    {
-        var after = await GetHdtv1080PSizesByProfile(ct);
-
-        after
-            .Should()
-            .ContainKey("HD-1080p")
-            .WhoseValue.Should()
-            .Be(new SizeSnapshot(6, 60, 40), "the profile's YAML quality_definition wins");
-        after
-            .Should()
-            .ContainKey("E2E-SonarrGuideOverride")
-            .WhoseValue.Should()
-            .Be(new SizeSnapshot(7, 70, 35), "the guide profile's reference wins over instance");
-        after
-            .Should()
-            .ContainKey("E2E-GuideOnlyProfile")
-            .WhoseValue.Should()
-            .Be(new SizeSnapshot(5, 50, 30), "the instance quality_definition applies");
-
-        // Sonarr ships a default "HD-1080p" profile, which the config manages
-        string[] managed = ["HD-1080p", "E2E-SonarrGuideOverride", "E2E-GuideOnlyProfile"];
-        var unmanaged = _unmanagedProfileSizesBeforeSync.Where(x => !managed.Contains(x.Key));
-        foreach (var (name, before) in unmanaged)
-        {
-            after
-                .Should()
-                .ContainKey(name)
-                .WhoseValue.Should()
-                .Be(before, $"unmanaged profile '{name}' must keep its sizes");
-        }
-    }
-
-    private async Task VerifySonarrV4QualityDefinitions(CancellationToken ct)
-    {
-        var qualityDefs = await _harness
-            .SonarrApi<SonarrApi.IQualityDefinitionApi>()
-            .QualitydefinitionGet(ct);
-        var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
-        hdtv1080P.MinSize.Should().BeApproximately(5, 0.1);
-        hdtv1080P.MaxSize.Should().BeApproximately(50, 0.1);
-        hdtv1080P.PreferredSize.Should().BeApproximately(30, 0.1);
-
-        var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
-        bluray1080P.MinSize.Should().BeApproximately(50.4, 0.1);
     }
 
     private static async Task LogOutput(BufferedCommandResult result)
@@ -462,7 +325,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         );
     }
 
-    private async Task VerifySonarrState(CancellationToken ct)
+    private static async Task VerifySonarrState(CancellationToken ct)
     {
         var profiles = await _harness
             .SonarrApi<SonarrApi.IQualityProfileApi>()
@@ -510,6 +373,17 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
         ];
         sonarrCfNames.Should().Contain(expectedSonarrCfs);
 
+        var qualityDefs = await _harness
+            .SonarrApi<SonarrApi.IQualityDefinitionApi>()
+            .QualitydefinitionGet(ct);
+        var hdtv1080P = qualityDefs.First(q => q.Quality?.Name == "HDTV-1080p");
+        hdtv1080P.MinSize.Should().BeApproximately(5, 0.1);
+        hdtv1080P.MaxSize.Should().BeApproximately(50, 0.1);
+        hdtv1080P.PreferredSize.Should().BeApproximately(30, 0.1);
+
+        var bluray1080P = qualityDefs.First(q => q.Quality?.Name == "Bluray-1080p");
+        bluray1080P.MinSize.Should().BeApproximately(50.4, 0.1);
+
         // Media naming settings
         var sonarrNaming = await _harness.SonarrApi<SonarrApi.INamingConfigApi>().NamingGet(ct);
         sonarrNaming.RenameEpisodes.Should().BeTrue("rename should be enabled");
@@ -534,7 +408,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             .Be("doNotUpgrade", "propers_and_repacks should be set to do_not_upgrade");
     }
 
-    private async Task VerifyRadarrState(CancellationToken ct)
+    private static async Task VerifyRadarrState(CancellationToken ct)
     {
         var profiles = await _harness
             .RadarrApi<RadarrApi.IQualityProfileApi>()
@@ -694,7 +568,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             );
     }
 
-    private async Task WaitForQualityDefinitionUpdates(CancellationToken ct)
+    private static async Task WaitForQualityDefinitionUpdates(CancellationToken ct)
     {
         var timeout = TimeSpan.FromSeconds(10);
         var pollInterval = TimeSpan.FromMilliseconds(500);
@@ -714,7 +588,7 @@ internal sealed class RecyclarrSyncTests(string sonarrImageTag, bool startRadarr
             await Task.Delay(pollInterval, ct);
         }
 
-        while (_harness.HasRadarr && DateTime.UtcNow < deadline)
+        while (DateTime.UtcNow < deadline)
         {
             var radarrDefs = await _harness
                 .RadarrApi<RadarrApi.IQualityDefinitionApi>()

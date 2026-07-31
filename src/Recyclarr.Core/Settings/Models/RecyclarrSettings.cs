@@ -8,4 +8,5 @@ public record RecyclarrSettings
     public LogJanitorSettings LogJanitor { get; init; } = new();
     public string? GitPath { get; init; }
     public NotificationSettings Notifications { get; init; } = new();
+    public ServerSettings Server { get; init; } = new();
 }

@@ -10,7 +10,8 @@ public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IApp
     public IDirectoryInfo ConfigDirectory => configRoot;
 
     // Ephemeral data directories (derive from data root)
-    public IDirectoryInfo LogDirectory => dataRoot.SubDirectory("logs", "cli");
+    public IDirectoryInfo CliLogDirectory => dataRoot.SubDirectory("logs", "cli");
+    public IDirectoryInfo ServerLogDirectory => dataRoot.SubDirectory("logs", "server");
     public IDirectoryInfo ResourceDirectory => dataRoot.SubDirectory("resources");
 
     // User configuration directories (derive from config root)
@@ -22,7 +23,8 @@ public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IApp
     public void CreateTopDirectories()
     {
         StateDirectory.Create();
-        LogDirectory.Create();
+        CliLogDirectory.Create();
+        ServerLogDirectory.Create();
         YamlConfigDirectory.Create();
         YamlIncludeDirectory.Create();
     }
