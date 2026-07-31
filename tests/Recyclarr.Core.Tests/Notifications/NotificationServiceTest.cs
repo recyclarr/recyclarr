@@ -25,6 +25,7 @@ internal sealed class NotificationServiceTest
             .Do(x =>
             {
                 var builder = x.Arg<Func<AppriseNotification, AppriseNotification>>();
+                builder.Should().NotBeNull();
                 _capturedNotification = builder(new AppriseNotification());
             });
 

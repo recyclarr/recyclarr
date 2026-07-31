@@ -1,4 +1,3 @@
-using Recyclarr.Cli.Pipelines.Plan;
 using Recyclarr.Cli.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync.Progress;
 

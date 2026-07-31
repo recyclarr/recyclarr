@@ -32,8 +32,8 @@ internal class UpdatedProfileBuilder(
     public List<UpdatedQualityProfile> BuildFrom(IEnumerable<PlannedQualityProfile> plannedProfiles)
     {
         var profileList = plannedProfiles.ToList();
-        var guideBacked = profileList.GuideBacked().ToList();
-        var userDefined = profileList.UserDefined();
+        var guideBacked = profileList.OfType<PlannedQualityProfile.GuideBacked>().ToList();
+        var userDefined = profileList.OfType<PlannedQualityProfile.UserDefined>();
 
         // Two-pass resolution for guide-backed profiles to support multiple profiles
         // sharing the same trash_id (see docs/architecture/quality-profile-state-resolution.md)

@@ -9,7 +9,7 @@ namespace Recyclarr.Cli.Pipelines.Plan;
 //
 // Callers that need guide-specific behavior pattern match on the variant. Callers that treat
 // the guide resource as an optional fallback (e.g., effective-value resolution) use the
-// GuideResource extension.
+// GuideResource property.
 internal abstract record PlannedQualityProfile
 {
     public required string Name { get; init; }
@@ -25,32 +25,15 @@ internal abstract record PlannedQualityProfile
     // CF scores: resolved from score_set or explicit config
     public IList<PlannedCfScore> CfScores { get; init; } = [];
 
+    public QualityProfileResource? GuideResource =>
+        this is GuideBacked guideBacked ? guideBacked.Resource : null;
+
     internal sealed record GuideBacked : PlannedQualityProfile
     {
         public required QualityProfileResource Resource { get; init; }
     }
 
     internal sealed record UserDefined : PlannedQualityProfile;
-}
-
-internal static class PlannedQualityProfileExtensions
-{
-    extension(PlannedQualityProfile profile)
-    {
-        // Optional access for consumers that resolve "effective" values with the guide resource
-        // as a fallback. For logic that differs by variant, pattern match on GuideBacked instead.
-        public QualityProfileResource? GuideResource =>
-            profile is PlannedQualityProfile.GuideBacked g ? g.Resource : null;
-    }
-
-    extension(IEnumerable<PlannedQualityProfile> profiles)
-    {
-        public IEnumerable<PlannedQualityProfile.GuideBacked> GuideBacked() =>
-            profiles.OfType<PlannedQualityProfile.GuideBacked>();
-
-        public IEnumerable<PlannedQualityProfile.UserDefined> UserDefined() =>
-            profiles.OfType<PlannedQualityProfile.UserDefined>();
-    }
 }
 
 // Holds a reference to PlannedCustomFormat (not just TrashId) to enable ID hydration.

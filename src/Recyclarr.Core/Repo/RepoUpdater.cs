@@ -117,7 +117,7 @@ public class RepoUpdater(ILogger log, Func<IDirectoryInfo, IGitRepository> repoF
                 log.Warning(
                     "Git cache for {Name} is {SizeMb:F1} MB after a fresh fetch, which still exceeds "
                         + "the configured limit of {LimitMb:F1} MB. The limit is below the minimum "
-                        + "achievable size; consider raising cache_limit.",
+                        + "achievable size; consider raising cache_limit",
                     repositorySource.Name,
                     newSize / (1024.0 * 1024.0),
                     limitBytes / (1024.0 * 1024.0)
