@@ -7,11 +7,11 @@
 
 ## Overview
 
-The service gateway layer sits between pipeline phases and HTTP clients, abstracting
+The service gateway layer sits between sync operations and HTTP clients, abstracting
 service-specific API details behind domain interfaces. Each feature gets a **port** (domain
 interface) and one **gateway per service** (infrastructure implementation).
 
-Pipeline phases inject the port and operate on domain types. They have no knowledge of which service
+Sync operations inject the port and operate on domain types. They have no knowledge of which service
 is active or how HTTP requests are made.
 
 ## Port + Gateway Pattern
@@ -21,8 +21,8 @@ is active or how HTTP requests are made.
 Domain interface defined in `src/Recyclarr.Core/Servarr/{Feature}/`. Speaks domain types only.
 Methods use read-only collection types (`IReadOnlyList<T>`) for both parameters and return values.
 
-Ports are not pipeline-exclusive. System status is consumed by the compatibility layer, not a
-pipeline.
+Ports are not sync-exclusive. System status is consumed by the compatibility layer, not a sync
+operation.
 
 ```txt
 Servarr/
@@ -38,7 +38,7 @@ Servarr/
     IMediaManagementService.cs
     MediaManagementData.cs
   MediaNaming/
-    ISonarrNamingService.cs          # split pipeline: one port per service
+    ISonarrNamingService.cs          # split operation: one port per service
     IRadarrNamingService.cs
     SonarrNamingData.cs
     RadarrNamingData.cs
@@ -107,7 +107,7 @@ internal class SonarrQualityDefinitionGateway(IQualityDefinitionApiService api)
 **Lifecycle:** Gateway instances are scoped to one sync instance (`InstancePerLifetimeScope`). State
 is created during fetch, consumed during persist, and discarded when the instance scope ends.
 
-**When not needed:** Pipelines with one-way sync (guide overwrites service) do not need stashed
+**When not needed:** Operations with one-way sync (guide overwrites service) do not need stashed
 DTOs. See the Custom Format passthrough exception below.
 
 ## DI Resolution
@@ -116,40 +116,40 @@ Keyed registration per service, plus a non-keyed lambda that selects the correct
 `IServiceConfiguration.ServiceType` at resolve time:
 
 ```csharp
-// Shared pipeline: keyed + non-keyed resolution
+// Shared operation: keyed + non-keyed resolution
 builder.RegisterServiceGateway<
     IQualityDefinitionService,
     SonarrQualityDefinitionGateway,
     RadarrQualityDefinitionGateway>();
 
-// Split pipeline: direct registration (one gateway per port)
+// Split operation: direct registration (one gateway per port)
 builder.RegisterType<SonarrNamingGateway>()
     .As<ISonarrNamingService>()
     .InstancePerLifetimeScope();
 ```
 
-Pipeline phases inject the port directly; they have no idea keying is involved.
+Sync operations inject the port directly; they have no idea keying is involved.
 
-## Shared vs Split Pipeline
+## Shared vs split operation
 
 **Litmus test:** Is there a meaningful shared domain concept, or just a shared endpoint path?
 
-- **Shared pipeline + gateway:** Same resource with service-specific properties (e.g. quality
+- **Shared operation + gateway:** Same resource with service-specific properties (e.g. quality
   profiles with Radarr language).
-- **Split into service-specific pipelines:** Different resource concepts behind a shared path (e.g.
+- **Split into service-specific operations:** Different resource concepts behind a shared path (e.g.
   media naming).
 
-Split pipelines don't mean "duplicate everything." Shared logic lives in helper classes that both
-pipelines depend on (e.g. `NamingFormatLookup`).
+Split operations don't mean "duplicate everything." Shared logic lives in helper classes that both
+operations depend on (e.g. `NamingFormatLookup`).
 
-## Gateway Multiplicity
+## Gateway multiplicity
 
-Every pipeline always gets one gateway per service (Sonarr + Radarr), regardless of whether the
-pipeline is shared or split.
+Every operation always gets one gateway per service (Sonarr + Radarr), regardless of whether the
+operation is shared or split.
 
-- **Shared pipelines:** Both gateways implement the same port. DI resolves the correct one via
+- **Shared operations:** Both gateways implement the same port. DI resolves the correct one via
   keyed/non-keyed pattern.
-- **Split pipelines:** Each pipeline has its own port and single gateway (e.g.
+- **Split operations:** Each operation has its own port and single gateway (e.g.
   `ISonarrNamingService` implemented by `SonarrNamingGateway`).
 
 There is never a single "shared" gateway that handles both services. Even when schemas are identical
@@ -160,8 +160,8 @@ service backs a different API client.
 
 ### Required properties
 
-Driven by domain/pipeline invariants, not API schema. A property is `required` only when omitting it
-at construction would silently mask a bug in domain logic.
+Driven by domain invariants, not API schema. A property is `required` only when omitting it at
+construction would silently mask a bug in domain logic.
 
 Decision tree:
 
@@ -250,7 +250,7 @@ handler pipeline is pooled by `IHttpClientFactory`.
 ## Service API Divergence
 
 Comparison of Sonarr and Radarr OpenAPI specs for endpoints Recyclarr consumes. Useful when deciding
-shared vs split pipeline for new features.
+shared vs split operation for new features.
 
 | Endpoint            | Divergence           | Notes                                                  |
 |---------------------|----------------------|--------------------------------------------------------|

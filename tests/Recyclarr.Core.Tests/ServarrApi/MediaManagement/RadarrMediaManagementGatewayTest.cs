@@ -53,7 +53,8 @@ internal sealed class RadarrMediaManagementGatewayTest
             .MediamanagementPut(
                 "1",
                 Arg.Is<RadarrApi.MediaManagementConfigResource>(d =>
-                    d.DownloadPropersAndRepacks == RadarrApi.ProperDownloadTypes.DoNotPrefer
+                    d != null
+                    && d.DownloadPropersAndRepacks == RadarrApi.ProperDownloadTypes.DoNotPrefer
                     && d.RecycleBin == "/recycle"
                 ),
                 Arg.Any<CancellationToken>()

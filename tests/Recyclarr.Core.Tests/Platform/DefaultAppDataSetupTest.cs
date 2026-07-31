@@ -79,7 +79,12 @@ internal sealed class DefaultAppDataSetupTest
 
         var paths = sut.CreateAppPaths();
 
-        paths.LogDirectory.FullName.Should().StartWith(dataPath);
+        paths
+            .CliLogDirectory.FullName.Should()
+            .Be(fs.CurrentDirectory().SubDirectory("data", "logs", "cli").FullName);
+        paths
+            .ServerLogDirectory.FullName.Should()
+            .Be(fs.CurrentDirectory().SubDirectory("data", "logs", "server").FullName);
         paths.ResourceDirectory.FullName.Should().StartWith(dataPath);
     }
 
@@ -100,7 +105,8 @@ internal sealed class DefaultAppDataSetupTest
 
         // Both config and data directories should be under the same root
         paths.YamlConfigDirectory.FullName.Should().StartWith(configPath);
-        paths.LogDirectory.FullName.Should().StartWith(configPath);
+        paths.CliLogDirectory.FullName.Should().StartWith(configPath);
+        paths.ServerLogDirectory.FullName.Should().StartWith(configPath);
         paths.ResourceDirectory.FullName.Should().StartWith(configPath);
     }
 
@@ -137,7 +143,8 @@ internal sealed class DefaultAppDataSetupTest
 
         // Path is normalized by file system, so /config/../data becomes /data
         var expectedDataPath = fs.CurrentDirectory().SubDirectory("data").FullName;
-        paths.LogDirectory.FullName.Should().StartWith(expectedDataPath);
+        paths.CliLogDirectory.FullName.Should().StartWith(expectedDataPath);
+        paths.ServerLogDirectory.FullName.Should().StartWith(expectedDataPath);
     }
 
     [Test, AutoMockData]
@@ -163,7 +170,8 @@ internal sealed class DefaultAppDataSetupTest
         paths.YamlConfigDirectory.FullName.Should().StartWith(expectedConfigPath);
 
         // Data uses specified directory
-        paths.LogDirectory.FullName.Should().StartWith(dataPath);
+        paths.CliLogDirectory.FullName.Should().StartWith(dataPath);
+        paths.ServerLogDirectory.FullName.Should().StartWith(dataPath);
         paths.ResourceDirectory.FullName.Should().StartWith(dataPath);
     }
 

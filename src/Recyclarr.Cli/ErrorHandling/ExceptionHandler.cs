@@ -1,4 +1,6 @@
 using Autofac.Core;
+using Recyclarr.ErrorHandling;
+using Recyclarr.Sync;
 
 namespace Recyclarr.Cli.ErrorHandling;
 
@@ -17,13 +19,13 @@ internal class ExceptionHandler(
 
         foreach (var strategy in strategies)
         {
-            var messages = await strategy.HandleAsync(actualException);
-            if (messages is null)
+            var failure = await strategy.HandleAsync(actualException);
+            if (failure is null)
             {
                 continue;
             }
 
-            (output ?? defaultOutput).Write(messages, actualException);
+            (output ?? defaultOutput).Write(SyncOutcomeFormatter.Format(failure), actualException);
             return true;
         }
 

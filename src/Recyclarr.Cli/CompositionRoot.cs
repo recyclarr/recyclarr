@@ -8,18 +8,17 @@ using Recyclarr.Cli.Console.Setup;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.ErrorHandling.Strategies;
 using Recyclarr.Cli.Logging;
-using Recyclarr.Cli.Migration;
-using Recyclarr.Cli.Migration.Steps;
-using Recyclarr.Cli.Pipelines;
+using Recyclarr.Cli.Preview;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Processors.Config;
-using Recyclarr.Cli.Processors.Delete;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
+using Recyclarr.Cli.Server;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.Config.Filtering;
+using Recyclarr.ErrorHandling;
 using Recyclarr.Logging;
+using Recyclarr.Pipelines;
 using Recyclarr.ResourceProviders;
 using Serilog.Core;
 using Spectre.Console;
@@ -46,7 +45,6 @@ internal static class CompositionRoot
         builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         CliRegistrations(builder);
-        RegisterMigrations(builder);
         RegisterServiceProcessors(builder);
         RegisterConfigServices(builder);
     }
@@ -55,70 +53,32 @@ internal static class CompositionRoot
     {
         RegisterErrorHandling(builder);
 
-        // Scope factories
-        builder.RegisterType<SyncScopeFactory>();
-
-        // Sync (registered in named "sync" scope for lifecycle management)
-        builder.RegisterMatchingScope(
-            "sync",
-            b =>
-            {
-                b.RegisterType<SyncProcessor>();
-                b.RegisterType<SyncProgressRenderer>();
-                b.RegisterType<DiagnosticsRenderer>();
-                b.RegisterType<DiagnosticsLogger>();
-            }
-        );
-
-        // Instance-level (resolved from "instance" child scope)
-        builder.RegisterType<InstanceSyncProcessor>();
-        builder.RegisterType<DeleteCustomFormatsProcessor>();
+        // Sync runs server-side; these types only send the request and render what comes back.
+        builder.RegisterType<SyncCommandHandler>();
+        builder.RegisterType<SyncProgressRenderer>();
+        builder.RegisterType<DiagnosticsRenderer>();
+        builder.RegisterType<SyncDiagnosticsLogger>();
+        builder.RegisterType<ConfigDiagnosticsRenderer>();
+        builder.RegisterType<ConfigDiagnosticsLogger>();
+        builder.RegisterType<PreviewRenderer>();
 
         // Configuration pipeline
         builder.RegisterType<ConfigPipelineFactory>();
 
-        builder.RegisterType<ConfigCreationProcessor>().As<IConfigCreationProcessor>();
         builder.RegisterType<ConfigListLocalProcessor>();
         builder.RegisterType<ConfigListTemplateProcessor>();
-
-        builder
-            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
-            .As<IConfigCreator>()
-            .OrderByRegistration();
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)
     {
-        // Exception strategies (dispatch)
-        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
+        // CLI-specific exception strategies
         builder.RegisterType<ServiceExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
-        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
 
         // Output strategies (routing)
         builder.RegisterType<FatalErrorOutputStrategy>();
-        builder.RegisterType<SyncEventOutputStrategy>();
 
         // Handler (orchestrator)
         builder.RegisterType<ExceptionHandler>();
-    }
-
-    private static void RegisterMigrations(ContainerBuilder builder)
-    {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
-        builder.RegisterType<MigrationExecutor>();
-
-        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
-        builder
-            .RegisterAssemblyTypes(thisAssembly)
-            .AssignableTo<IMigrationStep>()
-            .As<IMigrationStep>()
-            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterLogger(ContainerBuilder builder)
@@ -153,11 +113,12 @@ internal static class CompositionRoot
             .OrderByRegistration();
 
         builder.RegisterType<ProviderProgressHandler>();
+        builder.RegisterServerApi();
     }
 
     private static void RegisterConfigServices(ContainerBuilder builder)
     {
-        builder.RegisterType<ConsoleFilterResultRenderer>().As<IFilterResultRenderer>();
+        builder.RegisterType<ConsoleFilterResultRenderer>();
         builder
             .RegisterTypes(
                 typeof(DuplicateInstancesFilterResultRenderer),

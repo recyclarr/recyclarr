@@ -1,7 +1,7 @@
 # Sync Plan Phase
 
-The plan phase runs before pipeline execution, validating configuration against TRaSH Guides and
-building the data structures that drive synchronization. Plan components execute sequentially
+The plan phase runs before sync operations execute, validating configuration against TRaSH Guides
+and building the data structures that drive synchronization. Plan components execute sequentially
 because later components depend on earlier ones.
 
 ## Execution Order

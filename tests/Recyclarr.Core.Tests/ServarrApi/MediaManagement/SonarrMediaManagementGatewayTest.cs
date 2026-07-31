@@ -53,7 +53,8 @@ internal sealed class SonarrMediaManagementGatewayTest
             .MediamanagementPut(
                 "1",
                 Arg.Is<SonarrApi.MediaManagementConfigResource>(d =>
-                    d.DownloadPropersAndRepacks == SonarrApi.ProperDownloadTypes.DoNotPrefer
+                    d != null
+                    && d.DownloadPropersAndRepacks == SonarrApi.ProperDownloadTypes.DoNotPrefer
                     && d.RecycleBin == "/recycle"
                 ),
                 Arg.Any<CancellationToken>()
