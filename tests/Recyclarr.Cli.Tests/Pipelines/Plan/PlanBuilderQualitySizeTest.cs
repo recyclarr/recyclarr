@@ -38,6 +38,6 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.QualitySizesAvailable.Should().BeFalse();
-        publisher.Received().AddError(Arg.Is<string>(s => s.Contains("nonexistent")));
+        publisher.Received().AddError(Arg.Is<string>(s => s != null && s.Contains("nonexistent")));
     }
 }

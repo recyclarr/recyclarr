@@ -2,8 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Autofac.Extras.Ordering;
 using AutoFixture;
 using Recyclarr.Cli.Console.Commands;
-using Recyclarr.Cli.Processors;
-using Recyclarr.Cli.Processors.Config;
+using Recyclarr.Config;
 
 namespace Recyclarr.Cli.Tests.Processors;
 
@@ -24,12 +23,12 @@ internal sealed class ConfigCreationProcessorTest
 
     [Test, AutoMockData]
     public void Throw_when_no_config_creators_can_handle(
-        [CustomizeWith(typeof(EmptyOrderedEnumerable))] ConfigCreationProcessor sut
+        [CustomizeWith(typeof(EmptyOrderedEnumerable))] ConfigFileCreator sut
     )
     {
         var settings = new ConfigCreateCommand.CliSettings();
 
-        var act = () => sut.Process(settings);
+        var act = () => sut.Create(settings);
 
         act.Should().Throw<FatalException>();
     }

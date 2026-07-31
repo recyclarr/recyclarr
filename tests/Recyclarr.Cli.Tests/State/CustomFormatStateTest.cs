@@ -1,6 +1,6 @@
-using Recyclarr.Cli.Pipelines.CustomFormat.Models;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.CustomFormat.Models;
 using Recyclarr.SyncState;
 
 namespace Recyclarr.Cli.Tests.State;

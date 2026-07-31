@@ -1,7 +1,7 @@
 # Quality Profile Sync
 
-Quality Profile synchronization follows the standard pipeline pattern. This document covers
-QP-specific behaviors in transaction and persistence phases. For plan phase details, see
+Quality Profile synchronization is handled by `QualityProfileSyncOperation`. This document covers
+QP-specific behaviors in compute and persist. For plan phase details, see
 [sync-plan-phase.md](sync-plan-phase.md). For the ID-first matching algorithm, see
 [trash-id-state-system.md](trash-id-state-system.md).
 

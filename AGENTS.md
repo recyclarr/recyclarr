@@ -51,13 +51,18 @@ that action arrives too late.
   clients, or anti-corruption layers over distinct external systems.
 - `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
   (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
+- `http-server`: MUST load when writing, editing, or reviewing FastEndpoints endpoint classes, API
+  routes or URL structure, REST resource design, API versioning, OpenAPI spec generation, or Kestrel
+  server configuration in `Recyclarr.Server`.
 
 ## Project Context
 
 Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
 `ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (Refitter-
 generated clients from vendored `openapi.json`; `Generated/` is excluded from source control).
-Solution is SLNX (`Recyclarr.slnx`), not SLN.
+`Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core`; `Recyclarr.Client`
+(Refitter-generated typed client from the server's OpenAPI spec). Solution is SLNX
+(`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
@@ -183,20 +188,20 @@ generate valid YAML; there is no separate reference document to keep in sync.
 
 All sync operations must be deterministic.
 
-**Independent pipelines** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
+**Independent operations** (Quality Profiles, Quality Sizes, Media Naming, Media Management):
 
-- Items sync independently; partial sync within pipeline is acceptable
+- Items sync independently; partial sync within an operation is acceptable
 - Invalid items are skipped with errors; valid items proceed
 
-**Dependent pipelines** (Custom Formats):
+**Dependent operations** (Custom Formats):
 
-- All items must sync or the entire pipeline fails
-- Failure cascades to skip dependent pipelines (CF failure → QP skipped)
+- All items must sync or the entire operation fails
+- Failure cascades to skip dependent operations (CF failure → QP skipped)
 - Rationale: QP scoring requires complete CF data; partial CFs cause silent mis-scoring
 
 **Diagnostics:**
 
-- `AddError()`: Issues that cause items or pipelines to be skipped
+- `AddError()`: Issues that cause items or operations to be skipped
 - `AddWarning()`: Deprecations and informational messages only
 
 ## YAML Error Handling
@@ -275,6 +280,8 @@ log.Warning(message);
 - Central package management: `Directory.Packages.props` contains versions only. Private packages
   MUST have matching `PackageReference Update` entries in `Directory.Build.targets`; keep both files
   synchronized when adding, renaming, removing, or changing package privacy.
+- `InternalsVisibleTo` is granted convention-wide by `Directory.Build.props`. MUST NOT add it to an
+  individual csproj; name the consuming project to match the convention, or extend the convention.
 - When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**
@@ -363,6 +370,8 @@ never a directory. MUST use one of these or omit the scope entirely:
 - `yaml` -> `schemas/*`
 - `cli` -> `src/Recyclarr.Cli/*` outside `Pipelines/`
 - `servarr` -> `src/Recyclarr.Api.{Sonarr,Radarr}/*`, `src/Recyclarr.Core/ServarrApi/*`
+- `server` -> `src/Recyclarr.Server/*`
+- `client` -> `src/Recyclarr.Client/*`
 - `docker` -> Dockerfile and image assets (NOT Docker-related workflows; those are `ci:`)
 - `agents` -> `AGENTS.md`, `.opencode/*`, skills, agent definitions
 
@@ -381,6 +390,9 @@ Changelog, so the newest entries are always at the top.
 
 The `changelog` skill has detailed format and conventions.
 
-**IMPORTANT**: When planning user-facing changes (`feat`, `fix`, `perf`), always include
-`CHANGELOG.md` in scope. Verify changelog updates are part of the implementation plan before
-starting work.
+Long-running unreleased features: intermediate changes MUST NOT modify `CHANGELOG.md`. Add one
+consolidated entry only when the feature is complete and merge-ready. The `http-server` branch is
+currently in this state.
+
+Otherwise, when planning user-facing changes (`feat`, `fix`, `perf`), MUST include `CHANGELOG.md` in
+scope and verify the implementation plan includes its update before starting work.

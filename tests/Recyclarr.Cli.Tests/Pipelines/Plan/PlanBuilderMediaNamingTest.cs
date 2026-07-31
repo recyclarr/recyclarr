@@ -45,7 +45,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         sut.Build();
 
-        publisher.Received().AddError(Arg.Is<string>(s => s.Contains("nonexistent")));
+        publisher.Received().AddError(Arg.Is<string>(s => s != null && s.Contains("nonexistent")));
     }
 
     [Test]

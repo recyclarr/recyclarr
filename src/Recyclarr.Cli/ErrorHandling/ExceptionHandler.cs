@@ -1,4 +1,5 @@
 using Autofac.Core;
+using Recyclarr.ErrorHandling;
 
 namespace Recyclarr.Cli.ErrorHandling;
 

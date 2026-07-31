@@ -1,5 +1,6 @@
-using Recyclarr.Cli.Console;
+using Recyclarr.Common;
 using Recyclarr.Compatibility;
+using Recyclarr.ErrorHandling;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.ErrorHandling.Strategies;

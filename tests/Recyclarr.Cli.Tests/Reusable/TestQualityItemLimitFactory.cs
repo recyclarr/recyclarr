@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.TrashGuide;
 using Recyclarr.TrashGuide.QualitySize;
 

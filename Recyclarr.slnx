@@ -13,6 +13,8 @@
     <Project Path="tests/Recyclarr.Cli.Tests/Recyclarr.Cli.Tests.csproj" />
     <Project Path="tests/Recyclarr.Core.TestLibrary/Recyclarr.Core.TestLibrary.csproj" />
     <Project Path="tests/Recyclarr.Core.Tests/Recyclarr.Core.Tests.csproj" />
+    <Project Path="tests/Recyclarr.Server.TestLibrary/Recyclarr.Server.TestLibrary.csproj" />
+    <Project Path="tests/Recyclarr.Server.Tests/Recyclarr.Server.Tests.csproj" />
     <Project Path="tests/Recyclarr.TestLibrary/Recyclarr.TestLibrary.csproj" />
     <Project Path="tests\Recyclarr.EndToEndTests\Recyclarr.EndToEndTests.csproj" />
     <File Path="tests/.editorconfig" />
@@ -21,5 +23,7 @@
   <Project Path="src/Recyclarr.Api.Radarr/Recyclarr.Api.Radarr.csproj" />
   <Project Path="src/Recyclarr.Api.Sonarr/Recyclarr.Api.Sonarr.csproj" />
   <Project Path="src/Recyclarr.Cli/Recyclarr.Cli.csproj" />
+  <Project Path="src/Recyclarr.Client/Recyclarr.Client.csproj" />
   <Project Path="src/Recyclarr.Core/Recyclarr.Core.csproj" />
+  <Project Path="src/Recyclarr.Server/Recyclarr.Server.csproj" />
 </Solution>

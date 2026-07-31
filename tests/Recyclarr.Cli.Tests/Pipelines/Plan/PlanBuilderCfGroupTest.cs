@@ -285,7 +285,9 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
 
         // No CFs in plan (group was skipped due to error)
         plan.CustomFormats.Should().BeEmpty();
-        publisher.Received().AddError(Arg.Is<string>(s => s.Contains("nonexistent-group")));
+        publisher
+            .Received()
+            .AddError(Arg.Is<string>(s => s != null && s.Contains("nonexistent-group")));
     }
 
     [Test]
@@ -558,7 +560,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
-        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("redundant")));
+        publisher.Received().AddWarning(Arg.Is<string>(s => s != null && s.Contains("redundant")));
         publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
@@ -599,7 +601,7 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .Received()
             .AddError(
                 Arg.Is<string>(s =>
-                    s.Contains("nonexistent-cf") && s.Contains("Invalid CF trash_id")
+                    s != null && s.Contains("nonexistent-cf") && s.Contains("Invalid CF trash_id")
                 )
             );
     }
@@ -838,7 +840,9 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .Received()
             .AddError(
                 Arg.Is<string>(s =>
-                    s.Contains("nonexistent-cf") && s.Contains("Invalid CF trash_id in exclude")
+                    s != null
+                    && s.Contains("nonexistent-cf")
+                    && s.Contains("Invalid CF trash_id in exclude")
                 )
             );
     }
@@ -888,7 +892,9 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
             .ContainSingle()
             .Which.Resource.TrashId.Should()
             .Be("required-cf");
-        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("has no effect")));
+        publisher
+            .Received()
+            .AddWarning(Arg.Is<string>(s => s != null && s.Contains("has no effect")));
         publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }
 
@@ -928,7 +934,9 @@ internal sealed class PlanBuilderCfGroupTest : PlanBuilderTestBase
         publisher
             .Received()
             .AddWarning(
-                Arg.Is<string>(s => s.Contains("optional-cf") && s.Contains("has no effect"))
+                Arg.Is<string>(s =>
+                    s != null && s.Contains("optional-cf") && s.Contains("has no effect")
+                )
             );
         publisher.DidNotReceiveWithAnyArgs().AddError(default!);
     }

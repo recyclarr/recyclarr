@@ -12,14 +12,21 @@
     <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
     <PackageVersion Include="AwesomeAssertions.Analyzers" Version="9.0.8" />
     <PackageVersion Include="CliWrap" Version="3.10.4" />
+    <PackageVersion Include="FastEndpoints.OpenApi" Version="8.2.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="11.0.100-preview.6.26359.118" />
+    <PackageVersion Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.11.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="14.0.1" />
     <PackageVersion Include="Refitter.MSBuild" Version="2.1.2" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.16.17" />
     <PackageVersion Include="Serilog" Version="4.4.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -46,12 +53,16 @@
   <ItemGroup>
     <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.3" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
-    <PackageVersion Include="AutoFixture" Version="5.0.0-preview0012" />
-    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0012" />
-    <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0012" />
+    <PackageVersion Include="AutoFixture" Version="5.0.0-rc.1" />
+    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-rc.1" />
+    <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-rc.1" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.10" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <!-- Not used directly. Spectre.Console.Cli carries an assembly reference to it that NuGet does
+         not resolve, so reflecting over that assembly throws. FastEndpoints' endpoint scanner does
+         exactly that, which only matters where the CLI and an in-process server share a process. -->
+    <PackageVersion Include="NSubstitute" Version="6.0.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.14.0" />

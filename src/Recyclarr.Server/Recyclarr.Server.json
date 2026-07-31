@@ -1,0 +1,1210 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Recyclarr API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/sync/jobs": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncListJobs",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSyncJobsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncCreateJob",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSyncJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSyncJobResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSyncJobProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sync/jobs/{id}": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncGetJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sync/jobs/{id}/results": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncGetJobResults",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResultsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfigDiagnosticsResponse": {
+        "type": "object",
+        "properties": {
+          "missingConfigFiles": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "parseFailures": {
+            "$ref": "#/components/schemas/IReadOnlyListOfConfigParseFailureResponse"
+          },
+          "unknownInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "availableInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "invalidInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfInvalidInstanceResponse"
+          },
+          "duplicateInstances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "splitInstanceGroups": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSplitInstanceGroupResponse"
+          },
+          "deprecationWarnings": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "ConfigParseFailureResponse": {
+        "required": [
+          "fileName",
+          "line",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "line": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateSyncJobProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "traceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyCollectionOfProblemErrorDetail"
+          },
+          "diagnostics": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
+              }
+            ]
+          }
+        }
+      },
+      "CreateSyncJobRequest": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SupportedServices"
+              }
+            ]
+          },
+          "instances": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
+              }
+            ]
+          },
+          "preview": {
+            "type": "boolean"
+          },
+          "configs": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
+              }
+            ]
+          }
+        }
+      },
+      "CreateSyncJobResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CustomFormatChangeResponse": {
+        "required": [
+          "action",
+          "name",
+          "trashId"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "trashId": {
+            "type": "string"
+          },
+          "source": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CustomFormatSourceResponse"
+              }
+            ]
+          },
+          "inclusionReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "CustomFormatSourceResponse": {
+        "required": [
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "profileNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "CustomFormatsResultResponse": {
+        "required": [
+          "changes",
+          "unchangedCount"
+        ],
+        "type": "object",
+        "properties": {
+          "changes": {
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatChangeResponse"
+          },
+          "unchangedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DiagnosticEventResponse": {
+        "required": [
+          "level",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "FormatScoreChangeResponse": {
+        "required": [
+          "name",
+          "currentScore",
+          "newScore",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "currentScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "GetSyncJobResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "instances",
+          "preview",
+          "progress",
+          "diagnostics"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "service": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SupportedServices"
+              }
+            ]
+          },
+          "instances": {
+            "$ref": "#/components/schemas/IReadOnlyCollectionOfString"
+          },
+          "preview": {
+            "type": "boolean"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
+          },
+          "diagnostics": {
+            "$ref": "#/components/schemas/IReadOnlyListOfDiagnosticEventResponse"
+          },
+          "configDiagnostics": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
+              }
+            ]
+          }
+        }
+      },
+      "GetSyncJobResultsResponse": {
+        "required": [
+          "id",
+          "instances"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "instances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSyncInstanceResultResponse"
+          }
+        }
+      },
+      "InstanceSnapshotResponse": {
+        "required": [
+          "name",
+          "status",
+          "pipelines"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "pipelines": {
+            "$ref": "#/components/schemas/IReadOnlyListOfPipelineSnapshotResponse"
+          }
+        }
+      },
+      "InvalidInstanceResponse": {
+        "required": [
+          "instanceName",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "instanceName": {
+            "type": "string"
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "IReadOnlyCollectionOfProblemErrorDetail": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ProblemErrorDetail"
+        }
+      },
+      "IReadOnlyCollectionOfString": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "IReadOnlyListOfConfigParseFailureResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ConfigParseFailureResponse"
+        }
+      },
+      "IReadOnlyListOfCustomFormatChangeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CustomFormatChangeResponse"
+        }
+      },
+      "IReadOnlyListOfDiagnosticEventResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DiagnosticEventResponse"
+        }
+      },
+      "IReadOnlyListOfFormatScoreChangeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/FormatScoreChangeResponse"
+        }
+      },
+      "IReadOnlyListOfInstanceSnapshotResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/InstanceSnapshotResponse"
+        }
+      },
+      "IReadOnlyListOfInvalidInstanceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/InvalidInstanceResponse"
+        }
+      },
+      "IReadOnlyListOfPipelineSnapshotResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PipelineSnapshotResponse"
+        }
+      },
+      "IReadOnlyListOfQualityItemResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityItemResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileChangeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileChangeResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeItemResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeItemResponse"
+        }
+      },
+      "IReadOnlyListOfSplitInstanceGroupResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SplitInstanceGroupResponse"
+        }
+      },
+      "IReadOnlyListOfString": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "IReadOnlyListOfSyncInstanceResultResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SyncInstanceResultResponse"
+        }
+      },
+      "IReadOnlyListOfSyncJobSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SyncJobSummaryResponse"
+        }
+      },
+      "ListSyncJobsResponse": {
+        "required": [
+          "jobs"
+        ],
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSyncJobSummaryResponse"
+          }
+        }
+      },
+      "MediaManagementResultResponse": {
+        "type": "object",
+        "properties": {
+          "propersAndRepacks": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "PipelineItemChangesResponse": {
+        "required": [
+          "created",
+          "updated",
+          "deleted"
+        ],
+        "type": "object",
+        "properties": {
+          "created": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "updated": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "deleted": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "PipelineSnapshotResponse": {
+        "required": [
+          "type",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "changes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PipelineItemChangesResponse"
+              }
+            ]
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1"
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "default": "One or more validation errors occurred."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "default": 400
+          },
+          "instance": {
+            "type": "string",
+            "default": "/api/route"
+          },
+          "traceId": {
+            "type": "string",
+            "default": "0HMPNHL0JHL76:00000001"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "the details of the error"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "the name of the error or property of the dto that caused the error",
+                  "default": "Error or field name"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "the reason for the error",
+                  "default": "Error reason"
+                },
+                "code": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "description": "the code of the error"
+                },
+                "severity": {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "description": "the severity of the error"
+                }
+              },
+              "description": "the error details object"
+            }
+          }
+        },
+        "description": "RFC9457 compatible problem details/ error response class. this can be used by configuring startup like so:\n```app.UseFastEndpoints(c =&gt; c.Errors.UseProblemDetails())```"
+      },
+      "ProblemErrorDetail": {
+        "required": [
+          "name",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "severity": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "QualityItemResponse": {
+        "required": [
+          "name",
+          "allowed"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityItemResponse"
+          }
+        }
+      },
+      "QualityProfileChangeResponse": {
+        "required": [
+          "name",
+          "changeReason",
+          "current",
+          "desired",
+          "scoreChanges"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "changeReason": {
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/QualityProfileFieldsResponse"
+          },
+          "desired": {
+            "$ref": "#/components/schemas/QualityProfileFieldsResponse"
+          },
+          "qualities": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/QualityProfileQualitiesResponse"
+              }
+            ]
+          },
+          "scoreChanges": {
+            "$ref": "#/components/schemas/IReadOnlyListOfFormatScoreChangeResponse"
+          }
+        }
+      },
+      "QualityProfileFieldsResponse": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "upgradeAllowed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "minFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minUpgradeFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "upgradeUntilQuality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "upgradeUntilScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "QualityProfileQualitiesResponse": {
+        "required": [
+          "sortMode",
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "sortMode": {
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityItemResponse"
+          },
+          "desired": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityItemResponse"
+          }
+        }
+      },
+      "QualityProfilesResultResponse": {
+        "required": [
+          "profiles"
+        ],
+        "type": "object",
+        "properties": {
+          "profiles": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileChangeResponse"
+          }
+        }
+      },
+      "QualitySizeItemResponse": {
+        "required": [
+          "quality",
+          "min",
+          "max",
+          "preferred"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "min": {
+            "type": "number",
+            "format": "double"
+          },
+          "max": {
+            "type": "number",
+            "format": "double"
+          },
+          "preferred": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "QualitySizesResultResponse": {
+        "required": [
+          "items",
+          "maxLimit",
+          "preferredLimit"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeItemResponse"
+          },
+          "maxLimit": {
+            "type": "number",
+            "format": "double"
+          },
+          "preferredLimit": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "RadarrNamingResultResponse": {
+        "type": "object",
+        "properties": {
+          "renameMovies": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "standardMovieFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "movieFolderFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SonarrNamingResultResponse": {
+        "type": "object",
+        "properties": {
+          "renameEpisodes": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "seriesFolderFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "seasonFolderFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "standardEpisodeFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dailyEpisodeFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "animeEpisodeFormat": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SplitInstanceGroupResponse": {
+        "required": [
+          "baseUrl",
+          "instanceNames"
+        ],
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "type": "string"
+          },
+          "instanceNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "SupportedServices": {
+        "enum": [
+          "radarr",
+          "sonarr"
+        ],
+        "type": "string"
+      },
+      "SyncInstanceResultResponse": {
+        "required": [
+          "instance"
+        ],
+        "type": "object",
+        "properties": {
+          "instance": {
+            "type": "string"
+          },
+          "customFormats": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CustomFormatsResultResponse"
+              }
+            ]
+          },
+          "qualityProfiles": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/QualityProfilesResultResponse"
+              }
+            ]
+          },
+          "qualitySizes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/QualitySizesResultResponse"
+              }
+            ]
+          },
+          "sonarrNaming": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SonarrNamingResultResponse"
+              }
+            ]
+          },
+          "radarrNaming": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RadarrNamingResultResponse"
+              }
+            ]
+          },
+          "mediaManagement": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MediaManagementResultResponse"
+              }
+            ]
+          }
+        }
+      },
+      "SyncJobSummaryResponse": {
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 using FluentValidation.TestHelper;
-using Recyclarr.Cli.Pipelines.QualityProfile;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Config.Models;
+using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
 
 namespace Recyclarr.Cli.Tests.Pipelines.QualityProfile;

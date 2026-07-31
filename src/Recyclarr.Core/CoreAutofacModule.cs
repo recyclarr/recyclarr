@@ -1,11 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.Ordering;
 using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Compatibility;
@@ -19,7 +15,10 @@ using Recyclarr.Config.Parsing.PostProcessing;
 using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 using Recyclarr.Config.Parsing.PostProcessing.Deprecations;
 using Recyclarr.Config.Secrets;
+using Recyclarr.ErrorHandling;
 using Recyclarr.Http;
+using Recyclarr.Migration;
+using Recyclarr.Migration.Steps;
 using Recyclarr.Notifications;
 using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
@@ -59,7 +58,7 @@ public class CoreAutofacModule : Module
         RegisterCommon(builder);
         RegisterCompatibility(builder);
         RegisterConfig(builder);
-        RegisterHttp(builder);
+        RegisterErrorHandling(builder);
         RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
@@ -70,6 +69,31 @@ public class CoreAutofacModule : Module
         RegisterYaml(builder);
         RegisterVersionControl(builder);
         RegisterSyncEvents(builder);
+        RegisterMigrations(builder);
+        RegisterPorts(builder);
+    }
+
+    private static void RegisterErrorHandling(ContainerBuilder builder)
+    {
+        builder.RegisterType<HttpExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<GitExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ConfigExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<YamlExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<ValidationExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<EnvironmentExceptionStrategy>().As<IExceptionStrategy>();
+        builder.RegisterType<MigrationExceptionStrategy>().As<IExceptionStrategy>();
+    }
+
+    private void RegisterMigrations(ContainerBuilder builder)
+    {
+        builder.RegisterType<MigrationExecutor>().As<IMigrationExecutor>();
+
+        // Migration steps auto-discovered via assembly scanning, ordered by MigrationOrderAttribute metadata
+        builder
+            .RegisterAssemblyTypes(ThisAssembly)
+            .AssignableTo<IMigrationStep>()
+            .As<IMigrationStep>()
+            .WithMetadataFrom<MigrationOrderAttribute>();
     }
 
     private static void RegisterCache(ContainerBuilder builder)
@@ -109,6 +133,7 @@ public class CoreAutofacModule : Module
         builder.RegisterType<ConfigValidationExecutor>();
         builder.RegisterType<ConfigParser>();
         builder.RegisterType<InstanceScopeFactory>();
+        builder.RegisterType<InstanceSyncProcessor>();
 
         // Filter Processors
         builder.RegisterType<ConfigFilterProcessor>();
@@ -158,48 +183,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<SonarrConfigYamlValidator>().As<IValidator>();
 
         builder.RegisterType<ServiceConfigYamlValidator>().As<IValidator<ServiceConfigYaml>>();
-    }
-
-    private static void RegisterHttp(ContainerBuilder builder)
-    {
-        RegisterHttpClientFactory(builder);
-    }
-
-    [SuppressMessage(
-        "Security",
-        "CA5399:HttpClient is created without enabling CheckCertificateRevocationList"
-    )]
-    [SuppressMessage("Security", "CA5359:Do Not Disable Certificate Validation")]
-    private static void RegisterHttpClientFactory(ContainerBuilder builder)
-    {
-        var services = new ServiceCollection();
-
-        services.AddTransient<HttpLoggingHandler>();
-
-        // Suppress automatic scope creation per client; handler dependencies are all singletons
-        // and these scopes would be invisible to our intentional "sync" > "instance" hierarchy.
-        services.Configure<HttpClientFactoryOptions>("servarr", o => o.SuppressHandlerScope = true);
-        services
-            .AddHttpClient("servarr")
-            .AddHttpMessageHandler<HttpLoggingHandler>()
-            .ConfigurePrimaryHttpMessageHandler(sp =>
-            {
-                var settings = sp.GetRequiredService<ISettings<RecyclarrSettings>>();
-                var handler = new HttpClientHandler();
-
-                if (!settings.Value.EnableSslCertificateValidation)
-                {
-                    handler.ServerCertificateCustomValidationCallback =
-                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-                }
-
-                return handler;
-            });
-
-        services.Configure<HttpClientFactoryOptions>("apprise", o => o.SuppressHandlerScope = true);
-        services.AddHttpClient("apprise").AddHttpMessageHandler<HttpLoggingHandler>();
-
-        builder.Populate(services);
     }
 
     private static void RegisterNotifications(ContainerBuilder builder)
@@ -312,6 +295,7 @@ public class CoreAutofacModule : Module
         builder.RegisterSettings(x => x.LogJanitor);
         builder.RegisterSettings(x => x.Notifications);
         builder.RegisterSettings(x => x.ResourceProviders);
+        builder.RegisterSettings(x => x.Server);
     }
 
     private static void RegisterTrashGuide(ContainerBuilder builder)
@@ -352,11 +336,33 @@ public class CoreAutofacModule : Module
         builder
             .RegisterType<SyncRunScope>()
             .AsImplementedInterfaces()
-            .InstancePerMatchingLifetimeScope("sync");
+            .InstancePerMatchingLifetimeScope("run");
 
         builder
             .RegisterType<InstancePublisher>()
             .As<IInstancePublisher>()
             .InstancePerMatchingLifetimeScope("instance");
+
+        builder.RegisterType<DiagnosticsLogger>().InstancePerMatchingLifetimeScope("run");
+
+        builder
+            .RegisterType<SyncOrchestrator>()
+            .As<ISyncOrchestrator>()
+            .InstancePerMatchingLifetimeScope("run");
+
+        builder.RegisterType<SyncRunScopeFactory>().SingleInstance();
+    }
+
+    private static void RegisterPorts(ContainerBuilder builder)
+    {
+        // Custom format deletion port
+        builder.RegisterType<CustomFormatDeleter>().As<ICustomFormatDeleter>();
+
+        // Config file creation port
+        builder.RegisterType<ConfigFileCreator>().As<IConfigFileCreator>();
+        builder
+            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
+            .As<IConfigCreator>()
+            .OrderByRegistration();
     }
 }

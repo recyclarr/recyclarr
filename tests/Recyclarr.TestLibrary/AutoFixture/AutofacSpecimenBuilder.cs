@@ -10,10 +10,10 @@ internal class AutofacSpecimenBuilder(ILifetimeScope container) : ISpecimenBuild
     {
         if (request is not ParameterInfo paramInfo)
         {
-            return new NoSpecimen();
+            return NoSpecimen.Instance;
         }
 
         var instance = container.ResolveOptional(paramInfo.ParameterType);
-        return instance ?? new NoSpecimen();
+        return instance ?? NoSpecimen.Instance;
     }
 }

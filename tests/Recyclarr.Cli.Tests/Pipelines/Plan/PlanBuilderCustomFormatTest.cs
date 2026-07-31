@@ -39,7 +39,7 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.CustomFormats.Should().HaveCount(1);
-        publisher.Received().AddWarning(Arg.Is<string>(s => s.Contains("invalid-cf")));
+        publisher.Received().AddWarning(Arg.Is<string>(s => s != null && s.Contains("invalid-cf")));
     }
 
     [Test]

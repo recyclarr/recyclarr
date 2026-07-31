@@ -1,4 +1,4 @@
-using Recyclarr.Cli.Pipelines.Plan;
+using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
 
 namespace Recyclarr.Cli.Tests.Reusable;

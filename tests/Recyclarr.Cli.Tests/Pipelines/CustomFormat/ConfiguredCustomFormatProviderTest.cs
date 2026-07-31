@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using Recyclarr.Cli.Pipelines.CustomFormat;
 using Recyclarr.Cli.Tests.Pipelines.Plan;
 using Recyclarr.Config.Models;
 using Recyclarr.Core.TestLibrary;
+using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
 
@@ -251,7 +251,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
 
         // Valid skip ID should work (no entries from default-group)
         // Invalid skip ID should produce a warning
-        diagnostics.Received(1).AddWarning(Arg.Is<string>(s => s.Contains("nonexistent-group")));
+        diagnostics
+            .Received(1)
+            .AddWarning(Arg.Is<string>(s => s != null && s.Contains("nonexistent-group")));
     }
 
     [Test]
@@ -737,7 +739,9 @@ internal sealed class ConfiguredCustomFormatProviderTest : PlanBuilderTestBase
         var entries = sut.GetAll(diagnostics).ToList();
 
         entries.Should().BeEmpty();
-        diagnostics.Received(1).AddWarning(Arg.Is<string>(s => s.Contains("optional-group")));
+        diagnostics
+            .Received(1)
+            .AddWarning(Arg.Is<string>(s => s != null && s.Contains("optional-group")));
     }
 
     [Test]

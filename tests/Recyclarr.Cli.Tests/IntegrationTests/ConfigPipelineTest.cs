@@ -2,10 +2,10 @@ using System.IO.Abstractions;
 using Autofac;
 using Recyclarr.Cli.Processors;
 using Recyclarr.Cli.Tests.Reusable;
-using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing.ErrorHandling;
-using Recyclarr.TestLibrary.Autofac;
+using Spectre.Console;
+using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.IntegrationTests;
 
@@ -15,9 +15,38 @@ internal sealed class ConfigPipelineTest : CliIntegrationFixture
     {
         base.RegisterStubsAndMocks(builder);
 
-        // ConfigFilterProcessor depends on IFilterResultRenderer; use a mock since
-        // rendering behavior is not under test here.
-        builder.RegisterMockFor<IFilterResultRenderer>();
+        // Override the console with a TestConsole capable of capturing rendered output, so tests
+        // can assert on the configuration-error panel the CLI renders for filter diagnostics.
+        builder.Register(_ => new TestConsole()).As<IAnsiConsole>().SingleInstance();
+    }
+
+    [Test]
+    public void Renders_configuration_error_panel_for_non_existent_instance()
+    {
+        var factory = Resolve<ConfigPipelineFactory>();
+        var console = (TestConsole)Resolve<IAnsiConsole>();
+
+        Fs.AddFile(
+            "manual.yml",
+            new MockFileData(
+                """
+                radarr:
+                  instance1:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
+
+        var configs = factory
+            .FromPaths(["manual.yml"])
+            .FilterByInstance(["does-not-exist"])
+            .GetConfigs();
+
+        configs.Should().BeEmpty();
+        console.Output.Should().Contain("Non-Existent Instances");
+        console.Output.Should().Contain("does-not-exist");
+        console.Output.Should().Contain("instance1");
     }
 
     [Test]

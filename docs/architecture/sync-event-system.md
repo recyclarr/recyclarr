@@ -18,64 +18,38 @@ inner.
 ```txt
 Root Container (singletons, shared infrastructure)
   |
-  +-- "sync" scope (per sync run)
+  +-- "run" scope (per sync run)
   |     SyncRunScope (event hub: ISyncRunScope + ISyncRunPublisher)
-  |     SyncProcessor, SyncProgressRenderer, DiagnosticsRenderer
-  |     NotificationService
+  |     ISyncOrchestrator, DiagnosticsLogger, NotificationService, ISyncRunStorage
+  |     Server-only: SyncJobRunner
   |
-  +----+-- "instance" scope (per service instance, child of sync)
-       |     InstancePublisher (IInstancePublisher)
-       |     InstanceSyncProcessor, CompositeSyncPipeline
+  +----+-- "instance" scope (per service instance, child of the run)
+       |     IInstancePublisher
+       |     InstanceSyncProcessor, IPipelineExecutor
        |     IServiceConfiguration (the specific instance config)
-       |     Pipeline services (GenericSyncPipeline<T>, phases, API services)
+       |     ISyncOperation implementations, API services
        |
-       +-- PipelinePublisher (runtime object, not a scope)
-             Created per pipeline by InstancePublisher.ForPipeline()
+       +-- IPipelinePublisher (runtime object, not a scope)
+             Created per sync operation by IInstancePublisher.ForPipeline()
 ```
 
-### Scope Wrappers
+### Scope wrappers
 
-Named scopes are created through `LifetimeScopeFactory`, which begins a child scope and resolves a
-wrapper type from it. Each wrapper is the single service-locator touch point for its scope;
-everything else flows through constructor injection.
+Named scopes are created through scope factory classes, which begin a child scope and resolve a
+wrapper from it. Each wrapper is the single service-locator touch point for its scope; everything
+else flows through constructor injection.
 
-- `SyncScope` resolves `SyncProcessor` from the "sync" child scope.
-- `InstanceScope` resolves `InstanceSyncProcessor` and `IInstancePublisher` from the "instance"
-  child scope.
+- The "run" scope is created by `SyncJobLauncher` when a job is created, and wraps the orchestrator
+  plus event consumers. It is a child of the root container rather than of whatever asked for the
+  job: a run outlives the HTTP request that started it, and a child of a disposed scope cannot
+  resolve anything.
+- The "instance" scope is created per service configuration inside the orchestrator loop.
 
-Both extend `LifetimeScopeWrapper`, which implements `IDisposable` to dispose the underlying Autofac
-scope. `SyncCommand` creates and disposes the sync scope; `SyncProcessor` creates and disposes
-instance scopes in a loop over configurations.
-
-### DI Registration
-
-Scope-bound registrations use `InstancePerMatchingLifetimeScope` to tie component lifetime to the
-named scope:
-
-```csharp
-// CoreAutofacModule
-builder.RegisterType<SyncRunScope>()
-    .AsImplementedInterfaces()
-    .InstancePerMatchingLifetimeScope("sync");
-
-builder.RegisterType<InstancePublisher>()
-    .As<IInstancePublisher>()
-    .InstancePerMatchingLifetimeScope("instance");
-
-// CompositionRoot
-builder.RegisterMatchingScope("sync", b =>
-{
-    b.RegisterType<SyncScope>();
-    b.RegisterType<SyncProcessor>();
-    b.RegisterType<SyncProgressRenderer>();
-});
-
-builder.RegisterType<InstanceScope>();
-builder.RegisterType<InstanceSyncProcessor>();
-```
+Both wrappers implement `IDisposable` to dispose the underlying Autofac scope. The launcher creates
+and disposes the run scope; the orchestrator creates and disposes instance scopes.
 
 A noop `IInstancePublisher` is also registered at root scope for code paths that run outside a sync
-context (composition root tests, state repair).
+context (tests, deprecated commands).
 
 ## Event Model
 
@@ -84,7 +58,7 @@ Three typed event streams flow through `SyncRunScope`, which holds one `Subject<
 | Stream        | Event type            | Carries                                                            |
 |---------------|-----------------------|--------------------------------------------------------------------|
 | `Instances`   | `InstanceEvent`       | Instance name, status (Pending/Running/Succeeded/Failed)           |
-| `Pipelines`   | `PipelineEvent`       | Instance name, pipeline type, status, optional count               |
+| `Pipelines`   | `PipelineEvent`       | Instance name, operation type, status, optional count              |
 | `Diagnostics` | `SyncDiagnosticEvent` | Nullable instance name, level (Error/Warning/Deprecation), message |
 
 All three inherit from `SyncRunEvent`, which exists solely to enable `Observable.Merge` in the
@@ -128,29 +102,26 @@ Key behaviors:
   name.
 - `HasErrors` tracks whether any errors were emitted, used by `InstanceSyncProcessor` to
   short-circuit after plan validation failures.
-- `ForPipeline(PipelineType)` creates a `PipelinePublisher` for a specific pipeline.
+- `ForPipeline(PipelineType)` creates an `IPipelinePublisher` for a specific sync operation.
 
 ### IPipelinePublisher
 
-Runtime object, not DI-managed. Created by `InstancePublisher.ForPipeline()` for each pipeline
-during orchestration. Stamps both instance name and pipeline type on events.
+Runtime object, not DI-managed. Created by `IInstancePublisher.ForPipeline()` for each sync
+operation during orchestration. Stamps both instance name and operation type on events.
 
-`CompositeSyncPipeline` filters pipelines by service affinity (excluding pipelines that target a
-different service type), then creates one publisher per applicable pipeline and passes it to
-`GenericSyncPipeline.Execute()`, which sets it on `PipelineContext.Publisher`. Pipeline phases
-access the publisher through the context to emit status changes and diagnostics.
+The orchestrator creates one publisher per sync operation and passes it as a parameter to
+`Compute()` and `Persist()`. Operations use the publisher to emit status changes and diagnostics.
 
-### Noop Implementations
+### Noop implementations
 
 Both interfaces provide static `Noop` properties (`IInstancePublisher.Noop`,
 `IPipelinePublisher.Noop`) for contexts where event emission is unnecessary (tests, code paths
-outside sync scope). `PipelineContext.Publisher` defaults to `IPipelinePublisher.Noop`.
+outside sync scope).
 
 ## Consumers
 
 All consumers inject `ISyncRunScope` and subscribe in their constructors. Events accumulate in lists
-during the sync run. Explicit method calls from `SyncProcessor` trigger final processing after the
-run completes.
+during the sync run. Explicit method calls trigger final processing after the run completes.
 
 ### SyncProgressRenderer
 
@@ -166,7 +137,7 @@ producing immutable snapshots and `Subscribe` performing an atomic reference swa
 Subscribes to the `Diagnostics` stream and logs each event immediately via `ILogger` at the
 appropriate level (Error, Warning). This ensures diagnostic messages appear when `--log` is active
 (where `IAnsiConsole` output is suppressed). Has no explicit call site; activated by DI resolution
-in `SyncProcessor`.
+in the sync scope.
 
 ### DiagnosticsRenderer
 
@@ -192,55 +163,51 @@ The original design had consumers react automatically when `SyncRunScope.Dispose
    the consumer is already torn down.
 
 The current approach (eager `Subscribe` for accumulation, explicit `Report()` / `SendNotification()`
-calls from `SyncProcessor`) is the least-surprise alternative.
+calls from the orchestration layer) is the least-surprise alternative.
 
 ## Event Flow Walkthrough
 
 ```mermaid
 sequenceDiagram
-    participant Proc as Processors
+    participant Orch as Orchestrator
     participant Hub as SyncRunScope
     participant Con as Consumers
-    participant Pipe as Pipelines
+    participant Op as Sync Operations
 
-    Proc->>Hub: Start sync scope
+    Orch->>Hub: Start sync scope
     activate Hub
     Note over Hub,Con: Consumers subscribe in constructors
 
     loop Each instance
-        Proc->>Hub: InstanceEvent Running
+        Orch->>Hub: InstanceEvent Running
         Hub-->>Con: Instances stream
 
-        loop Each pipeline
-            Proc->>Pipe: Execute with PipelinePublisher
-            activate Pipe
-            Pipe->>Hub: PipelineEvent Running
-            Pipe->>Hub: SyncDiagnosticEvent
-            Pipe->>Hub: PipelineEvent Succeeded or Failed
+        loop Each sync operation
+            Orch->>Op: Compute/Persist with IPipelinePublisher
+            activate Op
+            Op->>Hub: PipelineEvent Running
+            Op->>Hub: SyncDiagnosticEvent
+            Op->>Hub: PipelineEvent Succeeded or Failed
             Hub-->>Con: Pipelines and Diagnostics streams
-            deactivate Pipe
+            deactivate Op
         end
 
-        Proc->>Hub: InstanceEvent Succeeded or Failed
+        Orch->>Hub: InstanceEvent Succeeded or Failed
         Hub-->>Con: Instances stream
     end
 
-    Proc->>Con: Report and SendNotification
-    Proc->>Hub: Dispose scope
+    Orch->>Con: Report and SendNotification
+    Orch->>Hub: Dispose scope
     Hub-->>Hub: OnCompleted
     deactivate Hub
 ```
 
-Participants map to concrete types as follows:
+The diagram is intentionally abstract. The orchestration layer spans several components (job
+launcher, sync orchestrator, instance processor, operation executor) but the event flow pattern is
+the same regardless of which component is the immediate caller.
 
-- **Processors**: `SyncCommand`, `SyncProcessor`, `InstanceSyncProcessor`, `CompositeSyncPipeline`
-- **Hub**: `SyncRunScope` (the three Subjects behind `ISyncRunScope` / `ISyncRunPublisher`)
-- **Consumers**: `SyncProgressRenderer`, `DiagnosticsLogger`, `DiagnosticsRenderer`,
-  `NotificationService`
-- **Pipelines**: `GenericSyncPipeline<TContext>` and its phases
+## Relationship to sync architecture
 
-## Relationship to Pipeline Architecture
-
-This system handles status tracking and diagnostics for the sync run. It does not control pipeline
-execution flow. For pipeline ordering, dependency cascading, phase execution, and the plan/pipeline
-split, see [Sync Pipeline Architecture](sync-pipeline-architecture.md).
+This system handles status tracking and diagnostics for the sync run. It does not control sync
+execution flow. For operation ordering, dependency cascading, and the plan/sync split, see [Sync
+architecture](sync-pipeline-architecture.md).
