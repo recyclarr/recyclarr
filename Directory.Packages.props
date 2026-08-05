@@ -46,8 +46,8 @@
   <ItemGroup>
     <PackageVersion Include="AgileObjects.ReadableExpressions" Version="4.1.3" />
     <PackageVersion Include="AutofacContrib.NSubstitute" Version="7.0.0" />
-    <PackageVersion Include="AutoFixture" Version="5.0.0-preview0012" />
-    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-preview0012" />
+    <PackageVersion Include="AutoFixture" Version="5.0.0-rc.1" />
+    <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-rc.1" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-preview0012" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
