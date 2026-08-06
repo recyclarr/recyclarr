@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Tag Release
+
+on:
+  pull_request:
+    branches: [master]
+    types: [closed]
+
+concurrency: tag-release
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  tag:
+    name: Tag Release
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Checkout release commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Setup .NET and tools
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Validate release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          version="${HEAD_REF#release/v}"
+          if [[ -z "$version" || "$HEAD_REF" == "$version" ]]; then
+            echo "Invalid release branch: $HEAD_REF" >&2
+            exit 1
+          fi
+
+          if [[ "$PR_TITLE" != "release: v$version" ]]; then
+            echo "Release title does not match v$version." >&2
+            exit 1
+          fi
+
+          mapfile -t changed_files < <(gh pr diff "$PR_NUMBER" --name-only)
+          if [[ ${#changed_files[@]} -ne 1 || ${changed_files[0]} != CHANGELOG.md ]]; then
+            echo "A release pull request may only change CHANGELOG.md." >&2
+            exit 1
+          fi
+
+          ./ci/prepare-release.py --verify "$version"
+
+          if git rev-parse --verify --quiet "refs/tags/v$version"; then
+            echo "Tag v$version already exists." >&2
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          tag_sha="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/tags" \
+            -f tag="v$VERSION" \
+            -f message="release v$VERSION" \
+            -f object="$MERGE_SHA" \
+            -f type=commit \
+            --jq .sha)"
+
+          gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/v$VERSION" \
+            -f sha="$tag_sha" \
+            --jq .ref

@@ -198,16 +198,15 @@ executable according to [Conventional Commits][commits] rules.
 
 ### Making a Release
 
-1. Run `scripts/prepare_release.py`, which will:
-   - Update the changelog according to [Keep a Changelog][changelog] rules
-   - Commit the changelog updates
-   - Create a tag for the release (using GitVersion)
-   - Prompt to push (which triggers the release pipeline)
-1. Use `--dry-run` to preview or `--undo` to reverse a local release
+1. Run the `Prepare Release` workflow from the GitHub Actions page using the `master` branch.
+1. Review and merge the generated release pull request.
+
+The workflow updates the changelog according to [Keep a Changelog][changelog] rules. Merging the
+pull request creates the GitVersion release tag and starts the release pipeline.
 
 ### Automated Release Process
 
-The Github Workflows handle:
+The GitHub workflows handle:
 
 1. Compiling .NET projects
 1. Creating a [Github Release][release] with artifacts

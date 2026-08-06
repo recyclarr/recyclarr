@@ -289,10 +289,6 @@ All under `./scripts`.
 - `query_issues.py`: Query Qodana issues from GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 
-**ONLY for human use (AI must never run these):**
-
-- `prepare_release.py`: Initiates a release of Recyclarr.
-
 **Gitignore management:**
 
 - `Update-Gitignore.ps1`: Updates the global `.gitignore`.

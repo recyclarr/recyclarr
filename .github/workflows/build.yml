@@ -242,7 +242,6 @@ jobs:
             archive/**/recyclarr-*.zip
             archive/**/recyclarr-*.tar.xz
           body: ${{ steps.changelog.outputs.release_notes }}
-          tag_name: ${{ github.event.create.ref }}
           draft: false
           prerelease: ${{ steps.gitversion.outputs.preReleaseTag != '' }}
 

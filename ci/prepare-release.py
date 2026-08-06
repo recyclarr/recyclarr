@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -295,6 +296,10 @@ def require_workflows_healthy(mainline: str) -> None:
         )
         pending += json.loads(result.stdout)
 
+    current_run_id = os.environ.get("GITHUB_RUN_ID")
+    if current_run_id:
+        pending = [run for run in pending if str(run["databaseId"]) != current_run_id]
+
     if pending:
         error(f"there are pending workflow runs on {mainline}:")
         for run in pending:
@@ -490,12 +495,70 @@ def main() -> None:
         action="store_true",
         help="reverse the most recent local release (delete tag, remove commit)",
     )
+    parser.add_argument(
+        "--update-changelog",
+        action="store_true",
+        help="update CHANGELOG.md without committing or tagging; print the version",
+    )
+    parser.add_argument(
+        "--verify",
+        metavar="VERSION",
+        help="verify that CHANGELOG.md and GitVersion match a prepared release",
+    )
+    parser.add_argument(
+        "--check-workflows",
+        action="store_true",
+        help="verify that mainline workflows are complete and successful",
+    )
     args = parser.parse_args()
+
+    mode_count = sum(
+        (
+            bool(args.dry_run),
+            args.undo,
+            args.update_changelog,
+            args.verify is not None,
+            args.check_workflows,
+        )
+    )
+    if mode_count > 1:
+        parser.error("release modes cannot be combined")
 
     mainline = detect_mainline()
 
     if args.undo:
         undo_release()
+        return
+
+    if args.check_workflows:
+        require_workflows_healthy(mainline)
+        return
+
+    if args.verify is not None:
+        version = args.verify
+        if not SEMVER_RE.match(version):
+            error(f"invalid version format: {version} (expected X.Y.Z)")
+            sys.exit(1)
+
+        resolved_version = resolve_version()
+        if resolved_version != version:
+            error(
+                f"GitVersion resolved {resolved_version}, but the release expects {version}"
+            )
+            sys.exit(1)
+
+        lines = CHANGELOG_PATH.read_text().splitlines()
+        unreleased_idx, next_heading_idx, changelog_version = parse_changelog(lines)
+        if unreleased_has_content(lines, unreleased_idx, next_heading_idx):
+            error("## [Unreleased] must be empty after preparing a release")
+            sys.exit(1)
+
+        if changelog_version != version:
+            error(
+                f"latest changelog version is {changelog_version!r}, expected {version}"
+            )
+            sys.exit(1)
+
         return
 
     # --dry-run VERSION replays a previous release retroactively
@@ -553,6 +616,12 @@ def main() -> None:
         return
 
     require_clean_worktree()
+
+    if args.update_changelog:
+        CHANGELOG_PATH.write_text(new_text)
+        print(version)
+        return
+
     require_up_to_date(mainline)
 
     # Show what will be released

@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+
+concurrency: prepare-release
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require master
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          if [[ "$RELEASE_REF" != refs/heads/master ]]; then
+            echo "Release preparation must run from master." >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup .NET and tools
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Check mainline workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./ci/prepare-release.py --check-workflows
+
+      - name: Update changelog
+        id: release
+        run: |
+          version="$(./ci/prepare-release.py --update-changelog)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Create release pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          add-paths: CHANGELOG.md
+          branch: release/v${{ steps.release.outputs.version }}
+          delete-branch: true
+          sign-commits: true
+          commit-message: "release: v${{ steps.release.outputs.version }}"
+          title: "release: v${{ steps.release.outputs.version }}"
+          body: Merge this pull request to publish the release.
