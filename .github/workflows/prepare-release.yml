@@ -43,6 +43,12 @@ jobs:
         run: |
           version="$(./ci/prepare-release.py --update-changelog)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "run-url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes
+        id: changelog
+        uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d
 
       - name: Generate app token
         id: app-token
@@ -63,4 +69,14 @@ jobs:
           sign-commits: true
           commit-message: "release: v${{ steps.release.outputs.version }}"
           title: "release: v${{ steps.release.outputs.version }}"
-          body: Merge this pull request to publish the release.
+          body: |
+            ## Release notes
+
+            ${{ steps.changelog.outputs.release_notes }}
+
+            ## Publishing
+
+            Merging this pull request creates tag `v${{ steps.release.outputs.version }}`. The tag
+            build publishes the artifacts and creates the GitHub release using the notes above.
+
+            [Preparation workflow](${{ steps.release.outputs.run-url }})
