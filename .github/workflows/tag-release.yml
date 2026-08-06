@@ -6,7 +6,7 @@ on:
     branches: [master]
     types: [closed]
 
-concurrency: tag-release
+concurrency: release-tag
 
 permissions:
   contents: read

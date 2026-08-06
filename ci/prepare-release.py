@@ -377,6 +377,71 @@ def tag_exists_on_remote(tag: str) -> bool:
     return bool(result.stdout.strip())
 
 
+def recovery_info(mainline: str) -> dict[str, str]:
+    """Return the only release tag eligible to move to the mainline HEAD."""
+    require_mainline_branch(mainline)
+
+    lines = CHANGELOG_PATH.read_text().splitlines()
+    unreleased_idx, next_heading_idx, version = parse_changelog(lines)
+    if unreleased_has_content(lines, unreleased_idx, next_heading_idx):
+        error("## [Unreleased] must be empty to recover a release")
+        sys.exit(1)
+
+    if version is None:
+        error("CHANGELOG.md has no released version to recover")
+        sys.exit(1)
+
+    section = parse_version_section(lines, version)
+    if section is None or section[2] is None:
+        error(f"could not determine the version before {version}")
+        sys.exit(1)
+
+    previous_version = section[2]
+    tag = f"v{version}"
+    tags = run_or_die(["git", "tag", "--list", "v*"], "failed to list tags")
+    stable_tags = [
+        candidate
+        for candidate in tags.stdout.splitlines()
+        if SEMVER_RE.match(candidate.removeprefix("v"))
+    ]
+    if tag not in stable_tags:
+        error(f"recovery tag {tag} does not exist")
+        sys.exit(1)
+
+    newest_tag = max(
+        stable_tags,
+        key=lambda candidate: tuple(
+            int(part) for part in candidate.removeprefix("v").split(".")
+        ),
+    )
+    if tag != newest_tag:
+        error(f"latest changelog version {tag} is not the newest tag ({newest_tag})")
+        sys.exit(1)
+
+    tag_sha = run_or_die(
+        ["git", "rev-parse", f"{tag}^{{commit}}"],
+        f"failed to resolve {tag}",
+    ).stdout.strip()
+    head_sha = run_or_die(["git", "rev-parse", "HEAD"], "failed to resolve HEAD")
+    head_sha = head_sha.stdout.strip()
+
+    if tag_sha == head_sha:
+        error(f"{tag} already points to the current {mainline} commit")
+        sys.exit(1)
+
+    ancestor = run_quiet(["git", "merge-base", "--is-ancestor", tag_sha, head_sha])
+    if ancestor.returncode != 0:
+        error(f"{tag} does not point to an ancestor of {mainline}")
+        sys.exit(1)
+
+    return {
+        "version": version,
+        "previous_version": previous_version,
+        "tag_sha": tag_sha,
+        "head_sha": head_sha,
+    }
+
+
 def undo_release() -> None:
     """Reverse a local release commit and tag."""
     # Verify HEAD is a release commit
@@ -517,6 +582,11 @@ def main() -> None:
         action="store_true",
         help="verify that mainline workflows are complete and successful",
     )
+    parser.add_argument(
+        "--recovery-info",
+        action="store_true",
+        help="print JSON describing the release eligible for recovery",
+    )
     args = parser.parse_args()
 
     mode_count = sum(
@@ -526,6 +596,7 @@ def main() -> None:
             args.update_changelog,
             args.verify is not None,
             args.check_workflows,
+            args.recovery_info,
         )
     )
     if mode_count > 1:
@@ -539,6 +610,10 @@ def main() -> None:
 
     if args.check_workflows:
         require_workflows_healthy(mainline)
+        return
+
+    if args.recovery_info:
+        print(json.dumps(recovery_info(mainline)))
         return
 
     if args.verify is not None:

@@ -204,6 +204,10 @@ executable according to [Conventional Commits][commits] rules.
 The workflow updates the changelog according to [Keep a Changelog][changelog] rules. Merging the
 pull request creates the GitVersion release tag and starts the release pipeline.
 
+If the tagged build needs an infrastructure or CI fix, push the fix to `master` and run the
+`Recover Release` workflow. Recovery is only available for the newest tag when it has no GitHub
+release and Unreleased remains empty.
+
 ### Automated Release Process
 
 The GitHub workflows handle:

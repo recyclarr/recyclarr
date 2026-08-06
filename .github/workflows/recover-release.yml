@@ -1,0 +1,135 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Recover Release
+
+on:
+  workflow_dispatch:
+
+concurrency: release-tag
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  recover:
+    name: Recover Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require master
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          if [[ "$RELEASE_REF" != refs/heads/master ]]; then
+            echo "Release recovery must run from master." >&2
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve recovery candidate
+        id: release
+        run: |
+          info="$(./ci/prepare-release.py --recovery-info)"
+          echo "version=$(jq -r .version <<<"$info")" >> "$GITHUB_OUTPUT"
+          echo "previous_version=$(jq -r .previous_version <<<"$info")" \
+            >> "$GITHUB_OUTPUT"
+          echo "tag_sha=$(jq -r .tag_sha <<<"$info")" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(jq -r .head_sha <<<"$info")" >> "$GITHUB_OUTPUT"
+
+      - name: Validate GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIOUS_VERSION: ${{ steps.release.outputs.previous_version }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          releases="$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100")"
+
+          candidate_count="$(jq --arg tag "v$VERSION" \
+            '[.[] | select(.tag_name == $tag)] | length' <<<"$releases")"
+          if [[ "$candidate_count" != 0 ]]; then
+            echo "A GitHub release already exists for v$VERSION." >&2
+            exit 1
+          fi
+
+          previous_count="$(jq --arg tag "v$PREVIOUS_VERSION" \
+            '[.[] | select(.tag_name == $tag and .draft == false)] | length' \
+            <<<"$releases")"
+          if [[ "$previous_count" != 1 ]]; then
+            echo "No GitHub release exists for v$PREVIOUS_VERSION." >&2
+            exit 1
+          fi
+
+      - name: Validate failed release build
+        env:
+          EXPECTED_SHA: ${{ steps.release.outputs.tag_sha }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          run="$(gh run list \
+            --workflow build.yml \
+            --branch "v$VERSION" \
+            --event push \
+            --limit 1 \
+            --json conclusion,headSha)"
+          conclusion="$(jq -r '.[0].conclusion // "missing"' <<<"$run")"
+          head_sha="$(jq -r '.[0].headSha // "missing"' <<<"$run")"
+
+          if [[ "$head_sha" != "$EXPECTED_SHA" ]]; then
+            echo "No release build exists for the current v$VERSION target." >&2
+            exit 1
+          fi
+
+          case "$conclusion" in
+            failure | cancelled | timed_out) ;;
+            *)
+              echo "The release build is not in a recoverable failed state." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Check mainline workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./ci/prepare-release.py --check-workflows
+
+      - name: Require unchanged master
+        env:
+          EXPECTED_SHA: ${{ steps.release.outputs.head_sha }}
+        run: |
+          git fetch origin master
+          current_sha="$(git rev-parse origin/master)"
+          if [[ "$current_sha" != "$EXPECTED_SHA" ]]; then
+            echo "master changed during recovery; run the workflow again." >&2
+            exit 1
+          fi
+
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          app-id: ${{ secrets.RECYCLARR_APP_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Move release tag
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TARGET_SHA: ${{ steps.release.outputs.head_sha }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          tag_sha="$(gh api --method POST "repos/$GITHUB_REPOSITORY/git/tags" \
+            -f tag="v$VERSION" \
+            -f message="release v$VERSION" \
+            -f object="$TARGET_SHA" \
+            -f type=commit \
+            --jq .sha)"
+
+          gh api --method PATCH \
+            "repos/$GITHUB_REPOSITORY/git/refs/tags/v$VERSION" \
+            -f sha="$tag_sha" \
+            -F force=true \
+            --jq .ref
