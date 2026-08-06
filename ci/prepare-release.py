@@ -300,6 +300,13 @@ def require_workflows_healthy(mainline: str) -> None:
     if current_run_id:
         pending = [run for run in pending if str(run["databaseId"]) != current_run_id]
 
+        for run in pending:
+            run_or_die(
+                ["gh", "run", "watch", str(run["databaseId"]), "--exit-status"],
+                f"{run['name']} workflow failed",
+            )
+        pending = []
+
     if pending:
         error(f"there are pending workflow runs on {mainline}:")
         for run in pending:
