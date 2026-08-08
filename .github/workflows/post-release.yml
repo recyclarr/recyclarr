@@ -1,4 +1,5 @@
-name: Release Notification
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Post Release
 
 on:
   release:
@@ -9,7 +10,7 @@ on:
       tag_name:
         required: true
         type: string
-        description: The release tag to generate a notification for
+        description: The published release tag to process
 
 env:
   TAG: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
@@ -18,15 +19,55 @@ permissions:
   contents: read
 
 jobs:
+  deploy-schemas:
+    name: Deploy Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.TAG }}
+
+      - name: Build Schemas
+        run: ./ci/build-schemas.py
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy schemas-dist --project-name=recyclarr-schemas --branch=master
+
+  update-homebrew:
+    name: Update Homebrew Tap
+    if: github.event_name == 'release' && github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Homebrew Tap Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RECYCLARR_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RECYCLARR_PRIVATE_KEY }}
+          repositories: homebrew-recyclarr
+          permission-actions: write
+
+      - name: Update Homebrew Tap
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          version="${TAG#v}"
+          gh workflow run update-formula.yml \
+            --repo recyclarr/homebrew-recyclarr \
+            -f version="$version"
+
   release-comments:
     name: Release Comments
     # The commenter action requires release event context (workflow_dispatch has none)
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
     steps:
       - name: Generate App Token
         id: app-token
@@ -47,6 +88,11 @@ jobs:
 
   notify:
     name: Discord Notification
+    needs: [deploy-schemas, update-homebrew]
+    if: |
+      always() &&
+      needs.deploy-schemas.result == 'success' &&
+      contains(fromJSON('["success", "skipped"]'), needs.update-homebrew.result)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -69,8 +115,7 @@ jobs:
         with:
           route: GET /repos/{org_repo}/releases/tags/{tag}
 
-      # Write changelog to an environment variable to avoid certain characters from being processed
-      # by the shell
+      # Avoid shell processing of characters in the changelog.
       - name: Get Information from Release
         env:
           DATA: ${{ steps.release.outputs.data }}

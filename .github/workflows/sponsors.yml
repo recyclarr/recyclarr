@@ -9,7 +9,7 @@ on:
       - .github/workflows/sponsors.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update-sponsors:
