@@ -23,9 +23,8 @@ to these services from the TRaSH Guides. For a more detailed features list, see 
 - Media Management (Propers/Repacks)
 
 > [!WARNING]
-> The `latest` Docker tag is no longer published. If you are using `recyclarr/recyclarr:latest` or
-> `ghcr.io/recyclarr/recyclarr:latest`, switch to a major version tag (e.g. `8`) to continue
-> receiving updates.
+> The `latest` Docker tag is not available on Docker Hub or GHCR. Use a major version tag (e.g. `8`)
+> instead.
 
 ## Read the Documentation
 
