@@ -1,0 +1,66 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: CodeQL
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - .github/actions/setup-dotnet/**
+      - .github/workflows/codeql.yml
+      - Directory.Build.props
+      - Directory.Build.targets
+      - Directory.Packages.props
+      - Recyclarr.slnx
+      - src/**
+      - tests/**
+  pull_request:
+    branches: [master]
+    paths:
+      - .github/actions/setup-dotnet/**
+      - .github/workflows/codeql.yml
+      - Directory.Build.props
+      - Directory.Build.targets
+      - Directory.Packages.props
+      - Recyclarr.slnx
+      - src/**
+      - tests/**
+  schedule:
+    - cron: 17 3 * * 2
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze C#
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        with:
+          build-mode: manual
+          languages: csharp
+
+      - name: Setup .NET and tools
+        uses: ./.github/actions/setup-dotnet
+
+      - name: Build solution
+        run: dotnet build Recyclarr.slnx -c Release --no-incremental -v q
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6

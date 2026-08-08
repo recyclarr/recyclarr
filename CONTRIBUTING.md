@@ -57,7 +57,7 @@ understand the project's conventions quickly.
 ### C# Code Requirements
 
 - Code must be free of warnings and analysis issues (zero tolerance policy)
-- Code quality is enforced via [Qodana] analysis in CI/CD
+- Compiler and analyzer diagnostics are enforced during builds; [CodeQL] scans for security issues
 - All new code must use the "Recyclarr Cleanup" [Code Cleanup] profile for code quality and
   redundancy fixes
 - All new code must be formatted with [CSharpier] for consistent code style
@@ -80,7 +80,7 @@ There are two recommended ways to use CSharpier:
 
 ### Essential
 
-- .NET SDK 9.0 and tooling (including dotnet CLI)
+- .NET SDK 10.0 and tooling (including dotnet CLI)
 - PowerShell 7+
 - Python 3.12+
 - Docker CLI (Docker Desktop on Windows)
@@ -253,7 +253,7 @@ branch.
    ```
 
 [markdownlint]: https://github.com/DavidAnson/markdownlint
-[Qodana]: https://www.jetbrains.com/qodana/
+[CodeQL]: https://codeql.github.com/
 [Code Cleanup]: https://www.jetbrains.com/help/rider/Code_Cleanup__Index.html
 [CSharpier]: https://csharpier.com/
 [csharpier_plugins]: https://csharpier.com/docs/Editors

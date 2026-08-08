@@ -286,7 +286,7 @@ All under `./scripts`.
 - `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
 - `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via `docker
   compose up -d`
-- `query_issues.py`: Query Qodana issues from GitHub code scanning API
+- `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 
 **Gitignore management:**

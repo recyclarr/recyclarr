@@ -25,13 +25,6 @@
       allowedVersions: "!/-(rc|preview|alpha|beta)/",
     },
     {
-      description: "Qodana linter image uses non-semver tags (YYYY.minor)",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["jetbrains/qodana-dotnet"],
-      versioning: "loose",
-      allowedVersions: "!/eap/",
-    },
-    {
       description: "Add changelog URLs for GitHub Actions digest updates",
       matchManagers: ["github-actions"],
       matchUpdateTypes: ["digest"],

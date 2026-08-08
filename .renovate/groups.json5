@@ -32,12 +32,5 @@
       commitMessagePrefix: "build(deps):",
       minimumGroupSize: 4,
     },
-    {
-      description: "Qodana action and linter image updated together",
-      groupName: "Qodana",
-      matchPackageNames: ["JetBrains/qodana-action", "jetbrains/qodana-dotnet"],
-      commitMessagePrefix: "ci(deps):",
-      minimumGroupSize: 2,
-    },
   ],
 }

@@ -38,13 +38,5 @@
       datasourceTemplate: "dotnet-version",
       extractVersionTemplate: "^(?<version>\\d+)",
     },
-    {
-      description: "Update Qodana linter image in qodana.yaml",
-      customType: "regex",
-      managerFilePatterns: ["/^qodana\\.ya?ml$/"],
-      matchStrings: [
-        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nlinter:\\s*"[^:]+:(?<currentValue>[^"]+)"',
-      ],
-    },
   ],
 }

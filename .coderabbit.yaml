@@ -19,7 +19,7 @@ reviews:
     - path: src/**
       instructions: >-
         C# 14 / .NET 10 with Autofac DI and nullable reference types. Do not comment on
-        formatting or style; Qodana and CSharpier handle those.
+        formatting or style; compiler analyzers and CSharpier handle those.
     - path: tests/**
       instructions: >-
         NUnit 4 + NSubstitute + AutoFixture + AwesomeAssertions.
