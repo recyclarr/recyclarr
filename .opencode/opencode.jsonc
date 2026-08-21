@@ -7,9 +7,5 @@
       "extensions": [".cs"],
     },
   },
-  "lsp": {
-    "csharp": {
-      "disabled": true,
-    },
-  },
+  "lsp": true,
 }
