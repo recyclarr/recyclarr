@@ -67,6 +67,6 @@
   </ItemGroup>
   <!-- Global Package References -->
   <ItemGroup>
-    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.5.7" />
+    <GlobalPackageReference Include="ReferenceTrimmer" Version="3.5.9" />
   </ItemGroup>
 </Project>
