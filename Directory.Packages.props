@@ -50,7 +50,7 @@
     <PackageVersion Include="AutoFixture.AutoNSubstitute" Version="5.0.0-rc.1" />
     <PackageVersion Include="AutoFixture.NUnit4" Version="5.0.0-rc.1" />
     <PackageVersion Include="coverlet.collector" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="NUnit" Version="4.6.1" />
