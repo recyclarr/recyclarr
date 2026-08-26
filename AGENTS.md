@@ -84,75 +84,59 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 
 ## Coding Standards & Development Requirements
 
-- You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
-  code. Concrete implementations get injected; tests can substitute. Search existing registrations
-  before adding new ones.
+- Build-enforced C# styles live in `.editorconfig`; follow them rather than documenting alternate
+  styles here.
+- Use dependency injection for service collaborators and resource-owning dependencies. Construct
+  values and domain objects locally; perform service construction in Autofac modules, composition
+  roots, or explicit factories. Concrete implementations may be injected directly. Search existing
+  registrations before adding new ones.
 - .NET 10.0 (C# 14) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
-- Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs
-  polymorphism tradeoffs for discussion rather than defaulting to enums.
-- Avoid interface pollution: not every service class needs an interface. Add interfaces when
-  justified (testability, more than one implementation).
+- Use enums for closed labels or states. Use polymorphism when variants own distinct behavior or
+  implementations must be substitutable or extensible.
+- Avoid interface pollution. Add interfaces for architectural boundaries, multiple implementations
+  or decorators, or test substitution; do not create one for every service by default.
 - When registering types as themselves in Autofac, `RegisterType<>()` already registers "as self",
   so don't use `.AsSelf()`; it is redundant.
 
-### Language Features
-
-All features below are available on net10.0 / C# 14. Use for new code; opportunistically refactor
-existing code when revisiting.
-
-- File-scoped namespaces: `namespace MyApp.Core;`
-- Primary constructors: `class Service(IDep dep, ILogger logger)`
-- Collection expressions: `[]`, `[item]`, `[..first, ..second]`
-  - NEVER use `new[]`, `new List<T>()`, `Array.Empty<T>()`
-  - For type inference, prefer `[new T { }, new T { }]` over casts
-  - Use `T[] x = [...]` only when simpler forms fail
-- `field` keyword in properties: `public string Name { get; set => field = value ?? throw new
-  ArgumentNullException(); } = "";`
-  - NEVER use explicit backing fields when `field` suffices
-- Extension members via `extension` blocks in a top-level nongeneric `static class`
-  - NEVER use `this` parameter syntax for new extension methods
-- Null-conditional assignment: `obj?.Prop = value;` over null checks wrapping assignment
-- Lambda modifiers without types: `(text, out result) => int.TryParse(text, out result)`
-  - NEVER add redundant parameter types when modifiers alone suffice
-- Pattern matching: `is not null`, switch expressions, property patterns
-  - Property patterns: `obj is Type { Prop: value }` over `obj is Type t && t.Prop == value`
-  - Extended property pattern: `obj is { Outer.Inner: value }`
-  - Empty property pattern: `{ } name` matches non-null and binds
-- `[GeneratedRegex]` on `static partial` properties returning `Regex`
-  - NEVER use `new Regex()`, `static readonly Regex` fields, or static `Regex.IsMatch()`/
-    `Regex.Replace()` methods
-
 ### Code Idioms
 
-- `internal` for implementation classes; `public` only for genuine external APIs. Concrete classes
-  implementing public interfaces should be `internal`.
-- Records for data models; favor immutability; use `IReadOnlyCollection`, `IReadOnlyDictionary`,
-  `init` setters
+- Extension members via `extension` blocks in a top-level nongeneric `static class`
+  - NEVER use `this` parameter syntax for new extension methods
+- Use `[GeneratedRegex]` on `static partial` properties for compile-time constant patterns. Use
+  normal `Regex` APIs when patterns are supplied at runtime.
+- Use `internal` unless another assembly must reference the type; `public` establishes an assembly
+  contract. Concrete implementations of public interfaces should remain `internal` when consumers
+  resolve them through DI.
+- Use records for value-oriented data and favor immutable state. `IReadOnlyCollection` and
+  `IReadOnlyDictionary` restrict mutation only through that reference; use immutable collections
+  when a stable snapshot is required.
 - JSON serialization: configure naming policy, converters, and style via `JsonSerializerOptions` (or
   source-generated `JsonSerializerContext`). Check for existing options before creating new
   instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
   convention.
-- `[UsedImplicitly]` for runtime-used members (deserialization, reflection, DI). Common for DTOs:
-  `[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]`
-- Warning suppression: `[SuppressMessage]` with `Justification` on class/method level; prefer
-  class-level when multiple members need same suppression. NEVER use `#pragma warning disable`.
-- LINQ method syntax only; NEVER use query syntax (`from`/`where`/`select` keywords). Prefer method
-  chaining over loops.
+- Use `[UsedImplicitly]` only for verified JetBrains inspection false positives caused by runtime
+  use through deserialization, reflection, or DI.
+- Suppress warnings at the narrowest practical scope and include a justification. Use
+  `[SuppressMessage]` for symbol-scoped analyzer findings and `#pragma warning` for unavoidable
+  line- or region-scoped compiler diagnostics.
+- LINQ method syntax is the repository convention; NEVER use query syntax (`from`/`where`/`select`).
+  Use LINQ for declarative transformations and loops for mutation, early exits, stateful logic, or
+  measured hot paths.
 - Named arguments for boolean literals: `new Options(SendInfo: false, SendEmpty: true)`. Also use
   named arguments for consecutive same-type parameters to clarify intent.
 - Filesystem operations: use `IDirectoryInfo`/`IFileInfo` extension methods (`.File()`,
   `.SubDirectory()`, `.IsAncestorOf()`) over raw `IFileSystem` access (`fs.Path.Combine`,
   `fs.FileInfo.New`). The extensions handle path joining idiomatically and keep `IFileSystem` out of
   method signatures.
-- `ValueTask` for hot paths; `CancellationToken` everywhere (variable name: `ct`)
-- Local functions go after `return`/`continue` statements; add explicit `return;`/`continue;` if
-  needed to separate main logic from local function definitions
+- Use `Task` by default. Use `ValueTask` for required interface contracts or when measurement shows
+  an allocation-sensitive path usually completes synchronously.
+- Accept and propagate `CancellationToken` for cancellable async or long-running work; name it `ct`.
 
 ### Comments
 
-- Null-suppression (`!`): every use MUST carry an inline comment naming the runtime guarantee (e.g.
-  `// non-null: validated above`), so a broken invariant is detectable later.
+- Avoid null-suppression (`!`). When it is necessary and the runtime guarantee is not obvious, add
+  an inline comment naming the invariant (for example, `// non-null: validated above`).
 - XML docs (`/// <summary>`): public/internal types and non-obvious members where the IntelliSense
   tooltip adds value; skip private implementation details.
 - NEVER commit commented-out code.
