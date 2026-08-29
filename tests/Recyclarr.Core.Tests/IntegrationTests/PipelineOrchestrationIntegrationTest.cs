@@ -3,7 +3,10 @@ using Recyclarr.Config.Models;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
+using LegacyPipelineResult = Recyclarr.Pipelines.PipelineResult;
+using SemanticPipelineResult = Recyclarr.Sync.Results.PipelineResult;
 
 namespace Recyclarr.Core.Tests.IntegrationTests;
 
@@ -40,7 +43,8 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         PipelineType type,
         IReadOnlyList<PipelineType> dependencies,
         bool shouldFail = false,
-        bool shouldSkip = false
+        bool shouldSkip = false,
+        SyncResultStatus? structuredStatus = null
     )
     {
         var operation = Substitute.For<ISyncOperation>();
@@ -61,7 +65,9 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
                 }
 
                 _executionOrder.Add(type);
-                return (object?)null;
+                return structuredStatus is { } status
+                    ? new TestPipelineResultSource(new TestPipelineResult(status))
+                    : null;
             });
         return operation;
     }
@@ -130,7 +136,28 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         // QP should be marked as skipped via its pipeline publisher
         _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
 
-        result.Should().Be(PipelineResult.Failed);
+        result.Should().Be(LegacyPipelineResult.Failed);
+    }
+
+    [TestCase(SyncResultStatus.Partial)]
+    [TestCase(SyncResultStatus.Failed)]
+    public async Task Unsuccessful_structured_result_blocks_dependents(SyncResultStatus status)
+    {
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, [], structuredStatus: status);
+        var qpOp = CreateStubOperation(PipelineType.QualityProfile, [PipelineType.CustomFormat]);
+
+        var sut = CreateExecutor([cfOp, qpOp]);
+
+        var result = await sut.Execute(
+            Substitute.For<ISyncSettings>(),
+            new TestPlan(),
+            _instancePublisher,
+            "test-instance",
+            CancellationToken.None
+        );
+
+        _executionOrder.Should().Equal(PipelineType.CustomFormat);
+        result.Should().Be(LegacyPipelineResult.Failed);
     }
 
     [Test]
@@ -155,7 +182,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         // CF, QP, MN should succeed; QS fails (but doesn't get counted in _executionOrder since
         // it throws before adding to the list)
         _executionOrder.Should().HaveCount(3);
-        result.Should().Be(PipelineResult.Failed);
+        result.Should().Be(LegacyPipelineResult.Failed);
     }
 
     [Test]
@@ -175,7 +202,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             CancellationToken.None
         );
 
-        result.Should().Be(PipelineResult.Completed);
+        result.Should().Be(LegacyPipelineResult.Completed);
     }
 
     [Test]
@@ -212,7 +239,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
 
         _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
 
-        result.Should().Be(PipelineResult.Failed);
+        result.Should().Be(LegacyPipelineResult.Failed);
     }
 
     [Test]
@@ -233,7 +260,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         );
 
         _executionOrder.Should().BeEquivalentTo([PipelineType.MediaNaming]);
-        result.Should().Be(PipelineResult.Completed);
+        result.Should().Be(LegacyPipelineResult.Completed);
     }
 
     [Test]
@@ -256,4 +283,10 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
 
         act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Cycle*");
     }
+
+    private sealed record TestPipelineResult(SyncResultStatus Status)
+        : SemanticPipelineResult(Status);
+
+    private sealed record TestPipelineResultSource(SemanticPipelineResult Result)
+        : IPipelineResultSource;
 }

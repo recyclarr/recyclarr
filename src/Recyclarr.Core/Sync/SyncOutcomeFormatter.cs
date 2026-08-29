@@ -174,10 +174,10 @@ public static class SyncOutcomeFormatter
             ],
             ContextualValidationFailure x =>
             [
-                .. x.Failures.Select(failure =>
+                .. x.Failures.Select(detail =>
                     !string.IsNullOrEmpty(x.ErrorPrefix)
-                        ? $"[{x.ErrorPrefix}] {failure.Message}"
-                        : failure.Message
+                        ? $"[{x.ErrorPrefix}] {detail.Message}"
+                        : detail.Message
                 ),
                 $"{x.Context} failed with {x.Failures.Count} error(s)",
             ],

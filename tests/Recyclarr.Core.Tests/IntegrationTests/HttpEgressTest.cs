@@ -11,7 +11,8 @@ internal sealed class HttpEgressTest : CoreIntegrationTestFixture
     {
         using var scope = ResolveWithConfig<ISystemApi>(NewConfig.Radarr());
 
-        var act = async () => await scope.Entry.Status();
+        var client = scope.Entry;
+        var act = async () => await client.Status();
 
         // Refit wraps handler exceptions, so assert on the message that reaches the test author.
         (await act.Should().ThrowAsync<ApiRequestException>()).WithMessage(

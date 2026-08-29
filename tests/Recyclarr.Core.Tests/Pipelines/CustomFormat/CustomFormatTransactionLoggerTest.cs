@@ -1,4 +1,3 @@
-using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync;
@@ -12,23 +11,23 @@ internal sealed class CustomFormatTransactionLoggerTest
     private readonly CustomFormatTransactionLogger _sut = new(Substitute.For<ILogger>());
 
     [Test]
-    public void Ambiguous_matches_retain_outcome_and_interrupt_pipeline()
+    public void Ambiguous_matches_retain_diagnostic_while_result_controls_status()
     {
         var transactions = new CustomFormatTransactionData();
         transactions.AmbiguousCustomFormats.Add(
             new AmbiguousMatch("HDR", [("HDR", 1), ("HDR", 2)])
         );
         var publisher = new RecordingPipelinePublisher();
+        var result = new CustomFormatPipelineResult(0, 1, [], []);
 
-        var act = () => _sut.LogTransactions(transactions, publisher);
+        _sut.LogTransactions(transactions, publisher, result);
 
-        act.Should().Throw<PipelineInterruptException>();
         publisher
             .Outcomes.Should()
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(new AmbiguousCustomFormatOutcome("HDR", [("HDR", 1), ("HDR", 2)]));
-        publisher.Status.Should().BeNull();
+        publisher.Status.Should().Be(PipelineProgressStatus.Failed);
     }
 
     [Test]
@@ -37,8 +36,9 @@ internal sealed class CustomFormatTransactionLoggerTest
         var transactions = new CustomFormatTransactionData();
         transactions.ReplacedCustomFormats.Add("HDR");
         var publisher = new RecordingPipelinePublisher();
+        var result = new CustomFormatPipelineResult(1, 0, [], []);
 
-        _sut.LogTransactions(transactions, publisher);
+        _sut.LogTransactions(transactions, publisher, result);
 
         publisher
             .Outcomes.Should()

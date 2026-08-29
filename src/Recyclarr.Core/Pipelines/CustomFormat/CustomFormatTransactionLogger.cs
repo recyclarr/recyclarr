@@ -1,6 +1,7 @@
 using Recyclarr.Pipelines.CustomFormat.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
@@ -8,19 +9,34 @@ internal class CustomFormatTransactionLogger(ILogger log)
 {
     public void LogTransactions(
         CustomFormatTransactionData transactions,
-        IPipelinePublisher publisher
+        IPipelinePublisher publisher,
+        CustomFormatPipelineResult result
     )
     {
-        var hasBlockingErrors = LogDiagnostics(publisher, transactions);
-        if (hasBlockingErrors)
+        LogDiagnostics(publisher, transactions);
+        LogResults(transactions);
+        SetStatus(transactions, publisher, result);
+    }
+
+    public static void SetStatus(
+        CustomFormatTransactionData transactions,
+        IPipelinePublisher publisher,
+        CustomFormatPipelineResult result
+    )
+    {
+        var status = result.Status switch
         {
-            throw new PipelineInterruptException();
-        }
-
-        var totalCount = LogResults(transactions);
-        var changes = BuildItemChanges(transactions);
-
-        publisher.SetStatus(PipelineProgressStatus.Succeeded, totalCount, changes);
+            SyncResultStatus.Succeeded => PipelineProgressStatus.Succeeded,
+            SyncResultStatus.Partial => PipelineProgressStatus.Partial,
+            SyncResultStatus.Failed => PipelineProgressStatus.Failed,
+            SyncResultStatus.Blocked => PipelineProgressStatus.Skipped,
+            _ => throw new ArgumentOutOfRangeException(nameof(result)),
+        };
+        publisher.SetStatus(
+            status,
+            transactions.TotalCustomFormatChanges,
+            BuildItemChanges(transactions)
+        );
     }
 
     private static PipelineItemChanges BuildItemChanges(CustomFormatTransactionData transactions)
@@ -43,7 +59,7 @@ internal class CustomFormatTransactionLogger(ILogger log)
         return new PipelineItemChanges(created, updated, deleted);
     }
 
-    private int LogResults(CustomFormatTransactionData transactions)
+    private void LogResults(CustomFormatTransactionData transactions)
     {
         var created = transactions.NewCustomFormats;
         if (created.Count > 0)
@@ -99,11 +115,9 @@ internal class CustomFormatTransactionLogger(ILogger log)
         {
             log.Information("All custom formats are already up to date!");
         }
-
-        return totalCount;
     }
 
-    private static bool LogDiagnostics(
+    private static void LogDiagnostics(
         IPipelinePublisher publisher,
         CustomFormatTransactionData transactions
     )
@@ -116,8 +130,6 @@ internal class CustomFormatTransactionLogger(ILogger log)
                 new AmbiguousCustomFormatOutcome(ambiguous.GuideName, ambiguous.ServiceMatches)
             );
         }
-
-        return transactions.AmbiguousCustomFormats.Count > 0;
     }
 
     private static void LogReplacedCustomFormats(

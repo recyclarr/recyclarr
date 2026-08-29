@@ -189,7 +189,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
 
         var results = await response.Content.ReadFromJsonAsync<GetSyncJobResultsResponse>();
         results.Should().NotBeNull();
-        results!.Id.Should().Be(created.Id);
+        results.Id.Should().Be(created.Id);
         return results;
     }
 

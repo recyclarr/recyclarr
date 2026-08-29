@@ -1,6 +1,7 @@
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines;
 
@@ -34,7 +35,7 @@ internal class CompositeSyncPipeline(
             string.Join(" -> ", sortedOperations.Select(o => o.Type))
         );
 
-        var failedOperations = new HashSet<PipelineType>();
+        var blockingOperations = new HashSet<PipelineType>();
 
         foreach (var operation in sortedOperations)
         {
@@ -49,7 +50,7 @@ internal class CompositeSyncPipeline(
             }
 
             var failedDependencies = operation
-                .Dependencies.Where(failedOperations.Contains)
+                .Dependencies.Where(blockingOperations.Contains)
                 .ToList();
             if (failedDependencies.Count > 0)
             {
@@ -73,11 +74,19 @@ internal class CompositeSyncPipeline(
                 {
                     await operation.Persist(result, publisher, ct);
                 }
+
+                if (
+                    result is IPipelineResultSource resultSource
+                    && !resultSource.Result.Status.SatisfiesDependency()
+                )
+                {
+                    blockingOperations.Add(operation.Type);
+                }
             }
             catch (PipelineInterruptException)
             {
                 publisher.SetStatus(PipelineProgressStatus.Failed);
-                failedOperations.Add(operation.Type);
+                blockingOperations.Add(operation.Type);
             }
             catch
             {
@@ -88,7 +97,7 @@ internal class CompositeSyncPipeline(
 
         log.Information("Completed at {Date}", DateTime.Now);
 
-        return failedOperations.Count > 0 || plan.HasErrors
+        return blockingOperations.Count > 0 || plan.HasErrors
             ? PipelineResult.Failed
             : PipelineResult.Completed;
     }

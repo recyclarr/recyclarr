@@ -40,17 +40,16 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         >(new CreateSyncJobRequest { Instances = ["real-instance"] });
 
         createResponse.StatusCode.Should().Be(HttpStatusCode.Accepted);
-        createResponse.Headers.Location.Should().NotBeNull();
-        createResponse
-            .Headers.Location!.OriginalString.Should()
-            .Be($"/api/v1/sync/jobs/{created.Id}");
+        var location = createResponse.Headers.Location;
+        location.Should().NotBeNull();
+        location.OriginalString.Should().Be($"/api/v1/sync/jobs/{created.Id}");
 
-        var getResponse = await client.GetAsync(createResponse.Headers.Location);
+        var getResponse = await client.GetAsync(location);
         var job = await getResponse.Content.ReadFromJsonAsync<GetSyncJobResponse>();
 
         getResponse.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted);
         job.Should().NotBeNull();
-        job!.Id.Should().Be(created.Id);
+        job.Id.Should().Be(created.Id);
         job.Instances.Should().Equal("real-instance");
         job.Preview.Should().BeFalse();
     }

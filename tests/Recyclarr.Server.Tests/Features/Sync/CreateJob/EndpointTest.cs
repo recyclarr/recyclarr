@@ -56,9 +56,10 @@ internal sealed class EndpointTest : ServerIntegrationFixture
         );
 
         problem.Should().NotBeNull();
-        problem!.Diagnostics.Should().NotBeNull();
-        problem.Diagnostics!.UnknownInstances.Should().Contain("does-not-exist");
-        problem.Diagnostics.AvailableInstances.Should().Contain("real-instance");
+        var diagnostics = problem.Diagnostics;
+        diagnostics.Should().NotBeNull();
+        diagnostics.UnknownInstances.Should().Contain("does-not-exist");
+        diagnostics.AvailableInstances.Should().Contain("real-instance");
 
         jobStore.GetAll(null).Should().BeEmpty();
     }
@@ -89,9 +90,10 @@ internal sealed class EndpointTest : ServerIntegrationFixture
         );
 
         problem.Should().NotBeNull();
-        problem!.Title.Should().Be("Config files not found");
-        problem.Diagnostics.Should().NotBeNull();
-        problem.Diagnostics!.MissingConfigFiles.Should().Equal(missing.FullName);
+        problem.Title.Should().Be("Config files not found");
+        var diagnostics = problem.Diagnostics;
+        diagnostics.Should().NotBeNull();
+        diagnostics.MissingConfigFiles.Should().Equal(missing.FullName);
 
         jobStore.GetAll(null).Should().BeEmpty();
     }
@@ -113,12 +115,14 @@ internal sealed class EndpointTest : ServerIntegrationFixture
         await ep.HandleAsync(req, CancellationToken.None);
 
         ep.ValidationFailed.Should().BeFalse();
-        ep.Response.Should().NotBeNull();
+        var response = ep.Response;
+        response.Should().NotBeNull();
 
-        var job = jobStore.Get(new JobId { Value = ep.Response!.Id });
+        var job = jobStore.Get(new JobId { Value = response.Id });
         job.Should().NotBeNull();
-        job!.ConfigDiagnostics.Should().NotBeNull();
-        job.ConfigDiagnostics!.UnknownInstances.Should().Contain("does-not-exist");
-        job.ConfigDiagnostics.AvailableInstances.Should().Contain("real-instance");
+        var diagnostics = job.ConfigDiagnostics;
+        diagnostics.Should().NotBeNull();
+        diagnostics.UnknownInstances.Should().Contain("does-not-exist");
+        diagnostics.AvailableInstances.Should().Contain("real-instance");
     }
 }
