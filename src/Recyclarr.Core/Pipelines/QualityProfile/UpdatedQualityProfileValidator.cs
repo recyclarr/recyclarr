@@ -1,7 +1,16 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Recyclarr.Common.Extensions;
 
 namespace Recyclarr.Pipelines.QualityProfile;
+
+internal enum QualityProfileValidationConstraint
+{
+    MinimumScoreUnsatisfied,
+    InvalidCutoff,
+    UnavailableCutoff,
+    QualitiesRequired,
+}
 
 internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQualityProfile>
 {
@@ -10,7 +19,11 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         RuleFor(x => x.EffectiveMinFormatScore).Custom(ValidateMinScoreSatisfied);
 
         RuleFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
-            .Custom(ValidateCutoff!)
+            .Custom(ValidateInvalidCutoff!)
+            .When(x => x.ProfileConfig.Config.UpgradeUntilQuality is not null);
+
+        RuleFor(x => x.ProfileConfig.Config.UpgradeUntilQuality)
+            .Custom(ValidateAvailableCutoff!)
             .When(x => x.ProfileConfig.Config.UpgradeUntilQuality is not null);
 
         // Qualities are consolidated in Plan phase (from config or guide resource)
@@ -18,7 +31,8 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         RuleFor(x => x.ProfileConfig.Config.Qualities)
             .NotEmpty()
             .When(x => x.Profile.Id is null)
-            .WithMessage("`qualities` is required when creating profiles for the first time");
+            .WithMessage("`qualities` is required when creating profiles for the first time")
+            .WithErrorCode(nameof(QualityProfileValidationConstraint.QualitiesRequired));
     }
 
     private static void ValidateMinScoreSatisfied(
@@ -38,14 +52,16 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
         // Match Sonarr's validation: fail only if both sum AND max are below minimum
         if (totalPositiveScores < minScore && maxScore < minScore)
         {
-            context.AddFailure(
-                $"Minimum Custom Format Score of {minScore} can never be satisfied because the total of all "
-                    + $"positive scores is {totalPositiveScores} and no single score meets the minimum"
+            AddFailure(
+                context,
+                QualityProfileValidationConstraint.MinimumScoreUnsatisfied,
+                $"Minimum Custom Format Score of {minScore} can never be satisfied because the total "
+                    + $"of all positive scores is {totalPositiveScores} and no single score meets the minimum"
             );
         }
     }
 
-    private static void ValidateCutoff(
+    private static void ValidateInvalidCutoff(
         string untilQuality,
         ValidationContext<UpdatedQualityProfile> context
     )
@@ -54,7 +70,22 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
 
         if (profile.UpdatedQualities.InvalidQualityNames.Any(x => x.EqualsIgnoreCase(untilQuality)))
         {
-            context.AddFailure($"`until_quality` references invalid quality '{untilQuality}'");
+            AddFailure(
+                context,
+                QualityProfileValidationConstraint.InvalidCutoff,
+                $"`until_quality` references invalid quality '{untilQuality}'"
+            );
+        }
+    }
+
+    private static void ValidateAvailableCutoff(
+        string untilQuality,
+        ValidationContext<UpdatedQualityProfile> context
+    )
+    {
+        var profile = context.InstanceToValidate;
+        if (profile.UpdatedQualities.InvalidQualityNames.Any(x => x.EqualsIgnoreCase(untilQuality)))
+        {
             return;
         }
 
@@ -65,9 +96,25 @@ internal class UpdatedQualityProfileValidator : AbstractValidator<UpdatedQuality
 
         if (items.FindCutoff(untilQuality) is null)
         {
-            context.AddFailure(
+            AddFailure(
+                context,
+                QualityProfileValidationConstraint.UnavailableCutoff,
                 "'until_quality' must refer to an existing and enabled quality or group"
             );
         }
+    }
+
+    private static void AddFailure(
+        ValidationContext<UpdatedQualityProfile> context,
+        QualityProfileValidationConstraint constraint,
+        string message
+    )
+    {
+        context.AddFailure(
+            new ValidationFailure(context.PropertyPath, message)
+            {
+                ErrorCode = constraint.ToString(),
+            }
+        );
     }
 }

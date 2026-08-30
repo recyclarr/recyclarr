@@ -78,6 +78,33 @@ internal sealed class QualityProfileStatCalculatorTest
         result.ProfileChanged.Should().BeTrue();
     }
 
+    [Test, AutoMockData]
+    public void Language_change_is_detected(QualityProfileStatCalculator sut)
+    {
+        var french = new ProfileLanguage { Id = 2, Name = "French" };
+        var profile = new UpdatedQualityProfile
+        {
+            Profile = new QualityProfileData
+            {
+                Id = 1,
+                Name = "Profile",
+                Language = new ProfileLanguage { Id = 1, Name = "English" },
+            },
+            ProfileConfig = NewPlan.Qp(
+                new QualityProfileConfig { Name = "Profile" },
+                NewPlan.QpResource("trash-id", "Profile") with
+                {
+                    Language = "French",
+                }
+            ),
+            Languages = [french],
+        };
+
+        var result = sut.Calculate(profile);
+
+        result.ProfileChanged.Should().BeTrue();
+    }
+
     [Test]
     public void Build_updated_dto_applies_name_change()
     {

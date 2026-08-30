@@ -1,11 +1,20 @@
 using System.Collections.ObjectModel;
 using FluentValidation.Results;
+using Recyclarr.Pipelines.Plan;
 
 namespace Recyclarr.Pipelines.QualityProfile.Models;
 
 internal record InvalidProfileData(
     UpdatedQualityProfile Profile,
     IReadOnlyCollection<ValidationFailure> Errors
+);
+
+internal record ReplacedProfileData(PlannedQualityProfile Profile, int ServiceId);
+
+internal record RenameConflictData(
+    PlannedQualityProfile Profile,
+    string ConflictName,
+    int ConflictId
 );
 
 public record QualityProfileTransactionData
@@ -16,13 +25,13 @@ public record QualityProfileTransactionData
     public Collection<UpdatedQualityProfile> UnchangedProfiles { get; } = [];
 
     // Warning/info cases
-    public Collection<string> NonExistentProfiles { get; } = [];
+    internal Collection<PlannedQualityProfile> NonExistentProfiles { get; } = [];
 
     // Profiles that already existed in the service and were replaced (for diagnostic warnings)
-    public Collection<string> ReplacedProfiles { get; } = [];
+    internal Collection<ReplacedProfileData> ReplacedProfiles { get; } = [];
 
     // Error cases
     internal Collection<InvalidProfileData> InvalidProfiles { get; } = [];
-    public Collection<string> RenameConflicts { get; } = [];
+    internal Collection<RenameConflictData> RenameConflicts { get; } = [];
     internal Collection<AmbiguousQualityProfile> AmbiguousProfiles { get; } = [];
 }

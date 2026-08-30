@@ -27,7 +27,7 @@ internal sealed class QualityProfileLoggerTest
         transactions.UnchangedProfiles.Add(CreateProfile("good"));
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(transactions, publisher, CreateResult(1, 0), [], []);
 
         publisher.Status.Should().Be(PipelineProgressStatus.Succeeded);
         publisher.Count.Should().Be(0);
@@ -43,7 +43,7 @@ internal sealed class QualityProfileLoggerTest
         );
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(transactions, publisher, CreateResult(1, 1), [], []);
 
         publisher.Status.Should().Be(PipelineProgressStatus.Partial);
         publisher.Count.Should().Be(0);
@@ -58,7 +58,7 @@ internal sealed class QualityProfileLoggerTest
         );
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(transactions, publisher, CreateResult(0, 1), [], []);
 
         publisher.Status.Should().Be(PipelineProgressStatus.Failed);
         publisher.Count.Should().Be(0);
@@ -69,10 +69,18 @@ internal sealed class QualityProfileLoggerTest
     {
         var transactions = new QualityProfileTransactionData();
         transactions.NewProfiles.Add(CreateProfile("good"));
-        transactions.RenameConflicts.Add("conflict");
+        transactions.RenameConflicts.Add(
+            new RenameConflictData(NewPlan.Qp("conflict"), "existing", 1)
+        );
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(
+            transactions,
+            publisher,
+            CreateResult(1, 1, deltaCount: 1),
+            transactions.NewProfiles,
+            []
+        );
 
         publisher.Status.Should().Be(PipelineProgressStatus.Partial);
         publisher.Count.Should().Be(1);
@@ -87,7 +95,7 @@ internal sealed class QualityProfileLoggerTest
         );
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(transactions, publisher, CreateResult(0, 1), [], []);
 
         publisher.Status.Should().Be(PipelineProgressStatus.Failed);
         publisher.Count.Should().Be(0);
@@ -105,7 +113,13 @@ internal sealed class QualityProfileLoggerTest
         );
         var publisher = new RecordingPipelinePublisher();
 
-        _sut.LogPersistenceResults(transactions, publisher);
+        _sut.LogPersistenceResults(
+            transactions,
+            publisher,
+            CreateResult(1, 1, deltaCount: 1),
+            [],
+            transactions.UpdatedProfiles
+        );
 
         publisher.Status.Should().Be(PipelineProgressStatus.Partial);
         publisher.Count.Should().Be(1);
@@ -121,15 +135,19 @@ internal sealed class QualityProfileLoggerTest
             InvalidExceptCfPatterns = ["missing.*"],
         };
         var transactions = new QualityProfileTransactionData();
-        transactions.NonExistentProfiles.Add("Missing Profile");
+        transactions.NonExistentProfiles.Add(NewPlan.Qp("Missing Profile"));
         transactions.InvalidProfiles.Add(
             new InvalidProfileData(
                 CreateProfile("Invalid Profile"),
                 [new ValidationFailure("Cutoff", "Invalid cutoff")]
             )
         );
-        transactions.ReplacedProfiles.Add("Replaced Profile");
-        transactions.RenameConflicts.Add("Existing Profile");
+        transactions.ReplacedProfiles.Add(
+            new ReplacedProfileData(NewPlan.Qp("Replaced Profile"), 1)
+        );
+        transactions.RenameConflicts.Add(
+            new RenameConflictData(NewPlan.Qp("Existing Profile"), "conflict", 2)
+        );
         transactions.AmbiguousProfiles.Add(
             new AmbiguousQualityProfile(NewPlan.Qp("Ambiguous Profile"), [("one", 1), ("two", 2)])
         );
@@ -183,5 +201,31 @@ internal sealed class QualityProfileLoggerTest
             Status = status;
             Count = count;
         }
+    }
+
+    private static QualityProfilePipelineResult CreateResult(
+        int completed,
+        int incomplete,
+        int deltaCount = 0
+    )
+    {
+        var deltas = Enumerable
+            .Range(0, deltaCount)
+            .Select<int, QualityProfileDelta>(x => new QualityProfileCreateDelta(
+                new UserDefinedQualityProfileIdentity($"profile-{x}"),
+                new QualityProfileControlledState(
+                    $"profile-{x}",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    [],
+                    []
+                )
+            ))
+            .ToList();
+        return new QualityProfilePipelineResult(completed, incomplete, [], deltas);
     }
 }

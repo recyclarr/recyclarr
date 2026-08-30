@@ -41,9 +41,9 @@ internal class CompositeSyncPipeline(
         {
             var publisher = instancePublisher.ForPipeline(operation.Type);
 
-            // Plan errors mean nothing can run; mark all operations skipped so the progress
-            // table shows `--` across the row and DeriveStatus infers instance Failed.
-            if (plan.HasErrors)
+            // Instance-blocking plan errors mean nothing can run. Resource-local plan errors flow
+            // to their producer so valid independent resources may still complete.
+            if (plan.HasInstanceBlockingErrors)
             {
                 publisher.SetStatus(PipelineProgressStatus.Skipped);
                 continue;

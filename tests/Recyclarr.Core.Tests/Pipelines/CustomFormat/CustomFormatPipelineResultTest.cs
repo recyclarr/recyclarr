@@ -21,40 +21,6 @@ internal sealed class CustomFormatPipelineResultTest
     }
 
     [Test]
-    public void Result_retains_typed_outcomes_and_deltas()
-    {
-        var identity = new CustomFormatIdentity("trash-id", "name");
-        CustomFormatOutcome outcome = new CustomFormatAdoptedOutcome(identity, 10);
-        CustomFormatDelta delta = new CustomFormatCreateDelta(
-            identity,
-            new CustomFormatSourceInfo(CfSource.FlatConfig, null, CfInclusionReason.None, [])
-        );
-
-        var result = new CustomFormatPipelineResult(1, 0, [outcome], [delta]);
-
-        result.Outcomes.Should().Equal(outcome);
-        result.Deltas.Should().Equal(delta);
-    }
-
-    [Test]
-    public void Update_describes_changed_components_without_service_snapshots()
-    {
-        var identity = new CustomFormatIdentity("trash-id", "new name");
-        CustomFormatUpdateComponent[] components =
-        [
-            new CustomFormatNameChanged(new ValueDelta<string>("old name", "new name")),
-            new CustomFormatSpecificationChanged("Release Title"),
-        ];
-        var delta = new CustomFormatUpdateDelta(
-            identity,
-            new CustomFormatSourceInfo(CfSource.FlatConfig, null, CfInclusionReason.None, []),
-            components
-        );
-
-        delta.Components.Should().Equal(components);
-    }
-
-    [Test]
     public void Nested_result_collections_are_stable_snapshots()
     {
         var identity = new CustomFormatIdentity("trash-id", "name");
@@ -72,11 +38,18 @@ internal sealed class CustomFormatPipelineResultTest
         );
         var delta = new CustomFormatUpdateDelta(identity, provenance, components);
         var outcome = new CustomFormatAmbiguousMatchOutcome(identity, serviceMatches);
+        var outcomes = new List<CustomFormatOutcome> { outcome };
+        var deltas = new List<CustomFormatDelta> { delta };
+        var result = new CustomFormatPipelineResult(1, 0, outcomes, deltas);
 
         components.Clear();
         serviceMatches.Clear();
         profiles.Clear();
+        outcomes.Clear();
+        deltas.Clear();
 
+        result.Outcomes.Should().Equal(outcome);
+        result.Deltas.Should().Equal(delta);
         delta.Components.Should().ContainSingle();
         outcome.ServiceMatches.Should().ContainSingle();
         provenance.ProfileNames.Should().ContainSingle();

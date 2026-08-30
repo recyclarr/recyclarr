@@ -7,18 +7,22 @@ internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublish
     private readonly List<SyncOutcome> _outcomes = [];
 
     public bool HasErrors { get; private set; }
+    public bool HasInstanceBlockingErrors { get; private set; }
     public IReadOnlyList<SyncOutcome> Outcomes => _outcomes;
 
     public void Add(SyncOutcome outcome)
     {
         _outcomes.Add(outcome);
-        HasErrors |= outcome.Level == SyncDiagnosticLevel.Error;
+        var isError = outcome.Level == SyncDiagnosticLevel.Error;
+        HasErrors |= isError;
+        HasInstanceBlockingErrors |= isError && outcome.Scope == SyncOutcomeScope.InstanceBlocking;
         publisher.Add(outcome);
     }
 
     public void AddError(string message)
     {
         HasErrors = true;
+        HasInstanceBlockingErrors = true;
         publisher.AddError(message);
     }
 

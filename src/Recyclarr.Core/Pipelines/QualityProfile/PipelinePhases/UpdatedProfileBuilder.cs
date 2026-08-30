@@ -137,7 +137,10 @@ internal class UpdatedProfileBuilder(
 
             if (nameConflicts.Count == 1)
             {
-                transactions.RenameConflicts.Add(planned.Name);
+                var conflict = nameConflicts[0];
+                transactions.RenameConflicts.Add(
+                    new RenameConflictData(planned, conflict.Name, conflict.Id!.Value)
+                );
                 return;
             }
 
@@ -163,7 +166,7 @@ internal class UpdatedProfileBuilder(
             }
 
             var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
-            AddExistingProfile(planned, fixedProfile, missingQualities);
+            AddExistingProfile(planned, serviceProfile, fixedProfile, missingQualities);
         }
         else
         {
@@ -191,7 +194,7 @@ internal class UpdatedProfileBuilder(
                 }
                 else
                 {
-                    transactions.NonExistentProfiles.Add(planned.Config.Name);
+                    transactions.NonExistentProfiles.Add(planned);
                 }
                 break;
 
@@ -200,10 +203,12 @@ internal class UpdatedProfileBuilder(
                 var serviceProfile = nameMatches[0];
 
                 // Config is authoritative: adopt the existing service profile
-                transactions.ReplacedProfiles.Add(planned.Name);
+                transactions.ReplacedProfiles.Add(
+                    new ReplacedProfileData(planned, serviceProfile.Id!.Value)
+                );
 
                 var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
-                AddExistingProfile(planned, fixedProfile, missingQualities);
+                AddExistingProfile(planned, serviceProfile, fixedProfile, missingQualities);
                 break;
             }
 
@@ -231,14 +236,14 @@ internal class UpdatedProfileBuilder(
                 }
                 else
                 {
-                    transactions.NonExistentProfiles.Add(planned.Config.Name);
+                    transactions.NonExistentProfiles.Add(planned);
                 }
                 break;
 
             case 1:
                 var serviceProfile = nameMatches[0];
                 var (fixedProfile, missingQualities) = FixupMissingQualities(serviceProfile);
-                AddExistingProfile(planned, fixedProfile, missingQualities);
+                AddExistingProfile(planned, serviceProfile, fixedProfile, missingQualities);
                 break;
 
             default:
@@ -268,6 +273,7 @@ internal class UpdatedProfileBuilder(
 
     private void AddExistingProfile(
         PlannedQualityProfile planned,
+        QualityProfileData originalProfile,
         QualityProfileData profile,
         IReadOnlyCollection<string> missingQualities
     )
@@ -278,6 +284,7 @@ internal class UpdatedProfileBuilder(
             {
                 ProfileConfig = planned,
                 Profile = profile,
+                OriginalProfile = originalProfile,
                 Languages = _languages,
                 UpdatedQualities = organizer.OrganizeItems(profile.Items, planned.Config),
                 MissingQualities = missingQualities,

@@ -24,7 +24,7 @@ public record PreferredGreaterThanMaxOutcome(string Quality, decimal Preferred, 
     : SyncOutcome(SyncDiagnosticLevel.Error);
 
 public record DuplicateQualityProfileNameOutcome(string Name)
-    : SyncOutcome(SyncDiagnosticLevel.Error);
+    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
 
 public record CustomFormatServiceIdCollisionOutcome(
     string ExistingName,
@@ -32,7 +32,7 @@ public record CustomFormatServiceIdCollisionOutcome(
     string NewName,
     string NewTrashId,
     int ServiceId
-) : SyncOutcome(SyncDiagnosticLevel.Error);
+) : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
 
 public record InvalidQualityProfileTrashIdOutcome(string TrashId)
     : SyncOutcome(SyncDiagnosticLevel.Warning);

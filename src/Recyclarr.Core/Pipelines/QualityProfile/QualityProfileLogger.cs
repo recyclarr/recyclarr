@@ -1,6 +1,7 @@
 using Recyclarr.Pipelines.QualityProfile.Models;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.QualityProfile;
 
@@ -14,7 +15,9 @@ internal class QualityProfileLogger(ILogger log)
         if (transactions.NonExistentProfiles.Count > 0)
         {
             publisher.Add(
-                new NonExistentQualityProfilesOutcome(transactions.NonExistentProfiles.ToList())
+                new NonExistentQualityProfilesOutcome(
+                    transactions.NonExistentProfiles.Select(x => x.Name).ToList()
+                )
             );
         }
 
@@ -106,7 +109,9 @@ internal class QualityProfileLogger(ILogger log)
             return;
         }
 
-        publisher.Add(new ReplacedQualityProfilesOutcome(replaced.ToList()));
+        publisher.Add(
+            new ReplacedQualityProfilesOutcome(replaced.Select(x => x.Profile.Name).ToList())
+        );
     }
 
     private static void LogRenameConflicts(
@@ -114,9 +119,9 @@ internal class QualityProfileLogger(ILogger log)
         QualityProfileTransactionData transactions
     )
     {
-        foreach (var name in transactions.RenameConflicts)
+        foreach (var conflict in transactions.RenameConflicts)
         {
-            publisher.Add(new QualityProfileRenameConflictOutcome(name));
+            publisher.Add(new QualityProfileRenameConflictOutcome(conflict.Profile.Name));
         }
     }
 
@@ -153,7 +158,10 @@ internal class QualityProfileLogger(ILogger log)
 
     public void LogPersistenceResults(
         QualityProfileTransactionData transactions,
-        IPipelinePublisher publisher
+        IPipelinePublisher publisher,
+        QualityProfilePipelineResult result,
+        IReadOnlyCollection<UpdatedQualityProfile> createdProfiles,
+        IReadOnlyCollection<ProfileWithStats> updatedProfiles
     )
     {
         // Profiles without changes get logged
@@ -166,30 +174,30 @@ internal class QualityProfileLogger(ILogger log)
         }
 
         // Log created profiles
-        if (transactions.NewProfiles.Count > 0)
+        if (createdProfiles.Count > 0)
         {
             log.Information(
                 "Created {Count} Profiles: {Names}",
-                transactions.NewProfiles.Count,
-                transactions.NewProfiles.Select(x => x.ProfileName)
+                createdProfiles.Count,
+                createdProfiles.Select(x => x.EffectiveName)
             );
         }
 
         // Log updated profiles
-        if (transactions.UpdatedProfiles.Count > 0)
+        if (updatedProfiles.Count > 0)
         {
             log.Information(
                 "Updated {Count} Profiles: {Names}",
-                transactions.UpdatedProfiles.Count,
-                transactions.UpdatedProfiles.Select(x => x.Profile.ProfileName)
+                updatedProfiles.Count,
+                updatedProfiles.Select(x => x.Profile.EffectiveName)
             );
         }
 
-        var totalChanged = transactions.NewProfiles.Count + transactions.UpdatedProfiles.Count;
+        var totalChanged = createdProfiles.Count + updatedProfiles.Count;
         if (totalChanged != 0)
         {
-            var numQuality = transactions.UpdatedProfiles.Count(x => x.QualitiesChanged);
-            var numScores = transactions.UpdatedProfiles.Count(x => x.ScoresChanged);
+            var numQuality = updatedProfiles.Count(x => x.QualitiesChanged);
+            var numScores = updatedProfiles.Count(x => x.ScoresChanged);
 
             log.Information(
                 "A total of {NumProfiles} profiles were synced. {NumQuality} contain quality changes and "
@@ -204,29 +212,19 @@ internal class QualityProfileLogger(ILogger log)
             log.Information("All quality profiles are up to date!");
         }
 
-        var status = DetermineStatus(transactions);
-        publisher.SetStatus(status, totalChanged);
+        SetStatus(publisher, result);
     }
 
-    private static PipelineProgressStatus DetermineStatus(
-        QualityProfileTransactionData transactions
-    )
+    public static void SetStatus(IPipelinePublisher publisher, QualityProfilePipelineResult result)
     {
-        var hasErrors =
-            transactions.InvalidProfiles.Count > 0
-            || transactions.RenameConflicts.Count > 0
-            || transactions.AmbiguousProfiles.Count > 0;
-
-        if (!hasErrors)
+        var status = result.Status switch
         {
-            return PipelineProgressStatus.Succeeded;
-        }
-
-        var hasValidProfiles =
-            transactions.NewProfiles.Count > 0
-            || transactions.UpdatedProfiles.Count > 0
-            || transactions.UnchangedProfiles.Count > 0;
-
-        return hasValidProfiles ? PipelineProgressStatus.Partial : PipelineProgressStatus.Failed;
+            SyncResultStatus.Succeeded => PipelineProgressStatus.Succeeded,
+            SyncResultStatus.Partial => PipelineProgressStatus.Partial,
+            SyncResultStatus.Failed => PipelineProgressStatus.Failed,
+            SyncResultStatus.Blocked => PipelineProgressStatus.Skipped,
+            _ => throw new ArgumentOutOfRangeException(nameof(result)),
+        };
+        publisher.SetStatus(status, result.Deltas.Count);
     }
 }

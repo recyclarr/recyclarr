@@ -14,6 +14,7 @@ public record UpdatedQualities
 public record UpdatedQualityProfile
 {
     public required QualityProfileData Profile { get; set; }
+    internal QualityProfileData? OriginalProfile { get; init; }
     internal PlannedQualityProfile ProfileConfig { get; init; } = null!;
     public IReadOnlyList<ProfileLanguage> Languages { get; init; } = [];
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];

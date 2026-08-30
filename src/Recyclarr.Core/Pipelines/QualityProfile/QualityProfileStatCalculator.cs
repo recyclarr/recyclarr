@@ -18,7 +18,7 @@ internal class QualityProfileStatCalculator(ILogger log)
     {
         log.Debug("Updates for profile {ProfileName}", profile.ProfileName);
 
-        var oldProfile = profile.Profile;
+        var oldProfile = profile.OriginalProfile ?? profile.Profile;
         var newProfile = profile.BuildMergedProfile();
 
         return new ProfileWithStats
@@ -53,6 +53,7 @@ internal class QualityProfileStatCalculator(ILogger log)
             oldProfile.MinUpgradeFormatScore,
             newProfile.MinUpgradeFormatScore
         );
+        Check("Language", oldProfile.Language?.Name, newProfile.Language?.Name);
 
         return changed;
 
