@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.7.2] - 2026-09-02
+
 ### Fixed
 
 - Docker: Permission error when using a separate named volume for ephemeral data
@@ -1404,7 +1406,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.7.1...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.7.2...HEAD
+[8.7.2]: https://github.com/recyclarr/recyclarr/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/recyclarr/recyclarr/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/recyclarr/recyclarr/compare/v8.6.0...v8.7.0
 [8.6.0]: https://github.com/recyclarr/recyclarr/compare/v8.5.1...v8.6.0
