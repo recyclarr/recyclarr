@@ -37,7 +37,7 @@ ENV PATH="${PATH}:/app/recyclarr" \
 
 RUN set -ex; \
     apk add --no-cache bash tzdata supercronic git tini; \
-    mkdir -p /config && chown 1000:1000 /config;
+    mkdir -p /config /data && chown 1000:1000 /config /data;
 
 COPY --link --from=build /app /app/recyclarr/
 COPY --chmod=555 ./docker/scripts/*.sh /

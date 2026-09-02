@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Docker: Permission error when using a separate named volume for ephemeral data
+
 ## [8.7.1] - 2026-08-07
 
 ### Fixed
