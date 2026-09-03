@@ -84,7 +84,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           comment-template: |
             🎉 This is included in {release_link}.
-          skip-label: renovate
+          skip-label: no-release-comment
 
   notify:
     name: Discord Notification

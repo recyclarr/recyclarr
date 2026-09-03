@@ -18,7 +18,7 @@
   ignorePresets: ["mergeConfidence:all-badges"],
   configMigration: true,
   gitIgnoredAuthors: ["227055450+renohate[bot]@users.noreply.github.com"],
-  labels: ["renovate"],
+  labels: ["renovate", "no-release-comment"],
   "pre-commit": {
     enabled: true,
   },

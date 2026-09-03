@@ -62,4 +62,5 @@ jobs:
             Automated update of the ${{ matrix.name }} OpenAPI spec from upstream.
 
             Source: ${{ matrix.upstream }}
+          labels: no-release-comment
           assignees: rcdailey

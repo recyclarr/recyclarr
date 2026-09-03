@@ -80,3 +80,4 @@ jobs:
             build publishes the artifacts and creates the GitHub release using the notes above.
 
             [Preparation workflow](${{ steps.release.outputs.run-url }})
+          labels: no-release-comment
