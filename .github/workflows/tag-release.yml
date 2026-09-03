@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET and tools
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Validate release
         id: release

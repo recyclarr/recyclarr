@@ -47,7 +47,7 @@ jobs:
   build-win:
     name: Build Windows
     secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
+    uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
         runtime: [win-x64, win-arm64]
@@ -59,7 +59,7 @@ jobs:
   build-linux:
     name: Build Linux
     secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
+    uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
         runtime: [linux-x64, linux-arm64, linux-arm]
@@ -71,7 +71,7 @@ jobs:
   build-osx:
     name: Build Mac OS
     secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
+    uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
         runtime: [osx-x64, osx-arm64]
@@ -84,7 +84,7 @@ jobs:
   build-musl:
     name: Build MUSL
     secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
+    uses: $/.github/workflows/reusable-build.yml
     strategy:
       matrix:
         runtime: [linux-musl-x64, linux-musl-arm, linux-musl-arm64]
@@ -111,7 +111,7 @@ jobs:
           persist-credentials: false
 
       - name: Download Artifacts
-        uses: ./.github/actions/download-tar
+        uses: $/.github/actions/download-tar
         with:
           name: ${{ matrix.runtime }}
           path: publish
@@ -146,7 +146,7 @@ jobs:
       #   run: xcrun stapler staple -v publish/recyclarr
 
       - name: Upload Artifacts
-        uses: ./.github/actions/upload-tar
+        uses: $/.github/actions/upload-tar
         with:
           name: ${{ matrix.runtime }}
           path: publish
@@ -159,7 +159,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/reusable-docker.yml
+    uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
 
   #############################################
@@ -181,7 +181,7 @@ jobs:
           persist-credentials: false
 
       - name: Download Artifacts
-        uses: ./.github/actions/download-tar
+        uses: $/.github/actions/download-tar
         with:
           path: publish
 
@@ -206,11 +206,11 @@ jobs:
           persist-credentials: false
 
       - name: Setup GitVersion
-        uses: ./.github/actions/setup-gitversion
+        uses: $/.github/actions/setup-gitversion
         id: gitversion
 
       - name: Download Artifacts
-        uses: ./.github/actions/download-tar
+        uses: $/.github/actions/download-tar
         with:
           path: publish
 

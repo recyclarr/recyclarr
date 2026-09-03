@@ -17,7 +17,7 @@ permissions:
 jobs:
   #############################################
   pre-check:
-    uses: ./.github/workflows/reusable-precheck.yml
+    uses: $/.github/workflows/reusable-precheck.yml
 
   #############################################
   pre-commit:
@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET & Tools
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Setup Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0

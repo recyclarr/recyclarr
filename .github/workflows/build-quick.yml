@@ -46,7 +46,7 @@ permissions:
 jobs:
   #############################################
   pre-check:
-    uses: ./.github/workflows/reusable-precheck.yml
+    uses: $/.github/workflows/reusable-precheck.yml
 
   #############################################
   build-validation:
@@ -54,7 +54,7 @@ jobs:
     needs: pre-check
     if: needs.pre-check.outputs.should_run == 'true'
     secrets: inherit
-    uses: ./.github/workflows/reusable-build.yml
+    uses: $/.github/workflows/reusable-build.yml
     with:
       platform: ubuntu-latest
       runtime: linux-x64
@@ -66,7 +66,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: ./.github/workflows/reusable-docker.yml
+    uses: $/.github/workflows/reusable-docker.yml
     secrets: inherit
 
   #############################################

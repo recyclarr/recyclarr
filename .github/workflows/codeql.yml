@@ -61,7 +61,7 @@ jobs:
 
       - name: Setup .NET and tools
         if: matrix.language == 'csharp'
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Build solution
         if: matrix.language == 'csharp'

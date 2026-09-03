@@ -35,7 +35,7 @@ permissions:
 jobs:
   #############################################
   pre-check:
-    uses: ./.github/workflows/reusable-precheck.yml
+    uses: $/.github/workflows/reusable-precheck.yml
 
   #############################################
   e2e-tests:
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup .NET & Tools
-        uses: ./.github/actions/setup-dotnet
+        uses: $/.github/actions/setup-dotnet
 
       - name: Run E2E Tests
         run: dotnet test tests/Recyclarr.EndToEndTests --filter "TestCategory=E2E" --logger "console;verbosity=detailed"
