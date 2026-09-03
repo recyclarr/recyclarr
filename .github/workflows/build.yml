@@ -163,29 +163,6 @@ jobs:
     secrets: inherit
 
   #############################################
-  test-artifact-download:
-    name: Test Artifact Download
-    runs-on: ubuntu-latest
-    if: "!startsWith(github.ref, 'refs/tags/v')"
-    needs:
-      - build-win
-      - build-linux
-      - codesign # Depends on build-osx
-      - docker # Depends on build-musl
-    env:
-      XZ_OPT: "-T0 -9"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Download Artifacts
-        uses: $/.github/actions/download-tar
-        with:
-          path: publish
-
-  #############################################
   release:
     name: Release
     runs-on: ubuntu-latest
