@@ -93,11 +93,15 @@ mock.Method(Arg.Any<string>(), Arg.Any<int>()).ReturnsForAnyArgs(value);
 
 ## AwesomeAssertions
 
+- Before writing an unfamiliar assertion or using LINQ to shape the value passed to `Should()`, run
+  `ctx7 library AwesomeAssertions "<needed behavior>"`, then query the resolved ID with `ctx7 docs`.
+  Check for a direct assertion, selector overload, or chaining API first.
+
 **Preferred:**
 
 ```csharp
 result.Should().BeEquivalentTo(expected);
-result.Select(x => x.Property).Should().BeEquivalentTo(expected);
+collection.Should().AllSatisfy(x => x.Property.Should().Be(expected));
 act.Should().Throw<ExceptionType>().WithMessage("pattern");
 collection.Should().HaveCount(n).And.Contain(item);
 dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
@@ -108,6 +112,11 @@ dict.Should().ContainKey(key).WhoseValue.Should().Be(expected);
 - `dict!["key"]!` - use `ContainKey().WhoseValue` instead
 - `HaveCount()` + `BeEquivalentTo()` - redundant; equivalence checks count
 - Multiple assertions instead of `.And` chaining
+- LINQ before `Should()` when an assertion-first equivalent exists. Prefer `Contain`, `OnlyContain`,
+  `AllSatisfy`, `HaveCount`, `ContainSingle().Which`, and selector overloads for clearer failures.
+  Use LINQ when no assertion API expresses the same outcome.
+- Replacing `All(predicate)` with `OnlyContain(predicate)` without considering empty collections;
+  `OnlyContain` fails when the collection is empty.
 
 ## Utilities
 
