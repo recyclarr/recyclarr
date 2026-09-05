@@ -38,8 +38,9 @@ quality profiles, naming, quality sizes, trash_ids). NEVER use `explore` for gui
 Per-skill triggers. MUST load before acting on the governed task; a skill loaded in parallel with
 that action arrives too late.
 
-- `testing`: MUST load for any work under `tests/**`, including authoring tests, updating E2E
-  fixtures, debugging failures, or running `coverage.py` / `Run-E2ETests.ps1`.
+- `testing`: MUST load before planning or performing work that requires tests, and before authoring
+  or editing tests, updating E2E fixtures, debugging failures, or running `coverage.py` /
+  `Run-E2ETests.ps1`.
 - `changelog`: MUST load when adding, editing, or reorganizing entries in `CHANGELOG.md`, or when
   drafting release notes.
 - `decisions`: MUST load when creating, editing, or superseding ADRs or PDRs under
@@ -86,10 +87,6 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - You MUST use dependency injection for all dependencies; NEVER manually 'new' objects in production
   code. Concrete implementations get injected; tests can substitute. Search existing registrations
   before adding new ones.
-- Search before writing: a change is rarely isolated. Find every call site and parallel
-  implementation that the change affects, and update them together.
-- Reuse or extend existing implementations before adding parallel ones. DRY targets knowledge
-  duplication, not incidental syntactic similarity.
 - .NET 10.0 (C# 14) + nullable reference types
 - Zero warnings/analysis issues — treat warnings as errors
 - Prefer polymorphism over enums when modeling behavior or extensibility. Propose enum vs

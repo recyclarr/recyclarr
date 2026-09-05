@@ -1,8 +1,9 @@
 ---
 name: testing
 description: >-
-  Use when writing, editing, refactoring, or debugging tests anywhere under
-  `tests/**` (unit, integration, or end-to-end); authoring NUnit 4 test
+  Use before planning or performing work that requires tests, and when
+  writing, editing, refactoring, or debugging tests anywhere under `tests/**`
+  (unit, integration, or end-to-end); authoring NUnit 4 test
   classes (`*Test`, `*IntegrationTest`); using NSubstitute mocks,
   AutoFixture with `[AutoMockData]` / `[InlineAutoMockData]` / `[Frozen]`,
   or AwesomeAssertions (NOT FluentAssertions); working with
@@ -70,12 +71,6 @@ dependency.Property.ReturnsNull();
 dependency.Method(default!).ReturnsForAnyArgs(value);
 dependency.Method().Returns([item1, item2]);
 Verify.That<T>(x => x.Property.Should().Be(expected));
-```
-
-**Last resort interaction verification** (when no observable outcome exists):
-
-```csharp
-mock.ReceivedWithAnyArgs().SetStatus(default, default);
 ```
 
 **Argument matching** (returns setup and received verification): Prefer
