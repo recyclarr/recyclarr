@@ -137,9 +137,25 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 
 - Avoid null-suppression (`!`). When it is necessary and the runtime guarantee is not obvious, add
   an inline comment naming the invariant (for example, `// non-null: validated above`).
-- XML docs (`/// <summary>`): public/internal types and non-obvious members where the IntelliSense
-  tooltip adds value; skip private implementation details.
 - NEVER commit commented-out code.
+
+#### Public Contract Documentation
+
+- Document hand-written public types with XML `<summary>` comments for maintainers who know C# but
+  not the subsystem. Explain purpose and unfamiliar domain terms; do not paraphrase the type name.
+- Add `<remarks>` when responsibility boundaries, consumer-visible guarantees, or lifecycle
+  constraints need more explanation. Do not require both tags or impose a fixed structure.
+- Document public members selectively when their signatures and type documentation leave important
+  contract meaning unexplained.
+- Do not add `<param>`, `<returns>`, `<value>`, or `<exception>` boilerplate. Describe consequential
+  behavior in the summary or remarks instead.
+- Do not add XML documentation to internal or private types or members. Prefer self-documenting
+  implementation code; follow the inline comment rules above when explanation is still necessary.
+- Keep shared contract documentation on the declaring interface or base member. Reference it rather
+  than duplicating it.
+- Verify documented guarantees against the implementation and callers. Update documentation when the
+  contract changes; do not describe intended behavior as an existing guarantee.
+- Apply these rules to new and changed contracts. Do not backfill unrelated code.
 
 ## Backward Compatibility
 
