@@ -10,23 +10,27 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
 {
     private const int RefreshIntervalMs = 80;
 
-    private readonly ProgressTableBuilder _tableBuilder = new();
-    private ProgressSnapshot _snapshot = new([]);
-
     public async Task RenderProgressAsync(
         IReadOnlyList<string> instanceNames,
         Func<Task> syncAction,
         CancellationToken ct
     )
     {
-        _snapshot = BuildInitialSnapshot(instanceNames);
+        if (!console.Profile.Capabilities.Interactive)
+        {
+            await syncAction();
+            return;
+        }
+
+        var tableBuilder = new ProgressTableBuilder();
+        var snapshot = BuildInitialSnapshot(instanceNames);
 
         // Fold pipeline events into immutable snapshots via Scan.
         // Instance status is derived from pipeline statuses (worst-status-wins).
         // Subscribe replaces the snapshot reference atomically for the render loop to poll.
         using var subscription = run
-            .Pipelines.Scan(_snapshot, ApplyPipelineEvent)
-            .Subscribe(s => _snapshot = s);
+            .Pipelines.Scan(snapshot, ApplyPipelineEvent)
+            .Subscribe(s => snapshot = s);
 
         console.MarkupLine(
             "[grey]Legend:[/] "
@@ -38,7 +42,7 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
         );
 
         await console
-            .Live(ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame()))
+            .Live(ProgressTableBuilder.BuildTable(snapshot, tableBuilder.GetNextSpinnerFrame()))
             .AutoClear(false)
             .StartAsync(RunSyncLoop);
 
@@ -52,7 +56,7 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
             while (!syncTask.IsCompleted)
             {
                 ctx.UpdateTarget(
-                    ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame())
+                    ProgressTableBuilder.BuildTable(snapshot, tableBuilder.GetNextSpinnerFrame())
                 );
 
                 try
@@ -66,7 +70,7 @@ internal class SyncProgressRenderer(IAnsiConsole console, ISyncRunScope run)
             }
 
             ctx.UpdateTarget(
-                ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame())
+                ProgressTableBuilder.BuildTable(snapshot, tableBuilder.GetNextSpinnerFrame())
             );
 
             await syncTask;

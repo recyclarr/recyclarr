@@ -11,6 +11,7 @@ internal class ConsoleSetupTask(IAnsiConsole console) : IGlobalSetupTask
         if (cmd.IsLogMode)
         {
             console.Profile.Out = new AnsiConsoleOutput(TextWriter.Null);
+            console.Profile.Capabilities.Interactive = false;
         }
 
         // Raw mode: configure for clean TSV output
