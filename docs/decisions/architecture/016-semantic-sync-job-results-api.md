@@ -81,6 +81,10 @@ SyncJobResultsResponse
 `qualityProfiles`, and `qualitySizes`. Pipelines that are not configured or do not apply are
 omitted. A blocked pipeline includes its status and blocking dependency.
 
+An instance's `service` field is the discriminator for its Sonarr or Radarr response type. Both
+types use one `naming` pipeline property; its schema is selected by the instance type. The service
+is represented by that concrete type rather than by a second ordinary property on the DTO.
+
 Each pipeline response contains explicit create, update, and delete collections where applicable.
 Outcomes are grouped under one pipeline-specific `outcomes` object with named typed collections.
 Empty or inapplicable collections may be omitted.

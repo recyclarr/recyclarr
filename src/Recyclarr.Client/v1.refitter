@@ -8,6 +8,8 @@
   // Status codes carry protocol meaning here: GET sync/jobs/{id} answers 200 when the job is
   // terminal and 202 while it is still running, so callers need the code, not just the body.
   "returnIApiResponse": true,
+  "usePolymorphicSerialization": true,
+  "includeInheritanceHierarchy": true,
   // Refitter maps a response body only for status codes 200, 201, 203, and 206
   // (Refitter.Core/Generation/ReturnTypeGenerator.cs). POST sync/jobs answers 202 exclusively, so
   // its body would otherwise be dropped. The key is the operation id produced by OperationIds in
