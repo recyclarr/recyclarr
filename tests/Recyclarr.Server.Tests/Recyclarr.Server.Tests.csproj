@@ -3,6 +3,7 @@
     <ProjectReference Include="..\..\src\Recyclarr.Server\Recyclarr.Server.csproj" />
     <ProjectReference Include="..\Recyclarr.Core.TestLibrary\Recyclarr.Core.TestLibrary.csproj" />
     <ProjectReference Include="..\Recyclarr.Server.TestLibrary\Recyclarr.Server.TestLibrary.csproj" />
+    <ProjectReference Include="..\..\src\Recyclarr.Client\Recyclarr.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Remove="AutoFixture" />
