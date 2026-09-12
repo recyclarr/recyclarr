@@ -15,11 +15,14 @@ internal sealed class SyncJob(JobId id, ServerSyncSettings request, DateTimeOffs
     public ProgressSnapshot Progress { get; set; } = new([]);
     public IReadOnlyList<SyncDiagnosticEvent> Diagnostics { get; set; } = [];
 
-    // Structured config-load diagnostics (unknown/invalid/duplicate/split instances, parse
-    // failures, deprecations) captured when loading configs for this job. Null when config
-    // loading produced no diagnostics. Distinct from Diagnostics above, which carries runtime
-    // pipeline events emitted while the sync itself is executing.
-    public ConfigLoadDiagnostics? ConfigDiagnostics { get; set; }
-
     public SyncRunResult? Result { get; set; }
+
+    internal SyncJob Snapshot() =>
+        new(Id, Request, CreatedAt)
+        {
+            Status = Status,
+            Progress = Progress,
+            Diagnostics = Diagnostics.ToList(),
+            Result = Result,
+        };
 }

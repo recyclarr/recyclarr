@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FastEndpoints;
@@ -7,6 +8,8 @@ using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Recyclarr.Server;
+using Recyclarr.Server.Features.Sync.GetResults;
+using Recyclarr.Server.Sync.Results;
 using Scalar.AspNetCore;
 using Serilog.Events;
 
@@ -48,6 +51,8 @@ builder
         // Endpoints tag themselves explicitly; path-segment tagging would add a redundant "Api"
         // tag derived from the /api/v1 route prefix.
         o.AutoTagPathSegmentIndex = 0;
+        o.ConfigureOpenApi = options =>
+            options.AddDocumentTransformer<SyncResultsDocumentTransformer>();
     });
 
 // Standalone invocations (e.g. the foreground `serve` command) have no parent to watch and manage
@@ -70,7 +75,10 @@ app.UseFastEndpoints(c =>
     c.Versioning.Prefix = "api/v";
     c.Versioning.PrependToRoute = true;
     c.Errors.UseProblemDetails();
+    c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    c.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     c.Serializer.Options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    c.Serializer.Options.TypeInfoResolver = CreateJsonTypeInfoResolver();
     c.Endpoints.NameGenerator = OperationIds.Generate;
 });
 app.MapOpenApi();
@@ -99,4 +107,27 @@ static LogEventLevel ParseLogLevel(string? value)
     return Enum.TryParse<LogEventLevel>(value, ignoreCase: true, out var level)
         ? level
         : LogEventLevel.Information;
+}
+
+static IJsonTypeInfoResolver CreateJsonTypeInfoResolver()
+{
+    var resolver = new DefaultJsonTypeInfoResolver();
+    resolver.Modifiers.Add(static typeInfo =>
+    {
+        if (typeInfo.Type != typeof(SyncInstanceResultsResponse))
+        {
+            return;
+        }
+
+        typeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+        {
+            TypeDiscriminatorPropertyName = "service",
+            DerivedTypes =
+            {
+                new JsonDerivedType(typeof(SonarrInstanceResultsResponse), "sonarr"),
+                new JsonDerivedType(typeof(RadarrInstanceResultsResponse), "radarr"),
+            },
+        };
+    });
+    return resolver;
 }
