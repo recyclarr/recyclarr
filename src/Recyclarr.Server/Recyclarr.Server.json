@@ -77,7 +77,17 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateSyncJobProblemDetails"
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -113,18 +123,69 @@
               }
             }
           },
-          "202": {
-            "description": "Accepted",
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sync/jobs/{id}/results": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncGetResults",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                  "$ref": "#/components/schemas/SyncJobResultsResponse"
                 }
               }
             }
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": null,
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -139,109 +200,15 @@
   },
   "components": {
     "schemas": {
-      "ConfigDiagnosticsResponse": {
-        "type": "object",
-        "properties": {
-          "missingConfigFiles": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "parseFailures": {
-            "$ref": "#/components/schemas/IReadOnlyListOfConfigParseFailureResponse"
-          },
-          "unknownInstances": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "availableInstances": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "invalidInstances": {
-            "$ref": "#/components/schemas/IReadOnlyListOfInvalidInstanceResponse"
-          },
-          "duplicateInstances": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "splitInstanceGroups": {
-            "$ref": "#/components/schemas/IReadOnlyListOfSplitInstanceGroupResponse"
-          },
-          "deprecationWarnings": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
-      },
-      "ConfigParseFailureResponse": {
-        "required": [
-          "fileName",
-          "line",
-          "message"
+      "BlockingPipeline": {
+        "enum": [
+          "customFormat",
+          "qualityProfile",
+          "qualitySize",
+          "mediaNaming",
+          "mediaManagement"
         ],
-        "type": "object",
-        "properties": {
-          "fileName": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "line": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateSyncJobProblemDetails": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "instance": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "traceId": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "detail": {
-            "type": [
-              "null",
-              "string"
-            ]
-          },
-          "errors": {
-            "$ref": "#/components/schemas/IReadOnlyCollectionOfProblemErrorDetail"
-          },
-          "diagnostics": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
-              }
-            ]
-          }
-        }
+        "type": "string"
       },
       "CreateSyncJobRequest": {
         "type": "object",
@@ -257,13 +224,11 @@
             ]
           },
           "instances": {
-            "const": null,
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "const": null,
               "type": "string"
             }
           },
@@ -271,13 +236,11 @@
             "type": "boolean"
           },
           "configs": {
-            "const": null,
             "type": [
               "null",
               "array"
             ],
             "items": {
-              "const": null,
               "type": "string"
             }
           }
@@ -304,24 +267,213 @@
           }
         }
       },
-      "DiagnosticEventResponse": {
+      "CustomFormatAmbiguousMatchResponse": {
         "required": [
-          "level",
-          "message"
+          "identity",
+          "serviceMatches"
         ],
         "type": "object",
         "properties": {
-          "level": {
-            "type": "string"
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
           },
-          "message": {
-            "type": "string"
+          "serviceMatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
+          }
+        }
+      },
+      "CustomFormatCreateResponse": {
+        "required": [
+          "identity",
+          "selectionProvenance"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
           },
-          "instance": {
+          "selectionProvenance": {
+            "$ref": "#/components/schemas/CustomFormatSelectionResponse"
+          }
+        }
+      },
+      "CustomFormatInclusionReason": {
+        "enum": [
+          "none",
+          "required",
+          "default",
+          "selected"
+        ],
+        "type": "string"
+      },
+      "CustomFormatOutcomesResponse": {
+        "type": "object",
+        "properties": {
+          "referenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "groupReferenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "incompatibleGroups": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "emptyGroups": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "adopted": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamedIdentityResponse"
+          },
+          "ambiguousMatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatAmbiguousMatchResponse"
+          },
+          "stateConflicts": {
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatStateConflictResponse"
+          },
+          "createRejected": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "updateRejected": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "deleteRejected": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          }
+        }
+      },
+      "CustomFormatPipelineResponse": {
+        "required": [
+          "status",
+          "outcomes",
+          "creates",
+          "updates",
+          "deletes"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/CustomFormatOutcomesResponse"
+          },
+          "creates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatCreateResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfCustomFormatUpdateResponse"
+          },
+          "deletes": {
+            "$ref": "#/components/schemas/IReadOnlyListOfTrashIdNameResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "CustomFormatSelectionResponse": {
+        "required": [
+          "source",
+          "groupName",
+          "inclusionReason",
+          "profileNames"
+        ],
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/CustomFormatSource"
+          },
+          "groupName": {
             "type": [
               "null",
               "string"
             ]
+          },
+          "inclusionReason": {
+            "$ref": "#/components/schemas/CustomFormatInclusionReason"
+          },
+          "profileNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "CustomFormatSource": {
+        "enum": [
+          "flatConfig",
+          "profileFormatItems",
+          "cfGroupImplicit",
+          "cfGroupExplicit"
+        ],
+        "type": "string"
+      },
+      "CustomFormatStateConflictResponse": {
+        "required": [
+          "identity",
+          "managedIdentity",
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
+          },
+          "managedIdentity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CustomFormatUpdateResponse": {
+        "required": [
+          "identity",
+          "selectionProvenance"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
+          },
+          "selectionProvenance": {
+            "$ref": "#/components/schemas/CustomFormatSelectionResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "includeWhenRenaming": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfBoolean"
+              }
+            ]
+          },
+          "specificationsAdded": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "specificationsChanged": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "specificationsRemoved": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         }
       },
@@ -332,8 +484,7 @@
           "createdAt",
           "instances",
           "preview",
-          "progress",
-          "diagnostics"
+          "progress"
         ],
         "type": "object",
         "properties": {
@@ -366,21 +517,19 @@
           },
           "progress": {
             "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
-          },
-          "diagnostics": {
-            "$ref": "#/components/schemas/IReadOnlyListOfDiagnosticEventResponse"
-          },
-          "configDiagnostics": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ConfigDiagnosticsResponse"
-              }
-            ]
           }
         }
+      },
+      "InstanceFailureCategory": {
+        "enum": [
+          "serviceUnavailable",
+          "serviceUnauthenticated",
+          "serviceUnauthorized",
+          "serviceRateLimited",
+          "serviceIncompatible",
+          "syncStateUnavailable"
+        ],
+        "type": "string"
       },
       "InstanceSnapshotResponse": {
         "required": [
@@ -401,43 +550,34 @@
           }
         }
       },
-      "InvalidInstanceResponse": {
-        "required": [
-          "instanceName",
-          "errors"
-        ],
-        "type": "object",
-        "properties": {
-          "instanceName": {
-            "type": "string"
-          },
-          "errors": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
-      },
-      "IReadOnlyCollectionOfProblemErrorDetail": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/ProblemErrorDetail"
-        }
-      },
       "IReadOnlyCollectionOfString": {
         "type": "array",
         "items": {
           "type": "string"
         }
       },
-      "IReadOnlyListOfConfigParseFailureResponse": {
+      "IReadOnlyListOfCustomFormatAmbiguousMatchResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/ConfigParseFailureResponse"
+          "$ref": "#/components/schemas/CustomFormatAmbiguousMatchResponse"
         }
       },
-      "IReadOnlyListOfDiagnosticEventResponse": {
+      "IReadOnlyListOfCustomFormatCreateResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/DiagnosticEventResponse"
+          "$ref": "#/components/schemas/CustomFormatCreateResponse"
+        }
+      },
+      "IReadOnlyListOfCustomFormatStateConflictResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CustomFormatStateConflictResponse"
+        }
+      },
+      "IReadOnlyListOfCustomFormatUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CustomFormatUpdateResponse"
         }
       },
       "IReadOnlyListOfInstanceSnapshotResponse": {
@@ -446,10 +586,34 @@
           "$ref": "#/components/schemas/InstanceSnapshotResponse"
         }
       },
-      "IReadOnlyListOfInvalidInstanceResponse": {
+      "IReadOnlyListOfMediaManagementUpdateResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/InvalidInstanceResponse"
+          "$ref": "#/components/schemas/MediaManagementUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfNamedIdentityResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamedIdentityResponse"
+        }
+      },
+      "IReadOnlyListOfNamedServiceResourceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamedServiceResourceResponse"
+        }
+      },
+      "IReadOnlyListOfNamingReferenceMismatchResponseOfRadarrNamingField": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamingReferenceMismatchResponseOfRadarrNamingField"
+        }
+      },
+      "IReadOnlyListOfNamingReferenceMismatchResponseOfSonarrNamingField": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NamingReferenceMismatchResponseOfSonarrNamingField"
         }
       },
       "IReadOnlyListOfPipelineSnapshotResponse": {
@@ -458,10 +622,136 @@
           "$ref": "#/components/schemas/PipelineSnapshotResponse"
         }
       },
-      "IReadOnlyListOfSplitInstanceGroupResponse": {
+      "IReadOnlyListOfQualityProfileAdoptedResponse": {
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/SplitInstanceGroupResponse"
+          "$ref": "#/components/schemas/QualityProfileAdoptedResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileAmbiguousMatchResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileAmbiguousMatchResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileCreateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileCreateResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileIdentityOutcomeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileIdentityOutcomeResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileLayoutResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileMinimumScoreResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileMinimumScoreResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileNamedOutcomeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileNamedOutcomeResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileNamesResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileNamesResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileQualityNameResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileQualityNameResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileRenameBlockedResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileRenameBlockedResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileResetReferencesResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileResetReferencesResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileScoreChangeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileScoreChangeResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileScoreCollisionResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileScoreCollisionResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileScoreResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileScoreResponse"
+        }
+      },
+      "IReadOnlyListOfQualityProfileUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualityProfileUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeMaximumComparisonResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeMaximumComparisonResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeMinimumComparisonResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeMinimumComparisonResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeReferenceResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeReferenceResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeTypeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeTypeResponse"
+        }
+      },
+      "IReadOnlyListOfQualitySizeUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QualitySizeUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfRadarrNamingUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RadarrNamingUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfSonarrNamingUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SonarrNamingUpdateResponse"
         }
       },
       "IReadOnlyListOfString": {
@@ -470,10 +760,28 @@
           "type": "string"
         }
       },
+      "IReadOnlyListOfSyncInstanceResultsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SyncInstanceResultsResponse"
+        }
+      },
       "IReadOnlyListOfSyncJobSummaryResponse": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/SyncJobSummaryResponse"
+        }
+      },
+      "IReadOnlyListOfTrashIdNameResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TrashIdNameResponse"
+        }
+      },
+      "IReadOnlyListOfValueChangeResponseOfDecimal": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ValueChangeResponseOfDecimal"
         }
       },
       "ListSyncJobsResponse": {
@@ -484,6 +792,104 @@
         "properties": {
           "jobs": {
             "$ref": "#/components/schemas/IReadOnlyListOfSyncJobSummaryResponse"
+          }
+        }
+      },
+      "MediaManagementPipelineResponse": {
+        "required": [
+          "status",
+          "updates"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfMediaManagementUpdateResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "MediaManagementUpdateResponse": {
+        "required": [
+          "propersAndRepacks"
+        ],
+        "type": "object",
+        "properties": {
+          "propersAndRepacks": {
+            "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse"
+          }
+        }
+      },
+      "NamedIdentityResponse": {
+        "required": [
+          "identity",
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/TrashIdNameResponse"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "NamedServiceResourceResponse": {
+        "required": [
+          "name",
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "NamingReferenceMismatchResponseOfRadarrNamingField": {
+        "required": [
+          "field",
+          "configuredKey"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/RadarrNamingField"
+          },
+          "configuredKey": {
+            "type": "string"
+          }
+        }
+      },
+      "NamingReferenceMismatchResponseOfSonarrNamingField": {
+        "required": [
+          "field",
+          "configuredKey"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/SonarrNamingField"
+          },
+          "configuredKey": {
+            "type": "string"
           }
         }
       },
@@ -537,6 +943,15 @@
             ]
           }
         }
+      },
+      "PipelineStatus": {
+        "enum": [
+          "succeeded",
+          "partial",
+          "failed",
+          "blocked"
+        ],
+        "type": "string"
       },
       "ProblemDetails": {
         "type": "object",
@@ -611,26 +1026,171 @@
         },
         "description": "RFC9457 compatible problem details/ error response class. this can be used by configuring startup like so:\n```app.UseFastEndpoints(c =&gt; c.Errors.UseProblemDetails())```"
       },
-      "ProblemErrorDetail": {
+      "PropersAndRepacksModeResponse": {
+        "enum": [
+          "preferAndUpgrade",
+          "doNotUpgrade",
+          "doNotPrefer"
+        ],
+        "type": "string"
+      },
+      "QualityProfileAdoptedResponse": {
+        "required": [
+          "identity",
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QualityProfileAmbiguousMatchResponse": {
+        "required": [
+          "identity",
+          "serviceMatches"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "serviceMatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamedServiceResourceResponse"
+          }
+        }
+      },
+      "QualityProfileControlledStateResponse": {
         "required": [
           "name",
-          "reason"
+          "upgradeAllowed",
+          "upgradeUntilQuality",
+          "upgradeUntilScore",
+          "minimumFormatScore",
+          "minimumUpgradeFormatScore",
+          "language",
+          "qualities",
+          "customFormatScores"
         ],
         "type": "object",
         "properties": {
           "name": {
             "type": "string"
           },
-          "reason": {
-            "type": "string"
+          "upgradeAllowed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           },
-          "code": {
+          "upgradeUntilQuality": {
             "type": [
               "null",
               "string"
             ]
           },
-          "severity": {
+          "upgradeUntilScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumUpgradeFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "language": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "qualities": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
+          }
+        }
+      },
+      "QualityProfileCreateResponse": {
+        "required": [
+          "identity",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "state": {
+            "$ref": "#/components/schemas/QualityProfileControlledStateResponse"
+          }
+        }
+      },
+      "QualityProfileFormatReferenceResponse": {
+        "required": [
+          "name",
+          "trashId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "trashId": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityProfileIdentityKind": {
+        "enum": [
+          "guideBacked",
+          "userDefined"
+        ],
+        "type": "string"
+      },
+      "QualityProfileIdentityOutcomeResponse": {
+        "required": [
+          "identity"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          }
+        }
+      },
+      "QualityProfileIdentityResponse": {
+        "required": [
+          "kind",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/QualityProfileIdentityKind"
+          },
+          "name": {
+            "type": "string"
+          },
+          "trashId": {
             "type": [
               "null",
               "string"
@@ -638,18 +1198,882 @@
           }
         }
       },
-      "SplitInstanceGroupResponse": {
+      "QualityProfileLayoutKind": {
+        "enum": [
+          "quality",
+          "group"
+        ],
+        "type": "string"
+      },
+      "QualityProfileLayoutResponse": {
         "required": [
-          "baseUrl",
-          "instanceNames"
+          "kind",
+          "name",
+          "allowed"
         ],
         "type": "object",
         "properties": {
-          "baseUrl": {
+          "kind": {
+            "$ref": "#/components/schemas/QualityProfileLayoutKind"
+          },
+          "name": {
             "type": "string"
           },
-          "instanceNames": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "qualities": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "QualityProfileMinimumScoreResponse": {
+        "required": [
+          "identity",
+          "minimumScore",
+          "totalPositiveScore",
+          "maximumScore"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "minimumScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPositiveScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maximumScore": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QualityProfileNamedOutcomeResponse": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityProfileNamesResponse": {
+        "required": [
+          "identity",
+          "names"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "names": {
             "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "QualityProfileOutcomesResponse": {
+        "type": "object",
+        "properties": {
+          "referenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "duplicateNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamedOutcomeResponse"
+          },
+          "scoreCollisions": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreCollisionResponse"
+          },
+          "notFound": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          },
+          "adopted": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAdoptedResponse"
+          },
+          "minimumScoresUnsatisfied": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileMinimumScoreResponse"
+          },
+          "invalidCutoffs": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
+          },
+          "unavailableCutoffs": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileQualityNameResponse"
+          },
+          "qualitiesRequired": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          },
+          "qualityReferenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileNamesResponse"
+          },
+          "resetScoreReferenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileResetReferencesResponse"
+          },
+          "renameBlocked": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileRenameBlockedResponse"
+          },
+          "ambiguousMatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileAmbiguousMatchResponse"
+          },
+          "createRejected": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          },
+          "updateRejected": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileIdentityOutcomeResponse"
+          }
+        }
+      },
+      "QualityProfilePipelineResponse": {
+        "required": [
+          "status",
+          "outcomes",
+          "creates",
+          "updates"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
+          },
+          "creates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileCreateResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileUpdateResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "QualityProfileQualityNameResponse": {
+        "required": [
+          "identity",
+          "qualityName"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "qualityName": {
+            "type": "string"
+          }
+        }
+      },
+      "QualityProfileRenameBlockedResponse": {
+        "required": [
+          "identity",
+          "conflict"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "conflict": {
+            "$ref": "#/components/schemas/NamedServiceResourceResponse"
+          }
+        }
+      },
+      "QualityProfileResetReferencesResponse": {
+        "required": [
+          "identity",
+          "names",
+          "patterns"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "names": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "patterns": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "QualityProfileScoreChangeResponse": {
+        "required": [
+          "name",
+          "value",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ValueChangeResponseOfInt32"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/QualityProfileScoreReason"
+          },
+          "trashId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "QualityProfileScoreCollisionResponse": {
+        "required": [
+          "existing",
+          "rejected",
+          "serviceId"
+        ],
+        "type": "object",
+        "properties": {
+          "existing": {
+            "$ref": "#/components/schemas/QualityProfileFormatReferenceResponse"
+          },
+          "rejected": {
+            "$ref": "#/components/schemas/QualityProfileFormatReferenceResponse"
+          },
+          "serviceId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QualityProfileScoreReason": {
+        "enum": [
+          "set",
+          "reset"
+        ],
+        "type": "string"
+      },
+      "QualityProfileScoreResponse": {
+        "required": [
+          "name",
+          "score"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trashId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "QualityProfileUpdateResponse": {
+        "required": [
+          "identity"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeAllowed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+              }
+            ]
+          },
+          "upgradeUntilQuality": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeUntilScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumUpgradeFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "language": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "qualityLayout": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+              }
+            ]
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
+          }
+        }
+      },
+      "QualitySizeKind": {
+        "enum": [
+          "numeric",
+          "unlimited"
+        ],
+        "type": "string"
+      },
+      "QualitySizeMaximumComparisonResponse": {
+        "required": [
+          "quality",
+          "preferred",
+          "maximum"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "maximum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          }
+        }
+      },
+      "QualitySizeMinimumComparisonResponse": {
+        "required": [
+          "quality",
+          "minimum",
+          "preferred"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "minimum": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          },
+          "preferred": {
+            "$ref": "#/components/schemas/QualitySizeValueResponse"
+          }
+        }
+      },
+      "QualitySizeOutcomesResponse": {
+        "type": "object",
+        "properties": {
+          "definitionReferenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeTypeResponse"
+          },
+          "referenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeReferenceResponse"
+          },
+          "serviceQualitiesNotFound": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          },
+          "preferredRatiosClamped": {
+            "$ref": "#/components/schemas/IReadOnlyListOfValueChangeResponseOfDecimal"
+          },
+          "minimumGreaterThanPreferred": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMinimumComparisonResponse"
+          },
+          "unlimitedPreferredGreaterThanMaximum": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
+          },
+          "preferredGreaterThanMaximum": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeMaximumComparisonResponse"
+          }
+        }
+      },
+      "QualitySizePipelineResponse": {
+        "required": [
+          "status",
+          "outcomes",
+          "updates"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/QualitySizeOutcomesResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualitySizeUpdateResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "QualitySizeReferenceResponse": {
+        "required": [
+          "quality",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "QualitySizeTypeResponse": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "QualitySizeUpdateResponse": {
+        "required": [
+          "quality"
+        ],
+        "type": "object",
+        "properties": {
+          "quality": {
+            "type": "string"
+          },
+          "minimum": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
+              }
+            ]
+          },
+          "preferred": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
+              }
+            ]
+          },
+          "maximum": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfQualitySizeValueResponse"
+              }
+            ]
+          }
+        }
+      },
+      "QualitySizeValueResponse": {
+        "required": [
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/QualitySizeKind"
+          },
+          "value": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "RadarrNamingField": {
+        "enum": [
+          "standardMovieFormat",
+          "movieFolderFormat"
+        ],
+        "type": "string"
+      },
+      "RadarrNamingOutcomesResponse": {
+        "required": [
+          "referenceMismatches"
+        ],
+        "type": "object",
+        "properties": {
+          "referenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamingReferenceMismatchResponseOfRadarrNamingField"
+          }
+        }
+      },
+      "RadarrNamingPipelineResponse": {
+        "required": [
+          "status",
+          "outcomes",
+          "updates"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/RadarrNamingOutcomesResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfRadarrNamingUpdateResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "RadarrNamingUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "renameMovies": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+              }
+            ]
+          },
+          "standardMovieFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "movieFolderFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          }
+        }
+      },
+      "RadarrPipelinesResponse": {
+        "type": "object",
+        "properties": {
+          "customFormats": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CustomFormatPipelineResponse"
+              }
+            ]
+          },
+          "qualityProfiles": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualityProfilePipelineResponse"
+              }
+            ]
+          },
+          "qualitySizes": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizePipelineResponse"
+              }
+            ]
+          },
+          "naming": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RadarrNamingPipelineResponse"
+              }
+            ]
+          },
+          "mediaManagement": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaManagementPipelineResponse"
+              }
+            ]
+          }
+        }
+      },
+      "SonarrNamingField": {
+        "enum": [
+          "seriesFolderFormat",
+          "seasonFolderFormat",
+          "standardEpisodeFormat",
+          "dailyEpisodeFormat",
+          "animeEpisodeFormat"
+        ],
+        "type": "string"
+      },
+      "SonarrNamingOutcomesResponse": {
+        "required": [
+          "referenceMismatches"
+        ],
+        "type": "object",
+        "properties": {
+          "referenceMismatches": {
+            "$ref": "#/components/schemas/IReadOnlyListOfNamingReferenceMismatchResponseOfSonarrNamingField"
+          }
+        }
+      },
+      "SonarrNamingPipelineResponse": {
+        "required": [
+          "status",
+          "outcomes",
+          "updates"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/SonarrNamingOutcomesResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSonarrNamingUpdateResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "SonarrNamingUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "renameEpisodes": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+              }
+            ]
+          },
+          "seriesFolderFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "seasonFolderFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "standardEpisodeFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "dailyEpisodeFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "animeEpisodeFormat": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          }
+        }
+      },
+      "SonarrPipelinesResponse": {
+        "type": "object",
+        "properties": {
+          "customFormats": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CustomFormatPipelineResponse"
+              }
+            ]
+          },
+          "qualityProfiles": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualityProfilePipelineResponse"
+              }
+            ]
+          },
+          "qualitySizes": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizePipelineResponse"
+              }
+            ]
+          },
+          "naming": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SonarrNamingPipelineResponse"
+              }
+            ]
+          },
+          "mediaManagement": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MediaManagementPipelineResponse"
+              }
+            ]
           }
         }
       },
@@ -659,6 +2083,132 @@
           "sonarr"
         ],
         "type": "string"
+      },
+      "SyncCompletionStatus": {
+        "enum": [
+          "succeeded",
+          "partial",
+          "failed"
+        ],
+        "type": "string"
+      },
+      "SyncFaultResponse": {
+        "required": [
+          "reference"
+        ],
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          }
+        }
+      },
+      "SyncInstanceResultsResponse": {
+        "required": [
+          "service"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/SyncInstanceResultsResponseSonarrInstanceResultsResponse"
+          },
+          {
+            "$ref": "#/components/schemas/SyncInstanceResultsResponseRadarrInstanceResultsResponse"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "service",
+          "mapping": {
+            "sonarr": "#/components/schemas/SyncInstanceResultsResponseSonarrInstanceResultsResponse",
+            "radarr": "#/components/schemas/SyncInstanceResultsResponseRadarrInstanceResultsResponse"
+          }
+        }
+      },
+      "SyncInstanceResultsResponseRadarrInstanceResultsResponse": {
+        "required": [
+          "pipelines",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "pipelines": {
+            "$ref": "#/components/schemas/RadarrPipelinesResponse"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncCompletionStatus"
+          },
+          "failure": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InstanceFailureCategory"
+              }
+            ]
+          }
+        }
+      },
+      "SyncInstanceResultsResponseSonarrInstanceResultsResponse": {
+        "required": [
+          "pipelines",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "pipelines": {
+            "$ref": "#/components/schemas/SonarrPipelinesResponse"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncCompletionStatus"
+          },
+          "failure": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/InstanceFailureCategory"
+              }
+            ]
+          }
+        }
+      },
+      "SyncJobResultsResponse": {
+        "required": [
+          "id",
+          "status",
+          "instances"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncCompletionStatus"
+          },
+          "instances": {
+            "$ref": "#/components/schemas/IReadOnlyListOfSyncInstanceResultsResponse"
+          },
+          "fault": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SyncFaultResponse"
+              }
+            ]
+          }
+        }
       },
       "SyncJobSummaryResponse": {
         "required": [
@@ -678,6 +2228,220 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "TrashIdNameResponse": {
+        "required": [
+          "trashId",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "trashId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ValueChangeResponseOfBoolean": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": "boolean"
+          },
+          "desired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ValueChangeResponseOfDecimal": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": "number",
+            "format": "double"
+          },
+          "desired": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "ValueChangeResponseOfInt32": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "desired": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
+          },
+          "desired": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/QualityProfileLayoutResponse"
+            }
+          }
+        }
+      },
+      "ValueChangeResponseOfNullableOfBoolean": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "desired": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "ValueChangeResponseOfNullableOfInt32": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "desired": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ValueChangeResponseOfNullableOfPropersAndRepacksModeResponse": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
+              }
+            ]
+          },
+          "desired": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PropersAndRepacksModeResponse"
+              }
+            ]
+          }
+        }
+      },
+      "ValueChangeResponseOfQualitySizeValueResponse": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizeValueResponse"
+              }
+            ]
+          },
+          "desired": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/QualitySizeValueResponse"
+              }
+            ]
+          }
+        }
+      },
+      "ValueChangeResponseOfString": {
+        "required": [
+          "current",
+          "desired"
+        ],
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "desired": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       }

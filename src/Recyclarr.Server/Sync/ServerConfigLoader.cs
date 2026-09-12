@@ -19,6 +19,7 @@ internal sealed record ServerConfigLoadResult(
 {
     // Paths the request named explicitly that do not exist on the server's filesystem.
     public IReadOnlyList<string> MissingConfigFiles { get; init; } = [];
+    public bool HasAvailableConfigs { get; init; }
 }
 
 // Server-side equivalent of Recyclarr.Cli's ConfigPipeline/ConfigPipelineFactory, minus CLI
@@ -94,6 +95,7 @@ internal sealed class ServerConfigLoader(
         )
         {
             MissingConfigFiles = requestedFiles[false].Select(x => x.FullName).ToList(),
+            HasAvailableConfigs = allConfigs.Count > 0,
         };
     }
 

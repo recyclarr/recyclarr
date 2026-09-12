@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Text.Json;
 using FastEndpoints;
 using Recyclarr.Server.Features.Sync.CreateJob;
 using Recyclarr.Server.Sync;
@@ -9,11 +8,6 @@ namespace Recyclarr.Server.Tests.Features.Sync.CreateJob;
 
 internal sealed class EndpointTest : ServerIntegrationFixture
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
-
     private void AddInstanceConfig(string instanceName)
     {
         Fs.AddFile(
@@ -30,7 +24,7 @@ internal sealed class EndpointTest : ServerIntegrationFixture
     }
 
     [Test]
-    public async Task Requesting_wholly_nonexistent_instance_yields_400_naming_bad_and_available()
+    public async Task Requesting_wholly_nonexistent_instance_yields_400_without_creating_job()
     {
         AddInstanceConfig("real-instance");
 
@@ -40,32 +34,16 @@ internal sealed class EndpointTest : ServerIntegrationFixture
             Resolve<ServerConfigLoader>(),
             Resolve<SyncJobLauncher>()
         );
-        ep.HttpContext.Response.Body = new MemoryStream();
-
         var req = new CreateSyncJobRequest { Instances = ["does-not-exist"] };
 
         await ep.HandleAsync(req, CancellationToken.None);
 
         ep.HttpContext.Response.StatusCode.Should().Be(400);
-        ep.HttpContext.Response.ContentType.Should().Be("application/problem+json");
-
-        ep.HttpContext.Response.Body.Position = 0;
-        var problem = await JsonSerializer.DeserializeAsync<CreateSyncJobProblemDetails>(
-            ep.HttpContext.Response.Body,
-            JsonOptions
-        );
-
-        problem.Should().NotBeNull();
-        var diagnostics = problem.Diagnostics;
-        diagnostics.Should().NotBeNull();
-        diagnostics.UnknownInstances.Should().Contain("does-not-exist");
-        diagnostics.AvailableInstances.Should().Contain("real-instance");
-
         jobStore.GetAll(null).Should().BeEmpty();
     }
 
     [Test]
-    public async Task Requesting_a_config_path_that_does_not_exist_yields_400_naming_the_file()
+    public async Task Requesting_missing_config_path_yields_400_without_creating_job()
     {
         var missing = Fs.CurrentDirectory().SubDirectory("elsewhere").File("gone.yml");
 
@@ -75,31 +53,17 @@ internal sealed class EndpointTest : ServerIntegrationFixture
             Resolve<ServerConfigLoader>(),
             Resolve<SyncJobLauncher>()
         );
-        ep.HttpContext.Response.Body = new MemoryStream();
-
         var req = new CreateSyncJobRequest { Configs = [missing.FullName] };
 
         await ep.HandleAsync(req, CancellationToken.None);
 
         ep.HttpContext.Response.StatusCode.Should().Be(400);
 
-        ep.HttpContext.Response.Body.Position = 0;
-        var problem = await JsonSerializer.DeserializeAsync<CreateSyncJobProblemDetails>(
-            ep.HttpContext.Response.Body,
-            JsonOptions
-        );
-
-        problem.Should().NotBeNull();
-        problem.Title.Should().Be("Config files not found");
-        var diagnostics = problem.Diagnostics;
-        diagnostics.Should().NotBeNull();
-        diagnostics.MissingConfigFiles.Should().Equal(missing.FullName);
-
         jobStore.GetAll(null).Should().BeEmpty();
     }
 
     [Test]
-    public async Task Mixed_valid_and_invalid_instances_syncs_valid_and_records_invalid_diagnostic()
+    public async Task Mixed_valid_and_invalid_instances_yield_400_without_creating_job()
     {
         AddInstanceConfig("real-instance");
 
@@ -114,15 +78,7 @@ internal sealed class EndpointTest : ServerIntegrationFixture
 
         await ep.HandleAsync(req, CancellationToken.None);
 
-        ep.ValidationFailed.Should().BeFalse();
-        var response = ep.Response;
-        response.Should().NotBeNull();
-
-        var job = jobStore.Get(new JobId { Value = response.Id });
-        job.Should().NotBeNull();
-        var diagnostics = job.ConfigDiagnostics;
-        diagnostics.Should().NotBeNull();
-        diagnostics.UnknownInstances.Should().Contain("does-not-exist");
-        diagnostics.AvailableInstances.Should().Contain("real-instance");
+        ep.HttpContext.Response.StatusCode.Should().Be(400);
+        jobStore.GetAll(null).Should().BeEmpty();
     }
 }
