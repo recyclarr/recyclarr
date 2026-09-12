@@ -17,31 +17,19 @@ internal sealed class SyncJobLauncher(
     SyncRunScopeFactory scopeFactory
 )
 {
-    public SyncJob Launch(
-        ServerSyncSettings settings,
-        ConfigLoadDiagnostics configDiagnostics,
-        IReadOnlyList<IServiceConfiguration> configs
-    )
+    public SyncJob Launch(ServerSyncSettings settings, IReadOnlyList<IServiceConfiguration> configs)
     {
         var job = store.Create(settings);
 
-        if (!configDiagnostics.IsEmpty)
-        {
-            store.Update(job.Id, j => j.ConfigDiagnostics = configDiagnostics);
-        }
-
-        var runScope = scopeFactory.Start<SyncJobRunner>();
-
         // Runs independently of whatever asked for the job; progress and the terminal result are
         // recorded in the store and observed through the job resource.
-        _ = Task.Run(() => RunAsync(runScope, job.Id, configs, settings), CancellationToken.None);
+        _ = Task.Run(() => RunAsync(job.Id, configs, settings), CancellationToken.None);
 
         return job;
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
     private async Task RunAsync(
-        LifetimeScopeWrapper<SyncJobRunner> runScope,
         JobId jobId,
         IReadOnlyList<IServiceConfiguration> configs,
         ISyncSettings settings
@@ -49,21 +37,21 @@ internal sealed class SyncJobLauncher(
     {
         try
         {
-            using (runScope)
-            {
-                await runScope.Entry.RunAsync(jobId, configs, settings, CancellationToken.None);
-            }
+            using var runScope = scopeFactory.Start<SyncJobRunner>();
+            await runScope.Entry.RunAsync(jobId, configs, settings, CancellationToken.None);
         }
         catch (OperationCanceledException e)
         {
-            log.Information(e, "Sync job {JobId} was canceled", jobId);
+            var reference = Guid.NewGuid().ToString("N");
+            log.Information(e, "Sync job {JobId} was canceled ({Reference})", jobId, reference);
             store.Update(
                 jobId,
                 j =>
                 {
                     if (j.Result is null)
                     {
-                        j.Status = SyncJobStatus.Failed;
+                        j.Result = new SyncRunResult([], new SyncFault(reference));
+                        j.Status = j.Result.Status.ToJobStatus();
                     }
                 }
             );

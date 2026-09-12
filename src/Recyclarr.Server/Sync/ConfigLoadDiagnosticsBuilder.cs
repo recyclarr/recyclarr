@@ -2,10 +2,8 @@ using Recyclarr.Config.Filtering;
 
 namespace Recyclarr.Server.Sync;
 
-// Projects the structured half of ServerConfigLoadResult (parse failures, filter diagnostics,
-// deprecation warnings) into ConfigLoadDiagnostics. Used both for the 400 response when nothing
-// is left to sync, and for the diagnostics recorded on jobs that proceed with a subset of valid
-// instances.
+// Projects parse failures, filter diagnostics, and deprecations into the shape used for server
+// logging and request admission.
 internal static class ConfigLoadDiagnosticsBuilder
 {
     public static ConfigLoadDiagnostics Build(ServerConfigLoadResult result)
