@@ -29,7 +29,7 @@ internal sealed class InMemorySyncJobStore : ISyncJobStore
     {
         lock (_gate)
         {
-            return _jobs.GetValueOrDefault(id);
+            return _jobs.GetValueOrDefault(id)?.Snapshot();
         }
     }
 
@@ -38,7 +38,7 @@ internal sealed class InMemorySyncJobStore : ISyncJobStore
         lock (_gate)
         {
             return _order
-                .Select(id => _jobs[id])
+                .Select(id => _jobs[id].Snapshot())
                 .Where(j => statusFilter is null || j.Status == statusFilter)
                 .ToList();
         }

@@ -34,13 +34,6 @@ internal sealed record InstanceSnapshotResponse(
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record DiagnosticEventResponse(string Level, string Message)
-{
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Instance { get; init; }
-}
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobResponse
 {
     public required Guid Id { get; init; }
@@ -53,8 +46,4 @@ internal sealed record GetSyncJobResponse
     public required IReadOnlyCollection<string> Instances { get; init; }
     public required bool Preview { get; init; }
     public required IReadOnlyList<InstanceSnapshotResponse> Progress { get; init; }
-    public required IReadOnlyList<DiagnosticEventResponse> Diagnostics { get; init; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public ConfigDiagnosticsResponse? ConfigDiagnostics { get; init; }
 }
