@@ -16,12 +16,8 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         // opt-out is explicit until API key auth lands (REC-153).
         AllowAnonymous();
 
-        // 200 once the job reaches a terminal state, 202 while it is still running.
         Description(b =>
-            b.Produces<GetSyncJobResponse>()
-                .Produces<GetSyncJobResponse>(202)
-                .ProducesProblemDetails(404)
-                .WithTags("Sync")
+            b.Produces<GetSyncJobResponse>().ProducesProblemDetails(404).WithTags("Sync")
         );
     }
 
@@ -37,13 +33,7 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
 
         Response = ToResponse(job);
 
-        var statusCode = job.Status.IsTerminal() ? 200 : 202;
-        if (statusCode == 202)
-        {
-            HttpContext.Response.Headers.RetryAfter = "1";
-        }
-
-        await Send.ResponseAsync(Response, statusCode, ct);
+        await Send.OkAsync(Response, ct);
     }
 
     private static GetSyncJobResponse ToResponse(SyncJob job)
@@ -57,13 +47,6 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
             Instances = job.Request.Instances,
             Preview = job.Request.Preview,
             Progress = job.Progress.Instances.Select(ToInstanceResponse).ToList(),
-            Diagnostics = job
-                .Diagnostics.Select(d => new DiagnosticEventResponse(d.Level.ToString(), d.Message)
-                {
-                    Instance = d.Instance,
-                })
-                .ToList(),
-            ConfigDiagnostics = job.ConfigDiagnostics?.ToResponse(),
         };
     }
 
