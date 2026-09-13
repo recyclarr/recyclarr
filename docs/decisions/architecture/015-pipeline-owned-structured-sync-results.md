@@ -66,6 +66,7 @@ Core returns one self-contained aggregate:
 ```txt
 SyncRunResult
 └── SyncInstanceResult
+    ├── PlanningOutcomes
     └── PipelineResult
         ├── Outcomes
         └── Deltas
@@ -73,6 +74,10 @@ SyncRunResult
 
 `SyncInstanceResult` includes the instance name and service type. Core results do not contain an
 HTTP job ID. The server owns the job and associates the returned run result with it.
+
+Planning outcomes belong to the instance because planning validates relationships across pipelines
+before any pipeline executes. Blocking planning outcomes fail the instance; non-blocking planning
+outcomes retain semantic context without changing terminal status.
 
 Instances and pipeline results use ordered, self-identifying lists. Dictionaries are private lookup
 indexes only. Each pipeline owns concrete result, outcome, and delta types. A minimal
@@ -101,13 +106,15 @@ status.
 The canonical language is defined in `CONTEXT.md`.
 
 - An outcome explains a decision, rejection, skip, or failure
+- A planning outcome explains a condition found before pipeline execution
 - A delta is a calculated semantic difference, not proof of application
 - A resource delta may contain value or structure deltas
 - A fault is unexpected and is not an outcome
 - Progress is transient and is not part of a terminal result
 
-Core outcomes contain no diagnostic severity or rendered message. Pipeline status communicates hard
-stops. Adapters may assign presentation severity from the typed contract.
+Core outcomes contain no diagnostic severity or rendered message. Pipeline status and blocking
+planning outcome types communicate hard stops. Adapters may assign presentation severity from the
+typed contract.
 
 ### Shared execution invariants
 
