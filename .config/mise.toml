@@ -1,9 +1,11 @@
 [env]
 RECYCLARR_CONFIG_DIR = "{{ [config_root, '..', 'dev-configs', 'appdata'] | join_path | canonicalize }}"
 LINEAR_CLIENT_ID = "356e0c82210f6ddb8641c5aa96e63b22"
+GITHUB_TOKEN = { value = "{{ exec(command='gh auth token') }}", redact = true, tools = true }
 
 [tools]
 dotnet = "10"
+gh = "latest"
 "github:santhosh-tekuri/jsonschema" = "latest"
 "npm:@microsoft/learn-cli" = "latest"
 python = "latest"
