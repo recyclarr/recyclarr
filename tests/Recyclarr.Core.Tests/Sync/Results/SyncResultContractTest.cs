@@ -117,6 +117,50 @@ internal sealed class SyncResultContractTest
     }
 
     [Test]
+    public void Instance_retains_an_ordered_snapshot_of_planning_outcomes()
+    {
+        var first = new TestPlanningNotice("first");
+        var second = new TestPlanningNotice("second");
+        var outcomes = new List<PlanningOutcome> { first, second };
+        var instance = new SyncInstanceResult(
+            "radarr",
+            SupportedServices.Radarr,
+            [],
+            planningOutcomes: outcomes
+        );
+
+        outcomes.Clear();
+
+        instance.PlanningOutcomes.Should().Equal(first, second);
+    }
+
+    [Test]
+    public void Blocking_planning_outcome_fails_the_instance()
+    {
+        var result = new SyncInstanceResult(
+            "sonarr",
+            SupportedServices.Sonarr,
+            [],
+            planningOutcomes: [new TestBlockingPlanningOutcome()]
+        );
+
+        result.Status.Should().Be(SyncResultStatus.Failed);
+    }
+
+    [Test]
+    public void Planning_notice_does_not_fail_the_instance()
+    {
+        var result = new SyncInstanceResult(
+            "sonarr",
+            SupportedServices.Sonarr,
+            [],
+            planningOutcomes: [new TestPlanningNotice("notice")]
+        );
+
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
+    }
+
+    [Test]
     public void Semantic_contracts_are_presentation_free()
     {
         PipelineOutcome outcome = new TestOutcome();
@@ -270,6 +314,10 @@ internal sealed class SyncResultContractTest
     }
 
     private sealed record TestOutcome : PipelineOutcome;
+
+    private sealed record TestPlanningNotice(string Value) : PlanningOutcome;
+
+    private sealed record TestBlockingPlanningOutcome : BlockingPlanningOutcome;
 
     private sealed record TestResourceDelta : ResourceDelta;
 }
