@@ -133,6 +133,15 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
   an allocation-sensitive path usually completes synchronously.
 - Accept and propagate `CancellationToken` for cancellable async or long-running work; name it `ct`.
 
+### IDE-Only Review
+
+Build success does not cover all IDE inspections. Before completing C# changes, review changed code:
+
+- Remove redundant namespace/type qualifiers when the shorter name resolves to the same symbol.
+- Omit optional arguments equal to their declared defaults when overload resolution is unchanged.
+- Use direct access when annotations or flow establish a non-null receiver, including after
+  `Should().NotBeNull()`. Keep `?.` for genuinely nullable receivers and validate untrusted inputs.
+
 ### Comments
 
 - Avoid null-suppression (`!`). When it is necessary and the runtime guarantee is not obvious, add
