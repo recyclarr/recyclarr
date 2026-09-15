@@ -1,14 +1,17 @@
 using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan;
 
 internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublisher
 {
     private readonly List<SyncOutcome> _outcomes = [];
+    private readonly List<PlanningOutcome> _planningOutcomes = [];
 
     public bool HasErrors { get; private set; }
     public bool HasInstanceBlockingErrors { get; private set; }
     public IReadOnlyList<SyncOutcome> Outcomes => _outcomes;
+    public IReadOnlyList<PlanningOutcome> PlanningOutcomes => _planningOutcomes;
 
     public void Add(SyncOutcome outcome)
     {
@@ -17,6 +20,11 @@ internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublish
         HasErrors |= isError;
         HasInstanceBlockingErrors |= isError && outcome.Scope == SyncOutcomeScope.InstanceBlocking;
         publisher.Add(outcome);
+    }
+
+    public void AddPlanningOutcome(PlanningOutcome outcome)
+    {
+        _planningOutcomes.Add(outcome);
     }
 
     public void AddError(string message)

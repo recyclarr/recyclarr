@@ -1,6 +1,7 @@
 using FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
@@ -17,6 +18,10 @@ internal class CfGroupAssignScoresToEntryValidator : AbstractValidator<AssignSco
             .WithMessage(s =>
                 $"CF group '{groupTrashId}': Invalid profile trash_id "
                 + $"in assign_scores_to: {s.TrashId}"
-            );
+            )
+            .WithState(s => new CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcome(
+                groupTrashId,
+                s.TrashId! // non-null: guarded by the rule's When condition
+            ));
     }
 }
