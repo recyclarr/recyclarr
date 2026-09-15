@@ -2,6 +2,7 @@ using FluentValidation;
 using Recyclarr.Common.Extensions;
 using Recyclarr.Config.Models;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
@@ -25,7 +26,8 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
 
         RuleFor(g => g.TrashId)
             .Must(id => _groups.ContainsKey(id))
-            .WithMessage(g => $"Invalid custom format group trash_id: {g.TrashId}");
+            .WithMessage(g => $"Invalid custom format group trash_id: {g.TrashId}")
+            .WithState(g => new CustomFormatGroupReferenceMismatchPlanningOutcome(g.TrashId));
 
         When(
             g => _groups.ContainsKey(g.TrashId),
@@ -57,6 +59,10 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
             .WithMessage(
                 (g, selectId) =>
                     $"CF group '{g.TrashId}': Invalid CF trash_id in select: {selectId}"
+            )
+            .WithState(
+                (g, selectId) =>
+                    new CustomFormatGroupSelectReferenceMismatchPlanningOutcome(g.TrashId, selectId)
             );
 
         RuleForEach(g => g.Select)
@@ -66,6 +72,10 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                 (g, selectId) =>
                     $"CF group '{g.TrashId}': Selecting required CF '{selectId}' is redundant "
                     + "(required CFs are always included)"
+            )
+            .WithState(
+                (g, selectId) =>
+                    new CustomFormatGroupRequiredItemSelectedPlanningOutcome(g.TrashId, selectId)
             );
 
         RuleForEach(g => g.Select)
@@ -75,6 +85,10 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                 (g, selectId) =>
                     $"CF group '{g.TrashId}': Selecting default CF '{selectId}' is redundant "
                     + "(default CFs are already included)"
+            )
+            .WithState(
+                (g, selectId) =>
+                    new CustomFormatGroupDefaultItemSelectedPlanningOutcome(g.TrashId, selectId)
             );
     }
 
@@ -85,6 +99,13 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
             .WithMessage(
                 (g, excludeId) =>
                     $"CF group '{g.TrashId}': Invalid CF trash_id in exclude: {excludeId}"
+            )
+            .WithState(
+                (g, excludeId) =>
+                    new CustomFormatGroupExcludeReferenceMismatchPlanningOutcome(
+                        g.TrashId,
+                        excludeId
+                    )
             );
 
         RuleForEach(g => g.Exclude)
@@ -94,6 +115,10 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                 (g, excludeId) =>
                     $"CF group '{g.TrashId}': Excluding required CF '{excludeId}' has no effect "
                     + "(required CFs are always included)"
+            )
+            .WithState(
+                (g, excludeId) =>
+                    new CustomFormatGroupRequiredItemExcludedPlanningOutcome(g.TrashId, excludeId)
             );
 
         // With select_all, excluding any non-required CF is valid
@@ -108,6 +133,10 @@ internal class ExplicitCfGroupValidator : AbstractValidator<CustomFormatGroupCon
                 (g, excludeId) =>
                     $"CF group '{g.TrashId}': Excluding non-default CF '{excludeId}' has no effect "
                     + "(only default CFs can be excluded)"
+            )
+            .WithState(
+                (g, excludeId) =>
+                    new CustomFormatGroupNonDefaultItemExcludedPlanningOutcome(g.TrashId, excludeId)
             );
     }
 }

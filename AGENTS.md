@@ -149,8 +149,9 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 
 ### Comments
 
-- Avoid null-suppression (`!`). When it is necessary and the runtime guarantee is not obvious, add
-  an inline comment naming the invariant (for example, `// non-null: validated above`).
+- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow analysis
+  cannot cross a third-party callback, prefer a documented `!` over an unreachable defensive throw
+  (for example, `// non-null: guarded above`).
 - NEVER commit commented-out code.
 
 #### Public Contract Documentation
