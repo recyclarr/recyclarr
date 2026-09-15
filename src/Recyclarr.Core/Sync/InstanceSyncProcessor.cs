@@ -29,6 +29,7 @@ internal class InstanceSyncProcessor(
     )
     {
         using var _ = LogContext.PushProperty(LogProperty.Scope, config.InstanceName);
+        PipelinePlan? plan = null;
 
         try
         {
@@ -40,9 +41,14 @@ internal class InstanceSyncProcessor(
 
             await enforcer.Check(config, ct);
 
-            var plan = planBuilder.Build();
+            plan = planBuilder.Build();
             var result = await pipelines.Execute(settings, plan, instancePublisher, buffer, ct);
-            return new SemanticInstanceResult(config.InstanceName, config.ServiceType, result);
+            return new SemanticInstanceResult(
+                config.InstanceName,
+                config.ServiceType,
+                result,
+                planningOutcomes: plan.PlanningOutcomes
+            );
         }
         catch (Exception e)
         {
@@ -64,7 +70,8 @@ internal class InstanceSyncProcessor(
                 config.InstanceName,
                 config.ServiceType,
                 buffer.Results,
-                operationalFailure
+                failure: operationalFailure,
+                planningOutcomes: plan?.PlanningOutcomes
             );
         }
     }

@@ -1,8 +1,10 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Recyclarr.Common.FluentValidation;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.ResourceProviders.Domain;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
@@ -19,7 +21,12 @@ internal class CustomFormatPlanComponent(
         // Validate explicit CF group config before resolution
         foreach (var groupConfig in config.CustomFormatGroups.Add)
         {
-            cfGroupValidator.Validate(groupConfig).ForwardTo(plan, log);
+            var validationResult = cfGroupValidator.Validate(groupConfig);
+            validationResult.ForwardTo(plan, log);
+            foreach (var failure in validationResult.Errors)
+            {
+                plan.AddPlanningOutcome(GetPlanningOutcome(failure));
+            }
         }
 
         var cfResources = cfQuery
@@ -28,7 +35,7 @@ internal class CustomFormatPlanComponent(
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll(plan)
+            .GetAll(plan, plan.AddPlanningOutcome)
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)
@@ -50,5 +57,13 @@ internal class CustomFormatPlanComponent(
                 }
             );
         }
+    }
+
+    private static PlanningOutcome GetPlanningOutcome(ValidationFailure failure)
+    {
+        return failure.CustomState as PlanningOutcome
+            ?? throw new InvalidOperationException(
+                $"CF group validation did not produce a planning outcome: {failure.PropertyName}"
+            );
     }
 }

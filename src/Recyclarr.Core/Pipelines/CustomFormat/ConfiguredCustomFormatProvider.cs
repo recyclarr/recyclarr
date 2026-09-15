@@ -2,6 +2,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
@@ -12,7 +13,10 @@ internal class ConfiguredCustomFormatProvider(
     ILogger log
 )
 {
-    public IEnumerable<ConfiguredCfEntry> GetAll(IDiagnosticPublisher diagnostics)
+    public IEnumerable<ConfiguredCfEntry> GetAll(
+        IDiagnosticPublisher diagnostics,
+        Action<PlanningOutcome>? capturePlanningOutcome = null
+    )
     {
         var qpResources = qpQuery
             .Get(config.ServiceType)
@@ -36,7 +40,8 @@ internal class ConfiguredCustomFormatProvider(
             var resolvedScores = ResolveAssignScoresTo(
                 cfg.AssignScoresTo,
                 qpResources,
-                diagnostics
+                diagnostics,
+                capturePlanningOutcome
             );
             foreach (var trashId in cfg.TrashIds)
             {
@@ -57,7 +62,14 @@ internal class ConfiguredCustomFormatProvider(
         }
 
         // From explicit CF groups (assumes validation already ran)
-        foreach (var entry in FromExplicitGroups(qpResources, cfGroupResources, diagnostics))
+        foreach (
+            var entry in FromExplicitGroups(
+                qpResources,
+                cfGroupResources,
+                diagnostics,
+                capturePlanningOutcome
+            )
+        )
         {
             yield return entry;
         }
@@ -192,7 +204,8 @@ internal class ConfiguredCustomFormatProvider(
     private IEnumerable<ConfiguredCfEntry> FromExplicitGroups(
         Dictionary<string, QualityProfileResource> qpResources,
         Dictionary<string, CfGroupResource> cfGroupResources,
-        IDiagnosticPublisher diagnostics
+        IDiagnosticPublisher diagnostics,
+        Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
         foreach (var groupConfig in config.CustomFormatGroups.Add)
@@ -206,7 +219,8 @@ internal class ConfiguredCustomFormatProvider(
                 groupConfig,
                 groupResource,
                 qpResources,
-                diagnostics
+                diagnostics,
+                capturePlanningOutcome
             );
 
             if (assignScoresTo.Count == 0)
@@ -281,11 +295,21 @@ internal class ConfiguredCustomFormatProvider(
     private List<AssignScoresToConfig> ResolveAssignScoresTo(
         ICollection<AssignScoresToConfig> scores,
         Dictionary<string, QualityProfileResource> qpResources,
-        IDiagnosticPublisher diagnostics
+        IDiagnosticPublisher diagnostics,
+        Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
         return scores
-            .SelectMany(s => ResolveProfileReference(s, qpResources, diagnostics, "custom_formats"))
+            .SelectMany(s =>
+                ResolveProfileReference(
+                    s,
+                    qpResources,
+                    diagnostics,
+                    "custom_formats",
+                    null,
+                    capturePlanningOutcome
+                )
+            )
             .ToList();
     }
 
@@ -294,7 +318,8 @@ internal class ConfiguredCustomFormatProvider(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
         Dictionary<string, QualityProfileResource> qpResources,
-        IDiagnosticPublisher diagnostics
+        IDiagnosticPublisher diagnostics,
+        Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
         if (groupConfig.AssignScoresTo.Count > 0)
@@ -305,7 +330,9 @@ internal class ConfiguredCustomFormatProvider(
                         entry,
                         qpResources,
                         diagnostics,
-                        $"CF group '{groupConfig.TrashId}'"
+                        $"CF group '{groupConfig.TrashId}'",
+                        groupConfig.TrashId,
+                        capturePlanningOutcome
                     )
                 )
                 .ToList();
@@ -347,7 +374,9 @@ internal class ConfiguredCustomFormatProvider(
         AssignScoresToConfig reference,
         Dictionary<string, QualityProfileResource> qpResources,
         IDiagnosticPublisher diagnostics,
-        string context
+        string context,
+        string? groupTrashId,
+        Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
         if (!string.IsNullOrEmpty(reference.Name))
@@ -369,12 +398,21 @@ internal class ConfiguredCustomFormatProvider(
 
         if (matchingProfiles.Count > 1)
         {
+            var profileNames = matchingProfiles.Select(qp => qp.Name).ToList();
             diagnostics.Add(
-                new AmbiguousProfileReferenceOutcome(
-                    context,
-                    reference.TrashId,
-                    matchingProfiles.Select(qp => qp.Name).ToList()
-                )
+                new AmbiguousProfileReferenceOutcome(context, reference.TrashId, profileNames)
+            );
+            capturePlanningOutcome?.Invoke(
+                groupTrashId is null
+                    ? new CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome(
+                        reference.TrashId,
+                        profileNames
+                    )
+                    : new CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome(
+                        groupTrashId,
+                        reference.TrashId,
+                        profileNames
+                    )
             );
             return [];
         }
