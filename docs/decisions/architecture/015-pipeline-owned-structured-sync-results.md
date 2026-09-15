@@ -136,6 +136,14 @@ successful. Batch and singleton pipelines follow their API request granularity.
 
 ### Pipeline contracts
 
+#### Planning
+
+- Planning outcomes belong to the instance rather than an individual pipeline
+- Blocking outcomes cover unknown Custom Format groups, unknown selected or excluded group members,
+  unknown group profile references, and ambiguous direct or group profile references
+- Non-blocking outcomes cover redundant selection and ineffective exclusion of group members
+- Outcomes retain group, Custom Format, profile, and ambiguity candidate context as applicable
+
 #### Custom Formats
 
 - Managed identity is Trash ID; name is descriptive context
