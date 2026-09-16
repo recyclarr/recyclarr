@@ -111,6 +111,89 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     }
 
     [Test]
+    public async Task Results_expose_every_planning_outcome_variant_in_order()
+    {
+        var contract = SyncResultScenarios.CompletePlanningOutcomeContract();
+        AssertCompletePlanningOutcomeInventory(contract);
+        var job = CreateCompletedJob(contract);
+
+        using var client = CreateClient();
+        var response = await RestService.For<ISyncApi>(client).Results(job.Id.Value);
+        response.Error.Should().BeNull();
+        response.Content.Should().NotBeNull();
+        var instance = response
+            .Content.Instances.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .Which;
+        var planningOutcomes = instance.PlanningOutcomes;
+        planningOutcomes.Should().NotBeNull();
+        planningOutcomes
+            .Select(x => x.GetType())
+            .Should()
+            .Equal(
+                typeof(PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse),
+                typeof(PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse)
+            );
+        var ambiguity = planningOutcomes[5]
+            .Should()
+            .BeOfType<PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse>()
+            .Which;
+        ambiguity.GroupTrashId.Should().Be("ambiguous-group");
+        ambiguity.ProfileTrashId.Should().Be("group-profile");
+        ambiguity.ProfileNames.Should().Equal("Group A", "Group B");
+
+        var raw = await client.GetStringAsync(
+            new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative)
+        );
+
+        raw.Should()
+            .Contain("\"planningOutcomes\":[{\"type\":\"customFormatGroupReferenceMismatch\"");
+        string[] outcomeTypes =
+        [
+            "customFormatGroupReferenceMismatch",
+            "customFormatGroupSelectReferenceMismatch",
+            "customFormatGroupExcludeReferenceMismatch",
+            "customFormatGroupQualityProfileReferenceMismatch",
+            "customFormatQualityProfileReferenceAmbiguous",
+            "customFormatGroupQualityProfileReferenceAmbiguous",
+            "customFormatGroupRequiredItemSelected",
+            "customFormatGroupDefaultItemSelected",
+            "customFormatGroupRequiredItemExcluded",
+            "customFormatGroupNonDefaultItemExcluded",
+        ];
+        outcomeTypes
+            .Select(type => raw.IndexOf($"\"type\":\"{type}\"", StringComparison.Ordinal))
+            .Should()
+            .BeInAscendingOrder()
+            .And.OnlyContain(index => index >= 0);
+        raw.Should().Contain("\"groupTrashId\":\"ambiguous-group\"");
+        raw.Should().Contain("\"profileTrashId\":\"group-profile\"");
+        raw.Should().Contain("\"profileNames\":[\"Group A\",\"Group B\"]");
+    }
+
+    private static void AssertCompletePlanningOutcomeInventory(SyncRunResult contract)
+    {
+        var representedTypes = contract
+            .Instances.SelectMany(x => x.PlanningOutcomes)
+            .Select(x => x.GetType());
+        var concreteContractTypes = typeof(PlanningOutcome)
+            .Assembly.GetTypes()
+            .Where(type => !type.IsAbstract && type.IsAssignableTo(typeof(PlanningOutcome)));
+
+        representedTypes.Should().BeEquivalentTo(concreteContractTypes);
+    }
+
+    [Test]
     public async Task Unknown_job_results_yield_problem_details()
     {
         using var client = CreateClient();
@@ -127,6 +210,27 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         var store = Services.GetRequiredService<ISyncJobStore>();
         var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []));
         store.Update(job.Id, x => x.Status = SyncJobStatus.Succeeded);
+
+        using var client = CreateClient();
+        var uri = new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative);
+        var response = await client.GetAsync(uri);
+
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+    }
+
+    [Test]
+    public async Task Unknown_planning_outcome_returns_safe_internal_error()
+    {
+        var result = new SyncRunResult([
+            new SyncInstanceResult(
+                "tv",
+                CoreService.Sonarr,
+                [],
+                planningOutcomes: [new UnknownPlanningOutcome()]
+            ),
+        ]);
+        var job = CreateCompletedJob(result);
 
         using var client = CreateClient();
         var uri = new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative);
@@ -366,4 +470,6 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         update?.StandardMovieFormat.Should().NotBeNull();
         update?.MovieFolderFormat.Should().NotBeNull();
     }
+
+    private sealed record UnknownPlanningOutcome : PlanningOutcome;
 }
