@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Recyclarr.Server.Features.Sync.GetResults;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -54,9 +56,13 @@ internal enum InstanceFailureCategory
 internal sealed record SyncFaultResponse(string Reference);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "service")]
+[JsonDerivedType(typeof(SonarrInstanceResultsResponse), "sonarr")]
+[JsonDerivedType(typeof(RadarrInstanceResultsResponse), "radarr")]
 internal abstract record SyncInstanceResultsResponse(string Name, SyncCompletionStatus Status)
 {
     public InstanceFailureCategory? Failure { get; init; }
+    public IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
