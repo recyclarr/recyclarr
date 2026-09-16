@@ -28,6 +28,59 @@ internal static class SyncResultScenarios
         return new SyncRunResult([sonarr, radarr]);
     }
 
+    public static SyncRunResult CompletePlanningOutcomeContract()
+    {
+        var instance = new SyncInstanceResult(
+            "planning",
+            SupportedServices.Sonarr,
+            [],
+            planningOutcomes: PlanningOutcomeContractInventory()
+        );
+        return new SyncRunResult([instance]);
+    }
+
+    private static IReadOnlyList<PlanningOutcome> PlanningOutcomeContractInventory() =>
+        [
+            new CustomFormatGroupReferenceMismatchPlanningOutcome("missing-group"),
+            new CustomFormatGroupSelectReferenceMismatchPlanningOutcome(
+                "select-group",
+                "missing-select"
+            ),
+            new CustomFormatGroupExcludeReferenceMismatchPlanningOutcome(
+                "exclude-group",
+                "missing-exclude"
+            ),
+            new CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcome(
+                "profile-group",
+                "missing-profile"
+            ),
+            new CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome(
+                "direct-profile",
+                ["Direct A", "Direct B"]
+            ),
+            new CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome(
+                "ambiguous-group",
+                "group-profile",
+                ["Group A", "Group B"]
+            ),
+            new CustomFormatGroupRequiredItemSelectedPlanningOutcome(
+                "required-select-group",
+                "required-select"
+            ),
+            new CustomFormatGroupDefaultItemSelectedPlanningOutcome(
+                "default-select-group",
+                "default-select"
+            ),
+            new CustomFormatGroupRequiredItemExcludedPlanningOutcome(
+                "required-exclude-group",
+                "required-exclude"
+            ),
+            new CustomFormatGroupNonDefaultItemExcludedPlanningOutcome(
+                "non-default-exclude-group",
+                "non-default-exclude"
+            ),
+        ];
+
     private static CustomFormatPipelineResult CustomFormats()
     {
         var identity = new CustomFormatIdentity("cf-one", "First CF");
