@@ -622,6 +622,12 @@
           "$ref": "#/components/schemas/PipelineSnapshotResponse"
         }
       },
+      "IReadOnlyListOfPlanningOutcomeResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PlanningOutcomeResponse"
+        }
+      },
       "IReadOnlyListOfQualityProfileAdoptedResponse": {
         "type": "array",
         "items": {
@@ -952,6 +958,199 @@
           "blocked"
         ],
         "type": "string"
+      },
+      "PlanningOutcomeResponse": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse"
+          },
+          {
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "customFormatGroupReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse",
+            "customFormatGroupSelectReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse",
+            "customFormatGroupExcludeReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse",
+            "customFormatGroupQualityProfileReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse",
+            "customFormatQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse",
+            "customFormatGroupQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse",
+            "customFormatGroupRequiredItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse",
+            "customFormatGroupDefaultItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse",
+            "customFormatGroupRequiredItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse",
+            "customFormatGroupNonDefaultItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "profileTrashId",
+          "profileNames"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "profileTrashId": {
+            "type": "string"
+          },
+          "profileNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "profileTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "profileTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse": {
+        "required": [
+          "groupTrashId",
+          "customFormatTrashId"
+        ],
+        "properties": {
+          "groupTrashId": {
+            "type": "string"
+          },
+          "customFormatTrashId": {
+            "type": "string"
+          }
+        }
+      },
+      "PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse": {
+        "required": [
+          "profileTrashId",
+          "profileNames"
+        ],
+        "properties": {
+          "profileTrashId": {
+            "type": "string"
+          },
+          "profileNames": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
       },
       "ProblemDetails": {
         "type": "object",
@@ -2149,6 +2348,9 @@
                 "$ref": "#/components/schemas/InstanceFailureCategory"
               }
             ]
+          },
+          "planningOutcomes": {
+            "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
           }
         }
       },
@@ -2177,6 +2379,9 @@
                 "$ref": "#/components/schemas/InstanceFailureCategory"
               }
             ]
+          },
+          "planningOutcomes": {
+            "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
           }
         }
       },
