@@ -18,15 +18,26 @@ internal sealed class SyncResultsDocumentTransformer : IOpenApiDocumentTransform
             return Task.CompletedTask;
         }
 
-        if (!schemas.TryGetValue(nameof(SyncInstanceResultsResponse), out var instanceSchema))
+        RemoveDiscriminatorProperties(schemas, nameof(SyncInstanceResultsResponse), "service");
+        RemoveDiscriminatorProperties(schemas, nameof(PlanningOutcomeResponse), "type");
+        return Task.CompletedTask;
+    }
+
+    private static void RemoveDiscriminatorProperties(
+        IDictionary<string, IOpenApiSchema> schemas,
+        string baseSchemaName,
+        string discriminatorProperty
+    )
+    {
+        if (!schemas.TryGetValue(baseSchemaName, out var baseSchema))
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        var mappings = instanceSchema.Discriminator?.Mapping;
+        var mappings = baseSchema.Discriminator?.Mapping;
         if (mappings is null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         foreach (var derivedSchema in mappings.Values)
@@ -34,10 +45,8 @@ internal sealed class SyncResultsDocumentTransformer : IOpenApiDocumentTransform
             var schemaName = derivedSchema.Reference.Id;
             if (schemaName is not null && schemas.TryGetValue(schemaName, out var schema))
             {
-                schema.Properties?.Remove("service");
+                schema.Properties?.Remove(discriminatorProperty);
             }
         }
-
-        return Task.CompletedTask;
     }
 }

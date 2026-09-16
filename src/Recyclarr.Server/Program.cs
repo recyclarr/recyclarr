@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FastEndpoints;
@@ -8,7 +7,6 @@ using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Recyclarr.Server;
-using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync.Results;
 using Scalar.AspNetCore;
 using Serilog.Events;
@@ -78,7 +76,6 @@ app.UseFastEndpoints(c =>
     c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     c.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     c.Serializer.Options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-    c.Serializer.Options.TypeInfoResolver = CreateJsonTypeInfoResolver();
     c.Endpoints.NameGenerator = OperationIds.Generate;
 });
 app.MapOpenApi();
@@ -107,27 +104,4 @@ static LogEventLevel ParseLogLevel(string? value)
     return Enum.TryParse<LogEventLevel>(value, ignoreCase: true, out var level)
         ? level
         : LogEventLevel.Information;
-}
-
-static IJsonTypeInfoResolver CreateJsonTypeInfoResolver()
-{
-    var resolver = new DefaultJsonTypeInfoResolver();
-    resolver.Modifiers.Add(static typeInfo =>
-    {
-        if (typeInfo.Type != typeof(SyncInstanceResultsResponse))
-        {
-            return;
-        }
-
-        typeInfo.PolymorphismOptions = new JsonPolymorphismOptions
-        {
-            TypeDiscriminatorPropertyName = "service",
-            DerivedTypes =
-            {
-                new JsonDerivedType(typeof(SonarrInstanceResultsResponse), "sonarr"),
-                new JsonDerivedType(typeof(RadarrInstanceResultsResponse), "radarr"),
-            },
-        };
-    });
-    return resolver;
 }
