@@ -38,6 +38,7 @@ internal static class SyncJobResultsResponseMapper
             )
             {
                 Failure = MapFailure(instance.Failure),
+                PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
             SupportedServices.Radarr => new RadarrInstanceResultsResponse(
                 instance.InstanceName,
@@ -46,12 +47,67 @@ internal static class SyncJobResultsResponseMapper
             )
             {
                 Failure = MapFailure(instance.Failure),
+                PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
             _ => throw new ArgumentOutOfRangeException(
                 nameof(instance),
                 instance.ServiceType,
                 null
             ),
+        };
+
+    private static PlanningOutcomeResponse MapPlanningOutcome(PlanningOutcome outcome) =>
+        outcome switch
+        {
+            CustomFormatGroupReferenceMismatchPlanningOutcome x =>
+                new CustomFormatGroupReferenceMismatchPlanningOutcomeResponse(x.GroupTrashId),
+            CustomFormatGroupSelectReferenceMismatchPlanningOutcome x =>
+                new CustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            CustomFormatGroupExcludeReferenceMismatchPlanningOutcome x =>
+                new CustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcome x =>
+                new CustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.ProfileTrashId
+                ),
+            CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome x =>
+                new CustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse(
+                    x.ProfileTrashId,
+                    x.ProfileNames
+                ),
+            CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome x =>
+                new CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.ProfileTrashId,
+                    x.ProfileNames
+                ),
+            CustomFormatGroupRequiredItemSelectedPlanningOutcome x =>
+                new CustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            CustomFormatGroupDefaultItemSelectedPlanningOutcome x =>
+                new CustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            CustomFormatGroupRequiredItemExcludedPlanningOutcome x =>
+                new CustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            CustomFormatGroupNonDefaultItemExcludedPlanningOutcome x =>
+                new CustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse(
+                    x.GroupTrashId,
+                    x.CustomFormatTrashId
+                ),
+            _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
         };
 
     private static SonarrPipelinesResponse MapSonarrPipelines(
