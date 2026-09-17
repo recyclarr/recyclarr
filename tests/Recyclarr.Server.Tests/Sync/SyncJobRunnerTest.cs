@@ -34,7 +34,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         );
 
         var store = Resolve<ISyncJobStore>();
-        var job = store.Create(settings);
+        var job = store.Create(settings, []);
 
         using var scope = Resolve<SyncRunScopeFactory>().Start<SyncJobRunner>();
         await scope.Entry.RunAsync(job.Id, [], settings, CancellationToken.None);

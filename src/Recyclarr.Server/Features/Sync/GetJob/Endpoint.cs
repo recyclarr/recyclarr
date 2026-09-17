@@ -46,7 +46,7 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
             Service = job.Request.Service,
             Instances = job.Request.Instances,
             Preview = job.Request.Preview,
-            Progress = job.Progress.Instances.Select(ToInstanceResponse).ToList(),
+            Progress = job.PipelineProgress.Instances.Select(ToInstanceResponse).ToList(),
         };
     }
 

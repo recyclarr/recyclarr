@@ -18,7 +18,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     public async Task Results_are_unavailable_while_job_is_running()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []));
+        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []), []);
         store.Update(job.Id, x => x.Status = SyncJobStatus.Running);
 
         using var client = CreateClient();
@@ -246,7 +246,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     public async Task Finished_job_without_a_result_returns_safe_internal_error()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []));
+        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []), []);
         store.Update(job.Id, x => x.Status = SyncJobStatus.Succeeded);
 
         using var client = CreateClient();
@@ -385,7 +385,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private SyncJob CreateCompletedJob(SyncRunResult result)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []));
+        var job = store.Create(new ServerSyncSettings(null, [], Preview: false, []), []);
         store.Update(
             job.Id,
             x =>
