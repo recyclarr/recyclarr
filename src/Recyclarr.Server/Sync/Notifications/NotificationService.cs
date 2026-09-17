@@ -94,6 +94,16 @@ internal sealed class NotificationService(
             reports.Add(new NotificationReport(ReportLevel.Error, FormatFailure(instance.Failure)));
         }
 
+        if (instance.Fault is not null)
+        {
+            reports.Add(
+                new NotificationReport(
+                    ReportLevel.Error,
+                    $"Unexpected sync fault. Reference: `{instance.Fault.Reference}`"
+                )
+            );
+        }
+
         reports.AddRange(
             instance.PlanningOutcomes.Select(outcome => new NotificationReport(
                 outcome is BlockingPlanningOutcome ? ReportLevel.Error : ReportLevel.Warning,
