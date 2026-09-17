@@ -131,7 +131,22 @@ internal sealed class SyncResultContractTest
 
         outcomes.Clear();
 
-        instance.PlanningOutcomes.Should().Equal(first, second);
+        instance
+            .PlanningOutcomes.Should()
+            .SatisfyRespectively(
+                outcome =>
+                    outcome
+                        .Should()
+                        .BeOfType<TestPlanningNotice>()
+                        .Which.Value.Should()
+                        .Be("first"),
+                outcome =>
+                    outcome
+                        .Should()
+                        .BeOfType<TestPlanningNotice>()
+                        .Which.Value.Should()
+                        .Be("second")
+            );
     }
 
     [Test]
