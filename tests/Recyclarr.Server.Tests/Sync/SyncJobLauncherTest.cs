@@ -5,6 +5,7 @@ using Recyclarr.Config;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
 using Recyclarr.Server.Sync;
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
@@ -60,6 +61,7 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
         builder.RegisterInstance(Substitute.For<INotificationService>());
         builder.RegisterType<SyncRunScope>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SyncDiagnosticsLogger>();
+        builder.RegisterType<SyncResultLogger>();
         builder.RegisterType<SyncJobRunner>().InstancePerMatchingLifetimeScope("run");
         builder
             .Register(_ => new SuccessfulOrchestrator())
