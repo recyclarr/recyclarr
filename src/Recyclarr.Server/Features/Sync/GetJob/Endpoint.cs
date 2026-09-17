@@ -52,6 +52,19 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
 
     private static InstanceSnapshotResponse ToInstanceResponse(InstanceSnapshot instance)
     {
-        return new InstanceSnapshotResponse(instance.Name, instance.Status.ToString(), []);
+        return new InstanceSnapshotResponse(instance.Name, MapStatus(instance.Status));
     }
+
+    private static InstanceProgressStatusResponse MapStatus(InstanceProgressStatus status) =>
+        status switch
+        {
+            InstanceProgressStatus.Pending => InstanceProgressStatusResponse.Pending,
+            InstanceProgressStatus.Running => InstanceProgressStatusResponse.Running,
+            InstanceProgressStatus.Succeeded => InstanceProgressStatusResponse.Succeeded,
+            InstanceProgressStatus.Partial => InstanceProgressStatusResponse.Partial,
+            InstanceProgressStatus.Failed => InstanceProgressStatusResponse.Failed,
+            InstanceProgressStatus.Interrupted => InstanceProgressStatusResponse.Interrupted,
+            InstanceProgressStatus.NotRun => InstanceProgressStatusResponse.NotRun,
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+        };
 }
