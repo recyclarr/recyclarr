@@ -1,17 +1,17 @@
-using Recyclarr.Notifications.Apprise.Dto;
+using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Notifications.Apprise;
+namespace Recyclarr.Server.Sync.Notifications.Apprise;
 
-internal class AppriseNotificationApiService(
+internal sealed class AppriseNotificationApiService(
     IAppriseApi api,
     ISettings<NotificationSettings> settings
 ) : IAppriseNotificationApiService
 {
     public async Task Notify(Func<AppriseNotification, AppriseNotification> notificationBuilder)
     {
-        // Guaranteed non-null: only constructed when INotificationService factory confirms Apprise is configured
+        // non-null: the notification factory only resolves this service when Apprise is configured
         var apprise = settings.Value.Apprise!;
 
         switch (apprise.Mode)

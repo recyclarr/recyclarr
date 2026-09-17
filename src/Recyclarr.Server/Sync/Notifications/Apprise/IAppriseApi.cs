@@ -1,7 +1,7 @@
-using Recyclarr.Notifications.Apprise.Dto;
+using Recyclarr.Server.Sync.Notifications.Apprise.Dto;
 using Refit;
 
-namespace Recyclarr.Notifications.Apprise;
+namespace Recyclarr.Server.Sync.Notifications.Apprise;
 
 internal interface IAppriseApi
 {

@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 
-namespace Recyclarr.Notifications.Apprise.Dto;
+namespace Recyclarr.Server.Sync.Notifications.Apprise.Dto;
 
 [UsedImplicitly(ImplicitUseKindFlags.Access, ImplicitUseTargetFlags.WithMembers)]
-public record AppriseNotification
+internal record AppriseNotification
 {
     public string? Body { get; init; }
     public string? Title { get; init; }
@@ -12,13 +12,13 @@ public record AppriseNotification
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Access, ImplicitUseTargetFlags.WithMembers)]
-public record AppriseStatefulNotification : AppriseNotification
+internal sealed record AppriseStatefulNotification : AppriseNotification
 {
     public string? Tag { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseKindFlags.Access, ImplicitUseTargetFlags.WithMembers)]
-public record AppriseStatelessNotification : AppriseNotification
+internal sealed record AppriseStatelessNotification : AppriseNotification
 {
     public Collection<string> Urls { get; init; } = [];
 }
