@@ -25,6 +25,7 @@ internal class SyncOrchestrator(
     public async Task<SyncRunResult> RunAsync(
         IReadOnlyList<IServiceConfiguration> configs,
         ISyncSettings settings,
+        IInstanceSyncProgress progress,
         CancellationToken ct
     )
     {
@@ -35,6 +36,7 @@ internal class SyncOrchestrator(
             ct.ThrowIfCancellationRequested();
 
             var state = new InstanceExecutionState(config);
+            ReportProgress(() => progress.InstanceStarted(config.InstanceName));
             LifetimeScopeWrapper<InstanceSyncProcessor>? instanceScope = null;
             Exception? attemptException = null;
             Exception? cleanupException = null;
@@ -82,18 +84,22 @@ internal class SyncOrchestrator(
                 _ => null,
             };
 
+            SemanticInstanceResult completedResult;
             if (faultException is not null)
             {
-                instances.Add(state.BuildFaultedResult(ReportFault(faultException)));
-                continue;
+                completedResult = state.BuildFaultedResult(ReportFault(faultException));
             }
-
-            if (state.CompletedResult is not { } completedResult)
+            else if (state.CompletedResult is not { } retainedResult)
             {
                 throw new InvalidOperationException("Instance attempt produced no terminal result");
             }
+            else
+            {
+                completedResult = retainedResult;
+            }
 
             instances.Add(completedResult);
+            ReportProgress(() => progress.InstanceCompleted(completedResult));
         }
 
         return new SyncRunResult(instances);
@@ -117,5 +123,22 @@ internal class SyncOrchestrator(
         }
 
         return new SyncFault(reference);
+    }
+
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Progress reporting cannot alter execution or terminal results."
+    )]
+    private static void ReportProgress(Action report)
+    {
+        try
+        {
+            report();
+        }
+        catch
+        {
+            // Progress is best effort; terminal results remain authoritative.
+        }
     }
 }
