@@ -40,7 +40,7 @@ internal sealed class SyncJobRunner(
             j =>
             {
                 j.Status = SyncJobStatus.Running;
-                j.Progress = snapshot;
+                j.PipelineProgress = snapshot;
             }
         );
 
@@ -53,7 +53,7 @@ internal sealed class SyncJobRunner(
         using var pipelineSubscription = run.Pipelines.Subscribe(evt =>
         {
             snapshot = ApplyPipelineEvent(snapshot, evt);
-            store.Update(jobId, j => j.Progress = snapshot);
+            store.Update(jobId, j => j.PipelineProgress = snapshot);
         });
 
         SyncJobStatus terminalStatus;
