@@ -11,9 +11,9 @@ internal sealed class InMemorySyncJobStore : ISyncJobStore
     private readonly Dictionary<JobId, SyncJob> _jobs = [];
     private readonly List<JobId> _order = [];
 
-    public SyncJob Create(ServerSyncSettings request)
+    public SyncJob Create(ServerSyncSettings request, IReadOnlyList<string> instanceNames)
     {
-        var job = new SyncJob(JobId.New(), request, DateTimeOffset.UtcNow);
+        var job = new SyncJob(JobId.New(), request, DateTimeOffset.UtcNow, instanceNames);
 
         lock (_gate)
         {
