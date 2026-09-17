@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Models;
 using Recyclarr.Notifications;
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
@@ -17,6 +18,7 @@ internal sealed class SyncJobRunner(
     ISyncRunScope run,
     ISyncJobStore store,
     INotificationService notify,
+    SyncResultLogger resultLogger,
     SyncDiagnosticsLogger diagnosticsLogger
 )
 {
@@ -70,6 +72,8 @@ internal sealed class SyncJobRunner(
             result = new SyncRunResult([], new SyncFault(reference));
             terminalStatus = result.Status.ToJobStatus();
         }
+
+        resultLogger.Log(jobId, result);
 
         // Sent from here rather than by the API caller: the notification body is built from the
         // ISyncRunScope observables, which only exist inside this lifetime scope. It also runs
