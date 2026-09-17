@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Models;
-using Recyclarr.Notifications;
+using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Progress;
@@ -75,11 +75,7 @@ internal sealed class SyncJobRunner(
 
         resultLogger.Log(jobId, result);
 
-        // Sent from here rather than by the API caller: the notification body is built from the
-        // ISyncRunScope observables, which only exist inside this lifetime scope. It also runs
-        // before the terminal status is recorded, so a client that sees the job finish sees every
-        // diagnostic the run produced, including a failed notification.
-        await SendNotificationAsync(diagnostics);
+        await SendNotificationAsync(result);
 
         store.Update(
             jobId,
@@ -93,22 +89,15 @@ internal sealed class SyncJobRunner(
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    private async Task SendNotificationAsync(List<SyncDiagnosticEvent> diagnostics)
+    private async Task SendNotificationAsync(SyncRunResult result)
     {
         try
         {
-            await notify.SendNotification();
+            await notify.SendNotification(result);
         }
         catch (Exception e)
         {
             log.Warning(e, "Failed to send notification");
-            diagnostics.Add(
-                new SyncDiagnosticEvent(
-                    null,
-                    SyncDiagnosticLevel.Warning,
-                    $"Failed to send notification: {e.Message}"
-                )
-            );
         }
     }
 

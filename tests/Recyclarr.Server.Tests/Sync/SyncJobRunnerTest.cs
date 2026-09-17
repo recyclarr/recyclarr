@@ -2,22 +2,25 @@ using Autofac;
 using NSubstitute.ExceptionExtensions;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.Notifications;
 using Recyclarr.Server.Sync;
+using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
+using Serilog.Events;
 
 namespace Recyclarr.Server.Tests.Sync;
 
 internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
 {
     private readonly INotificationService _notify = Substitute.For<INotificationService>();
+    private readonly RecordingLogger _log = new();
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
+        builder.RegisterInstance(_log).As<ILogger>();
         builder.RegisterInstance(_notify).As<INotificationService>();
     }
 
@@ -45,26 +48,28 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var job = await RunJob();
 
         job.Status.Should().Be(SyncJobStatus.Succeeded);
-        await _notify.Received().SendNotification();
+        await _notify.Received().SendNotification(job.Result!);
     }
 
     [Test]
-    public async Task Failure_to_notify_is_reported_as_a_diagnostic_on_the_finished_job()
+    public async Task Failure_to_notify_does_not_change_the_finished_job()
     {
-        _notify.SendNotification().ThrowsAsync(new InvalidOperationException("apprise is down"));
+        _notify
+            .SendNotification(default!)
+            .ThrowsAsyncForAnyArgs(new InvalidOperationException("apprise is down"));
 
         var job = await RunJob();
 
-        // Recorded alongside the terminal status so a client that polls once sees both.
         job.Status.Should().Be(SyncJobStatus.Succeeded);
-        job.Diagnostics.Should()
-            .ContainSingle()
-            .Which.Should()
-            .BeEquivalentTo(
-                new SyncDiagnosticEvent(
-                    null,
-                    SyncDiagnosticLevel.Warning,
-                    "Failed to send notification: apprise is down"
+        job.Result.Should().NotBeNull();
+        job.Diagnostics.Should().BeEmpty();
+        await _notify.Received().SendNotification(job.Result!);
+        _log.Events.Should()
+            .ContainSingle(evt =>
+                evt.Level == LogEventLevel.Warning
+                && evt.MessageTemplate.Text.Equals(
+                    "Failed to send notification",
+                    StringComparison.Ordinal
                 )
             );
     }
@@ -125,4 +130,14 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
             SyncResultStatus.Failed => new SyncRunResult([], new SyncFault("fault")),
             _ => throw new ArgumentOutOfRangeException(nameof(status)),
         };
+
+    private sealed class RecordingLogger : ILogger
+    {
+        public List<LogEvent> Events { get; } = [];
+
+        public void Write(LogEvent logEvent)
+        {
+            Events.Add(logEvent);
+        }
+    }
 }

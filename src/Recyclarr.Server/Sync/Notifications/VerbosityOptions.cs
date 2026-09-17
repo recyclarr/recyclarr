@@ -1,8 +1,8 @@
 using Recyclarr.Settings.Models;
 
-namespace Recyclarr.Notifications;
+namespace Recyclarr.Server.Sync.Notifications;
 
-public record VerbosityOptions(bool SendInfo, bool SendEmpty, bool SendItemDetails)
+internal sealed record VerbosityOptions(bool SendInfo, bool SendEmpty, bool SendItemDetails)
 {
     public static VerbosityOptions From(NotificationVerbosity verbosity) =>
         verbosity switch
