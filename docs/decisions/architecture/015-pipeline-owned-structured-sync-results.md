@@ -65,7 +65,9 @@ Core returns one self-contained aggregate:
 
 ```txt
 SyncRunResult
+├── Fault
 └── SyncInstanceResult
+    ├── Fault
     ├── PlanningOutcomes
     └── PipelineResult
         ├── Outcomes
@@ -120,7 +122,8 @@ typed contract.
 
 Every pipeline follows the same rules:
 
-1. Unexpected exceptions, cancellation, and instance-wide service failures propagate.
+1. Unexpected exceptions propagate to the owning boundary. Pipeline exceptions reach the instance
+   boundary; cancellation and failures outside an instance attempt reach the run boundary.
 2. Only recognized resource-local failures may become outcomes.
 3. Resource-local continuation is allowed only for independent resource units.
 4. Preview never writes service state or sync state.
@@ -193,7 +196,8 @@ successful. Batch and singleton pipelines follow their API request granularity.
 Expected service failures use safe categories such as unavailable, unauthenticated, unauthorized,
 rate limited, or rejected change. Resource-local rejections belong to pipeline results.
 Instance-wide failures stop the instance. Unexpected failures expose only an opaque fault reference
-outside Core presentation concerns.
+outside Core presentation concerns. ADR-017 defines fault attribution and continuation across
+independent instances.
 
 ### Consequences
 

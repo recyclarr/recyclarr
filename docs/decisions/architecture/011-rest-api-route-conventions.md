@@ -83,8 +83,8 @@ schedule state.
 
 - **Long-running operations are job resources.** Starting a sync means creating a job: `POST
   /sync/jobs` returns 202 with a `Location` header. There is no verb-style trigger endpoint. `GET
-  /sync/jobs/{id}` returns the full cumulative progress snapshot (per-instance, per-operation), so a
-  slow or skipped poll loses nothing. Clients poll; there is no SSE. "Is a sync running" is answered
+  /sync/jobs/{id}` returns the cumulative instance progress snapshot defined by ADR-018, so a slow or
+  skipped poll loses no current state. Clients poll; there is no SSE. "Is a sync running" is answered
   by the jobs collection, never by a singleton status resource.
 - **No DELETE with a request body.** Bulk deletion happens per-item (`DELETE
   .../custom-formats/{id}`); the client loops. RFC 9110 gives DELETE bodies no defined semantics and
