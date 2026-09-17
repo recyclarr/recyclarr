@@ -2349,6 +2349,16 @@
               }
             ]
           },
+          "fault": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SyncFaultResponse"
+              }
+            ]
+          },
           "planningOutcomes": {
             "$ref": "#/components/schemas/IReadOnlyListOfPlanningOutcomeResponse"
           }
@@ -2377,6 +2387,16 @@
               },
               {
                 "$ref": "#/components/schemas/InstanceFailureCategory"
+              }
+            ]
+          },
+          "fault": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SyncFaultResponse"
               }
             ]
           },
