@@ -24,7 +24,7 @@ internal class InstanceSyncProcessor(
 {
     public async Task<SemanticInstanceResult> Process(
         ISyncSettings settings,
-        PipelineExecutionBuffer buffer,
+        InstanceExecutionState state,
         CancellationToken ct
     )
     {
@@ -42,7 +42,14 @@ internal class InstanceSyncProcessor(
             await enforcer.Check(config, ct);
 
             plan = planBuilder.Build();
-            var result = await pipelines.Execute(settings, plan, instancePublisher, buffer, ct);
+            state.RetainPlanningOutcomes(plan.PlanningOutcomes);
+            var result = await pipelines.Execute(
+                settings,
+                plan,
+                instancePublisher,
+                state.PipelineBuffer,
+                ct
+            );
             return new SemanticInstanceResult(
                 config.InstanceName,
                 config.ServiceType,
@@ -69,7 +76,7 @@ internal class InstanceSyncProcessor(
             return new SemanticInstanceResult(
                 config.InstanceName,
                 config.ServiceType,
-                buffer.Results,
+                state.PipelineBuffer.Results,
                 failure: operationalFailure,
                 planningOutcomes: plan?.PlanningOutcomes
             );

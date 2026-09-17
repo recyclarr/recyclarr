@@ -7,8 +7,7 @@ namespace Recyclarr.Config;
 /// Creates an Autofac lifetime scope for processing one configured service instance.
 /// </summary>
 /// <remarks>
-/// Entry resolution occurs before ownership is returned. A resolution failure disposes the child
-/// scope so resources activated during the failed resolution do not leak.
+/// The returned wrapper owns the child scope and resolves its entry point on first access.
 /// </remarks>
 public class InstanceScopeFactory(ILifetimeScope scope)
 {
@@ -23,14 +22,6 @@ public class InstanceScopeFactory(ILifetimeScope scope)
             c => c.RegisterInstance(config).As<IServiceConfiguration>().As(config.GetType())
         );
 
-        try
-        {
-            return new LifetimeScopeWrapper<TEntry>(childScope);
-        }
-        catch
-        {
-            childScope.Dispose();
-            throw;
-        }
+        return new LifetimeScopeWrapper<TEntry>(childScope);
     }
 }
