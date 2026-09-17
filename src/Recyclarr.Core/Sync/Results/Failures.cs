@@ -24,7 +24,8 @@ public sealed record ServiceIncompatibleFailure : OperationalFailure;
 public sealed record SyncStateUnavailableFailure : OperationalFailure;
 
 /// <summary>
-/// An opaque reference to an unexpected run-level failure recorded outside the result contract.
+/// An opaque reference to an unexpected failure recorded outside the result contract.
+/// The result that owns the fault supplies its instance or run attribution.
 /// </summary>
 public sealed record SyncFault
 {
