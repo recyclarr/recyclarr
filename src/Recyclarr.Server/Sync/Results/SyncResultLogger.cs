@@ -56,6 +56,16 @@ internal sealed class SyncResultLogger(ILogger log)
             );
         }
 
+        if (instance.Fault is not null)
+        {
+            log.Error(
+                "Sync instance {Instance} completed with fault {FaultReference} for job {JobId}",
+                instance.InstanceName,
+                instance.Fault.Reference,
+                jobId.Value
+            );
+        }
+
         foreach (var outcome in instance.PlanningOutcomes)
         {
             log.Write(

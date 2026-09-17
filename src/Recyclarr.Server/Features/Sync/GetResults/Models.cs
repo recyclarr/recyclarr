@@ -62,6 +62,7 @@ internal sealed record SyncFaultResponse(string Reference);
 internal abstract record SyncInstanceResultsResponse(string Name, SyncCompletionStatus Status)
 {
     public InstanceFailureCategory? Failure { get; init; }
+    public SyncFaultResponse? Fault { get; init; }
     public IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes { get; init; } = [];
 }
 

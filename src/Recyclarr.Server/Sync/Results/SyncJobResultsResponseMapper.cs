@@ -38,6 +38,7 @@ internal static class SyncJobResultsResponseMapper
             )
             {
                 Failure = MapFailure(instance.Failure),
+                Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
             SupportedServices.Radarr => new RadarrInstanceResultsResponse(
@@ -47,6 +48,7 @@ internal static class SyncJobResultsResponseMapper
             )
             {
                 Failure = MapFailure(instance.Failure),
+                Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
             _ => throw new ArgumentOutOfRangeException(
@@ -55,6 +57,9 @@ internal static class SyncJobResultsResponseMapper
                 null
             ),
         };
+
+    private static SyncFaultResponse? MapFault(SyncFault? fault) =>
+        fault is null ? null : new SyncFaultResponse(fault.Reference);
 
     private static PlanningOutcomeResponse MapPlanningOutcome(PlanningOutcome outcome) =>
         outcome switch
