@@ -20,6 +20,7 @@ public sealed class ServerSyncStubsModule : Module
             m.RunAsync(
                     Arg.Any<IReadOnlyList<IServiceConfiguration>>(),
                     Arg.Any<ISyncSettings>(),
+                    Arg.Any<IInstanceSyncProgress>(),
                     Arg.Any<CancellationToken>()
                 )
                 .Returns(Task.FromResult(new SyncRunResult([])))

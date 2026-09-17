@@ -1,17 +1,15 @@
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Config.Models;
 using Recyclarr.Server.Sync.Notifications;
+using Recyclarr.Server.Sync.Progress;
 using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.Sync;
 
-// Entry point resolved inside a run's lifetime scope (see SyncRunScopeFactory). Subscribes to the
-// scope's ISyncRunScope observables to accumulate progress/diagnostics into the job store as the
-// run progresses, then records the terminal status once the orchestrator completes.
+// Entry point resolved inside a run's lifetime scope (see SyncRunScopeFactory). Reduces instance
+// lifecycle callbacks into the job store and records the terminal result.
 internal sealed class SyncJobRunner(
     ILogger log,
     ISyncOrchestrator orchestrator,
@@ -19,7 +17,9 @@ internal sealed class SyncJobRunner(
     ISyncJobStore store,
     INotificationService notify,
     SyncResultLogger resultLogger,
-    SyncDiagnosticsLogger diagnosticsLogger
+    SyncDiagnosticsLogger diagnosticsLogger,
+    Func<JobId, SyncJobProgress> progressFactory,
+    SyncJobFinalizer finalizer
 )
 {
     public async Task RunAsync(
@@ -33,16 +33,7 @@ internal sealed class SyncJobRunner(
         _ = diagnosticsLogger;
 
         var diagnostics = new List<SyncDiagnosticEvent>();
-        var snapshot = BuildInitialSnapshot(configs);
-
-        store.Update(
-            jobId,
-            j =>
-            {
-                j.Status = SyncJobStatus.Running;
-                j.PipelineProgress = snapshot;
-            }
-        );
+        store.Update(jobId, job => job.Status = SyncJobStatus.Running);
 
         using var diagnosticsSubscription = run.Diagnostics.Subscribe(evt =>
         {
@@ -50,42 +41,24 @@ internal sealed class SyncJobRunner(
             store.Update(jobId, j => j.Diagnostics = diagnostics.ToList());
         });
 
-        using var pipelineSubscription = run.Pipelines.Subscribe(evt =>
-        {
-            snapshot = ApplyPipelineEvent(snapshot, evt);
-            store.Update(jobId, j => j.PipelineProgress = snapshot);
-        });
-
-        SyncJobStatus terminalStatus;
-        SyncRunResult? result;
+        SyncRunResult result;
 
         try
         {
-            result = await orchestrator.RunAsync(configs, settings, ct);
-            terminalStatus = result.Status.ToJobStatus();
+            result = await orchestrator.RunAsync(configs, settings, progressFactory(jobId), ct);
+            finalizer.Complete(jobId, result, diagnostics);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
             diagnostics.Add(new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, e.Message));
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync runner fault {Reference}", reference);
-            result = new SyncRunResult([], new SyncFault(reference));
-            terminalStatus = result.Status.ToJobStatus();
+            result = finalizer.Fail(jobId, new SyncFault(reference), diagnostics);
         }
 
         resultLogger.Log(jobId, result);
 
         await SendNotificationAsync(result);
-
-        store.Update(
-            jobId,
-            j =>
-            {
-                j.Result = result;
-                j.Diagnostics = diagnostics.ToList();
-                j.Status = terminalStatus;
-            }
-        );
     }
 
     [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
@@ -99,61 +72,5 @@ internal sealed class SyncJobRunner(
         {
             log.Warning(e, "Failed to send notification");
         }
-    }
-
-    private static ProgressSnapshot BuildInitialSnapshot(
-        IReadOnlyList<IServiceConfiguration> configs
-    )
-    {
-        var instances = configs
-            .Select(c => new InstanceSnapshot(c.InstanceName, InstanceProgressStatus.Pending, []))
-            .ToImmutableList();
-
-        return new ProgressSnapshot(instances);
-    }
-
-    private static ProgressSnapshot ApplyPipelineEvent(ProgressSnapshot snapshot, PipelineEvent evt)
-    {
-        var index = snapshot.Instances.FindIndex(i =>
-            i.Name.Equals(evt.Instance, StringComparison.OrdinalIgnoreCase)
-        );
-        if (index < 0)
-        {
-            return snapshot;
-        }
-
-        var instance = snapshot.Instances[index];
-
-        // Interrupted only affects pipelines that haven't reached a terminal state yet;
-        // pipelines that already succeeded/failed/etc. keep their status.
-        if (
-            evt.Status is PipelineProgressStatus.Interrupted
-            && instance.Pipelines.TryGetValue(evt.Type, out var existing)
-            && IsTerminal(existing.Status)
-        )
-        {
-            return snapshot;
-        }
-
-        var pipelines = instance.Pipelines.SetItem(
-            evt.Type,
-            new PipelineSnapshot(evt.Status, evt.Count, evt.Changes)
-        );
-        var updated = instance with
-        {
-            Pipelines = pipelines,
-            Status = InstanceSnapshot.DeriveStatus(pipelines),
-        };
-        return snapshot with { Instances = snapshot.Instances.SetItem(index, updated) };
-    }
-
-    private static bool IsTerminal(PipelineProgressStatus status)
-    {
-        return status
-            is PipelineProgressStatus.Succeeded
-                or PipelineProgressStatus.Partial
-                or PipelineProgressStatus.Failed
-                or PipelineProgressStatus.Skipped
-                or PipelineProgressStatus.Interrupted;
     }
 }
