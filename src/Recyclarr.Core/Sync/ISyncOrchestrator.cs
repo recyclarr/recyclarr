@@ -7,8 +7,8 @@ namespace Recyclarr.Sync;
 /// Coordinates sync runs across configured service instances and returns their terminal results.
 /// </summary>
 /// <remarks>
-/// Expected instance failures are retained and later instances continue. Cancellation propagates;
-/// the first unexpected fault ends the run while preserving work that already completed.
+/// Expected failures and unexpected faults are retained on their owning instance, and later
+/// instances continue. Cancellation propagates and stops the run.
 /// </remarks>
 public interface ISyncOrchestrator
 {

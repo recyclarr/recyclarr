@@ -41,7 +41,7 @@ internal sealed class InstanceSyncProcessorTest
 
         var result = await sut.Process(
             Substitute.For<ISyncSettings>(),
-            new PipelineExecutionBuffer(),
+            CreateState(),
             CancellationToken.None
         );
 
@@ -67,11 +67,7 @@ internal sealed class InstanceSyncProcessorTest
         var sut = CreateSut(log, serviceInfo, publisher, pipelines, []);
 
         var act = () =>
-            sut.Process(
-                Substitute.For<ISyncSettings>(),
-                new PipelineExecutionBuffer(),
-                CancellationToken.None
-            );
+            sut.Process(Substitute.For<ISyncSettings>(), CreateState(), CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("unexpected");
         publisher.Outcomes.Should().BeEmpty();
@@ -98,7 +94,7 @@ internal sealed class InstanceSyncProcessorTest
 
         var result = await sut.Process(
             Substitute.For<ISyncSettings>(),
-            new PipelineExecutionBuffer(),
+            CreateState(),
             CancellationToken.None
         );
 
@@ -128,7 +124,7 @@ internal sealed class InstanceSyncProcessorTest
 
         var result = await sut.Process(
             Substitute.For<ISyncSettings>(),
-            new PipelineExecutionBuffer(),
+            CreateState(),
             CancellationToken.None
         );
 
@@ -160,6 +156,9 @@ internal sealed class InstanceSyncProcessorTest
             strategies
         );
     }
+
+    private static InstanceExecutionState CreateState() =>
+        new(new Recyclarr.Config.Models.RadarrConfiguration { InstanceName = "instance" });
 
     private sealed class RecordingInstancePublisher : IInstancePublisher
     {
