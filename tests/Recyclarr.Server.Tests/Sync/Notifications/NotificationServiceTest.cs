@@ -89,7 +89,8 @@ internal sealed class NotificationServiceTest
                     "offline",
                     SupportedServices.Sonarr,
                     [],
-                    new ServiceUnavailableFailure()
+                    new ServiceUnavailableFailure(),
+                    fault: new SyncFault("instance-fault")
                 ),
             ],
             new SyncFault("fault-reference")
@@ -105,6 +106,7 @@ internal sealed class NotificationServiceTest
             .Body.Should()
             .ContainAll(
                 "fault-reference",
+                "instance-fault",
                 "movies",
                 "group-id",
                 "selected-cf",

@@ -40,6 +40,11 @@ internal sealed class SyncResultLoggerTest
         log.Events.Should()
             .ContainSingle(evt =>
                 HasScalar(evt, "Instance", "offline")
+                && HasScalar(evt, "FaultReference", "instance-fault")
+            );
+        log.Events.Should()
+            .ContainSingle(evt =>
+                HasScalar(evt, "Instance", "offline")
                 && HasScalar(evt, "FailureType", nameof(ServiceUnavailableFailure))
             );
         var instanceSummary = log
@@ -214,7 +219,8 @@ internal sealed class SyncResultLoggerTest
                     "offline",
                     SupportedServices.Radarr,
                     [],
-                    new ServiceUnavailableFailure()
+                    new ServiceUnavailableFailure(),
+                    fault: new SyncFault("instance-fault")
                 ),
             ],
             new SyncFault("fault-reference")
