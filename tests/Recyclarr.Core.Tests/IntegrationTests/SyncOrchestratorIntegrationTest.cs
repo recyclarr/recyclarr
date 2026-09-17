@@ -32,6 +32,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             configs,
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -66,6 +67,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -85,6 +87,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("early-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -105,6 +108,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("first"), Config("scope-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -124,6 +128,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("dispose-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -144,6 +149,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("incompatible-dispose-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -162,6 +168,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("early-fault"), Config("fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -183,6 +190,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("fault-dispose-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -208,6 +216,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("planning-fault")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -230,6 +239,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         var result = await sut.RunAsync(
             [Config("incompatible"), Config("second")],
             Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
             CancellationToken.None
         );
 
@@ -241,10 +251,103 @@ internal sealed class SyncOrchestratorIntegrationTest
     }
 
     [Test]
+    public async Task Lifecycle_callbacks_are_ordered_and_completion_follows_cleanup()
+    {
+        var reporter = new RecordingFaultReporter();
+        var recorder = new ExecutionRecorder();
+        var progress = new RecordingProgress(recorder);
+        using var container = BuildContainer(reporter, recorder);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("first")],
+            Substitute.For<ISyncSettings>(),
+            progress,
+            CancellationToken.None
+        );
+
+        recorder
+            .Events.Should()
+            .Equal("started:first", "executed:first", "disposed:first", "completed:first");
+        progress.Completed.Should().ContainSingle().Which.Should().BeSameAs(result.Instances[0]);
+    }
+
+    [Test]
+    public async Task Faulted_instance_reports_completion_before_later_instance_starts()
+    {
+        var reporter = new RecordingFaultReporter();
+        var recorder = new ExecutionRecorder();
+        var progress = new RecordingProgress(recorder);
+        using var container = BuildContainer(reporter, recorder);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        await sut.RunAsync(
+            [Config("early-fault"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            progress,
+            CancellationToken.None
+        );
+
+        recorder
+            .Events.Should()
+            .Equal(
+                "started:early-fault",
+                "executed:early-fault",
+                "disposed:early-fault",
+                "completed:early-fault",
+                "started:last",
+                "executed:last",
+                "disposed:last",
+                "completed:last"
+            );
+        progress.Completed[0].Fault.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task Empty_run_reports_no_lifecycle_callbacks()
+    {
+        var reporter = new RecordingFaultReporter();
+        var progress = new RecordingProgress(new ExecutionRecorder());
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [],
+            Substitute.For<ISyncSettings>(),
+            progress,
+            CancellationToken.None
+        );
+
+        result.Instances.Should().BeEmpty();
+        progress.Completed.Should().BeEmpty();
+        progress.Started.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Lifecycle_callback_failures_do_not_change_execution_or_results()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+        var progress = new RecordingProgress(new ExecutionRecorder()) { ThrowOnReport = true };
+
+        var result = await sut.RunAsync(
+            [Config("first"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            progress,
+            CancellationToken.None
+        );
+
+        result.Instances.Select(instance => instance.InstanceName).Should().Equal("first", "last");
+        result.Status.Should().Be(SyncResultStatus.Succeeded);
+    }
+
+    [Test]
     public async Task Cancellation_with_cleanup_fault_propagates_without_starting_later_instances()
     {
         var reporter = new RecordingFaultReporter();
         var recorder = new ExecutionRecorder();
+        var progress = new RecordingProgress(recorder);
         using var container = BuildContainer(reporter, recorder);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
@@ -252,12 +355,20 @@ internal sealed class SyncOrchestratorIntegrationTest
             sut.RunAsync(
                 [Config("cancel-dispose-fault"), Config("never-started")],
                 Substitute.For<ISyncSettings>(),
+                progress,
                 CancellationToken.None
             );
 
         await act.Should().ThrowAsync<OperationCanceledException>();
         reporter.Exception.Should().BeOfType<InvalidOperationException>();
-        recorder.Executed.Should().Equal("cancel-dispose-fault");
+        recorder
+            .Events.Should()
+            .Equal(
+                "started:cancel-dispose-fault",
+                "executed:cancel-dispose-fault",
+                "disposed:cancel-dispose-fault"
+            );
+        progress.Completed.Should().BeEmpty();
     }
 
     private static IContainer BuildContainer(
@@ -328,7 +439,7 @@ internal sealed class SyncOrchestratorIntegrationTest
             CancellationToken ct
         )
         {
-            _recorder.Executed.Add(_config.InstanceName);
+            _recorder.Events.Add($"executed:{_config.InstanceName}");
 
             if (_config.InstanceName == "cancel-dispose-fault")
             {
@@ -357,6 +468,8 @@ internal sealed class SyncOrchestratorIntegrationTest
 
         public void Dispose()
         {
+            _recorder.Events.Add($"disposed:{_config.InstanceName}");
+
             if (
                 _config.InstanceName
                 is "dispose-fault"
@@ -385,7 +498,43 @@ internal sealed class SyncOrchestratorIntegrationTest
 
     private sealed class ExecutionRecorder
     {
-        public List<string> Executed { get; } = [];
+        public List<string> Events { get; } = [];
+    }
+
+    private sealed class RecordingProgress(ExecutionRecorder recorder) : IInstanceSyncProgress
+    {
+        public bool ThrowOnReport { get; init; }
+        public List<string> Started { get; } = [];
+        public List<SyncInstanceResult> Completed { get; } = [];
+
+        public void InstanceStarted(string instanceName)
+        {
+            recorder.Events.Add($"started:{instanceName}");
+            Started.Add(instanceName);
+            ThrowIfRequested();
+        }
+
+        public void InstanceCompleted(SyncInstanceResult result)
+        {
+            recorder.Events.Add($"completed:{result.InstanceName}");
+            Completed.Add(result);
+            ThrowIfRequested();
+        }
+
+        private void ThrowIfRequested()
+        {
+            if (ThrowOnReport)
+            {
+                throw new InvalidOperationException("progress failed");
+            }
+        }
+    }
+
+    private sealed class NoopProgress : IInstanceSyncProgress
+    {
+        public void InstanceStarted(string instanceName) { }
+
+        public void InstanceCompleted(SyncInstanceResult result) { }
     }
 
     private sealed class TestServiceInformation(IServiceConfiguration config) : IServiceInformation
