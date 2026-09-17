@@ -65,6 +65,7 @@ internal sealed class SyncResultContractTest
     public void Instance_status_derives_from_pipeline_results(
         IReadOnlyList<SyncResultStatus> pipelineStatuses,
         OperationalFailure? failure,
+        SyncFault? fault,
         SyncResultStatus expected
     )
     {
@@ -75,7 +76,13 @@ internal sealed class SyncResultContractTest
             ))
             .ToList();
 
-        var result = new SyncInstanceResult("sonarr", SupportedServices.Sonarr, pipelines, failure);
+        var result = new SyncInstanceResult(
+            "sonarr",
+            SupportedServices.Sonarr,
+            pipelines,
+            failure,
+            fault: fault
+        );
 
         result.Status.Should().Be(expected);
     }
@@ -114,6 +121,45 @@ internal sealed class SyncResultContractTest
         run.Fault.Should().Be(fault);
         instance.Pipelines.Should().Equal(first, second);
         instance.Failure.Should().Be(failure);
+    }
+
+    [Test]
+    public void Instance_retains_failures_planning_outcomes_and_opaque_fault()
+    {
+        var pipeline = new TestPipelineResult(SyncResultStatus.Succeeded);
+        var failure = new ServiceUnavailableFailure();
+        var fault = new SyncFault("fault-reference");
+        var instance = new SyncInstanceResult(
+            "radarr",
+            SupportedServices.Radarr,
+            [pipeline],
+            failure,
+            [new TestPlanningNotice("notice")],
+            fault: fault
+        );
+
+        instance.Status.Should().Be(SyncResultStatus.Partial);
+        instance.Failure.Should().Be(failure);
+        instance.Fault.Should().Be(fault);
+        instance.PlanningOutcomes.Should().ContainSingle();
+    }
+
+    [Test]
+    public void Run_aggregates_successful_and_instance_faulted_results_without_run_fault()
+    {
+        var successful = CreateInstance(SyncResultStatus.Succeeded);
+        var faulted = new SyncInstanceResult(
+            "faulted",
+            SupportedServices.Radarr,
+            [],
+            fault: new SyncFault("instance-fault")
+        );
+
+        var run = new SyncRunResult([successful, faulted]);
+
+        run.Status.Should().Be(SyncResultStatus.Partial);
+        run.Fault.Should().BeNull();
+        run.Instances[1].Fault.Should().Be(new SyncFault("instance-fault"));
     }
 
     [Test]
@@ -224,9 +270,10 @@ internal sealed class SyncResultContractTest
 
     private static IEnumerable<TestCaseData> InstanceStatusCases()
     {
-        yield return Case([], null, SyncResultStatus.Succeeded, "empty success");
+        yield return Case([], null, null, SyncResultStatus.Succeeded, "empty success");
         yield return Case(
             [SyncResultStatus.Succeeded, SyncResultStatus.Succeeded],
+            null,
             null,
             SyncResultStatus.Succeeded,
             "all succeeded"
@@ -234,11 +281,13 @@ internal sealed class SyncResultContractTest
         yield return Case(
             [SyncResultStatus.Partial],
             null,
+            null,
             SyncResultStatus.Partial,
             "partial child"
         );
         yield return Case(
             [SyncResultStatus.Succeeded, SyncResultStatus.Failed],
+            null,
             null,
             SyncResultStatus.Partial,
             "mixed completion"
@@ -246,23 +295,47 @@ internal sealed class SyncResultContractTest
         yield return Case(
             [SyncResultStatus.Failed, SyncResultStatus.Blocked],
             null,
+            null,
             SyncResultStatus.Failed,
             "no completion"
         );
-        yield return Case([], new ServiceUnavailableFailure(), SyncResultStatus.Failed, "failure");
+        yield return Case(
+            [],
+            new ServiceUnavailableFailure(),
+            null,
+            SyncResultStatus.Failed,
+            "failure"
+        );
         yield return Case(
             [SyncResultStatus.Succeeded],
             new ServiceUnavailableFailure(),
+            null,
             SyncResultStatus.Partial,
             "completion before failure"
+        );
+        yield return Case([], null, new SyncFault("fault"), SyncResultStatus.Failed, "fault");
+        yield return Case(
+            [SyncResultStatus.Succeeded],
+            null,
+            new SyncFault("fault"),
+            SyncResultStatus.Partial,
+            "success before fault"
+        );
+        yield return Case(
+            [SyncResultStatus.Partial],
+            null,
+            new SyncFault("fault"),
+            SyncResultStatus.Partial,
+            "partial before fault"
         );
 
         static TestCaseData Case(
             IReadOnlyList<SyncResultStatus> statuses,
             OperationalFailure? failure,
+            SyncFault? fault,
             SyncResultStatus expected,
             string name
-        ) => new(statuses, failure, expected) { TestName = $"Instance_status_{name}" };
+        ) => new(statuses, failure, fault, expected) { TestName = $"Instance_status_{name}" };
     }
 
     private static IEnumerable<TestCaseData> RunStatusCases()
