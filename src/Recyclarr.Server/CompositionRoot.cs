@@ -5,6 +5,7 @@ using Recyclarr.Common;
 using Recyclarr.Pipelines;
 using Recyclarr.ResourceProviders;
 using Recyclarr.Server.Sync;
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync;
 using Serilog.Events;
 using LoggingLevelSwitch = Serilog.Core.LoggingLevelSwitch;
@@ -50,6 +51,7 @@ internal static class CompositionRoot
             b =>
             {
                 b.RegisterType<SyncJobRunner>();
+                b.RegisterType<SyncResultLogger>();
                 b.RegisterType<SyncDiagnosticsLogger>();
                 b.RegisterType<ServerSyncFaultReporter>().As<ISyncFaultReporter>();
             }
