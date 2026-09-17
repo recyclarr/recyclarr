@@ -74,6 +74,7 @@ SyncJobResultsResponse
     ├── Name
     ├── Service
     ├── Status
+    ├── Fault
     └── Pipelines
 ```
 
@@ -103,9 +104,10 @@ Core domain models.
 
 ### Failures
 
-Resource-local failures appear as typed pipeline outcomes. Instance-wide service failures attach to
-the instance result. Unexpected background failures attach to the job result as an opaque reference.
-Parent status derives from child results; one failure is not duplicated at every level.
+Resource-local failures appear as typed pipeline outcomes. Instance-wide service failures and
+unexpected instance faults attach to the instance result. Unexpected failures outside an instance
+attempt attach to the job result. Faults expose only opaque references. Parent status derives from
+child results; one failure is not duplicated at every level.
 
 The API never exposes credentials, server paths, service URLs, raw response bodies, exception
 messages, stack traces, or C# type names.
