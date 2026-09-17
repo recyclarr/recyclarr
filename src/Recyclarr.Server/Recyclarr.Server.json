@@ -531,11 +531,22 @@
         ],
         "type": "string"
       },
+      "InstanceProgressStatusResponse": {
+        "enum": [
+          "pending",
+          "running",
+          "succeeded",
+          "partial",
+          "failed",
+          "interrupted",
+          "notRun"
+        ],
+        "type": "string"
+      },
       "InstanceSnapshotResponse": {
         "required": [
           "name",
-          "status",
-          "pipelines"
+          "status"
         ],
         "type": "object",
         "properties": {
@@ -543,10 +554,7 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
-          },
-          "pipelines": {
-            "$ref": "#/components/schemas/IReadOnlyListOfPipelineSnapshotResponse"
+            "$ref": "#/components/schemas/InstanceProgressStatusResponse"
           }
         }
       },
@@ -614,12 +622,6 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/NamingReferenceMismatchResponseOfSonarrNamingField"
-        }
-      },
-      "IReadOnlyListOfPipelineSnapshotResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/PipelineSnapshotResponse"
         }
       },
       "IReadOnlyListOfPlanningOutcomeResponse": {
@@ -896,57 +898,6 @@
           },
           "configuredKey": {
             "type": "string"
-          }
-        }
-      },
-      "PipelineItemChangesResponse": {
-        "required": [
-          "created",
-          "updated",
-          "deleted"
-        ],
-        "type": "object",
-        "properties": {
-          "created": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "updated": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          },
-          "deleted": {
-            "$ref": "#/components/schemas/IReadOnlyListOfString"
-          }
-        }
-      },
-      "PipelineSnapshotResponse": {
-        "required": [
-          "type",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "count": {
-            "type": [
-              "null",
-              "integer"
-            ],
-            "format": "int32"
-          },
-          "changes": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/PipelineItemChangesResponse"
-              }
-            ]
           }
         }
       },

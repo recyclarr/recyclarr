@@ -9,29 +9,19 @@ internal sealed record GetSyncJobRequest
     public Guid Id { get; init; }
 }
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record PipelineItemChangesResponse(
-    IReadOnlyList<string> Created,
-    IReadOnlyList<string> Updated,
-    IReadOnlyList<string> Deleted
-);
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record PipelineSnapshotResponse(string Type, string Status)
+internal enum InstanceProgressStatusResponse
 {
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? Count { get; init; }
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public PipelineItemChangesResponse? Changes { get; init; }
+    Pending,
+    Running,
+    Succeeded,
+    Partial,
+    Failed,
+    Interrupted,
+    NotRun,
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record InstanceSnapshotResponse(
-    string Name,
-    string Status,
-    IReadOnlyList<PipelineSnapshotResponse> Pipelines
-);
+internal sealed record InstanceSnapshotResponse(string Name, InstanceProgressStatusResponse Status);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record GetSyncJobResponse
