@@ -47,6 +47,7 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
         var result = await scope.Entry.RunAsync(
             [BuildInvalidConfig(), BuildNonBlockingConfig(), BuildHandledFailureConfig()],
             Substitute.For<ISyncSettings>(),
+            Substitute.For<IInstanceSyncProgress>(),
             CancellationToken.None
         );
 
