@@ -17,7 +17,7 @@ namespace Recyclarr.Core.Tests.IntegrationTests;
 internal sealed class SyncOrchestratorIntegrationTest
 {
     [Test]
-    public async Task Later_fault_retains_ordered_completed_results()
+    public async Task Faulted_instance_retains_work_and_later_instances_run()
     {
         var reporter = new RecordingFaultReporter();
         using var container = BuildContainer(reporter);
@@ -26,7 +26,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         {
             Config("first"),
             Config("fault"),
-            Config("never-started"),
+            Config("last"),
         };
 
         var result = await sut.RunAsync(
@@ -36,7 +36,7 @@ internal sealed class SyncOrchestratorIntegrationTest
         );
 
         result.Status.Should().Be(SyncResultStatus.Partial);
-        result.Instances.Select(x => x.InstanceName).Should().Equal("first", "fault");
+        result.Instances.Select(x => x.InstanceName).Should().Equal("first", "fault", "last");
         result
             .Instances[0]
             .Pipelines.Should()
@@ -49,8 +49,10 @@ internal sealed class SyncOrchestratorIntegrationTest
             .ContainSingle()
             .Which.Status.Should()
             .Be(SyncResultStatus.Failed);
-        result.Fault.Should().NotBeNull();
-        reporter.Reference.Should().Be(result.Fault.Reference);
+        var fault = result.Instances[1].Fault.Should().BeOfType<SyncFault>().Which;
+        result.Instances[2].Status.Should().Be(SyncResultStatus.Succeeded);
+        result.Fault.Should().BeNull();
+        reporter.Reference.Should().Be(fault.Reference);
         reporter.Exception.Should().BeOfType<InvalidOperationException>();
     }
 
@@ -62,67 +64,160 @@ internal sealed class SyncOrchestratorIntegrationTest
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var result = await sut.RunAsync(
-            [Config("fault")],
+            [Config("fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
             CancellationToken.None
         );
 
-        result.Fault.Should().NotBeNull();
-        result.Instances.Should().ContainSingle();
+        result.Fault.Should().BeNull();
+        result.Instances.Should().HaveCount(2);
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].InstanceName.Should().Be("last");
     }
 
     [Test]
-    public async Task Fault_before_pipeline_execution_does_not_invent_an_instance_result()
+    public async Task Fault_before_pipeline_execution_produces_faulted_instance_and_continues()
     {
         var reporter = new RecordingFaultReporter();
         using var container = BuildContainer(reporter);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var result = await sut.RunAsync(
-            [Config("early-fault")],
+            [Config("early-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
             CancellationToken.None
         );
 
-        result.Status.Should().Be(SyncResultStatus.Failed);
-        result.Instances.Should().BeEmpty();
-        result.Fault.Should().NotBeNull();
+        result.Status.Should().Be(SyncResultStatus.Partial);
+        result.Instances.Select(x => x.InstanceName).Should().Equal("early-fault", "last");
+        result.Instances[0].Pipelines.Should().BeEmpty();
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Fault.Should().BeNull();
     }
 
     [Test]
-    public async Task Scope_creation_fault_retains_prior_completed_instances()
+    public async Task Scope_creation_fault_produces_faulted_instance_and_continues()
     {
         var reporter = new RecordingFaultReporter();
         using var container = BuildContainer(reporter);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var result = await sut.RunAsync(
-            [Config("first"), Config("scope-fault")],
+            [Config("first"), Config("scope-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
             CancellationToken.None
         );
 
-        result.Instances.Should().ContainSingle().Which.InstanceName.Should().Be("first");
-        result.Fault.Should().NotBeNull();
+        result.Instances.Select(x => x.InstanceName).Should().Equal("first", "scope-fault", "last");
+        result.Instances[1].Fault.Should().NotBeNull();
+        result.Fault.Should().BeNull();
         reporter.Exception.Should().BeOfType<DependencyResolutionException>();
     }
 
     [Test]
-    public async Task Scope_disposal_fault_retains_completed_instance()
+    public async Task Scope_disposal_fault_retains_completed_instance_and_continues()
     {
         var reporter = new RecordingFaultReporter();
         using var container = BuildContainer(reporter);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var result = await sut.RunAsync(
-            [Config("dispose-fault")],
+            [Config("dispose-fault"), Config("last")],
             Substitute.For<ISyncSettings>(),
             CancellationToken.None
         );
 
-        result.Instances.Should().ContainSingle().Which.InstanceName.Should().Be("dispose-fault");
-        result.Fault.Should().NotBeNull();
+        result.Instances.Select(x => x.InstanceName).Should().Equal("dispose-fault", "last");
+        result.Instances[0].Pipelines.Should().ContainSingle();
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Fault.Should().BeNull();
         reporter.Exception.Should().BeOfType<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Cleanup_fault_retains_expected_operational_failure()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("incompatible-dispose-fault"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            CancellationToken.None
+        );
+
+        result.Instances[0].Failure.Should().BeOfType<ServiceIncompatibleFailure>();
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].Status.Should().Be(SyncResultStatus.Succeeded);
+    }
+
+    [Test]
+    public async Task Two_faulted_instances_each_retain_their_own_fault()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("early-fault"), Config("fault"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            CancellationToken.None
+        );
+
+        result.Instances.Should().HaveCount(3);
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].Fault.Should().NotBeNull();
+        result.Instances[0].Fault.Should().NotBe(result.Instances[1].Fault);
+        result.Instances[2].Status.Should().Be(SyncResultStatus.Succeeded);
+        reporter.Reports.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task Processing_and_disposal_faults_are_reported_together()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("fault-dispose-fault"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            CancellationToken.None
+        );
+
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].Status.Should().Be(SyncResultStatus.Succeeded);
+        reporter
+            .Exception.Should()
+            .BeOfType<AggregateException>()
+            .Which.InnerExceptions.Should()
+            .SatisfyRespectively(
+                exception => exception.Should().BeOfType<InvalidOperationException>(),
+                exception => exception.Should().BeOfType<InvalidOperationException>()
+            );
+    }
+
+    [Test]
+    public async Task Fault_after_planning_retains_planning_outcomes()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("planning-fault")],
+            Substitute.For<ISyncSettings>(),
+            CancellationToken.None
+        );
+
+        result
+            .Instances.Should()
+            .ContainSingle()
+            .Which.PlanningOutcomes.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<TestPlanningOutcome>();
     }
 
     [Test]
@@ -146,24 +241,29 @@ internal sealed class SyncOrchestratorIntegrationTest
     }
 
     [Test]
-    public async Task Cancellation_propagates_without_starting_later_instances()
+    public async Task Cancellation_with_cleanup_fault_propagates_without_starting_later_instances()
     {
         var reporter = new RecordingFaultReporter();
-        using var container = BuildContainer(reporter);
+        var recorder = new ExecutionRecorder();
+        using var container = BuildContainer(reporter, recorder);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var act = () =>
             sut.RunAsync(
-                [Config("cancel"), Config("never-started")],
+                [Config("cancel-dispose-fault"), Config("never-started")],
                 Substitute.For<ISyncSettings>(),
                 CancellationToken.None
             );
 
         await act.Should().ThrowAsync<OperationCanceledException>();
-        reporter.Reference.Should().BeNull();
+        reporter.Exception.Should().BeOfType<InvalidOperationException>();
+        recorder.Executed.Should().Equal("cancel-dispose-fault");
     }
 
-    private static IContainer BuildContainer(ISyncFaultReporter reporter)
+    private static IContainer BuildContainer(
+        ISyncFaultReporter reporter,
+        ExecutionRecorder? recorder = null
+    )
     {
         var radarrCapabilities = Substitute.For<IRadarrCapabilityFetcher>();
         radarrCapabilities
@@ -176,7 +276,15 @@ internal sealed class SyncOrchestratorIntegrationTest
         builder.RegisterInstance(radarrCapabilities).As<IRadarrCapabilityFetcher>();
         builder.RegisterInstance(Substitute.For<ISonarrCapabilityFetcher>());
         builder.RegisterInstance(Substitute.For<IInstancePublisher>());
-        builder.RegisterInstance(Array.Empty<IPlanComponent>().OrderBy(_ => 0));
+        builder.RegisterInstance(recorder ?? new ExecutionRecorder());
+        builder
+            .Register(c =>
+                new IPlanComponent[]
+                {
+                    new TestPlanningComponent(c.Resolve<IServiceConfiguration>()),
+                }.OrderBy(_ => 0)
+            )
+            .As<IOrderedEnumerable<IPlanComponent>>();
         builder.RegisterInstance(Array.Empty<IExceptionStrategy>().AsEnumerable());
         builder.RegisterInstance(reporter).As<ISyncFaultReporter>();
         builder.RegisterType<RadarrCapabilityEnforcer>();
@@ -199,8 +307,9 @@ internal sealed class SyncOrchestratorIntegrationTest
     private sealed class TestPipelineExecutor : IPipelineExecutor, IDisposable
     {
         private readonly IServiceConfiguration _config;
+        private readonly ExecutionRecorder _recorder;
 
-        public TestPipelineExecutor(IServiceConfiguration config)
+        public TestPipelineExecutor(IServiceConfiguration config, ExecutionRecorder recorder)
         {
             if (config.InstanceName == "scope-fault")
             {
@@ -208,6 +317,7 @@ internal sealed class SyncOrchestratorIntegrationTest
             }
 
             _config = config;
+            _recorder = recorder;
         }
 
         public Task<IReadOnlyList<SemanticPipelineResult>> Execute(
@@ -218,24 +328,25 @@ internal sealed class SyncOrchestratorIntegrationTest
             CancellationToken ct
         )
         {
-            if (_config.InstanceName == "cancel")
+            _recorder.Executed.Add(_config.InstanceName);
+
+            if (_config.InstanceName == "cancel-dispose-fault")
             {
                 throw new OperationCanceledException(ct);
             }
 
-            if (_config.InstanceName == "early-fault")
+            if (_config.InstanceName is "early-fault" or "planning-fault")
             {
                 throw new InvalidOperationException("unexpected");
             }
 
-            var status =
-                _config.InstanceName == "fault"
-                    ? SyncResultStatus.Failed
-                    : SyncResultStatus.Succeeded;
+            var status = _config.InstanceName is "fault" or "fault-dispose-fault"
+                ? SyncResultStatus.Failed
+                : SyncResultStatus.Succeeded;
             var result = new TestPipelineResult(status);
             buffer.Capture(PipelineType.CustomFormat, result);
 
-            return _config.InstanceName == "fault"
+            return _config.InstanceName is "fault" or "fault-dispose-fault"
                 ? Task.FromException<IReadOnlyList<SemanticPipelineResult>>(
                     new InvalidOperationException("unexpected")
                 )
@@ -246,17 +357,45 @@ internal sealed class SyncOrchestratorIntegrationTest
 
         public void Dispose()
         {
-            if (_config.InstanceName == "dispose-fault")
+            if (
+                _config.InstanceName
+                is "dispose-fault"
+                    or "fault-dispose-fault"
+                    or "incompatible-dispose-fault"
+                    or "cancel-dispose-fault"
+            )
             {
                 throw new InvalidOperationException("scope disposal failed");
             }
         }
     }
 
+    private sealed class TestPlanningComponent(IServiceConfiguration config) : IPlanComponent
+    {
+        public void Process(PipelinePlan plan)
+        {
+            if (config.InstanceName == "planning-fault")
+            {
+                plan.AddPlanningOutcome(new TestPlanningOutcome());
+            }
+        }
+    }
+
+    private sealed record TestPlanningOutcome : PlanningOutcome;
+
+    private sealed class ExecutionRecorder
+    {
+        public List<string> Executed { get; } = [];
+    }
+
     private sealed class TestServiceInformation(IServiceConfiguration config) : IServiceInformation
     {
         public Task<string> GetAppName(CancellationToken ct) =>
-            Task.FromResult(config.InstanceName == "incompatible" ? "Sonarr" : "Radarr");
+            Task.FromResult(
+                config.InstanceName is "incompatible" or "incompatible-dispose-fault"
+                    ? "Sonarr"
+                    : "Radarr"
+            );
 
         public Task<Version> GetVersion(CancellationToken ct) => Task.FromResult(new Version(6, 0));
     }
@@ -277,11 +416,13 @@ internal sealed class SyncOrchestratorIntegrationTest
         public bool ThrowOnReport { get; init; }
         public string? Reference { get; private set; }
         public Exception? Exception { get; private set; }
+        public List<(string Reference, Exception Exception)> Reports { get; } = [];
 
         public void Report(string reference, Exception exception)
         {
             Reference = reference;
             Exception = exception;
+            Reports.Add((reference, exception));
 
             if (ThrowOnReport)
             {
