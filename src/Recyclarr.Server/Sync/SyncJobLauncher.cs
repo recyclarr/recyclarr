@@ -19,7 +19,7 @@ internal sealed class SyncJobLauncher(
 {
     public SyncJob Launch(ServerSyncSettings settings, IReadOnlyList<IServiceConfiguration> configs)
     {
-        var job = store.Create(settings);
+        var job = store.Create(settings, configs.Select(config => config.InstanceName).ToList());
 
         // Runs independently of whatever asked for the job; progress and the terminal result are
         // recorded in the store and observed through the job resource.
