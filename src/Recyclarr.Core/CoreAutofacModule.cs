@@ -19,8 +19,6 @@ using Recyclarr.ErrorHandling;
 using Recyclarr.Http;
 using Recyclarr.Migration;
 using Recyclarr.Migration.Steps;
-using Recyclarr.Notifications;
-using Recyclarr.Notifications.Apprise;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
 using Recyclarr.Servarr.CustomFormat;
@@ -37,7 +35,6 @@ using Recyclarr.ServarrApi.QualityProfile;
 using Recyclarr.ServarrApi.System;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Deprecations;
-using Recyclarr.Settings.Models;
 using Recyclarr.Sync;
 using Recyclarr.SyncState;
 using Recyclarr.TrashGuide.CustomFormat;
@@ -59,7 +56,6 @@ public class CoreAutofacModule : Module
         RegisterCompatibility(builder);
         RegisterConfig(builder);
         RegisterErrorHandling(builder);
-        RegisterNotifications(builder);
         RegisterPlatform(builder);
         RegisterRepo(builder);
         RegisterServarrApiClients(builder);
@@ -183,28 +179,6 @@ public class CoreAutofacModule : Module
         builder.RegisterType<SonarrConfigYamlValidator>().As<IValidator>();
 
         builder.RegisterType<ServiceConfigYamlValidator>().As<IValidator<ServiceConfigYaml>>();
-    }
-
-    private static void RegisterNotifications(ContainerBuilder builder)
-    {
-        builder.RegisterType<NotificationService>();
-        builder.RegisterType<AppriseNotificationApiService>().As<IAppriseNotificationApiService>();
-
-        builder.Register<INotificationService>(c =>
-        {
-            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
-            return settings.Apprise is not null
-                ? c.Resolve<NotificationService>()
-                : new NoopNotificationService();
-        });
-
-        builder.RegisterAppriseRefitClient<IAppriseApi>();
-
-        builder.Register(c =>
-        {
-            var settings = c.Resolve<ISettings<NotificationSettings>>().Value;
-            return VerbosityOptions.From(settings.Verbosity);
-        });
     }
 
     private static void RegisterPlatform(ContainerBuilder builder)
