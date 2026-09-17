@@ -1,8 +1,6 @@
 using Autofac;
 using Recyclarr.Config.Models;
 using Recyclarr.Json;
-using Recyclarr.Settings;
-using Recyclarr.Settings.Models;
 using Refit;
 
 namespace Recyclarr.Http;
@@ -37,37 +35,5 @@ public static class RefitClientExtensions
                 .As<T>()
                 .InstancePerMatchingLifetimeScope("instance");
         }
-
-        // Registers a Refit interface for the Apprise notification API. The HttpClient
-        // is configured with BaseAddress from notification settings. Not per-instance scoped
-        // because Apprise config is global (not per Sonarr/Radarr instance).
-        public void RegisterAppriseRefitClient<T>()
-            where T : class
-        {
-            builder
-                .Register(ctx =>
-                {
-                    var factory = ctx.Resolve<IHttpClientFactory>();
-                    var settings = ctx.Resolve<ISettings<NotificationSettings>>().Value;
-                    var apprise =
-                        settings.Apprise
-                        ?? throw new InvalidOperationException(
-                            "No Apprise notification settings have been defined"
-                        );
-
-                    var client = factory.CreateClient("apprise");
-                    client.BaseAddress = apprise.BaseUrl;
-                    return RestService.For<T>(client, AppriseRefitSettings);
-                })
-                .As<T>();
-        }
     }
-
-    private static readonly RefitSettings AppriseRefitSettings = new()
-    {
-        ContentSerializer = new SystemTextJsonContentSerializer(
-            GlobalJsonSerializerSettings.Apprise
-        ),
-        CaptureRequestContent = true,
-    };
 }
