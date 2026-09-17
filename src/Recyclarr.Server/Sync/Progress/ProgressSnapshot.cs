@@ -64,6 +64,17 @@ internal sealed record ProgressSnapshot
         return changed ? new ProgressSnapshot(instances) : this;
     }
 
+    public ProgressSnapshot Reconcile(SyncRunResult result)
+    {
+        var snapshot = this;
+        foreach (var instanceResult in result.Instances)
+        {
+            snapshot = snapshot.Reconcile(instanceResult);
+        }
+
+        return snapshot;
+    }
+
     private ProgressSnapshot Update(
         string instanceName,
         Func<InstanceSnapshot, InstanceSnapshot?> update
@@ -79,6 +90,19 @@ internal sealed record ProgressSnapshot
 
         return new ProgressSnapshot(Instances.SetItem(index, updated));
     }
+
+    private ProgressSnapshot Reconcile(SyncInstanceResult result) =>
+        Update(
+            result.InstanceName,
+            instance =>
+                instance.Result is null
+                    ? instance with
+                    {
+                        Status = ToProgressStatus(result.Status),
+                        Result = result,
+                    }
+                    : null
+        );
 
     private static InstanceProgressStatus ToProgressStatus(SyncResultStatus status) =>
         status switch

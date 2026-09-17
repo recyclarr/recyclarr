@@ -18,6 +18,7 @@ public interface ISyncOrchestrator
     Task<SyncRunResult> RunAsync(
         IReadOnlyList<IServiceConfiguration> configs,
         ISyncSettings settings,
+        IInstanceSyncProgress progress,
         CancellationToken ct
     );
 }

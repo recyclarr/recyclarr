@@ -1,6 +1,6 @@
 using FastEndpoints;
 using Recyclarr.Server.Sync;
-using Recyclarr.Sync.Progress;
+using Recyclarr.Server.Sync.Progress;
 
 namespace Recyclarr.Server.Features.Sync.GetJob;
 
@@ -46,31 +46,12 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
             Service = job.Request.Service,
             Instances = job.Request.Instances,
             Preview = job.Request.Preview,
-            Progress = job.PipelineProgress.Instances.Select(ToInstanceResponse).ToList(),
+            Progress = job.Progress.Instances.Select(ToInstanceResponse).ToList(),
         };
     }
 
     private static InstanceSnapshotResponse ToInstanceResponse(InstanceSnapshot instance)
     {
-        return new InstanceSnapshotResponse(
-            instance.Name,
-            instance.Status.ToString(),
-            instance
-                .Pipelines.Select(kvp => new PipelineSnapshotResponse(
-                    kvp.Key.ToString(),
-                    kvp.Value.Status.ToString()
-                )
-                {
-                    Count = kvp.Value.Count,
-                    Changes = kvp.Value.Changes is null
-                        ? null
-                        : new PipelineItemChangesResponse(
-                            kvp.Value.Changes.Created,
-                            kvp.Value.Changes.Updated,
-                            kvp.Value.Changes.Deleted
-                        ),
-                })
-                .ToList()
-        );
+        return new InstanceSnapshotResponse(instance.Name, instance.Status.ToString(), []);
     }
 }
