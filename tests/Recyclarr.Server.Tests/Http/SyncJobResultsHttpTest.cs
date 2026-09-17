@@ -56,6 +56,44 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     }
 
     [Test]
+    public async Task Instance_fault_retains_its_scope_and_buffered_semantic_data()
+    {
+        var noOp = new CustomFormatPipelineResult(0, 0, [], []);
+        var result = new SyncRunResult([
+            new SyncInstanceResult(
+                "faulted",
+                CoreService.Sonarr,
+                [noOp],
+                fault: new SyncFault("instance-fault")
+            ),
+            new SyncInstanceResult("later", CoreService.Radarr, []),
+        ]);
+        var job = CreateCompletedJob(result);
+
+        using var client = CreateClient();
+        var response = await RestService.For<ISyncApi>(client).Results(job.Id.Value);
+
+        var content = response.Content ?? throw new InvalidOperationException("Missing response");
+        content.Status.Should().Be(SyncCompletionStatus.Partial);
+        content.Fault.Should().BeNull();
+        var faulted = content
+            .Instances[0]
+            .Should()
+            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .Which;
+        faulted.Name.Should().Be("faulted");
+        faulted.Status.Should().Be(SyncCompletionStatus.Partial);
+        faulted.Fault?.Reference.Should().Be("instance-fault");
+        faulted.Pipelines.CustomFormats?.Status.Should().Be(PipelineStatus.Succeeded);
+        content
+            .Instances[1]
+            .Should()
+            .BeOfType<SyncInstanceResultsResponseRadarrInstanceResultsResponse>()
+            .Which.Name.Should()
+            .Be("later");
+    }
+
+    [Test]
     public async Task Completed_job_can_return_no_instances()
     {
         var job = CreateCompletedJob(new SyncRunResult([]));
