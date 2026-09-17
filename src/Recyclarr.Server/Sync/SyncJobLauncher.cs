@@ -14,7 +14,8 @@ namespace Recyclarr.Server.Sync;
 internal sealed class SyncJobLauncher(
     ILogger log,
     ISyncJobStore store,
-    SyncRunScopeFactory scopeFactory
+    SyncRunScopeFactory scopeFactory,
+    SyncJobFinalizer finalizer
 )
 {
     public SyncJob Launch(ServerSyncSettings settings, IReadOnlyList<IServiceConfiguration> configs)
@@ -44,39 +45,16 @@ internal sealed class SyncJobLauncher(
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Information(e, "Sync job {JobId} was canceled ({Reference})", jobId, reference);
-            store.Update(
-                jobId,
-                j =>
-                {
-                    if (j.Result is null)
-                    {
-                        j.Result = new SyncRunResult([], new SyncFault(reference));
-                        j.Status = j.Result.Status.ToJobStatus();
-                    }
-                }
-            );
+            finalizer.Fail(jobId, new SyncFault(reference));
         }
         catch (Exception e)
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync launcher fault {Reference}", reference);
-            var result = new SyncRunResult([], new SyncFault(reference));
-            store.Update(
+            finalizer.Fail(
                 jobId,
-                j =>
-                {
-                    if (j.Result is null)
-                    {
-                        j.Result = result;
-                        j.Status = result.Status.ToJobStatus();
-                    }
-
-                    j.Diagnostics =
-                    [
-                        .. j.Diagnostics,
-                        new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, e.Message),
-                    ];
-                }
+                new SyncFault(reference),
+                [new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, e.Message)]
             );
         }
     }
