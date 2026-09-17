@@ -48,16 +48,4 @@ public static class GlobalJsonSerializerSettings
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             NumberHandling = JsonNumberHandling.AllowReadingFromString,
         };
-
-    /// <summary>
-    /// JSON settings used for Apprise notification API payloads.
-    /// </summary>
-    public static JsonSerializerOptions Apprise { get; } =
-        new()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = false,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
-        };
 }
