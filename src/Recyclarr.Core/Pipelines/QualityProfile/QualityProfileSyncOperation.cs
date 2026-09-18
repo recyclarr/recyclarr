@@ -34,7 +34,6 @@ internal class QualityProfileSyncOperation(
 
     protected override async Task<QualityProfileComputeResult> Compute(
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -85,8 +84,7 @@ internal class QualityProfileSyncOperation(
             deltas
         );
 
-        logger.LogTransactionNotices(transactions, publisher);
-        QualityProfileLogger.SetStatus(publisher, result);
+        logger.LogTransactionNotices(transactions);
 
         return new QualityProfileComputeResult(
             transactions,
@@ -98,7 +96,6 @@ internal class QualityProfileSyncOperation(
 
     protected override async Task Persist(
         QualityProfileComputeResult computeResult,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -157,13 +154,7 @@ internal class QualityProfileSyncOperation(
         statePersister.Save(computeResult.State);
         computeResult.CompleteApply(completedResources, incompleteResources, persistenceOutcomes);
 
-        logger.LogPersistenceResults(
-            transactions,
-            publisher,
-            computeResult.Result,
-            createdProfiles,
-            updatedProfiles
-        );
+        logger.LogPersistenceResults(transactions, createdProfiles, updatedProfiles);
     }
 
     private static bool IsResourceRejection(ApiException exception)

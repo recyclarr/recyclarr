@@ -1,4 +1,3 @@
-using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using InstanceProgressSnapshot = Recyclarr.Server.Sync.Progress.ProgressSnapshot;
 
@@ -18,7 +17,6 @@ internal sealed class SyncJob(
     public DateTimeOffset CreatedAt { get; } = createdAt;
     public SyncJobStatus Status { get; set; } = SyncJobStatus.Pending;
     public InstanceProgressSnapshot Progress { get; set; } = new(instanceNames);
-    public IReadOnlyList<SyncDiagnosticEvent> Diagnostics { get; set; } = [];
 
     public SyncRunResult? Result { get; set; }
 
@@ -27,7 +25,6 @@ internal sealed class SyncJob(
         {
             Status = Status,
             Progress = Progress,
-            Diagnostics = Diagnostics.ToList(),
             Result = Result,
         };
 }

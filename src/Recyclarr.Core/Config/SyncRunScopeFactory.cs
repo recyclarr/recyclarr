@@ -3,9 +3,7 @@ using Autofac;
 namespace Recyclarr.Config;
 
 /// <summary>
-/// Opens a lifetime scope for one sync run. Everything a run accumulates (its event streams,
-/// diagnostics subscriptions, and computed results) lives in that scope and dies with it, which is
-/// what keeps concurrent runs from seeing each other.
+/// Opens a lifetime scope for one sync run so run-scoped services and resources have one owner.
 /// </summary>
 /// <remarks>
 /// Registered as a singleton so runs are children of the root container. A run outlives whatever

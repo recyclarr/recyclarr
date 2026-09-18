@@ -305,15 +305,12 @@ internal sealed class CustomFormatSyncOperationTest
         var cf = NewCf.Data("Preview", "trash-id");
         var harness = CreateHarness([new PlannedCustomFormat(cf)], []);
         var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
-        var instancePublisher = Substitute.For<IInstancePublisher>();
-        instancePublisher.ForPipeline(default).ReturnsForAnyArgs(harness.Publisher);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
             harness.Plan,
-            instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -362,11 +359,10 @@ internal sealed class CustomFormatSyncOperationTest
             plan.AddCustomFormat(cf);
         }
 
-        var publisher = Substitute.For<IPipelinePublisher>();
         var log = Substitute.For<ILogger>();
         var logger = new CustomFormatTransactionLogger(log);
         var sut = new CustomFormatSyncOperation(log, api, statePersister, logger, config);
-        return new Harness(sut, api, statePersister, state, plan, publisher);
+        return new Harness(sut, api, statePersister, state, plan);
     }
 
     private static async Task<CustomFormatPipelineResult> Compute(Harness harness)
@@ -374,7 +370,6 @@ internal sealed class CustomFormatSyncOperationTest
         var result = await ((ISyncOperation)harness.Sut).Execute(
             preview: true,
             harness.Plan,
-            harness.Publisher,
             _ => { },
             CancellationToken.None
         );
@@ -386,7 +381,6 @@ internal sealed class CustomFormatSyncOperationTest
         var result = await ((ISyncOperation)harness.Sut).Execute(
             preview: false,
             harness.Plan,
-            harness.Publisher,
             _ => { },
             CancellationToken.None
         );
@@ -413,7 +407,6 @@ internal sealed class CustomFormatSyncOperationTest
         ICustomFormatService Api,
         ICustomFormatStatePersister StatePersister,
         TrashIdMappingStore State,
-        TestPlan Plan,
-        IPipelinePublisher Publisher
+        TestPlan Plan
     );
 }

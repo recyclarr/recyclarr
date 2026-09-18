@@ -31,7 +31,6 @@ internal class CustomFormatSyncOperation(
 
     protected override async Task<CustomFormatComputeResult> Compute(
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -157,13 +156,12 @@ internal class CustomFormatSyncOperation(
             state,
             result
         );
-        cfLogger.LogTransactions(transactions, publisher, result);
+        cfLogger.LogTransactions(transactions);
         return computeResult;
     }
 
     protected override async Task Persist(
         CustomFormatComputeResult computeResult,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -228,11 +226,6 @@ internal class CustomFormatSyncOperation(
         computeResult.State.Update(computeResult);
         statePersister.Save(computeResult.State);
         computeResult.CompleteApply(completedResources, incompleteResources, persistenceOutcomes);
-        CustomFormatTransactionLogger.SetStatus(
-            computeResult.Transactions,
-            publisher,
-            computeResult.Result
-        );
     }
 
     private static bool IsResourceRejection(ApiException exception)

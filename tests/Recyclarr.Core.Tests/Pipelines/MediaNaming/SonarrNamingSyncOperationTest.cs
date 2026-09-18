@@ -2,7 +2,6 @@ using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
-using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
@@ -142,7 +141,6 @@ internal sealed class SonarrNamingSyncOperationTest
         var result = await ((ISyncOperation)sut).Execute(
             preview,
             plan,
-            Substitute.For<IPipelinePublisher>(),
             _ => { },
             CancellationToken.None
         );

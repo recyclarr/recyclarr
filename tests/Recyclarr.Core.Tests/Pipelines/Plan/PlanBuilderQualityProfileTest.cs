@@ -73,7 +73,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-trash-id" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -91,7 +91,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "nonexistent-qp" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -118,7 +118,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-qualities" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -164,7 +164,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -204,7 +204,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -242,7 +242,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { Name = "Test Profile" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -275,7 +275,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-with-format-items" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -319,7 +319,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-anime" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -361,7 +361,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             QualityProfiles = [new QualityProfileConfig { TrashId = "qp-partial" }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -392,7 +392,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -445,7 +445,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
             QualityProfiles = [new QualityProfileConfig { Name = "WEB" }],
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -478,7 +478,7 @@ internal sealed class PlanBuilderQualityProfileTest : PlanBuilderTestBase
             ],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 

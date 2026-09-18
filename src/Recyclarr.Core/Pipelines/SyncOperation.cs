@@ -17,17 +17,16 @@ internal abstract class SyncOperation<TResult> : ISyncOperation
     async Task<SemanticPipelineResult> ISyncOperation.Execute(
         bool preview,
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         Action<SemanticPipelineResult> capture,
         CancellationToken ct
     )
     {
-        var computeResult = await Compute(plan, publisher, ct);
+        var computeResult = await Compute(plan, ct);
         capture(computeResult.Result);
 
         if (!preview)
         {
-            await Persist(computeResult, publisher, ct);
+            await Persist(computeResult, ct);
             capture(computeResult.Result);
         }
 
@@ -46,15 +45,7 @@ internal abstract class SyncOperation<TResult> : ISyncOperation
         PipelineType? blockedBy
     );
 
-    protected abstract Task<TResult> Compute(
-        PipelinePlan plan,
-        IPipelinePublisher publisher,
-        CancellationToken ct
-    );
+    protected abstract Task<TResult> Compute(PipelinePlan plan, CancellationToken ct);
 
-    protected abstract Task Persist(
-        TResult computeResult,
-        IPipelinePublisher publisher,
-        CancellationToken ct
-    );
+    protected abstract Task Persist(TResult computeResult, CancellationToken ct);
 }

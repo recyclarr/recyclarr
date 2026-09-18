@@ -5,8 +5,6 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Servarr.QualitySize;
-using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -65,7 +63,7 @@ internal sealed class QualitySizeSyncOperationTest
             },
         };
 
-        var result = await Execute(sut, plan, new RecordingPipelinePublisher());
+        var result = await Execute(sut, plan);
         result.Status.Should().Be(SyncResultStatus.Partial);
         result
             .Outcomes.Should()
@@ -120,7 +118,7 @@ internal sealed class QualitySizeSyncOperationTest
         plan.Add(new PreferredGreaterThanMaxOutcome("HDTV-1080p", 75, 50));
         plan.Add(new PreferredRatioClampedOutcome(2, 1));
 
-        var result = await Execute(sut, plan, new RecordingPipelinePublisher());
+        var result = await Execute(sut, plan);
         result.Status.Should().Be(SyncResultStatus.Failed);
         result
             .Outcomes.Should()
@@ -167,50 +165,27 @@ internal sealed class QualitySizeSyncOperationTest
                 Qualities = [new PlannedQualityItem("Bluray-1080p", 5, 100, 50)],
             },
         };
-        var publisher = new RecordingPipelinePublisher();
-
-        var result = await Execute(sut, plan, publisher);
+        var result = await Execute(sut, plan);
 
         result.Status.Should().Be(SyncResultStatus.Failed);
-        publisher
+        result
             .Outcomes.Should()
             .ContainSingle()
             .Which.Should()
-            .Be(new MissingServerQualityDefinitionOutcome("Bluray-1080p"));
+            .Be(new QualitySizeServiceQualityNotFoundOutcome("Bluray-1080p"));
     }
 
     private static async Task<QualitySizePipelineResult> Execute(
         QualitySizeSyncOperation sut,
-        PipelinePlan plan,
-        IPipelinePublisher publisher
+        PipelinePlan plan
     )
     {
         var result = await ((ISyncOperation)sut).Execute(
             preview: true,
             plan,
-            publisher,
             _ => { },
             CancellationToken.None
         );
         return result.Should().BeOfType<QualitySizePipelineResult>().Which;
-    }
-
-    private sealed class RecordingPipelinePublisher : IPipelinePublisher
-    {
-        public List<SyncOutcome> Outcomes { get; } = [];
-
-        public void Add(SyncOutcome outcome) => Outcomes.Add(outcome);
-
-        public void AddError(string message) { }
-
-        public void AddWarning(string message) { }
-
-        public void AddDeprecation(string message) { }
-
-        public void SetStatus(
-            PipelineProgressStatus status,
-            int? count = null,
-            PipelineItemChanges? changes = null
-        ) { }
     }
 }
