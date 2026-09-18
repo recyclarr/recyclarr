@@ -4,7 +4,6 @@ using Recyclarr.Pipelines.MediaManagement;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.MediaManagement;
@@ -100,39 +99,28 @@ internal sealed class MediaManagementSyncOperationTest
     }
 
     [Test]
-    public async Task Persist_writes_changed_mode_once_and_reports_one_change()
+    public async Task Persist_writes_changed_mode_once()
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.PreferAndUpgrade);
         MediaManagementData? written = null;
         api.WhenForAnyArgs(x => x.UpdateMediaManagement(default!, default))
             .Do(x => written = x.Arg<MediaManagementData>());
-        var publisher = Substitute.For<IPipelinePublisher>();
-
-        await ExecuteOperation(
-            sut,
-            PropersAndRepacksMode.DoNotPrefer,
-            preview: false,
-            publisher: publisher
-        );
+        await ExecuteOperation(sut, PropersAndRepacksMode.DoNotPrefer, preview: false);
 
         await api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
         written.Should().NotBeNull();
         written.Id.Should().Be(42);
         written.PropersAndRepacks.Should().Be(PropersAndRepacksMode.DoNotPrefer);
-        publisher.Received().SetStatus(PipelineProgressStatus.Succeeded, 1);
     }
 
     [Test]
-    public async Task Persist_skips_unchanged_mode_and_reports_zero_changes()
+    public async Task Persist_skips_unchanged_mode()
     {
         var mode = PropersAndRepacksMode.DoNotPrefer;
         var (sut, api) = CreateOperation(mode);
-        var publisher = Substitute.For<IPipelinePublisher>();
-
-        await ExecuteOperation(sut, mode, preview: false, publisher: publisher);
+        await ExecuteOperation(sut, mode, preview: false);
 
         await api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
-        publisher.Received().SetStatus(PipelineProgressStatus.Succeeded, 0);
     }
 
     [Test]
@@ -198,8 +186,6 @@ internal sealed class MediaManagementSyncOperationTest
         preview.Result.Should().BeEquivalentTo(apply.Result);
         await preview.Api.DidNotReceiveWithAnyArgs().UpdateMediaManagement(default!, default);
         await apply.Api.ReceivedWithAnyArgs(1).UpdateMediaManagement(default!, default);
-        preview.Publisher.Received().SetStatus(PipelineProgressStatus.Succeeded);
-        apply.Publisher.Received().SetStatus(PipelineProgressStatus.Succeeded, 1);
     }
 
     [Test]
@@ -207,13 +193,9 @@ internal sealed class MediaManagementSyncOperationTest
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
         var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [sut]);
-        var instancePublisher = Substitute.For<IInstancePublisher>();
-        instancePublisher.ForPipeline(default).ReturnsForAnyArgs(IPipelinePublisher.Noop);
-
         var results = await executor.Execute(
             Substitute.For<ISyncSettings>(),
             new TestPlan(),
-            instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -236,44 +218,32 @@ internal sealed class MediaManagementSyncOperationTest
         MediaManagementSyncOperation sut,
         PropersAndRepacksMode desired,
         bool preview,
-        IPipelinePublisher? publisher = null,
         CancellationToken ct = default
     )
     {
-        var result = await ((ISyncOperation)sut).Execute(
-            preview,
-            Plan(desired),
-            publisher ?? IPipelinePublisher.Noop,
-            _ => { },
-            ct
-        );
+        var result = await ((ISyncOperation)sut).Execute(preview, Plan(desired), _ => { }, ct);
         return result.Should().BeOfType<MediaManagementPipelineResult>().Which;
     }
 
     private static async Task<(
         MediaManagementPipelineResult Result,
-        IMediaManagementService Api,
-        IPipelinePublisher Publisher
+        IMediaManagementService Api
     )> Execute(bool preview)
     {
         var (sut, api) = CreateOperation(PropersAndRepacksMode.DoNotUpgrade);
         var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [sut]);
-        var publisher = Substitute.For<IPipelinePublisher>();
-        var instancePublisher = Substitute.For<IInstancePublisher>();
-        instancePublisher.ForPipeline(default).ReturnsForAnyArgs(publisher);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(preview);
 
         var results = await executor.Execute(
             settings,
             Plan(PropersAndRepacksMode.DoNotPrefer),
-            instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
 
         var result = results.Should().ContainSingle().Which;
-        return (result.Should().BeOfType<MediaManagementPipelineResult>().Which, api, publisher);
+        return (result.Should().BeOfType<MediaManagementPipelineResult>().Which, api);
     }
 
     private static TestPlan Plan(PropersAndRepacksMode desired) =>

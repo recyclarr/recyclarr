@@ -71,7 +71,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -93,7 +93,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -117,7 +117,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -146,7 +146,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -165,7 +165,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
     public void Build_with_empty_media_naming_omits_plan()
     {
         SetupRadarrMediaNamingGuideData();
-        var (sut, _) = CreatePlanBuilder(NewConfig.Radarr());
+        var sut = CreatePlanBuilder(NewConfig.Radarr());
 
         var plan = sut.Build();
 
@@ -183,7 +183,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
                 Movie = new RadarrMovieNamingConfig { Rename = false },
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -206,7 +206,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
                 },
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -234,7 +234,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
                 Episodes = new SonarrEpisodeNamingConfig { Standard = "standard" },
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 

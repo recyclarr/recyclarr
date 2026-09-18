@@ -1,7 +1,6 @@
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.MediaNaming.Sonarr;
@@ -21,7 +20,6 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
 
     protected override async Task<SonarrNamingComputeResult> Compute(
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -32,7 +30,6 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
         if (completedFields == 0)
         {
             var failedResult = new SonarrNamingPipelineResult(0, incompleteFields, outcomes, null);
-            SetStatus(publisher, failedResult);
             return new SonarrNamingComputeResult(null, null, failedResult);
         }
 
@@ -56,20 +53,17 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
             outcomes,
             delta
         );
-        SetStatus(publisher, result);
         return new SonarrNamingComputeResult(current, desired, result);
     }
 
     protected override async Task Persist(
         SonarrNamingComputeResult computeResult,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
         var (current, desired, result) = computeResult;
         if (result.Delta is null)
         {
-            SetStatus(publisher, result, 0);
             return;
         }
 
@@ -91,8 +85,6 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
         {
             log.Information("Media naming is up to date!");
         }
-
-        SetStatus(publisher, result, differences.Count);
     }
 
     private static SonarrNamingDelta? BuildDelta(
@@ -125,22 +117,5 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
         count += planned.DailyEpisodeFormat is not null ? 1 : 0;
         count += planned.AnimeEpisodeFormat is not null ? 1 : 0;
         return count;
-    }
-
-    private static void SetStatus(
-        IPipelinePublisher publisher,
-        SonarrNamingPipelineResult result,
-        int? count = null
-    )
-    {
-        var status = result.Status switch
-        {
-            SyncResultStatus.Succeeded => PipelineProgressStatus.Succeeded,
-            SyncResultStatus.Partial => PipelineProgressStatus.Partial,
-            SyncResultStatus.Failed => PipelineProgressStatus.Failed,
-            SyncResultStatus.Blocked => PipelineProgressStatus.Skipped,
-            _ => throw new ArgumentOutOfRangeException(nameof(result)),
-        };
-        publisher.SetStatus(status, count);
     }
 }

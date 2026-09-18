@@ -266,7 +266,6 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
         public Task<PipelineResult> Execute(
             bool preview,
             PipelinePlan plan,
-            IPipelinePublisher publisher,
             Action<PipelineResult> capture,
             CancellationToken ct
         )

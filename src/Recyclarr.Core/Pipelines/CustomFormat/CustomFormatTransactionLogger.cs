@@ -1,62 +1,12 @@
 using Recyclarr.Pipelines.CustomFormat.Models;
-using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
-using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.CustomFormat;
 
 internal class CustomFormatTransactionLogger(ILogger log)
 {
-    public void LogTransactions(
-        CustomFormatTransactionData transactions,
-        IPipelinePublisher publisher,
-        CustomFormatPipelineResult result
-    )
+    public void LogTransactions(CustomFormatTransactionData transactions)
     {
-        LogDiagnostics(publisher, transactions);
         LogResults(transactions);
-        SetStatus(transactions, publisher, result);
-    }
-
-    public static void SetStatus(
-        CustomFormatTransactionData transactions,
-        IPipelinePublisher publisher,
-        CustomFormatPipelineResult result
-    )
-    {
-        var status = result.Status switch
-        {
-            SyncResultStatus.Succeeded => PipelineProgressStatus.Succeeded,
-            SyncResultStatus.Partial => PipelineProgressStatus.Partial,
-            SyncResultStatus.Failed => PipelineProgressStatus.Failed,
-            SyncResultStatus.Blocked => PipelineProgressStatus.Skipped,
-            _ => throw new ArgumentOutOfRangeException(nameof(result)),
-        };
-        publisher.SetStatus(
-            status,
-            transactions.TotalCustomFormatChanges,
-            BuildItemChanges(transactions)
-        );
-    }
-
-    private static PipelineItemChanges BuildItemChanges(CustomFormatTransactionData transactions)
-    {
-        var created = transactions
-            .NewCustomFormats.Select(cf => cf.Name)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToList();
-
-        var updated = transactions
-            .UpdatedCustomFormats.Select(cf => cf.Name)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToList();
-
-        var deleted = transactions
-            .DeletedCustomFormats.Select(m => m.Name)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToList();
-
-        return new PipelineItemChanges(created, updated, deleted);
     }
 
     private void LogResults(CustomFormatTransactionData transactions)
@@ -115,34 +65,5 @@ internal class CustomFormatTransactionLogger(ILogger log)
         {
             log.Information("All custom formats are already up to date!");
         }
-    }
-
-    private static void LogDiagnostics(
-        IPipelinePublisher publisher,
-        CustomFormatTransactionData transactions
-    )
-    {
-        LogReplacedCustomFormats(publisher, transactions);
-
-        foreach (var ambiguous in transactions.AmbiguousCustomFormats)
-        {
-            publisher.Add(
-                new AmbiguousCustomFormatOutcome(ambiguous.GuideName, ambiguous.ServiceMatches)
-            );
-        }
-    }
-
-    private static void LogReplacedCustomFormats(
-        IPipelinePublisher publisher,
-        CustomFormatTransactionData transactions
-    )
-    {
-        var replaced = transactions.ReplacedCustomFormats;
-        if (replaced.Count == 0)
-        {
-            return;
-        }
-
-        publisher.Add(new ReplacedCustomFormatsOutcome(replaced.ToList()));
     }
 }

@@ -47,7 +47,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
             QualityDefinition = new QualityDefinitionConfig { Type = "movie" },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -65,7 +65,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
             QualityDefinition = new QualityDefinitionConfig { Type = "nonexistent" },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -85,7 +85,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
         {
             QualityDefinition = new QualityDefinitionConfig { Type = "movie", PreferredRatio = 2 },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -116,7 +116,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
                 ],
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -140,7 +140,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
                 Qualities = [new QualityDefinitionItemConfig { Name = "Unknown" }],
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -171,7 +171,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
                 ],
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -202,7 +202,7 @@ internal sealed class PlanBuilderQualitySizeTest : PlanBuilderTestBase
                 ],
             },
         };
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
