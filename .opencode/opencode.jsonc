@@ -1,11 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["../AGENTS.md"],
   "formatter": {
     "csharpier": {
       "command": ["dotnet", "csharpier", "format", "$FILE"],
       "extensions": [".cs"],
     },
   },
-  "lsp": true,
 }
