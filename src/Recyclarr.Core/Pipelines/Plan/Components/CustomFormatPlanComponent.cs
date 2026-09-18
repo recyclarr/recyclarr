@@ -22,7 +22,7 @@ internal class CustomFormatPlanComponent(
         foreach (var groupConfig in config.CustomFormatGroups.Add)
         {
             var validationResult = cfGroupValidator.Validate(groupConfig);
-            validationResult.ForwardTo(plan, log);
+            validationResult.ForwardTo(plan.Add, log);
             foreach (var failure in validationResult.Errors)
             {
                 plan.AddPlanningOutcome(GetPlanningOutcome(failure));
@@ -35,7 +35,7 @@ internal class CustomFormatPlanComponent(
 
         // Group by TrashId (same CF can appear in multiple configs)
         var configuredCfs = cfProvider
-            .GetAll(plan, plan.AddPlanningOutcome)
+            .GetAll(plan.Add, plan.AddPlanningOutcome)
             .GroupBy(x => x.TrashId, StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in configuredCfs)

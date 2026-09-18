@@ -1,5 +1,12 @@
 namespace Recyclarr.Sync;
 
+public enum SyncDiagnosticLevel
+{
+    Error,
+    Warning,
+    Deprecation,
+}
+
 public enum SyncOutcomeScope
 {
     InstanceBlocking,

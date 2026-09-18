@@ -80,8 +80,6 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
         builder.RegisterInstance(Substitute.For<ILogger>());
         builder.RegisterInstance(store).As<ISyncJobStore>();
         builder.RegisterInstance(Substitute.For<INotificationService>());
-        builder.RegisterType<SyncRunScope>().AsImplementedInterfaces().InstancePerLifetimeScope();
-        builder.RegisterType<SyncDiagnosticsLogger>();
         builder.RegisterType<SyncResultLogger>();
         builder.RegisterType<SyncJobFinalizer>();
         builder.RegisterType<SyncJobProgress>();

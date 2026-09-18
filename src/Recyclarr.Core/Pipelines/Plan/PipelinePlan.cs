@@ -3,7 +3,7 @@ using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.Plan;
 
-internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublisher
+internal class PipelinePlan
 {
     private readonly List<SyncOutcome> _outcomes = [];
     private readonly List<PlanningOutcome> _planningOutcomes = [];
@@ -19,29 +19,11 @@ internal class PipelinePlan(IDiagnosticPublisher publisher) : IDiagnosticPublish
         var isError = outcome.Level == SyncDiagnosticLevel.Error;
         HasErrors |= isError;
         HasInstanceBlockingErrors |= isError && outcome.Scope == SyncOutcomeScope.InstanceBlocking;
-        publisher.Add(outcome);
     }
 
     public void AddPlanningOutcome(PlanningOutcome outcome)
     {
         _planningOutcomes.Add(outcome);
-    }
-
-    public void AddError(string message)
-    {
-        HasErrors = true;
-        HasInstanceBlockingErrors = true;
-        publisher.AddError(message);
-    }
-
-    public void AddWarning(string message)
-    {
-        publisher.AddWarning(message);
-    }
-
-    public void AddDeprecation(string message)
-    {
-        publisher.AddDeprecation(message);
     }
 
     private readonly Dictionary<string, PlannedCustomFormat> _customFormats = new(

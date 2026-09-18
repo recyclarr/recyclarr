@@ -6,7 +6,6 @@ using NSubstitute.ExceptionExtensions;
 using Recyclarr.Compatibility;
 using Recyclarr.Compatibility.Radarr;
 using Recyclarr.Compatibility.Sonarr;
-using Recyclarr.ErrorHandling;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
@@ -26,18 +25,14 @@ internal interface IFailureApi
 internal sealed class InstanceSyncProcessorTest
 {
     [Test]
-    public async Task Handled_failure_is_retained_and_interrupts_pipelines()
+    public async Task Handled_failure_is_retained_and_logged()
     {
         var exception = await CreateApiRequestException();
         var serviceInfo = Substitute.For<IServiceInformation>();
         serviceInfo.GetAppName(default).ThrowsAsync(exception);
-        var failure = new HttpConnectionFailure();
-        var strategy = Substitute.For<IExceptionStrategy>();
-        strategy.HandleAsync(exception).Returns(failure);
         var log = new RecordingLogger();
-        var publisher = new RecordingInstancePublisher();
         var pipelines = new RecordingPipelineExecutor();
-        var sut = CreateSut(log, serviceInfo, publisher, pipelines, [strategy]);
+        var sut = CreateSut(log, serviceInfo, pipelines);
 
         var result = await sut.Process(
             Substitute.For<ISyncSettings>(),
@@ -46,8 +41,6 @@ internal sealed class InstanceSyncProcessorTest
         );
 
         result.Failure.Should().BeOfType<ServiceUnavailableFailure>();
-        publisher.Outcomes.Should().ContainSingle().Which.Should().BeSameAs(failure);
-        pipelines.Interrupted.Should().BeTrue();
         log.Events.Where(evt => evt.Level == LogEventLevel.Debug)
             .Should()
             .ContainSingle()
@@ -56,27 +49,24 @@ internal sealed class InstanceSyncProcessorTest
     }
 
     [Test]
-    public async Task Unexpected_failure_is_rethrown_without_an_outcome()
+    public async Task Unexpected_failure_is_rethrown()
     {
         var exception = new InvalidOperationException("unexpected");
         var serviceInfo = Substitute.For<IServiceInformation>();
         serviceInfo.GetAppName(default).ThrowsAsync(exception);
         var log = new RecordingLogger();
-        var publisher = new RecordingInstancePublisher();
         var pipelines = new RecordingPipelineExecutor();
-        var sut = CreateSut(log, serviceInfo, publisher, pipelines, []);
+        var sut = CreateSut(log, serviceInfo, pipelines);
 
         var act = () =>
             sut.Process(Substitute.For<ISyncSettings>(), CreateState(), CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("unexpected");
-        publisher.Outcomes.Should().BeEmpty();
-        pipelines.Interrupted.Should().BeFalse();
         log.Events.Should().NotContain(evt => evt.Exception == exception);
     }
 
     [Test]
-    public async Task Sync_state_failure_is_retained_and_interrupts_pipelines()
+    public async Task Sync_state_failure_is_retained()
     {
         var serviceInfo = Substitute.For<IServiceInformation>();
         serviceInfo.GetAppName(default).ReturnsForAnyArgs("Radarr");
@@ -84,13 +74,7 @@ internal sealed class InstanceSyncProcessorTest
         var pipelines = new ThrowingPipelineExecutor(
             new SyncStateUnavailableException(new IOException("unavailable"))
         );
-        var sut = CreateSut(
-            Substitute.For<ILogger>(),
-            serviceInfo,
-            new RecordingInstancePublisher(),
-            pipelines,
-            []
-        );
+        var sut = CreateSut(Substitute.For<ILogger>(), serviceInfo, pipelines);
 
         var result = await sut.Process(
             Substitute.For<ISyncSettings>(),
@@ -99,7 +83,6 @@ internal sealed class InstanceSyncProcessorTest
         );
 
         result.Failure.Should().BeOfType<SyncStateUnavailableFailure>();
-        pipelines.Interrupted.Should().BeTrue();
     }
 
     [TestCase(HttpStatusCode.Unauthorized, typeof(ServiceUnauthenticatedFailure))]
@@ -117,9 +100,7 @@ internal sealed class InstanceSyncProcessorTest
         var sut = CreateSut(
             Substitute.For<ILogger>(),
             serviceInfo,
-            new RecordingInstancePublisher(),
-            new RecordingPipelineExecutor(),
-            [new HttpExceptionStrategy()]
+            new RecordingPipelineExecutor()
         );
 
         var result = await sut.Process(
@@ -134,13 +115,11 @@ internal sealed class InstanceSyncProcessorTest
     private static InstanceSyncProcessor CreateSut(
         ILogger log,
         IServiceInformation serviceInfo,
-        IInstancePublisher publisher,
-        IPipelineExecutor pipelines,
-        IEnumerable<IExceptionStrategy> strategies
+        IPipelineExecutor pipelines
     )
     {
         IPlanComponent[] components = [];
-        var planBuilder = new PlanBuilder(components.OrderBy(_ => 0), publisher, log);
+        var planBuilder = new PlanBuilder(components.OrderBy(_ => 0), log);
         var enforcer = new ServiceAgnosticCapabilityEnforcer(
             serviceInfo,
             new SonarrCapabilityEnforcer(Substitute.For<ISonarrCapabilityFetcher>()),
@@ -149,66 +128,33 @@ internal sealed class InstanceSyncProcessorTest
         return new InstanceSyncProcessor(
             log,
             new Recyclarr.Config.Models.RadarrConfiguration { InstanceName = "instance" },
-            publisher,
             planBuilder,
             pipelines,
-            enforcer,
-            strategies
+            enforcer
         );
     }
 
     private static InstanceExecutionState CreateState() =>
         new(new Recyclarr.Config.Models.RadarrConfiguration { InstanceName = "instance" });
 
-    private sealed class RecordingInstancePublisher : IInstancePublisher
-    {
-        public List<SyncOutcome> Outcomes { get; } = [];
-
-        public void Add(SyncOutcome outcome) => Outcomes.Add(outcome);
-
-        public void AddError(string message) { }
-
-        public void AddWarning(string message) { }
-
-        public void AddDeprecation(string message) { }
-
-        public IPipelinePublisher ForPipeline(PipelineType type) => IPipelinePublisher.Noop;
-    }
-
     private sealed class RecordingPipelineExecutor : IPipelineExecutor
     {
-        public bool Interrupted { get; private set; }
-
         public Task<IReadOnlyList<PipelineResult>> Execute(
             ISyncSettings settings,
             PipelinePlan plan,
-            IInstancePublisher instancePublisher,
             PipelineExecutionBuffer buffer,
             CancellationToken ct
         ) => throw new InvalidOperationException("Pipeline execution was not expected");
-
-        public void InterruptAll(IInstancePublisher instancePublisher)
-        {
-            Interrupted = true;
-        }
     }
 
     private sealed class ThrowingPipelineExecutor(Exception exception) : IPipelineExecutor
     {
-        public bool Interrupted { get; private set; }
-
         public Task<IReadOnlyList<PipelineResult>> Execute(
             ISyncSettings settings,
             PipelinePlan plan,
-            IInstancePublisher instancePublisher,
             PipelineExecutionBuffer buffer,
             CancellationToken ct
         ) => Task.FromException<IReadOnlyList<PipelineResult>>(exception);
-
-        public void InterruptAll(IInstancePublisher instancePublisher)
-        {
-            Interrupted = true;
-        }
     }
 
     private sealed class RecordingLogger : ILogger

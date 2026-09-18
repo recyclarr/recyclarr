@@ -1,8 +1,5 @@
 using Recyclarr.ErrorHandling;
-using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.Plan;
-using Recyclarr.Pipelines.QualityProfile;
-using Recyclarr.Pipelines.QualitySize;
 using Recyclarr.Sync;
 
 namespace Recyclarr.Core.Tests.Sync;
@@ -104,61 +101,6 @@ internal sealed class SyncOutcomeFormatterTest
                 "NotEmpty"
             ),
             "Invalid CF trash_id"
-        );
-        yield return Case(
-            new MissingServerQualityDefinitionOutcome("Bluray"),
-            "Server lacks quality definition for Bluray; it will be skipped"
-        );
-        yield return Case(
-            new AmbiguousCustomFormatOutcome("HDR", [("HDR", 1), ("HDR", 2)]),
-            "Custom Format 'HDR' cannot be synced because multiple CFs match this name: "
-                + "\"HDR\" (ID: 1), \"HDR\" (ID: 2). Delete or rename duplicate CFs in the service"
-        );
-        yield return Case(
-            new ReplacedCustomFormatsOutcome(["HDR", "DV"]),
-            "2 custom format(s) already existed in the service and were replaced by Recyclarr: "
-                + "HDR, DV"
-        );
-        yield return Case(
-            new NonExistentQualityProfilesOutcome(["WEB", "Remux"]),
-            "The following quality profile names have no definition in the top-level "
-                + "`quality_profiles` list *and* do not exist in the remote service. Either create "
-                + "them manually in the service *or* add them to the top-level `quality_profiles` "
-                + "section so that Recyclarr can create the profiles for you: WEB, Remux"
-        );
-        yield return Case(
-            new InvalidQualityProfileOutcome("WEB", "Cutoff", "Invalid cutoff", "bad", "Rule"),
-            "Profile 'WEB': Invalid cutoff"
-        );
-        yield return Case(
-            new InvalidQualityNamesOutcome("WEB", ["Unknown"]),
-            "Quality profile 'WEB' references invalid quality names: Unknown"
-        );
-        yield return Case(
-            new InvalidExceptCustomFormatNamesOutcome("WEB", ["Unknown"]),
-            "`except` under `reset_unmatched_scores` in quality profile 'WEB' has invalid CF "
-                + "names: Unknown"
-        );
-        yield return Case(
-            new UnmatchedExceptCustomFormatPatternsOutcome("WEB", ["missing.*"]),
-            "`except_patterns` under `reset_unmatched_scores` in quality profile 'WEB' has "
-                + "patterns matching no CFs: missing.*"
-        );
-        yield return Case(
-            new ReplacedQualityProfilesOutcome(["WEB"]),
-            "1 quality profile(s) already existed in the service and were replaced by Recyclarr: "
-                + "WEB"
-        );
-        yield return Case(
-            new QualityProfileRenameConflictOutcome("WEB"),
-            "Quality profile cannot be renamed to 'WEB' because a profile with that name already "
-                + "exists. Delete or rename the existing profile in the service"
-        );
-        yield return Case(
-            new AmbiguousQualityProfileOutcome("WEB", [("WEB", 1), ("WEB", 2)]),
-            "Quality profile 'WEB' cannot be synced because multiple profiles match this name: "
-                + "\"WEB\" (ID: 1), \"WEB\" (ID: 2). Delete or rename duplicate profiles in the "
-                + "service"
         );
         yield return Case(new NoConfigurationFilesFailure(), "No configuration files found");
         yield return Case(
