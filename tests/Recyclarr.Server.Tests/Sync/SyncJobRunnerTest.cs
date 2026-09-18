@@ -64,7 +64,6 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
 
         job.Status.Should().Be(SyncJobStatus.Succeeded);
         job.Result.Should().NotBeNull();
-        job.Diagnostics.Should().BeEmpty();
         await _notify.Received().SendNotification(job.Result!);
         _log.Events.Should()
             .ContainSingle(evt =>
@@ -96,7 +95,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
     }
 
     [Test]
-    public async Task Unexpected_run_failure_remains_an_operational_diagnostic()
+    public async Task Unexpected_run_failure_is_retained_and_logged()
     {
         var firstResult = new SyncInstanceResult("first", SupportedServices.Radarr, []);
         var orchestrator = Resolve<ISyncOrchestrator>();
@@ -127,13 +126,16 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         job.Progress.Instances.Select(instance => instance.Status)
             .Should()
             .Equal(InstanceProgressStatus.Succeeded, InstanceProgressStatus.Interrupted);
-        var diagnostic = job.Diagnostics.Should().ContainSingle().Which;
-        diagnostic
-            .Should()
-            .BeEquivalentTo(
-                new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, "unexpected failure")
+        _log.Events.Should()
+            .ContainSingle(evt =>
+                evt.Level == LogEventLevel.Error
+                && evt.Exception != null
+                && evt.Exception.Message == "unexpected failure"
+                && evt.MessageTemplate.Text.Equals(
+                    "Unexpected sync runner fault {Reference}",
+                    StringComparison.Ordinal
+                )
             );
-        diagnostic.Outcome.Should().BeNull();
     }
 
     [Test]

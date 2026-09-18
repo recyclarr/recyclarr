@@ -16,7 +16,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -33,7 +33,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             MediaManagement = new MediaManagementConfig { PropersAndRepacks = null },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -47,7 +47,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
         // Default MediaManagementConfig has PropersAndRepacks = null
         var config = NewConfig.Radarr();
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -66,7 +66,7 @@ internal sealed class PlanBuilderMediaManagementTest : PlanBuilderTestBase
             },
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
