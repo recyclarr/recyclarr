@@ -64,7 +64,7 @@ public class CoreAutofacModule : Module
         RegisterTrashGuide(builder);
         RegisterYaml(builder);
         RegisterVersionControl(builder);
-        RegisterSyncEvents(builder);
+        RegisterSync(builder);
         RegisterMigrations(builder);
         RegisterPorts(builder);
     }
@@ -305,18 +305,8 @@ public class CoreAutofacModule : Module
         builder.RegisterType<GitRepository>().As<IGitRepository>();
     }
 
-    private static void RegisterSyncEvents(ContainerBuilder builder)
+    private static void RegisterSync(ContainerBuilder builder)
     {
-        builder
-            .RegisterType<SyncRunScope>()
-            .AsImplementedInterfaces()
-            .InstancePerMatchingLifetimeScope("run");
-
-        builder
-            .RegisterType<InstancePublisher>()
-            .As<IInstancePublisher>()
-            .InstancePerMatchingLifetimeScope("instance");
-
         builder
             .RegisterType<SyncOrchestrator>()
             .As<ISyncOrchestrator>()

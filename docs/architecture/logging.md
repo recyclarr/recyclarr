@@ -13,9 +13,9 @@ command finishes. The server cleans its logs during startup and never deletes it
 
 ## User-visible diagnostics
 
-Core publishes sync diagnostics without choosing an output channel. The server logger subscribes
-to the live domain events, while the CLI logger consumes the response DTOs returned for its command.
-CLI renderers remain presentation-only and write response DTOs to `IAnsiConsole`.
+Core returns structured outcomes, operational failures, and opaque fault references in terminal
+sync results. The Server formats that data for its log and HTTP responses. CLI renderers remain
+presentation-only and consume response DTOs.
 
 User-actionable diagnostics cross the HTTP boundary as structured response data. Each process logs
 the diagnostics at its own boundary:
@@ -24,7 +24,7 @@ the diagnostics at its own boundary:
 - `--log` suppresses `IAnsiConsole`; the CLI logger writes to both the CLI log and stdout.
 
 This behavior is the same for an ephemeral child server and a configured remote server. Internal
-server events are not part of the API contract and remain in the server log.
+exception details are not part of the API contract and remain in the server log.
 
 The process that understands a deprecation detects it. Server-side configuration deprecations are
 returned for the CLI to present and record. CLI-specific deprecations remain client-side.

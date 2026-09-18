@@ -40,11 +40,11 @@ internal sealed class ConfiguredCustomFormatProviderTest : CoreIntegrationTestFi
         bool isDefault = false
     ) => GuideData.AddCfGroup(trashId, name, customFormats, profileInclusions, isDefault);
 
-    private (ConfiguredCustomFormatProvider Sut, IDiagnosticPublisher Diagnostics) CreateSut(
+    private (ConfiguredCustomFormatProvider Sut, Action<SyncOutcome> Diagnostics) CreateSut(
         IServiceConfiguration config
     )
     {
-        var diagnostics = Substitute.For<IDiagnosticPublisher>();
+        var diagnostics = Substitute.For<Action<SyncOutcome>>();
         var scope = ResolveWithConfig<ConfiguredCustomFormatProvider>(config);
         return (scope.Entry, diagnostics);
     }
@@ -282,7 +282,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : CoreIntegrationTestFi
         // Invalid skip ID should produce a warning
         diagnostics
             .Received(1)
-            .Add(
+            .Invoke(
                 Arg.Is<InvalidCfGroupSkipIdOutcome>(x =>
                     x != null && x.TrashId == "nonexistent-group"
                 )
@@ -774,7 +774,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : CoreIntegrationTestFi
         entries.Should().BeEmpty();
         diagnostics
             .Received(1)
-            .Add(
+            .Invoke(
                 Arg.Is<EmptyCfGroupOutcome>(x =>
                     x != null && x.Name == "Optional Miscellaneous" && x.TrashId == "optional-group"
                 )
@@ -913,7 +913,7 @@ internal sealed class ConfiguredCustomFormatProviderTest : CoreIntegrationTestFi
         // Should produce an error about ambiguous trash_id
         diagnostics
             .Received(1)
-            .Add(
+            .Invoke(
                 Arg.Is<AmbiguousProfileReferenceOutcome>(x =>
                     x != null
                     && x.Context == "custom_formats"

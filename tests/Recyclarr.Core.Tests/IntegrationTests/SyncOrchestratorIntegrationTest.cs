@@ -5,7 +5,6 @@ using Recyclarr.Compatibility.Radarr;
 using Recyclarr.Compatibility.Sonarr;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
-using Recyclarr.ErrorHandling;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync;
@@ -386,7 +385,6 @@ internal sealed class SyncOrchestratorIntegrationTest
         builder.RegisterType<TestServiceInformation>().As<IServiceInformation>();
         builder.RegisterInstance(radarrCapabilities).As<IRadarrCapabilityFetcher>();
         builder.RegisterInstance(Substitute.For<ISonarrCapabilityFetcher>());
-        builder.RegisterInstance(Substitute.For<IInstancePublisher>());
         builder.RegisterInstance(recorder ?? new ExecutionRecorder());
         builder
             .Register(c =>
@@ -396,7 +394,6 @@ internal sealed class SyncOrchestratorIntegrationTest
                 }.OrderBy(_ => 0)
             )
             .As<IOrderedEnumerable<IPlanComponent>>();
-        builder.RegisterInstance(Array.Empty<IExceptionStrategy>().AsEnumerable());
         builder.RegisterInstance(reporter).As<ISyncFaultReporter>();
         builder.RegisterType<RadarrCapabilityEnforcer>();
         builder.RegisterType<SonarrCapabilityEnforcer>();
@@ -434,7 +431,6 @@ internal sealed class SyncOrchestratorIntegrationTest
         public Task<IReadOnlyList<SemanticPipelineResult>> Execute(
             ISyncSettings settings,
             PipelinePlan plan,
-            IInstancePublisher instancePublisher,
             PipelineExecutionBuffer buffer,
             CancellationToken ct
         )
@@ -463,8 +459,6 @@ internal sealed class SyncOrchestratorIntegrationTest
                 )
                 : Task.FromResult<IReadOnlyList<SemanticPipelineResult>>([result]);
         }
-
-        public void InterruptAll(IInstancePublisher instancePublisher) { }
 
         public void Dispose()
         {

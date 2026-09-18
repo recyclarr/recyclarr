@@ -1,15 +1,10 @@
-using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.Sync;
 
 internal sealed class SyncJobFinalizer(ISyncJobStore store)
 {
-    public void Complete(
-        JobId jobId,
-        SyncRunResult result,
-        IReadOnlyList<SyncDiagnosticEvent> diagnostics
-    )
+    public void Complete(JobId jobId, SyncRunResult result)
     {
         store.Update(
             jobId,
@@ -22,17 +17,12 @@ internal sealed class SyncJobFinalizer(ISyncJobStore store)
 
                 job.Progress = job.Progress.Reconcile(result).Stop();
                 job.Result = result;
-                job.Diagnostics = diagnostics.ToList();
                 job.Status = result.Status.ToJobStatus();
             }
         );
     }
 
-    public SyncRunResult Fail(
-        JobId jobId,
-        SyncFault fault,
-        IReadOnlyList<SyncDiagnosticEvent>? diagnostics = null
-    )
+    public SyncRunResult Fail(JobId jobId, SyncFault fault)
     {
         SyncRunResult? finalResult = null;
         store.Update(
@@ -52,7 +42,6 @@ internal sealed class SyncJobFinalizer(ISyncJobStore store)
                 finalResult = new SyncRunResult(completed, fault);
                 job.Progress = job.Progress.Stop();
                 job.Result = finalResult;
-                job.Diagnostics = diagnostics?.ToList() ?? job.Diagnostics;
                 job.Status = finalResult.Status.ToJobStatus();
             }
         );

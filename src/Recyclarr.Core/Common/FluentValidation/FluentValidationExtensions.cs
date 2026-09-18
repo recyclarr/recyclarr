@@ -48,13 +48,13 @@ public static class FluentValidationExtensions
     }
 
     /// <summary>
-    /// Forwards validation failures to an <see cref="IDiagnosticPublisher"/> as errors or warnings
-    /// based on severity. Info-level failures are routed to <paramref name="log"/> at debug level
-    /// (suppressed when no logger is provided). Returns true if the result has no errors.
+    /// Converts validation failures to sync outcomes. Info-level failures are routed to
+    /// <paramref name="log"/> at debug level (suppressed when no logger is provided). Returns true
+    /// if the result has no errors.
     /// </summary>
     public static bool ForwardTo(
         this ValidationResult result,
-        IDiagnosticPublisher publisher,
+        Action<SyncOutcome> addOutcome,
         ILogger? log = null
     )
     {
@@ -66,10 +66,10 @@ public static class FluentValidationExtensions
                     log?.Debug("{Message}", failure.ErrorMessage);
                     break;
                 case Severity.Warning:
-                    publisher.Add(ToOutcome(failure, SyncDiagnosticLevel.Warning));
+                    addOutcome(ToOutcome(failure, SyncDiagnosticLevel.Warning));
                     break;
                 default:
-                    publisher.Add(ToOutcome(failure, SyncDiagnosticLevel.Error));
+                    addOutcome(ToOutcome(failure, SyncDiagnosticLevel.Error));
                     break;
             }
         }

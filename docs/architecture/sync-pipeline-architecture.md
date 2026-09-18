@@ -46,7 +46,6 @@ The operation executes both stages and returns its final semantic result:
 var result = await operation.Execute(
     settings.Preview,
     plan,
-    publisher,
     capture,
     ct
 );
@@ -61,8 +60,8 @@ service models.
 Each operation declares whether it should skip via `ShouldSkip(plan)`. Service affinity is encoded
 in the plan components themselves (e.g. the Sonarr naming plan component produces nothing for Radarr
 instances), and config presence is checked against the plan (no `quality_sizes` section means the
-quality size operation skips). The orchestrator partitions operations by skip status before
-topological sorting.
+quality size operation skips). The orchestrator filters skipped operations before topological
+sorting.
 
 ## Dependency management
 
@@ -111,9 +110,9 @@ deltas that apply mode starts with, without writing service or sync state.
 
 `ISyncOrchestrator.RunAsync()` returns one `SyncRunResult` containing ordered instance and pipeline
 results. The Server stores this aggregate on the job before the run scope is disposed. No ambient
-result store or lookup step exists. Progress remains a separate transient stream and never
-determines terminal status. The Server does not currently expose the aggregate through HTTP; the
-semantic results endpoint is a separate adapter concern governed by ADR-016.
+result store or lookup step exists. Instance lifecycle callbacks update a Server-owned snapshot but
+never determine terminal status. The semantic results endpoint exposes the terminal aggregate as
+described by ADR-016.
 
 ## Error collection
 
@@ -124,12 +123,13 @@ The "collect and report later" pattern categorizes errors by source and timing:
   violations
 - Runtime errors (persistence): network issues, authentication failures, service unavailability
 
-Diagnostics flow through `IPipelinePublisher`, which operations receive as a parameter. These events
-support transient progress and presentation; semantic results alone determine terminal status.
+Plan and operation outcomes are retained as structured terminal result data. Server consumers
+format those outcomes for logs, notifications, and HTTP responses.
 
 Expected instance-wide failures attach a typed `OperationalFailure` to the instance result.
-Unexpected failures stop the run and attach one opaque fault reference. Results completed before
-the failure remain in the aggregate. Cancellation propagates and does not become a terminal result.
+Unexpected faults inside instance creation, processing, or cleanup attach one opaque fault reference
+to that instance and do not stop later instances. A fault outside that boundary stops the run and is
+attached to the run result. Cancellation propagates to the run boundary.
 
 ## Service abstraction
 
