@@ -1,0 +1,8 @@
+{
+  "Code review comment": {
+    "scope": "csharp",
+    "prefix": "cr",
+    "body": "// CodeReview: $0",
+    "description": "Insert a code review comment"
+  }
+}
