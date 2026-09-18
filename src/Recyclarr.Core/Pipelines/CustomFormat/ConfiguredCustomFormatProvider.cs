@@ -14,7 +14,7 @@ internal class ConfiguredCustomFormatProvider(
 )
 {
     public IEnumerable<ConfiguredCfEntry> GetAll(
-        IDiagnosticPublisher diagnostics,
+        Action<SyncOutcome> diagnostics,
         Action<PlanningOutcome>? capturePlanningOutcome = null
     )
     {
@@ -31,7 +31,7 @@ internal class ConfiguredCustomFormatProvider(
         // Warn about skip IDs that don't match any known CF group
         foreach (var skipId in skipSet.Where(id => !cfGroupResources.ContainsKey(id)))
         {
-            diagnostics.Add(new InvalidCfGroupSkipIdOutcome(skipId));
+            diagnostics(new InvalidCfGroupSkipIdOutcome(skipId));
         }
 
         // From flat custom_formats
@@ -204,7 +204,7 @@ internal class ConfiguredCustomFormatProvider(
     private IEnumerable<ConfiguredCfEntry> FromExplicitGroups(
         Dictionary<string, QualityProfileResource> qpResources,
         Dictionary<string, CfGroupResource> cfGroupResources,
-        IDiagnosticPublisher diagnostics,
+        Action<SyncOutcome> diagnostics,
         Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
@@ -225,7 +225,7 @@ internal class ConfiguredCustomFormatProvider(
 
             if (assignScoresTo.Count == 0)
             {
-                diagnostics.Add(
+                diagnostics(
                     new IncompatibleCfGroupOutcome(groupResource.Name, groupConfig.TrashId)
                 );
                 continue;
@@ -248,7 +248,7 @@ internal class ConfiguredCustomFormatProvider(
 
             if (!hasEntries)
             {
-                diagnostics.Add(new EmptyCfGroupOutcome(groupResource.Name, groupConfig.TrashId));
+                diagnostics(new EmptyCfGroupOutcome(groupResource.Name, groupConfig.TrashId));
             }
         }
     }
@@ -295,7 +295,7 @@ internal class ConfiguredCustomFormatProvider(
     private List<AssignScoresToConfig> ResolveAssignScoresTo(
         ICollection<AssignScoresToConfig> scores,
         Dictionary<string, QualityProfileResource> qpResources,
-        IDiagnosticPublisher diagnostics,
+        Action<SyncOutcome> diagnostics,
         Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
@@ -318,7 +318,7 @@ internal class ConfiguredCustomFormatProvider(
         CustomFormatGroupConfig groupConfig,
         CfGroupResource groupResource,
         Dictionary<string, QualityProfileResource> qpResources,
-        IDiagnosticPublisher diagnostics,
+        Action<SyncOutcome> diagnostics,
         Action<PlanningOutcome>? capturePlanningOutcome
     )
     {
@@ -373,7 +373,7 @@ internal class ConfiguredCustomFormatProvider(
     private IEnumerable<AssignScoresToConfig> ResolveProfileReference(
         AssignScoresToConfig reference,
         Dictionary<string, QualityProfileResource> qpResources,
-        IDiagnosticPublisher diagnostics,
+        Action<SyncOutcome> diagnostics,
         string context,
         string? groupTrashId,
         Action<PlanningOutcome>? capturePlanningOutcome
@@ -399,7 +399,7 @@ internal class ConfiguredCustomFormatProvider(
         if (matchingProfiles.Count > 1)
         {
             var profileNames = matchingProfiles.Select(qp => qp.Name).ToList();
-            diagnostics.Add(
+            diagnostics(
                 new AmbiguousProfileReferenceOutcome(context, reference.TrashId, profileNames)
             );
             capturePlanningOutcome?.Invoke(

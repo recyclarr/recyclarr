@@ -12,30 +12,16 @@ namespace Recyclarr.Core.Tests.IntegrationTests;
 internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTestFixture
 {
     private List<PipelineType> _executionOrder = null!;
-    private IInstancePublisher _instancePublisher = null!;
-    private Dictionary<PipelineType, IPipelinePublisher> _pipelinePublishers = null!;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         base.RegisterStubsAndMocks(builder);
 
         _executionOrder = [];
-        _pipelinePublishers = [];
 
         var config = Substitute.For<IServiceConfiguration>();
         config.ServiceType.Returns(SupportedServices.Sonarr);
         builder.RegisterInstance(config).As<IServiceConfiguration>();
-
-        _instancePublisher = Substitute.For<IInstancePublisher>();
-        _instancePublisher
-            .ForPipeline(Arg.Any<PipelineType>())
-            .Returns(ci =>
-            {
-                var type = ci.Arg<PipelineType>();
-                var pub = Substitute.For<IPipelinePublisher>();
-                _pipelinePublishers[type] = pub;
-                return pub;
-            });
     }
 
     private ISyncOperation CreateStubOperation(
@@ -53,7 +39,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             .Execute(
                 Arg.Any<bool>(),
                 Arg.Any<PipelinePlan>(),
-                Arg.Any<IPipelinePublisher>(),
                 Arg.Any<Action<SemanticPipelineResult>>(),
                 Arg.Any<CancellationToken>()
             )
@@ -61,7 +46,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             {
                 _executionOrder.Add(type);
                 var result = new TestPipelineResult(structuredStatus ?? SyncResultStatus.Succeeded);
-                callInfo.ArgAt<Action<SemanticPipelineResult>>(3)(result);
+                callInfo.ArgAt<Action<SemanticPipelineResult>>(2)(result);
                 return result;
             });
         operation
@@ -103,7 +88,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         await sut.Execute(
             settings,
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -133,7 +117,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             settings,
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -147,9 +130,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
                 PipelineType.QualitySize,
                 PipelineType.MediaNaming,
             ]);
-
-        // QP should be marked as skipped via its pipeline publisher
-        _pipelinePublishers[PipelineType.QualityProfile].ReceivedWithAnyArgs().SetStatus(default);
 
         result.Should().Contain(x => x.Status == SyncResultStatus.Blocked);
     }
@@ -166,7 +146,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             Substitute.For<ISyncSettings>(),
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -190,7 +169,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var results = await sut.Execute(
             Substitute.For<ISyncSettings>(),
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -210,7 +188,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         operation.Type.Returns(PipelineType.CustomFormat);
         operation.Dependencies.Returns([]);
         operation
-            .Execute(default, default!, default!, default!, default)
+            .Execute(default, default!, default!, default)
             .ReturnsForAnyArgs(
                 Task.FromException<SemanticPipelineResult>(
                     new InvalidOperationException("unexpected")
@@ -226,7 +204,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             sut.Execute(
                 Substitute.For<ISyncSettings>(),
                 new TestPlan(),
-                _instancePublisher,
                 buffer,
                 CancellationToken.None
             );
@@ -253,7 +230,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             settings,
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -274,7 +250,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             settings,
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -297,7 +272,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             settings,
             plan,
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -326,7 +300,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var results = await sut.Execute(
             Substitute.For<ISyncSettings>(),
             plan,
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -351,7 +324,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
         var result = await sut.Execute(
             settings,
             new TestPlan(),
-            _instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -373,7 +345,6 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             sut.Execute(
                 settings,
                 new TestPlan(),
-                _instancePublisher,
                 new PipelineExecutionBuffer(),
                 CancellationToken.None
             );

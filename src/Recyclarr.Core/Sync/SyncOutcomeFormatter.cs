@@ -1,9 +1,6 @@
 using System.Net;
 using Recyclarr.ErrorHandling;
-using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.Plan;
-using Recyclarr.Pipelines.QualityProfile;
-using Recyclarr.Pipelines.QualitySize;
 
 namespace Recyclarr.Sync;
 
@@ -85,54 +82,6 @@ public static class SyncOutcomeFormatter
                     + "Use 'name' to specify which profile to target.",
             ],
             RuleValidationOutcome x => [x.Message],
-            MissingServerQualityDefinitionOutcome x =>
-            [
-                $"Server lacks quality definition for {x.Quality}; it will be skipped",
-            ],
-            AmbiguousCustomFormatOutcome x =>
-            [
-                $"Custom Format '{x.GuideName}' cannot be synced because multiple CFs match "
-                    + $"this name: {FormatMatches(x.ServiceMatches)}. Delete or rename duplicate "
-                    + "CFs in the service",
-            ],
-            ReplacedCustomFormatsOutcome x => [FormatReplaced("custom format", x.Names)],
-            NonExistentQualityProfilesOutcome x =>
-            [
-                "The following quality profile names have no definition in the top-level "
-                    + "`quality_profiles` list *and* do not exist in the remote service. Either "
-                    + "create them manually in the service *or* add them to the top-level "
-                    + "`quality_profiles` section so that Recyclarr can create the profiles for "
-                    + $"you: {string.Join(", ", x.Names)}",
-            ],
-            InvalidQualityProfileOutcome x => [$"Profile '{x.ProfileName}': {x.Message}"],
-            InvalidQualityNamesOutcome x =>
-            [
-                $"Quality profile '{x.ProfileName}' references invalid quality names: "
-                    + string.Join(", ", x.Names),
-            ],
-            InvalidExceptCustomFormatNamesOutcome x =>
-            [
-                "`except` under `reset_unmatched_scores` in quality profile "
-                    + $"'{x.ProfileName}' has invalid CF names: {string.Join(", ", x.Names)}",
-            ],
-            UnmatchedExceptCustomFormatPatternsOutcome x =>
-            [
-                "`except_patterns` under `reset_unmatched_scores` in quality profile "
-                    + $"'{x.ProfileName}' has patterns matching no CFs: "
-                    + string.Join(", ", x.Patterns),
-            ],
-            ReplacedQualityProfilesOutcome x => [FormatReplaced("quality profile", x.Names)],
-            QualityProfileRenameConflictOutcome x =>
-            [
-                $"Quality profile cannot be renamed to '{x.Name}' because a profile with that "
-                    + "name already exists. Delete or rename the existing profile in the service",
-            ],
-            AmbiguousQualityProfileOutcome x =>
-            [
-                $"Quality profile '{x.ProfileName}' cannot be synced because multiple profiles "
-                    + $"match this name: {FormatMatches(x.ServiceMatches)}. Delete or rename "
-                    + "duplicate profiles in the service",
-            ],
             HandledInstanceFailure x => FormatHandledFailure(x),
             _ => throw new ArgumentOutOfRangeException(nameof(outcome), outcome, null),
         };
@@ -226,19 +175,5 @@ public static class SyncOutcomeFormatter
         }
 
         return messages;
-    }
-
-    private static string FormatMatches(IReadOnlyList<(string Name, int Id)> matches)
-    {
-        return string.Join(", ", matches.Select(match => $"\"{match.Name}\" (ID: {match.Id})"));
-    }
-
-    private static string FormatReplaced(string noun, IReadOnlyList<string> names)
-    {
-        const int maxNames = 20;
-        var formattedNames = string.Join(", ", names.Take(maxNames));
-        var overflow = names.Count > maxNames ? $" and {names.Count - maxNames} more" : "";
-        return $"{names.Count} {noun}(s) already existed in the service and were replaced by "
-            + $"Recyclarr: {formattedNames}{overflow}";
     }
 }

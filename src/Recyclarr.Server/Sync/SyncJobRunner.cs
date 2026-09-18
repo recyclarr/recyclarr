@@ -13,11 +13,9 @@ namespace Recyclarr.Server.Sync;
 internal sealed class SyncJobRunner(
     ILogger log,
     ISyncOrchestrator orchestrator,
-    ISyncRunScope run,
     ISyncJobStore store,
     INotificationService notify,
     SyncResultLogger resultLogger,
-    SyncDiagnosticsLogger diagnosticsLogger,
     Func<JobId, SyncJobProgress> progressFactory,
     SyncJobFinalizer finalizer
 )
@@ -29,31 +27,20 @@ internal sealed class SyncJobRunner(
         CancellationToken ct
     )
     {
-        // Injected to activate the server's diagnostic log subscription.
-        _ = diagnosticsLogger;
-
-        var diagnostics = new List<SyncDiagnosticEvent>();
         store.Update(jobId, job => job.Status = SyncJobStatus.Running);
-
-        using var diagnosticsSubscription = run.Diagnostics.Subscribe(evt =>
-        {
-            diagnostics.Add(evt);
-            store.Update(jobId, j => j.Diagnostics = diagnostics.ToList());
-        });
 
         SyncRunResult result;
 
         try
         {
             result = await orchestrator.RunAsync(configs, settings, progressFactory(jobId), ct);
-            finalizer.Complete(jobId, result, diagnostics);
+            finalizer.Complete(jobId, result);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            diagnostics.Add(new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, e.Message));
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync runner fault {Reference}", reference);
-            result = finalizer.Fail(jobId, new SyncFault(reference), diagnostics);
+            result = finalizer.Fail(jobId, new SyncFault(reference));
         }
 
         resultLogger.Log(jobId, result);

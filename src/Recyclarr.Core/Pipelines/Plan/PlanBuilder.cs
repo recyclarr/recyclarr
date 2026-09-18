@@ -1,16 +1,10 @@
-using Recyclarr.Sync;
-
 namespace Recyclarr.Pipelines.Plan;
 
-internal class PlanBuilder(
-    IOrderedEnumerable<IPlanComponent> components,
-    IInstancePublisher publisher,
-    ILogger log
-)
+internal class PlanBuilder(IOrderedEnumerable<IPlanComponent> components, ILogger log)
 {
     public PipelinePlan Build()
     {
-        var plan = new PipelinePlan(publisher);
+        var plan = new PipelinePlan();
 
         foreach (var component in components)
         {

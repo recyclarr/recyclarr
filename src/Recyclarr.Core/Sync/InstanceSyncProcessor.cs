@@ -1,7 +1,6 @@
 using Autofac.Core;
 using Recyclarr.Compatibility;
 using Recyclarr.Config.Models;
-using Recyclarr.ErrorHandling;
 using Recyclarr.Logging;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
@@ -15,11 +14,9 @@ namespace Recyclarr.Sync;
 internal class InstanceSyncProcessor(
     ILogger log,
     IServiceConfiguration config,
-    IInstancePublisher instancePublisher,
     PlanBuilder planBuilder,
     IPipelineExecutor pipelines,
-    ServiceAgnosticCapabilityEnforcer enforcer,
-    IEnumerable<IExceptionStrategy> strategies
+    ServiceAgnosticCapabilityEnforcer enforcer
 )
 {
     public async Task<SemanticInstanceResult> Process(
@@ -43,13 +40,7 @@ internal class InstanceSyncProcessor(
 
             plan = planBuilder.Build();
             state.RetainPlanningOutcomes(plan.PlanningOutcomes);
-            var result = await pipelines.Execute(
-                settings,
-                plan,
-                instancePublisher,
-                state.PipelineBuffer,
-                ct
-            );
+            var result = await pipelines.Execute(settings, plan, state.PipelineBuffer, ct);
             return new SemanticInstanceResult(
                 config.InstanceName,
                 config.ServiceType,
@@ -70,9 +61,7 @@ internal class InstanceSyncProcessor(
                 throw;
             }
 
-            await PublishDiagnostic(actual);
             log.Debug(actual, "Instance sync error (details logged for diagnostics)");
-            pipelines.InterruptAll(instancePublisher);
             return new SemanticInstanceResult(
                 config.InstanceName,
                 config.ServiceType,
@@ -80,21 +69,6 @@ internal class InstanceSyncProcessor(
                 failure: operationalFailure,
                 planningOutcomes: plan?.PlanningOutcomes
             );
-        }
-    }
-
-    private async Task PublishDiagnostic(Exception exception)
-    {
-        foreach (var strategy in strategies)
-        {
-            var failure = await strategy.HandleAsync(exception);
-            if (failure is null)
-            {
-                continue;
-            }
-
-            instancePublisher.Add(failure);
-            return;
         }
     }
 

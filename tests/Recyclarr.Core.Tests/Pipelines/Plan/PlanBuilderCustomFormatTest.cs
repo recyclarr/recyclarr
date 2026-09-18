@@ -23,7 +23,7 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["cf1", "cf2"] }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -42,7 +42,7 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
             CustomFormats = [new CustomFormatConfig { TrashIds = ["valid-cf", "invalid-cf"] }],
         };
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
@@ -58,7 +58,7 @@ internal sealed class PlanBuilderCustomFormatTest : PlanBuilderTestBase
     {
         var config = NewConfig.Radarr();
 
-        var (sut, _) = CreatePlanBuilder(config);
+        var sut = CreatePlanBuilder(config);
 
         var plan = sut.Build();
 
