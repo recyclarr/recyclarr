@@ -86,7 +86,6 @@ internal static class CompositionRoot
                 b.RegisterType<SyncJobRunner>();
                 b.RegisterType<SyncJobProgress>();
                 b.RegisterType<SyncResultLogger>();
-                b.RegisterType<SyncDiagnosticsLogger>();
                 b.RegisterType<ServerSyncFaultReporter>().As<ISyncFaultReporter>();
             }
         );

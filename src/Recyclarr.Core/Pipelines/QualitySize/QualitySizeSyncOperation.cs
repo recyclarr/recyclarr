@@ -3,7 +3,6 @@ using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualitySize.PipelinePhases.Limits;
 using Recyclarr.Servarr.QualitySize;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide.QualitySize;
 
@@ -28,7 +27,6 @@ internal class QualitySizeSyncOperation(
 
     protected override async Task<QualitySizeComputeResult> Compute(
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -37,7 +35,6 @@ internal class QualitySizeSyncOperation(
         if (planned.Qualities.Count == 0)
         {
             var emptyResult = new QualitySizePipelineResult(0, incompleteResources, outcomes, []);
-            SetStatus(publisher, emptyResult);
             return new QualitySizeComputeResult([], null, planned.Type, emptyResult);
         }
 
@@ -54,7 +51,6 @@ internal class QualitySizeSyncOperation(
             );
             if (serverEntry == null)
             {
-                publisher.Add(new MissingServerQualityDefinitionOutcome(plannedQuality.Quality));
                 outcomes.Add(new QualitySizeServiceQualityNotFoundOutcome(plannedQuality.Quality));
                 incompleteResources++;
                 continue;
@@ -105,21 +101,17 @@ internal class QualitySizeSyncOperation(
             outcomes,
             deltas
         );
-        SetStatus(publisher, result);
-
         return new QualitySizeComputeResult(updatedItems, limits, planned.Type, result);
     }
 
     protected override async Task Persist(
         QualitySizeComputeResult computeResult,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
         var limits = computeResult.Limits;
         if (limits is null)
         {
-            SetStatus(publisher, computeResult.Result, 0);
             return;
         }
 
@@ -135,7 +127,6 @@ internal class QualitySizeSyncOperation(
                 "All sizes for quality definition {Name} are already up to date!",
                 computeResult.QualityDefinitionType
             );
-            SetStatus(publisher, computeResult.Result, 0);
             return;
         }
 
@@ -146,7 +137,6 @@ internal class QualitySizeSyncOperation(
             itemsToUpdate.Count,
             computeResult.QualityDefinitionType
         );
-        SetStatus(publisher, computeResult.Result, itemsToUpdate.Count);
     }
 
     private static List<QualitySizeOutcome> BuildPlanOutcomes(
@@ -255,23 +245,6 @@ internal class QualitySizeSyncOperation(
 
     private static QualitySizeValue ToSemanticValue(decimal value, decimal unlimitedBoundary) =>
         value >= unlimitedBoundary ? new QualitySizeValue.Unlimited() : Numeric(value);
-
-    private static void SetStatus(
-        IPipelinePublisher publisher,
-        QualitySizePipelineResult result,
-        int? count = null
-    )
-    {
-        var status = result.Status switch
-        {
-            SyncResultStatus.Succeeded => PipelineProgressStatus.Succeeded,
-            SyncResultStatus.Partial => PipelineProgressStatus.Partial,
-            SyncResultStatus.Failed => PipelineProgressStatus.Failed,
-            SyncResultStatus.Blocked => PipelineProgressStatus.Skipped,
-            _ => throw new ArgumentOutOfRangeException(nameof(result)),
-        };
-        publisher.SetStatus(status, count);
-    }
 
     private static (decimal Min, decimal Max, decimal Preferred) ResolveValues(
         PlannedQualityItem planned,

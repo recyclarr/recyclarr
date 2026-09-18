@@ -199,15 +199,12 @@ internal sealed class QualityProfileSyncOperationTest
             )
         );
         var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
-        var instancePublisher = Substitute.For<IInstancePublisher>();
-        instancePublisher.ForPipeline(default).ReturnsForAnyArgs(harness.Publisher);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
             harness.Plan,
-            instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -581,15 +578,12 @@ internal sealed class QualityProfileSyncOperationTest
             Schema(NewQp.QualityItem(1, "Bluray-1080p", false))
         );
         var executor = new CompositeSyncPipeline(Substitute.For<ILogger>(), [harness.Sut]);
-        var instancePublisher = Substitute.For<IInstancePublisher>();
-        instancePublisher.ForPipeline(default).ReturnsForAnyArgs(harness.Publisher);
         var settings = Substitute.For<ISyncSettings>();
         settings.Preview.Returns(true);
 
         var results = await executor.Execute(
             settings,
             harness.Plan,
-            instancePublisher,
             new PipelineExecutionBuffer(),
             CancellationToken.None
         );
@@ -657,14 +651,7 @@ internal sealed class QualityProfileSyncOperationTest
             new QualityProfileStatCalculator(log),
             new QualityProfileLogger(log)
         );
-        return new Harness(
-            sut,
-            service,
-            statePersister,
-            state,
-            plan,
-            Substitute.For<IPipelinePublisher>()
-        );
+        return new Harness(sut, service, statePersister, state, plan);
     }
 
     private static async Task<QualityProfilePipelineResult> Compute(Harness harness)
@@ -672,7 +659,6 @@ internal sealed class QualityProfileSyncOperationTest
         var result = await ((ISyncOperation)harness.Sut).Execute(
             preview: true,
             harness.Plan,
-            harness.Publisher,
             _ => { },
             CancellationToken.None
         );
@@ -684,7 +670,6 @@ internal sealed class QualityProfileSyncOperationTest
         var result = await ((ISyncOperation)harness.Sut).Execute(
             preview: false,
             harness.Plan,
-            harness.Publisher,
             _ => { },
             CancellationToken.None
         );
@@ -711,7 +696,6 @@ internal sealed class QualityProfileSyncOperationTest
         IQualityProfileService Service,
         IQualityProfileStatePersister StatePersister,
         TrashIdMappingStore State,
-        TestPlan Plan,
-        IPipelinePublisher Publisher
+        TestPlan Plan
     );
 }

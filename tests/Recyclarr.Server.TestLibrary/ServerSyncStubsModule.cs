@@ -1,4 +1,3 @@
-using System.Reactive.Linq;
 using Autofac;
 using NSubstitute;
 using Recyclarr.Config.Models;
@@ -25,11 +24,5 @@ public sealed class ServerSyncStubsModule : Module
                 )
                 .Returns(Task.FromResult(new SyncRunResult([])))
         );
-
-        builder.RegisterMockFor<ISyncRunScope>(m =>
-        {
-            m.Pipelines.Returns(Observable.Never<PipelineEvent>());
-            m.Diagnostics.Returns(Observable.Never<SyncDiagnosticEvent>());
-        });
     }
 }

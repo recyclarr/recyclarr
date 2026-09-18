@@ -2,7 +2,6 @@ using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaManagement;
 using Recyclarr.Sync;
-using Recyclarr.Sync.Progress;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.MediaManagement;
@@ -26,7 +25,6 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
 
     protected override async Task<MediaManagementComputeResult> Compute(
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
@@ -43,20 +41,16 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
                 )
                 : null;
         var result = new MediaManagementPipelineResult(SyncResultStatus.Succeeded, delta);
-        publisher.SetStatus(PipelineProgressStatus.Succeeded);
         return new MediaManagementComputeResult(current, desired, result);
     }
 
     protected override async Task Persist(
         MediaManagementComputeResult computeResult,
-        IPipelinePublisher publisher,
         CancellationToken ct
     )
     {
         var (current, desired, result) = computeResult;
         var differences = current.GetDifferences(desired);
-        var changeCount = result.Delta is null ? 0 : 1;
-
         if (result.Delta is not null)
         {
             await api.UpdateMediaManagement(desired, ct);
@@ -67,7 +61,5 @@ internal class MediaManagementSyncOperation(ILogger log, IMediaManagementService
         {
             log.Information("Media management is up to date!");
         }
-
-        publisher.SetStatus(PipelineProgressStatus.Succeeded, changeCount);
     }
 }

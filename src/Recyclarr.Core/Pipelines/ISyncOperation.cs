@@ -14,7 +14,6 @@ internal interface ISyncOperation
     Task<SemanticPipelineResult> Execute(
         bool preview,
         PipelinePlan plan,
-        IPipelinePublisher publisher,
         Action<SemanticPipelineResult> capture,
         CancellationToken ct
     );

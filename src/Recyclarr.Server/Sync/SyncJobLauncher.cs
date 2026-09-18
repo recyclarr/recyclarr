@@ -51,11 +51,7 @@ internal sealed class SyncJobLauncher(
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync launcher fault {Reference}", reference);
-            finalizer.Fail(
-                jobId,
-                new SyncFault(reference),
-                [new SyncDiagnosticEvent(null, SyncDiagnosticLevel.Error, e.Message)]
-            );
+            finalizer.Fail(jobId, new SyncFault(reference));
         }
     }
 }
