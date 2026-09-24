@@ -25,9 +25,7 @@ internal sealed class ServerLogger(
         var debugLogFile = paths.ServerLogDirectory.File($"{prefix}.debug.log");
         var verboseLogFile = paths.ServerLogDirectory.File($"{prefix}.verbose.log");
         ActiveLogFiles = [debugLogFile, verboseLogFile];
-        var template = new ExpressionTemplate(
-            "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate + "{Inspect(@x).StackTrace}"
-        );
+        var template = new ExpressionTemplate(LogSetup.FileTemplate);
 
         config
             .MinimumLevel.Verbose()
