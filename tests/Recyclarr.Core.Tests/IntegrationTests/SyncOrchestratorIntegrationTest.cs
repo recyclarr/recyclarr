@@ -347,7 +347,8 @@ internal sealed class SyncOrchestratorIntegrationTest
         var reporter = new RecordingFaultReporter();
         var recorder = new ExecutionRecorder();
         var progress = new RecordingProgress(recorder);
-        using var container = BuildContainer(reporter, recorder);
+        using var cancellation = new CancellationTokenSource();
+        using var container = BuildContainer(reporter, recorder, cancellation);
         var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
 
         var act = () =>
@@ -355,7 +356,7 @@ internal sealed class SyncOrchestratorIntegrationTest
                 [Config("cancel-dispose-fault"), Config("never-started")],
                 Substitute.For<ISyncSettings>(),
                 progress,
-                CancellationToken.None
+                cancellation.Token
             );
 
         await act.Should().ThrowAsync<OperationCanceledException>();
@@ -370,9 +371,78 @@ internal sealed class SyncOrchestratorIntegrationTest
         progress.Completed.Should().BeEmpty();
     }
 
+    [Test]
+    public async Task Unsignaled_processing_cancellation_is_isolated_as_an_instance_fault()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("unsignaled-cancellation"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
+            CancellationToken.None
+        );
+
+        result
+            .Instances.Select(x => x.InstanceName)
+            .Should()
+            .Equal("unsignaled-cancellation", "last");
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].Status.Should().Be(SyncResultStatus.Succeeded);
+        reporter.Exception.Should().BeOfType<OperationCanceledException>();
+    }
+
+    [Test]
+    public async Task Signaled_cleanup_cancellation_propagates_without_completing_the_instance()
+    {
+        var reporter = new RecordingFaultReporter();
+        var progress = new RecordingProgress(new ExecutionRecorder());
+        using var cancellation = new CancellationTokenSource();
+        using var container = BuildContainer(reporter, cancellation: cancellation);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var act = () =>
+            sut.RunAsync(
+                [Config("cleanup-cancellation"), Config("never-started")],
+                Substitute.For<ISyncSettings>(),
+                progress,
+                cancellation.Token
+            );
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        progress.Started.Should().Equal("cleanup-cancellation");
+        progress.Completed.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Unsignaled_cleanup_cancellation_is_isolated_as_an_instance_fault()
+    {
+        var reporter = new RecordingFaultReporter();
+        using var container = BuildContainer(reporter);
+        var sut = new SyncOrchestrator(new InstanceScopeFactory(container), reporter);
+
+        var result = await sut.RunAsync(
+            [Config("unsignaled-cleanup-cancellation"), Config("last")],
+            Substitute.For<ISyncSettings>(),
+            new NoopProgress(),
+            CancellationToken.None
+        );
+
+        result
+            .Instances.Select(x => x.InstanceName)
+            .Should()
+            .Equal("unsignaled-cleanup-cancellation", "last");
+        result.Instances[0].Fault.Should().NotBeNull();
+        result.Instances[1].Status.Should().Be(SyncResultStatus.Succeeded);
+        reporter.Exception.Should().BeOfType<OperationCanceledException>();
+    }
+
     private static IContainer BuildContainer(
         ISyncFaultReporter reporter,
-        ExecutionRecorder? recorder = null
+        ExecutionRecorder? recorder = null,
+        CancellationTokenSource? cancellation = null
     )
     {
         var radarrCapabilities = Substitute.For<IRadarrCapabilityFetcher>();
@@ -386,6 +456,14 @@ internal sealed class SyncOrchestratorIntegrationTest
         builder.RegisterInstance(radarrCapabilities).As<IRadarrCapabilityFetcher>();
         builder.RegisterInstance(Substitute.For<ISonarrCapabilityFetcher>());
         builder.RegisterInstance(recorder ?? new ExecutionRecorder());
+        if (cancellation is null)
+        {
+            builder.RegisterType<CancellationTokenSource>().SingleInstance();
+        }
+        else
+        {
+            builder.RegisterInstance(cancellation).ExternallyOwned();
+        }
         builder
             .Register(c =>
                 new IPlanComponent[]
@@ -416,8 +494,13 @@ internal sealed class SyncOrchestratorIntegrationTest
     {
         private readonly IServiceConfiguration _config;
         private readonly ExecutionRecorder _recorder;
+        private readonly CancellationTokenSource _cancellation;
 
-        public TestPipelineExecutor(IServiceConfiguration config, ExecutionRecorder recorder)
+        public TestPipelineExecutor(
+            IServiceConfiguration config,
+            ExecutionRecorder recorder,
+            CancellationTokenSource cancellation
+        )
         {
             if (config.InstanceName == "scope-fault")
             {
@@ -426,9 +509,10 @@ internal sealed class SyncOrchestratorIntegrationTest
 
             _config = config;
             _recorder = recorder;
+            _cancellation = cancellation;
         }
 
-        public Task<IReadOnlyList<SemanticPipelineResult>> Execute(
+        public async Task<IReadOnlyList<SemanticPipelineResult>> Execute(
             ISyncSettings settings,
             PipelinePlan plan,
             PipelineExecutionBuffer buffer,
@@ -439,7 +523,18 @@ internal sealed class SyncOrchestratorIntegrationTest
 
             if (_config.InstanceName == "cancel-dispose-fault")
             {
+                await _cancellation.CancelAsync();
                 throw new OperationCanceledException(ct);
+            }
+
+            if (_config.InstanceName == "unsignaled-cancellation")
+            {
+                throw new OperationCanceledException(ct);
+            }
+
+            if (_config.InstanceName == "cleanup-cancellation")
+            {
+                await _cancellation.CancelAsync();
             }
 
             if (_config.InstanceName is "early-fault" or "planning-fault")
@@ -453,11 +548,12 @@ internal sealed class SyncOrchestratorIntegrationTest
             var result = new TestPipelineResult(status);
             buffer.Capture(PipelineType.CustomFormat, result);
 
-            return _config.InstanceName is "fault" or "fault-dispose-fault"
-                ? Task.FromException<IReadOnlyList<SemanticPipelineResult>>(
-                    new InvalidOperationException("unexpected")
-                )
-                : Task.FromResult<IReadOnlyList<SemanticPipelineResult>>([result]);
+            if (_config.InstanceName is "fault" or "fault-dispose-fault")
+            {
+                throw new InvalidOperationException("unexpected");
+            }
+
+            return [result];
         }
 
         public void Dispose()
@@ -473,6 +569,11 @@ internal sealed class SyncOrchestratorIntegrationTest
             )
             {
                 throw new InvalidOperationException("scope disposal failed");
+            }
+
+            if (_config.InstanceName is "cleanup-cancellation" or "unsignaled-cleanup-cancellation")
+            {
+                throw new OperationCanceledException();
             }
         }
     }

@@ -38,8 +38,10 @@ expose exception text, stack traces, request bodies, or service responses. Expec
 remain typed operational failures. An instance can retain both an expected failure and a cleanup
 fault when both occurred.
 
-Cancellation propagates and stops the run. Failures outside an instance attempt remain run-level
-faults. Fault reporting is best effort and cannot erase a terminal result or stop later instances.
+Cancellation signaled through the run token propagates and stops the run. An
+`OperationCanceledException` without that signal is an unexpected instance fault. Failures outside
+an instance attempt remain run-level faults. Fault reporting is best effort and cannot erase a
+terminal result or stop later instances.
 
 ### Consequences
 

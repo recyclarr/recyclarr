@@ -9,7 +9,7 @@ namespace Recyclarr.Sync;
 
 internal class SyncOrchestrator(
     InstanceScopeFactory instanceScopeFactory,
-    ISyncFaultReporter? faultReporter = null
+    ISyncFaultReporter faultReporter
 ) : ISyncOrchestrator
 {
     public async Task<SyncRunResult> RunAsync(
@@ -43,7 +43,7 @@ internal class SyncOrchestrator(
     [SuppressMessage(
         "Reliability",
         "CA2000:Dispose objects before losing scope",
-        Justification = "The explicit finally block captures disposal faults without losing context."
+        Justification = "Disposal is explicit so its fault is captured alongside processing faults."
     )]
     private async Task<SemanticInstanceResult> ExecuteInstanceAsync(
         IServiceConfiguration config,
@@ -54,59 +54,69 @@ internal class SyncOrchestrator(
         var state = new InstanceExecutionState(config);
         LifetimeScopeWrapper<InstanceSyncProcessor>? instanceScope = null;
         Exception? attemptException = null;
-        Exception? cleanupException = null;
 
         try
         {
-            try
-            {
-                instanceScope = instanceScopeFactory.Start<InstanceSyncProcessor>(config);
-                var result = await instanceScope.Entry.Process(settings, state, ct);
-                state.RetainCompletedResult(result);
-            }
-            catch (Exception e)
-            {
-                attemptException = e;
-            }
+            instanceScope = instanceScopeFactory.Start<InstanceSyncProcessor>(config);
+            state.RetainCompletedResult(await instanceScope.Entry.Process(settings, state, ct));
         }
-        finally
+        catch (Exception e)
         {
-            // Explicit disposal preserves both failures if processing and cleanup fail.
-            try
-            {
-                instanceScope?.Dispose();
-            }
-            catch (Exception e)
-            {
-                cleanupException = e;
-            }
+            attemptException = e;
         }
 
-        if (attemptException is OperationCanceledException cancellation)
+        var cleanupException = DisposeCapturingFault(instanceScope);
+        Exception[] exceptions =
+        [
+            .. new[] { attemptException, cleanupException }.OfType<Exception>(),
+        ];
+
+        if (exceptions.Length == 0)
         {
-            if (cleanupException is not null)
+            return state.CompletedResult
+                ?? throw new InvalidOperationException(
+                    "Instance attempt produced no terminal result"
+                );
+        }
+
+        // Only a signaled run token stops the run; any other cancellation is an instance fault.
+        var cancellation = ct.IsCancellationRequested
+            ? exceptions.OfType<OperationCanceledException>().FirstOrDefault()
+            : null;
+        if (cancellation is not null)
+        {
+            var fault = exceptions.FirstOrDefault(e => e is not OperationCanceledException);
+            if (fault is not null)
             {
-                ReportFault(cleanupException);
+                ReportFault(fault);
             }
 
-            ExceptionDispatchInfo.Capture(cancellation).Throw();
+            ExceptionDispatchInfo.Throw(cancellation);
         }
 
-        var faultException = (attemptException, cleanupException) switch
-        {
-            ({ } primary, { } cleanup) => new AggregateException(primary, cleanup),
-            ({ } primary, null) => primary,
-            (null, { } cleanup) => cleanup,
-            _ => null,
-        };
+        var faultException =
+            exceptions.Length == 1 ? exceptions[0] : new AggregateException(exceptions);
+        return state.BuildFaultedResult(ReportFault(faultException));
+    }
 
-        if (faultException is not null)
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Disposal faults are retained on the instance result."
+    )]
+    private static Exception? DisposeCapturingFault(
+        LifetimeScopeWrapper<InstanceSyncProcessor>? scope
+    )
+    {
+        try
         {
-            return state.BuildFaultedResult(ReportFault(faultException));
+            scope?.Dispose();
+            return null;
         }
-
-        return state.CompletedResult
-            ?? throw new InvalidOperationException("Instance attempt produced no terminal result");
+        catch (Exception e)
+        {
+            return e;
+        }
     }
 
     [SuppressMessage(
@@ -119,7 +129,7 @@ internal class SyncOrchestrator(
         var reference = Guid.NewGuid().ToString("N");
         try
         {
-            faultReporter?.Report(reference, exception);
+            faultReporter.Report(reference, exception);
         }
         catch
         {
