@@ -127,7 +127,7 @@ internal class ListMediaNamingCommand(
     {
         foreach (var (key, value) in formats)
         {
-            console.WriteLine($"{formatType}\t{TransformKey(key)}\t{value}");
+            console.WriteRawLine($"{formatType}\t{TransformKey(key)}\t{value}");
         }
     }
 
@@ -137,7 +137,7 @@ internal class ListMediaNamingCommand(
         {
             var split = key.Split(':');
             var version = split.Length > 1 ? $"v{split[1]}" : "All";
-            console.WriteLine($"{formatType}\t{split[0]}\t{version}\t{value}");
+            console.WriteRawLine($"{formatType}\t{split[0]}\t{version}\t{value}");
         }
     }
 

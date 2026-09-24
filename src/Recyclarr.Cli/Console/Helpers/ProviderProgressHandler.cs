@@ -1,7 +1,6 @@
 using Recyclarr.ResourceProviders.Infrastructure;
 using Recyclarr.ResourceProviders.Storage;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Console.Helpers;
 
@@ -9,13 +8,14 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
 {
     public async Task InitializeProvidersAsync(bool silent, CancellationToken ct)
     {
-        var progress = console.Progress();
         if (silent)
         {
-            progress.UseRenderHook((_, _) => new EmptyRenderable());
+            await factory.InitializeProvidersAsync(new ProgressReporter(console, task: null), ct);
+            return;
         }
 
-        await progress
+        await console
+            .Progress()
             .AutoClear(false)
             .Columns(
                 new TaskDescriptionColumn(),
@@ -31,7 +31,8 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
             });
     }
 
-    private class ProgressReporter(IAnsiConsole console, ProgressTask task)
+    // Without a task (raw mode), only failures are written; no progress is rendered.
+    private class ProgressReporter(IAnsiConsole console, ProgressTask? task)
         : IProgress<ProviderProgress>
     {
         public void Report(ProviderProgress value)
@@ -39,30 +40,23 @@ internal class ProviderProgressHandler(IAnsiConsole console, ProviderInitializat
             switch (value.Status)
             {
                 case ProviderStatus.Starting:
-                    task.MaxValue = value.TotalProviders ?? 1;
+                    task?.MaxValue = value.TotalProviders ?? 1;
                     break;
 
                 case ProviderStatus.Processing:
                     break;
 
                 case ProviderStatus.Completed:
-                    task.Increment(1);
+                    task?.Increment(1);
                     break;
 
                 case ProviderStatus.Failed:
                     var name = Markup.Escape(value.ProviderName);
                     var error = Markup.Escape(value.ErrorMessage ?? "");
-                    task.Increment(1);
+                    task?.Increment(1);
                     console.MarkupLine($"[red]Failed: {name} - {error}[/]");
                     break;
             }
         }
-    }
-
-    private sealed class EmptyRenderable : IRenderable
-    {
-        public Measurement Measure(RenderOptions options, int maxWidth) => new(0, 0);
-
-        public IEnumerable<Segment> Render(RenderOptions options, int maxWidth) => [];
     }
 }

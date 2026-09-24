@@ -12,9 +12,11 @@ internal class BaseCommandSettings : CommandSettings
     [DefaultValue(CliLogLevel.Info)]
     public FlagValue<CliLogLevel> LogLevel { get; init; } = null!;
 
-    // Log mode activates when explicitly requested or when output is redirected (non-TTY),
-    // since Spectre.Console animations produce garbage in piped/redirected output
-    public bool IsLogMode => LogLevel.IsSet || System.Console.IsOutputRedirected;
+    // Redirected output switches to log mode because progress animations corrupt it. Raw list
+    // output is exempt: it exists for pipes, and log mode would discard it.
+    public bool IsLogMode =>
+        LogLevel.IsSet
+        || (System.Console.IsOutputRedirected && this is not ListCommandSettings { Raw: true });
 
     // When --log is explicit, use the user's chosen level; for auto-detected non-TTY, default to Info
     public CliLogLevel EffectiveLogLevel => LogLevel.IsSet ? LogLevel.Value : CliLogLevel.Info;

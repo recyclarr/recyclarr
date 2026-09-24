@@ -70,7 +70,7 @@ internal class ListCustomFormatsCommand(
         foreach (var cf in items)
         {
             var category = cf.Category ?? "";
-            console.WriteLine($"{cf.Resource.TrashId}\t{cf.Resource.Name}\t{category}");
+            console.WriteRawLine($"{cf.Resource.TrashId}\t{cf.Resource.Name}\t{category}");
         }
     }
 

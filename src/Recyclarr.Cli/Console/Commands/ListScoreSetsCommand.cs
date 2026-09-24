@@ -63,7 +63,7 @@ internal class ListScoreSetsCommand(
     {
         foreach (var set in scoreSets)
         {
-            console.WriteLine(set);
+            console.WriteRawLine(set);
         }
     }
 

@@ -74,7 +74,7 @@ internal class ListQualityProfilesCommand(
     {
         foreach (var profile in profiles)
         {
-            console.WriteLine($"{profile.TrashId}\t{profile.Name}\t{profile.TrashUrl}");
+            console.WriteRawLine($"{profile.TrashId}\t{profile.Name}\t{profile.TrashUrl}");
         }
     }
 

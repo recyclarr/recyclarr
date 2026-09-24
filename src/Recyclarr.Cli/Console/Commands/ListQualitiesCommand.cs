@@ -60,7 +60,7 @@ internal class ListQualitiesCommand(
     {
         foreach (var q in qualitySizes)
         {
-            console.WriteLine(q.Type);
+            console.WriteRawLine(q.Type);
         }
     }
 

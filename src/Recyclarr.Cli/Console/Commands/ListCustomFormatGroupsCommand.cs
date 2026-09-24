@@ -83,7 +83,7 @@ internal class ListCustomFormatGroupsCommand(
             {
                 var required = cf.Required.ToString().ToLowerInvariant();
                 var isDefault = cf.Default.ToString().ToLowerInvariant();
-                console.WriteLine(
+                console.WriteRawLine(
                     $"{group.TrashId}\t{group.Name}\t{cf.TrashId}\t{cf.Name}\t{required}\t{isDefault}"
                 );
             }
