@@ -128,5 +128,9 @@ resharper_with_expression_modifies_all_members_highlighting = none
 # Remove once the analyzer is updated to recognize extension blocks.
 dotnet_diagnostic.CA1034.severity = none
 
+# CA1515: C# 14 extension blocks generate public marker types, triggering this rule spuriously.
+# Remove once the analyzer is updated to recognize extension blocks.
+dotnet_diagnostic.CA1515.severity = none
+
 # Allow `default` for reference types (no built-in inspection to enforce default over null)
 resharper_prefer_concrete_value_over_default_highlighting = none
