@@ -12,7 +12,7 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
     {
         var logFilePrefix = $"recyclarr_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
         var logDir = paths.CliLogDirectory;
-        var template = BuildExpressionTemplate();
+        var template = new ExpressionTemplate(LogSetup.FileTemplate);
 
         config
             .WriteTo.Logger(c =>
@@ -29,13 +29,5 @@ internal class FileLogSinkConfigurator(IAppPaths paths) : ILogConfigurator
         {
             return logDir.File($"{logFilePrefix}.{type}.log").FullName;
         }
-    }
-
-    private static ExpressionTemplate BuildExpressionTemplate()
-    {
-        var template =
-            "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate + "{Inspect(@x).StackTrace}";
-
-        return new ExpressionTemplate(template);
     }
 }
