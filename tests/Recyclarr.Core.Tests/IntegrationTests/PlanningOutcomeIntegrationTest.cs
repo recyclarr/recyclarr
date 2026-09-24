@@ -33,6 +33,7 @@ internal sealed class PlanningOutcomeIntegrationTest : CoreIntegrationTestFixtur
             .ReturnsForAnyArgs(new RadarrCapabilities(new Version(6, 0)));
         builder.RegisterInstance(capabilities).As<IRadarrCapabilityFetcher>();
         builder.RegisterInstance(Substitute.For<ISonarrCapabilityFetcher>());
+        builder.RegisterInstance(Substitute.For<ISyncFaultReporter>());
 
         ISyncOperation[] operations = [new TestSyncOperation()];
         builder.RegisterInstance(operations.AsEnumerable()).As<IEnumerable<ISyncOperation>>();
