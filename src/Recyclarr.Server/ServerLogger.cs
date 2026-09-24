@@ -17,13 +17,14 @@ internal sealed class ServerLogger(
     ServerLogOptions options
 )
 {
-    public IFileInfo? ActiveLogFile { get; private set; }
+    public IReadOnlyCollection<IFileInfo> ActiveLogFiles { get; private set; } = [];
 
     public void Configure(LoggerConfiguration config)
     {
         var prefix = $"recyclarr-server_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
-        var logFile = paths.ServerLogDirectory.File($"{prefix}.debug.log");
-        ActiveLogFile = logFile;
+        var debugLogFile = paths.ServerLogDirectory.File($"{prefix}.debug.log");
+        var verboseLogFile = paths.ServerLogDirectory.File($"{prefix}.verbose.log");
+        ActiveLogFiles = [debugLogFile, verboseLogFile];
         var template = new ExpressionTemplate(
             "[{@t:HH:mm:ss} {@l:u3}] " + LogSetup.BaseTemplate + "{Inspect(@x).StackTrace}"
         );
@@ -36,7 +37,13 @@ internal sealed class ServerLogger(
             )
             .Enrich.FromLogContext()
             .Enrich.With<ExceptionSanitizingEnricher>()
-            .WriteTo.Logger(c => c.MinimumLevel.Debug().WriteTo.File(template, logFile.FullName));
+            .WriteTo.Logger(c =>
+                c.MinimumLevel.Debug().WriteTo.File(template, debugLogFile.FullName)
+            )
+            .WriteTo.Logger(c =>
+                c.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Verbose)
+                    .WriteTo.File(template, verboseLogFile.FullName)
+            );
 
         // Ephemeral mode uses one event per line so the parent can re-emit it at the right level.
         // Standalone mode renders the same console format as the CLI logger.

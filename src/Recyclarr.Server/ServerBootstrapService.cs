@@ -19,9 +19,9 @@ internal sealed class ServerBootstrapService(
 {
     public async Task StartingAsync(CancellationToken ct)
     {
-        if (logger.ActiveLogFile is { } activeLogFile)
+        if (logger.ActiveLogFiles.Count > 0)
         {
-            logJanitor.DeleteOldestLogFiles(activeLogFile);
+            logJanitor.DeleteOldestLogFiles(logger.ActiveLogFiles);
         }
 
         migrations.PerformAllMigrationSteps();
