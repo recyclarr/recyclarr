@@ -8,8 +8,12 @@ different lifetimes.
 | CLI | `<data>/logs/cli` | Command lifecycle, HTTP client failures, and API diagnostics |
 | Server | `<data>/logs/server` | Hosting, requests, sync execution, and internal failures |
 
-`log_janitor.max_files` applies independently to each directory. The CLI cleans its logs when a
-command finishes. The server cleans its logs during startup and never deletes its active file.
+Each run writes a `debug` log (Debug and above) and a `verbose` log (Verbose events only, such as
+HTTP request and response bodies) to its directory.
+
+`log_janitor.max_files` counts files and applies independently to each directory. The CLI cleans
+its logs when a command finishes. The server cleans its logs during startup and never deletes the
+files of the current run.
 
 ## User-visible diagnostics
 

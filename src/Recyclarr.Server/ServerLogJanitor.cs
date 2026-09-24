@@ -7,17 +7,15 @@ namespace Recyclarr.Server;
 
 internal sealed class ServerLogJanitor(IAppPaths paths, ISettings<LogJanitorSettings> settings)
 {
-    public void DeleteOldestLogFiles(IFileInfo activeLogFile)
+    public void DeleteOldestLogFiles(IReadOnlyCollection<IFileInfo> activeLogFiles)
     {
-        var numberOfNewestToKeep = settings.Value.MaxFiles;
-        var completedFilesToKeep = Math.Max(0, numberOfNewestToKeep - 1);
+        var activePaths = activeLogFiles.Select(file => file.FullName).ToHashSet();
+        var completedFilesToKeep = Math.Max(0, settings.Value.MaxFiles - activePaths.Count);
 
         foreach (
             var file in paths
                 .ServerLogDirectory.GetFiles()
-                .Where(file =>
-                    !file.FullName.Equals(activeLogFile.FullName, StringComparison.Ordinal)
-                )
+                .Where(file => !activePaths.Contains(file.FullName))
                 .OrderByDescending(file => file.Name)
                 .Skip(completedFilesToKeep)
         )

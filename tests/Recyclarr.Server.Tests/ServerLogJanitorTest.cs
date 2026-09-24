@@ -16,8 +16,11 @@ internal sealed class ServerLogJanitorTest
         string[] logNames =
         [
             "recyclarr-server_2026-01-01_00-00-00.debug.log",
+            "recyclarr-server_2026-01-01_00-00-00.verbose.log",
             "recyclarr-server_2026-01-02_00-00-00.debug.log",
+            "recyclarr-server_2026-01-02_00-00-00.verbose.log",
             "recyclarr-server_2026-01-03_00-00-00.debug.log",
+            "recyclarr-server_2026-01-03_00-00-00.verbose.log",
         ];
         var logs = logNames.Select(paths.ServerLogDirectory.File).ToList();
 
@@ -27,28 +30,34 @@ internal sealed class ServerLogJanitorTest
         }
 
         var settings = Substitute.For<ISettings<LogJanitorSettings>>();
-        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 2 });
+        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 4 });
 
-        new ServerLogJanitor(paths, settings).DeleteOldestLogFiles(logs[2]);
+        new ServerLogJanitor(paths, settings).DeleteOldestLogFiles([logs[4], logs[5]]);
 
-        fs.AllFiles.Should().BeEquivalentTo(logs[1].FullName, logs[2].FullName);
+        fs.AllFiles.Should()
+            .BeEquivalentTo(logs[2].FullName, logs[3].FullName, logs[4].FullName, logs[5].FullName);
     }
 
     [Test]
-    public void Active_log_is_retained_when_max_files_is_zero()
+    public void Active_logs_are_retained_when_max_files_is_below_active_count()
     {
         var fs = new MockFileSystem();
         var root = fs.CurrentDirectory();
         var paths = new AppPaths(root.SubDirectory("config"), root.SubDirectory("data"));
         var oldLog = paths.ServerLogDirectory.File("recyclarr-server_old.debug.log");
-        var activeLog = paths.ServerLogDirectory.File("recyclarr-server_active.debug.log");
+        var activeDebugLog = paths.ServerLogDirectory.File("recyclarr-server_new.debug.log");
+        var activeVerboseLog = paths.ServerLogDirectory.File("recyclarr-server_new.verbose.log");
         fs.AddEmptyFile(oldLog);
-        fs.AddEmptyFile(activeLog);
+        fs.AddEmptyFile(activeDebugLog);
+        fs.AddEmptyFile(activeVerboseLog);
         var settings = Substitute.For<ISettings<LogJanitorSettings>>();
-        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 0 });
+        settings.Value.Returns(new LogJanitorSettings { MaxFiles = 1 });
 
-        new ServerLogJanitor(paths, settings).DeleteOldestLogFiles(activeLog);
+        new ServerLogJanitor(paths, settings).DeleteOldestLogFiles([
+            activeDebugLog,
+            activeVerboseLog,
+        ]);
 
-        fs.AllFiles.Should().BeEquivalentTo(activeLog.FullName);
+        fs.AllFiles.Should().BeEquivalentTo(activeDebugLog.FullName, activeVerboseLog.FullName);
     }
 }
