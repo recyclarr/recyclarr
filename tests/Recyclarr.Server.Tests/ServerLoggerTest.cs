@@ -25,21 +25,16 @@ internal sealed class ServerLoggerTest
     [Test]
     public void Verbose_and_debug_events_are_written_to_separate_files()
     {
-        var paths = new AppPaths(_root.SubDirectory("config"), _root.SubDirectory("data"));
-        paths.CreateTopDirectories();
-        var serverLogger = new ServerLogger(
-            paths,
-            new LoggingLevelSwitch(LogEventLevel.Fatal),
-            new ServerLogOptions(LogEventLevel.Fatal, UseParentProtocol: false)
-        );
+        var paths = CreatePaths();
 
-        var config = new LoggerConfiguration();
-        serverLogger.Configure(config);
-        using (var log = config.CreateLogger())
-        {
-            log.Verbose("verbose event");
-            log.Debug("debug event");
-        }
+        WriteLogs(
+            paths,
+            log =>
+            {
+                log.Verbose("verbose event");
+                log.Debug("debug event");
+            }
+        );
 
         var files = paths.ServerLogDirectory.GetFiles();
         files
@@ -56,5 +51,61 @@ internal sealed class ServerLoggerTest
             .Should()
             .Contain("debug event")
             .And.NotContain("verbose event");
+    }
+
+    [Test]
+    public void Entry_after_an_exception_starts_on_its_own_line()
+    {
+        var paths = CreatePaths();
+
+        WriteLogs(
+            paths,
+            log =>
+            {
+                log.Debug(CreateThrownException(), "failing event");
+                log.Debug("next event");
+            }
+        );
+
+        paths
+            .ServerLogDirectory.GetFiles("*.debug.log")
+            .Should()
+            .ContainSingle()
+            .Which.ReadAllLines()
+            .Should()
+            .ContainMatch("[* DBG] next event");
+    }
+
+    private AppPaths CreatePaths()
+    {
+        var paths = new AppPaths(_root.SubDirectory("config"), _root.SubDirectory("data"));
+        paths.CreateTopDirectories();
+        return paths;
+    }
+
+    private static void WriteLogs(IAppPaths paths, Action<ILogger> write)
+    {
+        var serverLogger = new ServerLogger(
+            paths,
+            new LoggingLevelSwitch(LogEventLevel.Fatal),
+            new ServerLogOptions(LogEventLevel.Fatal, UseParentProtocol: false)
+        );
+
+        var config = new LoggerConfiguration();
+        serverLogger.Configure(config);
+        using var log = config.CreateLogger();
+        write(log);
+    }
+
+    private static InvalidOperationException CreateThrownException()
+    {
+        try
+        {
+            throw new InvalidOperationException("boom");
+        }
+        catch (InvalidOperationException e)
+        {
+            return e;
+        }
     }
 }
