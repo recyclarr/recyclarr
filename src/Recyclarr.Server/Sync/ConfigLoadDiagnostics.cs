@@ -19,6 +19,12 @@ internal sealed record ConfigLoadDiagnostics
     public IReadOnlyList<SplitInstanceGroup> SplitInstanceGroups { get; init; } = [];
     public IReadOnlyList<string> DeprecationWarnings { get; init; } = [];
 
+    public bool HasServerConfigurationErrors =>
+        ParseFailures.Count > 0
+        || InvalidInstances.Count > 0
+        || DuplicateInstances.Count > 0
+        || SplitInstanceGroups.Count > 0;
+
     public bool IsEmpty =>
         ParseFailures.Count == 0
         && UnknownInstances.Count == 0
