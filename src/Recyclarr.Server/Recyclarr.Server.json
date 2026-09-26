@@ -234,15 +234,6 @@
           },
           "preview": {
             "type": "boolean"
-          },
-          "configs": {
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string"
-            }
           }
         }
       },

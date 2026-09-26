@@ -142,7 +142,7 @@ internal sealed class InMemorySyncJobStoreTest
         instance.Result.Should().BeSameAs(result);
     }
 
-    private static ServerSyncSettings NewSettings() => new(null, [], Preview: false, []);
+    private static ServerSyncSettings NewSettings() => new(null, [], Preview: false);
 
     private static SyncInstanceResult CreateResult(SyncResultStatus status) =>
         status switch

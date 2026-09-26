@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using Recyclarr.Config.Filtering;
 using Recyclarr.Config.Models;
 using Recyclarr.Config.Parsing;
@@ -17,8 +16,6 @@ internal sealed record ServerConfigLoadResult(
     IReadOnlyList<IFilterResult> FilterResults
 )
 {
-    // Paths the request named explicitly that do not exist on the server's filesystem.
-    public IReadOnlyList<string> MissingConfigFiles { get; init; } = [];
     public bool HasAvailableConfigs { get; init; }
 }
 
@@ -29,17 +26,14 @@ internal sealed class ServerConfigLoader(
     IConfigurationFinder finder,
     ConfigurationLoader loader,
     ConfigFilterProcessor filterProcessor,
-    IConfigDiagnosticCollector diagnosticCollector,
-    IFileSystem fs
+    IConfigDiagnosticCollector diagnosticCollector
 )
 {
     public ServerConfigLoadResult LoadConfigs(ServerSyncSettings settings)
     {
         var allConfigs = new List<LoadedConfigYaml>();
         var failures = new List<ConfigParsingException>();
-        var requestedFiles = ResolveConfigFiles(settings.Configs).ToLookup(x => x.Exists);
-
-        foreach (var file in requestedFiles[true])
+        foreach (var file in finder.GetConfigFiles())
         {
             try
             {
@@ -94,13 +88,7 @@ internal sealed class ServerConfigLoader(
             filterResult.FilterResults.ToList()
         )
         {
-            MissingConfigFiles = requestedFiles[false].Select(x => x.FullName).ToList(),
             HasAvailableConfigs = allConfigs.Count > 0,
         };
-    }
-
-    private IEnumerable<IFileInfo> ResolveConfigFiles(IReadOnlyCollection<string> paths)
-    {
-        return paths.Count > 0 ? paths.Select(fs.FileInfo.New) : finder.GetConfigFiles();
     }
 }
