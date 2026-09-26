@@ -107,7 +107,7 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
     }
 
     private static ServerSyncSettings NewSettings() =>
-        new(Service: null, Instances: [], Preview: false, Configs: []);
+        new(Service: null, Instances: [], Preview: false);
 
     private static RadarrConfiguration Config(string name) =>
         new()

@@ -65,7 +65,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
         var job = store.Create(
-            new ServerSyncSettings(null, [], Preview: false, []),
+            new ServerSyncSettings(null, [], Preview: false),
             ["completed", "running", "pending", "partial", "failed"]
         );
         var completed = new SyncInstanceResult("completed", SupportedServices.Radarr, []);
@@ -125,7 +125,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
         var job = store.Create(
-            new ServerSyncSettings(null, [], Preview: false, []),
+            new ServerSyncSettings(null, [], Preview: false),
             ["completed", "interrupted", "not-run"]
         );
         var completed = new SyncInstanceResult("completed", SupportedServices.Sonarr, []);
@@ -195,7 +195,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     [Test]
     public async Task Invalid_server_configuration_returns_safe_internal_error()
     {
-        var config = Paths.ConfigDirectory.File("broken.yml");
+        var config = Paths.YamlConfigDirectory.File("broken.yml");
         Fs.AddFile(
             config,
             new MockFileData(
@@ -212,11 +212,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         using var client = CreateClient();
         var response = await client.PostAsJsonAsync(
             new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest
-            {
-                Instances = ["unknown-instance"],
-                Configs = [config.FullName],
-            }
+            new CreateSyncJobRequest { Instances = ["unknown-instance"] }
         );
         var body = await response.Content.ReadAsStringAsync();
 
@@ -228,7 +224,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     [Test]
     public async Task Mixed_instance_selection_is_rejected_without_exposing_configuration()
     {
-        var config = Paths.ConfigDirectory.File("selection.yml");
+        var config = Paths.YamlConfigDirectory.File("selection.yml");
         Fs.AddFile(
             config,
             new MockFileData(
@@ -244,32 +240,12 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         using var client = CreateClient();
         var response = await client.PostAsJsonAsync(
             new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest
-            {
-                Instances = ["available-instance", "unknown-instance"],
-                Configs = [config.FullName],
-            }
+            new CreateSyncJobRequest { Instances = ["available-instance", "unknown-instance"] }
         );
         var body = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         body.Should().NotContain("available-instance").And.NotContain("unknown-instance");
-    }
-
-    [Test]
-    public async Task Missing_explicit_config_returns_safe_bad_request()
-    {
-        var missing = Paths.ConfigDirectory.File("private-missing.yml");
-        using var client = CreateClient();
-
-        var response = await client.PostAsJsonAsync(
-            new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest { Configs = [missing.FullName] }
-        );
-        var body = await response.Content.ReadAsStringAsync();
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        body.Should().NotContain(missing.FullName);
     }
 
     [Test]
@@ -370,13 +346,13 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     )]
     public async Task Invalid_configuration_variants_return_safe_internal_error(string yaml)
     {
-        var config = Paths.ConfigDirectory.File("invalid-variant.yml");
+        var config = Paths.YamlConfigDirectory.File("invalid-variant.yml");
         Fs.AddFile(config, new MockFileData(yaml));
         using var client = CreateClient();
 
         var response = await client.PostAsJsonAsync(
             new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest { Configs = [config.FullName] }
+            new CreateSyncJobRequest()
         );
         var body = await response.Content.ReadAsStringAsync();
 

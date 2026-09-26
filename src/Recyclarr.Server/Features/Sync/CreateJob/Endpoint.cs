@@ -29,12 +29,7 @@ internal sealed class Endpoint(
 
     public override async Task HandleAsync(CreateSyncJobRequest req, CancellationToken ct)
     {
-        var settings = new ServerSyncSettings(
-            req.Service,
-            req.Instances ?? [],
-            req.Preview,
-            req.Configs ?? []
-        );
+        var settings = new ServerSyncSettings(req.Service, req.Instances ?? [], req.Preview);
         ServerConfigLoadResult loadResult;
         try
         {
@@ -58,10 +53,7 @@ internal sealed class Endpoint(
             return;
         }
 
-        if (
-            loadDiagnostics.MissingConfigFiles.Count > 0
-            || loadDiagnostics.UnknownInstances.Count > 0
-        )
+        if (loadDiagnostics.UnknownInstances.Count > 0)
         {
             AddError("The sync request did not match available configuration");
             await Send.ErrorsAsync(400, ct);
