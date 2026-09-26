@@ -64,6 +64,9 @@ internal static class CompositionRoot
     private static void RegisterSyncServices(ContainerBuilder builder)
     {
         builder.RegisterType<ServerConfigLoader>();
+        builder
+            .Register(c => c.Resolve<ServerConfigLoader>().LoadServerConfiguration())
+            .SingleInstance();
 
         builder.RegisterType<InMemorySyncJobStore>().As<ISyncJobStore>().SingleInstance();
 
