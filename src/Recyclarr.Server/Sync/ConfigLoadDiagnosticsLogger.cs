@@ -9,11 +9,6 @@ internal static class ConfigLoadDiagnosticsLogger
 {
     public static void Log(ILogger log, ConfigLoadDiagnostics diagnostics)
     {
-        foreach (var file in diagnostics.MissingConfigFiles)
-        {
-            log.Error("Config file not found: {File}", file);
-        }
-
         foreach (var failure in diagnostics.ParseFailures)
         {
             log.Error(

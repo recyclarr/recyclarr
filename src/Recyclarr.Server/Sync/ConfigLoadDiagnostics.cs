@@ -11,7 +11,6 @@ internal sealed record SplitInstanceGroup(string BaseUrl, IReadOnlyList<string> 
 // and deprecation warnings. Endpoints project this into wire DTOs; no prose is composed here.
 internal sealed record ConfigLoadDiagnostics
 {
-    public IReadOnlyList<string> MissingConfigFiles { get; init; } = [];
     public IReadOnlyList<ConfigParseFailure> ParseFailures { get; init; } = [];
     public IReadOnlyList<string> UnknownInstances { get; init; } = [];
     public IReadOnlyList<string> AvailableInstances { get; init; } = [];
@@ -21,8 +20,7 @@ internal sealed record ConfigLoadDiagnostics
     public IReadOnlyList<string> DeprecationWarnings { get; init; } = [];
 
     public bool IsEmpty =>
-        MissingConfigFiles.Count == 0
-        && ParseFailures.Count == 0
+        ParseFailures.Count == 0
         && UnknownInstances.Count == 0
         && InvalidInstances.Count == 0
         && DuplicateInstances.Count == 0

@@ -43,26 +43,6 @@ internal sealed class EndpointTest : ServerIntegrationFixture
     }
 
     [Test]
-    public async Task Requesting_missing_config_path_yields_400_without_creating_job()
-    {
-        var missing = Fs.CurrentDirectory().SubDirectory("elsewhere").File("gone.yml");
-
-        var jobStore = Resolve<ISyncJobStore>();
-        var ep = Factory.Create<Endpoint>(
-            Resolve<ILogger>(),
-            Resolve<ServerConfigLoader>(),
-            Resolve<SyncJobLauncher>()
-        );
-        var req = new CreateSyncJobRequest { Configs = [missing.FullName] };
-
-        await ep.HandleAsync(req, CancellationToken.None);
-
-        ep.HttpContext.Response.StatusCode.Should().Be(400);
-
-        jobStore.GetAll(null).Should().BeEmpty();
-    }
-
-    [Test]
     public async Task Mixed_valid_and_invalid_instances_yield_400_without_creating_job()
     {
         AddInstanceConfig("real-instance");
