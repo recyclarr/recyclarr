@@ -28,12 +28,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
     private async Task<SyncJob> RunJob(IReadOnlyList<IServiceConfiguration>? configs = null)
     {
         configs ??= [];
-        var settings = new ServerSyncSettings(
-            Service: null,
-            Instances: [],
-            Preview: false,
-            Configs: []
-        );
+        var settings = new ServerSyncSettings(Service: null, Instances: [], Preview: false);
 
         var store = Resolve<ISyncJobStore>();
         var job = store.Create(settings, configs.Select(config => config.InstanceName).ToList());
@@ -161,7 +156,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
                 )
             );
         var configs = new[] { Config("first"), Config("second", SupportedServices.Sonarr) };
-        var settings = new ServerSyncSettings(null, [], Preview: false, []);
+        var settings = new ServerSyncSettings(null, [], Preview: false);
         var store = Resolve<ISyncJobStore>();
         var job = store.Create(settings, ["first", "second"]);
 

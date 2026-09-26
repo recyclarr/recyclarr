@@ -53,7 +53,6 @@ internal static class ConfigLoadDiagnosticsBuilder
 
         return new ConfigLoadDiagnostics
         {
-            MissingConfigFiles = result.MissingConfigFiles,
             ParseFailures = parseFailures,
             UnknownInstances = unknownInstances,
             AvailableInstances = availableInstances,
