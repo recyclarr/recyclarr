@@ -54,6 +54,7 @@ Rules that make this hold:
   scope here.
 - Config-file and template management endpoints (backing `config list` and `config create`) are
   deferred until those CLI commands migrate; they are file/document resources, not config state.
+  Superseded by ADR-019: no config-file or template endpoints exist.
 
 ### Consequences
 
