@@ -83,9 +83,9 @@ schedule state.
 
 - **Long-running operations are job resources.** Starting a sync means creating a job: `POST
   /sync/jobs` returns 202 with a `Location` header. There is no verb-style trigger endpoint. `GET
-  /sync/jobs/{id}` returns the cumulative instance progress snapshot defined by ADR-018, so a slow or
-  skipped poll loses no current state. Clients poll; there is no SSE. "Is a sync running" is answered
-  by the jobs collection, never by a singleton status resource.
+  /sync/jobs/{id}` returns the cumulative instance progress snapshot defined by ADR-018, so a slow
+  or skipped poll loses no current state. Clients poll; there is no SSE. "Is a sync running" is
+  answered by the jobs collection, never by a singleton status resource.
 - **No DELETE with a request body.** Bulk deletion happens per-item (`DELETE
   .../custom-formats/{id}`); the client loops. RFC 9110 gives DELETE bodies no defined semantics and
   intermediaries may drop them.
@@ -95,6 +95,11 @@ schedule state.
   the OpenAPI spec or the generated client. A future `/health/live` and `/health/ready` split is
   compatible with this placement.
 - **Errors** follow RFC 9457 Problem Details on every endpoint.
+- **Collections return summaries.** A collection response is an object that wraps its item array, so
+  paging or metadata can be added without a breaking change. Items carry only the fields list
+  consumers need, plus a stable id that a `/{id}` route can use later. Name item DTOs
+  `*SummaryResponse` so the full-resource name stays free for the `/{id}` representation. Adding
+  summary fields is additive; removing them is breaking.
 
 ### Consequences
 

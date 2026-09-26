@@ -39,6 +39,8 @@ Rationale and the full resource model live in ADR-011; config representation in 
 - `/health` stays outside `/api`: unversioned, anonymous, excluded from the OpenAPI spec. Everything
   under `/api` requires the API key.
 - All error responses use RFC 9457 Problem Details.
+- Collections return an object wrapping `*SummaryResponse` items; each item has a stable id for a
+  future `/{id}` route (ADR-011).
 - Response DTOs are domain-shaped, never YAML-shaped. Secrets (e.g. `api_key`) are absent from DTOs,
   not masked.
 
