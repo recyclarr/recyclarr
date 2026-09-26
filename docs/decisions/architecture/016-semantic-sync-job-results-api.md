@@ -6,9 +6,10 @@
 
 ## Context and Problem Statement
 
-Sync job progress is polled repeatedly, while terminal outcomes and deltas are read after completion.
-The existing response work carries diagnostic prose and shapes DTOs around the current CLI. It also
-returns an empty successful result while a job is still running, which hides resource state.
+Sync job progress is polled repeatedly, while terminal outcomes and deltas are read after
+completion. The existing response work carries diagnostic prose and shapes DTOs around the current
+CLI. It also returns an empty successful result while a job is still running, which hides resource
+state.
 
 The HTTP contract needs stable semantic DTOs independent of Core serialization and current consumer
 presentation.
@@ -33,6 +34,9 @@ Chosen option: "Keep one terminal results sub-resource with semantic DTOs", beca
 poll response small while returning one coherent terminal aggregate.
 
 ### Request and job lifecycle
+
+> Superseded by ADR-019: the server validates its configuration at startup. Job creation validates
+> only the request against the loaded configuration, and the 500 rule below no longer applies.
 
 `POST /api/v1/sync/jobs` performs only request and server-configuration validation before creating a
 job.
@@ -78,9 +82,9 @@ SyncJobResultsResponse
     └── Pipelines
 ```
 
-`Pipelines` is an object with named optional properties such as `customFormats`,
-`qualityProfiles`, and `qualitySizes`. Pipelines that are not configured or do not apply are
-omitted. A blocked pipeline includes its status and blocking dependency.
+`Pipelines` is an object with named optional properties such as `customFormats`, `qualityProfiles`,
+and `qualitySizes`. Pipelines that are not configured or do not apply are omitted. A blocked
+pipeline includes its status and blocking dependency.
 
 An instance's `service` field is the discriminator for its Sonarr or Radarr response type. Both
 types use one `naming` pipeline property; its schema is selected by the instance type. The service
@@ -95,12 +99,12 @@ resource counts, full Sonarr or Radarr resources, or raw Core models.
 
 ### Contract ownership
 
-Core owns semantic results. Server explicitly maps Core results into transport DTOs. Server DTOs
-may flatten Core aggregates, sanitize fields, and omit implementation data, but no current renderer
-or logger dictates their shape.
+Core owns semantic results. Server explicitly maps Core results into transport DTOs. Server DTOs may
+flatten Core aggregates, sanitize fields, and omit implementation data, but no current renderer or
+logger dictates their shape.
 
-Core types contain no serialization attributes for this API. Server does not directly serialize
-Core domain models.
+Core types contain no serialization attributes for this API. Server does not directly serialize Core
+domain models.
 
 ### Failures
 

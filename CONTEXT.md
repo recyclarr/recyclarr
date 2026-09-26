@@ -11,12 +11,17 @@ The lifecycle created after a sync request and its server-owned configuration pa
 The execution of accepted service instances within a sync job.
 
 **Sync request**:
-A request to create a sync job. Invalid request selectors are client errors; invalid server-owned
-configuration is a server fault.
+A request to create a sync job. It selects instances from the server's loaded configuration;
+selectors that match no loaded instance are client errors.
 
 **Sync result**:
 A terminal account of a sync run, instance, or pipeline. It contains a status, outcomes, and
 deltas.
+
+**Guide data**:
+Factual resources published by TRaSH Guides, such as Custom Formats, Quality Profiles, and their
+Trash IDs. Recyclarr templates and includes are not guide data, even when a resource provider
+delivers them.
 
 **Plan**:
 The result of analyzing configuration and cached guide data before any service interaction.
