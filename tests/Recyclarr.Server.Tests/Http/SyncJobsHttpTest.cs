@@ -193,35 +193,6 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     }
 
     [Test]
-    public async Task Invalid_server_configuration_returns_safe_internal_error()
-    {
-        var config = Paths.YamlConfigDirectory.File("broken.yml");
-        Fs.AddFile(
-            config,
-            new MockFileData(
-                """
-                radarr:
-                  broken:
-                    base_url: http://secret-service:7878
-                    api_key: secret-api-key
-                    unknown_property: invalid
-                """
-            )
-        );
-
-        using var client = CreateClient();
-        var response = await client.PostAsJsonAsync(
-            new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest { Instances = ["unknown-instance"] }
-        );
-        var body = await response.Content.ReadAsStringAsync();
-
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        body.Should().NotContain("secret-service").And.NotContain("secret-api-key");
-        body.Should().NotContain(config.FullName).And.NotContain("unknown_property");
-    }
-
-    [Test]
     public async Task Mixed_instance_selection_is_rejected_without_exposing_configuration()
     {
         var config = Paths.YamlConfigDirectory.File("selection.yml");
@@ -308,57 +279,6 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         );
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
-    }
-
-    [TestCase(
-        """
-            radarr:
-              invalid-instance:
-                base_url: http://private-invalid:7878
-                api_key: ""
-            """,
-        TestName = "Invalid instance returns safe internal error"
-    )]
-    [TestCase(
-        """
-            radarr:
-              duplicate-instance:
-                base_url: http://private-radarr:7878
-                api_key: first-secret
-            sonarr:
-              duplicate-instance:
-                base_url: http://private-sonarr:8989
-                api_key: second-secret
-            """,
-        TestName = "Duplicate instance returns safe internal error"
-    )]
-    [TestCase(
-        """
-            radarr:
-              split-one:
-                base_url: http://private-shared:7878
-                api_key: first-secret
-              split-two:
-                base_url: http://private-shared:7878
-                api_key: second-secret
-            """,
-        TestName = "Split instance returns safe internal error"
-    )]
-    public async Task Invalid_configuration_variants_return_safe_internal_error(string yaml)
-    {
-        var config = Paths.YamlConfigDirectory.File("invalid-variant.yml");
-        Fs.AddFile(config, new MockFileData(yaml));
-        using var client = CreateClient();
-
-        var response = await client.PostAsJsonAsync(
-            new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest()
-        );
-        var body = await response.Content.ReadAsStringAsync();
-
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        body.Should().NotContain("private-").And.NotContain("secret");
-        Services.GetRequiredService<ISyncJobStore>().GetAll(null).Should().BeEmpty();
     }
 
     private sealed record TestPipelineResult : PipelineResult

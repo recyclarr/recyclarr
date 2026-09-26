@@ -30,8 +30,9 @@ the diagnostics at its own boundary:
 This behavior is the same for an ephemeral child server and a configured remote server. Internal
 exception details are not part of the API contract and remain in the server log.
 
-The process that understands a deprecation detects it. Server-side configuration deprecations are
-returned for the CLI to present and record. CLI-specific deprecations remain client-side.
+The process that understands a deprecation detects it. The server logs configuration problems and
+deprecations once, at startup; they are not part of any HTTP response (ADR-019). CLI-specific
+deprecations remain client-side.
 
 In ephemeral mode, the server also forwards log events over the child process stdout protocol.
 This provides live server detail in `--log` mode. The server log remains the authoritative record

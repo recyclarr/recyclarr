@@ -46,7 +46,7 @@ internal sealed class Endpoint(
         var loadDiagnostics = ConfigLoadDiagnosticsBuilder.Build(loadResult);
         ConfigLoadDiagnosticsLogger.Log(log, loadDiagnostics);
 
-        if (HasServerConfigurationErrors(loadDiagnostics))
+        if (loadDiagnostics.HasServerConfigurationErrors)
         {
             AddError("Server configuration is invalid");
             await Send.ErrorsAsync(500, ct);
@@ -78,10 +78,4 @@ internal sealed class Endpoint(
         HttpContext.Response.Headers.Location = $"/api/v1/sync/jobs/{job.Id.Value}";
         await Send.ResponseAsync(Response, 202, ct);
     }
-
-    private static bool HasServerConfigurationErrors(ConfigLoadDiagnostics diagnostics) =>
-        diagnostics.ParseFailures.Count > 0
-        || diagnostics.InvalidInstances.Count > 0
-        || diagnostics.DuplicateInstances.Count > 0
-        || diagnostics.SplitInstanceGroups.Count > 0;
 }
