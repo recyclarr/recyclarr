@@ -6,6 +6,8 @@ using FastEndpoints;
 using FastEndpoints.OpenApi;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Recyclarr;
+using Recyclarr.Logging;
 using Recyclarr.Server;
 using Recyclarr.Server.Sync.Results;
 using Scalar.AspNetCore;
@@ -65,7 +67,7 @@ if (parentPid is not null)
 
 builder.Services.AddHostedService<ServerBootstrapService>();
 
-var app = builder.Build();
+await using var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 app.UseFastEndpoints(c =>
@@ -81,7 +83,19 @@ app.UseFastEndpoints(c =>
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-await app.StartAsync();
+try
+{
+    await app.StartAsync();
+}
+catch (Exception e)
+    when ((e as FatalException ?? e.FindInnerException<FatalException>()) is { } fatal)
+{
+    // The cause is already logged; startup fails without a READY line so a parent CLI sees the
+    // child exit instead of a server that cannot sync (ADR-019).
+    app.Services.GetRequiredService<ILogger>()
+        .Fatal("Server startup failed: {Message}", fatal.Message);
+    return 1;
+}
 
 // Emit the READY handshake so callers know the port we actually bound to
 var server = app.Services.GetRequiredService<IServer>();
@@ -92,7 +106,7 @@ app.Services.GetRequiredService<IReadySignal>().Ready(port);
 
 await app.WaitForShutdownAsync();
 
-return;
+return 0;
 
 static int? ParseParentPid(string? value)
 {
