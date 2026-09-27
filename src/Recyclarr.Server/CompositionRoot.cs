@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
 using Autofac.Extras.Ordering;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 using Recyclarr.Common;
 using Recyclarr.Pipelines;
 using Recyclarr.ResourceProviders;
@@ -55,6 +57,7 @@ internal static class CompositionRoot
         builder.RegisterType<FileSystem>().As<IFileSystem>();
 
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
+        builder.RegisterType<SettingsEndpointSetup>().As<IConfigureOptions<KestrelServerOptions>>();
 
         RegisterSyncServices(builder);
     }
