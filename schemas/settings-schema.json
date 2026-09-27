@@ -50,12 +50,6 @@
           "default": "localhost",
           "title": "Address for the HTTP server to bind to",
           "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces."
-        },
-        "base_url": {
-          "type": "string",
-          "format": "uri",
-          "title": "Address of an already-running Recyclarr server",
-          "description": "When set, commands send their work to this server instead of starting a private one. Use this to point the CLI at a 'recyclarr serve' instance, a container, or a Kubernetes deployment."
         }
       }
     },
