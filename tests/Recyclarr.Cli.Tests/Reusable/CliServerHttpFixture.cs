@@ -6,7 +6,6 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
-using Recyclarr.Platform;
 using Recyclarr.Server.TestLibrary;
 using Serilog.Events;
 using Spectre.Console;
@@ -138,6 +137,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         public CliContainer(Func<HttpClient> createClient)
         {
             _createClient = createClient;
+            Env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(ConfigDirectory.FullName);
 
             // A configured server address selects the centralized mode, so commands connect to
             // the in-process server instead of launching an ephemeral one.
@@ -154,15 +154,9 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
 
         protected override void RegisterStubsAndMocks(ContainerBuilder builder)
         {
-            base.RegisterStubsAndMocks(builder);
-
             builder.RegisterInstance(_createClient);
             builder.RegisterInstance(Console).As<IAnsiConsole>();
             builder.RegisterInstance(Log).As<ILogger>();
-
-            var env = Substitute.For<IEnvironment>();
-            env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(ConfigDirectory.FullName);
-            builder.RegisterInstance(env);
         }
 
         private IDirectoryInfo ConfigDirectory => Fs.CurrentDirectory().SubDirectory("cli-config");
