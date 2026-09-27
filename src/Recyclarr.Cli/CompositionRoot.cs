@@ -10,7 +10,6 @@ using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Cli.Server;
 using Recyclarr.Common;
 using Recyclarr.Common.FluentValidation;
-using Recyclarr.Logging;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -55,14 +54,9 @@ internal static class CompositionRoot
 
     private static void RegisterLogger(ContainerBuilder builder)
     {
-        // Log Configurators
-        builder.RegisterType<FileLogSinkConfigurator>().As<ILogConfigurator>();
-        builder.RegisterType<ConsoleLogSinkConfigurator>();
-
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<ReloadableLogger>().AsSelf().As<ILogger>().SingleInstance();
 
-        builder.RegisterType<LogJanitor>();
         builder.RegisterType<ValidationLogger>();
     }
 
@@ -78,8 +72,7 @@ internal static class CompositionRoot
             .RegisterTypes(
                 typeof(ConsoleSetupTask), // Must run before LoggerSetupTask (handles console redirect)
                 typeof(LoggerSetupTask),
-                typeof(ProgramInformationDisplayTask),
-                typeof(JanitorCleanupTask)
+                typeof(ProgramInformationDisplayTask)
             )
             .As<IGlobalSetupTask>()
             .OrderByRegistration();
