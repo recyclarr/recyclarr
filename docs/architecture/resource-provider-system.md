@@ -318,7 +318,9 @@ resource_providers:
 Access data from storage and provide root filesystem paths.
 
 - `GitProviderLocation`: Clones git repos to `cache/resources/{type}/git/{name}`, uses existing
-  `IRepoUpdater` infrastructure
+  `IRepoUpdater` infrastructure. When a fetch fails (for example, offline), the updater logs a
+  warning and uses the cached checkout from an earlier run. Initialization fails only when no
+  cache exists, or when a broken cache is deleted and the fresh clone also fails.
 - `LocalProviderLocation`: Returns user-configured directory paths directly (no caching)
 
 #### Provider Type (Structure Layer)
