@@ -6,6 +6,7 @@ using Autofac.Extras.Ordering;
 using Recyclarr.Common;
 using Recyclarr.Pipelines;
 using Recyclarr.ResourceProviders;
+using Recyclarr.Server.Features.Instances;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Notifications;
 using Recyclarr.Server.Sync.Notifications.Apprise;
@@ -65,6 +66,7 @@ internal static class CompositionRoot
     {
         builder.RegisterType<ServerConfigLoader>();
         builder.RegisterType<ServerConfigurationStore>().SingleInstance();
+        builder.RegisterType<InstanceServiceCaller>();
 
         builder.RegisterType<InMemorySyncJobStore>().As<ISyncJobStore>().SingleInstance();
 
