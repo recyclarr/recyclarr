@@ -120,6 +120,22 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     }
 
     [Test]
+    public async Task Running_job_answers_accepted_with_retry_after()
+    {
+        var store = Services.GetRequiredService<ISyncJobStore>();
+        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), ["running"]);
+        store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
+
+        using var client = CreateClient();
+        var response = await client.GetAsync(
+            new Uri($"/api/v1/sync/jobs/{job.Id.Value}", UriKind.Relative)
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        response.Headers.RetryAfter?.Delta.Should().Be(TimeSpan.FromSeconds(1));
+    }
+
+    [Test]
     public async Task Slow_poll_observes_completed_and_stopped_instance_states()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
