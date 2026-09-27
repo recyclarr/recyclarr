@@ -319,12 +319,5 @@ public class CoreAutofacModule : Module
     {
         // Custom format deletion port
         builder.RegisterType<CustomFormatDeleter>().As<ICustomFormatDeleter>();
-
-        // Config file creation port
-        builder.RegisterType<ConfigFileCreator>().As<IConfigFileCreator>();
-        builder
-            .RegisterTypes(typeof(TemplateConfigCreator), typeof(LocalConfigCreator))
-            .As<IConfigCreator>()
-            .OrderByRegistration();
     }
 }

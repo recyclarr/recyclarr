@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Autofac;
 using NSubstitute;
-using Recyclarr.Common;
 using Recyclarr.Compatibility;
 using Recyclarr.Platform;
 using Recyclarr.Repo;
@@ -60,10 +59,6 @@ public sealed class TestStubsModule : Module
         });
 
         builder.RegisterMockFor<IGitRepository>();
-        builder.RegisterMockFor<IResourceDataReader>(m =>
-        {
-            m.ReadData(default!).ReturnsForAnyArgs("# Recyclarr configuration\n");
-        });
 
         builder.RegisterMockFor<IServiceInformation>(m =>
         {
