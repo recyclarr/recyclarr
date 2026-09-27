@@ -36,9 +36,9 @@ the CLI to manage the server's lifecycle when no persistent server exists.
 
 ### Two launch models
 
-**Centralized**: User configures a server address in `settings.yml`. CLI commands connect to that
-address via the generated HTTP client (REC-151). No process management. This is the Kubernetes /
-Docker / long-lived deployment model.
+**Centralized**: User configures a server address in `cli.yml` (ADR-021). CLI commands connect to
+that address via the generated HTTP client (REC-151). No process management. This is the Kubernetes
+/ Docker / long-lived deployment model.
 
 **Ephemeral (attached)**: No server configured. The CLI spawns the server binary as a child process,
 uses it for the duration of the command, and the server dies with the CLI. The flow:

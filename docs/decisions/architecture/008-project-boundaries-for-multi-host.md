@@ -105,6 +105,9 @@ In Phase 3, Cli drops its Core reference entirely. It becomes a standalone HTTP 
 the Server's OpenAPI spec through code generation (the same Refit/Refitter pattern already used for
 Sonarr and Radarr APIs). At that point, Core becomes the Server's private dependency.
 
+Phase 3 is complete. ADR-020 records the resulting CLI boundary, including the
+`Recyclarr.Platform` library that the CLI and Core share.
+
 ### Consequences
 
 - Good, because two projects (not three) keeps the dependency graph simple
