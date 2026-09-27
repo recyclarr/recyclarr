@@ -6,9 +6,8 @@ using Recyclarr.Cli.Console;
 using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Recyclarr.Server.TestLibrary;
-using Recyclarr.Settings;
-using Recyclarr.Settings.Models;
 using Serilog.Events;
 using Spectre.Console;
 using Spectre.Console.Testing;
@@ -90,6 +89,14 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected string LogOutput => _cli.Log.Rendered;
 
     /// <summary>
+    /// Replaces the CLI's <c>cli.yml</c>. By default it points the CLI at the in-process server.
+    /// </summary>
+    protected void WriteCliSettings(string yaml)
+    {
+        _cli.WriteCliSettings(yaml);
+    }
+
+    /// <summary>
     /// Runs a CLI command line the way <c>Program</c> does, against the in-process server, and
     /// returns its exit code.
     /// </summary>
@@ -121,8 +128,24 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         base.Dispose(disposing);
     }
 
-    private sealed class CliContainer(Func<HttpClient> createClient) : CliIntegrationFixture
+    private sealed class CliContainer : CliIntegrationFixture
     {
+        private readonly Func<HttpClient> _createClient;
+
+        public CliContainer(Func<HttpClient> createClient)
+        {
+            _createClient = createClient;
+
+            // A configured server address selects the centralized mode, so commands connect to
+            // the in-process server instead of launching an ephemeral one.
+            WriteCliSettings(
+                $"""
+                server:
+                  base_url: {ServerAddress}
+                """
+            );
+        }
+
         public TestConsole Console { get; } = new TestConsole().Width(200);
         public RecordingLogger Log { get; } = new();
 
@@ -130,15 +153,20 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         {
             base.RegisterStubsAndMocks(builder);
 
-            builder.RegisterInstance(createClient);
+            builder.RegisterInstance(_createClient);
             builder.RegisterInstance(Console).As<IAnsiConsole>();
             builder.RegisterInstance(Log).As<ILogger>();
 
-            // A configured server address selects the centralized mode, so commands connect to
-            // the in-process server instead of launching an ephemeral one.
-            var settings = Substitute.For<ISettings<ServerSettings>>();
-            settings.Value.Returns(new ServerSettings { BaseUrl = ServerAddress });
-            builder.RegisterInstance(settings);
+            var env = Substitute.For<IEnvironment>();
+            env.GetEnvironmentVariable("RECYCLARR_CONFIG_DIR").Returns(ConfigDirectory.FullName);
+            builder.RegisterInstance(env);
+        }
+
+        private IDirectoryInfo ConfigDirectory => Fs.CurrentDirectory().SubDirectory("cli-config");
+
+        public void WriteCliSettings(string yaml)
+        {
+            Fs.AddFile(ConfigDirectory.File("cli.yml"), new MockFileData(yaml));
         }
 
         public new T Resolve<T>()

@@ -1,4 +1,5 @@
 using Autofac;
+using Recyclarr.Cli.Settings;
 
 namespace Recyclarr.Cli.Server;
 
@@ -8,6 +9,7 @@ internal static class ServerApiRegistration
     {
         public void RegisterServerApi()
         {
+            builder.RegisterType<CliSettingsLoader>();
             builder.RegisterType<EphemeralServerLauncher>();
             builder.RegisterType<ServerConnectionFactory>();
             builder.RegisterType<HttpClient>();
