@@ -14,11 +14,7 @@ internal sealed class Endpoint(ILogger log, ISyncJobStore jobStore)
         AllowAnonymous();
 
         Description(b =>
-            b.Produces<SyncJobResultsResponse>()
-                .ProducesProblemDetails(409)
-                .ProducesProblemDetails(404)
-                .ProducesProblemDetails(500)
-                .WithTags("Sync")
+            b.Produces<SyncJobResultsResponse>().ProducesProblems(409, 404, 500).WithTags("Sync")
         );
     }
 

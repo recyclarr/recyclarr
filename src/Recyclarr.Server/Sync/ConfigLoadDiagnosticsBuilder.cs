@@ -2,8 +2,8 @@ using Recyclarr.Config.Filtering;
 
 namespace Recyclarr.Server.Sync;
 
-// Projects parse failures, filter diagnostics, and deprecations into the shape used for server
-// logging and request admission.
+// Projects parse failures, filter diagnostics, and deprecations into the shape used for startup
+// logging and validation.
 internal static class ConfigLoadDiagnosticsBuilder
 {
     public static ConfigLoadDiagnostics Build(ServerConfigLoadResult result)
@@ -12,8 +12,6 @@ internal static class ConfigLoadDiagnosticsBuilder
             .Failures.Select(f => new ConfigParseFailure(f.FilePath?.Name, f.Line, f.Message))
             .ToList();
 
-        var unknownInstances = new List<string>();
-        var availableInstances = new List<string>();
         var invalidInstances = new List<InvalidInstance>();
         var duplicateInstances = new List<string>();
         var splitGroups = new List<SplitInstanceGroup>();
@@ -22,11 +20,6 @@ internal static class ConfigLoadDiagnosticsBuilder
         {
             switch (filterResult)
             {
-                case NonExistentInstancesFilterResult r:
-                    unknownInstances.AddRange(r.NonExistentInstances);
-                    availableInstances.AddRange(r.AvailableInstances);
-                    break;
-
                 case InvalidInstancesFilterResult r:
                     invalidInstances.AddRange(
                         r.InvalidInstances.Select(i => new InvalidInstance(
@@ -54,8 +47,6 @@ internal static class ConfigLoadDiagnosticsBuilder
         return new ConfigLoadDiagnostics
         {
             ParseFailures = parseFailures,
-            UnknownInstances = unknownInstances,
-            AvailableInstances = availableInstances,
             InvalidInstances = invalidInstances,
             DuplicateInstances = duplicateInstances,
             SplitInstanceGroups = splitGroups,

@@ -18,8 +18,7 @@ namespace Recyclarr.Server.Tests.Http;
 
 // Exercises sync jobs through the real ASP.NET Core pipeline (routing, api/v version prefix,
 // FastEndpoints middleware, Problem Details, wire JSON) rather than calling HandleAsync()
-// directly. The endpoint-level tests under Features/ cover handler logic; these cover the
-// adapter that only exists at the HTTP boundary.
+// directly.
 internal sealed class SyncJobsHttpTest : ServerHttpFixture
 {
     [Test]
@@ -168,9 +167,8 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
     }
 
-    // The gap that motivated the harness: Factory.Create emits FastEndpoints' default error shape
-    // instead of the Problem Details shape UseProblemDetails() produces, so an endpoint-level test
-    // cannot verify that validation failures fit CreateSyncJobProblemDetails.
+    // Factory.Create bypasses the global error response builder, so only the real pipeline can
+    // verify that validation failures fit CreateSyncJobProblemDetails.
     [Test]
     public async Task Validation_failure_fits_the_declared_problem_details_schema()
     {
@@ -179,7 +177,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var (response, problem) = await client.POSTAsync<
             CreateJobEndpoint,
             CreateSyncJobRequest,
-            ProblemDetails
+            CreateSyncJobProblemDetails
         >(new CreateSyncJobRequest { Service = (SupportedServices)999, Instances = ["anything"] });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -187,13 +185,13 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
 
         problem.Should().NotBeNull();
         problem.Status.Should().Be(400);
-        problem.Type.Should().NotBeNullOrEmpty();
         problem.Title.Should().NotBeNullOrEmpty();
-        problem.Errors.Should().ContainSingle(e => e.Name == "service");
+        problem.Errors.Should().ContainKey("service");
+        problem.UnknownInstances.Should().BeNull();
     }
 
     [Test]
-    public async Task Mixed_instance_selection_is_rejected_without_exposing_configuration()
+    public async Task Unknown_instances_are_rejected_with_unknown_and_available_names()
     {
         var config = Paths.YamlConfigDirectory.File("selection.yml");
         Fs.AddFile(
@@ -209,14 +207,53 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         );
 
         using var client = CreateClient();
-        var response = await client.PostAsJsonAsync(
-            new Uri("/api/v1/sync/jobs", UriKind.Relative),
-            new CreateSyncJobRequest { Instances = ["available-instance", "unknown-instance"] }
-        );
-        var body = await response.Content.ReadAsStringAsync();
+        var (response, problem) = await client.POSTAsync<
+            CreateJobEndpoint,
+            CreateSyncJobRequest,
+            CreateSyncJobProblemDetails
+        >(new CreateSyncJobRequest { Instances = ["available-instance", "unknown-instance"] });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        body.Should().NotContain("available-instance").And.NotContain("unknown-instance");
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+        problem.UnknownInstances.Should().Equal("unknown-instance");
+        problem.AvailableInstances.Should().Equal("available-instance");
+        Services.GetRequiredService<ISyncJobStore>().GetAll(null).Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Configuration_edited_after_startup_is_not_used()
+    {
+        var config = Paths.ConfigDirectory.File("recyclarr.yml");
+        Fs.AddFile(
+            config,
+            new MockFileData(
+                """
+                radarr:
+                  startup-instance:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
+        using var client = CreateClient();
+        Fs.AddFile(
+            config,
+            new MockFileData(
+                """
+                radarr:
+                  edited-instance:
+                    base_url: http://localhost:7878
+                    api_key: asdf
+                """
+            )
+        );
+
+        var response = await client.PostAsJsonAsync(
+            new Uri("/api/v1/sync/jobs", UriKind.Relative),
+            new CreateSyncJobRequest { Instances = ["edited-instance"] }
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Test]
@@ -244,7 +281,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     }
 
     [Test]
-    public async Task No_default_configuration_returns_internal_error()
+    public async Task Server_without_instances_rejects_sync_with_conflict()
     {
         using var client = CreateClient();
 
@@ -253,7 +290,8 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
             new CreateSyncJobRequest()
         );
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
     }
 
     [Test]
