@@ -4,10 +4,8 @@ using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
-/// <summary>
-/// The CLI's production composition root over an in-memory filesystem and environment. It uses
-/// no Recyclarr.Core test infrastructure, because the CLI does not depend on Core.
-/// </summary>
+// The CLI's production composition root over an in-memory filesystem and environment. It uses no
+// Recyclarr.Core test infrastructure, because the CLI does not depend on Core.
 internal abstract class CliIntegrationFixture : IDisposable
 {
     private readonly Lazy<IContainer> _container;
@@ -31,9 +29,7 @@ internal abstract class CliIntegrationFixture : IDisposable
         });
     }
 
-    /// <summary>
-    /// Overrides production registrations. Runs after the stub filesystem and environment.
-    /// </summary>
+    // Overrides production registrations. Runs after the stub filesystem and environment.
     protected virtual void RegisterStubsAndMocks(ContainerBuilder builder) { }
 
     protected T Resolve<T>()
