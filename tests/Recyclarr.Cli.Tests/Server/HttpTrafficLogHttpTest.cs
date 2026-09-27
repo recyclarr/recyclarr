@@ -2,9 +2,11 @@ using Recyclarr.Cli.Tests.Reusable;
 
 namespace Recyclarr.Cli.Tests.Server;
 
-// The CLI writes no log files, so its console log is the only local record of what it exchanged
-// with the server. That record must carry the request line and, at the most detailed level, the
-// payloads.
+/// <summary>
+/// The CLI writes no log files, so its console log is the only local record of what it exchanged
+/// with the server. That record must carry the request line and, at the most detailed level, the
+/// payloads.
+/// </summary>
 internal sealed class HttpTrafficLogHttpTest : CliServerHttpFixture
 {
     [Test]
