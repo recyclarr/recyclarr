@@ -1,4 +1,3 @@
-using Recyclarr.Client.V1;
 using Recyclarr.Settings;
 using Recyclarr.Settings.Models;
 
@@ -13,7 +12,7 @@ internal sealed class ServerConnectionFactory(
     ILogger log,
     ISettings<ServerSettings> settings,
     Func<EphemeralServerLauncher> createLauncher,
-    Func<Uri, ISyncApi> createSyncApi
+    Func<HttpClient> createClient
 )
 {
     public async Task<ServerConnection> ConnectAsync(CancellationToken ct)
@@ -22,12 +21,19 @@ internal sealed class ServerConnectionFactory(
         if (configuredUrl is not null)
         {
             log.Debug("Using configured server at {BaseUrl}", configuredUrl);
-            return new ServerConnection(createSyncApi(configuredUrl), ownedServer: null);
+            return new ServerConnection(CreateClient(configuredUrl), ownedServer: null);
         }
 
         var launcher = createLauncher();
         var address = await launcher.StartAsync(ct);
         log.Debug("Started ephemeral server at {BaseUrl}", address);
-        return new ServerConnection(createSyncApi(address), launcher);
+        return new ServerConnection(CreateClient(address), launcher);
+    }
+
+    private HttpClient CreateClient(Uri baseAddress)
+    {
+        var client = createClient();
+        client.BaseAddress = baseAddress;
+        return client;
     }
 }
