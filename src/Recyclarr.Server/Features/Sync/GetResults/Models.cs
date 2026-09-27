@@ -42,16 +42,6 @@ internal enum BlockingPipeline
     MediaManagement,
 }
 
-internal enum InstanceFailureCategory
-{
-    ServiceUnavailable,
-    ServiceUnauthenticated,
-    ServiceUnauthorized,
-    ServiceRateLimited,
-    ServiceIncompatible,
-    SyncStateUnavailable,
-}
-
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SyncFaultResponse(string Reference);
 
