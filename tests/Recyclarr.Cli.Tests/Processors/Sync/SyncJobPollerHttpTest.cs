@@ -10,13 +10,17 @@ using Refit;
 
 namespace Recyclarr.Cli.Tests.Processors.Sync;
 
-// The poller is what turns the server's 202/200 protocol into a stream of snapshots, so it is
-// tested against the real job resource rather than a stand-in for it.
+/// <summary>
+/// The poller is what turns the server's 202/200 protocol into a stream of snapshots, so it is
+/// tested against the real job resource rather than a stand-in for it.
+/// </summary>
 internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
 {
     private const string InstanceName = "real-instance";
 
-    // Holds the sync open so the job stays non-terminal for as long as the test needs it to.
+    /// <summary>
+    /// Holds the sync open so the job stays non-terminal for as long as the test needs it to.
+    /// </summary>
     private readonly TaskCompletionSource<SyncRunResult> _sync = new();
 
     private static CancellationToken Ct => TestContext.CurrentContext.CancellationToken;

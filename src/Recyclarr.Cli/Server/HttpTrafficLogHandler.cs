@@ -3,9 +3,11 @@ using Serilog.Events;
 
 namespace Recyclarr.Cli.Server;
 
-// The CLI writes no log files, so `--log` output is the only local record of its exchange with the
-// server. Request lines log at Debug and payloads at Verbose. Headers are never logged because
-// they will carry the server API key.
+/// <summary>
+/// Logs the CLI's exchange with the server. The CLI writes no log files, so <c>--log</c> output is
+/// the only local record of it. Request lines log at Debug and payloads at Verbose. Headers are
+/// never logged because they will carry the server API key.
+/// </summary>
 internal sealed class HttpTrafficLogHandler(ILogger log) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(

@@ -11,8 +11,10 @@ namespace Recyclarr.Cli.Processors.Sync;
 /// </summary>
 internal static class SyncJobPoller
 {
-    // The server advertises Retry-After: 1, which is guidance for third-party clients. This one
-    // drives a live progress table, so it polls faster than that.
+    /// <summary>
+    /// The server advertises Retry-After: 1, which is guidance for third-party clients. This one
+    /// drives a live progress table, so it polls faster than that.
+    /// </summary>
     private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(250);
 
     public static async IAsyncEnumerable<GetSyncJobResponse> PollAsync(

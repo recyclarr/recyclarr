@@ -10,9 +10,11 @@ using SupportedServices = Recyclarr.TrashGuide.SupportedServices;
 
 namespace Recyclarr.Cli.Tests.Processors.Sync;
 
-// Drives the real command handler against a real in-process server over HTTP. Everything the CLI
-// observes here (job creation, polling, terminal status) travels the same wire it does in
-// production; only the sync engine behind the server is stubbed.
+/// <summary>
+/// Drives the real command handler against a real in-process server over HTTP. Everything the CLI
+/// observes here (job creation, polling, terminal status) travels the same wire it does in
+/// production; only the sync engine behind the server is stubbed.
+/// </summary>
 internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
 {
     private const string InstanceName = "real-instance";
@@ -30,8 +32,10 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         failure: new ServiceUnavailableFailure()
     );
 
-    // Read lazily by the substitute below, so each test decides how the sync "went" before it
-    // triggers a job.
+    /// <summary>
+    /// Read lazily by the substitute below, so each test decides how the sync "went" before it
+    /// triggers a job.
+    /// </summary>
     private SyncRunResult _result = new([Succeeded]);
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
@@ -58,7 +62,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         (await TerminalStatusOfTheOnlyJob()).Should().Be("Succeeded");
     }
 
-    // A partial sync applied everything it could, which the CLI has always reported as success.
+    /// <summary>
+    /// A partial sync applied everything it could, which the CLI has always reported as success.
+    /// </summary>
     [Test]
     public async Task A_sync_that_was_only_partial_still_exits_successfully()
     {
@@ -83,7 +89,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
         (await TerminalStatusOfTheOnlyJob()).Should().Be("Failed");
     }
 
-    // The server refuses a request naming an unconfigured instance and never creates a job.
+    /// <summary>
+    /// The server refuses a request naming an unconfigured instance and never creates a job.
+    /// </summary>
     [Test]
     public async Task A_refused_request_fails_the_command_and_leaves_no_job_to_poll()
     {

@@ -98,7 +98,9 @@ internal class DeleteCustomFormatsCommand(
         return (int)ExitStatus.Succeeded;
     }
 
-    // Names match case-insensitively; names with no match are reported and skipped.
+    /// <summary>
+    /// Names match case-insensitively; names with no match are reported and skipped.
+    /// </summary>
     private List<InstanceCustomFormatSummaryResponse> SelectCandidates(
         CliSettings settings,
         IReadOnlyCollection<InstanceCustomFormatSummaryResponse> customFormats

@@ -2,8 +2,10 @@ using Recyclarr.Cli.Tests.Reusable;
 
 namespace Recyclarr.Cli.Tests.Settings;
 
-// A cli.yml the CLI cannot use must stop the command before it contacts any server, with a message
-// that points at the file.
+/// <summary>
+/// A cli.yml the CLI cannot use must stop the command before it contacts any server, with a
+/// message that points at the file.
+/// </summary>
 internal sealed class CliSettingsHttpTest : CliServerHttpFixture
 {
     [Test]

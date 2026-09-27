@@ -6,13 +6,16 @@ using Serilog.Templates.Themes;
 
 namespace Recyclarr.Cli.Logging;
 
-// Logger wrapper that supports reconfiguration after construction. Implements ILogger directly,
-// eliminating the need for a separate decorator. Registered as SingleInstance because it is a
-// shared mutable primitive (same category as LoggingLevelSwitch).
-//
-// The CLI writes no log files. Until command setup runs, only errors reach the console, so a
-// failure before setup is still visible. Setup then either sends everything at the selected level
-// to the console (log mode) or discards it, because IAnsiConsole carries user output.
+/// <summary>
+/// Logger wrapper that supports reconfiguration after construction. Implements ILogger directly,
+/// eliminating the need for a separate decorator. Registered as SingleInstance because it is a
+/// shared mutable primitive (same category as LoggingLevelSwitch).
+/// </summary>
+/// <remarks>
+/// The CLI writes no log files. Until command setup runs, only errors reach the console, so a
+/// failure before setup is still visible. Setup then either sends everything at the selected level
+/// to the console (log mode) or discards it, because IAnsiConsole carries user output.
+/// </remarks>
 internal class ReloadableLogger(IEnvironment env, LoggingLevelSwitch levelSwitch) : ILogger
 {
     private const string Template =

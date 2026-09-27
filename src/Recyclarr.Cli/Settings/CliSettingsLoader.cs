@@ -5,10 +5,14 @@ using YamlDotNet.RepresentationModel;
 
 namespace Recyclarr.Cli.Settings;
 
-// Reads cli.yml from the configuration directory the server also uses. Only the CLI reads this
-// file, so parsing is strict: a key the CLI does not know is an error, not a silent no-op.
-// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
-// YamlDotNet's deserializer names C# types instead.
+/// <summary>
+/// Reads cli.yml from the configuration directory the server also uses. Only the CLI reads this
+/// file, so parsing is strict: a key the CLI does not know is an error, not a silent no-op.
+/// </summary>
+/// <remarks>
+/// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
+/// YamlDotNet's deserializer names C# types instead.
+/// </remarks>
 internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
 {
     public const string FileName = "cli.yml";
