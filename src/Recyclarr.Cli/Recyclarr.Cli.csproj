@@ -23,11 +23,13 @@
     <PackageReference Include="TestableIO.System.IO.Abstractions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Extensions" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
     <ProjectReference Include="..\Recyclarr.Client\Recyclarr.Client.csproj" />
+    <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
     <!-- The server is a sibling executable the CLI launches, never an assembly it links against
          (ADR-010). Runtime packaging publishes it separately. -->
     <ProjectReference Include="..\Recyclarr.Server\Recyclarr.Server.csproj"

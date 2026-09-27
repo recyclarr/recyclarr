@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": ["null", "object"],
+  "title": "Recyclarr CLI Settings",
+  "description": "Optional settings for the recyclarr command line client (cli.yml). The server reads settings.yml instead.",
+  "additionalProperties": false,
+  "properties": {
+    "server": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "title": "How the CLI reaches a Recyclarr server",
+      "properties": {
+        "base_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://",
+          "title": "Address of an already-running Recyclarr server",
+          "description": "When set, commands send their work to this server instead of starting a private one. Use this to point the CLI at a 'recyclarr serve' instance, a container, or a Kubernetes deployment."
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,9 @@
 using System.Net;
 using Autofac.Core;
 using Recyclarr.Cli.Server;
+using Recyclarr.Cli.Settings;
 using Recyclarr.Client.V1;
+using Recyclarr.Platform;
 using Refit;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -9,7 +11,7 @@ using Spectre.Console.Cli;
 namespace Recyclarr.Cli.ErrorHandling;
 
 // Turns expected failures (server start, server HTTP errors, unreachable server, bad command
-// input) into user-facing messages. Unexpected exceptions are left to the caller.
+// input, unusable cli.yml or environment) into user-facing messages. Unexpected exceptions are left to the caller.
 internal class ExceptionHandler(IAnsiConsole console, ILogger log)
 {
     public async Task<bool> TryHandleAsync(Exception exception)
@@ -25,7 +27,10 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
             ApiRequestException { InnerException: { } e } => [Unreachable(e.Message)],
             ApiException e => await DescribeAsync(e),
             HttpRequestException e => [Unreachable(e.Message)],
-            CommandRuntimeException => [actual.Message],
+            CommandRuntimeException or CliSettingsException or EnvironmentException =>
+            [
+                actual.Message,
+            ],
             _ => null,
         };
 
