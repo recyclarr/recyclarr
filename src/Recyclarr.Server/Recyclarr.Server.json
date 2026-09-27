@@ -85,6 +85,46 @@
         }
       }
     },
+    "/api/v1/guide/{service}/naming": {
+      "get": {
+        "tags": [
+          "Guide"
+        ],
+        "operationId": "GuideNaming",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SupportedServices"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GuideNamingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/guide/{service}/qualities": {
       "get": {
         "tags": [
@@ -942,6 +982,89 @@
           }
         }
       },
+      "GuideNamingFormatResponse": {
+        "required": [
+          "key",
+          "version",
+          "format"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "version": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "format": {
+            "type": "string"
+          }
+        }
+      },
+      "GuideNamingResponse": {
+        "required": [
+          "service"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/GuideNamingResponseRadarrGuideNamingResponse"
+          },
+          {
+            "$ref": "#/components/schemas/GuideNamingResponseSonarrGuideNamingResponse"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "service",
+          "mapping": {
+            "radarr": "#/components/schemas/GuideNamingResponseRadarrGuideNamingResponse",
+            "sonarr": "#/components/schemas/GuideNamingResponseSonarrGuideNamingResponse"
+          }
+        }
+      },
+      "GuideNamingResponseRadarrGuideNamingResponse": {
+        "required": [
+          "movieFolder",
+          "standardMovie"
+        ],
+        "properties": {
+          "movieFolder": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          },
+          "standardMovie": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          }
+        }
+      },
+      "GuideNamingResponseSonarrGuideNamingResponse": {
+        "required": [
+          "seasonFolder",
+          "seriesFolder",
+          "standardEpisode",
+          "dailyEpisode",
+          "animeEpisode"
+        ],
+        "properties": {
+          "seasonFolder": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          },
+          "seriesFolder": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          },
+          "standardEpisode": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          },
+          "dailyEpisode": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          },
+          "animeEpisode": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideNamingFormatResponse"
+          }
+        }
+      },
       "GuideProfileQualityResponse": {
         "required": [
           "name",
@@ -1161,6 +1284,12 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/GuideCustomFormatSummaryResponse"
+        }
+      },
+      "IReadOnlyListOfGuideNamingFormatResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GuideNamingFormatResponse"
         }
       },
       "IReadOnlyListOfGuideProfileQualityResponse": {
