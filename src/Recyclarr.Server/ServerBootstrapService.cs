@@ -17,7 +17,8 @@ internal sealed class ServerBootstrapService(
     ProviderInitializationFactory providers,
     ServerLogJanitor logJanitor,
     ServerLogger logger,
-    Lazy<ServerConfiguration> configuration
+    ServerConfigLoader configLoader,
+    ServerConfigurationStore configuration
 ) : IHostedLifecycleService
 {
     public async Task StartingAsync(CancellationToken ct)
@@ -29,9 +30,7 @@ internal sealed class ServerBootstrapService(
 
         migrations.PerformAllMigrationSteps();
         await providers.InitializeProvidersAsync(progress: null, ct);
-        // Force the configuration snapshot to load now, so invalid configuration fails startup
-        // and deprecations are logged before any request is served.
-        _ = configuration.Value;
+        configuration.Publish(configLoader.LoadServerConfiguration());
     }
 
     public Task StartAsync(CancellationToken ct) => Task.CompletedTask;

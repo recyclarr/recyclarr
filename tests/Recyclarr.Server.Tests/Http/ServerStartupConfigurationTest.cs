@@ -1,6 +1,8 @@
 using System.IO.Abstractions;
 using System.Net;
+using System.Net.Http.Json;
 using Autofac;
+using Recyclarr.Server.Features.Sync.CreateJob;
 using Recyclarr.Server.TestLibrary;
 using Serilog.Events;
 
@@ -107,6 +109,63 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
                 evt.Level == LogEventLevel.Warning
                 && evt.MessageTemplate.Text == "[DEPRECATED] {Message}"
             );
+    }
+
+    // Includes resolve through resource providers, so this fails if configuration loads before
+    // the providers initialize.
+    [Test]
+    public async Task Configuration_can_use_includes_from_resource_providers()
+    {
+        var templates = Fs.CurrentDirectory().SubDirectory("templates");
+        Fs.AddFile(
+            templates.File("includes.json"),
+            new MockFileData(
+                """
+                {
+                  "radarr": [{ "id": "test-include", "template": "include.yml" }],
+                  "sonarr": []
+                }
+                """
+            )
+        );
+        Fs.AddFile(
+            templates.File("include.yml"),
+            new MockFileData(
+                """
+                quality_definition:
+                  type: movie
+                """
+            )
+        );
+        Fs.AddFile(
+            Paths.ConfigDirectory.File("settings.yml"),
+            new MockFileData(
+                $"""
+                resource_providers:
+                  - name: local-templates
+                    type: config-templates
+                    path: {templates.FullName}
+                """
+            )
+        );
+        AddConfig(
+            """
+            radarr:
+              with-include:
+                base_url: http://localhost:7878
+                api_key: asdf
+                include:
+                  - template: test-include
+            """
+        );
+
+        using var client = CreateClient();
+        var response = await client.PostAsJsonAsync(
+            new Uri("/api/v1/sync/jobs", UriKind.Relative),
+            new CreateSyncJobRequest { Instances = ["with-include"] }
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
     }
 
     [Test]

@@ -28,7 +28,7 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
         AddConfig(Paths.ConfigDirectory.File("recyclarr.yml"), "from-main-file");
         AddConfig(Paths.YamlConfigDirectory.File("extra.yml"), "from-configs-directory");
 
-        var configuration = Resolve<ServerConfiguration>();
+        var configuration = Resolve<ServerConfigLoader>().LoadServerConfiguration();
 
         configuration
             .InstanceNames.Should()
