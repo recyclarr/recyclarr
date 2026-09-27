@@ -5,7 +5,6 @@ using Recyclarr.Logging;
 using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Sync.Results;
-using Refit;
 using Serilog.Context;
 using SemanticInstanceResult = Recyclarr.Sync.Results.SyncInstanceResult;
 
@@ -55,7 +54,7 @@ internal class InstanceSyncProcessor(
                 ? inner
                 : e;
 
-            var operationalFailure = MapOperationalFailure(actual);
+            var operationalFailure = OperationalFailureClassifier.Classify(actual);
             if (operationalFailure is null)
             {
                 throw;
@@ -71,22 +70,4 @@ internal class InstanceSyncProcessor(
             );
         }
     }
-
-    private static OperationalFailure? MapOperationalFailure(Exception exception) =>
-        exception switch
-        {
-            ServiceIncompatibilityException => new ServiceIncompatibleFailure(),
-            SyncState.SyncStateUnavailableException => new SyncStateUnavailableFailure(),
-            ApiRequestException => new ServiceUnavailableFailure(),
-            HttpRequestException => new ServiceUnavailableFailure(),
-            ApiException { StatusCode: System.Net.HttpStatusCode.Unauthorized } =>
-                new ServiceUnauthenticatedFailure(),
-            ApiException { StatusCode: System.Net.HttpStatusCode.Forbidden } =>
-                new ServiceUnauthorizedFailure(),
-            ApiException { StatusCode: System.Net.HttpStatusCode.TooManyRequests } =>
-                new ServiceRateLimitedFailure(),
-            ApiException { StatusCode: >= System.Net.HttpStatusCode.InternalServerError } =>
-                new ServiceUnavailableFailure(),
-            _ => null,
-        };
 }
