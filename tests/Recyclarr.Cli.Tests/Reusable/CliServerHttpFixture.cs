@@ -90,9 +90,7 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     protected string LogOutput => _cli.Log.Rendered;
 
-    /// <summary>
-    /// Replaces the CLI's <c>cli.yml</c>. By default it points the CLI at the in-process server.
-    /// </summary>
+    // Replaces the CLI's cli.yml. By default it points the CLI at the in-process server.
     protected void WriteCliSettings(string yaml)
     {
         _cli.WriteCliSettings(yaml);
