@@ -1,10 +1,7 @@
 namespace Recyclarr.Server.Sync;
 
-/// <summary>
-/// Writes config-load diagnostics to the log. Clients render the structured form for the user;
-/// this is the log-channel counterpart, matching what DiagnosticsLogger does for the diagnostics a
-/// sync run emits while it executes.
-/// </summary>
+// Writes startup configuration diagnostics to the server log, the only place they appear
+// (ADR-019).
 internal static class ConfigLoadDiagnosticsLogger
 {
     public static void Log(ILogger log, ConfigLoadDiagnostics diagnostics)
@@ -16,11 +13,6 @@ internal static class ConfigLoadDiagnosticsLogger
                 failure.FileName ?? "unknown",
                 failure.Message
             );
-        }
-
-        foreach (var instance in diagnostics.UnknownInstances)
-        {
-            log.Error("Instance does not exist: {Instance}", instance);
         }
 
         foreach (var instance in diagnostics.InvalidInstances)

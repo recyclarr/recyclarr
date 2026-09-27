@@ -16,9 +16,7 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         // opt-out is explicit until API key auth lands (REC-153).
         AllowAnonymous();
 
-        Description(b =>
-            b.Produces<GetSyncJobResponse>().ProducesProblemDetails(404).WithTags("Sync")
-        );
+        Description(b => b.Produces<GetSyncJobResponse>().ProducesProblems(404).WithTags("Sync"));
     }
 
     public override async Task HandleAsync(GetSyncJobRequest req, CancellationToken ct)
