@@ -4,8 +4,6 @@ namespace Recyclarr.Platform;
 
 public class AppPaths(IDirectoryInfo configRoot, IDirectoryInfo dataRoot) : IAppPaths
 {
-    public static string DefaultAppDataDirectoryName => "recyclarr";
-
     // Config root for backward compatibility with other code
     public IDirectoryInfo ConfigDirectory => configRoot;
 
