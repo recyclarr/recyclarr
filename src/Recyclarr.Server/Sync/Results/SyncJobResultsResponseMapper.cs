@@ -4,6 +4,7 @@ using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualitySize;
+using Recyclarr.Server.Features;
 using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
@@ -37,7 +38,7 @@ internal static class SyncJobResultsResponseMapper
                 MapSonarrPipelines(instance.Pipelines)
             )
             {
-                Failure = MapFailure(instance.Failure),
+                Failure = instance.Failure?.ToCategory(),
                 Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
@@ -47,7 +48,7 @@ internal static class SyncJobResultsResponseMapper
                 MapRadarrPipelines(instance.Pipelines)
             )
             {
-                Failure = MapFailure(instance.Failure),
+                Failure = instance.Failure?.ToCategory(),
                 Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
@@ -197,17 +198,4 @@ internal static class SyncJobResultsResponseMapper
             );
         }
     }
-
-    private static InstanceFailureCategory? MapFailure(OperationalFailure? failure) =>
-        failure switch
-        {
-            null => null,
-            ServiceUnavailableFailure => InstanceFailureCategory.ServiceUnavailable,
-            ServiceUnauthenticatedFailure => InstanceFailureCategory.ServiceUnauthenticated,
-            ServiceUnauthorizedFailure => InstanceFailureCategory.ServiceUnauthorized,
-            ServiceRateLimitedFailure => InstanceFailureCategory.ServiceRateLimited,
-            ServiceIncompatibleFailure => InstanceFailureCategory.ServiceIncompatible,
-            SyncStateUnavailableFailure => InstanceFailureCategory.SyncStateUnavailable,
-            _ => throw new ArgumentOutOfRangeException(nameof(failure), failure, null),
-        };
 }
