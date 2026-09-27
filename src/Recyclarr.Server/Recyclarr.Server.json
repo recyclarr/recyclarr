@@ -5,6 +5,126 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/guide/{service}/custom-format-groups": {
+      "get": {
+        "tags": [
+          "Guide"
+        ],
+        "operationId": "GuideCustomFormatGroups",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SupportedServices"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGuideCustomFormatGroupsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guide/{service}/custom-formats": {
+      "get": {
+        "tags": [
+          "Guide"
+        ],
+        "operationId": "GuideCustomFormats",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SupportedServices"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGuideCustomFormatsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guide/{service}/score-sets": {
+      "get": {
+        "tags": [
+          "Guide"
+        ],
+        "operationId": "GuideScoreSets",
+        "parameters": [
+          {
+            "name": "service",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SupportedServices"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGuideScoreSetsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/instances/{name}/custom-formats": {
       "get": {
         "tags": [
@@ -670,6 +790,89 @@
           }
         }
       },
+      "GuideCustomFormatGroupMemberResponse": {
+        "required": [
+          "trashId",
+          "name",
+          "required",
+          "default"
+        ],
+        "type": "object",
+        "properties": {
+          "trashId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GuideCustomFormatGroupSummaryResponse": {
+        "required": [
+          "trashId",
+          "name",
+          "default",
+          "customFormats",
+          "qualityProfiles"
+        ],
+        "type": "object",
+        "properties": {
+          "trashId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "customFormats": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatGroupMemberResponse"
+          },
+          "qualityProfiles": {
+            "$ref": "#/components/schemas/IReadOnlyListOfString"
+          }
+        }
+      },
+      "GuideCustomFormatSummaryResponse": {
+        "required": [
+          "trashId",
+          "name",
+          "category"
+        ],
+        "type": "object",
+        "properties": {
+          "trashId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "GuideScoreSetSummaryResponse": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "HttpValidationProblemDetails": {
         "type": "object",
         "properties": {
@@ -797,6 +1000,30 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/CustomFormatUpdateResponse"
+        }
+      },
+      "IReadOnlyListOfGuideCustomFormatGroupMemberResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GuideCustomFormatGroupMemberResponse"
+        }
+      },
+      "IReadOnlyListOfGuideCustomFormatGroupSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GuideCustomFormatGroupSummaryResponse"
+        }
+      },
+      "IReadOnlyListOfGuideCustomFormatSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GuideCustomFormatSummaryResponse"
+        }
+      },
+      "IReadOnlyListOfGuideScoreSetSummaryResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/GuideScoreSetSummaryResponse"
         }
       },
       "IReadOnlyListOfInstanceCustomFormatSummaryResponse": {
@@ -1007,6 +1234,39 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/ValueChangeResponseOfDecimal"
+        }
+      },
+      "ListGuideCustomFormatGroupsResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatGroupSummaryResponse"
+          }
+        }
+      },
+      "ListGuideCustomFormatsResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideCustomFormatSummaryResponse"
+          }
+        }
+      },
+      "ListGuideScoreSetsResponse": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/IReadOnlyListOfGuideScoreSetSummaryResponse"
+          }
         }
       },
       "ListInstanceCustomFormatsResponse": {
