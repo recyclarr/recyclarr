@@ -465,6 +465,16 @@
               }
             }
           },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSyncJobResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
