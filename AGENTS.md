@@ -58,8 +58,8 @@ that action arrives too late.
 
 ## Project Context
 
-Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic;
-`TrashGuide/`, `ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}`
+Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `TrashGuide/`,
+`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}`
 (Refitter-generated clients from vendored `openapi.json`; `Generated/` is excluded from source
 control). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
 typed client from the server's OpenAPI spec) and `Recyclarr.Platform` (process and environment
@@ -150,28 +150,16 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 
 ### Comments
 
-- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow analysis
-  cannot cross a third-party callback, prefer a documented `!` over an unreachable defensive throw
-  (for example, `// non-null: guarded above`).
+- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow
+  analysis cannot cross a third-party callback, prefer a documented `!` over an unreachable
+  defensive throw (for example, `// non-null: guarded above`).
 - NEVER commit commented-out code.
 
-#### Public Contract Documentation
+#### Documentation Syntax
 
-- Document hand-written public types with XML `<summary>` comments for maintainers who know C# but
-  not the subsystem. Explain purpose and unfamiliar domain terms; do not paraphrase the type name.
-- Add `<remarks>` when responsibility boundaries, consumer-visible guarantees, or lifecycle
-  constraints need more explanation. Do not require both tags or impose a fixed structure.
-- Document public members selectively when their signatures and type documentation leave important
-  contract meaning unexplained.
-- Do not add `<param>`, `<returns>`, `<value>`, or `<exception>` boilerplate. Describe consequential
-  behavior in the summary or remarks instead.
-- Do not add XML documentation to internal or private types or members. Prefer self-documenting
-  implementation code; follow the inline comment rules above when explanation is still necessary.
-- Keep shared contract documentation on the declaring interface or base member. Reference it rather
-  than duplicating it.
-- Verify documented guarantees against the implementation and callers. Update documentation when the
-  contract changes; do not describe intended behavior as an existing guarantee.
-- Apply these rules to new and changed contracts. Do not backfill unrelated code.
+- Write type and member documentation as XML doc comments: `<summary>`, plus `<remarks>` when more
+  explanation is needed. Do not add `<param>`, `<returns>`, `<value>`, or `<exception>` boilerplate.
+- Reference shared documentation with `<inheritdoc/>` or `<see cref="..."/>` instead of copying it.
 
 ## Backward Compatibility
 
