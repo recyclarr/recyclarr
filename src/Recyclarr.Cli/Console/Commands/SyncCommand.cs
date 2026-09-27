@@ -3,8 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Server;
-using Recyclarr.Sync;
-using Recyclarr.TrashGuide;
+using Recyclarr.Client.V1;
 using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
@@ -20,7 +19,7 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
         "CA1819:Properties should not return arrays",
         Justification = "Spectre.Console requires it"
     )]
-    internal class CliSettings : BaseCommandSettings, ISyncSettings
+    internal class CliSettings : BaseCommandSettings
     {
         [CommandArgument(0, "[service]")]
         [EnumDescription<SupportedServices>(
@@ -28,12 +27,6 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
         )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
         public SupportedServices? Service { get; init; }
-
-        [CommandOption("-c|--config")]
-        [Description("One or more YAML configuration files to load & use.")]
-        [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] ConfigsOption { get; init; } = [];
-        public IReadOnlyCollection<string> Configs => ConfigsOption;
 
         [CommandOption("-p|--preview")]
         [Description("Perform a dry run: preview the results without syncing.")]
@@ -45,8 +38,7 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
             "One or more instance names to sync. If not specified, all instances will be synced."
         )]
         [UsedImplicitly(ImplicitUseKindFlags.Assign)]
-        public string[] InstancesOption { get; init; } = [];
-        public IReadOnlyCollection<string> Instances => InstancesOption;
+        public string[] Instances { get; init; } = [];
     }
 
     protected override async Task<int> ExecuteAsync(
@@ -58,6 +50,12 @@ internal class SyncCommand(ServerConnectionFactory connections, SyncCommandHandl
         // Resource providers are initialized by the server as part of its startup, so there is
         // nothing to prepare here. Disposing the connection stops an ephemeral server.
         await using var connection = await connections.ConnectAsync(ct);
-        return (int)await handler.RunAsync(connection.Sync, settings, ct);
+        var request = new CreateSyncJobRequest
+        {
+            Service = settings.Service,
+            Instances = [.. settings.Instances],
+            Preview = settings.Preview,
+        };
+        return (int)await handler.RunAsync(connection.Sync, request, ct);
     }
 }

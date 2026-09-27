@@ -34,7 +34,10 @@ internal sealed class EphemeralServerLauncher(
     /// Starts the server process and returns its base address once it reports readiness.
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the server binary is missing, or the process exits before sending READY.
+    /// Thrown when the server binary is missing.
+    /// </exception>
+    /// <exception cref="ServerStartException">
+    /// Thrown when the process exits before sending READY.
     /// </exception>
     public async Task<Uri> StartAsync(CancellationToken ct)
     {
@@ -93,22 +96,26 @@ internal sealed class EphemeralServerLauncher(
         }
     }
 
+    // A server that stops before READY failed to start, usually because of invalid configuration
+    // (ADR-019). Its error log lines are the only explanation the CLI gets, so they are kept for
+    // the failure message rather than only forwarded to the log.
     private async Task<Uri> ReadUntilReadyAsync(TextReader output, CancellationToken ct)
     {
+        List<string> startupErrors = [];
         while (true)
         {
             var line =
-                await output.ReadLineAsync(ct)
-                ?? throw new InvalidOperationException(
-                    "Server process exited before sending the READY handshake."
-                );
+                await output.ReadLineAsync(ct) ?? throw new ServerStartException(startupErrors);
 
             if (line.StartsWith(ReadyPrefix, StringComparison.Ordinal))
             {
                 return new Uri($"http://127.0.0.1:{line[ReadyPrefix.Length..]}");
             }
 
-            ForwardLine(line);
+            if (ForwardLine(line) is { Level: >= LogEventLevel.Error } forwarded)
+            {
+                startupErrors.Add(forwarded.Message);
+            }
         }
     }
 
@@ -120,12 +127,12 @@ internal sealed class EphemeralServerLauncher(
         }
     }
 
-    private void ForwardLine(string line)
+    private (LogEventLevel Level, string Message)? ForwardLine(string line)
     {
         if (!line.StartsWith(LogPrefix, StringComparison.Ordinal))
         {
             log.Debug("Unrecognized server output: {Line}", line);
-            return;
+            return null;
         }
 
         var payload = line[LogPrefix.Length..];
@@ -133,9 +140,11 @@ internal sealed class EphemeralServerLauncher(
         if (separator < 0 || !Enum.TryParse<LogEventLevel>(payload[..separator], out var level))
         {
             log.Debug("Unrecognized server output: {Line}", line);
-            return;
+            return null;
         }
 
-        log.Write(level, "{ServerMessage}", payload[(separator + 1)..]);
+        var message = payload[(separator + 1)..];
+        log.Write(level, "{ServerMessage}", message);
+        return (level, message);
     }
 }

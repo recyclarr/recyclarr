@@ -1,5 +1,4 @@
 using Recyclarr.Client.V1;
-using Recyclarr.Sync.Progress;
 using Spectre.Console;
 
 namespace Recyclarr.Cli.Processors.Sync.Progress;
@@ -9,7 +8,7 @@ internal class SyncProgressRenderer(IAnsiConsole console)
     private const int RefreshIntervalMs = 80;
 
     private readonly ProgressTableBuilder _tableBuilder = new();
-    private ProgressSnapshot _snapshot = new([]);
+    private IReadOnlyList<InstanceSnapshotResponse> _snapshot = [];
 
     /// <summary>
     /// Renders a live table from job snapshots as they arrive, and returns the final one. The
@@ -27,7 +26,7 @@ internal class SyncProgressRenderer(IAnsiConsole console)
                 + "[green]✓[/] ok [grey]·[/] "
                 + "[yellow]~[/] partial [grey]·[/] "
                 + "[red]✗[/] failed [grey]·[/] "
-                + "[grey]--[/] skipped"
+                + "[grey]--[/] not run"
                 + "\n"
         );
 
@@ -76,7 +75,7 @@ internal class SyncProgressRenderer(IAnsiConsole console)
             await foreach (var job in updates.WithCancellation(ct))
             {
                 lastJob = job;
-                _snapshot = ProgressSnapshotMapper.ToSnapshot(job.Progress);
+                _snapshot = [.. job.Progress];
             }
         }
     }

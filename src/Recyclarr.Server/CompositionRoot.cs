@@ -42,8 +42,6 @@ internal static class CompositionRoot
 
     public static void Setup(ContainerBuilder builder, ServerLogOptions logOptions)
     {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
@@ -55,7 +53,6 @@ internal static class CompositionRoot
         builder.RegisterModule<ResourceProviderAutofacModule>();
 
         builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         builder.RegisterType<ConsoleReadySignal>().As<IReadySignal>().SingleInstance();
 

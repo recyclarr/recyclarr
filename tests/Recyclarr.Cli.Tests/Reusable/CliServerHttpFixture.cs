@@ -1,7 +1,17 @@
+using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO.Abstractions;
 using Autofac;
+using Recyclarr.Cli.Console;
+using Recyclarr.Cli.ErrorHandling;
+using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
 using Recyclarr.Server.TestLibrary;
+using Recyclarr.Settings;
+using Recyclarr.Settings.Models;
+using Serilog.Events;
+using Spectre.Console;
+using Spectre.Console.Testing;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
@@ -22,19 +32,26 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     private static readonly Uri ServerAddress = new("http://localhost");
 
     private readonly CliContainer _cli;
-    private readonly Lazy<ISyncApi> _api;
+    private readonly Lazy<ServerConnection> _connection;
 
     protected CliServerHttpFixture()
     {
         _cli = new CliContainer(CreateClient);
-        _api = new Lazy<ISyncApi>(() => _cli.Resolve<Func<Uri, ISyncApi>>()(ServerAddress));
+        _connection = new Lazy<ServerConnection>(() =>
+        {
+            var client = _cli.Resolve<Func<HttpClient>>()();
+            client.BaseAddress = ServerAddress;
+            return new ServerConnection(client, ownedServer: null);
+        });
     }
 
     /// <summary>
-    /// The CLI's own <c>ISyncApi</c>, built by the production registration (and therefore the
-    /// production Refit settings), talking to the in-process server.
+    /// The CLI's production connection type (and therefore its Refit settings), talking to the
+    /// in-process server.
     /// </summary>
-    protected ISyncApi Api => _api.Value;
+    protected ServerConnection Connection => _connection.Value;
+
+    protected ISyncApi Api => Connection.Sync;
 
     /// <summary>
     /// Writes a config the server can load, so a sync request has something to act on.
@@ -60,6 +77,40 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         return _cli.Resolve<T>();
     }
 
+    /// <summary>
+    /// Everything the CLI wrote to the console during <see cref="RunCliAsync"/>. Tests run with
+    /// redirected output, which puts the CLI in log mode and silences markup output, so only raw
+    /// list output reaches it; use <see cref="LogOutput"/> for messages.
+    /// </summary>
+    protected string ConsoleOutput => _cli.Console.Output;
+
+    /// <summary>
+    /// Every message the CLI logged, rendered, one per line.
+    /// </summary>
+    protected string LogOutput => _cli.Log.Rendered;
+
+    /// <summary>
+    /// Runs a CLI command line the way <c>Program</c> does, against the in-process server, and
+    /// returns its exit code.
+    /// </summary>
+    protected async Task<int> RunCliAsync(params string[] args)
+    {
+        var scope = _cli.Resolve<ILifetimeScope>();
+        try
+        {
+            return await CliSetup.Run(scope, args);
+        }
+        catch (Exception e)
+        {
+            if (!await scope.Resolve<ExceptionHandler>().TryHandleAsync(e))
+            {
+                throw;
+            }
+
+            return (int)ExitStatus.Failed;
+        }
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -72,17 +123,44 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
 
     private sealed class CliContainer(Func<HttpClient> createClient) : CliIntegrationFixture
     {
+        public TestConsole Console { get; } = new TestConsole().Width(200);
+        public RecordingLogger Log { get; } = new();
+
         protected override void RegisterStubsAndMocks(ContainerBuilder builder)
         {
             base.RegisterStubsAndMocks(builder);
 
             builder.RegisterInstance(createClient);
+            builder.RegisterInstance(Console).As<IAnsiConsole>();
+            builder.RegisterInstance(Log).As<ILogger>();
+
+            // A configured server address selects the centralized mode, so commands connect to
+            // the in-process server instead of launching an ephemeral one.
+            var settings = Substitute.For<ISettings<ServerSettings>>();
+            settings.Value.Returns(new ServerSettings { BaseUrl = ServerAddress });
+            builder.RegisterInstance(settings);
         }
 
         public new T Resolve<T>()
             where T : notnull
         {
             return base.Resolve<T>();
+        }
+    }
+
+    private sealed class RecordingLogger : ILogger
+    {
+        private readonly ConcurrentQueue<LogEvent> _events = new();
+
+        public string Rendered =>
+            string.Join(
+                Environment.NewLine,
+                _events.Select(e => e.RenderMessage(CultureInfo.InvariantCulture))
+            );
+
+        public void Write(LogEvent logEvent)
+        {
+            _events.Enqueue(logEvent);
         }
     }
 }

@@ -2,7 +2,9 @@ using Autofac;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Tests.Reusable;
 using Recyclarr.Client.V1;
+using Recyclarr.Config.Models;
 using Recyclarr.Sync;
+using Recyclarr.Sync.Results;
 using Recyclarr.TestLibrary.Autofac;
 using Refit;
 
@@ -15,14 +17,20 @@ internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
     private const string InstanceName = "real-instance";
 
     // Holds the sync open so the job stays non-terminal for as long as the test needs it to.
-    private readonly TaskCompletionSource<ExitStatus> _sync = new();
+    private readonly TaskCompletionSource<SyncRunResult> _sync = new();
 
     private static CancellationToken Ct => TestContext.CurrentContext.CancellationToken;
 
     protected override void RegisterStubsAndMocks(ContainerBuilder builder)
     {
         builder.RegisterMockFor<ISyncOrchestrator>(m =>
-            m.RunAsync(default!, default!, default).ReturnsForAnyArgs(_sync.Task)
+            m.RunAsync(
+                    Arg.Any<IReadOnlyList<IServiceConfiguration>>(),
+                    Arg.Any<ISyncSettings>(),
+                    Arg.Any<IInstanceSyncProgress>(),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(_sync.Task)
         );
     }
 
@@ -51,7 +59,7 @@ internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
             // at least one intermediate snapshot ahead of the terminal one.
             if (statuses.Count == 2)
             {
-                _sync.SetResult(ExitStatus.Succeeded);
+                _sync.SetResult(new SyncRunResult([]));
             }
         }
 
@@ -75,7 +83,7 @@ internal sealed class SyncJobPollerHttpTest : CliServerHttpFixture
         {
             // A test that failed before releasing the sync would otherwise leave the server's
             // background run hanging on this task forever.
-            _sync.TrySetResult(ExitStatus.Succeeded);
+            _sync.TrySetResult(new SyncRunResult([]));
         }
 
         base.Dispose(disposing);

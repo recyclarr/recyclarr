@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.Pipelines.CustomFormat;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -13,8 +13,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ListScoreSetsCommand(
     ILogger log,
     IAnsiConsole console,
-    CategorizedCustomFormatProvider provider,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListScoreSetsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -33,15 +32,9 @@ internal class ListScoreSetsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-
-        var customFormats = provider.Get(settings.Service);
-
-        var scoreSets = customFormats
-            .SelectMany(x => x.Resource.TrashScores.Keys)
-            .Distinct(StringComparer.InvariantCultureIgnoreCase)
-            .Order(StringComparer.InvariantCultureIgnoreCase)
-            .ToList();
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.ScoreSets(settings.Service, ct);
+        var scoreSets = response.ContentOrThrow().Items.Select(x => x.Name).ToList();
 
         log.Debug("Found {Count} score sets for {Service}", scoreSets.Count, settings.Service);
         log.Information("Score sets: {@ScoreSets}", scoreSets);
