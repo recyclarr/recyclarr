@@ -3,8 +3,10 @@ using Recyclarr.Server.Sync;
 
 namespace Recyclarr.Server.Features.Sync.CreateJob;
 
-internal sealed class Endpoint(ServerConfiguration configuration, SyncJobLauncher launcher)
-    : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
+internal sealed class Endpoint(
+    ServerConfigurationStore configurationStore,
+    SyncJobLauncher launcher
+) : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
 {
     public override void Configure()
     {
@@ -26,6 +28,7 @@ internal sealed class Endpoint(ServerConfiguration configuration, SyncJobLaunche
 
     public override async Task HandleAsync(CreateSyncJobRequest req, CancellationToken ct)
     {
+        var configuration = configurationStore.Current;
         if (configuration.Instances.Count == 0)
         {
             AddError("No instances are configured on the server");
@@ -37,7 +40,7 @@ internal sealed class Endpoint(ServerConfiguration configuration, SyncJobLaunche
         var unknown = configuration.FindUnknown(settings.Instances);
         if (unknown.Count > 0)
         {
-            await SendUnknownInstancesAsync(unknown);
+            await SendUnknownInstancesAsync(unknown, configuration.InstanceNames);
             return;
         }
 
@@ -56,14 +59,17 @@ internal sealed class Endpoint(ServerConfiguration configuration, SyncJobLaunche
         await Send.ResponseAsync(Response, 202, ct);
     }
 
-    private async Task SendUnknownInstancesAsync(IReadOnlyList<string> unknown)
+    private async Task SendUnknownInstancesAsync(
+        IReadOnlyList<string> unknown,
+        IReadOnlyList<string> available
+    )
     {
         var problem = ErrorResponses.Apply(
             new CreateSyncJobProblemDetails
             {
                 Title = "The sync request names instances that are not configured",
                 UnknownInstances = unknown,
-                AvailableInstances = configuration.InstanceNames,
+                AvailableInstances = available,
             },
             HttpContext,
             400
