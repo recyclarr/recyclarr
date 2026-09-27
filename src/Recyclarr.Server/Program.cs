@@ -30,6 +30,10 @@ builder.Services.AddSerilog(
 );
 builder.Services.AddOutboundHttpClients();
 
+// IResult responses (TypedResults.Json), which endpoints use for Problem Details with extension
+// members, serialize with ASP.NET's options rather than FastEndpoints'.
+builder.Services.ConfigureHttpJsonOptions(o => ConfigureWireJson(o.SerializerOptions));
+
 builder
     .Services.AddFastEndpoints(o =>
     {
@@ -78,9 +82,7 @@ app.UseFastEndpoints(c =>
     // members to it (FastEndpoints#637). ASP.NET's type can be subclassed with typed members.
     c.Errors.ProducesMetadataType = typeof(HttpValidationProblemDetails);
     c.Errors.ResponseBuilder = ErrorResponses.Build;
-    c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    c.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    c.Serializer.Options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    ConfigureWireJson(c.Serializer.Options);
     c.Endpoints.NameGenerator = OperationIds.Generate;
 });
 app.MapOpenApi();
@@ -110,6 +112,13 @@ app.Services.GetRequiredService<IReadySignal>().Ready(port);
 await app.WaitForShutdownAsync();
 
 return 0;
+
+static void ConfigureWireJson(JsonSerializerOptions options)
+{
+    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+}
 
 static int? ParseParentPid(string? value)
 {
