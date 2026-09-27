@@ -21,8 +21,10 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
         IReadOnlyList<string>? messages = actual switch
         {
             ServerStartException e => [e.Message, .. e.Errors],
+            // Refit reports transport failures of IApiResponse calls as ApiRequestException.
+            ApiRequestException { InnerException: { } e } => [Unreachable(e.Message)],
             ApiException e => await DescribeAsync(e),
-            HttpRequestException e => [$"Unable to reach the Recyclarr server: {e.Message}"],
+            HttpRequestException e => [Unreachable(e.Message)],
             CommandRuntimeException => [actual.Message],
             _ => null,
         };
@@ -41,6 +43,9 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
         log.Error(actual, "Exiting due to fatal error");
         return true;
     }
+
+    private static string Unreachable(string reason) =>
+        $"Unable to reach the Recyclarr server: {reason}";
 
     private static async Task<IReadOnlyList<string>> DescribeAsync(ApiException e)
     {

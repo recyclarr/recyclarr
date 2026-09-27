@@ -47,6 +47,12 @@ internal class SyncCommandHandler(
             return response.Content!.Id;
         }
 
+        // No HTTP response at all: a transport failure, not a refusal.
+        if (response.Error is ApiRequestException transportFailure)
+        {
+            throw transportFailure;
+        }
+
         await RenderRefusalAsync(response);
         return null;
     }
