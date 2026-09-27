@@ -11,6 +11,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CLI: Raw list output was replaced by log messages when redirected or piped to another process
 - Sync: Crash on Windows when output is redirected to a file or piped to another process
+- Docker: Stopping the container interrupted a sync in progress instead of letting it finish
 
 ## [8.7.2] - 2026-09-02
 

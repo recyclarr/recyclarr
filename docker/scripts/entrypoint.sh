@@ -9,9 +9,9 @@ fi
 
 # If the script has any arguments, invoke the CLI instead
 if [ "$#" -gt 0 ]; then
-    recyclarr "$@"
+    exec recyclarr "$@"
 else
     echo "Starting cron schedule using: $CRON_SCHEDULE"
     echo "$CRON_SCHEDULE /cron.sh" > /tmp/crontab
-    supercronic -passthrough-logs -no-reap /tmp/crontab
+    exec supercronic -passthrough-logs -no-reap /tmp/crontab
 fi
