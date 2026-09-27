@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
+using Recyclarr.Server.Features.Guide.Naming;
 using Recyclarr.Server.Features.Sync.GetResults;
 
-namespace Recyclarr.Server.Sync.Results;
+namespace Recyclarr.Server;
 
-internal sealed class SyncResultsDocumentTransformer : IOpenApiDocumentTransformer
+// Polymorphic response types declare their discriminator on the base schema. Removing it from each
+// derived schema keeps generated clients from seeing the property twice.
+internal sealed class DiscriminatorDocumentTransformer : IOpenApiDocumentTransformer
 {
     public Task TransformAsync(
         OpenApiDocument document,
@@ -20,6 +23,7 @@ internal sealed class SyncResultsDocumentTransformer : IOpenApiDocumentTransform
 
         RemoveDiscriminatorProperties(schemas, nameof(SyncInstanceResultsResponse), "service");
         RemoveDiscriminatorProperties(schemas, nameof(PlanningOutcomeResponse), "type");
+        RemoveDiscriminatorProperties(schemas, nameof(GuideNamingResponse), "service");
         return Task.CompletedTask;
     }
 
