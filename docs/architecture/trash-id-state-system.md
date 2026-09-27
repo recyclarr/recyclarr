@@ -119,11 +119,6 @@ When checking for name collisions, Recyclarr uses case-insensitive matching but 
 3. **Update**: After Persist, state refreshes mappings
 4. **Save**: Updated state written to disk
 
-### State Repair Command (Deprecated)
-
-The `state repair` command is deprecated. Sync now handles all state reconciliation automatically by
-adopting existing resources that match by name. The command outputs a deprecation warning and exits.
-
 ## Design Principles
 
 **Config is Authoritative**: If a resource is in the user's YAML config, Recyclarr owns it. Single

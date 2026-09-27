@@ -16,8 +16,6 @@ internal static class CliSetup
             .WithExample("sync", "-i", "instance1", "-i", "instance2")
             .WithExample("sync", "sonarr", "--preview");
 
-        cli.AddCommand<MigrateCommand>("migrate");
-
         cli.AddBranch(
             "list",
             list =>
@@ -33,24 +31,6 @@ internal static class CliSetup
         );
 
         cli.AddBranch(
-            "config",
-            config =>
-            {
-                config.SetDescription("Operations for configuration files");
-                config.AddCommand<ConfigCreateCommand>("create");
-                config.AddBranch(
-                    "list",
-                    list =>
-                    {
-                        list.SetDescription("List configuration files in various ways");
-                        list.AddCommand<ConfigListLocalCommand>("local");
-                        list.AddCommand<ConfigListTemplatesCommand>("templates");
-                    }
-                );
-            }
-        );
-
-        cli.AddBranch(
             "delete",
             delete =>
             {
@@ -58,20 +38,6 @@ internal static class CliSetup
                     "Delete operations for remote services (e.g. Radarr, Sonarr)"
                 );
                 delete.AddCommand<DeleteCustomFormatsCommand>("custom-formats");
-            }
-        );
-
-        cli.AddBranch(
-            "state",
-            state =>
-            {
-                state.SetDescription("State management operations");
-                state
-                    .AddCommand<StateRepairCommand>("repair")
-                    .WithExample("state", "repair")
-                    .WithExample("state", "repair", "custom-formats")
-                    .WithExample("state", "repair", "-i", "instance1", "-i", "instance2")
-                    .WithExample("state", "repair", "custom-formats", "--preview");
             }
         );
     }
