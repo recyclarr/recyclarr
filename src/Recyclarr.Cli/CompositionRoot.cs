@@ -8,8 +8,6 @@ using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
 using Recyclarr.Cli.Server;
-using Recyclarr.Common;
-using Recyclarr.Common.FluentValidation;
 using Serilog.Core;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -20,19 +18,15 @@ internal static class CompositionRoot
 {
     public static void Setup(ContainerBuilder builder)
     {
-        var thisAssembly = typeof(CompositionRoot).Assembly;
-
         // Needed for Autofac.Extras.Ordering
         builder.RegisterSource<OrderedRegistrationSource>();
 
         RegisterLogger(builder);
 
-        // Core supplies settings.yml loading, application paths, and log setup. Sync, guide, and
-        // instance operations go through the server.
-        builder.RegisterModule<CoreAutofacModule>();
-
+        // The CLI is an HTTP client of the server (ADR-020). It needs only the environment and the
+        // configuration directory lookup, never Recyclarr.Core.
+        builder.RegisterModule<PlatformAutofacModule>();
         builder.RegisterType<FileSystem>().As<IFileSystem>();
-        builder.Register(_ => new ResourceDataReader(thisAssembly)).As<IResourceDataReader>();
 
         CliRegistrations(builder);
         RegisterServiceProcessors(builder);
@@ -56,8 +50,6 @@ internal static class CompositionRoot
     {
         builder.RegisterType<LoggingLevelSwitch>().SingleInstance();
         builder.RegisterType<ReloadableLogger>().AsSelf().As<ILogger>().SingleInstance();
-
-        builder.RegisterType<ValidationLogger>();
     }
 
     private static void CliRegistrations(ContainerBuilder builder)

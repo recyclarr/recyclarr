@@ -2,11 +2,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr</AssemblyName>
-    <!-- GitVersion.MsBuild generates an internal GitVersionInformation class in every project.
-         InternalsVisibleTo from Core exposes its copy, causing CS0436. The local copy is used. -->
     <!-- CA1515: Refit's source generator emits a public client stub into this assembly for every
          RestService.For<T>() call site. The generated type has no file to suppress it on. -->
-    <NoWarn>$(NoWarn);CS0436;CA1515</NoWarn>
+    <NoWarn>$(NoWarn);CA1515</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Recyclarr.Core\Recyclarr.Core.csproj" />
     <ProjectReference Include="..\Recyclarr.Client\Recyclarr.Client.csproj" />
     <ProjectReference Include="..\Recyclarr.Platform\Recyclarr.Platform.csproj" />
     <!-- The server is a sibling executable the CLI launches, never an assembly it links against
