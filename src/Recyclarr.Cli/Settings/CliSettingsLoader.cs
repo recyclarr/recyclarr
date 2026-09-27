@@ -1,21 +1,17 @@
 using System.IO.Abstractions;
-using System.Text.RegularExpressions;
 using Recyclarr.Platform;
 using YamlDotNet.Core;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.RepresentationModel;
 
 namespace Recyclarr.Cli.Settings;
 
 // Reads cli.yml from the configuration directory the server also uses. Only the CLI reads this
 // file, so parsing is strict: a key the CLI does not know is an error, not a silent no-op.
-internal sealed partial class CliSettingsLoader(ConfigDirectoryLocator configLocator)
+// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
+// YamlDotNet's deserializer names C# types instead.
+internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
 {
     public const string FileName = "cli.yml";
-
-    private static readonly IDeserializer Deserializer = new DeserializerBuilder()
-        .WithNamingConvention(UnderscoredNamingConvention.Instance)
-        .Build();
 
     public CliSettings Load()
     {
@@ -25,23 +21,92 @@ internal sealed partial class CliSettingsLoader(ConfigDirectoryLocator configLoc
             return new CliSettings();
         }
 
-        CliSettingsYaml? yaml;
         try
         {
-            using var reader = file.OpenText();
-            yaml = Deserializer.Deserialize<CliSettingsYaml?>(reader);
+            var root = Parse(file.OpenText);
+            var server = Mapping(root, "server", ["base_url"]);
+            var baseUrl = Scalar(server, "base_url", "server.base_url");
+            return new CliSettings { ServerBaseUrl = ParseBaseUrl(baseUrl) };
+        }
+        catch (CliSettingsException e)
+        {
+            throw new CliSettingsException($"{file.FullName}: {e.Message}");
+        }
+    }
+
+    private static YamlMappingNode? Parse(Func<TextReader> open)
+    {
+        var stream = new YamlStream();
+        try
+        {
+            using var reader = open();
+            stream.Load(reader);
         }
         catch (YamlException e)
         {
-            throw new CliSettingsException($"{file.FullName} (line {e.Start.Line}): {Describe(e)}");
+            throw new CliSettingsException($"invalid YAML at line {e.Start.Line}");
         }
 
-        return new CliSettings { ServerBaseUrl = ParseBaseUrl(yaml?.Server?.BaseUrl, file) };
+        return stream.Documents.FirstOrDefault()?.RootNode switch
+        {
+            null or YamlScalarNode { Value: null or "" } => null,
+            YamlMappingNode mapping => Validate(mapping, "", ["server"]),
+            _ => throw new CliSettingsException("the file must contain a mapping"),
+        };
     }
 
-    private static Uri? ParseBaseUrl(string? value, IFileInfo file)
+    private static YamlMappingNode? Mapping(
+        YamlMappingNode? parent,
+        string key,
+        IReadOnlyCollection<string> allowedKeys
+    )
     {
-        if (value is null)
+        return Child(parent, key) switch
+        {
+            null or YamlScalarNode { Value: null or "" } => null,
+            YamlMappingNode mapping => Validate(mapping, $"{key}.", allowedKeys),
+            _ => throw new CliSettingsException($"'{key}' must be a mapping"),
+        };
+    }
+
+    private static string? Scalar(YamlMappingNode? parent, string key, string path)
+    {
+        return Child(parent, key) switch
+        {
+            null => null,
+            YamlScalarNode scalar => scalar.Value,
+            _ => throw new CliSettingsException($"'{path}' must be a single value"),
+        };
+    }
+
+    private static YamlNode? Child(YamlMappingNode? parent, string key)
+    {
+        return parent?.Children.TryGetValue(new YamlScalarNode(key), out var node) == true
+            ? node
+            : null;
+    }
+
+    private static YamlMappingNode Validate(
+        YamlMappingNode mapping,
+        string prefix,
+        IReadOnlyCollection<string> allowedKeys
+    )
+    {
+        var unknown = mapping
+            .Children.Keys.Select(k => (k as YamlScalarNode)?.Value ?? k.ToString())
+            .FirstOrDefault(k => !allowedKeys.Contains(k));
+
+        if (unknown is not null)
+        {
+            throw new CliSettingsException($"unknown setting '{prefix}{unknown}'");
+        }
+
+        return mapping;
+    }
+
+    private static Uri? ParseBaseUrl(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
         {
             return null;
         }
@@ -55,32 +120,8 @@ internal sealed partial class CliSettingsLoader(ConfigDirectoryLocator configLoc
         }
 
         throw new CliSettingsException(
-            $"{file.FullName}: server.base_url must be an absolute http or https URL, "
+            "'server.base_url' must be an absolute http or https URL, "
                 + $"for example http://recyclarr:7982 (got '{value}')"
         );
-    }
-
-    // YamlDotNet names the C# type in unknown-property errors; report the YAML key instead.
-    private static string Describe(YamlException e)
-    {
-        var unknown = UnknownPropertyRegex.Match(e.Message);
-        return unknown.Success
-            ? $"unknown setting '{unknown.Groups["name"].Value}'"
-            : e.InnerException?.Message ?? e.Message;
-    }
-
-    [GeneratedRegex("^Property '(?<name>[^']+)' not found on type")]
-    private static partial Regex UnknownPropertyRegex { get; }
-
-    [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-    private sealed record CliSettingsYaml
-    {
-        public ServerYaml? Server { get; init; }
-    }
-
-    [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
-    private sealed record ServerYaml
-    {
-        public string? BaseUrl { get; init; }
     }
 }
