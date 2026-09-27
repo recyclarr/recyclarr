@@ -5,8 +5,10 @@ using Recyclarr.Client.V1;
 
 namespace Recyclarr.Cli.Tests.ErrorHandling;
 
-// A real HTTP client against a port nothing listens on, so the failure is Refit's own transport
-// error rather than a simulated one.
+/// <summary>
+/// A real HTTP client against a port nothing listens on, so the failure is Refit's own transport
+/// error rather than a simulated one.
+/// </summary>
 internal sealed class UnreachableServerTest : CliIntegrationFixture
 {
     [Test]

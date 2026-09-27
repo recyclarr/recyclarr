@@ -7,8 +7,10 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.Console.Commands;
 
-// The server reads its own bind address and port (settings.yml, or --urls/ASPNETCORE_URLS), so
-// this command only starts it in the foreground.
+/// <summary>
+/// Starts the server in the foreground. The server reads its own bind address and port
+/// (settings.yml, or --urls/ASPNETCORE_URLS), so this command passes nothing to it.
+/// </summary>
 [Description("Run the Recyclarr HTTP server in the foreground")]
 [UsedImplicitly]
 internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
