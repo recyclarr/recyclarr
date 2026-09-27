@@ -1,7 +1,9 @@
 namespace Recyclarr.Cli.Server;
 
-// The ephemeral server exited before it was ready. Errors holds the error log lines the server
-// wrote while starting, which explain why (for example, invalid configuration).
+/// <summary>
+/// The ephemeral server exited before it was ready. Errors holds the error log lines the server
+/// wrote while starting, which explain why (for example, invalid configuration).
+/// </summary>
 internal sealed class ServerStartException(IReadOnlyList<string> errors)
     : Exception("The Recyclarr server failed to start")
 {

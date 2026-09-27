@@ -10,8 +10,11 @@ using Spectre.Console.Cli;
 
 namespace Recyclarr.Cli.ErrorHandling;
 
-// Turns expected failures (server start, server HTTP errors, unreachable server, bad command
-// input, unusable cli.yml or environment) into user-facing messages. Unexpected exceptions are left to the caller.
+/// <summary>
+/// Turns expected failures (server start, server HTTP errors, unreachable server, bad command
+/// input, unusable cli.yml or environment) into user-facing messages. Unexpected exceptions are
+/// left to the caller.
+/// </summary>
 internal class ExceptionHandler(IAnsiConsole console, ILogger log)
 {
     public async Task<bool> TryHandleAsync(Exception exception)

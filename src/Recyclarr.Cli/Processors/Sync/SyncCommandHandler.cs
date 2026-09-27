@@ -33,7 +33,9 @@ internal class SyncCommandHandler(
             : ExitStatus.Succeeded;
     }
 
-    // Returns the id of the accepted job, or null when the server refused the request.
+    /// <summary>
+    /// Returns the id of the accepted job, or null when the server refused the request.
+    /// </summary>
     private async Task<Guid?> CreateJobAsync(
         ISyncApi api,
         CreateSyncJobRequest request,

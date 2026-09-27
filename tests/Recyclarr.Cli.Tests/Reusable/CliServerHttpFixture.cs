@@ -25,8 +25,10 @@ namespace Recyclarr.Cli.Tests.Reusable;
 /// </remarks>
 internal abstract class CliServerHttpFixture : ServerHttpFixture
 {
-    // Refit needs an absolute base address. The handler behind it routes in-memory, so the
-    // authority is never resolved.
+    /// <summary>
+    /// Refit needs an absolute base address. The handler behind it routes in-memory, so the
+    /// authority is never resolved.
+    /// </summary>
     private static readonly Uri ServerAddress = new("http://localhost");
 
     private readonly CliContainer _cli;
@@ -90,7 +92,9 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     /// </summary>
     protected string LogOutput => _cli.Log.Rendered;
 
-    // Replaces the CLI's cli.yml. By default it points the CLI at the in-process server.
+    /// <summary>
+    /// Replaces the CLI's cli.yml. By default it points the CLI at the in-process server.
+    /// </summary>
     protected void WriteCliSettings(string yaml)
     {
         _cli.WriteCliSettings(yaml);

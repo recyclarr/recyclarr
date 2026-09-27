@@ -10,8 +10,10 @@ using Refit;
 
 namespace Recyclarr.Cli.Tests.Console.Commands;
 
-// Runs list and delete command lines against the in-process server, so parsing, the generated
-// client, server responses, rendering, and exit codes are all exercised together.
+/// <summary>
+/// Runs list and delete command lines against the in-process server, so parsing, the generated
+/// client, server responses, rendering, and exit codes are all exercised together.
+/// </summary>
 internal sealed class ServerBackedCommandsHttpTest : CliServerHttpFixture
 {
     private readonly ICustomFormatService _customFormats = Substitute.For<ICustomFormatService>();

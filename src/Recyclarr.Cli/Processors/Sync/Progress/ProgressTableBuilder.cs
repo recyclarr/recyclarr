@@ -4,8 +4,10 @@ using Spectre.Console.Rendering;
 
 namespace Recyclarr.Cli.Processors.Sync.Progress;
 
-// Progress is instance-level only: the polled job carries each instance's status, not pipeline
-// detail (ADR-018).
+/// <summary>
+/// Builds the sync progress table. Progress is instance-level only: the polled job carries each
+/// instance's status, not pipeline detail (ADR-018).
+/// </summary>
 internal class ProgressTableBuilder
 {
     private static readonly string[] SpinnerFrames =
