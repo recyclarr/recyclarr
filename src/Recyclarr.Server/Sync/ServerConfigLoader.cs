@@ -7,22 +7,17 @@ using Recyclarr.Config.Parsing.PostProcessing.ConfigMerging;
 
 namespace Recyclarr.Server.Sync;
 
-// Structured equivalent of Recyclarr.Cli's ConfigRegistryResult, plus the filter diagnostics
-// that ConfigFilterProcessor produces. Callers (endpoints) decide how to translate this into
-// HTTP responses and job diagnostics; this type carries no rendering concerns.
+// Loaded instances plus the parse failures, filter diagnostics, and deprecations found while
+// loading them.
 internal sealed record ServerConfigLoadResult(
     IReadOnlyList<IServiceConfiguration> Configs,
     IReadOnlyList<ConfigParsingException> Failures,
     IReadOnlyList<string> DeprecationWarnings,
     IReadOnlyList<IFilterResult> FilterResults
-)
-{
-    public bool HasAvailableConfigs { get; init; }
-}
+);
 
-// Server-side equivalent of Recyclarr.Cli's ConfigPipeline/ConfigPipelineFactory, minus CLI
-// rendering concerns (IAnsiConsole, ConfigFailureRenderer). Parse failures and filter
-// diagnostics are collected into ServerConfigLoadResult instead of being rendered or thrown.
+// Loads the server's configuration directory once at startup (ADR-019). Parse failures and filter
+// diagnostics are collected, logged, and turned into a startup failure.
 internal sealed class ServerConfigLoader(
     ILogger log,
     IConfigurationFinder finder,
@@ -37,9 +32,7 @@ internal sealed class ServerConfigLoader(
     /// </summary>
     public ServerConfiguration LoadServerConfiguration()
     {
-        var result = LoadConfigs(
-            new ServerSyncSettings(Service: null, Instances: [], Preview: false)
-        );
+        var result = LoadConfigs();
         var diagnostics = ConfigLoadDiagnosticsBuilder.Build(result);
         ConfigLoadDiagnosticsLogger.Log(log, diagnostics);
 
@@ -53,7 +46,7 @@ internal sealed class ServerConfigLoader(
         return new ServerConfiguration(result.Configs);
     }
 
-    public ServerConfigLoadResult LoadConfigs(ServerSyncSettings settings)
+    private ServerConfigLoadResult LoadConfigs()
     {
         var allConfigs = new List<LoadedConfigYaml>();
         var failures = new List<ConfigParsingException>();
@@ -75,18 +68,16 @@ internal sealed class ServerConfigLoader(
             }
         }
 
-        var criteria = new ConfigFilterCriteria
-        {
-            Service = settings.Service,
-            Instances = settings.Instances,
-        };
         var allInstanceNames = allConfigs
             .Select(x => x.InstanceName)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var matchedConfigs = allConfigs.Where(criteria.InstanceMatchesCriteria).ToList();
-        var filterResult = filterProcessor.Filter(criteria, matchedConfigs, allInstanceNames);
+        var filterResult = filterProcessor.Filter(
+            new ConfigFilterCriteria(),
+            allConfigs,
+            allInstanceNames
+        );
 
         var configs = filterResult
             .Configs.Select(x =>
@@ -110,10 +101,7 @@ internal sealed class ServerConfigLoader(
             failures,
             diagnosticCollector.Deprecations,
             filterResult.FilterResults.ToList()
-        )
-        {
-            HasAvailableConfigs = allConfigs.Count > 0,
-        };
+        );
     }
 
     // A server without configuration still serves guide data; it has nothing to sync.

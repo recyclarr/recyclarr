@@ -39,7 +39,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -77,17 +77,17 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/CreateSyncJobProblemDetails"
                 }
               }
             }
           },
-          "500": {
-            "description": "Server Error",
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -128,7 +128,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -169,17 +169,17 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
           },
           "409": {
-            "description": null,
+            "description": "Conflict",
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -189,7 +189,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
                 }
               }
             }
@@ -209,6 +209,63 @@
           "mediaManagement"
         ],
         "type": "string"
+      },
+      "CreateSyncJobProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "unknownInstances": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "availableInstances": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
+          }
+        }
       },
       "CreateSyncJobRequest": {
         "type": "object",
@@ -509,6 +566,51 @@
           "progress": {
             "$ref": "#/components/schemas/IReadOnlyListOfInstanceSnapshotResponse"
           }
+        }
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "$ref": "#/components/schemas/IDictionaryOfStringAndStringArray"
+          }
+        }
+      },
+      "IDictionaryOfStringAndStringArray": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/StringArray"
         }
       },
       "InstanceFailureCategory": {
@@ -1093,79 +1195,6 @@
             "$ref": "#/components/schemas/IReadOnlyListOfString"
           }
         }
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "default": "https://www.rfc-editor.org/rfc/rfc7231#section-6.5.1"
-          },
-          "title": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "default": "One or more validation errors occurred."
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "default": 400
-          },
-          "instance": {
-            "type": "string",
-            "default": "/api/route"
-          },
-          "traceId": {
-            "type": "string",
-            "default": "0HMPNHL0JHL76:00000001"
-          },
-          "detail": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "the details of the error"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "the name of the error or property of the dto that caused the error",
-                  "default": "Error or field name"
-                },
-                "reason": {
-                  "type": "string",
-                  "description": "the reason for the error",
-                  "default": "Error reason"
-                },
-                "code": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "description": "the code of the error"
-                },
-                "severity": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "description": "the severity of the error"
-                }
-              },
-              "description": "the error details object"
-            }
-          }
-        },
-        "description": "RFC9457 compatible problem details/ error response class. this can be used by configuring startup like so:\n```app.UseFastEndpoints(c =&gt; c.Errors.UseProblemDetails())```"
       },
       "PropersAndRepacksModeResponse": {
         "enum": [
@@ -2216,6 +2245,12 @@
               }
             ]
           }
+        }
+      },
+      "StringArray": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
       },
       "SupportedServices": {
