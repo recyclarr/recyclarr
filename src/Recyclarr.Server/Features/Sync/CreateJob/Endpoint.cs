@@ -3,11 +3,8 @@ using Recyclarr.Server.Sync;
 
 namespace Recyclarr.Server.Features.Sync.CreateJob;
 
-internal sealed class Endpoint(
-    ILogger log,
-    ServerConfigLoader configLoader,
-    SyncJobLauncher launcher
-) : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
+internal sealed class Endpoint(ServerConfiguration configuration, SyncJobLauncher launcher)
+    : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
 {
     public override void Configure()
     {
@@ -21,61 +18,59 @@ internal sealed class Endpoint(
         Description(b =>
             b.ClearDefaultProduces()
                 .Produces<CreateSyncJobResponse>(202)
-                .ProducesProblemDetails()
-                .ProducesProblemDetails(500)
+                .Produces<CreateSyncJobProblemDetails>(400, "application/problem+json")
+                .ProducesProblems(409)
                 .WithTags("Sync")
         );
     }
 
     public override async Task HandleAsync(CreateSyncJobRequest req, CancellationToken ct)
     {
+        if (configuration.Instances.Count == 0)
+        {
+            AddError("No instances are configured on the server");
+            await Send.ErrorsAsync(409, ct);
+            return;
+        }
+
         var settings = new ServerSyncSettings(req.Service, req.Instances ?? [], req.Preview);
-        ServerConfigLoadResult loadResult;
-        try
+        var unknown = configuration.FindUnknown(settings.Instances);
+        if (unknown.Count > 0)
         {
-            loadResult = configLoader.LoadConfigs(settings);
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            log.Error(e, "Failed to load server configuration for a sync job");
-            AddError("Server configuration could not be loaded");
-            await Send.ErrorsAsync(500, ct);
+            await SendUnknownInstancesAsync(unknown);
             return;
         }
 
-        var loadDiagnostics = ConfigLoadDiagnosticsBuilder.Build(loadResult);
-        ConfigLoadDiagnosticsLogger.Log(log, loadDiagnostics);
-
-        if (loadDiagnostics.HasServerConfigurationErrors)
+        var selected = configuration.Select(settings.Service, settings.Instances);
+        if (selected.Count == 0)
         {
-            AddError("Server configuration is invalid");
-            await Send.ErrorsAsync(500, ct);
-            return;
-        }
-
-        if (loadDiagnostics.UnknownInstances.Count > 0)
-        {
-            AddError("The sync request did not match available configuration");
+            AddError("The sync request did not match any configured instance");
             await Send.ErrorsAsync(400, ct);
             return;
         }
 
-        if (loadResult.Configs.Count == 0)
-        {
-            var status = loadResult.HasAvailableConfigs ? 400 : 500;
-            AddError(
-                status == 400
-                    ? "The sync request did not match available configuration"
-                    : "No server configuration is available for synchronization"
-            );
-            await Send.ErrorsAsync(status, ct);
-            return;
-        }
-
-        var job = launcher.Launch(settings, loadResult.Configs);
+        var job = launcher.Launch(settings, selected);
 
         Response = new CreateSyncJobResponse(job.Id.Value, job.Status.ToString(), job.CreatedAt);
         HttpContext.Response.Headers.Location = $"/api/v1/sync/jobs/{job.Id.Value}";
         await Send.ResponseAsync(Response, 202, ct);
+    }
+
+    private async Task SendUnknownInstancesAsync(IReadOnlyList<string> unknown)
+    {
+        var problem = ErrorResponses.Apply(
+            new CreateSyncJobProblemDetails
+            {
+                Title = "The sync request names instances that are not configured",
+                UnknownInstances = unknown,
+                AvailableInstances = configuration.InstanceNames,
+            },
+            HttpContext,
+            400
+        );
+
+        await Send.ResultAsync(
+            TypedResults.Json(problem, statusCode: 400, contentType: "application/problem+json")
+        );
     }
 }

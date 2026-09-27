@@ -6,6 +6,7 @@ namespace Recyclarr.Server.Tests.Sync;
 
 internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
 {
+    // Instances sharing a base URL are rejected as split, so each gets its own host.
     private void AddConfig(IFileInfo file, string instanceName)
     {
         Fs.AddFile(
@@ -14,25 +15,23 @@ internal sealed class ServerConfigLoaderTest : ServerIntegrationFixture
                 $"""
                 radarr:
                   {instanceName}:
-                    base_url: http://localhost:7878
+                    base_url: http://{instanceName}:7878
                     api_key: asdf
                 """
             )
         );
     }
 
-    private static ServerSyncSettings Settings()
-    {
-        return new ServerSyncSettings(Service: null, Instances: [], Preview: false);
-    }
-
     [Test]
-    public void Configs_are_loaded_from_the_default_locations()
+    public void Every_config_location_is_loaded()
     {
-        AddConfig(Paths.ConfigDirectory.File("recyclarr.yml"), "from-default-location");
+        AddConfig(Paths.ConfigDirectory.File("recyclarr.yml"), "from-main-file");
+        AddConfig(Paths.YamlConfigDirectory.File("extra.yml"), "from-configs-directory");
 
-        var result = Resolve<ServerConfigLoader>().LoadConfigs(Settings());
+        var configuration = Resolve<ServerConfiguration>();
 
-        result.Configs.Select(x => x.InstanceName).Should().Equal("from-default-location");
+        configuration
+            .InstanceNames.Should()
+            .BeEquivalentTo("from-main-file", "from-configs-directory");
     }
 }
