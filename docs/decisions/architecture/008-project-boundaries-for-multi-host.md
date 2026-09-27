@@ -107,6 +107,9 @@ Recyclarr owns both the server and its spec; Sonarr and Radarr use hand-written 
 ([ADR-010](010-hand-written-servarr-api-contracts.md)). At that point, Core becomes the Server's
 private dependency.
 
+Phase 3 is complete. ADR-020 records the resulting CLI boundary, including the
+`Recyclarr.Platform` library that the CLI and Core share.
+
 ### Consequences
 
 - Good, because two projects (not three) keeps the dependency graph simple

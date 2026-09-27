@@ -58,12 +58,13 @@ that action arrives too late.
 
 ## Project Context
 
-Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
+Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic; `TrashGuide/`,
 `ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (hand-written
 Refit contracts; model only used fields, no enums, every DTO derives from `ExtensibleResource`; see
-ADR-010). `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core`; `Recyclarr.Client`
-(Refitter-generated typed client from the server's OpenAPI spec). Solution is SLNX
-(`Recyclarr.slnx`), not SLN.
+ADR-010). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
+typed client from the server's OpenAPI spec) and `Recyclarr.Platform` (process and environment
+primitives only, also referenced by Core; ADR-020). The CLI MUST NOT reference Core. Solution is
+SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
@@ -149,9 +150,9 @@ Build success does not cover all IDE inspections. Before completing C# changes, 
 
 ### Comments
 
-- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow analysis
-  cannot cross a third-party callback, prefer a documented `!` over an unreachable defensive throw
-  (for example, `// non-null: guarded above`).
+- Avoid null-suppression (`!`). When an adjacent runtime guard establishes non-null but flow
+  analysis cannot cross a third-party callback, prefer a documented `!` over an unreachable
+  defensive throw (for example, `// non-null: guarded above`).
 - NEVER commit commented-out code.
 
 #### Public Contract Documentation
