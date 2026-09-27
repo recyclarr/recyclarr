@@ -12,7 +12,13 @@ internal static class ServerApiRegistration
             builder.RegisterType<CliSettingsLoader>();
             builder.RegisterType<EphemeralServerLauncher>();
             builder.RegisterType<ServerConnectionFactory>();
-            builder.RegisterType<HttpClient>();
+            builder.RegisterType<HttpTrafficLogHandler>();
+            builder.Register(c =>
+            {
+                var handler = c.Resolve<HttpTrafficLogHandler>();
+                handler.InnerHandler = new SocketsHttpHandler();
+                return new HttpClient(handler);
+            });
         }
     }
 }

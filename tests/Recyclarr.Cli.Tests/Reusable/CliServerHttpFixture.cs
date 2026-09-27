@@ -35,7 +35,10 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
 
     protected CliServerHttpFixture()
     {
-        _cli = new CliContainer(CreateClient);
+        // The production traffic handler sits in front of the in-memory server handler, so tests
+        // observe the same request logging as a real run. non-null: the factory runs only after
+        // construction, when a command connects.
+        _cli = new CliContainer(() => CreateDefaultClient(_cli!.Resolve<HttpTrafficLogHandler>()));
         _connection = new Lazy<ServerConnection>(() =>
         {
             var client = _cli.Resolve<Func<HttpClient>>()();
