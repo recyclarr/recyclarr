@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Cli.Console.Helpers;
-using Recyclarr.ResourceProviders.Domain;
-using Recyclarr.TrashGuide;
+using Recyclarr.Cli.Server;
+using Recyclarr.Client.V1;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Rendering;
@@ -14,8 +14,7 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ListCustomFormatGroupsCommand(
     ILogger log,
     IAnsiConsole console,
-    CfGroupResourceQuery cfGroupQuery,
-    ProviderProgressHandler providerProgressHandler
+    ServerConnectionFactory connections
 ) : AsyncCommand<ListCustomFormatGroupsCommand.CliSettings>
 {
     [UsedImplicitly]
@@ -44,9 +43,9 @@ internal class ListCustomFormatGroupsCommand(
         CancellationToken ct
     )
     {
-        await providerProgressHandler.InitializeProvidersAsync(settings.Raw, ct);
-
-        var groups = cfGroupQuery.Get(settings.Service).OrderBy(g => g.Name).ToList();
+        await using var connection = await connections.ConnectAsync(ct);
+        var response = await connection.Guide.CustomFormatGroups(settings.Service, ct);
+        var groups = response.ContentOrThrow().Items.OrderBy(g => g.Name).ToList();
 
         if (settings.Filter is not null)
         {
@@ -74,7 +73,7 @@ internal class ListCustomFormatGroupsCommand(
         return (int)ExitStatus.Succeeded;
     }
 
-    private void OutputRaw(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputRaw(IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups)
     {
         foreach (var group in groups)
         {
@@ -89,7 +88,10 @@ internal class ListCustomFormatGroupsCommand(
         }
     }
 
-    private void OutputTable(IReadOnlyCollection<CfGroupResource> groups, bool showDetails)
+    private void OutputTable(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups,
+        bool showDetails
+    )
     {
         console.WriteLine();
 
@@ -108,7 +110,9 @@ internal class ListCustomFormatGroupsCommand(
         );
     }
 
-    private void OutputCompactTable(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputCompactTable(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups
+    )
     {
         var table = new Table().RoundedBorder();
         table.AddColumn("Group");
@@ -122,7 +126,9 @@ internal class ListCustomFormatGroupsCommand(
         console.Write(table);
     }
 
-    private void OutputDetailedPanels(IReadOnlyCollection<CfGroupResource> groups)
+    private void OutputDetailedPanels(
+        IReadOnlyCollection<GuideCustomFormatGroupSummaryResponse> groups
+    )
     {
         foreach (var group in groups)
         {
@@ -138,16 +144,10 @@ internal class ListCustomFormatGroupsCommand(
                 rows.Add(FormatCustomFormatRow(cf));
             }
 
-            var profileNames = group.QualityProfiles.Include.Keys.Order().ToList();
+            var profileNames = group.QualityProfiles.Order().ToList();
             if (profileNames.Count > 0)
             {
-                var groupDefault = string.Equals(
-                    group.Default,
-                    "true",
-                    StringComparison.OrdinalIgnoreCase
-                );
-
-                var tag = groupDefault ? "[green](default)[/]" : "[yellow](optional)[/]";
+                var tag = group.Default ? "[green](default)[/]" : "[yellow](optional)[/]";
 
                 rows.Add(new Markup("\n[underline]Quality Profiles[/]"));
                 rows.AddRange(profileNames.Select(p => new Markup($"  {p.EscapeMarkup()} {tag}")));
@@ -159,7 +159,7 @@ internal class ListCustomFormatGroupsCommand(
         }
     }
 
-    private static Grid FormatCustomFormatRow(CfGroupCustomFormat cf)
+    private static Grid FormatCustomFormatRow(GuideCustomFormatGroupMemberResponse cf)
     {
         var tag =
             cf.Required ? "[red]required[/]"

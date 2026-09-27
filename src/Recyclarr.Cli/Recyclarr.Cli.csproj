@@ -49,8 +49,4 @@
           SkipUnchangedFiles="true"
           OverwriteReadOnlyFiles="true" />
   </Target>
-
-  <ItemGroup>
-    <EmbeddedResource Include="config-template.yml" />
-  </ItemGroup>
 </Project>
