@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Recyclarr;
 using Recyclarr.Logging;
 using Recyclarr.Server;
-using Recyclarr.Server.Sync.Results;
 using Scalar.AspNetCore;
 using Serilog.Events;
 
@@ -56,7 +55,7 @@ builder
         // tag derived from the /api/v1 route prefix.
         o.AutoTagPathSegmentIndex = 0;
         o.ConfigureOpenApi = options =>
-            options.AddDocumentTransformer<SyncResultsDocumentTransformer>();
+            options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
     });
 
 // Standalone invocations (e.g. the foreground `serve` command) have no parent to watch and manage
