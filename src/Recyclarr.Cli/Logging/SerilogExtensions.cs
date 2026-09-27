@@ -9,6 +9,7 @@ internal static class SerilogExtensions
     {
         return level switch
         {
+            CliLogLevel.Verbose => LogEventLevel.Verbose,
             CliLogLevel.Debug => LogEventLevel.Debug,
             CliLogLevel.Warn => LogEventLevel.Warning,
             _ => LogEventLevel.Information,
