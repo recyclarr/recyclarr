@@ -6,14 +6,11 @@ internal sealed record InvalidInstance(string InstanceName, IReadOnlyList<string
 
 internal sealed record SplitInstanceGroup(string BaseUrl, IReadOnlyList<string> InstanceNames);
 
-// Structured, renderer-agnostic record of everything that can go wrong while loading configs for
-// a sync request: parse failures, filter diagnostics (unknown/invalid/duplicate/split instances),
-// and deprecation warnings. Endpoints project this into wire DTOs; no prose is composed here.
+// Structured record of everything that can go wrong while loading configuration at startup: parse
+// failures, filter diagnostics (invalid/duplicate/split instances), and deprecation warnings.
 internal sealed record ConfigLoadDiagnostics
 {
     public IReadOnlyList<ConfigParseFailure> ParseFailures { get; init; } = [];
-    public IReadOnlyList<string> UnknownInstances { get; init; } = [];
-    public IReadOnlyList<string> AvailableInstances { get; init; } = [];
     public IReadOnlyList<InvalidInstance> InvalidInstances { get; init; } = [];
     public IReadOnlyList<string> DuplicateInstances { get; init; } = [];
     public IReadOnlyList<SplitInstanceGroup> SplitInstanceGroups { get; init; } = [];
@@ -24,12 +21,4 @@ internal sealed record ConfigLoadDiagnostics
         || InvalidInstances.Count > 0
         || DuplicateInstances.Count > 0
         || SplitInstanceGroups.Count > 0;
-
-    public bool IsEmpty =>
-        ParseFailures.Count == 0
-        && UnknownInstances.Count == 0
-        && InvalidInstances.Count == 0
-        && DuplicateInstances.Count == 0
-        && SplitInstanceGroups.Count == 0
-        && DeprecationWarnings.Count == 0;
 }

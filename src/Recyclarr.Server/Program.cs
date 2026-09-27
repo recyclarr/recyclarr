@@ -74,7 +74,10 @@ app.UseFastEndpoints(c =>
 {
     c.Versioning.Prefix = "api/v";
     c.Versioning.PrependToRoute = true;
-    c.Errors.UseProblemDetails();
+    // FastEndpoints' own ProblemDetails is sealed, so endpoints cannot add RFC 9457 extension
+    // members to it (FastEndpoints#637). ASP.NET's type can be subclassed with typed members.
+    c.Errors.ProducesMetadataType = typeof(HttpValidationProblemDetails);
+    c.Errors.ResponseBuilder = ErrorResponses.Build;
     c.Serializer.Options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     c.Serializer.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     c.Serializer.Options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
