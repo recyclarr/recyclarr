@@ -1,19 +1,18 @@
 # Logging
 
-The CLI and HTTP server own separate logs because they may run on different machines and have
-different lifetimes.
+Only the HTTP server writes log files (ADR-022). The CLI logs to the console, and only with `--log`.
 
-| Process | Directory | Contents |
+| Process | Output | Contents |
 | --- | --- | --- |
-| CLI | `<data>/logs/cli` | Command lifecycle, HTTP client failures, and API diagnostics |
+| CLI | console, with `--log` | Command lifecycle, HTTP traffic, and forwarded server events |
 | Server | `<data>/logs/server` | Hosting, requests, sync execution, and internal failures |
 
-Each run writes a `debug` log (Debug and above) and a `verbose` log (Verbose events only, such as
-HTTP request and response bodies) to its directory.
+Each server run writes a `debug` log (Debug and above) and a `verbose` log (Verbose events only) to
+its directory. The CLI logs each server request at Debug and request and response bodies at
+Verbose; it never logs headers.
 
-`log_janitor.max_files` counts files and applies independently to each directory. The CLI cleans
-its logs when a command finishes. The server cleans its logs during startup and never deletes the
-files of the current run.
+`log_janitor.max_files` counts server log files. The server cleans its logs during startup and never
+deletes the files of the current run.
 
 ## User-visible diagnostics
 
@@ -24,8 +23,8 @@ presentation-only and consume response DTOs.
 User-actionable diagnostics cross the HTTP boundary as structured response data. Each process logs
 the diagnostics at its own boundary:
 
-- Normal mode displays `IAnsiConsole` output and writes the CLI log.
-- `--log` suppresses `IAnsiConsole`; the CLI logger writes to both the CLI log and stdout.
+- Normal mode displays `IAnsiConsole` output; the CLI logger is silent.
+- `--log` suppresses `IAnsiConsole`; the CLI logger writes to stdout.
 
 This behavior is the same for an ephemeral child server and a configured remote server. Internal
 exception details are not part of the API contract and remain in the server log.
@@ -36,4 +35,4 @@ deprecations remain client-side.
 
 In ephemeral mode, the server also forwards log events over the child process stdout protocol.
 This provides live server detail in `--log` mode. The server log remains the authoritative record
-for the server process; the CLI log is the record for one command invocation.
+for the server process.

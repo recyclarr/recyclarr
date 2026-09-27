@@ -58,12 +58,13 @@ that action arrives too late.
 
 ## Project Context
 
-Projects: `Recyclarr.Cli` (entry, sync pipelines) -> `Recyclarr.Core` (logic; `TrashGuide/`,
-`ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}` (Refitter-
-generated clients from vendored `openapi.json`; `Generated/` is excluded from source control).
-`Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core`; `Recyclarr.Client`
-(Refitter-generated typed client from the server's OpenAPI spec). Solution is SLNX
-(`Recyclarr.slnx`), not SLN.
+Projects: `Recyclarr.Server` (HTTP API via FastEndpoints) -> `Recyclarr.Core` (logic;
+`TrashGuide/`, `ServarrApi/`, `Config/`, `SyncState/` folders) -> `Recyclarr.Api.{Sonarr,Radarr}`
+(Refitter-generated clients from vendored `openapi.json`; `Generated/` is excluded from source
+control). `Recyclarr.Cli` (HTTP client of the server) -> `Recyclarr.Client` (Refitter-generated
+typed client from the server's OpenAPI spec) and `Recyclarr.Platform` (process and environment
+primitives only, also referenced by Core; ADR-020). The CLI MUST NOT reference Core. Solution is
+SLNX (`Recyclarr.slnx`), not SLN.
 
 - DI: Autofac. Every library gets its own Autofac Module to keep registration modular.
 - Config: YAML with JSON Schema validation (see YAML Schema Maintenance)
