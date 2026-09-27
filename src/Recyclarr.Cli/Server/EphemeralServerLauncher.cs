@@ -96,9 +96,11 @@ internal sealed class EphemeralServerLauncher(
         }
     }
 
-    // A server that stops before READY failed to start, usually because of invalid configuration
-    // (ADR-019). Its error log lines are the only explanation the CLI gets, so they are kept for
-    // the failure message rather than only forwarded to the log.
+    /// <summary>
+    /// A server that stops before READY failed to start, usually because of invalid configuration
+    /// (ADR-019). Its error log lines are the only explanation the CLI gets, so they are kept for
+    /// the failure message rather than only forwarded to the log.
+    /// </summary>
     private async Task<Uri> ReadUntilReadyAsync(TextReader output, CancellationToken ct)
     {
         List<string> startupErrors = [];

@@ -13,10 +13,12 @@ namespace Recyclarr.Cli.Server;
 internal sealed class ServerConnection(HttpClient client, IAsyncDisposable? ownedServer)
     : IAsyncDisposable
 {
-    // The generated contracts carry explicit [JsonPropertyName] attributes, so only enums and
-    // nulls need configuring here. The server writes enums as camelCase strings. Optional request
-    // fields generate as nullable, and the server rejects an explicit null for a non-nullable
-    // field, so unset fields are omitted.
+    /// <summary>
+    /// The generated contracts carry explicit [JsonPropertyName] attributes, so only enums and
+    /// nulls need configuring here. The server writes enums as camelCase strings. Optional
+    /// request fields generate as nullable, and the server rejects an explicit null for a
+    /// non-nullable field, so unset fields are omitted.
+    /// </summary>
     private static readonly RefitSettings SelfApiRefitSettings = new()
     {
         ContentSerializer = new SystemTextJsonContentSerializer(
