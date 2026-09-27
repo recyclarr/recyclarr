@@ -1,14 +1,54 @@
+using System.IO.Abstractions;
 using Autofac;
-using Recyclarr.Core.TestLibrary;
+using Recyclarr.Platform;
 
 namespace Recyclarr.Cli.Tests.Reusable;
 
-internal abstract class CliIntegrationFixture : IntegrationTestFixture
+/// <summary>
+/// The CLI's production composition root over an in-memory filesystem and environment. It uses
+/// no Recyclarr.Core test infrastructure, because the CLI does not depend on Core.
+/// </summary>
+internal abstract class CliIntegrationFixture : IDisposable
 {
-    protected override void RegisterTypes(ContainerBuilder builder)
+    private readonly Lazy<IContainer> _container;
+
+    protected MockFileSystem Fs { get; } =
+        new(new MockFileSystemOptions { CreateDefaultTempDir = false });
+
+    protected IEnvironment Env { get; } = Substitute.For<IEnvironment>();
+
+    protected CliIntegrationFixture()
     {
-        // Do NOT invoke the base method here!
-        // We are deliberately REPLACING those registrations (the composition root here is a SUPERSET).
-        CompositionRoot.Setup(builder);
+        // Lazy because virtual methods must not run during construction.
+        _container = new Lazy<IContainer>(() =>
+        {
+            var builder = new ContainerBuilder();
+            CompositionRoot.Setup(builder);
+            builder.RegisterInstance(Fs).As<IFileSystem>();
+            builder.RegisterInstance(Env);
+            RegisterStubsAndMocks(builder);
+            return builder.Build();
+        });
+    }
+
+    /// <summary>
+    /// Overrides production registrations. Runs after the stub filesystem and environment.
+    /// </summary>
+    protected virtual void RegisterStubsAndMocks(ContainerBuilder builder) { }
+
+    protected T Resolve<T>()
+        where T : notnull
+    {
+        return _container.Value.Resolve<T>();
+    }
+
+    public void Dispose()
+    {
+        if (_container.IsValueCreated)
+        {
+            _container.Value.Dispose();
+        }
+
+        GC.SuppressFinalize(this);
     }
 }
