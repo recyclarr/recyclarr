@@ -55,7 +55,12 @@ builder
         // tag derived from the /api/v1 route prefix.
         o.AutoTagPathSegmentIndex = 0;
         o.ConfigureOpenApi = options =>
+        {
+            options.CreateSchemaReferenceId = PolymorphicSchemaIds.Wrap(
+                options.CreateSchemaReferenceId
+            );
             options.AddDocumentTransformer<DiscriminatorDocumentTransformer>();
+        };
     });
 
 // Standalone invocations (e.g. the foreground `serve` command) have no parent to watch and manage

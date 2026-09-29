@@ -1021,21 +1021,21 @@
         "type": "object",
         "anyOf": [
           {
-            "$ref": "#/components/schemas/GuideNamingResponseRadarrGuideNamingResponse"
+            "$ref": "#/components/schemas/GuideNamingResponseRadarr"
           },
           {
-            "$ref": "#/components/schemas/GuideNamingResponseSonarrGuideNamingResponse"
+            "$ref": "#/components/schemas/GuideNamingResponseSonarr"
           }
         ],
         "discriminator": {
           "propertyName": "service",
           "mapping": {
-            "radarr": "#/components/schemas/GuideNamingResponseRadarrGuideNamingResponse",
-            "sonarr": "#/components/schemas/GuideNamingResponseSonarrGuideNamingResponse"
+            "radarr": "#/components/schemas/GuideNamingResponseRadarr",
+            "sonarr": "#/components/schemas/GuideNamingResponseSonarr"
           }
         }
       },
-      "GuideNamingResponseRadarrGuideNamingResponse": {
+      "GuideNamingResponseRadarr": {
         "required": [
           "movieFolder",
           "standardMovie"
@@ -1049,7 +1049,7 @@
           }
         }
       },
-      "GuideNamingResponseSonarrGuideNamingResponse": {
+      "GuideNamingResponseSonarr": {
         "required": [
           "seasonFolder",
           "seriesFolder",
@@ -1727,53 +1727,53 @@
         "type": "object",
         "anyOf": [
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded"
           },
           {
-            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse"
+            "$ref": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "customFormatGroupReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse",
-            "customFormatGroupSelectReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse",
-            "customFormatGroupExcludeReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse",
-            "customFormatGroupQualityProfileReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse",
-            "customFormatQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse",
-            "customFormatGroupQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse",
-            "customFormatGroupRequiredItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse",
-            "customFormatGroupDefaultItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse",
-            "customFormatGroupRequiredItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse",
-            "customFormatGroupNonDefaultItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse"
+            "customFormatGroupReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupReferenceMismatch",
+            "customFormatGroupSelectReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch",
+            "customFormatGroupExcludeReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch",
+            "customFormatGroupQualityProfileReferenceMismatch": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch",
+            "customFormatQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous",
+            "customFormatGroupQualityProfileReferenceAmbiguous": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous",
+            "customFormatGroupRequiredItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected",
+            "customFormatGroupDefaultItemSelected": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected",
+            "customFormatGroupRequiredItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded",
+            "customFormatGroupNonDefaultItemExcluded": "#/components/schemas/PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded"
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1787,7 +1787,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1801,7 +1801,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1815,7 +1815,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous": {
         "required": [
           "groupTrashId",
           "profileTrashId",
@@ -1833,7 +1833,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch": {
         "required": [
           "groupTrashId",
           "profileTrashId"
@@ -1847,7 +1847,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupReferenceMismatch": {
         "required": [
           "groupTrashId"
         ],
@@ -1857,7 +1857,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1871,7 +1871,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1885,7 +1885,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch": {
         "required": [
           "groupTrashId",
           "customFormatTrashId"
@@ -1899,7 +1899,7 @@
           }
         }
       },
-      "PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse": {
+      "PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous": {
         "required": [
           "profileTrashId",
           "profileNames"
@@ -3045,21 +3045,21 @@
         "type": "object",
         "anyOf": [
           {
-            "$ref": "#/components/schemas/SyncInstanceResultsResponseSonarrInstanceResultsResponse"
+            "$ref": "#/components/schemas/SyncInstanceResultsResponseSonarr"
           },
           {
-            "$ref": "#/components/schemas/SyncInstanceResultsResponseRadarrInstanceResultsResponse"
+            "$ref": "#/components/schemas/SyncInstanceResultsResponseRadarr"
           }
         ],
         "discriminator": {
           "propertyName": "service",
           "mapping": {
-            "sonarr": "#/components/schemas/SyncInstanceResultsResponseSonarrInstanceResultsResponse",
-            "radarr": "#/components/schemas/SyncInstanceResultsResponseRadarrInstanceResultsResponse"
+            "sonarr": "#/components/schemas/SyncInstanceResultsResponseSonarr",
+            "radarr": "#/components/schemas/SyncInstanceResultsResponseRadarr"
           }
         }
       },
-      "SyncInstanceResultsResponseRadarrInstanceResultsResponse": {
+      "SyncInstanceResultsResponseRadarr": {
         "required": [
           "pipelines",
           "name",
@@ -3100,7 +3100,7 @@
           }
         }
       },
-      "SyncInstanceResultsResponseSonarrInstanceResultsResponse": {
+      "SyncInstanceResultsResponseSonarr": {
         "required": [
           "pipelines",
           "name",
