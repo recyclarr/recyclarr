@@ -17,8 +17,9 @@ deletes the files of the current run.
 ## User-visible diagnostics
 
 Core returns structured outcomes, operational failures, and opaque fault references in terminal
-sync results. The Server formats that data for its log and HTTP responses. CLI renderers remain
-presentation-only and consume response DTOs.
+sync results. The Server formats that data for its log and HTTP responses. After a sync job ends,
+the CLI fetches the terminal results and formats the response DTOs for the console and its log.
+CLI renderers remain presentation-only.
 
 User-actionable diagnostics cross the HTTP boundary as structured response data. Each process logs
 the diagnostics at its own boundary:

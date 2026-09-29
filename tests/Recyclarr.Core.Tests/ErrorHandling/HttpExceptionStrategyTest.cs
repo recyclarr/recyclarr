@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using Recyclarr.ErrorHandling;
-using Recyclarr.Sync;
 using Refit;
 
 namespace Recyclarr.Core.Tests.ErrorHandling;
@@ -63,10 +62,6 @@ internal sealed class HttpExceptionStrategyTest
             .BeEquivalentTo([
                 new HttpApiResponseMessage("Minimum Custom Format Score can never be satisfied"),
             ]);
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .BeEquivalentTo("HTTP 400: Minimum Custom Format Score can never be satisfied");
     }
 
     [Test]
@@ -83,38 +78,29 @@ internal sealed class HttpExceptionStrategyTest
         outcome
             .ResponseMessages.Should()
             .BeEquivalentTo([new HttpApiResponseMessage("Request body can't be empty")]);
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .BeEquivalentTo("HTTP 400: Request body can't be empty");
     }
 
     [Test]
-    public async Task Empty_body_falls_back_to_status_text()
+    public async Task Empty_body_retains_no_response_messages()
     {
         var sut = new HttpExceptionStrategy();
         var result = await sut.HandleAsync(await CreateApiException(HttpStatusCode.BadRequest, ""));
 
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         outcome.ResponseMessages.Should().BeEmpty();
-        SyncOutcomeFormatter.Format(outcome).Should().BeEquivalentTo("HTTP 400");
     }
 
     [Test]
-    public async Task Connection_error_returns_check_base_url()
+    public async Task Connection_error_is_a_connection_failure()
     {
         var sut = new HttpExceptionStrategy();
         var result = await sut.HandleAsync(new HttpRequestException("Connection refused"));
 
-        var outcome = result.Should().BeOfType<HttpConnectionFailure>().Which;
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .BeEquivalentTo("Connection failed - check your base_url");
+        result.Should().BeOfType<HttpConnectionFailure>();
     }
 
     [Test]
-    public async Task Unauthorized_returns_check_api_key()
+    public async Task Unauthorized_retains_status_code()
     {
         var sut = new HttpExceptionStrategy();
         var result = await sut.HandleAsync(
@@ -123,14 +109,10 @@ internal sealed class HttpExceptionStrategyTest
 
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         outcome.StatusCode.Should().Be(401);
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .BeEquivalentTo("HTTP 401: Unauthorized - check your api_key");
     }
 
     [Test]
-    public async Task Unauthorized_retains_response_context_without_changing_message()
+    public async Task Unauthorized_retains_response_context()
     {
         const string body = """{"Title":"Invalid request","Errors":{"apiKey":["Expired"]}}""";
         var sut = new HttpExceptionStrategy();
@@ -146,10 +128,6 @@ internal sealed class HttpExceptionStrategyTest
             new HttpApiFieldError("apiKey", "Expired"),
         ];
         outcome.ResponseMessages.Should().BeEquivalentTo(expected);
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .Equal("HTTP 401: Unauthorized - check your api_key");
     }
 
     [Test]
@@ -171,10 +149,6 @@ internal sealed class HttpExceptionStrategyTest
             new HttpApiFieldError("cutoff", "Invalid"),
         ];
         outcome.ResponseMessages.Should().BeEquivalentTo(expected);
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .Equal("HTTP 400: Validation failed", "name: Required", "cutoff: Invalid");
     }
 
     [Test]
@@ -188,11 +162,10 @@ internal sealed class HttpExceptionStrategyTest
 
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         outcome.ResponseMessages.Should().BeEmpty();
-        SyncOutcomeFormatter.Format(outcome).Should().Equal("HTTP 400");
     }
 
     [Test]
-    public async Task Request_content_is_retained_and_formatted()
+    public async Task Request_content_is_retained()
     {
         var sut = new HttpExceptionStrategy();
 
@@ -203,9 +176,5 @@ internal sealed class HttpExceptionStrategyTest
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         outcome.HasRequestContent.Should().BeTrue();
         outcome.RequestBody.Should().Be("{\"name\":\"WEB\"}");
-        SyncOutcomeFormatter
-            .Format(outcome)
-            .Should()
-            .Equal("HTTP 400", "Request body: {\"name\":\"WEB\"}");
     }
 }

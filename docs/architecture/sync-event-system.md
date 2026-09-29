@@ -85,7 +85,8 @@ from the terminal results endpoint after the job reaches a terminal state.
 
 `SyncResultLogger` and `NotificationService` also consume the terminal result. They format typed
 outcomes and opaque fault references at the Server boundary; exception details remain in the
-server log.
+server log. The CLI reads the same result through the results endpoint and renders the final
+status table, preview changes, and diagnostics from the response DTOs.
 
 See [Sync architecture](sync-pipeline-architecture.md) for operation ordering, dependency blocking,
 and semantic pipeline results.
