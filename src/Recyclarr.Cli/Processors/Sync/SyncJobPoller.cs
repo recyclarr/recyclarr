@@ -1,5 +1,6 @@
 using System.Net;
 using System.Runtime.CompilerServices;
+using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
 
 namespace Recyclarr.Cli.Processors.Sync;
@@ -26,13 +27,7 @@ internal static class SyncJobPoller
         while (true)
         {
             using var response = await api.JobsGet(jobId, ct);
-            if (response.Error is not null)
-            {
-                throw response.Error;
-            }
-
-            // non-null: a successful response always carries the job resource
-            yield return response.Content!;
+            yield return response.ContentOrThrow();
 
             if (response.StatusCode == HttpStatusCode.OK)
             {

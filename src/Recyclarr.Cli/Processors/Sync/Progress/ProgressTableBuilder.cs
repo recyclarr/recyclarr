@@ -64,11 +64,6 @@ internal class ProgressTableBuilder
         {
             InstanceProgressStatusResponse.Pending => $"[grey{bold}]{spinnerFrame}[/]",
             InstanceProgressStatusResponse.Running => $"[blue{bold}]{spinnerFrame}[/]",
-            InstanceProgressStatusResponse.Succeeded => "[green]✓[/]",
-            InstanceProgressStatusResponse.Partial => "[yellow]~[/]",
-            InstanceProgressStatusResponse.Failed => "[red]✗[/]",
-            InstanceProgressStatusResponse.Interrupted or InstanceProgressStatusResponse.NotRun =>
-                "[grey]--[/]",
-            _ => " ",
+            _ => StatusMarkup.Of(status),
         };
 }
