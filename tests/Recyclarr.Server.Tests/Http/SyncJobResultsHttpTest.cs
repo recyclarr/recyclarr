@@ -48,7 +48,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Content.Instances.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         instance.Name.Should().Be("tv");
         instance.Pipelines.CustomFormats?.Status.Should().Be(PipelineStatus.Succeeded);
@@ -79,7 +79,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         var faulted = content
             .Instances[0]
             .Should()
-            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         faulted.Name.Should().Be("faulted");
         faulted.Status.Should().Be(SyncCompletionStatus.Partial);
@@ -88,7 +88,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         content
             .Instances[1]
             .Should()
-            .BeOfType<SyncInstanceResultsResponseRadarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseRadarr>()
             .Which.Name.Should()
             .Be("later");
     }
@@ -121,9 +121,9 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
 
         var sonarr = response
             .Content.Instances.Should()
-            .ContainSingle(x => x is SyncInstanceResultsResponseSonarrInstanceResultsResponse)
+            .ContainSingle(x => x is SyncInstanceResultsResponseSonarr)
             .Which.Should()
-            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         AssertCustomFormats(sonarr.Pipelines.CustomFormats);
         AssertQualityProfiles(sonarr.Pipelines.QualityProfiles);
@@ -132,9 +132,9 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
 
         var radarr = response
             .Content.Instances.Should()
-            .ContainSingle(x => x is SyncInstanceResultsResponseRadarrInstanceResultsResponse)
+            .ContainSingle(x => x is SyncInstanceResultsResponseRadarr)
             .Which.Should()
-            .BeOfType<SyncInstanceResultsResponseRadarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseRadarr>()
             .Which;
         AssertQualitySizes(radarr.Pipelines.QualitySizes);
         AssertRadarrNaming(radarr.Pipelines.Naming);
@@ -163,7 +163,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Content.Instances.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         var planningOutcomes = instance.PlanningOutcomes;
         planningOutcomes.Should().NotBeNull();
@@ -171,20 +171,20 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Select(x => x.GetType())
             .Should()
             .Equal(
-                typeof(PlanningOutcomeResponseCustomFormatGroupReferenceMismatchPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatchPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatchPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatchPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguousPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemSelectedPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupDefaultItemSelectedPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemExcludedPlanningOutcomeResponse),
-                typeof(PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcludedPlanningOutcomeResponse)
+                typeof(PlanningOutcomeResponseCustomFormatGroupReferenceMismatch),
+                typeof(PlanningOutcomeResponseCustomFormatGroupSelectReferenceMismatch),
+                typeof(PlanningOutcomeResponseCustomFormatGroupExcludeReferenceMismatch),
+                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceMismatch),
+                typeof(PlanningOutcomeResponseCustomFormatQualityProfileReferenceAmbiguous),
+                typeof(PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous),
+                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemSelected),
+                typeof(PlanningOutcomeResponseCustomFormatGroupDefaultItemSelected),
+                typeof(PlanningOutcomeResponseCustomFormatGroupRequiredItemExcluded),
+                typeof(PlanningOutcomeResponseCustomFormatGroupNonDefaultItemExcluded)
             );
         var ambiguity = planningOutcomes[5]
             .Should()
-            .BeOfType<PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcomeResponse>()
+            .BeOfType<PlanningOutcomeResponseCustomFormatGroupQualityProfileReferenceAmbiguous>()
             .Which;
         ambiguity.GroupTrashId.Should().Be("ambiguous-group");
         ambiguity.ProfileTrashId.Should().Be("group-profile");
@@ -304,7 +304,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Instances.Should()
             .ContainSingle()
             .Which.Should()
-            .BeOfType<SyncInstanceResultsResponseSonarrInstanceResultsResponse>()
+            .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         instance.Pipelines.CustomFormats?.Status.Should().Be(PipelineStatus.Failed);
         instance.Pipelines.QualityProfiles?.Status.Should().Be(PipelineStatus.Blocked);
@@ -346,10 +346,8 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Instances.Select(x =>
                 x switch
                 {
-                    SyncInstanceResultsResponseSonarrInstanceResultsResponse sonarr =>
-                        sonarr.Failure,
-                    SyncInstanceResultsResponseRadarrInstanceResultsResponse radarr =>
-                        radarr.Failure,
+                    SyncInstanceResultsResponseSonarr sonarr => sonarr.Failure,
+                    SyncInstanceResultsResponseRadarr radarr => radarr.Failure,
                     _ => throw new ArgumentOutOfRangeException(nameof(x)),
                 }
             )
