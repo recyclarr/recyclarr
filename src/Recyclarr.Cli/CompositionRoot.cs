@@ -7,6 +7,7 @@ using Recyclarr.Cli.ErrorHandling;
 using Recyclarr.Cli.Logging;
 using Recyclarr.Cli.Processors.Sync;
 using Recyclarr.Cli.Processors.Sync.Progress;
+using Recyclarr.Cli.Processors.Sync.Results;
 using Recyclarr.Cli.Server;
 using Serilog.Core;
 using Spectre.Console;
@@ -39,6 +40,8 @@ internal static class CompositionRoot
         // Sync runs server-side; these types only send the request and render what comes back.
         builder.RegisterType<SyncCommandHandler>();
         builder.RegisterType<SyncProgressRenderer>();
+        builder.RegisterType<SyncResultsPresenter>();
+        builder.RegisterType<PreviewRenderer>();
     }
 
     private static void RegisterErrorHandling(ContainerBuilder builder)

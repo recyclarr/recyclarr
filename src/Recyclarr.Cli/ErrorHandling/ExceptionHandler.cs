@@ -60,25 +60,11 @@ internal class ExceptionHandler(IAnsiConsole console, ILogger log)
         if (e.StatusCode == HttpStatusCode.BadGateway)
         {
             var failure = await e.GetContentAsAsync<ServiceFailureProblemDetails>();
-            return [DescribeServiceFailure(failure?.Failure)];
+            return [ServiceFailureText.Describe(failure?.Failure)];
         }
 
         var problem = await e.GetContentAsAsync<HttpValidationProblemDetails>();
         var details = problem?.Errors?.Values.SelectMany(x => x) ?? [];
         return [problem?.Title ?? e.Message, .. details];
     }
-
-    private static string DescribeServiceFailure(InstanceFailureCategory? failure) =>
-        failure switch
-        {
-            InstanceFailureCategory.ServiceUnauthenticated =>
-                "The service rejected the API key (401). Check api_key in your configuration.",
-            InstanceFailureCategory.ServiceUnauthorized =>
-                "The service denied access (403). Check the API key's permissions.",
-            InstanceFailureCategory.ServiceRateLimited =>
-                "The service is rate limiting requests (429). Try again later.",
-            InstanceFailureCategory.ServiceIncompatible =>
-                "The service version is not supported by Recyclarr.",
-            _ => "The service could not be reached. Check base_url and that the service is up.",
-        };
 }

@@ -13,6 +13,7 @@ internal class SyncProgressRenderer(IAnsiConsole console)
     /// <summary>
     /// Renders a live table from job snapshots as they arrive, and returns the final one. The
     /// display refreshes faster than snapshots arrive so the spinner keeps animating between polls.
+    /// The live table clears when the job ends; the caller replaces it with the results table.
     /// </summary>
     public async Task<GetSyncJobResponse> RenderProgressAsync(
         IAsyncEnumerable<GetSyncJobResponse> updates,
@@ -23,19 +24,17 @@ internal class SyncProgressRenderer(IAnsiConsole console)
 
         console.MarkupLine(
             "[grey]Legend:[/] "
-                + "[green]✓[/] ok [grey]·[/] "
-                + "[yellow]~[/] partial [grey]·[/] "
-                + "[red]✗[/] failed [grey]·[/] "
-                + "[grey]--[/] not run"
+                + $"{StatusMarkup.Ok} ok [grey]·[/] "
+                + $"{StatusMarkup.Partial} partial [grey]·[/] "
+                + $"{StatusMarkup.Failed} failed [grey]·[/] "
+                + $"{StatusMarkup.NotRun} not run"
                 + "\n"
         );
 
         await console
             .Live(ProgressTableBuilder.BuildTable(_snapshot, _tableBuilder.GetNextSpinnerFrame()))
-            .AutoClear(false)
+            .AutoClear(true)
             .StartAsync(RunPollLoop);
-
-        console.WriteLine();
 
         return lastJob
             ?? throw new InvalidOperationException("The sync job reported no status at all");
