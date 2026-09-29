@@ -38,12 +38,12 @@ internal class ListMediaNamingCommand(
         IReadOnlyList<(string Type, string Title, IReadOnlyList<GuideNamingFormatResponse>)> lists =
             response.ContentOrThrow() switch
             {
-                GuideNamingResponseRadarrGuideNamingResponse radarr =>
+                GuideNamingResponseRadarr radarr =>
                 [
                     ("movie_folder", "Movie Folder Format", radarr.MovieFolder),
                     ("standard_movie", "Standard Movie Format", radarr.StandardMovie),
                 ],
-                GuideNamingResponseSonarrGuideNamingResponse sonarr =>
+                GuideNamingResponseSonarr sonarr =>
                 [
                     ("season_folder", "Season Folder Format", sonarr.SeasonFolder),
                     ("series_folder", "Series Folder Format", sonarr.SeriesFolder),
