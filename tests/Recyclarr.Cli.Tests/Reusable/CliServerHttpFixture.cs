@@ -93,6 +93,11 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected string LogOutput => _cli.Log.Rendered;
 
     /// <summary>
+    /// Every message the CLI logged, rendered, with the level it was logged at.
+    /// </summary>
+    protected IReadOnlyList<(LogEventLevel Level, string Message)> LogEntries => _cli.Log.Entries;
+
+    /// <summary>
     /// Replaces the CLI's cli.yml. By default it points the CLI at the in-process server.
     /// </summary>
     protected void WriteCliSettings(string yaml)
@@ -179,11 +184,10 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     {
         private readonly ConcurrentQueue<LogEvent> _events = new();
 
-        public string Rendered =>
-            string.Join(
-                Environment.NewLine,
-                _events.Select(e => e.RenderMessage(CultureInfo.InvariantCulture))
-            );
+        public string Rendered => string.Join(Environment.NewLine, Entries.Select(e => e.Message));
+
+        public IReadOnlyList<(LogEventLevel Level, string Message)> Entries =>
+            [.. _events.Select(e => (e.Level, e.RenderMessage(CultureInfo.InvariantCulture)))];
 
         public void Write(LogEvent logEvent)
         {

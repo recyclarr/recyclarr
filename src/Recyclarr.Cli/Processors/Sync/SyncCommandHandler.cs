@@ -1,4 +1,6 @@
 using Recyclarr.Cli.Processors.Sync.Progress;
+using Recyclarr.Cli.Processors.Sync.Results;
+using Recyclarr.Cli.Server;
 using Recyclarr.Client.V1;
 using Refit;
 using Spectre.Console;
@@ -8,7 +10,8 @@ namespace Recyclarr.Cli.Processors.Sync;
 internal class SyncCommandHandler(
     ILogger log,
     IAnsiConsole console,
-    SyncProgressRenderer progressRenderer
+    SyncProgressRenderer progressRenderer,
+    SyncResultsPresenter resultsPresenter
 )
 {
     public async Task<ExitStatus> RunAsync(
@@ -26,9 +29,13 @@ internal class SyncCommandHandler(
         var updates = SyncJobPoller.PollAsync(api, jobId.Value, ct);
         var job = await progressRenderer.RenderProgressAsync(updates, ct);
 
+        using var response = await api.Results(jobId.Value, ct);
+        var results = response.ContentOrThrow();
+        resultsPresenter.Present(results, job.Progress, job.Preview);
+
         // Only an outright failure earns a non-zero exit code. A partial sync applied everything
         // it could, which is the outcome the CLI has always reported as success.
-        return job.Status.Equals("Failed", StringComparison.OrdinalIgnoreCase)
+        return results.Status == SyncCompletionStatus.Failed
             ? ExitStatus.Failed
             : ExitStatus.Succeeded;
     }
