@@ -1,0 +1,55 @@
+# @name listSyncJobs
+GET {{baseUrl}}/api/v1/sync/jobs
+
+?? status == 200
+?? body jobs isArray
+
+###
+
+# @name listSucceededSyncJobs
+GET {{baseUrl}}/api/v1/sync/jobs?status=succeeded
+
+?? status == 200
+
+{{response
+  const assert = require("assert");
+
+  test("lists only succeeded jobs", () => {
+    assert.ok(response.parsedBody.jobs.every(j => j.status === "Succeeded"));
+  });
+}}
+
+###
+
+# Unknown status filter
+GET {{baseUrl}}/api/v1/sync/jobs?status=bogus
+
+?? status == 400
+
+###
+
+# Unknown job
+GET {{baseUrl}}/api/v1/sync/jobs/00000000-0000-0000-0000-000000000000
+
+?? status == 404
+
+###
+
+# Unknown job
+GET {{baseUrl}}/api/v1/sync/jobs/00000000-0000-0000-0000-000000000000/results
+
+?? status == 404
+
+###
+
+# Unknown instance
+POST {{baseUrl}}/api/v1/sync/jobs
+Content-Type: application/json
+
+{
+  "instances": ["does-not-exist"],
+  "preview": true
+}
+
+?? status == 400
+?? body unknownInstances isArray
