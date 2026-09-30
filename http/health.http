@@ -1,0 +1,5 @@
+# @name health
+GET {{baseUrl}}/health
+
+?? status == 200
+?? body status == healthy

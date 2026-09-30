@@ -1,30 +1,44 @@
+{{
+  // Prompt only when --var did not supply the value; a file-level @service would override --var.
+  if (typeof service === "undefined") {
+    exports.service = "{{$pick-askonce Service? $value: all,radarr,sonarr}}";
+  }
+}}
+
+###
+
 # @name createSyncJob
+{{
+  // "all" omits the service filter so the job syncs every configured instance.
+  const request = { preview: String(preview) === "true" };
+  if (service !== "all") request.service = service;
+  exports.createSyncJobBody = JSON.stringify(request);
+}}
 POST {{baseUrl}}/api/v1/sync/jobs
 Content-Type: application/json
 
-{
-  "service": "{{service}}",
-  "preview": {{preview}}
-}
+{{createSyncJobBody}}
 
 ?? status == 202
-?? body $.id isString
+?? body id isString
 
 {{response
-  exports.pollResponse = { statusCode: 202 };
-  exports.pollAttempts = 0;
-  exports.pollDeadline = Date.now() + 60_000;
+  // Poll state lives in $global: exports from loop iterations do not reach later regions.
+  $global.poll = { response: { statusCode: 202 }, attempts: 0, deadline: Date.now() + 60_000 };
 }}
 
 ###
 
 # @name poll
-# @loop while pollResponse.statusCode === 202 && pollAttempts++ < 60 && Date.now() < pollDeadline
+# @loop while $global.poll.response.statusCode === 202 && $global.poll.attempts < 60 && Date.now() < $global.poll.deadline
 # @sleep 1000
 GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
 
 {{response
   const assert = require("assert");
+
+  $global.poll.response = response;
+  $global.poll.attempts++;
 
   test("poll status is accepted", () => {
     assert.ok(
@@ -38,12 +52,13 @@ GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
 
 {{
   const assert = require("assert");
-  assert.equal(pollResponse.statusCode, 200, "sync did not finish within 60 seconds");
-  assert.notEqual(poll.status, "Failed", "sync job failed");
+  const { response: last } = $global.poll;
+  assert.equal(last.statusCode, 200, "sync did not finish within 60 seconds");
+  assert.notEqual(last.parsedBody.status, "Failed", "sync job failed");
 }}
 
 # @name getSyncJobResults
 GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}/results
 
 ?? status == 200
-?? body $.id isString
+?? body id isString
