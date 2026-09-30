@@ -53,8 +53,8 @@ that action arrives too late.
 - `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
   (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
 - `http-server`: MUST load when writing, editing, or reviewing FastEndpoints endpoint classes, API
-  routes or URL structure, REST resource design, API versioning, OpenAPI spec generation, or Kestrel
-  server configuration in `Recyclarr.Server`.
+  routes or URL structure, REST resource design, API versioning, OpenAPI spec generation, Kestrel
+  server configuration in `Recyclarr.Server`, or httpyac files under `http/`.
 
 ## Project Context
 
@@ -281,6 +281,11 @@ log.Warning(message);
 - When running `dotnet test` or `dotnet build`, MUST limit output to 200 lines.
 
 **Development and Testing:**
+
+Before starting the server or another backend process, check for a running one (e.g. the user's
+`dotnet watch`) with `pgrep -af 'dotnet|recyclarr'` and `ss -ltnp`. Reuse it when it serves the
+task. MUST NOT stop it or start a parallel instance. If it blocks the task (stale build, port
+conflict, shared state), stop and ask the user to shut it down.
 
 All under `./scripts`.
 

@@ -5,7 +5,8 @@ description: >-
   request/response DTOs, endpoint versioning, OpenAPI spec generation or
   build-time spec export, API versioning strategy, Kestrel server embedding,
   or Recyclarr.Server project structure; designing or reviewing API routes,
-  URL structure, REST resources, or endpoint paths. Triggers on phrases like
+  URL structure, REST resources, or endpoint paths; editing httpyac `.http`
+  request files under `http/`. Triggers on phrases like
   "add an endpoint", "FastEndpoints", "endpoint class", "API version",
   "OpenAPI spec", "Kestrel server", "API endpoint", "API route", "REST
   resource", "URL structure", "endpoint path", "HTTP server", "release
@@ -140,6 +141,12 @@ the input to Refitter, which generates the typed client (ADR-013).
 - `Recyclarr.Client` has a `ProjectReference` on Server for build ordering (not assembly reference)
 - One `.refitter` config per API version, scoped by `includePathMatches` into a version namespace
   (`Recyclarr.Client.V1`), so the version stays out of the call chain
+
+## httpyac Requests
+
+`http/*.http` exercises every endpoint against a running server. When an endpoint, route, status
+code, or DTO field changes, MUST update the affected `.http` file in the same change and run it.
+Conventions live in `http/AGENTS.md`.
 
 ## Kestrel Embedding
 
