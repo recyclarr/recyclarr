@@ -1,0 +1,4 @@
+# Unknown service
+GET {{baseUrl}}/api/v1/guide/lidarr/custom-formats
+
+?? status == 400
