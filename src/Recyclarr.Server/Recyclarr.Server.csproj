@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>recyclarr-server</AssemblyName>
     <NoWarn>$(NoWarn);CS0436</NoWarn>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
     <OpenApiGenerateDocuments>true</OpenApiGenerateDocuments>
     <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)</OpenApiDocumentsDirectory>
     <!-- Spec generation loads the compiled assembly, which fails during cross-compilation.
