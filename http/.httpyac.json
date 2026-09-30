@@ -2,8 +2,8 @@
   "environments": {
     "$default": {
       "baseUrl": "http://localhost:7982",
-      "service": "radarr",
-      "preview": true
+      "preview": true,
+      "destructive": false
     }
   }
 }
