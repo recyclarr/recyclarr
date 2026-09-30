@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using Recyclarr.Cli.Server;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -16,6 +17,8 @@ namespace Recyclarr.Cli.Console.Commands;
 internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
     : AsyncCommand<ServeCommand.Settings>
 {
+    private int _interrupted;
+
     [UsedImplicitly]
     internal class Settings : BaseCommandSettings;
 
@@ -38,10 +41,30 @@ internal class ServeCommand(ILogger log, IAnsiConsole console, IFileSystem fs)
 
         log.Debug("Starting server process: {Path}", serverBinary.FullName);
 
+        // Registered before the server starts, so no Ctrl+C can end the CLI and leave it behind
+        using var interrupt = PosixSignalRegistration.Create(PosixSignal.SIGINT, OnInterrupt);
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo(serverBinary.FullName) { UseShellExecute = false };
         process.Start();
-        await process.WaitForExitAsync(ct);
+
+        // Deliberately ignores ct: the server owns shutdown, and its exit code is the result
+        await process.WaitForExitAsync(CancellationToken.None);
+        log.Debug("Server process exited with code {ExitCode}", process.ExitCode);
         return process.ExitCode;
+    }
+
+    /// <summary>
+    /// Ctrl+C reaches the server directly because it shares the terminal's process group, and
+    /// the server shuts down gracefully on it. The first interrupt is therefore swallowed so the
+    /// CLI outlives the server and reports its exit code. A repeated interrupt is not swallowed,
+    /// so a server that hangs on shutdown cannot trap the user.
+    /// </summary>
+    private void OnInterrupt(PosixSignalContext context)
+    {
+        if (Interlocked.Exchange(ref _interrupted, 1) == 0)
+        {
+            context.Cancel = true;
+        }
     }
 }
