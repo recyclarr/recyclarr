@@ -62,3 +62,19 @@ GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}/results
 
 ?? status == 200
 ?? body id isString
+
+{{response
+  // Readability aid: logs the results without empty arrays and objects, recursively.
+  // Also hides meaningful empties such as a value change with `current: []`.
+  const isEmpty = (v) => Array.isArray(v)
+    ? v.length === 0
+    : v !== null && typeof v === "object" && Object.keys(v).length === 0;
+  const prune = (v) => {
+    if (Array.isArray(v)) return v.map(prune);
+    if (v === null || typeof v !== "object") return v;
+    return Object.fromEntries(
+      Object.entries(v).map(([k, x]) => [k, prune(x)]).filter(([, x]) => !isEmpty(x))
+    );
+  };
+  console.log(JSON.stringify(prune(response.parsedBody), null, 2));
+}}
