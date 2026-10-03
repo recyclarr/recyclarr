@@ -68,6 +68,9 @@ problem that does not exist within a single sync operation.
 
 ### Shared vs. service-specific pipeline boundary
 
+Superseded by ADR-023, which places fields by service ownership and keeps one operation per
+pipeline.
+
 The litmus test for whether a feature uses a shared pipeline with gateways or gets service-specific
 pipelines: **Is there a meaningful shared domain concept, or just a shared endpoint path?**
 
