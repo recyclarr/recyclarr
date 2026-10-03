@@ -132,15 +132,12 @@ Sync operations inject the port directly; they have no idea keying is involved.
 
 ## Shared vs split operation
 
-**Litmus test:** Is there a meaningful shared domain concept, or just a shared endpoint path?
+[ADR-023][adr-023] sets the rule: each field lives on a shared type or on the type of the one
+service that owns it, and each pipeline has one operation with per-service components resolved
+through DI. Media naming still has split operations until it is migrated.
 
-- **Shared operation + gateway:** Same resource with service-specific properties (e.g. quality
-  profiles with Radarr language).
-- **Split into service-specific operations:** Different resource concepts behind a shared path (e.g.
-  media naming).
-
-Split operations don't mean "duplicate everything." Shared logic lives in helper classes that both
-operations depend on (e.g. `NamingFormatLookup`).
+Shared logic lives in helper classes that both services' components depend on (e.g.
+`NamingFormatLookup`).
 
 ## Gateway multiplicity
 
@@ -265,3 +262,4 @@ shared vs split operation for new features.
 Both services publish official OpenAPI 3.0 specs (auto-generated via Swashbuckle).
 
 [adr-007]: ../decisions/architecture/007-custom-format-gateway-passthrough.md
+[adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
