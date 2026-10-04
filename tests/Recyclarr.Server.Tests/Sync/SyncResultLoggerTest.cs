@@ -135,15 +135,16 @@ internal sealed class SyncResultLoggerTest
             incompleteResources: 0,
             [new CustomFormatAdoptedOutcome(identity, 10)],
             [
-                new CustomFormatCreateDelta(
-                    identity,
-                    new CustomFormatSourceInfo(
+                new CustomFormatCreateDelta
+                {
+                    Identity = identity,
+                    SelectionProvenance = new CustomFormatSourceInfo(
                         CfSource.CfGroupExplicit,
                         "Group",
                         CfInclusionReason.Selected,
                         ["Profile"]
-                    )
-                ),
+                    ),
+                },
             ]
         );
         var qualityProfiles = new QualityProfilePipelineResult(

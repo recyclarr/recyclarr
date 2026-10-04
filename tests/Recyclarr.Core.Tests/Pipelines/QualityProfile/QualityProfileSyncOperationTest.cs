@@ -49,7 +49,9 @@ internal sealed class QualityProfileSyncOperationTest
             .Identity.Should()
             .Be(new GuideBackedQualityProfileIdentity(new MappingKey("qp-trash-id", "WEB-1080p")));
         delta.State.Name.Should().Be("WEB-1080p");
-        delta.State.Qualities.Should().Equal(new QualityProfileQuality("Bluray-1080p", true));
+        delta
+            .State.Qualities.Should()
+            .Equal(new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true });
     }
 
     [Test]
@@ -85,7 +87,7 @@ internal sealed class QualityProfileSyncOperationTest
             resource,
             new PlannedCfScore(new PlannedCustomFormat(NewCf.Data("HDR", "cf-trash-id", 10)), 100)
         );
-        var mapping = new TrashIdMapping("qp-trash-id", "Old Name", 7);
+        var mapping = NewSyncState.Mapping("qp-trash-id", "Old Name", 7);
         var harness = CreateHarness([planned], [current], Schema(current.Items), [mapping]);
 
         var compute = await Compute(harness);
@@ -262,7 +264,7 @@ internal sealed class QualityProfileSyncOperationTest
                 new QualityProfileData { Id = 8, Name = "New Name" },
             ],
             Schema(),
-            [new TrashIdMapping("trash-id", "Old Name", 7)]
+            [NewSyncState.Mapping("trash-id", "Old Name", 7)]
         );
 
         var compute = await Compute(harness);
@@ -489,7 +491,7 @@ internal sealed class QualityProfileSyncOperationTest
             .ContainSingle()
             .Which.Identity.Should()
             .Be(new GuideBackedQualityProfileIdentity(new MappingKey("rejected-id", "Rejected")));
-        harness.State.Mappings.Should().Equal(new TrashIdMapping("accepted-id", "Accepted", 9));
+        harness.State.Mappings.Should().Equal(NewSyncState.Mapping("accepted-id", "Accepted", 9));
     }
 
     [Test]
@@ -499,8 +501,8 @@ internal sealed class QualityProfileSyncOperationTest
         var accepted = GuideProfile("Accepted New", "accepted-id");
         var oldRejected = new QualityProfileData { Id = 7, Name = "Rejected Old" };
         var oldAccepted = new QualityProfileData { Id = 8, Name = "Accepted Old" };
-        var rejectedMapping = new TrashIdMapping("rejected-id", "Rejected Old", 7);
-        var acceptedMapping = new TrashIdMapping("accepted-id", "Accepted Old", 8);
+        var rejectedMapping = NewSyncState.Mapping("rejected-id", "Rejected Old", 7);
+        var acceptedMapping = NewSyncState.Mapping("accepted-id", "Accepted Old", 8);
         var harness = CreateHarness(
             [rejected, accepted],
             [oldRejected, oldAccepted],
@@ -523,7 +525,7 @@ internal sealed class QualityProfileSyncOperationTest
         compute.Outcomes.OfType<QualityProfileUpdateRejectedOutcome>().Should().ContainSingle();
         harness
             .State.Mappings.Should()
-            .Equal(rejectedMapping, new TrashIdMapping("accepted-id", "Accepted New", 8));
+            .Equal(rejectedMapping, NewSyncState.Mapping("accepted-id", "Accepted New", 8));
     }
 
     [Test]
@@ -652,7 +654,7 @@ internal sealed class QualityProfileSyncOperationTest
             [planned],
             [current],
             Schema(current.Items),
-            [new TrashIdMapping("qp-trash-id", "Movies", 7)],
+            [NewSyncState.Mapping("qp-trash-id", "Movies", 7)],
             new RadarrQualityProfileFields(languages)
         );
 

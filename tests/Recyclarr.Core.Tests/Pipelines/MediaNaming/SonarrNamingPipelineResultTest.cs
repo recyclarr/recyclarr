@@ -19,21 +19,4 @@ internal sealed class SonarrNamingPipelineResultTest
 
         result.Status.Should().Be(expected);
     }
-
-    [Test]
-    public void Outcomes_are_a_stable_snapshot()
-    {
-        var outcomes = new List<SonarrNamingOutcome>
-        {
-            new SonarrNamingReferenceMismatchOutcome(
-                SonarrNamingFormatField.StandardEpisodeFormat,
-                "unknown"
-            ),
-        };
-        var result = new SonarrNamingPipelineResult(0, 1, outcomes, null);
-
-        outcomes.Clear();
-
-        result.Outcomes.Should().ContainSingle();
-    }
 }

@@ -160,16 +160,17 @@ internal sealed class NotificationServiceTest
                 .Range(1, 25)
                 .Select(i =>
                     (CustomFormatDelta)
-                        new CustomFormatUpdateDelta(
-                            new CustomFormatIdentity($"id-{i}", $"CF{i:D2}"),
-                            new CustomFormatSourceInfo(
+                        new CustomFormatUpdateDelta
+                        {
+                            Identity = new CustomFormatIdentity($"id-{i}", $"CF{i:D2}"),
+                            SelectionProvenance = new CustomFormatSourceInfo(
                                 CfSource.CfGroupExplicit,
                                 "Group",
                                 CfInclusionReason.Selected,
                                 []
                             ),
-                            []
-                        )
+                            Components = [],
+                        }
                 ),
         ]);
 
@@ -188,26 +189,31 @@ internal sealed class NotificationServiceTest
     {
         deltas ??=
         [
-            new CustomFormatCreateDelta(
-                new CustomFormatIdentity("created", "NewCF"),
-                new CustomFormatSourceInfo(
-                    CfSource.CfGroupExplicit,
-                    "Group",
-                    CfInclusionReason.Selected,
-                    []
-                )
-            ),
-            new CustomFormatUpdateDelta(
-                new CustomFormatIdentity("updated", "UpdatedCF"),
-                new CustomFormatSourceInfo(
+            new CustomFormatCreateDelta
+            {
+                Identity = new CustomFormatIdentity("created", "NewCF"),
+                SelectionProvenance = new CustomFormatSourceInfo(
                     CfSource.CfGroupExplicit,
                     "Group",
                     CfInclusionReason.Selected,
                     []
                 ),
-                []
-            ),
-            new CustomFormatDeleteDelta(new CustomFormatIdentity("deleted", "DeletedCF")),
+            },
+            new CustomFormatUpdateDelta
+            {
+                Identity = new CustomFormatIdentity("updated", "UpdatedCF"),
+                SelectionProvenance = new CustomFormatSourceInfo(
+                    CfSource.CfGroupExplicit,
+                    "Group",
+                    CfInclusionReason.Selected,
+                    []
+                ),
+                Components = [],
+            },
+            new CustomFormatDeleteDelta
+            {
+                Identity = new CustomFormatIdentity("deleted", "DeletedCF"),
+            },
         ];
 
         return new SyncRunResult([

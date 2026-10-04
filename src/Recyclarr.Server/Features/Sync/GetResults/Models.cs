@@ -9,12 +9,11 @@ internal sealed record GetSyncJobResultsRequest
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SyncJobResultsResponse(
-    Guid Id,
-    SyncCompletionStatus Status,
-    IReadOnlyList<SyncInstanceResultsResponse> Instances
-)
+internal sealed record SyncJobResultsResponse
 {
+    public required Guid Id { get; init; }
+    public required SyncCompletionStatus Status { get; init; }
+    public required IReadOnlyList<SyncInstanceResultsResponse> Instances { get; init; }
     public SyncFaultResponse? Fault { get; init; }
 }
 
@@ -49,26 +48,26 @@ internal sealed record SyncFaultResponse(string Reference);
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "service")]
 [JsonDerivedType(typeof(SonarrInstanceResultsResponse), "sonarr")]
 [JsonDerivedType(typeof(RadarrInstanceResultsResponse), "radarr")]
-internal abstract record SyncInstanceResultsResponse(string Name, SyncCompletionStatus Status)
+internal abstract record SyncInstanceResultsResponse
 {
+    public required string Name { get; init; }
+    public required SyncCompletionStatus Status { get; init; }
     public InstanceFailureCategory? Failure { get; init; }
     public SyncFaultResponse? Fault { get; init; }
     public IReadOnlyList<PlanningOutcomeResponse> PlanningOutcomes { get; init; } = [];
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SonarrInstanceResultsResponse(
-    string Name,
-    SyncCompletionStatus Status,
-    SonarrPipelinesResponse Pipelines
-) : SyncInstanceResultsResponse(Name, Status);
+internal sealed record SonarrInstanceResultsResponse : SyncInstanceResultsResponse
+{
+    public required SonarrPipelinesResponse Pipelines { get; init; }
+}
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record RadarrInstanceResultsResponse(
-    string Name,
-    SyncCompletionStatus Status,
-    RadarrPipelinesResponse Pipelines
-) : SyncInstanceResultsResponse(Name, Status);
+internal sealed record RadarrInstanceResultsResponse : SyncInstanceResultsResponse
+{
+    public required RadarrPipelinesResponse Pipelines { get; init; }
+}
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record SonarrPipelinesResponse

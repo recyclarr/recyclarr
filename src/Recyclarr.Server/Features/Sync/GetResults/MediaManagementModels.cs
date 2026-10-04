@@ -13,10 +13,9 @@ internal sealed record MediaManagementUpdateResponse(
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record MediaManagementPipelineResponse(
-    PipelineStatus Status,
-    IReadOnlyList<MediaManagementUpdateResponse> Updates
-)
+internal sealed record MediaManagementPipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required IReadOnlyList<MediaManagementUpdateResponse> Updates { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
 }

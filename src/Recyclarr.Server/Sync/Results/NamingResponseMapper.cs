@@ -20,12 +20,11 @@ internal static partial class NamingResponseMapper
             outcomes.Count
         );
 
-        return new SonarrNamingPipelineResponse(
-            ResultValueMapper.MapStatus(result.Status),
-            new SonarrNamingOutcomesResponse(outcomes),
-            result.Delta is null ? [] : [MapSonarrUpdate(result.Delta)]
-        )
+        return new SonarrNamingPipelineResponse
         {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = new SonarrNamingOutcomesResponse(outcomes),
+            Updates = result.Delta is null ? [] : [MapSonarrUpdate(result.Delta)],
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
@@ -42,12 +41,11 @@ internal static partial class NamingResponseMapper
             outcomes.Count
         );
 
-        return new RadarrNamingPipelineResponse(
-            ResultValueMapper.MapStatus(result.Status),
-            new RadarrNamingOutcomesResponse(outcomes),
-            result.Delta is null ? [] : [MapRadarrUpdate(result.Delta)]
-        )
+        return new RadarrNamingPipelineResponse
         {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = new RadarrNamingOutcomesResponse(outcomes),
+            Updates = result.Delta is null ? [] : [MapRadarrUpdate(result.Delta)],
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }

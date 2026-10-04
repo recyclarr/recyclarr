@@ -19,21 +19,4 @@ internal sealed class RadarrNamingPipelineResultTest
 
         result.Status.Should().Be(expected);
     }
-
-    [Test]
-    public void Outcomes_are_a_stable_snapshot()
-    {
-        var outcomes = new List<RadarrNamingOutcome>
-        {
-            new RadarrNamingReferenceMismatchOutcome(
-                RadarrNamingFormatField.StandardMovieFormat,
-                "unknown"
-            ),
-        };
-        var result = new RadarrNamingPipelineResult(0, 1, outcomes, null);
-
-        outcomes.Clear();
-
-        result.Outcomes.Should().ContainSingle();
-    }
 }

@@ -486,18 +486,20 @@ internal class QualityProfileSyncOperation(
     {
         var deltas = transactions
             .NewProfiles.Select<UpdatedQualityProfile, QualityProfileDelta>(
-                profile => new QualityProfileCreateDelta(
-                    CreateIdentity(profile.ProfileConfig),
-                    BuildControlledState(profile)
-                )
+                profile => new QualityProfileCreateDelta
+                {
+                    Identity = CreateIdentity(profile.ProfileConfig),
+                    State = BuildControlledState(profile),
+                }
             )
             .ToList();
 
         deltas.AddRange(
-            transactions.UpdatedProfiles.Select(x => new QualityProfileUpdateDelta(
-                CreateIdentity(x.Profile.ProfileConfig),
-                BuildUpdateComponents(x)
-            ))
+            transactions.UpdatedProfiles.Select(x => new QualityProfileUpdateDelta
+            {
+                Identity = CreateIdentity(x.Profile.ProfileConfig),
+                Components = BuildUpdateComponents(x),
+            })
         );
         return deltas;
     }
@@ -509,16 +511,18 @@ internal class QualityProfileSyncOperation(
         var guide = planned.GuideResource;
         var desired = profile.BuildMergedProfile();
 
-        var shared = new QualityProfileControlledState(
-            profile.EffectiveName,
-            config.UpgradeAllowed ?? guide?.UpgradeAllowed,
-            config.UpgradeUntilQuality ?? NullIfEmpty(guide?.Cutoff),
-            config.UpgradeUntilScore ?? guide?.CutoffFormatScore,
-            config.MinFormatScore ?? guide?.MinFormatScore,
-            config.MinUpgradeFormatScore ?? guide?.MinUpgradeFormatScore,
-            config.Qualities.Count > 0 ? MapQualityLayout(desired.Items) : [],
-            MapControlledScores(profile)
-        );
+        var shared = new QualityProfileControlledState
+        {
+            Name = profile.EffectiveName,
+            UpgradeAllowed = config.UpgradeAllowed ?? guide?.UpgradeAllowed,
+            UpgradeUntilQuality = config.UpgradeUntilQuality ?? NullIfEmpty(guide?.Cutoff),
+            UpgradeUntilScore = config.UpgradeUntilScore ?? guide?.CutoffFormatScore,
+            MinimumFormatScore = config.MinFormatScore ?? guide?.MinFormatScore,
+            MinimumUpgradeFormatScore =
+                config.MinUpgradeFormatScore ?? guide?.MinUpgradeFormatScore,
+            Qualities = config.Qualities.Count > 0 ? MapQualityLayout(desired.Items) : [],
+            CustomFormatScores = MapControlledScores(profile),
+        };
         return serviceFields.DescribeCreate(shared, desired);
     }
 
@@ -636,15 +640,19 @@ internal class QualityProfileSyncOperation(
         return items
             .Select<QualityProfileItem, QualityProfileQualityLayoutItem>(item =>
                 item.Quality is { } quality
-                    ? new QualityProfileQuality(
-                        quality.Name ?? item.Name ?? "",
-                        item.Allowed ?? false
-                    )
-                    : new QualityProfileQualityGroup(
-                        item.Name ?? "",
-                        item.Allowed ?? false,
-                        item.Items.Select(x => x.Quality?.Name ?? x.Name ?? "").ToList()
-                    )
+                    ? new QualityProfileQuality
+                    {
+                        Name = quality.Name ?? item.Name ?? "",
+                        Allowed = item.Allowed ?? false,
+                    }
+                    : new QualityProfileQualityGroup
+                    {
+                        Name = item.Name ?? "",
+                        Allowed = item.Allowed ?? false,
+                        Qualities = item
+                            .Items.Select(x => x.Quality?.Name ?? x.Name ?? "")
+                            .ToList(),
+                    }
             )
             .ToList();
     }

@@ -61,7 +61,10 @@ internal sealed class HttpExceptionStrategyTest
         outcome
             .ResponseMessages.Should()
             .BeEquivalentTo([
-                new HttpApiResponseMessage("Minimum Custom Format Score can never be satisfied"),
+                new HttpApiResponseMessage
+                {
+                    Message = "Minimum Custom Format Score can never be satisfied",
+                },
             ]);
     }
 
@@ -78,7 +81,9 @@ internal sealed class HttpExceptionStrategyTest
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         outcome
             .ResponseMessages.Should()
-            .BeEquivalentTo([new HttpApiResponseMessage("Request body can't be empty")]);
+            .BeEquivalentTo([
+                new HttpApiResponseMessage { Message = "Request body can't be empty" },
+            ]);
     }
 
     [Test]
@@ -125,8 +130,8 @@ internal sealed class HttpExceptionStrategyTest
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         HttpApiFailureMessage[] expected =
         [
-            new HttpApiResponseMessage("Invalid request"),
-            new HttpApiFieldError("apiKey", "Expired"),
+            new HttpApiResponseMessage { Message = "Invalid request" },
+            new HttpApiFieldError { Field = "apiKey", Message = "Expired" },
         ];
         outcome.ResponseMessages.Should().BeEquivalentTo(expected);
     }
@@ -145,9 +150,9 @@ internal sealed class HttpExceptionStrategyTest
         var outcome = result.Should().BeOfType<HttpApiFailure>().Which;
         HttpApiFailureMessage[] expected =
         [
-            new HttpApiResponseMessage("Validation failed"),
-            new HttpApiFieldError("name", "Required"),
-            new HttpApiFieldError("cutoff", "Invalid"),
+            new HttpApiResponseMessage { Message = "Validation failed" },
+            new HttpApiFieldError { Field = "name", Message = "Required" },
+            new HttpApiFieldError { Field = "cutoff", Message = "Invalid" },
         ];
         outcome.ResponseMessages.Should().BeEquivalentTo(expected);
     }

@@ -48,21 +48,19 @@ internal sealed record RadarrNamingOutcomesResponse(
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SonarrNamingPipelineResponse(
-    PipelineStatus Status,
-    SonarrNamingOutcomesResponse Outcomes,
-    IReadOnlyList<SonarrNamingUpdateResponse> Updates
-)
+internal sealed record SonarrNamingPipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required SonarrNamingOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<SonarrNamingUpdateResponse> Updates { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record RadarrNamingPipelineResponse(
-    PipelineStatus Status,
-    RadarrNamingOutcomesResponse Outcomes,
-    IReadOnlyList<RadarrNamingUpdateResponse> Updates
-)
+internal sealed record RadarrNamingPipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required RadarrNamingOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<RadarrNamingUpdateResponse> Updates { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
 }

@@ -132,7 +132,7 @@ internal class CustomFormatSyncOperation(
             else if (config.DeleteOldCustomFormats)
             {
                 transactions.DeletedCustomFormats.Add(candidate);
-                deltas.Add(new CustomFormatDeleteDelta(ToIdentity(candidate)));
+                deltas.Add(new CustomFormatDeleteDelta { Identity = ToIdentity(candidate) });
             }
         }
 
@@ -314,7 +314,13 @@ internal class CustomFormatSyncOperation(
             case 0:
                 // No collision - safe to create
                 transactions.NewCustomFormats.Add(guideCf);
-                deltas.Add(new CustomFormatCreateDelta(ToIdentity(guideCf), provenance));
+                deltas.Add(
+                    new CustomFormatCreateDelta
+                    {
+                        Identity = ToIdentity(guideCf),
+                        SelectionProvenance = provenance,
+                    }
+                );
                 break;
 
             case 1:
@@ -357,11 +363,12 @@ internal class CustomFormatSyncOperation(
         {
             transactions.UpdatedCustomFormats.Add(guideCf);
             deltas.Add(
-                new CustomFormatUpdateDelta(
-                    ToIdentity(guideCf),
-                    provenance,
-                    BuildUpdateComponents(serviceCf, guideCf)
-                )
+                new CustomFormatUpdateDelta
+                {
+                    Identity = ToIdentity(guideCf),
+                    SelectionProvenance = provenance,
+                    Components = BuildUpdateComponents(serviceCf, guideCf),
+                }
             );
         }
         else

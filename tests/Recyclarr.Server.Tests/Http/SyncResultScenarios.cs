@@ -115,19 +115,21 @@ internal static class SyncResultScenarios
         ];
         CustomFormatDelta[] deltas =
         [
-            new CustomFormatCreateDelta(identity, selection),
-            new CustomFormatUpdateDelta(
-                identity,
-                selection,
+            new CustomFormatCreateDelta { Identity = identity, SelectionProvenance = selection },
+            new CustomFormatUpdateDelta
+            {
+                Identity = identity,
+                SelectionProvenance = selection,
+                Components =
                 [
                     new CustomFormatNameChanged(new ValueDelta<string>("Old", "New")),
                     new CustomFormatIncludeWhenRenamingChanged(new ValueDelta<bool>(false, true)),
                     new CustomFormatSpecificationAdded("Added"),
                     new CustomFormatSpecificationChanged("Changed"),
                     new CustomFormatSpecificationRemoved("Removed"),
-                ]
-            ),
-            new CustomFormatDeleteDelta(managed),
+                ],
+            },
+            new CustomFormatDeleteDelta { Identity = managed },
         ];
         return new CustomFormatPipelineResult(
             completedResources: 1,
@@ -165,18 +167,24 @@ internal static class SyncResultScenarios
             new QualityProfileUpdateRejectedOutcome(user),
         ];
 
-        var currentLayout = new QualityProfileQuality("Current", true);
-        var desiredLayout = new QualityProfileQualityGroup("Desired", true, ["One", "Two"]);
-        var sharedState = new QualityProfileControlledState(
-            "Guide",
-            null,
-            "Cutoff",
-            100,
-            0,
-            null,
-            [desiredLayout],
-            [new QualityProfileCustomFormatScore("CF", "cf-one", 10)]
-        );
+        var currentLayout = new QualityProfileQuality { Name = "Current", Allowed = true };
+        var desiredLayout = new QualityProfileQualityGroup
+        {
+            Name = "Desired",
+            Allowed = true,
+            Qualities = ["One", "Two"],
+        };
+        var sharedState = new QualityProfileControlledState
+        {
+            Name = "Guide",
+            UpgradeAllowed = null,
+            UpgradeUntilQuality = "Cutoff",
+            UpgradeUntilScore = 100,
+            MinimumFormatScore = 0,
+            MinimumUpgradeFormatScore = null,
+            Qualities = [desiredLayout],
+            CustomFormatScores = [new QualityProfileCustomFormatScore("CF", "cf-one", 10)],
+        };
         var isRadarr = service == SupportedServices.Radarr;
         var state = isRadarr
             ? new RadarrQualityProfileControlledState(sharedState, "English")
@@ -186,9 +194,11 @@ internal static class SyncResultScenarios
             : [];
         QualityProfileDelta[] deltas =
         [
-            new QualityProfileCreateDelta(guide, state),
-            new QualityProfileUpdateDelta(
-                user,
+            new QualityProfileCreateDelta { Identity = guide, State = state },
+            new QualityProfileUpdateDelta
+            {
+                Identity = user,
+                Components =
                 [
                     new QualityProfileNameChanged(new ValueDelta<string>("Old", "New")),
                     new QualityProfileUpgradeAllowedChanged(new ValueDelta<bool?>(null, false)),
@@ -214,8 +224,8 @@ internal static class SyncResultScenarios
                         new ValueDelta<int>(5, 0),
                         QualityProfileScoreChangeReason.Reset
                     ),
-                ]
-            ),
+                ],
+            },
         ];
         return new QualityProfilePipelineResult(
             completedResources: 1,

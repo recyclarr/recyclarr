@@ -350,7 +350,13 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                 [
                     NewPipelineResult.CustomFormats(
                         [],
-                        [new CustomFormatCreateDelta(new("cf-x265", "x265 (HD)"), groupSource)]
+                        [
+                            new CustomFormatCreateDelta
+                            {
+                                Identity = new("cf-x265", "x265 (HD)"),
+                                SelectionProvenance = groupSource,
+                            },
+                        ]
                     ),
                     NewPipelineResult.QualityProfiles([], [NewProfile("HD Bluray")]),
                     NewPipelineResult.QualitySizes(
@@ -503,8 +509,13 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                         [],
                         [
                             Create("cf1", "One"),
-                            new CustomFormatUpdateDelta(new("cf2", "Two"), source, []),
-                            new CustomFormatDeleteDelta(new("cf3", "Three")),
+                            new CustomFormatUpdateDelta
+                            {
+                                Identity = new("cf2", "Two"),
+                                SelectionProvenance = source,
+                                Components = [],
+                            },
+                            new CustomFormatDeleteDelta { Identity = new("cf3", "Three") },
                         ]
                     ),
                     NewPipelineResult.QualityProfiles(
@@ -666,16 +677,18 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     }
 
     private static QualityProfileUpdateDelta NewProfileUpdate(string name) =>
-        new(
-            new UserDefinedQualityProfileIdentity(name),
+        new()
+        {
+            Identity = new UserDefinedQualityProfileIdentity(name),
+            Components =
             [
                 new QualityProfileMinimumFormatScoreChanged(new ValueDelta<int?>(0, 10)),
                 new RadarrQualityProfileLanguageChanged(
                     new ValueDelta<string?>("English", "French")
                 ),
                 new QualityProfileQualityLayoutChanged(
-                    [new QualityProfileQuality("Remux-2160p", Allowed: true)],
-                    [new QualityProfileQuality("Remux-2160p", Allowed: false)]
+                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = true }],
+                    [new QualityProfileQuality { Name = "Remux-2160p", Allowed = false }]
                 ),
                 new QualityProfileCustomFormatScoreChanged(
                     "x265 (HD)",
@@ -683,33 +696,47 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
                     new ValueDelta<int>(0, -10000),
                     QualityProfileScoreChangeReason.Set
                 ),
-            ]
-        );
+            ],
+        };
 
     // Every caller syncs a Radarr instance, so the created profile carries Radarr's state.
     private static QualityProfileCreateDelta NewProfile(string name) =>
-        new(
-            new UserDefinedQualityProfileIdentity(name),
-            new RadarrQualityProfileControlledState(
-                new QualityProfileControlledState(
-                    name,
-                    upgradeAllowed: true,
-                    upgradeUntilQuality: "Bluray-1080p",
-                    upgradeUntilScore: 10000,
-                    minimumFormatScore: 0,
-                    minimumUpgradeFormatScore: 1,
-                    [new QualityProfileQuality("Bluray-1080p", Allowed: true)],
-                    [new QualityProfileCustomFormatScore("x264", "cf-x264", 50)]
-                ),
+        new()
+        {
+            Identity = new UserDefinedQualityProfileIdentity(name),
+            State = new RadarrQualityProfileControlledState(
+                new QualityProfileControlledState
+                {
+                    Name = name,
+                    UpgradeAllowed = true,
+                    UpgradeUntilQuality = "Bluray-1080p",
+                    UpgradeUntilScore = 10000,
+                    MinimumFormatScore = 0,
+                    MinimumUpgradeFormatScore = 1,
+                    Qualities =
+                    [
+                        new QualityProfileQuality { Name = "Bluray-1080p", Allowed = true },
+                    ],
+                    CustomFormatScores =
+                    [
+                        new QualityProfileCustomFormatScore("x264", "cf-x264", 50),
+                    ],
+                },
                 language: null
-            )
-        );
+            ),
+        };
 
     private static CustomFormatCreateDelta Create(string trashId, string name) =>
-        new(
-            new CustomFormatIdentity(trashId, name),
-            new CustomFormatSourceInfo(CfSource.FlatConfig, null, CfInclusionReason.None, [])
-        );
+        new()
+        {
+            Identity = new CustomFormatIdentity(trashId, name),
+            SelectionProvenance = new CustomFormatSourceInfo(
+                CfSource.FlatConfig,
+                null,
+                CfInclusionReason.None,
+                []
+            ),
+        };
 
     private async Task<ExitStatus> RunSync(CreateSyncJobRequest? request = null)
     {

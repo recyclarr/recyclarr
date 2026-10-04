@@ -25,8 +25,8 @@ public sealed record QualitySizePipelineResult : PipelineResult
     )
         : base(status, blockedBy)
     {
-        Outcomes = outcomes.ToList().AsReadOnly();
-        Deltas = deltas.ToList().AsReadOnly();
+        Outcomes = outcomes;
+        Deltas = deltas;
     }
 
     public IReadOnlyList<QualitySizeOutcome> Outcomes { get; }
@@ -82,17 +82,10 @@ public sealed record QualitySizePreferredGreaterThanMaximumOutcome(
     QualitySizeValue Maximum
 ) : QualitySizeOutcome;
 
-public sealed record QualitySizeDelta : ResourceDelta
-{
-    public QualitySizeDelta(string quality, IReadOnlyList<QualitySizeUpdateComponent> components)
-    {
-        Quality = quality;
-        Components = components.ToList().AsReadOnly();
-    }
-
-    public string Quality { get; }
-    public IReadOnlyList<QualitySizeUpdateComponent> Components { get; }
-}
+public sealed record QualitySizeDelta(
+    string Quality,
+    IReadOnlyList<QualitySizeUpdateComponent> Components
+) : ResourceDelta;
 
 public abstract record QualitySizeUpdateComponent;
 
