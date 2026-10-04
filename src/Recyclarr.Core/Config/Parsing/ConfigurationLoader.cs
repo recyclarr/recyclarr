@@ -6,12 +6,11 @@ using Serilog.Context;
 
 namespace Recyclarr.Config.Parsing;
 
-public record LoadedConfigYaml(
-    string InstanceName,
-    SupportedServices ServiceType,
-    ServiceConfigYaml Yaml
-)
+public record LoadedConfigYaml
 {
+    public required string InstanceName { get; init; }
+    public required SupportedServices ServiceType { get; init; }
+    public required ServiceConfigYaml Yaml { get; init; }
     public IFileInfo? YamlPath { get; init; }
 }
 
@@ -71,7 +70,12 @@ public class ConfigurationLoader(
         {
             return configs
                     ?.Where(x => x.Value is not null)
-                    .Select(kvp => new LoadedConfigYaml(kvp.Key, serviceType, kvp.Value!))
+                    .Select(kvp => new LoadedConfigYaml
+                    {
+                        InstanceName = kvp.Key,
+                        ServiceType = serviceType,
+                        Yaml = kvp.Value!,
+                    })
                 ?? [];
         }
     }

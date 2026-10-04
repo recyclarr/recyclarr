@@ -39,15 +39,16 @@ internal sealed class CustomFormatSyncOperationTest
         delta
             .Should()
             .BeEquivalentTo(
-                new CustomFormatCreateDelta(
-                    new CustomFormatIdentity("trash-id", "Release Title"),
-                    new CustomFormatSourceInfo(
+                new CustomFormatCreateDelta
+                {
+                    Identity = new CustomFormatIdentity("trash-id", "Release Title"),
+                    SelectionProvenance = new CustomFormatSourceInfo(
                         CfSource.CfGroupExplicit,
                         "Streaming Services",
                         CfInclusionReason.Required,
                         ["WEB-1080p"]
-                    )
-                )
+                    ),
+                }
             );
     }
 
@@ -74,7 +75,7 @@ internal sealed class CustomFormatSyncOperationTest
         var harness = CreateHarness(
             [new PlannedCustomFormat(desired)],
             [current],
-            [new TrashIdMapping("trash-id", "New Name", 7)]
+            [NewSyncState.Mapping("trash-id", "New Name", 7)]
         );
 
         var compute = await Compute(harness);
@@ -166,7 +167,7 @@ internal sealed class CustomFormatSyncOperationTest
         var harness = CreateHarness(
             [],
             [serviceCf],
-            [new TrashIdMapping("orphan-id", "Orphan", 7)],
+            [NewSyncState.Mapping("orphan-id", "Orphan", 7)],
             deleteOldCustomFormats: false
         );
 
@@ -183,7 +184,7 @@ internal sealed class CustomFormatSyncOperationTest
         var harness = CreateHarness(
             [],
             [serviceCf],
-            [new TrashIdMapping("orphan-id", "Orphan", 7)],
+            [NewSyncState.Mapping("orphan-id", "Orphan", 7)],
             deleteOldCustomFormats: true
         );
 
@@ -192,7 +193,12 @@ internal sealed class CustomFormatSyncOperationTest
         compute.Status.Should().Be(SyncResultStatus.Succeeded);
         compute
             .Deltas.Should()
-            .Equal(new CustomFormatDeleteDelta(new CustomFormatIdentity("orphan-id", "Orphan")));
+            .Equal(
+                new CustomFormatDeleteDelta
+                {
+                    Identity = new CustomFormatIdentity("orphan-id", "Orphan"),
+                }
+            );
     }
 
     [Test]
@@ -203,8 +209,8 @@ internal sealed class CustomFormatSyncOperationTest
             [new PlannedCustomFormat(desired)],
             [NewCf.Data("Managed", "", 7)],
             [
-                new TrashIdMapping("managed-id", "Managed", 7),
-                new TrashIdMapping("orphan-id", "Orphan", 7),
+                NewSyncState.Mapping("managed-id", "Managed", 7),
+                NewSyncState.Mapping("orphan-id", "Orphan", 7),
             ],
             deleteOldCustomFormats: true
         );
@@ -251,7 +257,7 @@ internal sealed class CustomFormatSyncOperationTest
             .ContainSingle()
             .Which.Identity.Should()
             .Be(new CustomFormatIdentity("rejected-id", "Rejected"));
-        harness.State.Mappings.Should().Equal(new TrashIdMapping("accepted-id", "Accepted", 9));
+        harness.State.Mappings.Should().Equal(NewSyncState.Mapping("accepted-id", "Accepted", 9));
     }
 
     [Test]
@@ -261,8 +267,8 @@ internal sealed class CustomFormatSyncOperationTest
         {
             IncludeCustomFormatWhenRenaming = true,
         };
-        var managedMapping = new TrashIdMapping("managed-id", "Managed", 7);
-        var orphanMapping = new TrashIdMapping("orphan-id", "Orphan", 8);
+        var managedMapping = NewSyncState.Mapping("managed-id", "Managed", 7);
+        var orphanMapping = NewSyncState.Mapping("orphan-id", "Orphan", 8);
         var harness = CreateHarness(
             [new PlannedCustomFormat(desired)],
             [NewCf.Data("Managed", "", 7), NewCf.Data("Orphan", "", 8)],

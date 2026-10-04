@@ -21,24 +21,28 @@ internal enum QualityProfileScoreReason
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileIdentityResponse(QualityProfileIdentityKind Kind, string Name)
+internal sealed record QualityProfileIdentityResponse
 {
+    public required QualityProfileIdentityKind Kind { get; init; }
+    public required string Name { get; init; }
     public string? TrashId { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileLayoutResponse(
-    QualityProfileLayoutKind Kind,
-    string Name,
-    bool Allowed
-)
+internal sealed record QualityProfileLayoutResponse
 {
+    public required QualityProfileLayoutKind Kind { get; init; }
+    public required string Name { get; init; }
+    public required bool Allowed { get; init; }
     public IReadOnlyList<string>? Qualities { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileScoreResponse(string Name, int Score)
+internal sealed record QualityProfileScoreResponse
 {
+    public required string Name { get; init; }
+    public required int Score { get; init; }
+
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public string? TrashId { get; init; }
 }
@@ -88,12 +92,11 @@ internal sealed record RadarrQualityProfileCreateResponse(
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileScoreChangeResponse(
-    string Name,
-    ValueChangeResponse<int> Value,
-    QualityProfileScoreReason Reason
-)
+internal sealed record QualityProfileScoreChangeResponse
 {
+    public required string Name { get; init; }
+    public required ValueChangeResponse<int> Value { get; init; }
+    public required QualityProfileScoreReason Reason { get; init; }
     public string? TrashId { get; init; }
 }
 

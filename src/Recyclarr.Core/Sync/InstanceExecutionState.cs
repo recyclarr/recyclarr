@@ -12,7 +12,7 @@ internal sealed class InstanceExecutionState(IServiceConfiguration config)
 
     public void RetainPlanningOutcomes(IReadOnlyList<PlanningOutcome> outcomes)
     {
-        _planningOutcomes = outcomes.ToList().AsReadOnly();
+        _planningOutcomes = outcomes;
     }
 
     public void RetainCompletedResult(SyncInstanceResult result)

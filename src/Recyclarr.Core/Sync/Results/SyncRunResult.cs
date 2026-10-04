@@ -4,8 +4,8 @@ namespace Recyclarr.Sync.Results;
 /// The ordered terminal instance results and optional unexpected fault for one sync run.
 /// </summary>
 /// <remarks>
-/// Instance results are copied into a stable snapshot. Status is derived from those results and the
-/// presence of a fault rather than from transient progress events.
+/// Status is derived from the instance results and the presence of a fault rather than from
+/// transient progress events.
 /// </remarks>
 public sealed record SyncRunResult
 {
@@ -13,7 +13,7 @@ public sealed record SyncRunResult
     {
         ArgumentNullException.ThrowIfNull(instances);
 
-        Instances = instances.ToList().AsReadOnly();
+        Instances = instances;
         Fault = fault;
         Status = SyncResultStatusAggregation.From(
             Instances.Select(x => x.Status),

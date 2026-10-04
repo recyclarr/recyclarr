@@ -35,48 +35,20 @@ public sealed record CustomFormatGroupQualityProfileReferenceMismatchPlanningOut
 /// A Quality Profile Trash ID assigned directly from Custom Format configuration matches more than
 /// one configured profile.
 /// </summary>
-public sealed record CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome
-    : BlockingPlanningOutcome
-{
-    public CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome(
-        string profileTrashId,
-        IReadOnlyList<string> profileNames
-    )
-    {
-        ArgumentNullException.ThrowIfNull(profileNames);
-
-        ProfileTrashId = profileTrashId;
-        ProfileNames = profileNames.ToList().AsReadOnly();
-    }
-
-    public string ProfileTrashId { get; }
-    public IReadOnlyList<string> ProfileNames { get; }
-}
+public sealed record CustomFormatQualityProfileReferenceAmbiguousPlanningOutcome(
+    string ProfileTrashId,
+    IReadOnlyList<string> ProfileNames
+) : BlockingPlanningOutcome;
 
 /// <summary>
 /// A Quality Profile Trash ID assigned from a Custom Format group matches more than one configured
 /// profile.
 /// </summary>
-public sealed record CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome
-    : BlockingPlanningOutcome
-{
-    public CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome(
-        string groupTrashId,
-        string profileTrashId,
-        IReadOnlyList<string> profileNames
-    )
-    {
-        ArgumentNullException.ThrowIfNull(profileNames);
-
-        GroupTrashId = groupTrashId;
-        ProfileTrashId = profileTrashId;
-        ProfileNames = profileNames.ToList().AsReadOnly();
-    }
-
-    public string GroupTrashId { get; }
-    public string ProfileTrashId { get; }
-    public IReadOnlyList<string> ProfileNames { get; }
-}
+public sealed record CustomFormatGroupQualityProfileReferenceAmbiguousPlanningOutcome(
+    string GroupTrashId,
+    string ProfileTrashId,
+    IReadOnlyList<string> ProfileNames
+) : BlockingPlanningOutcome;
 
 /// <summary>
 /// A required Custom Format was explicitly selected even though groups always include it.

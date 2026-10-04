@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.SyncState;
@@ -36,8 +37,8 @@ public sealed record QualityProfilePipelineResult : PipelineResult
     {
         CompletedResources = completedResources;
         IncompleteResources = incompleteResources;
-        Outcomes = outcomes.ToList().AsReadOnly();
-        Deltas = deltas.ToList().AsReadOnly();
+        Outcomes = outcomes;
+        Deltas = deltas;
     }
 
     public IReadOnlyList<QualityProfileOutcome> Outcomes { get; }
@@ -119,38 +120,16 @@ public sealed record QualityProfileUnavailableCutoffOutcome(
 public sealed record QualityProfileQualitiesRequiredOutcome(QualityProfileIdentity Identity)
     : QualityProfileOutcome;
 
-public sealed record QualityProfileQualityReferenceMismatchOutcome : QualityProfileOutcome
-{
-    public QualityProfileQualityReferenceMismatchOutcome(
-        QualityProfileIdentity identity,
-        IReadOnlyList<string> names
-    )
-    {
-        Identity = identity;
-        Names = names.ToList().AsReadOnly();
-    }
+public sealed record QualityProfileQualityReferenceMismatchOutcome(
+    QualityProfileIdentity Identity,
+    IReadOnlyList<string> Names
+) : QualityProfileOutcome;
 
-    public QualityProfileIdentity Identity { get; }
-    public IReadOnlyList<string> Names { get; }
-}
-
-public sealed record QualityProfileResetScoreReferenceMismatchOutcome : QualityProfileOutcome
-{
-    public QualityProfileResetScoreReferenceMismatchOutcome(
-        QualityProfileIdentity identity,
-        IReadOnlyList<string> names,
-        IReadOnlyList<string> patterns
-    )
-    {
-        Identity = identity;
-        Names = names.ToList().AsReadOnly();
-        Patterns = patterns.ToList().AsReadOnly();
-    }
-
-    public QualityProfileIdentity Identity { get; }
-    public IReadOnlyList<string> Names { get; }
-    public IReadOnlyList<string> Patterns { get; }
-}
+public sealed record QualityProfileResetScoreReferenceMismatchOutcome(
+    QualityProfileIdentity Identity,
+    IReadOnlyList<string> Names,
+    IReadOnlyList<string> Patterns
+) : QualityProfileOutcome;
 
 public sealed record QualityProfileServiceMatch(string Name, int ServiceId);
 
@@ -159,20 +138,10 @@ public sealed record QualityProfileRenameBlockedOutcome(
     QualityProfileServiceMatch Conflict
 ) : QualityProfileOutcome;
 
-public sealed record QualityProfileAmbiguousMatchOutcome : QualityProfileOutcome
-{
-    public QualityProfileAmbiguousMatchOutcome(
-        QualityProfileIdentity identity,
-        IReadOnlyList<QualityProfileServiceMatch> serviceMatches
-    )
-    {
-        Identity = identity;
-        ServiceMatches = serviceMatches.ToList().AsReadOnly();
-    }
-
-    public QualityProfileIdentity Identity { get; }
-    public IReadOnlyList<QualityProfileServiceMatch> ServiceMatches { get; }
-}
+public sealed record QualityProfileAmbiguousMatchOutcome(
+    QualityProfileIdentity Identity,
+    IReadOnlyList<QualityProfileServiceMatch> ServiceMatches
+) : QualityProfileOutcome;
 
 public sealed record QualityProfileCreateRejectedOutcome(QualityProfileIdentity Identity)
     : QualityProfileOutcome;
@@ -180,25 +149,19 @@ public sealed record QualityProfileCreateRejectedOutcome(QualityProfileIdentity 
 public sealed record QualityProfileUpdateRejectedOutcome(QualityProfileIdentity Identity)
     : QualityProfileOutcome;
 
-public abstract record QualityProfileDelta(QualityProfileIdentity Identity) : ResourceDelta;
+public abstract record QualityProfileDelta : ResourceDelta
+{
+    public required QualityProfileIdentity Identity { get; init; }
+}
 
-public sealed record QualityProfileCreateDelta(
-    QualityProfileIdentity Identity,
-    QualityProfileControlledState State
-) : QualityProfileDelta(Identity);
+public sealed record QualityProfileCreateDelta : QualityProfileDelta
+{
+    public required QualityProfileControlledState State { get; init; }
+}
 
 public sealed record QualityProfileUpdateDelta : QualityProfileDelta
 {
-    public QualityProfileUpdateDelta(
-        QualityProfileIdentity identity,
-        IReadOnlyList<QualityProfileUpdateComponent> components
-    )
-        : base(identity)
-    {
-        Components = components.ToList().AsReadOnly();
-    }
-
-    public IReadOnlyList<QualityProfileUpdateComponent> Components { get; }
+    public required IReadOnlyList<QualityProfileUpdateComponent> Components { get; init; }
 }
 
 /// <summary>
@@ -207,39 +170,19 @@ public sealed record QualityProfileUpdateDelta : QualityProfileDelta
 /// </summary>
 public record QualityProfileControlledState
 {
-    public QualityProfileControlledState(
-        string name,
-        bool? upgradeAllowed,
-        string? upgradeUntilQuality,
-        int? upgradeUntilScore,
-        int? minimumFormatScore,
-        int? minimumUpgradeFormatScore,
-        IReadOnlyList<QualityProfileQualityLayoutItem> qualities,
-        IReadOnlyList<QualityProfileCustomFormatScore> customFormatScores
-    )
-    {
-        Name = name;
-        UpgradeAllowed = upgradeAllowed;
-        UpgradeUntilQuality = upgradeUntilQuality;
-        UpgradeUntilScore = upgradeUntilScore;
-        MinimumFormatScore = minimumFormatScore;
-        MinimumUpgradeFormatScore = minimumUpgradeFormatScore;
-        Qualities = qualities.ToList().AsReadOnly();
-        CustomFormatScores = customFormatScores.ToList().AsReadOnly();
-    }
-
-    public string Name { get; }
-    public bool? UpgradeAllowed { get; }
-    public string? UpgradeUntilQuality { get; }
-    public int? UpgradeUntilScore { get; }
-    public int? MinimumFormatScore { get; }
-    public int? MinimumUpgradeFormatScore { get; }
-    public IReadOnlyList<QualityProfileQualityLayoutItem> Qualities { get; }
-    public IReadOnlyList<QualityProfileCustomFormatScore> CustomFormatScores { get; }
+    public required string Name { get; init; }
+    public required bool? UpgradeAllowed { get; init; }
+    public required string? UpgradeUntilQuality { get; init; }
+    public required int? UpgradeUntilScore { get; init; }
+    public required int? MinimumFormatScore { get; init; }
+    public required int? MinimumUpgradeFormatScore { get; init; }
+    public required IReadOnlyList<QualityProfileQualityLayoutItem> Qualities { get; init; }
+    public required IReadOnlyList<QualityProfileCustomFormatScore> CustomFormatScores { get; init; }
 }
 
 public sealed record RadarrQualityProfileControlledState : QualityProfileControlledState
 {
+    [SetsRequiredMembers]
     public RadarrQualityProfileControlledState(
         QualityProfileControlledState shared,
         string? language
@@ -252,20 +195,17 @@ public sealed record RadarrQualityProfileControlledState : QualityProfileControl
     public string? Language { get; }
 }
 
-public abstract record QualityProfileQualityLayoutItem(string Name, bool Allowed);
+public abstract record QualityProfileQualityLayoutItem
+{
+    public required string Name { get; init; }
+    public required bool Allowed { get; init; }
+}
 
-public sealed record QualityProfileQuality(string Name, bool Allowed)
-    : QualityProfileQualityLayoutItem(Name, Allowed);
+public sealed record QualityProfileQuality : QualityProfileQualityLayoutItem;
 
 public sealed record QualityProfileQualityGroup : QualityProfileQualityLayoutItem
 {
-    public QualityProfileQualityGroup(string name, bool allowed, IReadOnlyList<string> qualities)
-        : base(name, allowed)
-    {
-        Qualities = qualities.ToList().AsReadOnly();
-    }
-
-    public IReadOnlyList<string> Qualities { get; }
+    public required IReadOnlyList<string> Qualities { get; init; }
 }
 
 public sealed record QualityProfileCustomFormatScore(string Name, string? TrashId, int Score);
@@ -293,20 +233,10 @@ public sealed record QualityProfileMinimumUpgradeFormatScoreChanged(ValueDelta<i
 public sealed record RadarrQualityProfileLanguageChanged(ValueDelta<string?> Value)
     : QualityProfileUpdateComponent;
 
-public sealed record QualityProfileQualityLayoutChanged : QualityProfileUpdateComponent
-{
-    public QualityProfileQualityLayoutChanged(
-        IReadOnlyList<QualityProfileQualityLayoutItem> current,
-        IReadOnlyList<QualityProfileQualityLayoutItem> desired
-    )
-    {
-        Current = current.ToList().AsReadOnly();
-        Desired = desired.ToList().AsReadOnly();
-    }
-
-    public IReadOnlyList<QualityProfileQualityLayoutItem> Current { get; }
-    public IReadOnlyList<QualityProfileQualityLayoutItem> Desired { get; }
-}
+public sealed record QualityProfileQualityLayoutChanged(
+    IReadOnlyList<QualityProfileQualityLayoutItem> Current,
+    IReadOnlyList<QualityProfileQualityLayoutItem> Desired
+) : QualityProfileUpdateComponent;
 
 public enum QualityProfileScoreChangeReason
 {

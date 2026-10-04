@@ -324,34 +324,34 @@ internal static partial class QualityProfileResponseMapper
     private static QualityProfileIdentityResponse MapIdentity(QualityProfileIdentity identity) =>
         identity switch
         {
-            GuideBackedQualityProfileIdentity x => new QualityProfileIdentityResponse(
-                QualityProfileIdentityKind.GuideBacked,
-                x.MappingKey.Name
-            )
+            GuideBackedQualityProfileIdentity x => new QualityProfileIdentityResponse
             {
+                Kind = QualityProfileIdentityKind.GuideBacked,
+                Name = x.MappingKey.Name,
                 TrashId = x.MappingKey.TrashId,
             },
-            UserDefinedQualityProfileIdentity x => new QualityProfileIdentityResponse(
-                QualityProfileIdentityKind.UserDefined,
-                x.Name
-            ),
+            UserDefinedQualityProfileIdentity x => new QualityProfileIdentityResponse
+            {
+                Kind = QualityProfileIdentityKind.UserDefined,
+                Name = x.Name,
+            },
             _ => throw new ArgumentOutOfRangeException(nameof(identity), identity, null),
         };
 
     private static QualityProfileLayoutResponse MapLayout(QualityProfileQualityLayoutItem item) =>
         item switch
         {
-            QualityProfileQuality x => new QualityProfileLayoutResponse(
-                QualityProfileLayoutKind.Quality,
-                x.Name,
-                x.Allowed
-            ),
-            QualityProfileQualityGroup x => new QualityProfileLayoutResponse(
-                QualityProfileLayoutKind.Group,
-                x.Name,
-                x.Allowed
-            )
+            QualityProfileQuality x => new QualityProfileLayoutResponse
             {
+                Kind = QualityProfileLayoutKind.Quality,
+                Name = x.Name,
+                Allowed = x.Allowed,
+            },
+            QualityProfileQualityGroup x => new QualityProfileLayoutResponse
+            {
+                Kind = QualityProfileLayoutKind.Group,
+                Name = x.Name,
+                Allowed = x.Allowed,
                 Qualities = x.Qualities,
             },
             _ => throw new ArgumentOutOfRangeException(nameof(item), item, null),
@@ -369,17 +369,16 @@ internal static partial class QualityProfileResponseMapper
     private static QualityProfileScoreChangeResponse MapScoreChange(
         QualityProfileCustomFormatScoreChanged change
     ) =>
-        new(
-            change.Name,
-            ResultValueMapper.MapValue(change.Value),
-            change.Reason switch
+        new()
+        {
+            Name = change.Name,
+            Value = ResultValueMapper.MapValue(change.Value),
+            Reason = change.Reason switch
             {
                 QualityProfileScoreChangeReason.Set => QualityProfileScoreReason.Set,
                 QualityProfileScoreChangeReason.Reset => QualityProfileScoreReason.Reset,
                 _ => throw new ArgumentOutOfRangeException(nameof(change)),
-            }
-        )
-        {
+            },
             TrashId = change.TrashId,
         };
 

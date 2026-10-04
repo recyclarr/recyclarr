@@ -61,7 +61,7 @@ internal class HttpExceptionStrategy : IExceptionStrategy
                 && msgProp.GetString() is { } msg
             )
             {
-                return [new HttpApiResponseMessage(msg)];
+                return [new HttpApiResponseMessage { Message = msg }];
             }
 
             // ServiceErrorsList format: {"Title":"...","Errors":{"field":["msg"]}}
@@ -80,9 +80,10 @@ internal class HttpExceptionStrategy : IExceptionStrategy
                 item.TryGetProperty("errorMessage", out var errProp)
                 && errProp.ValueKind == JsonValueKind.String
             )
-            .Select(item => new HttpApiResponseMessage(
-                item.GetProperty("errorMessage").GetString() ?? ""
-            ))
+            .Select(item => new HttpApiResponseMessage
+            {
+                Message = item.GetProperty("errorMessage").GetString() ?? "",
+            })
             .ToList();
     }
 
@@ -97,7 +98,10 @@ internal class HttpExceptionStrategy : IExceptionStrategy
             return [];
         }
 
-        var messages = new List<HttpApiFailureMessage> { new HttpApiResponseMessage(title) };
+        var messages = new List<HttpApiFailureMessage>
+        {
+            new HttpApiResponseMessage { Message = title },
+        };
 
         if (
             !root.TryGetProperty("Errors", out var errorsProp)
@@ -118,7 +122,7 @@ internal class HttpExceptionStrategy : IExceptionStrategy
             {
                 if (errItem.ValueKind == JsonValueKind.String && errItem.GetString() is { } errText)
                 {
-                    messages.Add(new HttpApiFieldError(prop.Name, errText));
+                    messages.Add(new HttpApiFieldError { Field = prop.Name, Message = errText });
                 }
             }
         }

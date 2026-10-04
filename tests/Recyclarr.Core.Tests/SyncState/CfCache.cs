@@ -20,7 +20,7 @@ internal static class CfCache
             transactions
                 .NewCustomFormats.Concat(transactions.UpdatedCustomFormats)
                 .Concat(transactions.UnchangedCustomFormats)
-                .Select(cf => new TrashIdMapping(cf.TrashId, cf.Name, cf.Id)),
+                .Select(cf => NewSyncState.Mapping(cf.TrashId, cf.Name, cf.Id)),
             transactions.DeletedCustomFormats.Select(m => m.ServiceId),
             serviceCfs.Select(cf => cf.Id)
         );

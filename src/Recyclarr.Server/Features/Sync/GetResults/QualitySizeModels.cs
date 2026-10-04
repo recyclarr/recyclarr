@@ -7,14 +7,16 @@ internal enum QualitySizeKind
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualitySizeValueResponse(QualitySizeKind Kind)
+internal sealed record QualitySizeValueResponse
 {
+    public required QualitySizeKind Kind { get; init; }
     public decimal? Value { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualitySizeUpdateResponse(string Quality)
+internal sealed record QualitySizeUpdateResponse
 {
+    public required string Quality { get; init; }
     public ValueChangeResponse<QualitySizeValueResponse>? Minimum { get; init; }
     public ValueChangeResponse<QualitySizeValueResponse>? Preferred { get; init; }
     public ValueChangeResponse<QualitySizeValueResponse>? Maximum { get; init; }
@@ -56,11 +58,10 @@ internal sealed record QualitySizeOutcomesResponse
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualitySizePipelineResponse(
-    PipelineStatus Status,
-    QualitySizeOutcomesResponse Outcomes,
-    IReadOnlyList<QualitySizeUpdateResponse> Updates
-)
+internal sealed record QualitySizePipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required QualitySizeOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<QualitySizeUpdateResponse> Updates { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
 }

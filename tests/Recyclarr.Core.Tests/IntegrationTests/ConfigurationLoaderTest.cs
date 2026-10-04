@@ -111,15 +111,16 @@ internal sealed class ConfigurationLoaderTest : CoreIntegrationTestFixture
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
-                new LoadedConfigYaml(
-                    "name",
-                    SupportedServices.Sonarr,
-                    new SonarrConfigYaml
+                new LoadedConfigYaml
+                {
+                    InstanceName = "name",
+                    ServiceType = SupportedServices.Sonarr,
+                    Yaml = new SonarrConfigYaml
                     {
                         ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                         BaseUrl = "http://localhost:8989",
-                    }
-                )
+                    },
+                }
             );
     }
 }

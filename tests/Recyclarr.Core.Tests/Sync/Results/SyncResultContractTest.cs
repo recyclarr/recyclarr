@@ -163,19 +163,16 @@ internal sealed class SyncResultContractTest
     }
 
     [Test]
-    public void Instance_retains_an_ordered_snapshot_of_planning_outcomes()
+    public void Instance_retains_planning_outcomes_in_order()
     {
         var first = new TestPlanningNotice("first");
         var second = new TestPlanningNotice("second");
-        var outcomes = new List<PlanningOutcome> { first, second };
         var instance = new SyncInstanceResult(
             "radarr",
             SupportedServices.Radarr,
             [],
-            planningOutcomes: outcomes
+            planningOutcomes: [first, second]
         );
-
-        outcomes.Clear();
 
         instance
             .PlanningOutcomes.Should()

@@ -4,8 +4,7 @@ namespace Recyclarr.ErrorHandling;
 
 public abstract record HandledInstanceFailure : SyncOutcome
 {
-    protected HandledInstanceFailure()
-        : base(SyncDiagnosticLevel.Error) { }
+    public sealed override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
 }
 
 public record NoConfigurationFilesFailure : HandledInstanceFailure;
@@ -39,11 +38,17 @@ public record HttpApiFailure(
     string? RequestBody
 ) : HandledInstanceFailure;
 
-public abstract record HttpApiFailureMessage(string Message);
+public abstract record HttpApiFailureMessage
+{
+    public required string Message { get; init; }
+}
 
-public record HttpApiResponseMessage(string Message) : HttpApiFailureMessage(Message);
+public record HttpApiResponseMessage : HttpApiFailureMessage;
 
-public record HttpApiFieldError(string Field, string Message) : HttpApiFailureMessage(Message);
+public record HttpApiFieldError : HttpApiFailureMessage
+{
+    public required string Field { get; init; }
+}
 
 public record MigrationFailure(
     string OperationDescription,

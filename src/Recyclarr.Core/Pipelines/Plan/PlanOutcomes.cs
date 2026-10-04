@@ -2,29 +2,54 @@ using Recyclarr.Sync;
 
 namespace Recyclarr.Pipelines.Plan;
 
-public record InvalidNamingFormatOutcome(string FormatType, string ConfigValue)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+public record InvalidNamingFormatOutcome(string FormatType, string ConfigValue) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record QualityDefinitionNotFoundOutcome(string Type)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+public record QualityDefinitionNotFoundOutcome(string Type) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record QualityNotFoundOutcome(string Quality, string Type)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+public record QualityNotFoundOutcome(string Quality, string Type) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record PreferredRatioClampedOutcome(decimal Original, decimal Clamped)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record PreferredRatioClampedOutcome(decimal Original, decimal Clamped) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
 public record MinGreaterThanPreferredOutcome(string Quality, decimal Min, decimal Preferred)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+    : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record UnlimitedPreferredGreaterThanMaxOutcome(string Quality, decimal Max)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+public record UnlimitedPreferredGreaterThanMaxOutcome(string Quality, decimal Max) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
 public record PreferredGreaterThanMaxOutcome(string Quality, decimal Preferred, decimal Max)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+    : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record DuplicateQualityProfileNameOutcome(string Name)
-    : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+public record DuplicateQualityProfileNameOutcome(string Name) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
 public record CustomFormatServiceIdCollisionOutcome(
     string ExistingName,
@@ -32,28 +57,45 @@ public record CustomFormatServiceIdCollisionOutcome(
     string NewName,
     string NewTrashId,
     int ServiceId
-) : SyncOutcome(SyncDiagnosticLevel.Error, SyncOutcomeScope.ResourceLocal);
+) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+    public override SyncOutcomeScope Scope => SyncOutcomeScope.ResourceLocal;
+}
 
-public record InvalidQualityProfileTrashIdOutcome(string TrashId)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record InvalidQualityProfileTrashIdOutcome(string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
-public record InvalidCustomFormatTrashIdOutcome(string TrashId)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record InvalidCustomFormatTrashIdOutcome(string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
-public record InvalidCfGroupSkipIdOutcome(string TrashId)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record InvalidCfGroupSkipIdOutcome(string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
-public record IncompatibleCfGroupOutcome(string Name, string TrashId)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record IncompatibleCfGroupOutcome(string Name, string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
-public record EmptyCfGroupOutcome(string Name, string TrashId)
-    : SyncOutcome(SyncDiagnosticLevel.Warning);
+public record EmptyCfGroupOutcome(string Name, string TrashId) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Warning;
+}
 
 public record AmbiguousProfileReferenceOutcome(
     string Context,
     string TrashId,
     IReadOnlyList<string> ProfileNames
-) : SyncOutcome(SyncDiagnosticLevel.Error);
+) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => SyncDiagnosticLevel.Error;
+}
 
 public record RuleValidationOutcome(
     SyncDiagnosticLevel Severity,
@@ -61,4 +103,7 @@ public record RuleValidationOutcome(
     string Message,
     string? AttemptedValue,
     string? ErrorCode
-) : SyncOutcome(Severity);
+) : SyncOutcome
+{
+    public override SyncDiagnosticLevel Level => Severity;
+}
