@@ -16,7 +16,6 @@ public record UpdatedQualityProfile
     public required QualityProfileData Profile { get; set; }
     internal QualityProfileData? OriginalProfile { get; init; }
     internal PlannedQualityProfile ProfileConfig { get; init; } = null!;
-    public IReadOnlyList<ProfileLanguage> Languages { get; init; } = [];
     public IReadOnlyCollection<UpdatedFormatScore> UpdatedScores { get; set; } = [];
     public UpdatedQualities UpdatedQualities { get; init; } = new();
     public IReadOnlyCollection<string> InvalidExceptCfNames { get; set; } = [];
@@ -114,19 +113,6 @@ public record UpdatedQualityProfile
             {
                 Cutoff = merged.Items.FindCutoff(effectiveCutoff) ?? merged.Items.FirstCutoffId(),
             };
-        }
-
-        // Language passthrough from guide resource
-        var resourceLanguage = ProfileConfig.GuideResource?.Language;
-        if (!string.IsNullOrEmpty(resourceLanguage))
-        {
-            var language = Languages.FirstOrDefault(l =>
-                l.Name.Equals(resourceLanguage, StringComparison.OrdinalIgnoreCase)
-            );
-            if (language is not null)
-            {
-                merged = merged with { Language = language };
-            }
         }
 
         return merged;

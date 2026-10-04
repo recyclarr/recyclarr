@@ -1,6 +1,7 @@
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Servarr.QualityProfile;
+using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.QualityProfile;
 
@@ -33,8 +34,12 @@ internal sealed class QualityProfileStatCalculatorTest
     }
 
     [Test, AutoMockData]
-    public void No_changes_detected_when_all_fields_match(QualityProfileStatCalculator sut)
+    public void No_changes_detected_when_all_fields_match(
+        [Frozen] IQualityProfileServiceFields serviceFields,
+        QualityProfileStatCalculator sut
+    )
     {
+        serviceFields.FindChanges(default!, default!).ReturnsForAnyArgs([]);
         var profile = CreateProfile(
             new QualityProfileData
             {
@@ -79,26 +84,19 @@ internal sealed class QualityProfileStatCalculatorTest
     }
 
     [Test, AutoMockData]
-    public void Language_change_is_detected(QualityProfileStatCalculator sut)
+    public void Service_owned_field_change_is_detected(
+        [Frozen] IQualityProfileServiceFields serviceFields,
+        QualityProfileStatCalculator sut
+    )
     {
-        var french = new ProfileLanguage { Id = 2, Name = "French" };
-        var profile = new UpdatedQualityProfile
-        {
-            Profile = new QualityProfileData
-            {
-                Id = 1,
-                Name = "Profile",
-                Language = new ProfileLanguage { Id = 1, Name = "English" },
-            },
-            ProfileConfig = NewPlan.Qp(
-                new QualityProfileConfig { Name = "Profile" },
-                NewPlan.QpResource("trash-id", "Profile") with
-                {
-                    Language = "French",
-                }
-            ),
-            Languages = [french],
-        };
+        serviceFields
+            .FindChanges(default!, default!)
+            .ReturnsForAnyArgs([
+                new RadarrQualityProfileLanguageChanged(
+                    new ValueDelta<string?>("English", "French")
+                ),
+            ]);
+        var profile = CreateProfile(new QualityProfileData { Id = 1, Name = "Profile" });
 
         var result = sut.Calculate(profile);
 

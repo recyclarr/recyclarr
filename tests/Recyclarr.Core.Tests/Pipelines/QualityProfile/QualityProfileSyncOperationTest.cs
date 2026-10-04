@@ -6,6 +6,7 @@ using Recyclarr.Pipelines;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Pipelines.QualityProfile;
 using Recyclarr.Pipelines.QualityProfile.State;
+using Recyclarr.ResourceProviders.Domain;
 using Recyclarr.Servarr.QualityProfile;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
@@ -621,17 +622,76 @@ internal sealed class QualityProfileSyncOperationTest
         return new QualityProfileData { Name = "Schema", Items = items };
     }
 
+    [Test]
+    public async Task Radarr_language_drift_alone_is_detected_and_restored()
+    {
+        var english = new ProfileLanguage { Id = 1, Name = "English" };
+        var french = new ProfileLanguage { Id = 2, Name = "French" };
+        var current = new RadarrQualityProfileData
+        {
+            Id = 7,
+            Name = "Movies",
+            UpgradeAllowed = false,
+            MinFormatScore = 0,
+            MinUpgradeFormatScore = 0,
+            CutoffFormatScore = 0,
+            Cutoff = 1,
+            Items = [NewQp.QualityItem(1, "Bluray-1080p", true)],
+            Language = english,
+        };
+        var resource = new RadarrQualityProfileResource
+        {
+            TrashId = "qp-trash-id",
+            Name = "Movies",
+            Language = "French",
+        };
+        var planned = NewPlan.Qp(new QualityProfileConfig { Name = "Movies" }, resource);
+        var languages = Substitute.For<IRadarrLanguageService>();
+        languages.GetLanguages(default).ReturnsForAnyArgs([english, french]);
+        var harness = CreateHarness(
+            [planned],
+            [current],
+            Schema(current.Items),
+            [new TrashIdMapping("qp-trash-id", "Movies", 7)],
+            new RadarrQualityProfileFields(languages)
+        );
+
+        var compute = await Compute(harness);
+        await Persist(harness);
+
+        compute
+            .Deltas.Should()
+            .ContainSingle()
+            .Which.Should()
+            .BeOfType<QualityProfileUpdateDelta>()
+            .Which.Components.Should()
+            .Equal(
+                new RadarrQualityProfileLanguageChanged(
+                    new ValueDelta<string?>("English", "French")
+                )
+            );
+        await harness
+            .Service.Received()
+            .UpdateQualityProfile(
+                Arg.Is<QualityProfileData>(x =>
+                    x is RadarrQualityProfileData
+                    && ((RadarrQualityProfileData)x).Language == french
+                ),
+                Arg.Any<CancellationToken>()
+            );
+    }
+
     private static Harness CreateHarness(
         IReadOnlyList<PlannedQualityProfile> planned,
         IReadOnlyList<QualityProfileData> serviceProfiles,
         QualityProfileData schema,
-        IReadOnlyList<TrashIdMapping>? mappings = null
+        IReadOnlyList<TrashIdMapping>? mappings = null,
+        IQualityProfileServiceFields? serviceFields = null
     )
     {
         var service = Substitute.For<IQualityProfileService>();
         service.GetQualityProfiles(default).ReturnsForAnyArgs(serviceProfiles);
         service.GetSchema(default).ReturnsForAnyArgs(schema);
-        service.GetLanguages(default).ReturnsForAnyArgs([]);
 
         var state = new TrashIdMappingStore(mappings?.ToList() ?? []);
         var statePersister = Substitute.For<IQualityProfileStatePersister>();
@@ -643,12 +703,15 @@ internal sealed class QualityProfileSyncOperationTest
             plan.AddQualityProfile(profile);
         }
 
+        // Unless a test supplies Radarr's, Sonarr's (empty) service-owned field behavior applies.
         var log = Substitute.For<ILogger>();
+        serviceFields ??= new SonarrQualityProfileFields();
         var sut = new QualityProfileSyncOperation(
             log,
             service,
+            serviceFields,
             statePersister,
-            new QualityProfileStatCalculator(log),
+            new QualityProfileStatCalculator(log, serviceFields),
             new QualityProfileLogger(log)
         );
         return new Harness(sut, service, statePersister, state, plan);

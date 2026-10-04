@@ -9,8 +9,6 @@ internal static partial class SonarrQualityProfileMapper
 {
     public static partial QualityProfileData ToDomain(SonarrApi.QualityProfileResource dto);
 
-    public static partial ProfileLanguage ToDomain(SonarrApi.LanguageResource dto);
-
     [MapProperty(
         nameof(SonarrApi.ProfileFormatItemResource.Format),
         nameof(QualityProfileFormatItem.FormatId)

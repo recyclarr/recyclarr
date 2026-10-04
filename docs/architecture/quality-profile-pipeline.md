@@ -34,10 +34,19 @@ Quality ordering supports:
 
 Qualities are inherited from guide resources when not specified in config.
 
-## Language Passthrough (Radarr)
+## Service-Owned Fields
 
-For Radarr profiles, language settings from guide resources pass through to the service. Sonarr does
-not have language in quality profiles; such data is preserved via extra JSON passthrough.
+The pipeline has one sync operation for both services. Fields only one service has live on that
+service's types ([ADR-023][adr-023]), and their behavior lives in `IQualityProfileServiceFields`,
+which DI resolves per instance:
+
+- Radarr (`RadarrQualityProfileFields`): profile language. The guide's `language` applies when the
+  instance offers a language with that name; otherwise the profile keeps its current language. A
+  language difference alone makes the profile changed, so drift is restored.
+- Sonarr (`SonarrQualityProfileFields`): no service-owned fields. Sonarr guide JSON that contains a
+  `language` is ignored.
+
+[adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
 
 ## No Delete Feature
 

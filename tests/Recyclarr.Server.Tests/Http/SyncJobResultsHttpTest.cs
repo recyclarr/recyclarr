@@ -126,7 +126,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .BeOfType<SyncInstanceResultsResponseSonarr>()
             .Which;
         AssertCustomFormats(sonarr.Pipelines.CustomFormats);
-        AssertQualityProfiles(sonarr.Pipelines.QualityProfiles);
+        AssertSonarrQualityProfiles(sonarr.Pipelines.QualityProfiles);
         AssertSonarrNaming(sonarr.Pipelines.Naming);
         sonarr.Pipelines.MediaManagement?.Updates.Should().ContainSingle();
 
@@ -136,6 +136,7 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             .Which.Should()
             .BeOfType<SyncInstanceResultsResponseRadarr>()
             .Which;
+        AssertRadarrQualityProfiles(radarr.Pipelines.QualityProfiles);
         AssertQualitySizes(radarr.Pipelines.QualitySizes);
         AssertRadarrNaming(radarr.Pipelines.Naming);
 
@@ -418,12 +419,51 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         counts.Should().HaveCount(10).And.OnlyContain(x => x == 1);
     }
 
-    private static void AssertQualityProfiles(QualityProfilePipelineResponse? pipeline)
+    private static void AssertSonarrQualityProfiles(SonarrQualityProfilePipelineResponse? pipeline)
     {
         pipeline.Should().NotBeNull();
         pipeline.Creates.Should().ContainSingle();
-        pipeline.Updates.Should().ContainSingle();
-        var outcomes = pipeline.Outcomes;
+        AssertQualityProfileOutcomes(pipeline.Outcomes);
+
+        var update = pipeline.Updates.Should().ContainSingle().Which;
+        object?[] changes =
+        [
+            update.Name,
+            update.UpgradeAllowed,
+            update.UpgradeUntilQuality,
+            update.UpgradeUntilScore,
+            update.MinimumFormatScore,
+            update.MinimumUpgradeFormatScore,
+            update.QualityLayout,
+        ];
+        changes.Should().OnlyContain(x => x != null);
+        update.CustomFormatScores.Should().HaveCount(2);
+    }
+
+    private static void AssertRadarrQualityProfiles(RadarrQualityProfilePipelineResponse? pipeline)
+    {
+        pipeline.Should().NotBeNull();
+        pipeline.Creates.Should().ContainSingle().Which.State.Language.Should().Be("English");
+        AssertQualityProfileOutcomes(pipeline.Outcomes);
+
+        var update = pipeline.Updates.Should().ContainSingle().Which;
+        object?[] changes =
+        [
+            update.Name,
+            update.UpgradeAllowed,
+            update.UpgradeUntilQuality,
+            update.UpgradeUntilScore,
+            update.MinimumFormatScore,
+            update.MinimumUpgradeFormatScore,
+            update.Language,
+            update.QualityLayout,
+        ];
+        changes.Should().OnlyContain(x => x != null);
+        update.CustomFormatScores.Should().HaveCount(2);
+    }
+
+    private static void AssertQualityProfileOutcomes(QualityProfileOutcomesResponse outcomes)
+    {
         int?[] counts =
         [
             outcomes.ReferenceMismatches?.Count,
@@ -443,21 +483,6 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
             outcomes.UpdateRejected?.Count,
         ];
         counts.Should().HaveCount(15).And.OnlyContain(x => x == 1);
-
-        var update = pipeline.Updates.Should().ContainSingle().Which;
-        object?[] changes =
-        [
-            update.Name,
-            update.UpgradeAllowed,
-            update.UpgradeUntilQuality,
-            update.UpgradeUntilScore,
-            update.MinimumFormatScore,
-            update.MinimumUpgradeFormatScore,
-            update.Language,
-            update.QualityLayout,
-        ];
-        changes.Should().OnlyContain(x => x != null);
-        update.CustomFormatScores.Should().HaveCount(2);
     }
 
     private static void AssertQualitySizes(QualitySizePipelineResponse? pipeline)

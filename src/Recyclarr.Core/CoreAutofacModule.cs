@@ -210,7 +210,6 @@ public class CoreAutofacModule : Module
         builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IQualityProfileSchemaApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IQualityProfileSchemaApi>();
-        builder.RegisterServarrRefitClient<SonarrApi.ILanguageApi>();
         builder.RegisterServarrRefitClient<RadarrApi.ILanguageApi>();
         builder.RegisterServarrRefitClient<SonarrApi.IMediaManagementConfigApi>();
         builder.RegisterServarrRefitClient<RadarrApi.IMediaManagementConfigApi>();
@@ -228,6 +227,10 @@ public class CoreAutofacModule : Module
             SonarrQualityProfileGateway,
             RadarrQualityProfileGateway
         >();
+        builder
+            .RegisterType<RadarrLanguageGateway>()
+            .As<IRadarrLanguageService>()
+            .InstancePerLifetimeScope();
         builder.RegisterServiceGateway<
             ICustomFormatService,
             SonarrCustomFormatGateway,

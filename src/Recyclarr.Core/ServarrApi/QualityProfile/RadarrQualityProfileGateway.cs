@@ -8,8 +8,7 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 internal class RadarrQualityProfileGateway(
     ILogger log,
     RadarrApi.IQualityProfileApi profileApi,
-    RadarrApi.IQualityProfileSchemaApi schemaApi,
-    RadarrApi.ILanguageApi languageApi
+    RadarrApi.IQualityProfileSchemaApi schemaApi
 ) : IQualityProfileService
 {
     private readonly Dictionary<int, RadarrApi.QualityProfileResource> _stashedProfiles = [];
@@ -36,12 +35,6 @@ internal class RadarrQualityProfileGateway(
         dto.ReverseItems();
         _stashedSchema = dto;
         return RadarrQualityProfileMapper.ToDomain(dto);
-    }
-
-    public async Task<IReadOnlyList<ProfileLanguage>> GetLanguages(CancellationToken ct)
-    {
-        var dtos = await languageApi.LanguageGet(ct);
-        return dtos.Select(RadarrQualityProfileMapper.ToDomain).ToList();
     }
 
     public async Task<QualityProfileData> CreateQualityProfile(
@@ -114,14 +107,9 @@ internal class RadarrQualityProfileGateway(
             .ToList();
         baseDto.Items = domain.Items.Select(i => MergeItem(i, qualityIndex)).ToList();
 
-        // Radarr-specific: language field on the profile resource
-        if (domain.Language is not null)
+        if (domain is RadarrQualityProfileData { Language: { } language })
         {
-            baseDto.Language = new RadarrApi.Language
-            {
-                Id = domain.Language.Id,
-                Name = domain.Language.Name,
-            };
+            baseDto.Language = new RadarrApi.Language { Id = language.Id, Name = language.Name };
         }
 
         return baseDto;

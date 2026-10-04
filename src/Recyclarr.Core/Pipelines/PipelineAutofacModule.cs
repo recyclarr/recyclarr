@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extras.Ordering;
 using FluentValidation;
+using Recyclarr.Common;
 using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.CustomFormat.State;
@@ -82,6 +83,11 @@ public class PipelineAutofacModule : Module
 
     private static void RegisterQualityProfileSupport(ContainerBuilder builder)
     {
+        builder.RegisterServiceGateway<
+            IQualityProfileServiceFields,
+            SonarrQualityProfileFields,
+            RadarrQualityProfileFields
+        >();
         builder.RegisterType<QualityProfileStatCalculator>();
         builder.RegisterType<QualityProfileLogger>();
         builder.RegisterType<QualityProfileStatePersister>().As<IQualityProfileStatePersister>();
