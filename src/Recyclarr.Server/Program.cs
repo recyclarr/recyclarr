@@ -121,6 +121,7 @@ static void ConfigureWireJson(JsonSerializerOptions options)
 {
     options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.RespectNullableAnnotations = true;
     options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 }
 
