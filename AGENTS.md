@@ -117,6 +117,9 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - Use records for value-oriented data and favor immutable state. `IReadOnlyCollection` and
   `IReadOnlyDictionary` restrict mutation only through that reference; use immutable collections
   when a stable snapshot is required.
+  - Assign collection inputs directly (`Items = items`); do not copy them (`ToList().AsReadOnly()`)
+    to guard internal callers. Defensive copies belong only where untrusted callers cross a trust
+    boundary.
 - Record shape: a record is either fully positional or declares no primary constructor.
   - Positional records may add only computed get-only members, and only when never serialized.
   - Base records declare no primary constructor. A derived record may be positional only when its
