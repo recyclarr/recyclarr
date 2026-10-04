@@ -1,30 +1,22 @@
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
-using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.MediaNaming.Sonarr;
 
-internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
-    : SyncOperation<SonarrNamingComputeResult>
+internal class SonarrNamingSync(ILogger log, ISonarrNamingService api) : IMediaNamingSync
 {
-    public override PipelineType Type => PipelineType.MediaNaming;
-    public override string Description => "Sonarr Media Naming";
+    public PipelineResult CreateEmptyResult() => new SonarrNamingPipelineResult(0, 0, [], null);
 
-    protected override PipelineResult CreateEmptyResult(
-        SyncResultStatus status,
-        PipelineType? blockedBy
-    ) => new SonarrNamingPipelineResult(0, 0, [], null).WithStatus(status, blockedBy);
-
-    public override bool ShouldSkip(PipelinePlan plan) => !plan.SonarrMediaNamingAvailable;
-
-    protected override async Task<SonarrNamingComputeResult> Compute(
-        PipelinePlan plan,
+    public async Task<IPipelineResultSource> Compute(
+        PlannedMediaNaming plannedNaming,
         CancellationToken ct
     )
     {
-        var planned = plan.SonarrMediaNaming.Data;
-        var outcomes = plan.SonarrMediaNaming.Mismatches.Cast<SonarrNamingOutcome>().ToList();
+        // DI resolves this sync only for Sonarr instances, whose planner plans Sonarr naming
+        var sonarrNaming = (PlannedSonarrMediaNaming)plannedNaming;
+        var planned = sonarrNaming.Data;
+        var outcomes = sonarrNaming.Mismatches.Cast<SonarrNamingOutcome>().ToList();
         var completedFields = CountConfiguredFields(planned);
         var incompleteFields = outcomes.Count;
         if (completedFields == 0)
@@ -56,12 +48,9 @@ internal class SonarrNamingSyncOperation(ILogger log, ISonarrNamingService api)
         return new SonarrNamingComputeResult(current, desired, result);
     }
 
-    protected override async Task Persist(
-        SonarrNamingComputeResult computeResult,
-        CancellationToken ct
-    )
+    public async Task Persist(IPipelineResultSource computeResult, CancellationToken ct)
     {
-        var (current, desired, result) = computeResult;
+        var (current, desired, result) = (SonarrNamingComputeResult)computeResult;
         if (result.Delta is null)
         {
             return;
