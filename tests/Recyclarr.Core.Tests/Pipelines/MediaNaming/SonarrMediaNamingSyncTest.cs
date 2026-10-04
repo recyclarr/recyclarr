@@ -1,4 +1,5 @@
 using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.MediaNaming;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
@@ -6,7 +7,7 @@ using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
 
-internal sealed class SonarrNamingSyncOperationTest
+internal sealed class SonarrMediaNamingSyncTest
 {
     [Test]
     public async Task Compute_returns_changed_values_and_retains_reference_mismatch()
@@ -24,14 +25,14 @@ internal sealed class SonarrNamingSyncOperationTest
                     AnimeEpisodeFormat = "anime-current",
                 }
             );
-        var sut = new SonarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var mismatch = new SonarrNamingReferenceMismatchOutcome(
             SonarrNamingFormatField.AnimeEpisodeFormat,
             "unknown"
         );
         var plan = new TestPlan
         {
-            SonarrMediaNaming = new PlannedSonarrMediaNaming
+            MediaNaming = new PlannedSonarrMediaNaming
             {
                 Data = new SonarrNamingData
                 {
@@ -65,10 +66,10 @@ internal sealed class SonarrNamingSyncOperationTest
     public async Task All_invalid_fields_fail_without_reading_or_writing_service()
     {
         var api = Substitute.For<ISonarrNamingService>();
-        var sut = new SonarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var plan = new TestPlan
         {
-            SonarrMediaNaming = new PlannedSonarrMediaNaming
+            MediaNaming = new PlannedSonarrMediaNaming
             {
                 Data = new SonarrNamingData(),
                 Mismatches =
@@ -94,7 +95,7 @@ internal sealed class SonarrNamingSyncOperationTest
     {
         var api = Substitute.For<ISonarrNamingService>();
         api.GetNaming(default).ReturnsForAnyArgs(new SonarrNamingData { RenameEpisodes = true });
-        var sut = new SonarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var changedPlan = Plan(new SonarrNamingData { RenameEpisodes = false });
 
         await Execute(sut, changedPlan, preview: false);
@@ -107,7 +108,7 @@ internal sealed class SonarrNamingSyncOperationTest
     {
         var api = Substitute.For<ISonarrNamingService>();
         api.GetNaming(default).ReturnsForAnyArgs(new SonarrNamingData { RenameEpisodes = true });
-        var sut = new SonarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var plan = Plan(new SonarrNamingData { RenameEpisodes = true });
 
         await Execute(sut, plan, preview: false);
@@ -121,7 +122,7 @@ internal sealed class SonarrNamingSyncOperationTest
         var api = Substitute.For<ISonarrNamingService>();
         api.GetNaming(default)
             .ReturnsForAnyArgs(Task.FromCanceled<SonarrNamingData>(new CancellationToken(true)));
-        var sut = new SonarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var plan = Plan(new SonarrNamingData { RenameEpisodes = false });
 
         var act = () => Execute(sut, plan, preview: true);
@@ -130,10 +131,13 @@ internal sealed class SonarrNamingSyncOperationTest
     }
 
     private static TestPlan Plan(SonarrNamingData data) =>
-        new() { SonarrMediaNaming = new PlannedSonarrMediaNaming { Data = data } };
+        new() { MediaNaming = new PlannedSonarrMediaNaming { Data = data } };
+
+    private static MediaNamingSyncOperation CreateSut(ISonarrNamingService api) =>
+        new(new SonarrNamingSync(Substitute.For<ILogger>(), api));
 
     private static async Task<SonarrNamingPipelineResult> Execute(
-        SonarrNamingSyncOperation sut,
+        MediaNamingSyncOperation sut,
         PipelinePlan plan,
         bool preview
     )

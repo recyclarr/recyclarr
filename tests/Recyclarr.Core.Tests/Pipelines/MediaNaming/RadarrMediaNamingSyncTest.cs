@@ -1,4 +1,5 @@
 using Recyclarr.Pipelines;
+using Recyclarr.Pipelines.MediaNaming;
 using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
@@ -6,7 +7,7 @@ using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Core.Tests.Pipelines.MediaNaming;
 
-internal sealed class RadarrNamingSyncOperationTest
+internal sealed class RadarrMediaNamingSyncTest
 {
     [Test]
     public async Task Compute_returns_one_delta_with_only_changed_values()
@@ -21,10 +22,10 @@ internal sealed class RadarrNamingSyncOperationTest
                     MovieFolderFormat = "folder-current",
                 }
             );
-        var sut = new RadarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var plan = new TestPlan
         {
-            RadarrMediaNaming = new PlannedRadarrMediaNaming
+            MediaNaming = new PlannedRadarrMediaNaming
             {
                 Data = new RadarrNamingData
                 {
@@ -54,14 +55,14 @@ internal sealed class RadarrNamingSyncOperationTest
     {
         var api = Substitute.For<IRadarrNamingService>();
         api.GetNaming(default).ReturnsForAnyArgs(new RadarrNamingData { RenameMovies = false });
-        var sut = new RadarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var mismatch = new RadarrNamingReferenceMismatchOutcome(
             RadarrNamingFormatField.StandardMovieFormat,
             "unknown"
         );
         var plan = new TestPlan
         {
-            RadarrMediaNaming = new PlannedRadarrMediaNaming
+            MediaNaming = new PlannedRadarrMediaNaming
             {
                 Data = new RadarrNamingData { RenameMovies = false },
                 Mismatches = [mismatch],
@@ -83,10 +84,10 @@ internal sealed class RadarrNamingSyncOperationTest
         api.GetNaming(default).ReturnsForAnyArgs(new RadarrNamingData { RenameMovies = true });
         api.UpdateNaming(default!, default)
             .ReturnsForAnyArgs(Task.FromException(new InvalidOperationException("rejected")));
-        var sut = new RadarrNamingSyncOperation(Substitute.For<ILogger>(), api);
+        var sut = CreateSut(api);
         var plan = new TestPlan
         {
-            RadarrMediaNaming = new PlannedRadarrMediaNaming
+            MediaNaming = new PlannedRadarrMediaNaming
             {
                 Data = new RadarrNamingData { RenameMovies = false },
             },
@@ -97,8 +98,11 @@ internal sealed class RadarrNamingSyncOperationTest
         await api.ReceivedWithAnyArgs(1).UpdateNaming(default!, default);
     }
 
+    private static MediaNamingSyncOperation CreateSut(IRadarrNamingService api) =>
+        new(new RadarrNamingSync(Substitute.For<ILogger>(), api));
+
     private static async Task<RadarrNamingPipelineResult> Execute(
-        RadarrNamingSyncOperation sut,
+        MediaNamingSyncOperation sut,
         PipelinePlan plan,
         bool preview
     )

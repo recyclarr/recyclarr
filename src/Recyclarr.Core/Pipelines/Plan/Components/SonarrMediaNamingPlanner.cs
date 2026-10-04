@@ -6,31 +6,24 @@ using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
-internal class SonarrMediaNamingPlanComponent(
+internal class SonarrMediaNamingPlanner(
     MediaNamingResourceQuery guide,
     IServiceConfiguration config
-) : IPlanComponent
+) : IMediaNamingPlanner
 {
-    public void Process(PipelinePlan plan)
+    public PlannedMediaNaming? Plan(PipelinePlan plan)
     {
-        if (config is not SonarrConfiguration sonarrConfig)
-        {
-            return;
-        }
-
+        // DI resolves this planner only for Sonarr instances
+        var sonarrConfig = (SonarrConfiguration)config;
         var mismatches = new List<SonarrNamingReferenceMismatchOutcome>();
         var data = BuildData(sonarrConfig, guide, mismatches, plan);
 
         if (!data.HasValues() && mismatches.Count == 0)
         {
-            return;
+            return null;
         }
 
-        plan.SonarrMediaNaming = new PlannedSonarrMediaNaming
-        {
-            Data = data,
-            Mismatches = mismatches.AsReadOnly(),
-        };
+        return new PlannedSonarrMediaNaming { Data = data, Mismatches = mismatches.AsReadOnly() };
     }
 
     private static SonarrNamingData BuildData(

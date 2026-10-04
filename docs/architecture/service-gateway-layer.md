@@ -38,7 +38,7 @@ Servarr/
     IMediaManagementService.cs
     MediaManagementData.cs
   MediaNaming/
-    ISonarrNamingService.cs          # split operation: one port per service
+    ISonarrNamingService.cs          # no shared fields: one port per service
     IRadarrNamingService.cs
     SonarrNamingData.cs
     RadarrNamingData.cs
@@ -116,37 +116,39 @@ Keyed registration per service, plus a non-keyed lambda that selects the correct
 `IServiceConfiguration.ServiceType` at resolve time:
 
 ```csharp
-// Shared operation: keyed + non-keyed resolution
+// Shared port: keyed + non-keyed resolution
 builder.RegisterServiceGateway<
     IQualityDefinitionService,
     SonarrQualityDefinitionGateway,
     RadarrQualityDefinitionGateway>();
 
-// Split operation: direct registration (one gateway per port)
+// Per-service port: direct registration (one gateway per port)
 builder.RegisterType<SonarrNamingGateway>()
     .As<ISonarrNamingService>()
     .InstancePerLifetimeScope();
 ```
 
-Sync operations inject the port directly; they have no idea keying is involved.
+Sync operations and per-service components inject the port directly; they have no idea keying is
+involved.
 
-## Shared vs split operation
+## One operation per pipeline
 
 [ADR-023][adr-023] sets the rule: each field lives on a shared type or on the type of the one
 service that owns it, and each pipeline has one operation with per-service components resolved
-through DI. Media naming still has split operations until it is migrated.
+through DI with `RegisterServiceGateway`. Quality profiles (`IQualityProfileServiceFields`) and
+media naming (`IMediaNamingPlanner`, `IMediaNamingSync`) follow it.
 
 Shared logic lives in helper classes that both services' components depend on (e.g.
 `NamingFormatLookup`).
 
 ## Gateway multiplicity
 
-Every operation always gets one gateway per service (Sonarr + Radarr), regardless of whether the
-operation is shared or split.
+Every pipeline gets one gateway per service (Sonarr + Radarr), regardless of whether its port is
+shared.
 
-- **Shared operations:** Both gateways implement the same port. DI resolves the correct one via
+- **Shared ports:** Both gateways implement the same port. DI resolves the correct one via
   keyed/non-keyed pattern.
-- **Split operations:** Each operation has its own port and single gateway (e.g.
+- **Per-service ports:** Each service's component injects its own port and single gateway (e.g.
   `ISonarrNamingService` implemented by `SonarrNamingGateway`).
 
 There is never a single "shared" gateway that handles both services. Even when schemas are identical
@@ -247,7 +249,7 @@ handler pipeline is pooled by `IHttpClientFactory`.
 ## Service API Divergence
 
 Comparison of Sonarr and Radarr OpenAPI specs for endpoints Recyclarr consumes. Useful when deciding
-shared vs split operation for new features.
+which fields are shared and which are service-owned for new features.
 
 | Endpoint            | Divergence           | Notes                                                  |
 |---------------------|----------------------|--------------------------------------------------------|

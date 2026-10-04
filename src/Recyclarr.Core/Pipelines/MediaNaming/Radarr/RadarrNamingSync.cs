@@ -1,30 +1,22 @@
 using Recyclarr.Pipelines.Plan;
 using Recyclarr.Servarr.MediaNaming;
-using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Pipelines.MediaNaming.Radarr;
 
-internal class RadarrNamingSyncOperation(ILogger log, IRadarrNamingService api)
-    : SyncOperation<RadarrNamingComputeResult>
+internal class RadarrNamingSync(ILogger log, IRadarrNamingService api) : IMediaNamingSync
 {
-    public override PipelineType Type => PipelineType.MediaNaming;
-    public override string Description => "Radarr Media Naming";
+    public PipelineResult CreateEmptyResult() => new RadarrNamingPipelineResult(0, 0, [], null);
 
-    protected override PipelineResult CreateEmptyResult(
-        SyncResultStatus status,
-        PipelineType? blockedBy
-    ) => new RadarrNamingPipelineResult(0, 0, [], null).WithStatus(status, blockedBy);
-
-    public override bool ShouldSkip(PipelinePlan plan) => !plan.RadarrMediaNamingAvailable;
-
-    protected override async Task<RadarrNamingComputeResult> Compute(
-        PipelinePlan plan,
+    public async Task<IPipelineResultSource> Compute(
+        PlannedMediaNaming plannedNaming,
         CancellationToken ct
     )
     {
-        var planned = plan.RadarrMediaNaming.Data;
-        var outcomes = plan.RadarrMediaNaming.Mismatches.Cast<RadarrNamingOutcome>().ToList();
+        // DI resolves this sync only for Radarr instances, whose planner plans Radarr naming
+        var radarrNaming = (PlannedRadarrMediaNaming)plannedNaming;
+        var planned = radarrNaming.Data;
+        var outcomes = radarrNaming.Mismatches.Cast<RadarrNamingOutcome>().ToList();
         var completedFields = CountConfiguredFields(planned);
         var incompleteFields = outcomes.Count;
         if (completedFields == 0)
@@ -53,12 +45,9 @@ internal class RadarrNamingSyncOperation(ILogger log, IRadarrNamingService api)
         return new RadarrNamingComputeResult(current, desired, result);
     }
 
-    protected override async Task Persist(
-        RadarrNamingComputeResult computeResult,
-        CancellationToken ct
-    )
+    public async Task Persist(IPipelineResultSource computeResult, CancellationToken ct)
     {
-        var (current, desired, result) = computeResult;
+        var (current, desired, result) = (RadarrNamingComputeResult)computeResult;
         if (result.Delta is null)
         {
             return;
