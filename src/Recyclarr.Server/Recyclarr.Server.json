@@ -1500,6 +1500,18 @@
           "$ref": "#/components/schemas/RadarrNamingUpdateResponse"
         }
       },
+      "IReadOnlyListOfRadarrQualityProfileCreateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RadarrQualityProfileCreateResponse"
+        }
+      },
+      "IReadOnlyListOfRadarrQualityProfileUpdateResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RadarrQualityProfileUpdateResponse"
+        }
+      },
       "IReadOnlyListOfSonarrNamingUpdateResponse": {
         "type": "array",
         "items": {
@@ -1960,7 +1972,6 @@
           "upgradeUntilScore",
           "minimumFormatScore",
           "minimumUpgradeFormatScore",
-          "language",
           "qualities",
           "customFormatScores"
         ],
@@ -2001,12 +2012,6 @@
               "integer"
             ],
             "format": "int32"
-          },
-          "language": {
-            "type": [
-              "null",
-              "string"
-            ]
           },
           "qualities": {
             "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
@@ -2222,39 +2227,6 @@
           }
         }
       },
-      "QualityProfilePipelineResponse": {
-        "required": [
-          "status",
-          "outcomes",
-          "creates",
-          "updates"
-        ],
-        "type": "object",
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/PipelineStatus"
-          },
-          "outcomes": {
-            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
-          },
-          "creates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileCreateResponse"
-          },
-          "updates": {
-            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileUpdateResponse"
-          },
-          "blockedBy": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/BlockingPipeline"
-              }
-            ]
-          }
-        }
-      },
       "QualityProfileQualityNameResponse": {
         "required": [
           "identity",
@@ -2444,16 +2416,6 @@
               },
               {
                 "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
-              }
-            ]
-          },
-          "language": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/ValueChangeResponseOfString"
               }
             ]
           },
@@ -2758,7 +2720,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/QualityProfilePipelineResponse"
+                "$ref": "#/components/schemas/RadarrQualityProfilePipelineResponse"
               }
             ]
           },
@@ -2791,6 +2753,212 @@
                 "$ref": "#/components/schemas/MediaManagementPipelineResponse"
               }
             ]
+          }
+        }
+      },
+      "RadarrQualityProfileControlledStateResponse": {
+        "required": [
+          "language",
+          "name",
+          "upgradeAllowed",
+          "upgradeUntilQuality",
+          "upgradeUntilScore",
+          "minimumFormatScore",
+          "minimumUpgradeFormatScore",
+          "qualities",
+          "customFormatScores"
+        ],
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "upgradeAllowed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "upgradeUntilQuality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "upgradeUntilScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "minimumUpgradeFormatScore": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "qualities": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileLayoutResponse"
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreResponse"
+          }
+        }
+      },
+      "RadarrQualityProfileCreateResponse": {
+        "required": [
+          "identity",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "state": {
+            "$ref": "#/components/schemas/RadarrQualityProfileControlledStateResponse"
+          }
+        }
+      },
+      "RadarrQualityProfilePipelineResponse": {
+        "required": [
+          "creates",
+          "updates",
+          "status",
+          "outcomes"
+        ],
+        "type": "object",
+        "properties": {
+          "creates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileCreateResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfRadarrQualityProfileUpdateResponse"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
+              }
+            ]
+          }
+        }
+      },
+      "RadarrQualityProfileUpdateResponse": {
+        "required": [
+          "identity"
+        ],
+        "type": "object",
+        "properties": {
+          "language": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "identity": {
+            "$ref": "#/components/schemas/QualityProfileIdentityResponse"
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeAllowed": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfBoolean"
+              }
+            ]
+          },
+          "upgradeUntilQuality": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfString"
+              }
+            ]
+          },
+          "upgradeUntilScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "minimumUpgradeFormatScore": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfNullableOfInt32"
+              }
+            ]
+          },
+          "qualityLayout": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ValueChangeResponseOfIReadOnlyListOfQualityProfileLayoutResponse"
+              }
+            ]
+          },
+          "customFormatScores": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileScoreChangeResponse"
           }
         }
       },
@@ -2970,7 +3138,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/QualityProfilePipelineResponse"
+                "$ref": "#/components/schemas/SonarrQualityProfilePipelineResponse"
               }
             ]
           },
@@ -3001,6 +3169,39 @@
               },
               {
                 "$ref": "#/components/schemas/MediaManagementPipelineResponse"
+              }
+            ]
+          }
+        }
+      },
+      "SonarrQualityProfilePipelineResponse": {
+        "required": [
+          "creates",
+          "updates",
+          "status",
+          "outcomes"
+        ],
+        "type": "object",
+        "properties": {
+          "creates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileCreateResponse"
+          },
+          "updates": {
+            "$ref": "#/components/schemas/IReadOnlyListOfQualityProfileUpdateResponse"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PipelineStatus"
+          },
+          "outcomes": {
+            "$ref": "#/components/schemas/QualityProfileOutcomesResponse"
+          },
+          "blockedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BlockingPipeline"
               }
             ]
           }

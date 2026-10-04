@@ -552,6 +552,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             .Should()
             .Contain("UHD (Change Reason: Changed)")
             .And.MatchRegex(@"Minimum Format Score\s+│\s+0\s+│\s+10")
+            .And.MatchRegex(@"Language\s+│\s+English\s+│\s+French")
             .And.Contain("✓ Remux-2160p")
             .And.Contain("✗ Remux-2160p")
             .And.MatchRegex(@"x265 \(HD\)\s+│\s+0\s+│\s+-10000\s+│\s+Set")
@@ -669,6 +670,9 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             new UserDefinedQualityProfileIdentity(name),
             [
                 new QualityProfileMinimumFormatScoreChanged(new ValueDelta<int?>(0, 10)),
+                new RadarrQualityProfileLanguageChanged(
+                    new ValueDelta<string?>("English", "French")
+                ),
                 new QualityProfileQualityLayoutChanged(
                     [new QualityProfileQuality("Remux-2160p", Allowed: true)],
                     [new QualityProfileQuality("Remux-2160p", Allowed: false)]
@@ -682,19 +686,22 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
             ]
         );
 
+    // Every caller syncs a Radarr instance, so the created profile carries Radarr's state.
     private static QualityProfileCreateDelta NewProfile(string name) =>
         new(
             new UserDefinedQualityProfileIdentity(name),
-            new QualityProfileControlledState(
-                name,
-                upgradeAllowed: true,
-                upgradeUntilQuality: "Bluray-1080p",
-                upgradeUntilScore: 10000,
-                minimumFormatScore: 0,
-                minimumUpgradeFormatScore: 1,
-                language: null,
-                [new QualityProfileQuality("Bluray-1080p", Allowed: true)],
-                [new QualityProfileCustomFormatScore("x264", "cf-x264", 50)]
+            new RadarrQualityProfileControlledState(
+                new QualityProfileControlledState(
+                    name,
+                    upgradeAllowed: true,
+                    upgradeUntilQuality: "Bluray-1080p",
+                    upgradeUntilScore: 10000,
+                    minimumFormatScore: 0,
+                    minimumUpgradeFormatScore: 1,
+                    [new QualityProfileQuality("Bluray-1080p", Allowed: true)],
+                    [new QualityProfileCustomFormatScore("x264", "cf-x264", 50)]
+                ),
+                language: null
             )
         );
 

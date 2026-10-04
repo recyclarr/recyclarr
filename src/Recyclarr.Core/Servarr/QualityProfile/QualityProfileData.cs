@@ -18,6 +18,15 @@ public record QualityProfileData : IServiceResource
     public int? CutoffFormatScore { get; init; }
     public IReadOnlyList<QualityProfileFormatItem> FormatItems { get; init; } = [];
     public IReadOnlyList<QualityProfileItem> Items { get; init; } = [];
+}
+
+/// <summary>
+/// A Radarr quality profile. Radarr profiles have a language; Sonarr profiles do not (ADR-023).
+/// Shared pipeline code transforms profiles with <c>with</c> expressions, which keep this runtime
+/// type, so the language survives from fetch through persist.
+/// </summary>
+public record RadarrQualityProfileData : QualityProfileData
+{
     public ProfileLanguage? Language { get; init; }
 }
 
