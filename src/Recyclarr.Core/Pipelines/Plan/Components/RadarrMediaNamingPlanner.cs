@@ -6,31 +6,24 @@ using Recyclarr.Servarr.MediaNaming;
 
 namespace Recyclarr.Pipelines.Plan.Components;
 
-internal class RadarrMediaNamingPlanComponent(
+internal class RadarrMediaNamingPlanner(
     MediaNamingResourceQuery guide,
     IServiceConfiguration config
-) : IPlanComponent
+) : IMediaNamingPlanner
 {
-    public void Process(PipelinePlan plan)
+    public PlannedMediaNaming? Plan(PipelinePlan plan)
     {
-        if (config is not RadarrConfiguration radarrConfig)
-        {
-            return;
-        }
-
+        // DI resolves this planner only for Radarr instances
+        var radarrConfig = (RadarrConfiguration)config;
         var mismatches = new List<RadarrNamingReferenceMismatchOutcome>();
         var data = BuildData(radarrConfig, guide, mismatches, plan);
 
         if (!data.HasValues() && mismatches.Count == 0)
         {
-            return;
+            return null;
         }
 
-        plan.RadarrMediaNaming = new PlannedRadarrMediaNaming
-        {
-            Data = data,
-            Mismatches = mismatches.AsReadOnly(),
-        };
+        return new PlannedRadarrMediaNaming { Data = data, Mismatches = mismatches.AsReadOnly() };
     }
 
     private static RadarrNamingData BuildData(

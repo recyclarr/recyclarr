@@ -6,6 +6,7 @@ using Recyclarr.Config.Models;
 using Recyclarr.Pipelines.CustomFormat;
 using Recyclarr.Pipelines.CustomFormat.State;
 using Recyclarr.Pipelines.MediaManagement;
+using Recyclarr.Pipelines.MediaNaming;
 using Recyclarr.Pipelines.MediaNaming.Radarr;
 using Recyclarr.Pipelines.MediaNaming.Sonarr;
 using Recyclarr.Pipelines.Plan;
@@ -45,12 +46,16 @@ public class PipelineAutofacModule : Module
                 typeof(CustomFormatPlanComponent),
                 typeof(QualityProfilePlanComponent),
                 typeof(QualitySizePlanComponent),
-                typeof(SonarrMediaNamingPlanComponent),
-                typeof(RadarrMediaNamingPlanComponent),
+                typeof(MediaNamingPlanComponent),
                 typeof(MediaManagementPlanComponent)
             )
             .As<IPlanComponent>()
             .OrderByRegistration();
+        builder.RegisterServiceGateway<
+            IMediaNamingPlanner,
+            SonarrMediaNamingPlanner,
+            RadarrMediaNamingPlanner
+        >();
     }
 
     private static void RegisterPipelineExecutor(ContainerBuilder builder)
@@ -67,11 +72,11 @@ public class PipelineAutofacModule : Module
                 typeof(CustomFormatSyncOperation),
                 typeof(QualityProfileSyncOperation),
                 typeof(QualitySizeSyncOperation),
-                typeof(SonarrNamingSyncOperation),
-                typeof(RadarrNamingSyncOperation),
+                typeof(MediaNamingSyncOperation),
                 typeof(MediaManagementSyncOperation)
             )
             .As<ISyncOperation>();
+        builder.RegisterServiceGateway<IMediaNamingSync, SonarrNamingSync, RadarrNamingSync>();
     }
 
     private static void RegisterCustomFormatSupport(ContainerBuilder builder)

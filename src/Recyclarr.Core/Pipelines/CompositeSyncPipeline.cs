@@ -14,11 +14,7 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncOperation> op
         CancellationToken ct
     )
     {
-        // Filter before TopologicalSort: plan components already encode service affinity
-        // (e.g. SonarrMediaNamingAvailable is false for Radarr instances), so ShouldSkip
-        // resolves duplicate PipelineType keys (both naming ops share MediaNaming).
-        var applicable = operations.Where(operation => !operation.ShouldSkip(plan)).ToList();
-        var sortedOperations = TopologicalSort(applicable);
+        var sortedOperations = TopologicalSort(operations);
         log.Debug(
             "Sync operation order: {Order}",
             string.Join(" -> ", sortedOperations.Select(o => o.Type))
@@ -28,6 +24,12 @@ internal class CompositeSyncPipeline(ILogger log, IEnumerable<ISyncOperation> op
 
         foreach (var operation in sortedOperations)
         {
+            // A skipped operation has nothing configured, so it reports no result
+            if (operation.ShouldSkip(plan))
+            {
+                continue;
+            }
+
             var failedDependencies = operation
                 .Dependencies.Where(dependency =>
                     completedOperations.TryGetValue(dependency, out var result)

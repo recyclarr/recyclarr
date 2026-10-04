@@ -313,12 +313,12 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
     }
 
     [Test]
-    public async Task Duplicate_pipeline_type_runs_applicable_and_skips_other()
+    public async Task Skipped_operation_runs_nothing_and_reports_no_result()
     {
-        var applicableOp = CreateStubOperation(PipelineType.MediaNaming, []);
+        var cfOp = CreateStubOperation(PipelineType.CustomFormat, []);
         var skippedOp = CreateStubOperation(PipelineType.MediaNaming, [], shouldSkip: true);
 
-        var sut = CreateExecutor([applicableOp, skippedOp]);
+        var sut = CreateExecutor([cfOp, skippedOp]);
 
         var settings = Substitute.For<ISyncSettings>();
         var result = await sut.Execute(
@@ -328,7 +328,7 @@ internal sealed class PipelineOrchestrationIntegrationTest : CoreIntegrationTest
             CancellationToken.None
         );
 
-        _executionOrder.Should().BeEquivalentTo([PipelineType.MediaNaming]);
+        _executionOrder.Should().Equal(PipelineType.CustomFormat);
         result.Should().ContainSingle();
     }
 

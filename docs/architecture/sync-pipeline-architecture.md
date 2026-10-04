@@ -57,11 +57,9 @@ service models.
 
 ### Skipping operations
 
-Each operation declares whether it should skip via `ShouldSkip(plan)`. Service affinity is encoded
-in the plan components themselves (e.g. the Sonarr naming plan component produces nothing for Radarr
-instances), and config presence is checked against the plan (no `quality_sizes` section means the
-quality size operation skips). The orchestrator filters skipped operations before topological
-sorting.
+Each operation declares whether it should skip via `ShouldSkip(plan)`, based on config presence in
+the plan (no `quality_sizes` section means the quality size operation skips). The orchestrator
+checks it while running the sorted operations; a skipped operation reports no result.
 
 ## Dependency management
 
@@ -137,9 +135,12 @@ Sonarr and Radarr are similar but have differences in areas like Media Naming fo
 Definition size limits. These differences are handled through service-specific implementations
 behind domain interfaces (see [service-gateway-layer.md](service-gateway-layer.md)).
 
-Media Naming has separate sync operations for Sonarr and Radarr since the APIs are completely
-different. Both share the same `PipelineType.MediaNaming` identity; the `ShouldSkip` check ensures
-only the relevant operation runs per instance.
+Each pipeline has one plan component and one sync operation ([ADR-023][adr-023]). Behavior that
+depends on service-owned fields lives in per-service components that DI selects for the instance.
+Media naming shares no fields, so its planner (`IMediaNamingPlanner`) and sync (`IMediaNamingSync`)
+components hold all of its logic.
+
+[adr-023]: ../decisions/architecture/023-service-owned-fields-in-shared-pipelines.md
 
 ## Extensibility
 
