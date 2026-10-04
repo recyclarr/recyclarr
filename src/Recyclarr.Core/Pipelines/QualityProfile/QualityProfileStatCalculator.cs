@@ -12,7 +12,7 @@ public record ProfileWithStats
     public bool QualitiesChanged { get; init; }
 }
 
-internal class QualityProfileStatCalculator(ILogger log)
+internal class QualityProfileStatCalculator(ILogger log, IQualityProfileServiceFields serviceFields)
 {
     public ProfileWithStats Calculate(UpdatedQualityProfile profile)
     {
@@ -53,7 +53,11 @@ internal class QualityProfileStatCalculator(ILogger log)
             oldProfile.MinUpgradeFormatScore,
             newProfile.MinUpgradeFormatScore
         );
-        Check("Language", oldProfile.Language?.Name, newProfile.Language?.Name);
+        foreach (var change in serviceFields.FindChanges(oldProfile, newProfile))
+        {
+            log.Debug("{Change}", change);
+            changed = true;
+        }
 
         return changed;
 

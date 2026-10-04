@@ -22,7 +22,6 @@ internal class UpdatedProfileBuilder(
         serviceData.Profiles.ToLookup(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
     private readonly QualityProfileData _schema = serviceData.Schema;
-    private readonly IReadOnlyList<ProfileLanguage> _languages = serviceData.Languages;
     private readonly List<UpdatedQualityProfile> _existingProfiles = [];
 
     // Tracks which state mapping service_ids have been claimed during two-pass resolution.
@@ -265,7 +264,6 @@ internal class UpdatedProfileBuilder(
             {
                 ProfileConfig = planned,
                 Profile = _schema,
-                Languages = _languages,
                 UpdatedQualities = organizer.OrganizeItems(_schema.Items, planned.Config),
             }
         );
@@ -285,7 +283,6 @@ internal class UpdatedProfileBuilder(
                 ProfileConfig = planned,
                 Profile = profile,
                 OriginalProfile = originalProfile,
-                Languages = _languages,
                 UpdatedQualities = organizer.OrganizeItems(profile.Items, planned.Config),
                 MissingQualities = missingQualities,
             }
