@@ -117,6 +117,12 @@ suppress the hook: `SKIP=no-review-markers pre-commit run --files <files>`
 - Use records for value-oriented data and favor immutable state. `IReadOnlyCollection` and
   `IReadOnlyDictionary` restrict mutation only through that reference; use immutable collections
   when a stable snapshot is required.
+- Record shape: a record is either fully positional or declares no primary constructor.
+  - Positional records may add only computed get-only members, and only when never serialized.
+  - Base records declare no primary constructor. A derived record may be positional only when its
+    base has no stored properties; otherwise it uses `required` properties.
+  - Prefer `required` over positional parameters for serialized fields: System.Text.Json enforces
+    `required` but fills missing constructor parameters with defaults.
 - JSON serialization: configure naming policy, converters, and style via `JsonSerializerOptions` (or
   source-generated `JsonSerializerContext`). Check for existing options before creating new
   instances. Reserve per-property attributes (`[JsonPropertyName]`, etc.) for exceptions to the
