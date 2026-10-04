@@ -1,26 +1,38 @@
 using System.Globalization;
+using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AwesomeAssertions;
-using CliWrap;
-using CliWrap.Buffered;
 using NUnit.Framework;
+using Recyclarr.Client.V1;
+using Refit;
 using RadarrApi = Recyclarr.Api.Radarr;
 using SonarrApi = Recyclarr.Api.Sonarr;
 
 namespace Recyclarr.EndToEndTests;
 
 [TestFixture(Category = "E2E"), Explicit, NonParallelizable]
-[Ignore(
-    "REC-157: the harness publishes only the CLI, so ephemeral launch finds no server binary, and "
-        + "these assertions read sync log lines that are now written by the server process."
-)]
 internal sealed class RecyclarrSyncTests
 {
+    private const string MainConfig = "recyclarr.yml";
+    private const string DeleteDisabledConfig = "recyclarr-delete-disabled.yml";
+
+    private static readonly TimeSpan JobPollInterval = TimeSpan.FromMilliseconds(500);
+
+    private static readonly JsonSerializerOptions ResultsJsonOptions = new()
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+    };
+
     private static RecyclarrTestHarness _harness = null!;
 
     [OneTimeSetUp]
     public static async Task OneTimeSetUp()
     {
-        _harness = await RecyclarrTestHarness.StartAsync(TestContext.CurrentContext);
+        var context = TestContext.CurrentContext;
+        _harness = await RecyclarrTestHarness.StartAsync(context);
+        await _harness.StartServerAsync(MainConfig, context.CancellationToken);
     }
 
     [OneTimeTearDown]
@@ -33,11 +45,7 @@ internal sealed class RecyclarrSyncTests
     [CancelAfter(60_000)]
     public async Task Order1_initial_sync_creates_expected_state(CancellationToken ct)
     {
-        var result = await RunRecyclarrSync(ct);
-        await LogOutput(result);
-        result
-            .ExitCode.Should()
-            .Be(0, $"recyclarr sync failed:\n{result.StandardOutput}\n{result.StandardError}");
+        await SyncSucceeds(ct);
 
         await WaitForQualityDefinitionUpdates(ct);
 
@@ -49,9 +57,7 @@ internal sealed class RecyclarrSyncTests
     [CancelAfter(60_000)]
     public async Task Order2_resync_is_idempotent(CancellationToken ct)
     {
-        var result = await RunRecyclarrSync(ct);
-        await LogOutput(result);
-        result.ExitCode.Should().Be(0, "re-sync should succeed");
+        await SyncSucceeds(ct);
 
         var sonarrCfNames = (
             await _harness.SonarrApi<SonarrApi.ICustomFormatApi>().CustomformatGet(ct)
@@ -109,9 +115,7 @@ internal sealed class RecyclarrSyncTests
         renamedCfs.Should().Contain(cf => cf.Name == "Obfuscated-RENAMED");
 
         // Run sync - should restore original name via ID-first matching
-        var result = await RunRecyclarrSync(ct);
-        await LogOutput(result);
-        result.ExitCode.Should().Be(0, "sync should succeed and restore renamed CF");
+        await SyncSucceeds(ct);
 
         // Verify name restored
         var restoredCfs = await cfApi.CustomformatGet(ct);
@@ -140,9 +144,7 @@ internal sealed class RecyclarrSyncTests
         afterDelete.Should().NotContain(cf => cf.Name == "Bad Dual Groups");
 
         // Run sync - should detect stale cache and recreate CF
-        var result = await RunRecyclarrSync(ct);
-        await LogOutput(result);
-        result.ExitCode.Should().Be(0, "sync should succeed and recreate deleted CF");
+        await SyncSucceeds(ct);
 
         // Verify CF recreated
         var recreated = await cfApi.CustomformatGet(ct);
@@ -155,10 +157,18 @@ internal sealed class RecyclarrSyncTests
     [CancelAfter(60_000)]
     public async Task Order5_resync_preserves_orphaned_cf_when_delete_disabled(CancellationToken ct)
     {
-        // Run sync with alternate config that has Obfuscated removed and delete_old_custom_formats: false
-        var result = await RunRecyclarrSync(ct, _harness.ConfigPathDeleteDisabled);
-        await LogOutput(result);
-        result.ExitCode.Should().Be(0, "sync should succeed with delete disabled");
+        // Restart with alternate config that has Obfuscated removed and
+        // delete_old_custom_formats: false. Sync state from earlier syncs survives the restart, so
+        // the server still knows it owns Obfuscated.
+        await _harness.StartServerAsync(DeleteDisabledConfig, ct);
+        try
+        {
+            await SyncSucceeds(ct);
+        }
+        finally
+        {
+            await _harness.StartServerAsync(MainConfig, ct);
+        }
 
         // Verify Obfuscated still exists even though it's not in the config
         // This proves the delete toggle prevents deletion of orphaned CFs
@@ -253,9 +263,7 @@ internal sealed class RecyclarrSyncTests
         await File.WriteAllTextAsync(guideJsonPath, updatedGuideJson, ct);
 
         // First sync after guide change: should detect and apply the group rename
-        var result = await RunRecyclarrSync(ct);
-        await LogOutput(result);
-        result.ExitCode.Should().Be(0, "sync after guide update should succeed");
+        await SyncSucceeds(ct);
 
         // Verify the group rename persisted in Sonarr
         var profilesAfter = await profileApi.QualityprofileGet(ct);
@@ -276,51 +284,64 @@ internal sealed class RecyclarrSyncTests
         // Second sync (same guide data): should detect NO changes (idempotency).
         // This is the actual bug: if the comparison logic doesn't stabilize after
         // a guide-driven group rename, every sync pushes an unnecessary update.
-        var resyncResult = await RunRecyclarrSync(ct);
-        await LogOutput(resyncResult);
-        resyncResult.ExitCode.Should().Be(0, "re-sync should succeed");
-        resyncResult
-            .StandardOutput.Should()
-            .Contain(
-                "All quality profiles are up to date",
-                "re-sync should detect no changes after guide-driven group rename"
-            );
+        var resyncResults = await SyncSucceeds(ct);
+        var because =
+            "re-sync should detect no changes after guide-driven group rename; results:\n"
+            + Describe(resyncResults);
+        var qualityProfiles = resyncResults
+            .Instances.OfType<SyncInstanceResultsResponseSonarr>()
+            .Should()
+            .ContainSingle()
+            .Which.Pipelines.QualityProfiles;
+        qualityProfiles.Should().NotBeNull(because);
+        qualityProfiles.Creates.Should().BeEmpty(because);
+        qualityProfiles.Updates.Should().BeEmpty(because);
     }
 
-    private static async Task<BufferedCommandResult> RunRecyclarrSync(
-        CancellationToken ct,
-        string? configPath = null
-    )
+    /// <summary>
+    /// Runs a sync job for every configured instance and requires it to succeed completely. The
+    /// failure message carries the full job results so diagnostics are visible in test output.
+    /// </summary>
+    private static async Task<SyncJobResultsResponse> SyncSucceeds(CancellationToken ct)
     {
-        return await Cli.Wrap(_harness.RecyclarrBinaryPath)
-            .WithArguments([
-                "sync",
-                "--log",
-                "debug",
-                "--config",
-                configPath ?? _harness.ConfigPath,
-            ])
-            .WithEnvironmentVariables(env =>
-                env.Set("SONARR_URL", $"http://localhost:{_harness.SonarrPort}")
-                    .Set("SONARR_API_KEY", "testkey")
-                    .Set("RADARR_URL", $"http://localhost:{_harness.RadarrPort}")
-                    .Set("RADARR_API_KEY", "testkey")
-                    .Set("RECYCLARR_CONFIG_DIR", _harness.AppDataDir.FullName)
-                    .Set("RECYCLARR_APP_DATA", "")
-            )
-            .WithValidation(CommandResultValidation.None)
-            .ExecuteBufferedAsync(ct);
+        var sync = _harness.Sync;
+
+        var created = ContentOf(await sync.JobsPost(new CreateSyncJobRequest(), ct));
+
+        // The job resource answers 202 while the sync runs and 200 once it is terminal.
+        while (true)
+        {
+            using var job = await sync.JobsGet(created.Id, ct);
+            ContentOf(job);
+            if (job.StatusCode == HttpStatusCode.OK)
+            {
+                break;
+            }
+
+            await Task.Delay(JobPollInterval, ct);
+        }
+
+        var results = ContentOf(await sync.Results(created.Id, ct));
+        results
+            .Status.Should()
+            .Be(SyncCompletionStatus.Succeeded, "sync results:\n" + Describe(results));
+        return results;
     }
 
-    private static async Task LogOutput(BufferedCommandResult result)
+    private static T ContentOf<T>(IApiResponse<T> response)
     {
-        var testName = TestContext.CurrentContext.Test.Name;
-        await TestContext.Out.WriteLineAsync(
-            $"=== [{testName}] Recyclarr stdout ===\n{result.StandardOutput}"
-        );
-        await TestContext.Out.WriteLineAsync(
-            $"=== [{testName}] Recyclarr stderr ===\n{result.StandardError}"
-        );
+        if (response.Error is not null)
+        {
+            throw response.Error;
+        }
+
+        return response.Content
+            ?? throw new InvalidOperationException("The server returned an empty body.");
+    }
+
+    private static string Describe(SyncJobResultsResponse results)
+    {
+        return JsonSerializer.Serialize(results, ResultsJsonOptions);
     }
 
     private static async Task VerifySonarrState(CancellationToken ct)

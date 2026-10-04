@@ -6,6 +6,7 @@ using CliWrap;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using NUnit.Framework;
+using Recyclarr.Client.V1;
 using Refit;
 
 namespace Recyclarr.EndToEndTests;
@@ -27,15 +28,39 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         ),
     };
 
+    // Match the CLI's self-API settings: enums are camelCase strings and unset request fields are
+    // omitted, because the server rejects explicit nulls for non-nullable fields.
+    private static readonly RefitSettings ServerRefitSettings = new()
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(
+            new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            }
+        ),
+    };
+
+    private const string ApiKey = "testkey";
+
     private readonly HttpClient _sonarr;
     private readonly HttpClient _radarr;
     private readonly IContainer _sonarrContainer;
     private readonly IContainer _radarrContainer;
+    private readonly string _serverBinaryPath;
+    private readonly IDirectoryInfo _fixturesDir;
+    private RecyclarrServerProcess? _server;
+    private HttpClient? _serverClient;
+    private ISyncApi? _sync;
 
-    public string RecyclarrBinaryPath { get; }
+    /// <summary>
+    /// The server's config directory. It also holds sync state, which must survive server
+    /// restarts so later syncs recognize resources that earlier syncs created.
+    /// </summary>
     public IDirectoryInfo AppDataDir { get; }
-    public string ConfigPath { get; }
-    public string ConfigPathDeleteDisabled { get; }
+
+    public ISyncApi Sync =>
+        _sync ?? throw new InvalidOperationException("The server has not been started.");
 
     public T SonarrApi<T>()
         where T : class => RestService.For<T>(_sonarr, ServarrRefitSettings);
@@ -43,60 +68,54 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     public T RadarrApi<T>()
         where T : class => RestService.For<T>(_radarr, ServarrRefitSettings);
 
-    // Expose ports for environment variable setup in RunRecyclarrSync
-    public int SonarrPort => _sonarrContainer.GetMappedPublicPort(8989);
-    public int RadarrPort => _radarrContainer.GetMappedPublicPort(7878);
-
     private RecyclarrTestHarness(
         HttpClient sonarr,
         HttpClient radarr,
         IContainer sonarrContainer,
         IContainer radarrContainer,
-        string recyclarrBinaryPath,
-        IDirectoryInfo appDataDir,
-        string configPath,
-        string configPathDeleteDisabled
+        string serverBinaryPath,
+        IDirectoryInfo fixturesDir,
+        IDirectoryInfo appDataDir
     )
     {
         _sonarr = sonarr;
         _radarr = radarr;
         _sonarrContainer = sonarrContainer;
         _radarrContainer = radarrContainer;
-        RecyclarrBinaryPath = recyclarrBinaryPath;
+        _serverBinaryPath = serverBinaryPath;
+        _fixturesDir = fixturesDir;
         AppDataDir = appDataDir;
-        ConfigPath = configPath;
-        ConfigPathDeleteDisabled = configPathDeleteDisabled;
     }
 
+    /// <summary>
+    /// Starts Sonarr and Radarr containers and publishes the server. Call
+    /// <see cref="StartServerAsync"/> before syncing.
+    /// </summary>
     public static async Task<RecyclarrTestHarness> StartAsync(TestContext testContext)
     {
         var ct = testContext.CancellationToken;
-        const string apiKey = "testkey";
 
         var guid = Guid.NewGuid();
         var publishPath = FileSystem.DirectoryInfo.New(
             FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), $"recyclarr-e2e-publish-{guid}")
         );
-        var recyclarrBinaryPath = publishPath.File("recyclarr").FullName;
+        var serverBinaryPath = publishPath.File("recyclarr-server").FullName;
         var appDataDir = FileSystem.DirectoryInfo.New(
             FileSystem.Path.Combine(FileSystem.Path.GetTempPath(), $"recyclarr-e2e-appdata-{guid}")
         );
         appDataDir.Create();
 
-        var configPath = Path.Combine(testContext.TestDirectory, "Fixtures", "recyclarr.yml");
-        var configPathDeleteDisabled = Path.Combine(
-            testContext.TestDirectory,
-            "Fixtures",
-            "recyclarr-delete-disabled.yml"
+        var fixturesDir = FileSystem.DirectoryInfo.New(
+            FileSystem.Path.Combine(testContext.TestDirectory, "Fixtures")
         );
-        await SetUpFixtures(appDataDir, testContext.TestDirectory, ct);
+        await SetUpFixtures(appDataDir, fixturesDir, ct);
 
         var repositoryRoot = GetRepositoryRoot();
-        var cliProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Cli");
+        var serverProjectPath = Path.Combine(repositoryRoot, "src", "Recyclarr.Server");
 
         var sonarrContainer = new ContainerBuilder("linuxserver/sonarr:latest")
             .WithPortBinding(8989, true)
-            .WithEnvironment("SONARR__AUTH__APIKEY", apiKey)
+            .WithEnvironment("SONARR__AUTH__APIKEY", ApiKey)
             .WithTmpfsMount("/config")
             .WithWaitStrategy(
                 Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(8989))
@@ -106,7 +125,7 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
 
         var radarrContainer = new ContainerBuilder("linuxserver/radarr:latest")
             .WithPortBinding(7878, true)
-            .WithEnvironment("RADARR__AUTH__APIKEY", apiKey)
+            .WithEnvironment("RADARR__AUTH__APIKEY", ApiKey)
             .WithTmpfsMount("/config")
             .WithWaitStrategy(
                 Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(7878))
@@ -119,10 +138,9 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         var publishTask = Cli.Wrap("dotnet")
             .WithArguments([
                 "publish",
-                cliProjectPath,
+                serverProjectPath,
                 "-c",
                 "Release",
-                "--self-contained",
                 "-o",
                 publishPath.FullName,
             ])
@@ -133,23 +151,71 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
         var sonarrUrl = $"http://localhost:{sonarrContainer.GetMappedPublicPort(8989)}";
         var radarrUrl = $"http://localhost:{radarrContainer.GetMappedPublicPort(7878)}";
 
-        var sonarr = CreateHttpClient(sonarrUrl, apiKey);
-        var radarr = CreateHttpClient(radarrUrl, apiKey);
+        var sonarr = CreateHttpClient(sonarrUrl, ApiKey);
+        var radarr = CreateHttpClient(radarrUrl, ApiKey);
 
         return new RecyclarrTestHarness(
             sonarr,
             radarr,
             sonarrContainer,
             radarrContainer,
-            recyclarrBinaryPath,
-            appDataDir,
-            configPath,
-            configPathDeleteDisabled
+            serverBinaryPath,
+            fixturesDir,
+            appDataDir
         );
+    }
+
+    /// <summary>
+    /// Installs the named fixture as the server's only configuration file and (re)starts the
+    /// server so it loads that configuration.
+    /// </summary>
+    public async Task StartServerAsync(string configFixtureName, CancellationToken ct)
+    {
+        await StopServerAsync();
+
+        _fixturesDir
+            .File(configFixtureName)
+            .CopyTo(AppDataDir.File("recyclarr.yml").FullName, overwrite: true);
+
+        var sonarrUrl = $"http://localhost:{_sonarrContainer.GetMappedPublicPort(8989)}";
+        var radarrUrl = $"http://localhost:{_radarrContainer.GetMappedPublicPort(7878)}";
+
+        _server = await RecyclarrServerProcess.StartAsync(
+            _serverBinaryPath,
+            new Dictionary<string, string?>
+            {
+                ["SONARR_URL"] = sonarrUrl,
+                ["SONARR_API_KEY"] = ApiKey,
+                ["RADARR_URL"] = radarrUrl,
+                ["RADARR_API_KEY"] = ApiKey,
+                // Pin both directories so a developer's own settings never leak into the run.
+                ["RECYCLARR_CONFIG_DIR"] = AppDataDir.FullName,
+                ["RECYCLARR_DATA_DIR"] = AppDataDir.FullName,
+                ["RECYCLARR_APP_DATA"] = "",
+            },
+            ct
+        );
+
+        _serverClient = new HttpClient { BaseAddress = _server.BaseAddress };
+        _sync = RestService.For<ISyncApi>(_serverClient, ServerRefitSettings);
+    }
+
+    private async Task StopServerAsync()
+    {
+        _sync = null;
+        _serverClient?.Dispose();
+        _serverClient = null;
+
+        if (_server is not null)
+        {
+            await _server.DisposeAsync();
+            _server = null;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
+        await StopServerAsync();
         _sonarr.Dispose();
         _radarr.Dispose();
         await _sonarrContainer.DisposeAsync();
@@ -170,14 +236,10 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
 
     private static async Task SetUpFixtures(
         IDirectoryInfo appDataDir,
-        string testDirectory,
+        IDirectoryInfo fixturesDir,
         CancellationToken ct
     )
     {
-        var fixturesDir = FileSystem.DirectoryInfo.New(
-            FileSystem.Path.Combine(testDirectory, "Fixtures")
-        );
-
         var sonarrCfsSource = fixturesDir.SubDirectory("custom-formats-sonarr");
         var sonarrCfsDest = appDataDir.SubDirectory("custom-formats-sonarr");
         if (sonarrCfsSource.Exists)

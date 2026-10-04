@@ -200,8 +200,11 @@ failure. Run coverage BEFORE writing tests to understand gaps.
 
 ## End-to-End Tests
 
-E2E tests run the full Recyclarr CLI against containerized Sonarr/Radarr instances. Tests verify
-that sync operations produce expected state in the services.
+E2E tests run the published `recyclarr-server` process against containerized Sonarr/Radarr
+instances and drive sync through the generated `Recyclarr.Client`; the CLI is out of scope. Tests
+assert structured job results and service state, never process output or log text. The server
+loads config once at startup, so a test needing a different config restarts it with another
+fixture.
 
 ### Running E2E Tests
 
