@@ -38,14 +38,13 @@ internal static partial class CustomFormatResponseMapper
             deletes.Count
         );
 
-        return new CustomFormatPipelineResponse(
-            ResultValueMapper.MapStatus(result.Status),
-            outcomes,
-            creates,
-            updates,
-            deletes
-        )
+        return new CustomFormatPipelineResponse
         {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = outcomes,
+            Creates = creates,
+            Updates = updates,
+            Deletes = deletes,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
@@ -96,11 +95,10 @@ internal static partial class CustomFormatResponseMapper
 
     private static CustomFormatUpdateResponse MapUpdate(CustomFormatUpdateDelta delta)
     {
-        var response = new CustomFormatUpdateResponse(
-            MapIdentity(delta.Identity),
-            MapSelection(delta.SelectionProvenance)
-        )
+        var response = new CustomFormatUpdateResponse
         {
+            Identity = MapIdentity(delta.Identity),
+            SelectionProvenance = MapSelection(delta.SelectionProvenance),
             Name = delta
                 .Components.OfType<CustomFormatNameChanged>()
                 .Select(x => ResultValueMapper.MapValue(x.Value))

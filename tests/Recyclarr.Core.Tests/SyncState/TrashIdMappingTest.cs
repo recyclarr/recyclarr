@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Recyclarr.Json;
-using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
 
@@ -9,7 +8,7 @@ internal sealed class TrashIdMappingTest
     [Test]
     public void Serialize_outputs_current_format_only()
     {
-        var mapping = new TrashIdMapping("abc123", "AMZN", 42);
+        var mapping = NewSyncState.Mapping("abc123", "AMZN", 42);
 
         var json = JsonSerializer.Serialize(mapping, GlobalJsonSerializerSettings.Recyclarr);
 

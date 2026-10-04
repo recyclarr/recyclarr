@@ -8,11 +8,10 @@ internal static class MediaManagementResponseMapper
     public static MediaManagementPipelineResponse ToResponse(
         MediaManagementPipelineResult result
     ) =>
-        new(
-            ResultValueMapper.MapStatus(result.Status),
-            result.Delta is null ? [] : [MapUpdate(result.Delta)]
-        )
+        new()
         {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Updates = result.Delta is null ? [] : [MapUpdate(result.Delta)],
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
 

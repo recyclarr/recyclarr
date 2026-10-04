@@ -61,6 +61,11 @@ internal sealed class CustomFormatComputeResult(
 
     private static TrashIdMapping ToMapping(CustomFormatResource cf)
     {
-        return new TrashIdMapping(cf.TrashId, cf.Name, cf.Id);
+        return new TrashIdMapping
+        {
+            TrashId = cf.TrashId,
+            Name = cf.Name,
+            ServiceId = cf.Id,
+        };
     }
 }

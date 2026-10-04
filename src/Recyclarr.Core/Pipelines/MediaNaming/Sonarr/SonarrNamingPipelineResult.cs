@@ -24,7 +24,7 @@ public sealed record SonarrNamingPipelineResult : PipelineResult
     )
         : base(status, blockedBy)
     {
-        Outcomes = outcomes.ToList().AsReadOnly();
+        Outcomes = outcomes;
         Delta = delta;
     }
 

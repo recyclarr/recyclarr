@@ -19,12 +19,11 @@ internal static class SyncJobResultsResponseMapper
             job.Result
             ?? throw new InvalidOperationException("A terminal sync job must have a result");
 
-        return new SyncJobResultsResponse(
-            job.Id.Value,
-            ResultValueMapper.MapCompletionStatus(result.Status),
-            result.Instances.Select(MapInstance).ToList()
-        )
+        return new SyncJobResultsResponse
         {
+            Id = job.Id.Value,
+            Status = ResultValueMapper.MapCompletionStatus(result.Status),
+            Instances = result.Instances.Select(MapInstance).ToList(),
             Fault = result.Fault is null ? null : new SyncFaultResponse(result.Fault.Reference),
         };
     }
@@ -32,22 +31,20 @@ internal static class SyncJobResultsResponseMapper
     private static SyncInstanceResultsResponse MapInstance(SyncInstanceResult instance) =>
         instance.ServiceType switch
         {
-            SupportedServices.Sonarr => new SonarrInstanceResultsResponse(
-                instance.InstanceName,
-                ResultValueMapper.MapCompletionStatus(instance.Status),
-                MapSonarrPipelines(instance.Pipelines)
-            )
+            SupportedServices.Sonarr => new SonarrInstanceResultsResponse
             {
+                Name = instance.InstanceName,
+                Status = ResultValueMapper.MapCompletionStatus(instance.Status),
+                Pipelines = MapSonarrPipelines(instance.Pipelines),
                 Failure = instance.Failure?.ToCategory(),
                 Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
             },
-            SupportedServices.Radarr => new RadarrInstanceResultsResponse(
-                instance.InstanceName,
-                ResultValueMapper.MapCompletionStatus(instance.Status),
-                MapRadarrPipelines(instance.Pipelines)
-            )
+            SupportedServices.Radarr => new RadarrInstanceResultsResponse
             {
+                Name = instance.InstanceName,
+                Status = ResultValueMapper.MapCompletionStatus(instance.Status),
+                Pipelines = MapRadarrPipelines(instance.Pipelines),
                 Failure = instance.Failure?.ToCategory(),
                 Fault = MapFault(instance.Fault),
                 PlanningOutcomes = instance.PlanningOutcomes.Select(MapPlanningOutcome).ToList(),
