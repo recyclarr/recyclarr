@@ -75,7 +75,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.RadarrMediaNaming.Should().NotBeNull();
+        plan.MediaNaming.Should().BeOfType<PlannedRadarrMediaNaming>();
         plan.Outcomes.Should().BeEmpty();
     }
 
@@ -122,8 +122,9 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
         var plan = sut.Build();
 
         plan.HasErrors.Should().BeTrue();
-        plan.RadarrMediaNamingAvailable.Should().BeTrue();
-        plan.RadarrMediaNaming.Mismatches.Should()
+        plan.MediaNamingAvailable.Should().BeTrue();
+        Radarr(plan)
+            .Mismatches.Should()
             .ContainSingle()
             .Which.Should()
             .Be(
@@ -150,9 +151,10 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.RadarrMediaNamingAvailable.Should().BeTrue();
-        plan.RadarrMediaNaming.Data.HasValues().Should().BeFalse();
-        plan.RadarrMediaNaming.Mismatches.Should()
+        plan.MediaNamingAvailable.Should().BeTrue();
+        Radarr(plan).Data.HasValues().Should().BeFalse();
+        Radarr(plan)
+            .Mismatches.Should()
             .Equal(
                 new RadarrNamingReferenceMismatchOutcome(
                     RadarrNamingFormatField.StandardMovieFormat,
@@ -169,7 +171,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.RadarrMediaNamingAvailable.Should().BeFalse();
+        plan.MediaNamingAvailable.Should().BeFalse();
     }
 
     [Test]
@@ -187,7 +189,7 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.RadarrMediaNaming.Data.RenameMovies.Should().BeFalse();
+        Radarr(plan).Data.RenameMovies.Should().BeFalse();
     }
 
     [Test]
@@ -210,9 +212,10 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.SonarrMediaNaming.Data.SeriesFolderFormat.Should().Be("series");
-        plan.SonarrMediaNaming.Data.StandardEpisodeFormat.Should().Be("standard-v4");
-        plan.SonarrMediaNaming.Mismatches.Should()
+        Sonarr(plan).Data.SeriesFolderFormat.Should().Be("series");
+        Sonarr(plan).Data.StandardEpisodeFormat.Should().Be("standard-v4");
+        Sonarr(plan)
+            .Mismatches.Should()
             .Equal(
                 new SonarrNamingReferenceMismatchOutcome(
                     SonarrNamingFormatField.DailyEpisodeFormat,
@@ -238,6 +241,12 @@ internal sealed class PlanBuilderMediaNamingTest : PlanBuilderTestBase
 
         var plan = sut.Build();
 
-        plan.SonarrMediaNaming.Data.StandardEpisodeFormat.Should().Be("standard-base");
+        Sonarr(plan).Data.StandardEpisodeFormat.Should().Be("standard-base");
     }
+
+    private static PlannedRadarrMediaNaming Radarr(PipelinePlan plan) =>
+        plan.MediaNaming.Should().BeOfType<PlannedRadarrMediaNaming>().Which;
+
+    private static PlannedSonarrMediaNaming Sonarr(PipelinePlan plan) =>
+        plan.MediaNaming.Should().BeOfType<PlannedSonarrMediaNaming>().Which;
 }
