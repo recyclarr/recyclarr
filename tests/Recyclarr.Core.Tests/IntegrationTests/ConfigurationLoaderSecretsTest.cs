@@ -40,16 +40,17 @@ internal sealed class ConfigurationLoaderSecretsTest : CoreIntegrationTestFixtur
             .ContainSingle()
             .Which.Should()
             .BeEquivalentTo(
-                new LoadedConfigYaml(
-                    "instance1",
-                    SupportedServices.Sonarr,
-                    new SonarrConfigYaml
+                new LoadedConfigYaml
+                {
+                    InstanceName = "instance1",
+                    ServiceType = SupportedServices.Sonarr,
+                    Yaml = new SonarrConfigYaml
                     {
                         ApiKey = "95283e6b156c42f3af8a9b16173f876b",
                         BaseUrl = "https://radarr:7878",
                         CustomFormats = [new CustomFormatConfigYaml { TrashIds = ["1234567"] }],
-                    }
-                )
+                    },
+                }
             );
     }
 

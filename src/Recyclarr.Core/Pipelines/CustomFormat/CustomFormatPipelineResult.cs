@@ -40,8 +40,8 @@ public sealed record CustomFormatPipelineResult : PipelineResult
     {
         CompletedResources = completedResources;
         IncompleteResources = incompleteResources;
-        Outcomes = outcomes.ToList().AsReadOnly();
-        Deltas = deltas.ToList().AsReadOnly();
+        Outcomes = outcomes;
+        Deltas = deltas;
     }
 
     public IReadOnlyList<CustomFormatOutcome> Outcomes { get; }
@@ -94,20 +94,10 @@ public sealed record CustomFormatAdoptedOutcome(CustomFormatIdentity Identity, i
 
 public sealed record CustomFormatServiceMatch(string Name, int ServiceId);
 
-public sealed record CustomFormatAmbiguousMatchOutcome : CustomFormatOutcome
-{
-    public CustomFormatAmbiguousMatchOutcome(
-        CustomFormatIdentity identity,
-        IReadOnlyList<CustomFormatServiceMatch> serviceMatches
-    )
-    {
-        Identity = identity;
-        ServiceMatches = serviceMatches.ToList().AsReadOnly();
-    }
-
-    public CustomFormatIdentity Identity { get; }
-    public IReadOnlyList<CustomFormatServiceMatch> ServiceMatches { get; }
-}
+public sealed record CustomFormatAmbiguousMatchOutcome(
+    CustomFormatIdentity Identity,
+    IReadOnlyList<CustomFormatServiceMatch> ServiceMatches
+) : CustomFormatOutcome;
 
 public sealed record CustomFormatStateConflictOutcome(
     CustomFormatIdentity Identity,
@@ -124,32 +114,23 @@ public sealed record CustomFormatUpdateRejectedOutcome(CustomFormatIdentity Iden
 public sealed record CustomFormatDeleteRejectedOutcome(CustomFormatIdentity Identity)
     : CustomFormatOutcome;
 
-public abstract record CustomFormatDelta(CustomFormatIdentity Identity) : ResourceDelta;
+public abstract record CustomFormatDelta : ResourceDelta
+{
+    public required CustomFormatIdentity Identity { get; init; }
+}
 
-public sealed record CustomFormatCreateDelta(
-    CustomFormatIdentity Identity,
-    CustomFormatSourceInfo SelectionProvenance
-) : CustomFormatDelta(Identity);
+public sealed record CustomFormatCreateDelta : CustomFormatDelta
+{
+    public required CustomFormatSourceInfo SelectionProvenance { get; init; }
+}
 
 public sealed record CustomFormatUpdateDelta : CustomFormatDelta
 {
-    public CustomFormatUpdateDelta(
-        CustomFormatIdentity identity,
-        CustomFormatSourceInfo selectionProvenance,
-        IReadOnlyList<CustomFormatUpdateComponent> components
-    )
-        : base(identity)
-    {
-        SelectionProvenance = selectionProvenance;
-        Components = components.ToList().AsReadOnly();
-    }
-
-    public CustomFormatSourceInfo SelectionProvenance { get; }
-    public IReadOnlyList<CustomFormatUpdateComponent> Components { get; }
+    public required CustomFormatSourceInfo SelectionProvenance { get; init; }
+    public required IReadOnlyList<CustomFormatUpdateComponent> Components { get; init; }
 }
 
-public sealed record CustomFormatDeleteDelta(CustomFormatIdentity Identity)
-    : CustomFormatDelta(Identity);
+public sealed record CustomFormatDeleteDelta : CustomFormatDelta;
 
 public abstract record CustomFormatUpdateComponent;
 

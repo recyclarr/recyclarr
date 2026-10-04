@@ -68,7 +68,7 @@ internal sealed class SyncStatePersisterTest
 
         var result = sut.Load();
 
-        result.Mappings.Should().BeEquivalentTo([new TrashIdMapping("abc", "Test", 42)]);
+        result.Mappings.Should().BeEquivalentTo([NewSyncState.Mapping("abc", "Test", 42)]);
     }
 
     [Test]

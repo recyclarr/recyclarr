@@ -17,7 +17,14 @@ internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
 
         var result = sut.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
-            [new LoadedConfigYaml("instance1", SupportedServices.Radarr, config)],
+            [
+                new LoadedConfigYaml
+                {
+                    InstanceName = "instance1",
+                    ServiceType = SupportedServices.Radarr,
+                    Yaml = config,
+                },
+            ],
             context
         );
 
@@ -46,16 +53,18 @@ internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
         var result = sut.Filter(
             new ConfigFilterCriteria { Instances = ["instance1"] },
             [
-                new LoadedConfigYaml(
-                    "instance1",
-                    SupportedServices.Radarr,
-                    new RadarrConfigYaml { BaseUrl = "http://same" }
-                ),
-                new LoadedConfigYaml(
-                    "instance2",
-                    SupportedServices.Radarr,
-                    new RadarrConfigYaml { BaseUrl = "http://same" }
-                ),
+                new LoadedConfigYaml
+                {
+                    InstanceName = "instance1",
+                    ServiceType = SupportedServices.Radarr,
+                    Yaml = new RadarrConfigYaml { BaseUrl = "http://same" },
+                },
+                new LoadedConfigYaml
+                {
+                    InstanceName = "instance2",
+                    ServiceType = SupportedServices.Radarr,
+                    Yaml = new RadarrConfigYaml { BaseUrl = "http://same" },
+                },
             ],
             context
         );
@@ -83,11 +92,12 @@ internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
         var context = new FilterContext { AllAvailableInstances = ["instance1", "instance2"] };
         LoadedConfigYaml[] yaml =
         [
-            new(
-                "instance1",
-                SupportedServices.Radarr,
-                new RadarrConfigYaml { BaseUrl = "http://myradarr.domain.com" }
-            ),
+            new()
+            {
+                InstanceName = "instance1",
+                ServiceType = SupportedServices.Radarr,
+                Yaml = new RadarrConfigYaml { BaseUrl = "http://myradarr.domain.com" },
+            },
         ];
 
         var result = sut.Filter(
@@ -117,11 +127,12 @@ internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
         var context = new FilterContext { AllAvailableInstances = ["instance1"] };
         LoadedConfigYaml[] yaml =
         [
-            new(
-                "instance1",
-                SupportedServices.Radarr,
-                new RadarrConfigYaml { BaseUrl = "http://myradarr.domain.com" }
-            ),
+            new()
+            {
+                InstanceName = "instance1",
+                ServiceType = SupportedServices.Radarr,
+                Yaml = new RadarrConfigYaml { BaseUrl = "http://myradarr.domain.com" },
+            },
         ];
 
         var result = sut.Filter(
@@ -142,16 +153,18 @@ internal sealed class ConfigFiltersTest : CoreIntegrationTestFixture
         var context = new FilterContext();
         LoadedConfigYaml[] yaml =
         [
-            new(
-                "instance1",
-                SupportedServices.Radarr,
-                new RadarrConfigYaml { BaseUrl = "http://different2" }
-            ),
-            new(
-                "instance1",
-                SupportedServices.Sonarr,
-                new RadarrConfigYaml { BaseUrl = "http://different1" }
-            ),
+            new()
+            {
+                InstanceName = "instance1",
+                ServiceType = SupportedServices.Radarr,
+                Yaml = new RadarrConfigYaml { BaseUrl = "http://different2" },
+            },
+            new()
+            {
+                InstanceName = "instance1",
+                ServiceType = SupportedServices.Sonarr,
+                Yaml = new RadarrConfigYaml { BaseUrl = "http://different1" },
+            },
         ];
 
         var result = sut.Filter(

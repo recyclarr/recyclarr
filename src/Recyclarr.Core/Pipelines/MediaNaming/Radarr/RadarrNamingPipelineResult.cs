@@ -24,7 +24,7 @@ public sealed record RadarrNamingPipelineResult : PipelineResult
     )
         : base(status, blockedBy)
     {
-        Outcomes = outcomes.ToList().AsReadOnly();
+        Outcomes = outcomes;
         Delta = delta;
     }
 

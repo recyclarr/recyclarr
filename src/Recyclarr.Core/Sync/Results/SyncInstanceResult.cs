@@ -6,9 +6,8 @@ namespace Recyclarr.Sync.Results;
 /// The planning outcomes, terminal pipeline results, and optional failures for one service instance.
 /// </summary>
 /// <remarks>
-/// Collections are copied into stable snapshots. Status is derived from pipeline results, blocking
-/// planning outcomes, operational failures, and unexpected faults rather than from transient
-/// progress events.
+/// Status is derived from pipeline results, blocking planning outcomes, operational failures, and
+/// unexpected faults rather than from transient progress events.
 /// </remarks>
 public sealed record SyncInstanceResult
 {
@@ -26,8 +25,8 @@ public sealed record SyncInstanceResult
 
         InstanceName = instanceName;
         ServiceType = serviceType;
-        Pipelines = pipelines.ToList().AsReadOnly();
-        PlanningOutcomes = (planningOutcomes ?? []).ToList().AsReadOnly();
+        Pipelines = pipelines;
+        PlanningOutcomes = planningOutcomes ?? [];
         Failure = failure;
         Fault = fault;
         Status = SyncResultStatusAggregation.From(

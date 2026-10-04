@@ -31,11 +31,10 @@ internal sealed record CustomFormatCreateResponse(
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record CustomFormatUpdateResponse(
-    TrashIdNameResponse Identity,
-    CustomFormatSelectionResponse SelectionProvenance
-)
+internal sealed record CustomFormatUpdateResponse
 {
+    public required TrashIdNameResponse Identity { get; init; }
+    public required CustomFormatSelectionResponse SelectionProvenance { get; init; }
     public ValueChangeResponse<string>? Name { get; init; }
     public ValueChangeResponse<bool>? IncludeWhenRenaming { get; init; }
     public IReadOnlyList<string> SpecificationsAdded { get; init; } = [];
@@ -75,13 +74,12 @@ internal sealed record CustomFormatOutcomesResponse
 internal sealed record NamedIdentityResponse(TrashIdNameResponse Identity, int ServiceId);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record CustomFormatPipelineResponse(
-    PipelineStatus Status,
-    CustomFormatOutcomesResponse Outcomes,
-    IReadOnlyList<CustomFormatCreateResponse> Creates,
-    IReadOnlyList<CustomFormatUpdateResponse> Updates,
-    IReadOnlyList<TrashIdNameResponse> Deletes
-)
+internal sealed record CustomFormatPipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required CustomFormatOutcomesResponse Outcomes { get; init; }
+    public required IReadOnlyList<CustomFormatCreateResponse> Creates { get; init; }
+    public required IReadOnlyList<CustomFormatUpdateResponse> Updates { get; init; }
+    public required IReadOnlyList<TrashIdNameResponse> Deletes { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
 }

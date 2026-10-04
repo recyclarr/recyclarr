@@ -52,11 +52,15 @@ internal static class ResultValueMapper
     public static QualitySizeValueResponse MapQualitySize(QualitySizeValue value) =>
         value switch
         {
-            QualitySizeValue.Numeric x => new QualitySizeValueResponse(QualitySizeKind.Numeric)
+            QualitySizeValue.Numeric x => new QualitySizeValueResponse
             {
+                Kind = QualitySizeKind.Numeric,
                 Value = x.Value,
             },
-            QualitySizeValue.Unlimited => new QualitySizeValueResponse(QualitySizeKind.Unlimited),
+            QualitySizeValue.Unlimited => new QualitySizeValueResponse
+            {
+                Kind = QualitySizeKind.Unlimited,
+            },
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 

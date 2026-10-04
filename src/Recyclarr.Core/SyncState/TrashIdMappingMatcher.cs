@@ -26,7 +26,14 @@ public static class TrashIdMappingMatcher
             switch (nameMatches.Count)
             {
                 case 1:
-                    matches.Add(new TrashIdMapping(guide.TrashId, guide.Name, nameMatches[0].Id));
+                    matches.Add(
+                        new TrashIdMapping
+                        {
+                            TrashId = guide.TrashId,
+                            Name = guide.Name,
+                            ServiceId = nameMatches[0].Id,
+                        }
+                    );
                     break;
                 case > 1:
                     ambiguous.Add(new AmbiguousMatch(guide.Name, nameMatches));

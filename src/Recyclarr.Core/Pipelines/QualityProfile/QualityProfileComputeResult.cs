@@ -65,7 +65,12 @@ internal sealed class QualityProfileComputeResult(
                     Profile.Id: { } serviceId,
                     ProfileConfig: PlannedQualityProfile.GuideBacked guideBacked,
                 }
-            ? new TrashIdMapping(guideBacked.Resource.TrashId, profile.EffectiveName, serviceId)
+            ? new TrashIdMapping
+            {
+                TrashId = guideBacked.Resource.TrashId,
+                Name = profile.EffectiveName,
+                ServiceId = serviceId,
+            }
             : null;
     }
 }

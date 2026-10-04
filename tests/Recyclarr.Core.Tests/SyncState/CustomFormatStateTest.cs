@@ -1,6 +1,5 @@
 using Recyclarr.Core.TestLibrary;
 using Recyclarr.Pipelines.CustomFormat.Models;
-using Recyclarr.SyncState;
 
 namespace Recyclarr.Core.Tests.SyncState;
 
@@ -30,10 +29,10 @@ internal sealed class CustomFormatStateTest
         cache
             .Mappings.Should()
             .BeEquivalentTo([
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4),
+                NewSyncState.Mapping("1", "one", 1),
+                NewSyncState.Mapping("2", "two", 2),
+                NewSyncState.Mapping("3", "three", 3),
+                NewSyncState.Mapping("4", "four", 4),
             ]);
     }
 
@@ -43,7 +42,7 @@ internal sealed class CustomFormatStateTest
         var transactions = new CustomFormatTransactionData
         {
             NewCustomFormats = { NewCf.Data("one", "1", 1), NewCf.Data("two", "2", 2) },
-            DeletedCustomFormats = { new TrashIdMapping("3", "three", 3) },
+            DeletedCustomFormats = { NewSyncState.Mapping("3", "three", 3) },
         };
 
         // Note: ID 3 is being deleted, so it's not in serviceCfs
@@ -55,8 +54,8 @@ internal sealed class CustomFormatStateTest
         };
 
         var cache = CfCache.New(
-            new TrashIdMapping("3", "three", 3),
-            new TrashIdMapping("4", "four", 4)
+            NewSyncState.Mapping("3", "three", 3),
+            NewSyncState.Mapping("4", "four", 4)
         );
 
         cache.Update(transactions.ToSyncSource(serviceCfs));
@@ -64,9 +63,9 @@ internal sealed class CustomFormatStateTest
         cache
             .Mappings.Should()
             .BeEquivalentTo([
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("4", "four", 4),
+                NewSyncState.Mapping("1", "one", 1),
+                NewSyncState.Mapping("2", "two", 2),
+                NewSyncState.Mapping("4", "four", 4),
             ]);
     }
 
@@ -76,17 +75,20 @@ internal sealed class CustomFormatStateTest
         var serviceCfs = new[] { NewCf.Data("one", "1", 1), NewCf.Data("two", "2", 2) };
 
         var cache = CfCache.New(
-            new TrashIdMapping("1", "one", 1),
-            new TrashIdMapping("2", "two", 2),
-            new TrashIdMapping("3", "three", 3),
-            new TrashIdMapping("4", "four", 4)
+            NewSyncState.Mapping("1", "one", 1),
+            NewSyncState.Mapping("2", "two", 2),
+            NewSyncState.Mapping("3", "three", 3),
+            NewSyncState.Mapping("4", "four", 4)
         );
 
         cache.Update(new CustomFormatTransactionData().ToSyncSource(serviceCfs));
 
         cache
             .Mappings.Should()
-            .BeEquivalentTo([new TrashIdMapping("1", "one", 1), new TrashIdMapping("2", "two", 2)]);
+            .BeEquivalentTo([
+                NewSyncState.Mapping("1", "one", 1),
+                NewSyncState.Mapping("2", "two", 2),
+            ]);
     }
 
     [Test]
@@ -106,7 +108,10 @@ internal sealed class CustomFormatStateTest
 
         cache
             .Mappings.Should()
-            .BeEquivalentTo([new TrashIdMapping("1", "one", 1), new TrashIdMapping("2", "two", 2)]);
+            .BeEquivalentTo([
+                NewSyncState.Mapping("1", "one", 1),
+                NewSyncState.Mapping("2", "two", 2),
+            ]);
     }
 
     [Test]
@@ -128,10 +133,10 @@ internal sealed class CustomFormatStateTest
         };
 
         var cache = CfCache.New(
-            new TrashIdMapping("1", "one", 1),
-            new TrashIdMapping("2", "two", 2),
-            new TrashIdMapping("3", "three", 3),
-            new TrashIdMapping("4", "four", 4)
+            NewSyncState.Mapping("1", "one", 1),
+            NewSyncState.Mapping("2", "two", 2),
+            NewSyncState.Mapping("3", "three", 3),
+            NewSyncState.Mapping("4", "four", 4)
         );
 
         cache.Update(transactions.ToSyncSource(serviceCfs));
@@ -139,10 +144,10 @@ internal sealed class CustomFormatStateTest
         cache
             .Mappings.Should()
             .BeEquivalentTo([
-                new TrashIdMapping("1", "one_new", 1),
-                new TrashIdMapping("2", "two_new", 2),
-                new TrashIdMapping("3", "three_new", 3),
-                new TrashIdMapping("4", "four_new", 4),
+                NewSyncState.Mapping("1", "one_new", 1),
+                NewSyncState.Mapping("2", "two_new", 2),
+                NewSyncState.Mapping("3", "three_new", 3),
+                NewSyncState.Mapping("4", "four_new", 4),
             ]);
     }
 
@@ -160,11 +165,11 @@ internal sealed class CustomFormatStateTest
         };
 
         var cache = CfCache.New(
-            new TrashIdMapping("1", "one", 1),
-            new TrashIdMapping("12", "one2", 1),
-            new TrashIdMapping("2", "two", 2),
-            new TrashIdMapping("3", "three", 3),
-            new TrashIdMapping("4", "four", 4)
+            NewSyncState.Mapping("1", "one", 1),
+            NewSyncState.Mapping("12", "one2", 1),
+            NewSyncState.Mapping("2", "two", 2),
+            NewSyncState.Mapping("3", "three", 3),
+            NewSyncState.Mapping("4", "four", 4)
         );
 
         cache.Update(transactions.ToSyncSource(serviceCfs));
@@ -172,10 +177,10 @@ internal sealed class CustomFormatStateTest
         cache
             .Mappings.Should()
             .BeEquivalentTo([
-                new TrashIdMapping("1", "one", 1),
-                new TrashIdMapping("2", "two", 2),
-                new TrashIdMapping("3", "three", 3),
-                new TrashIdMapping("4", "four", 4),
+                NewSyncState.Mapping("1", "one", 1),
+                NewSyncState.Mapping("2", "two", 2),
+                NewSyncState.Mapping("3", "three", 3),
+                NewSyncState.Mapping("4", "four", 4),
             ]);
     }
 
@@ -193,10 +198,10 @@ internal sealed class CustomFormatStateTest
         };
 
         var cache = CfCache.New(
-            new TrashIdMapping("1", "one", 1),
-            new TrashIdMapping("3", "three", 3),
-            new TrashIdMapping("4", "four", 4),
-            new TrashIdMapping("2", "two", 2)
+            NewSyncState.Mapping("1", "one", 1),
+            NewSyncState.Mapping("3", "three", 3),
+            NewSyncState.Mapping("4", "four", 4),
+            NewSyncState.Mapping("2", "two", 2)
         );
 
         cache.Update(transactions.ToSyncSource(serviceCfs));
@@ -205,10 +210,10 @@ internal sealed class CustomFormatStateTest
             .Mappings.Should()
             .BeEquivalentTo(
                 [
-                    new TrashIdMapping("1", "one", 1),
-                    new TrashIdMapping("2", "two", 2),
-                    new TrashIdMapping("3", "three", 3),
-                    new TrashIdMapping("4", "four", 4),
+                    NewSyncState.Mapping("1", "one", 1),
+                    NewSyncState.Mapping("2", "two", 2),
+                    NewSyncState.Mapping("3", "three", 3),
+                    NewSyncState.Mapping("4", "four", 4),
                 ],
                 o => o.WithStrictOrdering()
             );
@@ -219,9 +224,9 @@ internal sealed class CustomFormatStateTest
     {
         // Arrange: Cache has two mappings with same CustomFormatId
         var cache = CfCache.New(
-            new TrashIdMapping("first-trash-id", "First Format", 3), // First occurrence - should be kept
-            new TrashIdMapping("second-trash-id", "Second Format", 3), // Duplicate ID - should be removed
-            new TrashIdMapping("other-trash-id", "Other Format", 5) // Different ID, should remain
+            NewSyncState.Mapping("first-trash-id", "First Format", 3), // First occurrence - should be kept
+            NewSyncState.Mapping("second-trash-id", "Second Format", 3), // Duplicate ID - should be removed
+            NewSyncState.Mapping("other-trash-id", "Other Format", 5) // Different ID, should remain
         );
 
         // Service has CF with the duplicate ID

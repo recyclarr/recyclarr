@@ -21,20 +21,20 @@ internal static class QualitySizeResponseMapper
             outcomes.PreferredGreaterThanMaximum.Count
         );
 
-        return new QualitySizePipelineResponse(
-            ResultValueMapper.MapStatus(result.Status),
-            outcomes,
-            updates
-        )
+        return new QualitySizePipelineResponse
         {
+            Status = ResultValueMapper.MapStatus(result.Status),
+            Outcomes = outcomes,
+            Updates = updates,
             BlockedBy = ResultValueMapper.MapBlockedBy(result.BlockedBy),
         };
     }
 
     private static QualitySizeUpdateResponse MapUpdate(QualitySizeDelta delta)
     {
-        var response = new QualitySizeUpdateResponse(delta.Quality)
+        var response = new QualitySizeUpdateResponse
         {
+            Quality = delta.Quality,
             Minimum = delta
                 .Components.OfType<QualitySizeMinimumChanged>()
                 .Select(x => ResultValueMapper.MapQualitySizeValue(x.Value))
