@@ -10,8 +10,6 @@ namespace Recyclarr.Cli.Processors.Sync.Results;
 /// </summary>
 internal class PreviewRenderer(IAnsiConsole console)
 {
-    private const string Unset = FieldChange.Unset;
-
     public void Render(InstanceResults instance)
     {
         console.WriteLine();
@@ -156,99 +154,21 @@ internal class PreviewRenderer(IAnsiConsole console)
             };
     }
 
-    private static Rows? QualityProfiles(QualityProfilePipelineResponse pipeline)
+    private static Rows? QualityProfiles(QualityProfileResults pipeline)
     {
-        if (pipeline.Creates.Count == 0 && pipeline.Updates.Count == 0)
+        if (pipeline.Changes.Count == 0)
         {
             return null;
         }
 
         var rows = new List<IRenderable>();
 
-        foreach (var create in pipeline.Creates)
+        foreach (var change in pipeline.Changes)
         {
-            var state = create.State;
-            var tree = ProfileTree(create.Identity, "New");
-            AddFields(
-                tree,
-                [
-                    new FieldChange("Name", Unset, state.Name),
-                    new FieldChange(
-                        "Upgrades Allowed?",
-                        Unset,
-                        FieldChange.Text(state.UpgradeAllowed)
-                    ),
-                    new FieldChange(
-                        "Minimum Format Score",
-                        Unset,
-                        FieldChange.Text(state.MinimumFormatScore)
-                    ),
-                    new FieldChange(
-                        "Minimum Format Upgrade Score",
-                        Unset,
-                        FieldChange.Text(state.MinimumUpgradeFormatScore)
-                    ),
-                    new FieldChange(
-                        "Upgrade Until Quality",
-                        Unset,
-                        state.UpgradeUntilQuality ?? Unset
-                    ),
-                    new FieldChange(
-                        "Upgrade Until Score",
-                        Unset,
-                        FieldChange.Text(state.UpgradeUntilScore)
-                    ),
-                    new FieldChange("Language", Unset, state.Language ?? Unset),
-                ]
-            );
-            AddQualities(tree, [], state.Qualities);
-            AddScores(
-                tree,
-                state.CustomFormatScores.Select(x =>
-                    (x.Name, Unset, FieldChange.Text(x.Score), "Set")
-                )
-            );
-            rows.Add(tree);
-        }
-
-        foreach (var update in pipeline.Updates)
-        {
-            var tree = ProfileTree(update.Identity, "Changed");
-            AddFields(
-                tree,
-                new[]
-                {
-                    FieldChange.From("Name", update.Name),
-                    FieldChange.From("Upgrades Allowed?", update.UpgradeAllowed),
-                    FieldChange.From("Minimum Format Score", update.MinimumFormatScore),
-                    FieldChange.From(
-                        "Minimum Format Upgrade Score",
-                        update.MinimumUpgradeFormatScore
-                    ),
-                    FieldChange.From("Upgrade Until Quality", update.UpgradeUntilQuality),
-                    FieldChange.From("Upgrade Until Score", update.UpgradeUntilScore),
-                    FieldChange.From("Language", update.Language),
-                }
-                    .OfType<FieldChange>()
-                    .ToList()
-            );
-
-            if (update.QualityLayout is { } layout)
-            {
-                AddQualities(tree, layout.Current ?? [], layout.Desired ?? []);
-            }
-
-            AddScores(
-                tree,
-                (update.CustomFormatScores ?? []).Select(x =>
-                    (
-                        x.Name,
-                        FieldChange.Text(x.Value.Current),
-                        FieldChange.Text(x.Value.Desired),
-                        x.Reason.ToString()
-                    )
-                )
-            );
+            var tree = ProfileTree(change.Identity, change.Reason);
+            AddFields(tree, change.Fields);
+            AddQualities(tree, change.CurrentQualities, change.DesiredQualities);
+            AddScores(tree, change.Scores);
             rows.Add(tree);
         }
 
@@ -269,8 +189,8 @@ internal class PreviewRenderer(IAnsiConsole console)
 
         static void AddQualities(
             Tree tree,
-            ICollection<QualityProfileLayoutResponse> current,
-            ICollection<QualityProfileLayoutResponse> desired
+            IReadOnlyCollection<QualityProfileLayoutResponse> current,
+            IReadOnlyCollection<QualityProfileLayoutResponse> desired
         )
         {
             if (desired.Count == 0)
@@ -286,7 +206,7 @@ internal class PreviewRenderer(IAnsiConsole console)
             tree.AddNode(new Rows(new Markup("[b]Quality Updates[/]"), columns));
         }
 
-        static Panel Layout(string header, ICollection<QualityProfileLayoutResponse> items)
+        static Panel Layout(string header, IReadOnlyCollection<QualityProfileLayoutResponse> items)
         {
             var tree = new Tree("");
             foreach (var item in items)
@@ -304,13 +224,9 @@ internal class PreviewRenderer(IAnsiConsole console)
                 .NoBorder();
         }
 
-        static void AddScores(
-            Tree tree,
-            IEnumerable<(string Name, string Current, string Desired, string Reason)> scores
-        )
+        static void AddScores(Tree tree, IReadOnlyList<ScoreChange> scores)
         {
-            var list = scores.ToList();
-            if (list.Count == 0)
+            if (scores.Count == 0)
             {
                 return;
             }
@@ -321,9 +237,9 @@ internal class PreviewRenderer(IAnsiConsole console)
                 .AddColumn("[bold]New[/]")
                 .AddColumn("[bold]Reason[/]");
 
-            foreach (var (name, current, desired, reason) in list)
+            foreach (var score in scores)
             {
-                table.AddRow(name.EscapeMarkup(), current, desired, reason);
+                table.AddRow(score.Name.EscapeMarkup(), score.Current, score.Desired, score.Reason);
             }
 
             tree.AddNode(new Rows(new Markup("[b]Score Updates[/]"), table));

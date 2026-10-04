@@ -18,12 +18,17 @@ internal static class SyncResultScenarios
         var sonarr = new SyncInstanceResult(
             "tv",
             SupportedServices.Sonarr,
-            [CustomFormats(), QualityProfiles(), SonarrNaming(), MediaManagement()]
+            [
+                CustomFormats(),
+                QualityProfiles(SupportedServices.Sonarr),
+                SonarrNaming(),
+                MediaManagement(),
+            ]
         );
         var radarr = new SyncInstanceResult(
             "movies",
             SupportedServices.Radarr,
-            [QualitySizes(), RadarrNaming()]
+            [QualityProfiles(SupportedServices.Radarr), QualitySizes(), RadarrNaming()]
         );
         return new SyncRunResult([sonarr, radarr]);
     }
@@ -132,7 +137,8 @@ internal static class SyncResultScenarios
         );
     }
 
-    private static QualityProfilePipelineResult QualityProfiles()
+    // Radarr results add the Radarr-only language to the create state and the update components.
+    private static QualityProfilePipelineResult QualityProfiles(SupportedServices service)
     {
         var guide = new GuideBackedQualityProfileIdentity(new MappingKey("qp-one", "Guide"));
         var user = new UserDefinedQualityProfileIdentity("User");
@@ -161,17 +167,23 @@ internal static class SyncResultScenarios
 
         var currentLayout = new QualityProfileQuality("Current", true);
         var desiredLayout = new QualityProfileQualityGroup("Desired", true, ["One", "Two"]);
-        var state = new QualityProfileControlledState(
+        var sharedState = new QualityProfileControlledState(
             "Guide",
             null,
             "Cutoff",
             100,
             0,
             null,
-            "English",
             [desiredLayout],
             [new QualityProfileCustomFormatScore("CF", "cf-one", 10)]
         );
+        var isRadarr = service == SupportedServices.Radarr;
+        var state = isRadarr
+            ? new RadarrQualityProfileControlledState(sharedState, "English")
+            : sharedState;
+        QualityProfileUpdateComponent[] serviceComponents = isRadarr
+            ? [new RadarrQualityProfileLanguageChanged(new ValueDelta<string?>(null, "English"))]
+            : [];
         QualityProfileDelta[] deltas =
         [
             new QualityProfileCreateDelta(guide, state),
@@ -188,7 +200,7 @@ internal static class SyncResultScenarios
                     new QualityProfileMinimumUpgradeFormatScoreChanged(
                         new ValueDelta<int?>(null, 6)
                     ),
-                    new QualityProfileLanguageChanged(new ValueDelta<string?>(null, "English")),
+                    .. serviceComponents,
                     new QualityProfileQualityLayoutChanged([currentLayout], [desiredLayout]),
                     new QualityProfileCustomFormatScoreChanged(
                         "CF",

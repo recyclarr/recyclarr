@@ -220,7 +220,7 @@ internal static class SyncDiagnostics
     }
 
     private static IEnumerable<(DiagnosticSeverity, string)> QualityProfiles(
-        QualityProfilePipelineResponse pipeline
+        QualityProfileResults pipeline
     )
     {
         var o = pipeline.Outcomes;

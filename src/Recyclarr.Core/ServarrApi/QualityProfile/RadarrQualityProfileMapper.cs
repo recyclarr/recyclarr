@@ -7,7 +7,7 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
 internal static partial class RadarrQualityProfileMapper
 {
-    public static partial QualityProfileData ToDomain(RadarrApi.QualityProfileResource dto);
+    public static partial RadarrQualityProfileData ToDomain(RadarrApi.QualityProfileResource dto);
 
     public static partial ProfileLanguage ToDomain(RadarrApi.LanguageResource dto);
 
@@ -33,7 +33,6 @@ internal static partial class RadarrQualityProfileMapper
         };
     }
 
-    // Radarr profile has a Language field; map it to the domain ProfileLanguage
     private static ProfileLanguage? LanguageToDomain(RadarrApi.Language? dto)
     {
         return dto is { Id: { } id, Name: { } name }

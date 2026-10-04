@@ -44,7 +44,7 @@ internal sealed record QualityProfileScoreResponse(string Name, int Score)
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileControlledStateResponse
+internal record QualityProfileControlledStateResponse
 {
     public required string Name { get; init; }
 
@@ -63,17 +63,28 @@ internal sealed record QualityProfileControlledStateResponse
     [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public required int? MinimumUpgradeFormatScore { get; init; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public required string? Language { get; init; }
-
     public required IReadOnlyList<QualityProfileLayoutResponse> Qualities { get; init; }
     public required IReadOnlyList<QualityProfileScoreResponse> CustomFormatScores { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record RadarrQualityProfileControlledStateResponse
+    : QualityProfileControlledStateResponse
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required string? Language { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record QualityProfileCreateResponse(
     QualityProfileIdentityResponse Identity,
     QualityProfileControlledStateResponse State
+);
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record RadarrQualityProfileCreateResponse(
+    QualityProfileIdentityResponse Identity,
+    RadarrQualityProfileControlledStateResponse State
 );
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -87,19 +98,25 @@ internal sealed record QualityProfileScoreChangeResponse(
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfileUpdateResponse(QualityProfileIdentityResponse Identity)
+internal record QualityProfileUpdateResponse
 {
+    public required QualityProfileIdentityResponse Identity { get; init; }
     public ValueChangeResponse<string>? Name { get; init; }
     public ValueChangeResponse<bool?>? UpgradeAllowed { get; init; }
     public ValueChangeResponse<string?>? UpgradeUntilQuality { get; init; }
     public ValueChangeResponse<int?>? UpgradeUntilScore { get; init; }
     public ValueChangeResponse<int?>? MinimumFormatScore { get; init; }
     public ValueChangeResponse<int?>? MinimumUpgradeFormatScore { get; init; }
-    public ValueChangeResponse<string?>? Language { get; init; }
     public ValueChangeResponse<
         IReadOnlyList<QualityProfileLayoutResponse>
     >? QualityLayout { get; init; }
     public IReadOnlyList<QualityProfileScoreChangeResponse> CustomFormatScores { get; init; } = [];
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record RadarrQualityProfileUpdateResponse : QualityProfileUpdateResponse
+{
+    public ValueChangeResponse<string?>? Language { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -189,13 +206,28 @@ internal sealed record QualityProfileOutcomesResponse
     public IReadOnlyList<QualityProfileIdentityOutcomeResponse> UpdateRejected { get; init; } = [];
 }
 
+/// <summary>
+/// Fields both services' quality profile results share. Each service's pipelines response names
+/// its concrete type, so no discriminator is needed (ADR-023).
+/// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record QualityProfilePipelineResponse(
-    PipelineStatus Status,
-    QualityProfileOutcomesResponse Outcomes,
-    IReadOnlyList<QualityProfileCreateResponse> Creates,
-    IReadOnlyList<QualityProfileUpdateResponse> Updates
-)
+internal abstract record QualityProfilePipelineResponse
 {
+    public required PipelineStatus Status { get; init; }
+    public required QualityProfileOutcomesResponse Outcomes { get; init; }
     public BlockingPipeline? BlockedBy { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record SonarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
+{
+    public required IReadOnlyList<QualityProfileCreateResponse> Creates { get; init; }
+    public required IReadOnlyList<QualityProfileUpdateResponse> Updates { get; init; }
+}
+
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+internal sealed record RadarrQualityProfilePipelineResponse : QualityProfilePipelineResponse
+{
+    public required IReadOnlyList<RadarrQualityProfileCreateResponse> Creates { get; init; }
+    public required IReadOnlyList<RadarrQualityProfileUpdateResponse> Updates { get; init; }
 }

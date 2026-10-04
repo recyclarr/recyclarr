@@ -201,7 +201,11 @@ public sealed record QualityProfileUpdateDelta : QualityProfileDelta
     public IReadOnlyList<QualityProfileUpdateComponent> Components { get; }
 }
 
-public sealed record QualityProfileControlledState
+/// <summary>
+/// The profile fields Recyclarr controls when it creates a profile. Fields that only one service
+/// has live on that service's derived type (ADR-023).
+/// </summary>
+public record QualityProfileControlledState
 {
     public QualityProfileControlledState(
         string name,
@@ -210,7 +214,6 @@ public sealed record QualityProfileControlledState
         int? upgradeUntilScore,
         int? minimumFormatScore,
         int? minimumUpgradeFormatScore,
-        string? language,
         IReadOnlyList<QualityProfileQualityLayoutItem> qualities,
         IReadOnlyList<QualityProfileCustomFormatScore> customFormatScores
     )
@@ -221,7 +224,6 @@ public sealed record QualityProfileControlledState
         UpgradeUntilScore = upgradeUntilScore;
         MinimumFormatScore = minimumFormatScore;
         MinimumUpgradeFormatScore = minimumUpgradeFormatScore;
-        Language = language;
         Qualities = qualities.ToList().AsReadOnly();
         CustomFormatScores = customFormatScores.ToList().AsReadOnly();
     }
@@ -232,9 +234,22 @@ public sealed record QualityProfileControlledState
     public int? UpgradeUntilScore { get; }
     public int? MinimumFormatScore { get; }
     public int? MinimumUpgradeFormatScore { get; }
-    public string? Language { get; }
     public IReadOnlyList<QualityProfileQualityLayoutItem> Qualities { get; }
     public IReadOnlyList<QualityProfileCustomFormatScore> CustomFormatScores { get; }
+}
+
+public sealed record RadarrQualityProfileControlledState : QualityProfileControlledState
+{
+    public RadarrQualityProfileControlledState(
+        QualityProfileControlledState shared,
+        string? language
+    )
+        : base(shared)
+    {
+        Language = language;
+    }
+
+    public string? Language { get; }
 }
 
 public abstract record QualityProfileQualityLayoutItem(string Name, bool Allowed);
@@ -275,7 +290,7 @@ public sealed record QualityProfileMinimumFormatScoreChanged(ValueDelta<int?> Va
 public sealed record QualityProfileMinimumUpgradeFormatScoreChanged(ValueDelta<int?> Value)
     : QualityProfileUpdateComponent;
 
-public sealed record QualityProfileLanguageChanged(ValueDelta<string?> Value)
+public sealed record RadarrQualityProfileLanguageChanged(ValueDelta<string?> Value)
     : QualityProfileUpdateComponent;
 
 public sealed record QualityProfileQualityLayoutChanged : QualityProfileUpdateComponent

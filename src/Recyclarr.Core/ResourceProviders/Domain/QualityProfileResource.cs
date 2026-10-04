@@ -40,7 +40,6 @@ public record QualityProfileResource : IGuideResource
     public int MinFormatScore { get; init; }
     public int CutoffFormatScore { get; init; }
     public int MinUpgradeFormatScore { get; init; }
-    public string Language { get; init; } = "";
     public IReadOnlyCollection<QualityProfileQualityItem> Items { get; init; } = [];
     public IReadOnlyDictionary<string, string> FormatItems { get; init; } =
         new Dictionary<string, string>();
@@ -53,8 +52,15 @@ public record QualityProfileResource : IGuideResource
         new Dictionary<string, string>();
 }
 
-[UsedImplicitly]
-public record RadarrQualityProfileResource : QualityProfileResource;
+/// <summary>
+/// A Radarr guide profile. Only Radarr profiles have a language (ADR-023); Sonarr guide JSON may
+/// still contain one, and it is ignored.
+/// </summary>
+[UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+public record RadarrQualityProfileResource : QualityProfileResource
+{
+    public string Language { get; init; } = "";
+}
 
 [UsedImplicitly]
 public record SonarrQualityProfileResource : QualityProfileResource;

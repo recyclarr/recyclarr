@@ -8,8 +8,7 @@ namespace Recyclarr.ServarrApi.QualityProfile;
 internal class SonarrV3QualityProfileGateway(
     ILogger log,
     SonarrApi.IQualityProfileApi profileApi,
-    SonarrApi.IQualityProfileSchemaApi schemaApi,
-    SonarrApi.ILanguageApi languageApi
+    SonarrApi.IQualityProfileSchemaApi schemaApi
 ) : IQualityProfileService
 {
     private readonly Dictionary<int, SonarrApi.QualityProfileResource> _stashedProfiles = [];
@@ -36,12 +35,6 @@ internal class SonarrV3QualityProfileGateway(
         dto.ReverseItems();
         _stashedSchema = dto;
         return SonarrV3QualityProfileMapper.ToDomain(dto);
-    }
-
-    public async Task<IReadOnlyList<ProfileLanguage>> GetLanguages(CancellationToken ct)
-    {
-        var dtos = await languageApi.LanguageGet(ct);
-        return dtos.Select(SonarrV3QualityProfileMapper.ToDomain).ToList();
     }
 
     public async Task<QualityProfileData> CreateQualityProfile(

@@ -36,7 +36,6 @@ internal sealed class QualityProfilePipelineResultTest
             1000,
             0,
             1,
-            "English",
             qualities,
             scores
         );

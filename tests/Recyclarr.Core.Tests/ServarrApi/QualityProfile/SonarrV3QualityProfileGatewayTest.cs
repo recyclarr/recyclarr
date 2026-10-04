@@ -62,15 +62,9 @@ internal sealed class SonarrV3QualityProfileGatewayTest
 
         var api = Substitute.For<SonarrApi.IQualityProfileApi>();
         var schemaApi = Substitute.For<SonarrApi.IQualityProfileSchemaApi>();
-        var languageApi = Substitute.For<SonarrApi.ILanguageApi>();
         api.QualityprofileGet().ReturnsForAnyArgs([originalDto]);
 
-        var sut = new SonarrV3QualityProfileGateway(
-            new TestableLogger(),
-            api,
-            schemaApi,
-            languageApi
-        );
+        var sut = new SonarrV3QualityProfileGateway(new TestableLogger(), api, schemaApi);
 
         // Fetch to populate stash
         await sut.GetQualityProfiles(CancellationToken.None);

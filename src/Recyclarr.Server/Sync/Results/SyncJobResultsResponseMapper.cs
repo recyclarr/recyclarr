@@ -130,7 +130,7 @@ internal static class SyncJobResultsResponseMapper
                 .SingleOrDefault(),
             QualityProfiles = pipelines
                 .OfType<QualityProfilePipelineResult>()
-                .Select(QualityProfileResponseMapper.ToResponse)
+                .Select(QualityProfileResponseMapper.ToSonarrResponse)
                 .SingleOrDefault(),
             QualitySizes = pipelines
                 .OfType<QualitySizePipelineResult>()
@@ -161,7 +161,7 @@ internal static class SyncJobResultsResponseMapper
                 .SingleOrDefault(),
             QualityProfiles = pipelines
                 .OfType<QualityProfilePipelineResult>()
-                .Select(QualityProfileResponseMapper.ToResponse)
+                .Select(QualityProfileResponseMapper.ToRadarrResponse)
                 .SingleOrDefault(),
             QualitySizes = pipelines
                 .OfType<QualitySizePipelineResult>()

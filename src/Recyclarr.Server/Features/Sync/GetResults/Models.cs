@@ -74,7 +74,7 @@ internal sealed record RadarrInstanceResultsResponse(
 internal sealed record SonarrPipelinesResponse
 {
     public CustomFormatPipelineResponse? CustomFormats { get; init; }
-    public QualityProfilePipelineResponse? QualityProfiles { get; init; }
+    public SonarrQualityProfilePipelineResponse? QualityProfiles { get; init; }
     public QualitySizePipelineResponse? QualitySizes { get; init; }
     public SonarrNamingPipelineResponse? Naming { get; init; }
     public MediaManagementPipelineResponse? MediaManagement { get; init; }
@@ -84,7 +84,7 @@ internal sealed record SonarrPipelinesResponse
 internal sealed record RadarrPipelinesResponse
 {
     public CustomFormatPipelineResponse? CustomFormats { get; init; }
-    public QualityProfilePipelineResponse? QualityProfiles { get; init; }
+    public RadarrQualityProfilePipelineResponse? QualityProfiles { get; init; }
     public QualitySizePipelineResponse? QualitySizes { get; init; }
     public RadarrNamingPipelineResponse? Naming { get; init; }
     public MediaManagementPipelineResponse? MediaManagement { get; init; }

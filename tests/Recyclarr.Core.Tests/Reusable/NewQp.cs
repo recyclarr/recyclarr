@@ -86,7 +86,6 @@ internal static class NewQp
 
     public static QualityProfileServiceData ServiceData(
         IReadOnlyList<QualityProfileData>? profiles = null,
-        QualityProfileData? schema = null,
-        IReadOnlyList<ProfileLanguage>? languages = null
-    ) => new(profiles ?? [], schema ?? new QualityProfileData { Name = "" }, languages ?? []);
+        QualityProfileData? schema = null
+    ) => new(profiles ?? [], schema ?? new QualityProfileData { Name = "" });
 }

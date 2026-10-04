@@ -18,6 +18,7 @@ namespace Recyclarr.Pipelines.QualityProfile;
 internal class QualityProfileSyncOperation(
     ILogger log,
     IQualityProfileService service,
+    IQualityProfileServiceFields serviceFields,
     IQualityProfileStatePersister statePersister,
     QualityProfileStatCalculator statCalculator,
     QualityProfileLogger logger
@@ -40,14 +41,10 @@ internal class QualityProfileSyncOperation(
         // Fetch phase
         var profilesTask = service.GetQualityProfiles(ct);
         var schemaTask = service.GetSchema(ct);
-        var languagesTask = service.GetLanguages(ct);
-        await Task.WhenAll(profilesTask, schemaTask, languagesTask);
+        var serviceFieldsTask = serviceFields.LoadAsync(ct);
+        await Task.WhenAll(profilesTask, schemaTask, serviceFieldsTask);
 
-        var apiFetchOutput = new QualityProfileServiceData(
-            await profilesTask,
-            await schemaTask,
-            await languagesTask
-        );
+        var apiFetchOutput = new QualityProfileServiceData(await profilesTask, await schemaTask);
         var state = statePersister.Load();
 
         // Transaction phase
@@ -61,6 +58,7 @@ internal class QualityProfileSyncOperation(
             apiFetchOutput,
             state
         );
+        ApplyServiceFields(transactions.NewProfiles.Concat(existingProfiles));
 
         // Process new profiles: update scores, validate (remove invalid from collection)
         UpdateProfileScores(transactions.NewProfiles);
@@ -231,6 +229,16 @@ internal class QualityProfileSyncOperation(
     {
         var builder = new UpdatedProfileBuilder(log, serviceData, state, transactions);
         return builder.BuildFrom(plannedProfiles);
+    }
+
+    // Service-owned values go on the working profile, so every merged profile built from it
+    // (change detection, deltas, persist) carries them.
+    private void ApplyServiceFields(IEnumerable<UpdatedQualityProfile> profiles)
+    {
+        foreach (var profile in profiles)
+        {
+            profile.Profile = serviceFields.ApplyDesired(profile.Profile, profile.ProfileConfig);
+        }
     }
 
     private static void UpdateProfileScores(IEnumerable<UpdatedQualityProfile> updatedProfiles)
@@ -474,7 +482,7 @@ internal class QualityProfileSyncOperation(
         }
     }
 
-    private static List<QualityProfileDelta> BuildDeltas(QualityProfileTransactionData transactions)
+    private List<QualityProfileDelta> BuildDeltas(QualityProfileTransactionData transactions)
     {
         var deltas = transactions
             .NewProfiles.Select<UpdatedQualityProfile, QualityProfileDelta>(
@@ -494,26 +502,27 @@ internal class QualityProfileSyncOperation(
         return deltas;
     }
 
-    private static QualityProfileControlledState BuildControlledState(UpdatedQualityProfile profile)
+    private QualityProfileControlledState BuildControlledState(UpdatedQualityProfile profile)
     {
         var planned = profile.ProfileConfig;
         var config = planned.Config;
         var guide = planned.GuideResource;
+        var desired = profile.BuildMergedProfile();
 
-        return new QualityProfileControlledState(
+        var shared = new QualityProfileControlledState(
             profile.EffectiveName,
             config.UpgradeAllowed ?? guide?.UpgradeAllowed,
             config.UpgradeUntilQuality ?? NullIfEmpty(guide?.Cutoff),
             config.UpgradeUntilScore ?? guide?.CutoffFormatScore,
             config.MinFormatScore ?? guide?.MinFormatScore,
             config.MinUpgradeFormatScore ?? guide?.MinUpgradeFormatScore,
-            NullIfEmpty(guide?.Language),
-            config.Qualities.Count > 0 ? MapQualityLayout(profile.BuildMergedProfile().Items) : [],
+            config.Qualities.Count > 0 ? MapQualityLayout(desired.Items) : [],
             MapControlledScores(profile)
         );
+        return serviceFields.DescribeCreate(shared, desired);
     }
 
-    private static List<QualityProfileUpdateComponent> BuildUpdateComponents(
+    private List<QualityProfileUpdateComponent> BuildUpdateComponents(
         ProfileWithStats profileWithStats
     )
     {
@@ -548,11 +557,7 @@ internal class QualityProfileSyncOperation(
             desired.MinUpgradeFormatScore,
             value => new QualityProfileMinimumUpgradeFormatScoreChanged(value)
         );
-        AddChanged(
-            current.Language?.Name,
-            desired.Language?.Name,
-            value => new QualityProfileLanguageChanged(value)
-        );
+        components.AddRange(serviceFields.FindChanges(current, desired));
 
         if (profileWithStats.QualitiesChanged)
         {
