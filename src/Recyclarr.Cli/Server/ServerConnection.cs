@@ -17,7 +17,8 @@ internal sealed class ServerConnection(HttpClient client, IAsyncDisposable? owne
     /// The generated contracts carry explicit [JsonPropertyName] attributes, so only enums and
     /// nulls need configuring here. The server writes enums as camelCase strings. Optional
     /// request fields generate as nullable, and the server rejects an explicit null for a
-    /// non-nullable field, so unset fields are omitted.
+    /// non-nullable field, so unset fields are omitted. Responses get the same null rule, so a
+    /// response that breaks the contract fails at deserialization instead of later.
     /// </summary>
     private static readonly RefitSettings SelfApiRefitSettings = new()
     {
@@ -25,6 +26,7 @@ internal sealed class ServerConnection(HttpClient client, IAsyncDisposable? owne
             new JsonSerializerOptions
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                RespectNullableAnnotations = true,
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             }
         ),

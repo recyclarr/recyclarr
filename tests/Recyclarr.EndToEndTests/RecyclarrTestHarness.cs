@@ -29,13 +29,15 @@ internal sealed class RecyclarrTestHarness : IAsyncDisposable
     };
 
     // Match the CLI's self-API settings: enums are camelCase strings and unset request fields are
-    // omitted, because the server rejects explicit nulls for non-nullable fields.
+    // omitted, because the server rejects explicit nulls for non-nullable fields. Responses get
+    // the same null rule.
     private static readonly RefitSettings ServerRefitSettings = new()
     {
         ContentSerializer = new SystemTextJsonContentSerializer(
             new JsonSerializerOptions
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                RespectNullableAnnotations = true,
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
             }
         ),
