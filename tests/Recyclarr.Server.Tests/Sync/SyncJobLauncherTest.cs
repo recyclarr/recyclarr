@@ -40,31 +40,31 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
         var completed = await WaitForCompletion(Resolve<ISyncJobStore>(), job.Id);
 
         completed.Status.Should().Be(SyncJobStatus.Partial);
-        completed.Result?.Fault?.Reference.Should().NotBeNullOrWhiteSpace();
-        completed.Result?.Instances.Should().ContainSingle().Which.Should().BeSameAs(firstResult);
+        completed.FaultReference.Should().NotBeNullOrWhiteSpace();
         completed
             .Progress.Instances.Select(instance => instance.Status)
             .Should()
             .Equal(InstanceProgressStatus.Succeeded, InstanceProgressStatus.Interrupted);
+        completed.Progress.Instances[0].Result?.Name.Should().Be(firstResult.InstanceName);
     }
 
     [Test]
     public async Task Scope_setup_failure_finishes_with_a_fault_result()
     {
         using var scope = new ContainerBuilder().Build();
-        var store = new InMemorySyncJobStore();
+        var store = Resolve<ISyncJobStore>();
         var launcher = new SyncJobLauncher(
             Substitute.For<ILogger>(),
             store,
             new SyncRunScopeFactory(scope),
-            new SyncJobFinalizer(store)
+            Resolve<SyncJobFinalizer>()
         );
 
         var job = launcher.Launch(NewSettings(), [Config("not-started")]);
         var completed = await WaitForCompletion(store, job.Id);
 
         completed.Status.Should().Be(SyncJobStatus.Failed);
-        completed.Result?.Fault?.Reference.Should().NotBeNullOrWhiteSpace();
+        completed.FaultReference.Should().NotBeNullOrWhiteSpace();
         completed
             .Progress.Instances.Should()
             .ContainSingle()
@@ -75,9 +75,10 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
     [Test]
     public async Task Scope_cleanup_failure_preserves_the_completed_result()
     {
-        var store = new InMemorySyncJobStore();
+        var store = Resolve<ISyncJobStore>();
         var builder = new ContainerBuilder();
         builder.RegisterInstance(Substitute.For<ILogger>());
+        builder.RegisterInstance(TimeProvider.System);
         builder.RegisterInstance(store).As<ISyncJobStore>();
         builder.RegisterInstance(Substitute.For<INotificationService>());
         builder.RegisterType<SyncResultLogger>();
@@ -95,15 +96,14 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
             log,
             store,
             new SyncRunScopeFactory(scope),
-            new SyncJobFinalizer(store)
+            Resolve<SyncJobFinalizer>()
         );
 
         var job = launcher.Launch(NewSettings(), []);
         var completed = await WaitForCompletion(store, job.Id);
 
         completed.Status.Should().Be(SyncJobStatus.Succeeded);
-        completed.Result.Should().NotBeNull();
-        completed.Result?.Fault.Should().BeNull();
+        completed.FaultReference.Should().BeNull();
     }
 
     private static ServerSyncSettings NewSettings() =>

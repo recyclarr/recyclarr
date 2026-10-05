@@ -35,6 +35,13 @@ internal sealed class Endpoint(ILogger log, ISyncJobStore jobStore)
             return;
         }
 
+        if (job.Status == SyncJobStatus.Skipped)
+        {
+            AddError("Sync job was skipped and has no results");
+            await Send.ErrorsAsync(409, ct);
+            return;
+        }
+
         try
         {
             await Send.OkAsync(SyncJobResultsResponseMapper.Map(job), ct);
