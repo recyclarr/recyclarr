@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [8.7.3] - 2026-10-05
+
 ### Fixed
 
 - CLI: Raw list output was replaced by log messages when redirected or piped to another process
@@ -1412,7 +1414,8 @@ See the Python Migration Guide for details on how to update your YAML configurat
 - Nearly all command line options removed in favor of YAML equivalents.
 - Completely removed old python project & source code
 
-[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.7.2...HEAD
+[Unreleased]: https://github.com/recyclarr/recyclarr/compare/v8.7.3...HEAD
+[8.7.3]: https://github.com/recyclarr/recyclarr/compare/v8.7.2...v8.7.3
 [8.7.2]: https://github.com/recyclarr/recyclarr/compare/v8.7.1...v8.7.2
 [8.7.1]: https://github.com/recyclarr/recyclarr/compare/v8.7.0...v8.7.1
 [8.7.0]: https://github.com/recyclarr/recyclarr/compare/v8.6.0...v8.7.0
