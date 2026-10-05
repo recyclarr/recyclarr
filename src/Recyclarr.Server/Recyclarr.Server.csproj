@@ -19,6 +19,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -29,6 +31,8 @@
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
+    <PackageReference Include="TickerQ" />
+    <PackageReference Include="TickerQ.EntityFrameworkCore" />
   </ItemGroup>
 
   <ItemGroup>

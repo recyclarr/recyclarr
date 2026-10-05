@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Autofac;
@@ -9,8 +10,10 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Recyclarr;
 using Recyclarr.Logging;
 using Recyclarr.Server;
+using Recyclarr.Server.Persistence;
 using Scalar.AspNetCore;
 using Serilog.Events;
+using TickerQ.DependencyInjection;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -22,8 +25,16 @@ var logOptions = new ServerLogOptions(
     UseParentProtocol: parentPid is not null
 );
 
+var mode = parentPid is null ? ServerMode.Persistent : ServerMode.Ephemeral;
+
+// Build-time OpenAPI generation runs this entry point and starts the host, including hosted
+// services, against a no-op server. Main cannot exit early (generation needs a built host), so
+// services that touch disk, the database, or the config directory are not registered at all.
+// https://learn.microsoft.com/aspnet/core/fundamentals/openapi/aspnetcore-openapi
+var isDocumentGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
+
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-builder.Host.ConfigureContainer<ContainerBuilder>(b => CompositionRoot.Setup(b, logOptions));
+builder.Host.ConfigureContainer<ContainerBuilder>(b => CompositionRoot.Setup(b, logOptions, mode));
 builder.Services.AddSerilog(
     (services, config) => services.GetRequiredService<ServerLogger>().Configure(config)
 );
@@ -73,7 +84,11 @@ if (parentPid is not null)
     ));
 }
 
-builder.Services.AddHostedService<ServerBootstrapService>();
+if (!isDocumentGeneration)
+{
+    builder.Services.AddServerPersistence();
+    builder.Services.AddHostedService<ServerBootstrapService>();
+}
 
 await using var app = builder.Build();
 
@@ -91,6 +106,11 @@ app.UseFastEndpoints(c =>
 });
 app.MapOpenApi();
 app.MapScalarApiReference();
+
+if (!isDocumentGeneration)
+{
+    app.UseTickerQ();
+}
 
 try
 {

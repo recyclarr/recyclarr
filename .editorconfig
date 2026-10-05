@@ -134,3 +134,12 @@ dotnet_diagnostic.CA1515.severity = none
 
 # Allow `default` for reference types (no built-in inspection to enforce default over null)
 resharper_prefer_concrete_value_over_default_highlighting = none
+
+# EF Core migrations are tool-generated; regenerate rather than hand-edit. One folder per context:
+#   dotnet ef migrations add <Name> --project src/Recyclarr.Server --context <Context>
+#     --output-dir Persistence/Migrations/<Folder> --namespace <Folder>DatabaseMigrations
+# The namespace keeps them outside `Recyclarr.*`, where `Recyclarr.Migration` hides EF's `Migration`
+# base type. EF then writes the model snapshot to a `<Namespace>/` folder at the project root; move
+# it next to the migrations.
+[src/Recyclarr.Server/Persistence/Migrations/**.cs]
+generated_code = true
