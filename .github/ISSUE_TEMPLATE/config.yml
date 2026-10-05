@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Report a security vulnerability
+  - name: Privately report a security vulnerability
     url: https://github.com/recyclarr/recyclarr/security/advisories/new
-    about: Please report security vulnerabilities privately. See SECURITY.md.
+    about: Opens GitHub's private report form. Do not report vulnerabilities in public issues.
   - name: Need Help?
     url: https://discord.com/invite/Vau8dZ3
     about: Ask for help in the Trash Discord server.
