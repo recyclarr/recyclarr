@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using Recyclarr.Sync.Results;
+using Recyclarr.Server.Features.Sync.GetResults;
 
 namespace Recyclarr.Server.Sync.Progress;
 
@@ -17,7 +17,18 @@ internal sealed record ProgressSnapshot
         Instances = instances;
     }
 
+    // Rebuilds a snapshot read back from storage, in selection order.
+    public static ProgressSnapshot Restore(IEnumerable<InstanceSnapshot> instances) =>
+        new(instances.ToImmutableList());
+
     public ImmutableList<InstanceSnapshot> Instances { get; }
+
+    // At least one instance finished with changes applied, so a run that stops early is partial
+    // rather than failed.
+    public bool HasCompletedWork =>
+        Instances.Any(instance =>
+            instance.Status is InstanceProgressStatus.Succeeded or InstanceProgressStatus.Partial
+        );
 
     public ProgressSnapshot Start(string instanceName) =>
         Update(
@@ -31,9 +42,9 @@ internal sealed record ProgressSnapshot
                     : null
         );
 
-    public ProgressSnapshot Complete(SyncInstanceResult result) =>
+    public ProgressSnapshot Complete(SyncInstanceResultsResponse result) =>
         Update(
-            result.InstanceName,
+            result.Name,
             instance =>
                 instance.Status == InstanceProgressStatus.Running
                     ? instance with
@@ -64,10 +75,10 @@ internal sealed record ProgressSnapshot
         return changed ? new ProgressSnapshot(instances) : this;
     }
 
-    public ProgressSnapshot Reconcile(SyncRunResult result)
+    public ProgressSnapshot Reconcile(IEnumerable<SyncInstanceResultsResponse> results)
     {
         var snapshot = this;
-        foreach (var instanceResult in result.Instances)
+        foreach (var instanceResult in results)
         {
             snapshot = snapshot.Reconcile(instanceResult);
         }
@@ -91,9 +102,9 @@ internal sealed record ProgressSnapshot
         return new ProgressSnapshot(Instances.SetItem(index, updated));
     }
 
-    private ProgressSnapshot Reconcile(SyncInstanceResult result) =>
+    private ProgressSnapshot Reconcile(SyncInstanceResultsResponse result) =>
         Update(
-            result.InstanceName,
+            result.Name,
             instance =>
                 instance.Result is null
                     ? instance with
@@ -104,12 +115,12 @@ internal sealed record ProgressSnapshot
                     : null
         );
 
-    private static InstanceProgressStatus ToProgressStatus(SyncResultStatus status) =>
+    private static InstanceProgressStatus ToProgressStatus(SyncCompletionStatus status) =>
         status switch
         {
-            SyncResultStatus.Succeeded => InstanceProgressStatus.Succeeded,
-            SyncResultStatus.Partial => InstanceProgressStatus.Partial,
-            SyncResultStatus.Failed or SyncResultStatus.Blocked => InstanceProgressStatus.Failed,
+            SyncCompletionStatus.Succeeded => InstanceProgressStatus.Succeeded,
+            SyncCompletionStatus.Partial => InstanceProgressStatus.Partial,
+            SyncCompletionStatus.Failed => InstanceProgressStatus.Failed,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
         };
 }

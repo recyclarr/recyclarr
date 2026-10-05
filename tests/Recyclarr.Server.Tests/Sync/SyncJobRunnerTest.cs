@@ -45,7 +45,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var job = await RunJob();
 
         job.Status.Should().Be(SyncJobStatus.Succeeded);
-        await _notify.Received().SendNotification(job.Result!);
+        await _notify.ReceivedWithAnyArgs().SendNotification(default!);
     }
 
     [Test]
@@ -58,8 +58,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var job = await RunJob();
 
         job.Status.Should().Be(SyncJobStatus.Succeeded);
-        job.Result.Should().NotBeNull();
-        await _notify.Received().SendNotification(job.Result!);
+        await _notify.ReceivedWithAnyArgs().SendNotification(default!);
         _log.Events.Should()
             .ContainSingle(evt =>
                 evt.Level == LogEventLevel.Warning
@@ -85,8 +84,8 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
 
         var job = await RunJob();
 
-        job.Result.Should().BeSameAs(result);
         job.Status.Should().Be(expected);
+        job.FaultReference.Should().Be(result.Fault?.Reference);
     }
 
     [Test]
@@ -115,17 +114,45 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
         var job = await RunJob([Config("first"), Config("second")]);
 
         job.Status.Should().Be(SyncJobStatus.Partial);
-        job.Result.Should().NotBeNull();
-        job.Result.Fault.Should().NotBeNull();
-        job.Result.Instances.Should().ContainSingle().Which.Should().BeSameAs(firstResult);
+        job.FaultReference.Should().NotBeNullOrWhiteSpace();
         job.Progress.Instances.Select(instance => instance.Status)
             .Should()
             .Equal(InstanceProgressStatus.Succeeded, InstanceProgressStatus.Interrupted);
+        job.Progress.Instances[0].Result?.Name.Should().Be(firstResult.InstanceName);
         _log.Events.Should()
             .ContainSingle(evt =>
                 evt.Level == LogEventLevel.Error
                 && evt.Exception != null
                 && evt.Exception.Message == "unexpected failure"
+                && evt.MessageTemplate.Text.Equals(
+                    "Unexpected sync runner fault {Reference}",
+                    StringComparison.Ordinal
+                )
+            );
+    }
+
+    [Test]
+    public async Task Result_without_an_api_representation_fails_the_job_with_a_fault()
+    {
+        var result = new SyncRunResult([
+            new SyncInstanceResult(
+                "instance",
+                SupportedServices.Radarr,
+                [],
+                planningOutcomes: [new UnknownPlanningOutcome()]
+            ),
+        ]);
+        Resolve<ISyncOrchestrator>()
+            .RunAsync(default!, default!, default!, default)
+            .ReturnsForAnyArgs(result);
+
+        var job = await RunJob([Config("instance")]);
+
+        job.Status.Should().Be(SyncJobStatus.Failed);
+        job.FaultReference.Should().NotBeNullOrWhiteSpace();
+        _log.Events.Should()
+            .ContainSingle(evt =>
+                evt.Level == LogEventLevel.Error
                 && evt.MessageTemplate.Text.Equals(
                     "Unexpected sync runner fault {Reference}",
                     StringComparison.Ordinal
@@ -177,7 +204,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
             .Progress.Instances.Select(instance => instance.Status)
             .Should()
             .Equal(InstanceProgressStatus.Succeeded, InstanceProgressStatus.Running);
-        between.Progress.Instances[0].Result.Should().BeSameAs(firstResult);
+        between.Progress.Instances[0].Result?.Name.Should().Be(firstResult.InstanceName);
 
         releaseSecond.SetResult();
         await run;
@@ -203,7 +230,7 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
 
         var instance = job.Progress.Instances.Should().ContainSingle().Which;
         instance.Status.Should().Be(InstanceProgressStatus.Succeeded);
-        instance.Result.Should().BeSameAs(result.Instances[0]);
+        instance.Result?.Name.Should().Be(result.Instances[0].InstanceName);
     }
 
     private static async Task<SyncRunResult> ExecuteControlled(
@@ -262,6 +289,8 @@ internal sealed class SyncJobRunnerTest : ServerIntegrationFixture
             SyncResultStatus.Failed => new SyncRunResult([], new SyncFault("fault")),
             _ => throw new ArgumentOutOfRangeException(nameof(status)),
         };
+
+    private sealed record UnknownPlanningOutcome : PlanningOutcome;
 
     private sealed class RecordingLogger : ILogger
     {

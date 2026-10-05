@@ -53,7 +53,14 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         {
             Id = job.Id.Value,
             Status = job.Status.ToString(),
+            Trigger = job.Trigger.ToString(),
             CreatedAt = job.CreatedAt,
+            StartedAt = job.StartedAt,
+            FinishedAt = job.FinishedAt,
+            ScheduledFor = job.ScheduledFor,
+            SkippedBecause = job.SkippedBy is { } skippedBy
+                ? new SkippedBecauseResponse(skippedBy.Value)
+                : null,
             Service = job.Request.Service,
             Instances = job.Request.Instances,
             Preview = job.Request.Preview,

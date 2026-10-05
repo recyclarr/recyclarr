@@ -55,6 +55,8 @@ GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}
   const { response: last } = $global.poll;
   assert.equal(last.statusCode, 200, "sync did not finish within 60 seconds");
   assert.notEqual(last.parsedBody.status, "Failed", "sync job failed");
+  assert.equal(last.parsedBody.trigger, "Manual");
+  assert.ok(last.parsedBody.startedAt && last.parsedBody.finishedAt, "job timestamps missing");
 }}
 
 # @name getSyncJobResults
