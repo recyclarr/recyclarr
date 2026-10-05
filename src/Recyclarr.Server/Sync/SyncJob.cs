@@ -1,30 +1,30 @@
-using Recyclarr.Sync.Results;
-using InstanceProgressSnapshot = Recyclarr.Server.Sync.Progress.ProgressSnapshot;
+using Recyclarr.Server.Sync.Progress;
 
 namespace Recyclarr.Server.Sync;
 
-// Mutable job record updated in place by ISyncJobStore.Update while the sync runs in the
-// background. Access is synchronized by the store, not by this type.
-internal sealed class SyncJob(
-    JobId id,
-    ServerSyncSettings request,
-    DateTimeOffset createdAt,
-    IReadOnlyList<string> instanceNames
-)
+/// <summary>
+/// One sync job as read from <see cref="ISyncJobStore"/>. Every read returns a new instance;
+/// mutable members exist only for the mutation callback of <see cref="ISyncJobStore.Update"/>,
+/// which the store persists afterwards.
+/// </summary>
+internal sealed class SyncJob
 {
-    public JobId Id { get; } = id;
-    public ServerSyncSettings Request { get; } = request;
-    public DateTimeOffset CreatedAt { get; } = createdAt;
-    public SyncJobStatus Status { get; set; } = SyncJobStatus.Pending;
-    public InstanceProgressSnapshot Progress { get; set; } = new(instanceNames);
+    public required JobId Id { get; init; }
+    public required SyncJobTrigger Trigger { get; init; }
+    public required ServerSyncSettings Request { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
 
-    public SyncRunResult? Result { get; set; }
+    // The schedule occurrence a scheduled job was created for; null for manual jobs.
+    public DateTimeOffset? ScheduledFor { get; init; }
 
-    internal SyncJob Snapshot() =>
-        new(Id, Request, CreatedAt, [])
-        {
-            Status = Status,
-            Progress = Progress,
-            Result = Result,
-        };
+    // For a skipped scheduled occurrence: the active job that caused the skip.
+    public JobId? SkippedBy { get; init; }
+
+    public required SyncJobStatus Status { get; set; }
+    public DateTimeOffset? StartedAt { get; set; }
+    public DateTimeOffset? FinishedAt { get; set; }
+    public required ProgressSnapshot Progress { get; set; }
+
+    // Correlates a run-level fault with its log entry.
+    public string? FaultReference { get; set; }
 }

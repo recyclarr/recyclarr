@@ -1,8 +1,11 @@
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Sync.Results;
 
 namespace Recyclarr.Server.Sync;
 
-internal sealed class SyncJobFinalizer(ISyncJobStore store)
+// Records a job's terminal state. Both operations are no-ops once the job is terminal (the store
+// never mutates terminal jobs), so the first outcome recorded wins.
+internal sealed class SyncJobFinalizer(ISyncJobStore store, TimeProvider time)
 {
     public void Complete(JobId jobId, SyncRunResult result)
     {
@@ -10,42 +13,44 @@ internal sealed class SyncJobFinalizer(ISyncJobStore store)
             jobId,
             job =>
             {
-                if (job.Result is not null)
-                {
-                    return;
-                }
-
-                job.Progress = job.Progress.Reconcile(result).Stop();
-                job.Result = result;
+                var instances = result.Instances.Select(SyncJobResultsResponseMapper.MapInstance);
+                job.Progress = job.Progress.Reconcile(instances).Stop();
                 job.Status = result.Status.ToJobStatus();
+                job.FaultReference = result.Fault?.Reference;
+                job.FinishedAt = time.GetUtcNow();
             }
         );
     }
 
-    public SyncRunResult Fail(JobId jobId, SyncFault fault)
+    // The run stopped on a fault: instances already finished keep their results. A fault before
+    // the runner marked the job running (run scope setup) still counts as a started run.
+    public void Fail(JobId jobId, SyncFault fault)
     {
-        SyncRunResult? finalResult = null;
         store.Update(
             jobId,
             job =>
             {
-                if (job.Result is not null)
+                if (job.Status != SyncJobStatus.Pending)
                 {
-                    finalResult = job.Result;
                     return;
                 }
 
-                var completed = job
-                    .Progress.Instances.Select(instance => instance.Result)
-                    .OfType<SyncInstanceResult>()
-                    .ToList();
-                finalResult = new SyncRunResult(completed, fault);
-                job.Progress = job.Progress.Stop();
-                job.Result = finalResult;
-                job.Status = finalResult.Status.ToJobStatus();
+                job.Status = SyncJobStatus.Running;
+                job.StartedAt = time.GetUtcNow();
             }
         );
 
-        return finalResult ?? new SyncRunResult([], fault);
+        store.Update(
+            jobId,
+            job =>
+            {
+                job.Progress = job.Progress.Stop();
+                job.Status = job.Progress.HasCompletedWork
+                    ? SyncJobStatus.Partial
+                    : SyncJobStatus.Failed;
+                job.FaultReference = fault.Reference;
+                job.FinishedAt = time.GetUtcNow();
+            }
+        );
     }
 }

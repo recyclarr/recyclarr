@@ -8,10 +8,16 @@ namespace Recyclarr.Server.Features.Sync.ListJobs;
 internal sealed record ListSyncJobsRequest
 {
     public string? Status { get; init; }
+    public string? Trigger { get; init; }
 }
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-internal sealed record SyncJobSummaryResponse(Guid Id, string Status, DateTimeOffset CreatedAt);
+internal sealed record SyncJobSummaryResponse(
+    Guid Id,
+    string Status,
+    string Trigger,
+    DateTimeOffset CreatedAt
+);
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed record ListSyncJobsResponse(IReadOnlyList<SyncJobSummaryResponse> Jobs);
@@ -22,7 +28,19 @@ internal sealed class Validator : Validator<ListSyncJobsRequest>
     public Validator()
     {
         RuleFor(x => x.Status)
-            .Must(s => s is null || Enum.TryParse<SyncJobStatus>(s, ignoreCase: true, out _))
-            .WithMessage("Status must be one of: Pending, Running, Succeeded, Partial, Failed");
+            .Must(IsNullOrName<SyncJobStatus>)
+            .WithMessage(
+                $"Status must be one of: {string.Join(", ", Enum.GetNames<SyncJobStatus>())}"
+            );
+        RuleFor(x => x.Trigger)
+            .Must(IsNullOrName<SyncJobTrigger>)
+            .WithMessage(
+                $"Trigger must be one of: {string.Join(", ", Enum.GetNames<SyncJobTrigger>())}"
+            );
     }
+
+    // Enum.TryParse also accepts numbers, including undefined ones; filters take names only.
+    private static bool IsNullOrName<T>(string? value)
+        where T : struct, Enum =>
+        value is null || Enum.GetNames<T>().Contains(value, StringComparer.OrdinalIgnoreCase);
 }

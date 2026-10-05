@@ -363,6 +363,16 @@
                 "string"
               ]
             }
+          },
+          {
+            "name": "trigger",
+            "in": "query",
+            "schema": {
+              "type": [
+                "null",
+                "string"
+              ]
+            }
           }
         ],
         "responses": {
@@ -881,6 +891,7 @@
         "required": [
           "id",
           "status",
+          "trigger",
           "createdAt",
           "instances",
           "preview",
@@ -895,9 +906,43 @@
           "status": {
             "type": "string"
           },
+          "trigger": {
+            "type": "string"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "scheduledFor": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "skippedBecause": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SkippedBecauseResponse"
+              }
+            ]
           },
           "service": {
             "oneOf": [
@@ -3004,6 +3049,18 @@
           }
         }
       },
+      "SkippedBecauseResponse": {
+        "required": [
+          "jobId"
+        ],
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "SonarrNamingField": {
         "enum": [
           "seriesFolderFormat",
@@ -3376,6 +3433,7 @@
         "required": [
           "id",
           "status",
+          "trigger",
           "createdAt"
         ],
         "type": "object",
@@ -3385,6 +3443,9 @@
             "format": "uuid"
           },
           "status": {
+            "type": "string"
+          },
+          "trigger": {
             "type": "string"
           },
           "createdAt": {

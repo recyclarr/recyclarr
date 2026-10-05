@@ -22,7 +22,8 @@ internal sealed class ServerBootstrapService(
     ServerConfigLoader configLoader,
     ServerConfigurationStore configuration,
     IDbContextFactory<ServerDbContext> serverDb,
-    IDbContextFactory<TickerQueueDbContext> tickerQueueDb
+    IDbContextFactory<TickerQueueDbContext> tickerQueueDb,
+    ISyncJobStore jobs
 ) : IHostedLifecycleService
 {
     public async Task StartingAsync(CancellationToken ct)
@@ -40,6 +41,9 @@ internal sealed class ServerBootstrapService(
         // StartingAsync before any StartAsync, so its tables exist by then.
         await MigrateAsync(serverDb, ct);
         await MigrateAsync(tickerQueueDb, ct);
+
+        // Nothing can be running yet, so any active job was cut off by the previous shutdown.
+        jobs.InterruptActive();
     }
 
     private static async Task MigrateAsync<TContext>(

@@ -114,7 +114,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     [Test]
     public async Task Outcomes_appear_in_the_diagnostics_panel_and_the_log_with_their_instance()
     {
-        AddInstanceConfig(InstanceName);
+        AddInstanceConfig(InstanceName, Failed.InstanceName);
         var identity = new CustomFormatIdentity("cf-x264", "x264");
         _result = new SyncRunResult(
             [
@@ -575,7 +575,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     [Test]
     public async Task Diagnostics_are_sorted_by_instance_then_message()
     {
-        AddInstanceConfig(InstanceName);
+        AddInstanceConfig("zeta", "alpha");
         _result = new SyncRunResult([
             new SyncInstanceResult(
                 "zeta",
@@ -758,6 +758,7 @@ internal sealed class SyncCommandHandlerHttpTest : CliServerHttpFixture
     {
         using var response = await Api.JobsGet(
             status: null,
+            trigger: null,
             TestContext.CurrentContext.CancellationToken
         );
 
