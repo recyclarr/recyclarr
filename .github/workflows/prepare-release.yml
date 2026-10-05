@@ -60,6 +60,7 @@ jobs:
           permission-pull-requests: write
 
       - name: Create release pull request
+        id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -81,3 +82,10 @@ jobs:
 
             [Preparation workflow](${{ steps.release.outputs.run-url }})
           labels: no-release-comment
+
+      - name: Annotate release pull request
+        if: steps.pr.outputs.pull-request-url
+        env:
+          PR_OPERATION: ${{ steps.pr.outputs.pull-request-operation }}
+          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
+        run: echo "::notice title=Release pull request ${PR_OPERATION}::$PR_URL"
