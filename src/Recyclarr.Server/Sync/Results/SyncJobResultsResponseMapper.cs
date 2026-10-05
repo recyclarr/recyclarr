@@ -13,22 +13,34 @@ namespace Recyclarr.Server.Sync.Results;
 
 internal static class SyncJobResultsResponseMapper
 {
-    public static SyncJobResultsResponse Map(SyncJob job)
-    {
-        var result =
-            job.Result
-            ?? throw new InvalidOperationException("A terminal sync job must have a result");
-
-        return new SyncJobResultsResponse
+    // Assembles results from what the job stored; instances that never finished are absent.
+    public static SyncJobResultsResponse Map(SyncJob job) =>
+        new()
         {
             Id = job.Id.Value,
-            Status = ResultValueMapper.MapCompletionStatus(result.Status),
-            Instances = result.Instances.Select(MapInstance).ToList(),
-            Fault = result.Fault is null ? null : new SyncFaultResponse(result.Fault.Reference),
+            Status = MapJobCompletion(job),
+            Instances = job
+                .Progress.Instances.Select(instance => instance.Result)
+                .OfType<SyncInstanceResultsResponse>()
+                .ToList(),
+            Fault = job.FaultReference is null ? null : new SyncFaultResponse(job.FaultReference),
         };
-    }
 
-    private static SyncInstanceResultsResponse MapInstance(SyncInstanceResult instance) =>
+    private static SyncCompletionStatus MapJobCompletion(SyncJob job) =>
+        job.Status switch
+        {
+            SyncJobStatus.Succeeded => SyncCompletionStatus.Succeeded,
+            SyncJobStatus.Partial => SyncCompletionStatus.Partial,
+            SyncJobStatus.Failed => SyncCompletionStatus.Failed,
+            SyncJobStatus.Interrupted => job.Progress.HasCompletedWork
+                ? SyncCompletionStatus.Partial
+                : SyncCompletionStatus.Failed,
+            _ => throw new InvalidOperationException(
+                $"Sync job in status {job.Status} has no results"
+            ),
+        };
+
+    public static SyncInstanceResultsResponse MapInstance(SyncInstanceResult instance) =>
         instance.ServiceType switch
         {
             SupportedServices.Sonarr => new SonarrInstanceResultsResponse

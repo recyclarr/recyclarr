@@ -76,7 +76,8 @@ internal static class CompositionRoot
         builder.RegisterType<ServerConfigurationStore>().SingleInstance();
         builder.RegisterType<InstanceServiceCaller>();
 
-        builder.RegisterType<InMemorySyncJobStore>().As<ISyncJobStore>().SingleInstance();
+        builder.RegisterInstance(TimeProvider.System);
+        builder.RegisterType<DatabaseSyncJobStore>().As<ISyncJobStore>().SingleInstance();
 
         builder.RegisterType<SyncJobLauncher>();
         builder.RegisterType<SyncJobFinalizer>();

@@ -17,7 +17,8 @@ internal sealed class SyncJobRunner(
     INotificationService notify,
     SyncResultLogger resultLogger,
     Func<JobId, SyncJobProgress> progressFactory,
-    SyncJobFinalizer finalizer
+    SyncJobFinalizer finalizer,
+    TimeProvider time
 )
 {
     public async Task RunAsync(
@@ -27,20 +28,30 @@ internal sealed class SyncJobRunner(
         CancellationToken ct
     )
     {
-        store.Update(jobId, job => job.Status = SyncJobStatus.Running);
+        store.Update(
+            jobId,
+            job =>
+            {
+                job.Status = SyncJobStatus.Running;
+                job.StartedAt = time.GetUtcNow();
+            }
+        );
 
+        var progress = progressFactory(jobId);
         SyncRunResult result;
 
         try
         {
-            result = await orchestrator.RunAsync(configs, settings, progressFactory(jobId), ct);
+            result = await orchestrator.RunAsync(configs, settings, progress, ct);
             finalizer.Complete(jobId, result);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
             var reference = Guid.NewGuid().ToString("N");
             log.Error(e, "Unexpected sync runner fault {Reference}", reference);
-            result = finalizer.Fail(jobId, new SyncFault(reference));
+            var fault = new SyncFault(reference);
+            finalizer.Fail(jobId, fault);
+            result = new SyncRunResult(progress.Completed, fault);
         }
 
         resultLogger.Log(jobId, result);

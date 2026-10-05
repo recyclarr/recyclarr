@@ -21,8 +21,30 @@ GET {{baseUrl}}/api/v1/sync/jobs?status=succeeded
 
 ###
 
+# @name listScheduledSyncJobs
+GET {{baseUrl}}/api/v1/sync/jobs?trigger=scheduled
+
+?? status == 200
+
+{{response
+  const assert = require("assert");
+
+  test("lists only scheduled jobs", () => {
+    assert.ok(response.parsedBody.jobs.every(j => j.trigger === "Scheduled"));
+  });
+}}
+
+###
+
 # Unknown status filter
 GET {{baseUrl}}/api/v1/sync/jobs?status=bogus
+
+?? status == 400
+
+###
+
+# Unknown trigger filter
+GET {{baseUrl}}/api/v1/sync/jobs?trigger=bogus
 
 ?? status == 400
 

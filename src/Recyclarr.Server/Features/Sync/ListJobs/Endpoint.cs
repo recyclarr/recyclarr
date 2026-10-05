@@ -24,10 +24,18 @@ internal sealed class Endpoint(ISyncJobStore jobStore)
         SyncJobStatus? statusFilter = req.Status is null
             ? null
             : Enum.Parse<SyncJobStatus>(req.Status, ignoreCase: true);
+        SyncJobTrigger? triggerFilter = req.Trigger is null
+            ? null
+            : Enum.Parse<SyncJobTrigger>(req.Trigger, ignoreCase: true);
 
         var jobs = jobStore
-            .GetAll(statusFilter)
-            .Select(j => new SyncJobSummaryResponse(j.Id.Value, j.Status.ToString(), j.CreatedAt))
+            .GetAll(statusFilter, triggerFilter)
+            .Select(j => new SyncJobSummaryResponse(
+                j.Id.Value,
+                j.Status.ToString(),
+                j.Trigger.ToString(),
+                j.CreatedAt
+            ))
             .ToList();
 
         Response = new ListSyncJobsResponse(jobs);

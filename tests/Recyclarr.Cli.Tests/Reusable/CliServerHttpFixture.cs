@@ -57,20 +57,25 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     protected ISyncApi Api => Connection.Sync;
 
     /// <summary>
-    /// Writes a config the server can load, so a sync request has something to act on.
+    /// Writes a config the server can load, so a sync request has something to act on. The server
+    /// keeps results only for instances a job selected, so name every instance a stubbed result
+    /// reports. Each instance gets its own port because config validation rejects instances that
+    /// share a base URL.
     /// </summary>
-    protected void AddInstanceConfig(string instanceName)
+    protected void AddInstanceConfig(params string[] instanceNames)
     {
+        var instances = instanceNames.Select(
+            (name, i) =>
+                $"""
+                      {name}:
+                        base_url: http://localhost:{7878 + i}
+                        api_key: asdf
+                    """
+        );
+
         Fs.AddFile(
             Paths.ConfigDirectory.File("recyclarr.yml"),
-            new MockFileData(
-                $"""
-                radarr:
-                  {instanceName}:
-                    base_url: http://localhost:7878
-                    api_key: asdf
-                """
-            )
+            new MockFileData($"radarr:\n{string.Join('\n', instances)}\n")
         );
     }
 

@@ -30,6 +30,23 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     }
 
     [Test]
+    public async Task Skipped_job_has_no_results()
+    {
+        var store = Services.GetRequiredService<ISyncJobStore>();
+        var settings = new ServerSyncSettings(null, [], Preview: false);
+        store.Create(settings, []);
+        var skipped = store.CreateScheduled(settings, [], DateTimeOffset.UnixEpoch);
+
+        using var client = CreateClient();
+        var uri = new Uri($"/api/v1/sync/jobs/{skipped.Id.Value}/results", UriKind.Relative);
+        var response = await client.GetAsync(uri);
+
+        skipped.Status.Should().Be(SyncJobStatus.Skipped);
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+    }
+
+    [Test]
     public async Task Generated_client_reads_the_service_specific_instance_result()
     {
         var noOp = new CustomFormatPipelineResult(0, 0, [], []);
@@ -244,42 +261,6 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     }
 
     [Test]
-    public async Task Finished_job_without_a_result_returns_safe_internal_error()
-    {
-        var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), []);
-        store.Update(job.Id, x => x.Status = SyncJobStatus.Succeeded);
-
-        using var client = CreateClient();
-        var uri = new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative);
-        var response = await client.GetAsync(uri);
-
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
-    }
-
-    [Test]
-    public async Task Unknown_planning_outcome_returns_safe_internal_error()
-    {
-        var result = new SyncRunResult([
-            new SyncInstanceResult(
-                "tv",
-                CoreService.Sonarr,
-                [],
-                planningOutcomes: [new UnknownPlanningOutcome()]
-            ),
-        ]);
-        var job = CreateCompletedJob(result);
-
-        using var client = CreateClient();
-        var uri = new Uri($"/api/v1/sync/jobs/{job.Id.Value}/results", UriKind.Relative);
-        var response = await client.GetAsync(uri);
-
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
-    }
-
-    [Test]
     public async Task Blocked_pipeline_identifies_its_failed_dependency()
     {
         var customFormats = new CustomFormatPipelineResult(
@@ -384,15 +365,12 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
     private SyncJob CreateCompletedJob(SyncRunResult result)
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
-        var job = store.Create(new ServerSyncSettings(null, [], Preview: false), []);
-        store.Update(
-            job.Id,
-            x =>
-            {
-                x.Result = result;
-                x.Status = result.Status.ToJobStatus();
-            }
+        var job = store.Create(
+            new ServerSyncSettings(null, [], Preview: false),
+            result.Instances.Select(x => x.InstanceName).ToList()
         );
+        store.Update(job.Id, x => x.Status = SyncJobStatus.Running);
+        Services.GetRequiredService<SyncJobFinalizer>().Complete(job.Id, result);
         return job;
     }
 
@@ -531,6 +509,4 @@ internal sealed class SyncJobResultsHttpTest : ServerHttpFixture
         update?.StandardMovieFormat.Should().NotBeNull();
         update?.MovieFolderFormat.Should().NotBeNull();
     }
-
-    private sealed record UnknownPlanningOutcome : PlanningOutcome;
 }

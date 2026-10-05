@@ -4,8 +4,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using Recyclarr.Pipelines.MediaManagement;
 using Recyclarr.Server.Features.Sync.CreateJob;
+using Recyclarr.Server.Features.Sync.GetResults;
 using Recyclarr.Server.Sync;
+using Recyclarr.Server.Sync.Results;
 using Recyclarr.Server.TestLibrary;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
@@ -71,7 +74,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var partial = new SyncInstanceResult(
             "partial",
             SupportedServices.Radarr,
-            [new TestPipelineResult(SyncResultStatus.Succeeded)],
+            [new MediaManagementPipelineResult(SyncResultStatus.Succeeded, delta: null)],
             fault: new SyncFault("partial-fault")
         );
         var failed = new SyncInstanceResult(
@@ -85,10 +88,10 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
             current =>
             {
                 current.Status = SyncJobStatus.Running;
-                current.Progress = current.Progress.Start("completed").Complete(completed);
+                current.Progress = current.Progress.Start("completed").Complete(Map(completed));
                 current.Progress = current.Progress.Start("running");
-                current.Progress = current.Progress.Start("partial").Complete(partial);
-                current.Progress = current.Progress.Start("failed").Complete(failed);
+                current.Progress = current.Progress.Start("partial").Complete(Map(partial));
+                current.Progress = current.Progress.Start("failed").Complete(Map(failed));
             }
         );
 
@@ -120,6 +123,39 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
     }
 
     [Test]
+    public async Task Skipped_occurrence_reports_its_schedule_and_the_blocking_job()
+    {
+        var store = Services.GetRequiredService<ISyncJobStore>();
+        var settings = new ServerSyncSettings(null, [], Preview: false);
+        var active = store.Create(settings, []);
+        var occurrence = new DateTimeOffset(2026, 10, 5, 0, 0, 0, TimeSpan.Zero);
+        var skipped = store.CreateScheduled(settings, [], occurrence);
+
+        using var client = CreateClient();
+        var response = await RestService.For<ISyncApi>(client).JobsGet(skipped.Id.Value);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content?.Status.Should().Be(nameof(SyncJobStatus.Skipped));
+        response.Content?.Trigger.Should().Be(nameof(SyncJobTrigger.Scheduled));
+        response.Content?.ScheduledFor.Should().Be(occurrence);
+        response.Content?.SkippedBecause?.JobId.Should().Be(active.Id.Value);
+    }
+
+    [TestCase("status=5")]
+    [TestCase("trigger=5")]
+    [TestCase("trigger=bogus")]
+    public async Task Job_list_filters_accept_only_names(string query)
+    {
+        using var client = CreateClient();
+
+        var response = await client.GetAsync(
+            new Uri($"/api/v1/sync/jobs?{query}", UriKind.Relative)
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Test]
     public async Task Running_job_answers_accepted_with_retry_after()
     {
         var store = Services.GetRequiredService<ISyncJobStore>();
@@ -144,14 +180,15 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
             ["completed", "interrupted", "not-run"]
         );
         var completed = new SyncInstanceResult("completed", SupportedServices.Sonarr, []);
+        store.Update(job.Id, current => current.Status = SyncJobStatus.Running);
         store.Update(
             job.Id,
             current =>
             {
-                current.Progress = current.Progress.Start("completed").Complete(completed);
+                current.Progress = current.Progress.Start("completed").Complete(Map(completed));
                 current.Progress = current.Progress.Start("interrupted").Stop();
-                current.Result = new SyncRunResult([completed], new SyncFault("run-fault"));
-                current.Status = current.Result.Status.ToJobStatus();
+                current.FaultReference = "run-fault";
+                current.Status = SyncJobStatus.Partial;
             }
         );
 
@@ -233,7 +270,7 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
         problem.UnknownInstances.Should().Equal("unknown-instance");
         problem.AvailableInstances.Should().Equal("available-instance");
-        Services.GetRequiredService<ISyncJobStore>().GetAll(null).Should().BeEmpty();
+        Services.GetRequiredService<ISyncJobStore>().GetAll(null, null).Should().BeEmpty();
     }
 
     [Test]
@@ -335,14 +372,6 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
     }
 
-    private sealed record TestPipelineResult : PipelineResult
-    {
-        public TestPipelineResult(SyncResultStatus status)
-            : base(status) { }
-
-        internal override PipelineResult WithStatus(
-            SyncResultStatus status,
-            Recyclarr.Sync.PipelineType? blockedBy = null
-        ) => new TestPipelineResult(status);
-    }
+    private static SyncInstanceResultsResponse Map(SyncInstanceResult result) =>
+        SyncJobResultsResponseMapper.MapInstance(result);
 }
