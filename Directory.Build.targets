@@ -16,6 +16,7 @@
     <PackageReference Update="GitVersion.MsBuild" PrivateAssets="all" />
     <PackageReference Update="JetBrains.Annotations" PrivateAssets="all" />
     <PackageReference Update="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
     <PackageReference Update="Microsoft.Extensions.ApiDescription.Server" PrivateAssets="all" />
     <PackageReference Update="Microsoft.NET.Test.Sdk" PrivateAssets="all" />
     <PackageReference Update="NSubstitute" PrivateAssets="all" />
