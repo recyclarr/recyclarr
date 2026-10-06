@@ -35,26 +35,8 @@ quality profiles, naming, quality sizes, trash_ids). NEVER use `explore` for gui
 
 ## Skills
 
-Per-skill triggers. MUST load before acting on the governed task; a skill loaded in parallel with
-that action arrives too late.
-
-- `testing`: MUST load before planning or performing work that requires tests, and before authoring
-  or editing tests, updating E2E fixtures, debugging failures, or running `coverage.py` /
-  `Run-E2ETests.ps1`.
-- `changelog`: MUST load when adding, editing, or reorganizing entries in `CHANGELOG.md`, or when
-  drafting release notes.
-- `decisions`: MUST load when creating, editing, or superseding ADRs or PDRs under
-  `docs/decisions/`.
-- `mapperly`: MUST load when writing, editing, or debugging `Riok.Mapperly` mapper classes
-  (`[Mapper]`-attributed partials, `*Mapper.cs` under `ServarrApi/`, RMG-prefixed diagnostics).
-- `duplication-vs-abstraction`: MUST load when weighing whether to extract a shared abstraction,
-  base class, or generic helper, particularly across Sonarr/Radarr parallels, Refit-generated
-  clients, or anti-corruption layers over distinct external systems.
-- `rx-observables`: MUST load when writing, editing, or reviewing code that uses `System.Reactive`
-  (Rx.NET), `IObservable`/`IObserver`, subjects, `CompositeDisposable`, or `TestScheduler`.
-- `http-server`: MUST load when writing, editing, or reviewing FastEndpoints endpoint classes, API
-  routes or URL structure, REST resource design, API versioning, OpenAPI spec generation, Kestrel
-  server configuration in `Recyclarr.Server`, or httpyac files under `http/`.
+MUST load a skill whose description matches the task before acting on that task; a skill loaded in
+parallel with the action arrives too late.
 
 ## Project Context
 
@@ -301,8 +283,8 @@ All under `./scripts`.
 - `coverage.py`: Run tests with coverage (`--run`) and query results (`files`, `uncovered`,
   `lowest`)
 - `Run-E2ETests.ps1`: **MUST** use this to run E2E tests. NEVER use `dotnet test` for E2E.
-- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via `docker
-  compose up -d`
+- `Docker-Recyclarr.ps1`: Run Recyclarr in container; auto-starts dependent services via
+  `docker compose up -d`
 - `query_issues.py`: Query CodeQL alerts from the GitHub code scanning API
   - Flags: `-p <path>`, `-r <rule>`, `-s <severity>` (default: warning), `-b <branch>`
 
