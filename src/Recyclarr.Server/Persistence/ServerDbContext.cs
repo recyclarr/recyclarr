@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Recyclarr.Server.Persistence;
@@ -34,6 +35,19 @@ internal sealed class ServerDbContext(DbContextOptions<ServerDbContext> options)
     public DbSet<SyncJobRecord> SyncJobs => Set<SyncJobRecord>();
     public DbSet<SyncJobInstanceRecord> SyncJobInstances => Set<SyncJobInstanceRecord>();
 
+    // Escalates warnings that indicate a query bug: nondeterministic row limits and cartesian
+    // explosion from several collection includes.
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.ConfigureWarnings(w =>
+            w.Throw(
+                CoreEventId.RowLimitingOperationWithoutOrderByWarning,
+                CoreEventId.FirstWithoutOrderByAndFilterWarning,
+                RelationalEventId.MultipleCollectionIncludeWarning
+            )
+        );
+    }
+
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // Readable rows that survive enum member reordering.
@@ -45,22 +59,6 @@ internal sealed class ServerDbContext(DbContextOptions<ServerDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<SyncJobRecord>(job =>
-        {
-            job.ToTable("SyncJobs");
-            job.HasIndex(x => x.Status);
-            job.HasIndex(x => x.CreatedAt);
-            job.HasMany(x => x.Progress)
-                .WithOne()
-                .HasForeignKey(x => x.JobId)
-                .OnDelete(DeleteBehavior.Cascade);
-            job.Navigation(x => x.Progress).AutoInclude();
-        });
-
-        modelBuilder.Entity<SyncJobInstanceRecord>(instance =>
-        {
-            instance.ToTable("SyncJobInstances");
-            instance.HasKey(x => new { x.JobId, x.Ordinal });
-        });
+        modelBuilder.Entity<SyncJobRecord>().Navigation(x => x.Progress).AutoInclude();
     }
 }
