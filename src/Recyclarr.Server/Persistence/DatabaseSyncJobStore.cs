@@ -19,10 +19,16 @@ internal sealed class DatabaseSyncJobStore(
         lock (_gate)
         {
             using var db = dbFactory.CreateDbContext();
-            var record = NewRecord(request, instanceNames, SyncJobTrigger.Manual);
-            db.SyncJobs.Add(record);
+            var job = NewJob(
+                request,
+                instanceNames,
+                SyncJobTrigger.Manual,
+                scheduledFor: null,
+                skippedBy: null
+            );
+            db.SyncJobs.Add(SyncJobRecordMapper.ToRecord(job));
             db.SaveChanges();
-            return ToJob(record);
+            return job;
         }
     }
 
@@ -40,32 +46,29 @@ internal sealed class DatabaseSyncJobStore(
                     x.Status == SyncJobStatus.Pending || x.Status == SyncJobStatus.Running
                 )
                 .OrderBy(x => x.CreatedAt)
+                .ThenBy(x => x.Id)
                 .Select(x => (Guid?)x.Id)
                 .FirstOrDefault();
 
-            var record = NewRecord(request, instanceNames, SyncJobTrigger.Scheduled);
-            record.ScheduledFor = scheduledFor;
+            var job = NewJob(
+                request,
+                instanceNames,
+                SyncJobTrigger.Scheduled,
+                scheduledFor,
+                skippedBy: active is { } activeId ? new JobId { Value = activeId } : null
+            );
 
-            if (active is not null)
+            if (job.SkippedBy is not null)
             {
-                record.Status = SyncJobStatus.Skipped;
-                record.SkippedByJobId = active;
-                record.FinishedAt = record.CreatedAt;
-                foreach (var instance in record.Progress)
-                {
-                    instance.Status = InstanceProgressStatus.NotRun;
-                }
+                job.Status = SyncJobStatus.Skipped;
+                job.FinishedAt = job.CreatedAt;
+                job.Progress = job.Progress.Stop();
             }
 
-            db.SyncJobs.Add(record);
+            db.SyncJobs.Add(SyncJobRecordMapper.ToRecord(job));
+            StageEviction(db);
             db.SaveChanges();
-
-            if (record.Status.IsTerminal())
-            {
-                EvictExcessTerminalJobs(db);
-            }
-
-            return ToJob(record);
+            return job;
         }
     }
 
@@ -73,13 +76,13 @@ internal sealed class DatabaseSyncJobStore(
     {
         using var db = dbFactory.CreateDbContext();
         var record = db.SyncJobs.AsNoTracking().FirstOrDefault(x => x.Id == id.Value);
-        return record is null ? null : ToJob(record);
+        return record is null ? null : SyncJobRecordMapper.ToJob(record);
     }
 
-    public IReadOnlyList<SyncJob> GetAll(SyncJobStatus? status, SyncJobTrigger? trigger)
+    public IReadOnlyList<SyncJobSummary> GetAll(SyncJobStatus? status, SyncJobTrigger? trigger)
     {
         using var db = dbFactory.CreateDbContext();
-        var query = db.SyncJobs.AsNoTracking();
+        IQueryable<SyncJobRecord> query = db.SyncJobs;
 
         if (status is not null)
         {
@@ -91,7 +94,9 @@ internal sealed class DatabaseSyncJobStore(
             query = query.Where(x => x.Trigger == trigger);
         }
 
-        return query.OrderBy(x => x.CreatedAt).AsEnumerable().Select(ToJob).ToList();
+        return SyncJobRecordMapper
+            .ProjectToSummary(query.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id))
+            .ToList();
     }
 
     public void Update(JobId id, Action<SyncJob> mutate)
@@ -105,7 +110,7 @@ internal sealed class DatabaseSyncJobStore(
                 return;
             }
 
-            var job = ToJob(record);
+            var job = SyncJobRecordMapper.ToJob(record);
             mutate(job);
             if (!record.Status.CanTransitionTo(job.Status))
             {
@@ -114,13 +119,9 @@ internal sealed class DatabaseSyncJobStore(
                 );
             }
 
-            Apply(job, record);
+            SyncJobRecordMapper.Apply(job, record);
+            StageEviction(db);
             db.SaveChanges();
-
-            if (job.Status.IsTerminal())
-            {
-                EvictExcessTerminalJobs(db);
-            }
         }
     }
 
@@ -138,110 +139,67 @@ internal sealed class DatabaseSyncJobStore(
             var now = time.GetUtcNow();
             foreach (var record in records)
             {
-                var job = ToJob(record);
+                var job = SyncJobRecordMapper.ToJob(record);
                 job.Progress = job.Progress.Stop();
                 job.Status = SyncJobStatus.Interrupted;
                 job.FinishedAt = now;
-                Apply(job, record);
+                SyncJobRecordMapper.Apply(job, record);
             }
 
+            StageEviction(db);
             db.SaveChanges();
-            EvictExcessTerminalJobs(db);
         }
     }
 
-    private SyncJobRecord NewRecord(
+    private SyncJob NewJob(
         ServerSyncSettings request,
         IReadOnlyList<string> instanceNames,
-        SyncJobTrigger trigger
-    )
-    {
-        var id = JobId.New().Value;
-        return new SyncJobRecord
-        {
-            Id = id,
-            Trigger = trigger,
-            Status = SyncJobStatus.Pending,
-            CreatedAt = time.GetUtcNow(),
-            Service = request.Service,
-            Instances = request.Instances.ToList(),
-            Preview = request.Preview,
-            Progress = instanceNames
-                .Select(
-                    (name, i) =>
-                        new SyncJobInstanceRecord
-                        {
-                            JobId = id,
-                            Ordinal = i,
-                            Name = name,
-                            Status = InstanceProgressStatus.Pending,
-                        }
-                )
-                .ToList(),
-        };
-    }
-
-    // Caller must hold _gate.
-    private static void EvictExcessTerminalJobs(ServerDbContext db)
-    {
-        var terminal = db
-            .SyncJobs.Where(x =>
-                x.Status != SyncJobStatus.Pending && x.Status != SyncJobStatus.Running
-            )
-            .OrderByDescending(x => x.CreatedAt)
-            .Skip(MaxTerminalJobs)
-            .ToList();
-
-        if (terminal.Count == 0)
-        {
-            return;
-        }
-
-        db.SyncJobs.RemoveRange(terminal);
-        db.SaveChanges();
-    }
-
-    private static SyncJob ToJob(SyncJobRecord record) =>
+        SyncJobTrigger trigger,
+        DateTimeOffset? scheduledFor,
+        JobId? skippedBy
+    ) =>
         new()
         {
-            Id = new JobId { Value = record.Id },
-            Trigger = record.Trigger,
-            Request = new ServerSyncSettings(record.Service, record.Instances, record.Preview),
-            CreatedAt = record.CreatedAt,
-            ScheduledFor = record.ScheduledFor,
-            SkippedBy = record.SkippedByJobId is { } skippedBy
-                ? new JobId { Value = skippedBy }
-                : null,
-            Status = record.Status,
-            StartedAt = record.StartedAt,
-            FinishedAt = record.FinishedAt,
-            FaultReference = record.FaultReference,
-            Progress = ProgressSnapshot.Restore(
-                record
-                    .Progress.OrderBy(x => x.Ordinal)
-                    .Select(x => new InstanceSnapshot(
-                        x.Name,
-                        x.Status,
-                        x.ResultJson is null ? null : StoredInstanceResult.Deserialize(x.ResultJson)
-                    ))
-            ),
+            Id = JobId.New(),
+            Trigger = trigger,
+            Request = request,
+            CreatedAt = time.GetUtcNow(),
+            ScheduledFor = scheduledFor,
+            SkippedBy = skippedBy,
+            Status = SyncJobStatus.Pending,
+            Progress = new ProgressSnapshot(instanceNames),
         };
 
-    // Writes the mutable job state back; identity and the accepted request never change.
-    private static void Apply(SyncJob job, SyncJobRecord record)
+    // Caller must hold _gate. Stages removal of terminal jobs beyond the retention limit, counting
+    // the jobs this context is about to add or finish, so one SaveChanges writes both.
+    private static void StageEviction(ServerDbContext db)
     {
-        record.Status = job.Status;
-        record.StartedAt = job.StartedAt;
-        record.FinishedAt = job.FinishedAt;
-        record.FaultReference = job.FaultReference;
+        var pending = db.ChangeTracker.Entries<SyncJobRecord>().Select(x => x.Entity).ToList();
+        var pendingIds = pending.Select(x => x.Id).ToList();
 
-        var instances = record.Progress.OrderBy(x => x.Ordinal).ToList();
-        foreach (var (row, snapshot) in instances.Zip(job.Progress.Instances))
+        var stored = db
+            .SyncJobs.Where(x =>
+                !pendingIds.Contains(x.Id)
+                && x.Status != SyncJobStatus.Pending
+                && x.Status != SyncJobStatus.Running
+            )
+            .Select(x => new { x.Id, x.CreatedAt })
+            .ToList();
+
+        var excess = stored
+            .Concat(
+                pending.Where(x => x.Status.IsTerminal()).Select(x => new { x.Id, x.CreatedAt })
+            )
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Skip(MaxTerminalJobs)
+            .Select(x => x.Id);
+
+        foreach (var id in excess)
         {
-            row.Status = snapshot.Status;
-            row.ResultJson = snapshot.Result is null
-                ? null
-                : StoredInstanceResult.Serialize(snapshot.Result);
+            // Untracked jobs are removed through a key-only stub; the database cascades the
+            // delete to their instance rows.
+            db.SyncJobs.Remove(pending.Find(x => x.Id == id) ?? new SyncJobRecord { Id = id });
         }
     }
 }

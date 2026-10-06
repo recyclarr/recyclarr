@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Progress;
 using Recyclarr.TrashGuide;
@@ -8,6 +9,8 @@ namespace Recyclarr.Server.Persistence;
 /// Stored row for one sync job. Holds what the job API reports after a restart: the accepted
 /// request, lifecycle timestamps, and per-instance progress with each finished instance's result.
 /// </summary>
+[Index(nameof(Status))]
+[Index(nameof(CreatedAt))]
 internal sealed class SyncJobRecord
 {
     public Guid Id { get; set; }
@@ -21,7 +24,7 @@ internal sealed class SyncJobRecord
     public DateTimeOffset? ScheduledFor { get; set; }
 
     public SupportedServices? Service { get; set; }
-    public List<string> Instances { get; set; } = [];
+    public IReadOnlyCollection<string> Instances { get; set; } = [];
     public bool Preview { get; set; }
 
     // For a skipped scheduled occurrence: the active job that caused the skip.
@@ -38,9 +41,14 @@ internal sealed class SyncJobRecord
 /// <summary>
 /// Stored progress for one selected instance of a sync job, in selection order.
 /// </summary>
+[PrimaryKey(nameof(JobId), nameof(Ordinal))]
 internal sealed class SyncJobInstanceRecord
 {
     public Guid JobId { get; set; }
+
+    // Inverse of SyncJobRecord.Progress; names the JobId foreign key by convention.
+    public SyncJobRecord? Job { get; set; }
+
     public int Ordinal { get; set; }
     public required string Name { get; set; }
     public InstanceProgressStatus Status { get; set; }
