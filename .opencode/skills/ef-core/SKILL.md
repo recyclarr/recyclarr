@@ -86,19 +86,23 @@ expresses the intent; never restate a convention.
   Multiple providers: one migration set per provider, each in its own assembly.
 - Seed with `UseSeeding` and `UseAsyncSeeding`, both implemented and idempotent. `HasData` only for
   static reference data with fixed keys.
-- CI runs `dotnet ef migrations has-pending-model-changes`; since EF9, migrating with an outdated
-  model throws.
+- A test per context diffs the last migration's snapshot against the current model
+  (`IMigrationsModelDiffer.GetDifferences`) and asserts no operations, so failures name the missing
+  changes. Build the context without migrating; since EF9, migrating with an outdated model throws.
 - Write expand/contract migrations: each must work with the previous app version. Additive changes
   ship first; destructive changes ship in a later release.
 
 ### Where migrations run
 
-Default: the app migrates at startup (`MigrateAsync`) before serving. It behaves the same in every
-environment, deploys schema and code together, and suits apps operated by other people. EF9+ takes a
-database-wide lock, so concurrent instances are safe.
+Choose by who operates the deployment:
 
-Also expose a separate migrate command, so operators can run migrations as a deploy step (e.g. a
-Kubernetes init container) and give the app credentials without schema rights.
+- Others operate it (self-hosted apps): migrate at startup (`MigrateAsync`) before serving. EF9+
+  takes a database-wide lock, so accidental concurrent starts are safe.
+- You operate it, or it runs many replicas: build a migration bundle in CI and run it as a one-shot
+  deploy job with a schema-privileged identity; the app identity gets data rights only. Do not
+  migrate from every replica's entrypoint.
+- SQL must be reviewed before it runs: generate a script instead. Bundles cannot show their SQL;
+  scripts bypass migration locking; SQLite cannot generate idempotent scripts.
 
 Move to pre-deploy and post-deploy migrations when DDL outgrows startup (long index builds, large
 tables, many instances). Run data backfills as batched, throttled, idempotent background jobs in the

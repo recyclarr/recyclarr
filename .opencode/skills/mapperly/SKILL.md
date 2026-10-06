@@ -12,7 +12,8 @@ description: >-
   `obj/Debug/*/generated/Riok.Mapperly/`. Triggers on phrases like "add a
   Mapperly mapper", "Mapperly null handling", "DTO to domain mapping",
   "generated mapper", or edits to files ending in `*Mapper.cs` under
-  `ServarrApi/`. Do NOT use for hand-written mapping code or AutoMapper.
+  `ServarrApi/` or `Persistence/`. Do NOT use for hand-written mapping code or
+  AutoMapper.
 ---
 
 # Mapperly
@@ -21,8 +22,16 @@ Conventions and null-handling semantics for Mapperly source-generated mappers.
 
 ## Mapper Conventions
 
-- `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Generated DTOs
-  have many properties we don't map; this silences unmapped-property warnings.
+- Strictness by mapping kind:
+  - Generated external DTOs (Refit/OpenAPI):
+    `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]`; DTOs carry many members we
+    don't map.
+  - Types we own (domain <-> persistence entity): plain `[Mapper]` (default `Both`), so an unmapped
+    member fails the build.
+  - Existing-target updates (`[MappingTarget]`) on owned types:
+    `[MapperRequiredMapping(RequiredMappingStrategy.Source)]`, ignoring only source members that
+    must not be written. Target-only members are covered by the creating mapping; checking them here
+    only adds ignore lists.
 - One mapper class per service (Sonarr/Radarr). Generated DTO types share names but are distinct
   types from separate packages.
 - Namespace aliases disambiguate: `using SonarrApi = Recyclarr.Api.Sonarr`.
