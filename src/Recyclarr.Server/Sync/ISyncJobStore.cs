@@ -22,7 +22,7 @@ internal interface ISyncJobStore
     SyncJob? Get(JobId id);
 
     // Oldest first.
-    IReadOnlyList<SyncJob> GetAll(SyncJobStatus? status, SyncJobTrigger? trigger);
+    IReadOnlyList<SyncJobSummary> GetAll(SyncJobStatus? status, SyncJobTrigger? trigger);
 
     /// <summary>
     /// Applies <paramref name="mutate"/> to the job and persists the result. Read, mutation, and
