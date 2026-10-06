@@ -12,7 +12,8 @@ description: >-
   `obj/*/*/generated/Riok.Mapperly/`. Triggers on phrases like "add a
   Mapperly mapper", "Mapperly null handling", "DTO to domain mapping",
   "generated mapper", or edits to files ending in `*Mapper.cs` under
-  `ServarrApi/`. Do NOT use for hand-written mapping code or AutoMapper.
+  `ServarrApi/` or `Persistence/`. Do NOT use for hand-written mapping code or
+  AutoMapper.
 ---
 
 # Mapperly
@@ -23,9 +24,15 @@ Re-verify against generated code after a Mapperly upgrade.
 
 ## Mapper Conventions
 
-- `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Service DTOs
-  have properties we don't map (including extension data); this silences unmapped-member warnings
-  (RMG012, RMG020).
+- Strictness by mapping kind:
+  - Service DTOs (Refit): `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]`; DTOs
+    carry members we don't map, including extension data (silences RMG012, RMG020).
+  - Types we own (domain <-> persistence entity): plain `[Mapper]` (default `Both`), so an unmapped
+    member fails the build.
+  - Existing-target updates (`[MappingTarget]`) on owned types:
+    `[MapperRequiredMapping(RequiredMappingStrategy.Source)]`, ignoring only source members that
+    must not be written. Target-only members are covered by the creating mapping; checking them here
+    only adds ignore lists.
 - Mappers are `internal static partial class`.
 - One mapper class per service API generation (`SonarrV3*`, `SonarrV5*`, `Radarr*`). Service DTO
   types share names but are distinct types; alias namespaces:
