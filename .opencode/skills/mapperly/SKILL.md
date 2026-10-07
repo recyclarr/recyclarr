@@ -7,9 +7,9 @@ description: >-
   or other Mapperly attributes; mapping between nullable Refit/OpenAPI DTOs
   and non-nullable domain records; debugging null-handling in generated
   mapping code (positional records, `required init`, initializer defaults);
-  investigating Mapperly diagnostics such as RMG001, RMG020, or RMG089;
+  investigating Mapperly diagnostics such as RMG023, RMG060, or RMG089;
   inspecting source-generated output under
-  `obj/Debug/*/generated/Riok.Mapperly/`. Triggers on phrases like "add a
+  `obj/*/*/generated/Riok.Mapperly/`. Triggers on phrases like "add a
   Mapperly mapper", "Mapperly null handling", "DTO to domain mapping",
   "generated mapper", or edits to files ending in `*Mapper.cs` under
   `ServarrApi/`. Do NOT use for hand-written mapping code or AutoMapper.
@@ -17,64 +17,68 @@ description: >-
 
 # Mapperly
 
-Conventions and null-handling semantics for Mapperly source-generated mappers.
+Repository conventions and verified null-handling behavior for Mapperly mappers. Behavior below was
+observed in generated output from `Riok.Mapperly` 4.3.1 (pinned in `Directory.Packages.props`).
+Re-verify against generated code after a Mapperly upgrade.
 
 ## Mapper Conventions
 
 - `[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]` on every mapper. Generated DTOs
-  have many properties we don't map; this silences unmapped-property warnings.
-- One mapper class per service (Sonarr/Radarr). Generated DTO types share names but are distinct
-  types from separate packages.
-- Namespace aliases disambiguate: `using SonarrApi = Recyclarr.Api.Sonarr`.
+  have many properties we don't map; this silences unmapped-member warnings (RMG012, RMG020).
 - Mappers are `internal static partial class`.
+- One mapper class per service (Sonarr/Radarr). Generated DTO types share names but are distinct
+  types from separate packages; alias namespaces: `using SonarrApi = Recyclarr.Api.Sonarr`.
+- Domain-to-DTO writes use an existing-target method
+  (`void UpdateDto(TDomain, [MappingTarget] TDto)`) so DTO fields the domain does not model keep
+  their fetched values.
 
-## Null Handling (nullable DTO -> non-nullable domain)
+## Null Handling
 
-Generated Refit DTOs mark all properties as nullable (`T?`). Domain models use non-nullable types
-for fields that should always have a value. Mapperly handles the mismatch differently depending on
-the target shape.
+Refit DTOs declare every property nullable. Mapper settings stay at defaults
+(`ThrowOnMappingNullMismatch = true`, `AllowNullPropertyAssignment = true`). The generated code for
+a null source value depends on the target member shape:
 
-### Constructor parameters (positional records)
+| Target member                                           | Null source value                      |
+| ------------------------------------------------------- | -------------------------------------- |
+| Nullable (`T?`)                                         | Assigned, including null               |
+| Non-nullable constructor parameter                      | `?? throw ArgumentNullException`       |
+| Non-nullable `init` or `required` (with or without `=`) | `?? throw ArgumentNullException`       |
+| Non-nullable settable (`set`)                           | Assignment skipped; prior value stays  |
 
-Mapperly substitutes type-appropriate defaults when the source is null:
+Consequences:
 
-- `string?` -> `string`: `""` (empty string)
-- `T?` where `T` has a parameterless constructor: `new T()`
-- `T?` value type: `default(T)`
+- Property initializers never act as fallbacks for constructor or `init` targets; the generated
+  object initializer overwrites them or throws. `public string Name { get; init; } = "";` still
+  throws when the DTO field is null.
+- A field that Sonarr/Radarr may omit needs a nullable domain property, or a user-implemented method
+  that supplies the fallback (see `ItemToDomain` in `SonarrQualityProfileMapper`).
+- A non-nullable settable property with no initializer stays `null` when the source is null,
+  silently violating its contract. Avoid this shape.
+- In `UpdateDto`, a null domain value overwrites the DTO field with null, because DTO targets are
+  nullable.
+- `ThrowOnMappingNullMismatch = false` replaces the throw with `""`, `new T()`, or `default`. It is
+  unused in this repository; collections such as `List<T>` still throw and report RMG002.
 
-### Init properties without initializers
+## Diagnostics
 
-Mapperly generates `throw ArgumentNullException` when the source is null. This is hardcoded for
-`required init` properties regardless of mapper settings.
+- RMG089 (Info): "Mapping the nullable source property ... to the target property ... which is not
+  nullable". Expected for every nullable DTO to non-nullable domain member; it marks a member that
+  throws or skips per the table above. Check that outcome is intended rather than suppressing it.
+- RMG023 (Error): a `required` target member has no matching source member.
+  `RequiredMappingStrategy .None` does not suppress it; add `[MapProperty]` or a user-implemented
+  method.
+- RMG060 (Warning): multiple user-implemented methods for the same type pair.
 
-### Init/setter properties with initializers (e.g. `= ""`, `= []`)
+## User-Implemented Methods
 
-Mapperly skips the assignment when the source is null. The initializer value is preserved. This is
-the safest pattern for "optional with sensible default" semantics.
+Mapperly discovers any non-partial method in the mapper with a mapping signature and uses it for
+that type pair, including nested members and collection elements (`MapFieldValue` in
+`SonarrCustomFormatMapper`). Parameter and return types must match the mapped types exactly,
+including nullability.
 
-### Setter properties without initializers
+## Verifying Generated Code
 
-Mapperly skips the assignment. The property stays at `default(T)`, which for reference types is
-`null`. This silently violates the non-nullable contract. Avoid this shape for non-nullable
-reference types.
-
-### Nullable target properties
-
-Assigned directly, including null. No special handling.
-
-## RMG089 Diagnostic
-
-"Mapping nullable source property X to target property Y which is not nullable." Default severity:
-Info. This diagnostic is informational; the generated code handles the mismatch using the rules
-above. No suppression or severity promotion is needed.
-
-## Inspecting Generated Code
-
-To see what Mapperly actually generates, temporarily add to `Directory.Build.props`:
-
-```xml
-<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-```
-
-Output appears in `obj/Debug/<tfm>/generated/Riok.Mapperly/Riok.Mapperly.MapperGenerator/`. Remove
-the property when done.
+`Directory.Build.props` enables `EmitCompilerGeneratedFiles` for the whole repository. After a
+build, find the output with `rg --files --no-ignore -g '<Mapper>.g.cs' src/<Project>/obj`; it lives
+under `obj/<Configuration>/<tfm>/generated/Riok.Mapperly/Riok.Mapperly.MapperGenerator/`. Confirm
+null handling there instead of inferring it from attributes.
