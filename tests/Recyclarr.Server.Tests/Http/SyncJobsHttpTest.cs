@@ -55,7 +55,8 @@ internal sealed class SyncJobsHttpTest : ServerHttpFixture
         var getResponse = await RestService.For<ISyncApi>(client).JobsGet(created.Id);
         var job = getResponse.Content;
 
-        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        // The job may still be queued or running (202) or already finished (200).
+        getResponse.IsSuccessStatusCode.Should().BeTrue();
         job.Should().NotBeNull();
         job.Id.Should().Be(created.Id);
         job.Instances.Should().Equal("real-instance");

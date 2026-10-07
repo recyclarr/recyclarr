@@ -24,32 +24,35 @@ internal enum SyncJobStatus
 
 internal static class SyncJobStatusExtensions
 {
-    public static bool IsTerminal(this SyncJobStatus status)
+    extension(SyncJobStatus from)
     {
-        return status is not (SyncJobStatus.Pending or SyncJobStatus.Running);
+        public bool IsTerminal() => from is not (SyncJobStatus.Pending or SyncJobStatus.Running);
+
+        // Staying in the same active status is allowed; it covers progress-only updates.
+        public bool CanTransitionTo(SyncJobStatus to) =>
+            (from, to) switch
+            {
+                (SyncJobStatus.Pending, SyncJobStatus.Pending or SyncJobStatus.Running) => true,
+                (SyncJobStatus.Running, SyncJobStatus.Running) => true,
+                (SyncJobStatus.Pending or SyncJobStatus.Running, SyncJobStatus.Interrupted) => true,
+                (
+                    SyncJobStatus.Running,
+                    SyncJobStatus.Succeeded
+                        or SyncJobStatus.Partial
+                        or SyncJobStatus.Failed
+                ) => true,
+                _ => false,
+            };
     }
 
-    // Staying in the same active status is allowed; it covers progress-only updates.
-    public static bool CanTransitionTo(this SyncJobStatus from, SyncJobStatus to) =>
-        (from, to) switch
-        {
-            (SyncJobStatus.Pending, SyncJobStatus.Pending or SyncJobStatus.Running) => true,
-            (SyncJobStatus.Running, SyncJobStatus.Running) => true,
-            (SyncJobStatus.Pending or SyncJobStatus.Running, SyncJobStatus.Interrupted) => true,
-            (
-                SyncJobStatus.Running,
-                SyncJobStatus.Succeeded
-                    or SyncJobStatus.Partial
-                    or SyncJobStatus.Failed
-            ) => true,
-            _ => false,
-        };
-
-    public static SyncJobStatus ToJobStatus(this SyncResultStatus status) =>
-        status switch
-        {
-            SyncResultStatus.Succeeded => SyncJobStatus.Succeeded,
-            SyncResultStatus.Partial => SyncJobStatus.Partial,
-            _ => SyncJobStatus.Failed,
-        };
+    extension(SyncResultStatus status)
+    {
+        public SyncJobStatus ToJobStatus() =>
+            status switch
+            {
+                SyncResultStatus.Succeeded => SyncJobStatus.Succeeded,
+                SyncResultStatus.Partial => SyncJobStatus.Partial,
+                _ => SyncJobStatus.Failed,
+            };
+    }
 }

@@ -89,6 +89,24 @@ internal sealed class ServerStartupConfigurationTest : ServerHttpFixture
     }
 
     [Test]
+    public void Invalid_schedule_cron_stops_startup()
+    {
+        Fs.AddFile(
+            Paths.ConfigDirectory.File("settings.yml"),
+            new MockFileData("server:\n  schedule:\n    cron: not a cron\n")
+        );
+
+        var start = () => CreateClient();
+
+        start.Should().Throw<Exception>();
+        _log.Events.Should()
+            .Contain(evt =>
+                evt.Level == LogEventLevel.Fatal
+                && evt.MessageTemplate.Text == "Server startup failed: {Message}"
+            );
+    }
+
+    [Test]
     public async Task Deprecation_is_logged_once_at_startup()
     {
         AddConfig(

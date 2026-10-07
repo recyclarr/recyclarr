@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="Cronos" />
     <PackageReference Include="FastEndpoints.OpenApi" />
     <PackageReference Include="GitVersion.MsBuild" />
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">

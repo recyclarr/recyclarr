@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Autofac;
 using Recyclarr.Config;
 using Recyclarr.Config.Models;
@@ -10,11 +9,27 @@ using Recyclarr.Server.Tests.Reusable;
 using Recyclarr.Sync;
 using Recyclarr.Sync.Results;
 using Recyclarr.TrashGuide;
+using TickerQ.Utilities.Base;
 
 namespace Recyclarr.Server.Tests.Sync;
 
-internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
+internal sealed class SyncJobTickerFunctionTest : ServerIntegrationFixture
 {
+    [Test]
+    public async Task Terminal_job_is_not_run()
+    {
+        var store = Resolve<ISyncJobStore>();
+        var job = CreateJob(store, Config("left-over"));
+        store.InterruptActive();
+
+        await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
+
+        await Resolve<ISyncOrchestrator>()
+            .DidNotReceiveWithAnyArgs()
+            .RunAsync(default!, default!, default!, default);
+        store.Get(job.Id)?.Status.Should().Be(SyncJobStatus.Interrupted);
+    }
+
     [Test]
     public async Task Canceled_run_finishes_with_a_fault_result()
     {
@@ -34,10 +49,11 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
                 progress.InstanceStarted("second");
                 return Task.FromException<SyncRunResult>(new OperationCanceledException());
             });
-        var launcher = Resolve<SyncJobLauncher>();
+        var store = Resolve<ISyncJobStore>();
+        var job = CreateJob(store, Config("first"), Config("second"));
 
-        var job = launcher.Launch(NewSettings(), [Config("first"), Config("second")]);
-        var completed = await WaitForCompletion(Resolve<ISyncJobStore>(), job.Id);
+        await Execute(Resolve<SyncRunScopeFactory>(), job.Id);
+        var completed = store.Get(job.Id)!;
 
         completed.Status.Should().Be(SyncJobStatus.Partial);
         completed.FaultReference.Should().NotBeNullOrWhiteSpace();
@@ -53,15 +69,10 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
     {
         using var scope = new ContainerBuilder().Build();
         var store = Resolve<ISyncJobStore>();
-        var launcher = new SyncJobLauncher(
-            Substitute.For<ILogger>(),
-            store,
-            new SyncRunScopeFactory(scope),
-            Resolve<SyncJobFinalizer>()
-        );
+        var job = CreateJob(store, Config("not-started"));
 
-        var job = launcher.Launch(NewSettings(), [Config("not-started")]);
-        var completed = await WaitForCompletion(store, job.Id);
+        await Execute(new SyncRunScopeFactory(scope), job.Id);
+        var completed = store.Get(job.Id)!;
 
         completed.Status.Should().Be(SyncJobStatus.Failed);
         completed.FaultReference.Should().NotBeNullOrWhiteSpace();
@@ -91,23 +102,41 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
             .InstancePerLifetimeScope()
             .OnRelease(_ => throw new InvalidOperationException("cleanup secret"));
         using var scope = builder.Build();
-        var log = Substitute.For<ILogger>();
-        var launcher = new SyncJobLauncher(
-            log,
-            store,
-            new SyncRunScopeFactory(scope),
-            Resolve<SyncJobFinalizer>()
-        );
+        var job = CreateJob(store);
 
-        var job = launcher.Launch(NewSettings(), []);
-        var completed = await WaitForCompletion(store, job.Id);
+        await Execute(new SyncRunScopeFactory(scope), job.Id);
+        var completed = store.Get(job.Id)!;
 
         completed.Status.Should().Be(SyncJobStatus.Succeeded);
         completed.FaultReference.Should().BeNull();
     }
 
-    private static ServerSyncSettings NewSettings() =>
-        new(Service: null, Instances: [], Preview: false);
+    // Publishes the configs as the server configuration and creates a job selecting all of them.
+    private SyncJob CreateJob(ISyncJobStore store, params IServiceConfiguration[] configs)
+    {
+        Resolve<ServerConfigurationStore>().Publish(new ServerConfiguration(configs));
+        return store.Create(
+            new ServerSyncSettings(Service: null, Instances: [], Preview: false),
+            [.. configs.Select(x => x.InstanceName)]
+        );
+    }
+
+    private Task Execute(SyncRunScopeFactory scopes, JobId id)
+    {
+        var function = new SyncJobTickerFunction(
+            Substitute.For<ILogger>(),
+            Resolve<ISyncJobStore>(),
+            Resolve<ServerConfigurationStore>(),
+            new SyncExecutionGate(),
+            scopes,
+            Resolve<SyncJobFinalizer>()
+        );
+        var context = new TickerFunctionContext<SyncJobTickerRequest>(
+            new TickerFunctionContext(),
+            new SyncJobTickerRequest(id.Value)
+        );
+        return function.ExecuteAsync(context, CancellationToken.None);
+    }
 
     private static RadarrConfiguration Config(string name) =>
         new()
@@ -116,23 +145,6 @@ internal sealed class SyncJobLauncherTest : ServerIntegrationFixture
             BaseUrl = new Uri("http://localhost"),
             ApiKey = "api-key",
         };
-
-    private static async Task<SyncJob> WaitForCompletion(ISyncJobStore store, JobId id)
-    {
-        var elapsed = Stopwatch.StartNew();
-        while (elapsed.Elapsed < TimeSpan.FromSeconds(5))
-        {
-            var job = store.Get(id);
-            if (job?.Status.IsTerminal() is true)
-            {
-                return job;
-            }
-
-            await Task.Delay(10);
-        }
-
-        throw new TimeoutException("Sync job did not finish");
-    }
 
     private sealed class SuccessfulOrchestrator : ISyncOrchestrator
     {

@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Recyclarr.Server.Sync;
 using Recyclarr.Server.Sync.Progress;
+using TickerQ.Utilities.Entities;
 
 namespace Recyclarr.Server.Persistence;
 
 internal sealed class DatabaseSyncJobStore(
     IDbContextFactory<ServerDbContext> dbFactory,
+    IDbContextFactory<TickerQueueDbContext> tickerQueueFactory,
     TimeProvider time
 ) : ISyncJobStore
 {
@@ -66,8 +68,7 @@ internal sealed class DatabaseSyncJobStore(
             }
 
             db.SyncJobs.Add(SyncJobRecordMapper.ToRecord(job));
-            StageEviction(db);
-            db.SaveChanges();
+            SaveWithEviction(db);
             return job;
         }
     }
@@ -99,6 +100,16 @@ internal sealed class DatabaseSyncJobStore(
             .ToList();
     }
 
+    public DateTimeOffset? LatestScheduledOccurrence()
+    {
+        using var db = dbFactory.CreateDbContext();
+        return db
+            .SyncJobs.Where(x => x.Trigger == SyncJobTrigger.Scheduled)
+            .OrderByDescending(x => x.ScheduledFor)
+            .Select(x => x.ScheduledFor)
+            .FirstOrDefault();
+    }
+
     public void Update(JobId id, Action<SyncJob> mutate)
     {
         lock (_gate)
@@ -120,8 +131,7 @@ internal sealed class DatabaseSyncJobStore(
             }
 
             SyncJobRecordMapper.Apply(job, record);
-            StageEviction(db);
-            db.SaveChanges();
+            SaveWithEviction(db);
         }
     }
 
@@ -146,8 +156,7 @@ internal sealed class DatabaseSyncJobStore(
                 SyncJobRecordMapper.Apply(job, record);
             }
 
-            StageEviction(db);
-            db.SaveChanges();
+            SaveWithEviction(db);
         }
     }
 
@@ -170,9 +179,37 @@ internal sealed class DatabaseSyncJobStore(
             Progress = new ProgressSnapshot(instanceNames),
         };
 
-    // Caller must hold _gate. Stages removal of terminal jobs beyond the retention limit, counting
-    // the jobs this context is about to add or finish, so one SaveChanges writes both.
-    private static void StageEviction(ServerDbContext db)
+    public void AssignTicker(JobId id, Guid tickerId)
+    {
+        lock (_gate)
+        {
+            using var db = dbFactory.CreateDbContext();
+            db.SyncJobs.Where(x => x.Id == id.Value)
+                .ExecuteUpdate(x => x.SetProperty(r => r.TickerId, tickerId));
+        }
+    }
+
+    // Caller must hold _gate. Writes the context's changes together with the eviction of terminal
+    // jobs beyond the retention limit, then removes the evicted jobs' tickers. The tickers live in
+    // TickerQ's context, so their removal is a separate write; a ticker left behind by a failure
+    // there is inert because its job no longer exists.
+    private void SaveWithEviction(ServerDbContext db)
+    {
+        var tickerIds = StageEviction(db);
+        db.SaveChanges();
+
+        if (tickerIds.Count == 0)
+        {
+            return;
+        }
+
+        using var queue = tickerQueueFactory.CreateDbContext();
+        queue.Set<TimeTickerEntity>().Where(x => tickerIds.Contains(x.Id)).ExecuteDelete();
+    }
+
+    // Stages removal of terminal jobs beyond the retention limit, counting the jobs this context is
+    // about to add or finish. Returns the tickers of the evicted jobs.
+    private static List<Guid> StageEviction(ServerDbContext db)
     {
         var pending = db.ChangeTracker.Entries<SyncJobRecord>().Select(x => x.Entity).ToList();
         var pendingIds = pending.Select(x => x.Id).ToList();
@@ -183,23 +220,31 @@ internal sealed class DatabaseSyncJobStore(
                 && x.Status != SyncJobStatus.Pending
                 && x.Status != SyncJobStatus.Running
             )
-            .Select(x => new { x.Id, x.CreatedAt })
+            .Select(x => new EvictionCandidate(x.Id, x.CreatedAt, x.TickerId))
             .ToList();
 
         var excess = stored
             .Concat(
-                pending.Where(x => x.Status.IsTerminal()).Select(x => new { x.Id, x.CreatedAt })
+                pending
+                    .Where(x => x.Status.IsTerminal())
+                    .Select(x => new EvictionCandidate(x.Id, x.CreatedAt, x.TickerId))
             )
             .OrderByDescending(x => x.CreatedAt)
             .ThenByDescending(x => x.Id)
             .Skip(MaxTerminalJobs)
-            .Select(x => x.Id);
+            .ToList();
 
-        foreach (var id in excess)
+        foreach (var candidate in excess)
         {
             // Untracked jobs are removed through a key-only stub; the database cascades the
             // delete to their instance rows.
-            db.SyncJobs.Remove(pending.Find(x => x.Id == id) ?? new SyncJobRecord { Id = id });
+            db.SyncJobs.Remove(
+                pending.Find(x => x.Id == candidate.Id) ?? new SyncJobRecord { Id = candidate.Id }
+            );
         }
+
+        return [.. excess.Select(x => x.TickerId).OfType<Guid>()];
     }
+
+    private sealed record EvictionCandidate(Guid Id, DateTimeOffset CreatedAt, Guid? TickerId);
 }
