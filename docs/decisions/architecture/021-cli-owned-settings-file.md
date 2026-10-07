@@ -7,8 +7,8 @@
 
 The CLI read `server.base_url` from `settings.yml`, which the server owns and validates strictly. In
 centralized mode the CLI and the server often run on different machines. A shared file forces each
-process to accept or ignore the other's keys, and one schema then describes keys that two
-processes own.
+process to accept or ignore the other's keys, and one schema then describes keys that two processes
+own.
 
 ## Decision Drivers
 
@@ -25,12 +25,14 @@ processes own.
 
 ## Decision Outcome
 
-Chosen option: "Separate files", because each file has one owner and existing server settings
-files keep working.
+Chosen option: "Separate files", because each file has one owner and existing server settings files
+keep working.
 
 - `cli.yml` is optional and lives in the configuration directory (ADR-020). If it is absent, every
   default applies and commands use an ephemeral server.
 - `server.base_url` selects centralized mode (ADR-010). REC-153 adds the API key beside it.
+- A non-empty `RECYCLARR_SERVER_URL` overrides `server.base_url`, so a container image can target
+  its own server without a file in the user's volume. An empty value falls back to the file.
 - Parsing is strict. An unknown key or a base URL that is not absolute http or https stops the
   command with a message that names the file.
 - The CLI reads the file only when a command connects to a server.

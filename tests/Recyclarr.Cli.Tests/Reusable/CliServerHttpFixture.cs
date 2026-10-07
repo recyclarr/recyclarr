@@ -111,6 +111,15 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
     }
 
     /// <summary>
+    /// Sets an environment variable the CLI reads. The in-process server routes every request
+    /// regardless of host, so a test can point the CLI at any address.
+    /// </summary>
+    protected void SetCliEnvironmentVariable(string name, string value)
+    {
+        _cli.SetEnvironmentVariable(name, value);
+    }
+
+    /// <summary>
     /// Runs a CLI command line the way <c>Program</c> does, against the in-process server, and
     /// returns its exit code.
     /// </summary>
@@ -176,6 +185,11 @@ internal abstract class CliServerHttpFixture : ServerHttpFixture
         public void WriteCliSettings(string yaml)
         {
             Fs.AddFile(ConfigDirectory.File("cli.yml"), new MockFileData(yaml));
+        }
+
+        public void SetEnvironmentVariable(string name, string value)
+        {
+            Env.GetEnvironmentVariable(name).Returns(value);
         }
 
         public new T Resolve<T>()
