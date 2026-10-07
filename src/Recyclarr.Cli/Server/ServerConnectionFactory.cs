@@ -3,9 +3,9 @@ using Recyclarr.Cli.Settings;
 namespace Recyclarr.Cli.Server;
 
 /// <summary>
-/// Resolves which server a command talks to. A <c>server.base_url</c> in <c>cli.yml</c> means the
-/// user runs their own server (centralized); its absence means one is launched for the duration
-/// of the command (ephemeral). See ADR-010.
+/// Resolves which server a command talks to. A configured server address (see
+/// <see cref="CliSettingsLoader"/>) means the user runs their own server (centralized); its
+/// absence means one is launched for the duration of the command (ephemeral). See ADR-010.
 /// </summary>
 internal sealed class ServerConnectionFactory(
     ILogger log,

@@ -11,13 +11,32 @@ namespace Recyclarr.Cli.Settings;
 /// </summary>
 /// <remarks>
 /// The node tree is walked by hand rather than deserialized, so every error names the YAML path;
-/// YamlDotNet's deserializer names C# types instead.
+/// YamlDotNet's deserializer names C# types instead. A non-empty <c>RECYCLARR_SERVER_URL</c>
+/// overrides <c>server.base_url</c>, so an image can target its own server without a file in the
+/// user's volume.
 /// </remarks>
-internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
+internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator, IEnvironment env)
 {
     public const string FileName = "cli.yml";
+    public const string ServerUrlVariable = "RECYCLARR_SERVER_URL";
 
     public CliSettings Load()
+    {
+        var settings = LoadFile();
+
+        var envUrl = env.GetEnvironmentVariable(ServerUrlVariable);
+        if (string.IsNullOrEmpty(envUrl))
+        {
+            return settings;
+        }
+
+        return settings with
+        {
+            ServerBaseUrl = ParseBaseUrl(envUrl, ServerUrlVariable),
+        };
+    }
+
+    private CliSettings LoadFile()
     {
         var file = configLocator.Locate().File(FileName);
         if (!file.Exists)
@@ -30,7 +49,12 @@ internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
             var root = Parse(file.OpenText);
             var server = Mapping(root, "server", ["base_url"]);
             var baseUrl = Scalar(server, "base_url", "server.base_url");
-            return new CliSettings { ServerBaseUrl = ParseBaseUrl(baseUrl) };
+            return new CliSettings
+            {
+                ServerBaseUrl = string.IsNullOrEmpty(baseUrl)
+                    ? null
+                    : ParseBaseUrl(baseUrl, "'server.base_url'"),
+            };
         }
         catch (CliSettingsException e)
         {
@@ -108,13 +132,8 @@ internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
         return mapping;
     }
 
-    private static Uri? ParseBaseUrl(string? value)
+    private static Uri ParseBaseUrl(string value, string source)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            return null;
-        }
-
         if (
             Uri.TryCreate(value, UriKind.Absolute, out var url)
             && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps)
@@ -124,7 +143,7 @@ internal sealed class CliSettingsLoader(ConfigDirectoryLocator configLocator)
         }
 
         throw new CliSettingsException(
-            "'server.base_url' must be an absolute http or https URL, "
+            $"{source} must be an absolute http or https URL, "
                 + $"for example http://recyclarr:7982 (got '{value}')"
         );
     }

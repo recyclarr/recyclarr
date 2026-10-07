@@ -15,7 +15,7 @@
           "format": "uri",
           "pattern": "^https?://",
           "title": "Address of an already-running Recyclarr server",
-          "description": "When set, commands send their work to this server instead of starting a private one. Use this to point the CLI at a 'recyclarr serve' instance, a container, or a Kubernetes deployment."
+          "description": "When set, commands send their work to this server instead of starting a private one. Use this to point the CLI at a 'recyclarr serve' instance, a container, or a Kubernetes deployment. A non-empty RECYCLARR_SERVER_URL environment variable overrides this value."
         }
       }
     }
