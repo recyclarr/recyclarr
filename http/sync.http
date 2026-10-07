@@ -80,3 +80,13 @@ GET {{baseUrl}}/api/v1/sync/jobs/{{createSyncJob.id}}/results
   };
   console.log(JSON.stringify(prune(response.parsedBody), null, 2));
 }}
+
+###
+
+# @name getSyncSchedule
+GET {{baseUrl}}/api/v1/sync/schedule
+
+?? status == 200
+?? body enabled isBoolean
+?? body cron isString
+?? body timeZone isString

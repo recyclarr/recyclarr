@@ -50,6 +50,26 @@
           "default": "localhost",
           "title": "Address for the HTTP server to bind to",
           "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces."
+        },
+        "schedule": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "title": "Built-in sync schedule of the persistent server",
+          "description": "Applies only to `recyclarr serve`. A scheduled sync is skipped when another sync is already running.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "title": "Run sync on the schedule",
+              "description": "Set to false when an external scheduler creates sync jobs through the API."
+            },
+            "cron": {
+              "type": "string",
+              "default": "0 0 * * *",
+              "title": "Standard 5-field cron expression for when to sync",
+              "description": "Evaluated in the system time zone (the TZ environment variable in containers)."
+            }
+          }
         }
       }
     },
