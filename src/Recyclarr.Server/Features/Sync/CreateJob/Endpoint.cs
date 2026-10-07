@@ -5,7 +5,10 @@ namespace Recyclarr.Server.Features.Sync.CreateJob;
 
 internal sealed class Endpoint(
     ServerConfigurationStore configurationStore,
-    SyncJobLauncher launcher
+    ISyncJobStore store,
+    // Lazy: endpoints are constructed while routes are mapped, including during build-time OpenAPI
+    // generation, where TickerQ (the launcher's queue) is not registered.
+    Lazy<SyncJobLauncher> launcher
 ) : Endpoint<CreateSyncJobRequest, CreateSyncJobResponse>
 {
     public override void Configure()
@@ -52,7 +55,8 @@ internal sealed class Endpoint(
             return;
         }
 
-        var job = launcher.Launch(settings, selected);
+        var job = store.Create(settings, [.. selected.Select(x => x.InstanceName)]);
+        await launcher.Value.LaunchAsync(job.Id);
 
         Response = new CreateSyncJobResponse(job.Id.Value, job.Status.ToString(), job.CreatedAt);
         HttpContext.Response.Headers.Location = $"/api/v1/sync/jobs/{job.Id.Value}";
