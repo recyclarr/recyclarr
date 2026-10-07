@@ -9,4 +9,7 @@
     <PackageReference Remove="AutoFixture" />
     <PackageReference Remove="Serilog.Sinks.NUnit" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+  </ItemGroup>
 </Project>

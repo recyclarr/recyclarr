@@ -11,6 +11,7 @@ using Recyclarr;
 using Recyclarr.Logging;
 using Recyclarr.Server;
 using Recyclarr.Server.Persistence;
+using Recyclarr.Server.Sync.Schedule;
 using Scalar.AspNetCore;
 using Serilog.Events;
 using TickerQ.DependencyInjection;
@@ -88,6 +89,7 @@ if (!isDocumentGeneration)
 {
     builder.Services.AddServerPersistence();
     builder.Services.AddHostedService<ServerBootstrapService>();
+    builder.Services.AddHostedService<SyncScheduler>();
 }
 
 await using var app = builder.Build();

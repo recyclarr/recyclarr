@@ -558,6 +558,26 @@
           }
         }
       }
+    },
+    "/api/v1/sync/schedule": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "operationId": "SyncGetSchedule",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncScheduleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3453,6 +3473,42 @@
             "format": "date-time"
           }
         }
+      },
+      "SyncScheduleResponse": {
+        "required": [
+          "enabled",
+          "cron",
+          "timeZone",
+          "previousOccurrence",
+          "nextOccurrence"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "cron": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "previousOccurrence": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "nextOccurrence": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "description": "The built-in sync schedule. PreviousOccurrence is the most recent retained scheduled job\n            (run or skipped); NextOccurrence is absent while the schedule is disabled."
       },
       "TrashIdNameResponse": {
         "required": [
