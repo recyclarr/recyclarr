@@ -43,19 +43,20 @@
           "minimum": 1,
           "maximum": 65535,
           "default": 7982,
-          "title": "Port number for the HTTP server to listen on"
+          "title": "Port number for the HTTP server to listen on",
+          "description": "Ignored by the Docker image, which always listens on port 7982; remap it with Docker port mapping."
         },
         "bind_address": {
           "type": "string",
           "default": "localhost",
           "title": "Address for the HTTP server to bind to",
-          "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces."
+          "description": "Use 'localhost' to bind to the loopback interface only, or '0.0.0.0' to listen on all interfaces. Ignored by the Docker image, which always listens on all interfaces."
         },
         "schedule": {
           "type": ["null", "object"],
           "additionalProperties": false,
           "title": "Built-in sync schedule of the persistent server",
-          "description": "Applies only to `recyclarr serve`. A scheduled sync is skipped when another sync is already running.",
+          "description": "Applies only to the persistent server (`recyclarr serve` or the Docker image). A scheduled sync is skipped when another sync is already running.",
           "properties": {
             "enabled": {
               "type": "boolean",

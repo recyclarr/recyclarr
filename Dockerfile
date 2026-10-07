@@ -22,7 +22,7 @@ RUN dotnet publish src/Recyclarr.Cli -a $TARGETARCH --no-restore -o /app \
 # Enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
 # final stage/image
-FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 
 LABEL name="recyclarr" \
   org.opencontainers.image.source="https://github.com/recyclarr/recyclarr" \
@@ -32,20 +32,31 @@ LABEL name="recyclarr" \
 # Read below for the reasons why COMPlus_EnableDiagnostics is set:
 # https://github.com/dotnet/docs/issues/10217
 # https://github.com/dotnet/runtime/issues/96227
+#
+# The server always listens on all interfaces at 7982; users remap the port with Docker. An
+# explicit URL makes the server ignore server.bind_address and server.port from settings.yml.
+# ASPNETCORE_HTTP_PORTS is cleared so the base image's 8080 default does not compete with it.
+# RECYCLARR_SERVER_URL makes `docker exec <container> recyclarr ...` use this server instead of
+# starting a private one against the same /config.
 ENV PATH="${PATH}:/app/recyclarr" \
     RECYCLARR_CONFIG_DIR=/config \
-    CRON_SCHEDULE="@daily" \
-    RECYCLARR_CREATE_CONFIG=false \
+    ASPNETCORE_URLS=http://0.0.0.0:7982 \
+    ASPNETCORE_HTTP_PORTS= \
+    RECYCLARR_SERVER_URL=http://localhost:7982 \
     COMPlus_EnableDiagnostics=0
 
 RUN set -ex; \
-    apk add --no-cache bash tzdata supercronic git tini; \
+    apk add --no-cache bash tzdata git tini; \
     mkdir -p /config /data && chown 1000:1000 /config /data;
 
 COPY --link --from=build /app /app/recyclarr/
-COPY --chmod=555 ./docker/scripts/*.sh /
 
 USER 1000:1000
 VOLUME /config
+EXPOSE 7982
 
-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+# 127.0.0.1, not localhost: busybox wget tries ::1 first, and the server listens on IPv4 only.
+HEALTHCHECK CMD wget -q --spider http://127.0.0.1:7982/health || exit 1
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["recyclarr-server"]
