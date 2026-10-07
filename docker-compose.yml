@@ -94,10 +94,10 @@ services:
       #   - linux/arm/v7
       #   - linux/arm64
       #   - linux/amd64
+    ports: [7982:7982]
     volumes:
       - ${RECYCLARR_CONFIG_DIR:?RECYCLARR_CONFIG_DIR must be set}:/config
     environment:
-      CRON_SCHEDULE: "* * * * *"
       TZ: America/Chicago
       RADARR_URL: http://radarr_develop2:7878
       SONARR_URL: http://sonarr_develop2:8989
